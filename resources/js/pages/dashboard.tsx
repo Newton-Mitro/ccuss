@@ -1,263 +1,358 @@
-import { cn } from '@/lib/utils';
+import { Head, router, usePage } from '@inertiajs/react';
 import {
-    BarChart,
-    ChevronDown,
-    ChevronRight,
-    FileText,
-    Home,
-    LogOut,
-    Menu,
-    Moon,
-    Settings,
-    Sun,
-    Users,
-} from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+    ArcElement,
+    BarElement,
+    CategoryScale,
+    Chart as ChartJS,
+    DoughnutController,
+    Legend,
+    LineElement,
+    LinearScale,
+    PointElement,
+    RadarController,
+    RadialLinearScale,
+    Title,
+    Tooltip,
+} from 'chart.js';
+import { useEffect, useMemo, useState } from 'react';
+import { Bar, Doughnut, Line, Radar } from 'react-chartjs-2';
+import CustomAuthLayout from '../layouts/custom-auth-layout';
 
-interface SidebarItem {
-    name: string;
-    icon?: React.ReactNode;
-    path?: string;
-    children?: SidebarItem[];
-}
+// Register Chart.js modules
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    PointElement,
+    LineElement,
+    ArcElement,
+    RadialLinearScale,
+    DoughnutController,
+    RadarController,
+    Title,
+    Tooltip,
+    Legend,
+);
 
-const sidebarMenu: SidebarItem[] = [
-    { name: 'Dashboard', icon: <Home size={18} />, path: '/dashboard' },
-    {
-        name: 'Users',
-        icon: <Users size={18} />,
-        children: [
-            { name: 'All Users', path: '/users' },
-            { name: 'Add New', path: '/users/create' },
-            {
-                name: 'Roles & Permissions',
-                children: [
-                    { name: 'Roles', path: '/users/roles' },
-                    { name: 'Permissions', path: '/users/permissions' },
-                ],
-            },
-        ],
-    },
-    {
-        name: 'Reports',
-        icon: <FileText size={18} />,
-        children: [
-            { name: 'Monthly', path: '/reports/monthly' },
-            { name: 'Annual', path: '/reports/annual' },
-        ],
-    },
-    { name: 'Analytics', icon: <BarChart size={18} />, path: '/analytics' },
-    { name: 'Settings', icon: <Settings size={18} />, path: '/settings' },
-];
+export default function DashboardPage() {
+    const { stats, monthlyVisitors, routeVisits, auditLogs }: any =
+        usePage().props;
 
-export default function Dashboard({ children }: { children: React.ReactNode }) {
-    const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
-    const [sidebarOpen, setSidebarOpen] = useState(true);
-    const [darkMode, setDarkMode] = useState(false);
-    const [userMenuOpen, setUserMenuOpen] = useState(false);
-    const userMenuRef = useRef<HTMLDivElement>(null);
+    // 🎨 Theme Colors
+    const [themeColors, setThemeColors] = useState({
+        background: '',
+        card: '',
+        border: '',
+        foreground: '',
+        chart1: '',
+        chart2: '',
+        chart3: '',
+        chart4: '',
+        chart5: '',
+    });
 
-    // Close menu on outside click
+    // Update theme colors dynamically
     useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (
-                userMenuRef.current &&
-                !userMenuRef.current.contains(event.target as Node)
-            ) {
-                setUserMenuOpen(false);
-            }
+        const root = getComputedStyle(document.documentElement);
+        const getVar = (v: string) => root.getPropertyValue(v).trim();
+
+        const updateTheme = () => {
+            setThemeColors({
+                background: getVar('--color-background'),
+                card: getVar('--color-card'),
+                border: getVar('--color-border'),
+                foreground: getVar('--color-foreground'),
+                chart1: getVar('--color-chart-1'),
+                chart2: getVar('--color-chart-2'),
+                chart3: getVar('--color-chart-3'),
+                chart4: getVar('--color-chart-4'),
+                chart5: getVar('--color-chart-5'),
+            });
         };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () =>
-            document.removeEventListener('mousedown', handleClickOutside);
+
+        updateTheme();
+        const observer = new MutationObserver(updateTheme);
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['class'],
+        });
+
+        return () => observer.disconnect();
     }, []);
 
-    const toggleMenu = (name: string) =>
-        setOpenMenus((prev) => ({ ...prev, [name]: !prev[name] }));
+    // 💻 KPI Cards
+    const kpiCards = [
+        {
+            label: 'Branches',
+            value: stats.branches,
+            icon: 'fa-code-branch',
+            route: '/branches',
+            color: themeColors.chart1,
+        },
+        {
+            label: 'Customers',
+            value: stats.customers,
+            icon: 'fa-users',
+            route: '/customers',
+            color: themeColors.chart2,
+        },
+        {
+            label: 'Savings',
+            value: stats.savingsAccounts,
+            icon: 'fa-piggy-bank',
+            route: '/savings',
+            color: themeColors.chart3,
+        },
+        {
+            label: 'Shares',
+            value: stats.shares,
+            icon: 'fa-chart-pie',
+            route: '/shares',
+            color: themeColors.chart4,
+        },
+        {
+            label: 'Loans',
+            value: stats.loans,
+            icon: 'fa-money-check-dollar',
+            route: '/loans',
+            color: themeColors.chart5,
+        },
+        {
+            label: 'Vendors',
+            value: stats.vendors,
+            icon: 'fa-store',
+            route: '/vendors',
+            color: themeColors.chart1,
+        },
+        {
+            label: 'Assets',
+            value: stats.assets,
+            icon: 'fa-boxes-stacked',
+            route: '/assets',
+            color: themeColors.chart2,
+        },
+        {
+            label: 'Employees',
+            value: stats.employees,
+            icon: 'fa-user-tie',
+            route: '/hr/employees',
+            color: themeColors.chart3,
+        },
+        {
+            label: 'Audit Logs',
+            value: stats.auditLogs,
+            icon: 'fa-list-check',
+            route: '/audit-logs',
+            color: themeColors.chart4,
+        },
+        {
+            label: 'Users',
+            value: stats.users,
+            icon: 'fa-user-gear',
+            route: '/users',
+            color: themeColors.chart5,
+        },
+        {
+            label: 'Visitors',
+            value: stats.totalVisitors,
+            icon: 'fa-chart-line',
+            route: '/visitors',
+            color: themeColors.chart1,
+        },
+    ];
 
-    const toggleTheme = () => {
-        const newTheme = !darkMode;
-        setDarkMode(newTheme);
-        document.documentElement.classList.toggle('dark', newTheme);
-        localStorage.setItem('theme', newTheme ? 'dark' : 'light');
-    };
+    // 📊 Chart Options
+    const chartOptions = useMemo(
+        () => ({
+            responsive: true,
+            plugins: {
+                legend: { labels: { color: themeColors.foreground } },
+                title: { display: false, color: themeColors.foreground },
+            },
+            scales: {
+                x: {
+                    ticks: { color: themeColors.foreground },
+                    grid: { color: themeColors.border },
+                },
+                y: {
+                    ticks: { color: themeColors.foreground },
+                    grid: { color: themeColors.border },
+                },
+            },
+        }),
+        [themeColors],
+    );
+
+    // Monthly Visitors (Line)
+    const monthlyVisitorsData = useMemo(
+        () => ({
+            labels: Object.keys(monthlyVisitors),
+            datasets: [
+                {
+                    label: 'Visitors',
+                    data: Object.values(monthlyVisitors),
+                    fill: true,
+                    backgroundColor: themeColors.chart1 + '33',
+                    borderColor: themeColors.chart1,
+                    tension: 0.3,
+                },
+            ],
+        }),
+        [monthlyVisitors, themeColors],
+    );
+
+    // Route Visits (Bar)
+    const routeVisitedData = useMemo(
+        () => ({
+            labels: Object.keys(routeVisits),
+            datasets: [
+                {
+                    label: 'Visits',
+                    data: Object.values(routeVisits),
+                    backgroundColor: [
+                        themeColors.chart1,
+                        themeColors.chart2,
+                        themeColors.chart3,
+                        themeColors.chart4,
+                        themeColors.chart5,
+                    ],
+                },
+            ],
+        }),
+        [routeVisits, themeColors],
+    );
+
+    // Doughnut Chart
+    const doughnutData = useMemo(
+        () => ({
+            labels: ['Branches', 'Customers', 'Loans', 'Assets', 'Employees'],
+            datasets: [
+                {
+                    data: [
+                        stats.branches,
+                        stats.customers,
+                        stats.loans,
+                        stats.assets,
+                        stats.employees,
+                    ],
+                    backgroundColor: [
+                        themeColors.chart1,
+                        themeColors.chart2,
+                        themeColors.chart3,
+                        themeColors.chart4,
+                        themeColors.chart5,
+                    ],
+                },
+            ],
+        }),
+        [stats, themeColors],
+    );
+
+    // Radar Chart
+    const radarData = useMemo(
+        () => ({
+            labels: ['Savings', 'Shares', 'Loans', 'Vendors', 'Users'],
+            datasets: [
+                {
+                    label: 'KPI Radar',
+                    data: [
+                        stats.savingsAccounts,
+                        stats.shares,
+                        stats.loans,
+                        stats.vendors,
+                        stats.users,
+                    ],
+                    backgroundColor: themeColors.chart1 + '33',
+                    borderColor: themeColors.chart1,
+                    borderWidth: 2,
+                },
+            ],
+        }),
+        [stats, themeColors],
+    );
 
     return (
-        <div className="flex h-screen bg-background text-foreground transition-colors duration-300">
-            {/* Sidebar */}
-            <aside
-                className={cn(
-                    'flex-shrink-0 border-r border-border bg-card transition-all duration-300',
-                    sidebarOpen ? 'w-64' : 'w-16',
-                )}
-            >
-                <div className="flex h-16 items-center gap-2 border-b border-border px-4">
-                    <img src="/logo.png" alt="Logo" className="h-8 w-8" />
-                    <div
-                        className={cn(
-                            'font-semibold text-primary transition-opacity duration-300',
-                            sidebarOpen
-                                ? 'opacity-100'
-                                : 'w-0 overflow-hidden opacity-0',
-                        )}
-                    >
-                        Dashboard
-                    </div>
-                </div>
-
-                <nav className="h-[calc(100%-4rem)] overflow-y-auto px-2 py-4 text-sm">
-                    <ul className="space-y-1">
-                        {sidebarMenu.map((item) => (
-                            <SidebarMenuItem
-                                key={item.name}
-                                item={item}
-                                openMenus={openMenus}
-                                toggleMenu={toggleMenu}
-                                level={0}
-                                sidebarOpen={sidebarOpen}
+        <CustomAuthLayout>
+            <Head title="Dashboard" />
+            <div className="h-[calc(100vh-100px)] space-y-8 overflow-auto p-6 transition-colors duration-300">
+                {/* KPI Cards */}
+                <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
+                    {kpiCards.map((card, idx) => (
+                        <div
+                            key={idx}
+                            onClick={() => router.visit(card.route)}
+                            className="flex cursor-pointer items-center rounded-xl border p-4 shadow transition-all hover:scale-[1.02] hover:shadow-md"
+                            style={{
+                                backgroundColor: `${card.color}15`,
+                                borderColor: `${card.color}40`,
+                            }}
+                        >
+                            <i
+                                className={`fa-solid ${card.icon} mr-6 text-3xl`}
+                                style={{ color: card.color }}
                             />
-                        ))}
-                    </ul>
-                </nav>
-            </aside>
-
-            {/* Main Content */}
-            <div className="flex flex-1 flex-col transition-colors duration-300">
-                {/* Top Bar */}
-                <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6">
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => setSidebarOpen((prev) => !prev)}
-                            className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-                        >
-                            <Menu size={18} />
-                        </button>
-
-                        {/* Breadcrumb */}
-                        <nav className="flex items-center space-x-1 text-sm font-semibold text-primary">
-                            <a href="#" className="hover:underline">
-                                Dashboard
-                            </a>
-                            <span className="text-muted-foreground">/</span>
-                            <a href="#" className="hover:underline">
-                                Hero Slides
-                            </a>
-                        </nav>
-                    </div>
-
-                    {/* User Menu */}
-                    <div
-                        className="relative flex items-center gap-3"
-                        ref={userMenuRef}
-                    >
-                        <button
-                            onClick={toggleTheme}
-                            className="rounded p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                        >
-                            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-                        </button>
-
-                        <button
-                            onClick={() => setUserMenuOpen((prev) => !prev)}
-                            className="flex items-center gap-2 rounded px-2 py-1"
-                        >
-                            <img
-                                src="/logo.png"
-                                alt="John Doe"
-                                className="h-8 w-8 rounded-full border border-border bg-muted object-cover p-1 transition-colors hover:bg-muted-foreground"
-                            />
-                        </button>
-
-                        {/* Dropdown */}
-                        {userMenuOpen && (
-                            <div className="absolute top-full right-0 z-50 mt-2 w-48 rounded border border-border bg-card shadow-lg">
-                                <div className="flex flex-col p-2">
-                                    <span className="px-3 py-1 text-sm font-medium">
-                                        John Doe
-                                    </span>
-                                    <span className="px-3 py-1 text-xs text-muted-foreground">
-                                        john.doe@email.com
-                                    </span>
-                                    <button className="mt-2 flex items-center gap-2 rounded px-3 py-1 text-sm text-destructive transition-colors hover:bg-muted hover:text-destructive-foreground">
-                                        <LogOut size={16} /> Logout
-                                    </button>
+                            <div>
+                                <div className="text-2xl font-bold">
+                                    {card.value}
+                                </div>
+                                <div className="text-sm opacity-70">
+                                    {card.label}
                                 </div>
                             </div>
-                        )}
-                    </div>
-                </header>
-
-                {/* Page Content */}
-                <main className="flex-1 overflow-y-auto bg-background p-6 transition-colors">
-                    {children}
-                </main>
-            </div>
-        </div>
-    );
-}
-
-function SidebarMenuItem({
-    item,
-    openMenus,
-    toggleMenu,
-    level,
-    sidebarOpen,
-}: {
-    item: SidebarItem;
-    openMenus: Record<string, boolean>;
-    toggleMenu: (name: string) => void;
-    level: number;
-    sidebarOpen: boolean;
-}) {
-    const hasChildren = item.children && item.children.length > 0;
-    const isOpen = openMenus[item.name];
-
-    return (
-        <li>
-            <button
-                onClick={() => hasChildren && toggleMenu(item.name)}
-                className={cn(
-                    'flex w-full items-center justify-between rounded-md px-3 py-2 text-left transition-colors hover:bg-muted',
-                    level > 0
-                        ? 'pl-6 text-sm text-muted-foreground'
-                        : 'font-medium',
-                )}
-            >
-                <div className="flex items-center gap-3">
-                    <span className="text-primary">{item.icon}</span>
-                    {sidebarOpen && <span>{item.name}</span>}
+                        </div>
+                    ))}
                 </div>
 
-                {hasChildren && sidebarOpen && (
-                    <span className="text-muted-foreground">
-                        {isOpen ? (
-                            <ChevronDown size={16} />
-                        ) : (
-                            <ChevronRight size={16} />
-                        )}
-                    </span>
-                )}
-            </button>
-
-            {hasChildren && isOpen && (
-                <ul
-                    className={cn(
-                        'mt-1 ml-2 space-y-1 border-l border-border pl-2 transition-all duration-300',
-                        sidebarOpen ? 'block' : 'hidden',
-                    )}
-                >
-                    {item.children?.map((child) => (
-                        <SidebarMenuItem
-                            key={child.name}
-                            item={child}
-                            openMenus={openMenus}
-                            toggleMenu={toggleMenu}
-                            level={level + 1}
-                            sidebarOpen={sidebarOpen}
+                {/* Charts */}
+                <div className="grid gap-4 md:grid-cols-2">
+                    <div className="rounded-xl border p-4 shadow-sm">
+                        <h2 className="mb-3 text-lg font-semibold">
+                            Top Visited Routes
+                        </h2>
+                        <Bar data={routeVisitedData} options={chartOptions} />
+                    </div>
+                    <div className="rounded-xl border p-4 shadow-sm">
+                        <h2 className="mb-3 text-lg font-semibold">
+                            Monthly Visitors
+                        </h2>
+                        <Line
+                            data={monthlyVisitorsData}
+                            options={chartOptions}
                         />
-                    ))}
-                </ul>
-            )}
-        </li>
+                    </div>
+                    <div className="rounded-xl border p-4 shadow-sm">
+                        <h2 className="mb-3 text-lg font-semibold">
+                            Branches vs Customers
+                        </h2>
+                        <Doughnut data={doughnutData} options={chartOptions} />
+                    </div>
+                    <div className="rounded-xl border p-4 shadow-sm">
+                        <h2 className="mb-3 text-lg font-semibold">
+                            KPI Radar
+                        </h2>
+                        <Radar data={radarData} options={chartOptions} />
+                    </div>
+                </div>
+
+                {/* Audit Logs */}
+                <div className="rounded-xl border p-4 shadow-sm">
+                    <h2 className="mb-3 text-lg font-semibold">
+                        Recent Audit Logs
+                    </h2>
+                    <ul className="space-y-2 text-sm">
+                        {auditLogs.map((log: any) => (
+                            <li key={log.id} className="flex justify-between">
+                                <span>{log.action}</span>
+                                <span className="opacity-70">
+                                    {new Date(
+                                        log.created_at,
+                                    ).toLocaleTimeString()}
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            </div>
+        </CustomAuthLayout>
     );
 }

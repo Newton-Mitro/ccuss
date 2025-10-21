@@ -1,5 +1,6 @@
-@import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Chewy&family=Fascinate&family=Fascinate+Inline&family=Meow+Script&family=Pacifico&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 
+@import 'tailwindcss';
 @import 'tw-animate-css';
 
 @source '../views';
@@ -12,45 +13,38 @@
         'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
+    --font-pacifico: 'Pacifico', cursive;
+    --font-roboto: 'Roboto', sans-serif;
+    --font-meow-script: 'Meow Script', cursive;
+    --font-fascinate: 'Fascinate', system-ui;
+    --font-chewy: 'Chewy', system-ui;
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
     --radius-sm: calc(var(--radius) - 4px);
 
+    /* Global Colors */
     --color-background: var(--background);
     --color-foreground: var(--foreground);
-
     --color-card: var(--card);
     --color-card-foreground: var(--card-foreground);
-
     --color-popover: var(--popover);
     --color-popover-foreground: var(--popover-foreground);
-
     --color-primary: var(--primary);
     --color-primary-foreground: var(--primary-foreground);
-
     --color-secondary: var(--secondary);
     --color-secondary-foreground: var(--secondary-foreground);
-
     --color-muted: var(--muted);
     --color-muted-foreground: var(--muted-foreground);
-
     --color-accent: var(--accent);
     --color-accent-foreground: var(--accent-foreground);
-
     --color-destructive: var(--destructive);
     --color-destructive-foreground: var(--destructive-foreground);
-
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);
 
-    --color-chart-1: var(--chart-1);
-    --color-chart-2: var(--chart-2);
-    --color-chart-3: var(--chart-3);
-    --color-chart-4: var(--chart-4);
-    --color-chart-5: var(--chart-5);
-
+    /* Sidebar */
     --color-sidebar: var(--sidebar);
     --color-sidebar-foreground: var(--sidebar-foreground);
     --color-sidebar-primary: var(--sidebar-primary);
@@ -59,34 +53,53 @@
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
+
+    /* Charts */
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
 }
 
+/* Default (light) theme */
 :root {
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
+
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.145 0 0);
+
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
+
     --primary: oklch(0.205 0 0);
     --primary-foreground: oklch(0.985 0 0);
+
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
+
     --muted: oklch(0.97 0 0);
     --muted-foreground: oklch(0.556 0 0);
+
     --accent: oklch(0.97 0 0);
     --accent-foreground: oklch(0.205 0 0);
+
     --destructive: oklch(0.577 0.245 27.325);
     --destructive-foreground: oklch(0.577 0.245 27.325);
+
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
     --ring: oklch(0.87 0 0);
+
     --chart-1: oklch(0.646 0.222 41.116);
     --chart-2: oklch(0.6 0.118 184.704);
     --chart-3: oklch(0.398 0.07 227.392);
     --chart-4: oklch(0.828 0.189 84.429);
     --chart-5: oklch(0.769 0.188 70.08);
+
     --radius: 0.625rem;
+
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.145 0 0);
     --sidebar-primary: oklch(0.205 0 0);
@@ -97,47 +110,214 @@
     --sidebar-ring: oklch(0.87 0 0);
 }
 
+/* Dark Theme */
 .dark {
     --background: oklch(0.145 0 0);
     --foreground: oklch(0.985 0 0);
+
     --card: oklch(0.145 0 0);
     --card-foreground: oklch(0.985 0 0);
+
     --popover: oklch(0.145 0 0);
     --popover-foreground: oklch(0.985 0 0);
+
     --primary: oklch(0.985 0 0);
     --primary-foreground: oklch(0.205 0 0);
+
     --secondary: oklch(0.269 0 0);
     --secondary-foreground: oklch(0.985 0 0);
+
     --muted: oklch(0.269 0 0);
     --muted-foreground: oklch(0.708 0 0);
+
     --accent: oklch(0.269 0 0);
     --accent-foreground: oklch(0.985 0 0);
+
     --destructive: oklch(0.396 0.141 25.723);
     --destructive-foreground: oklch(0.637 0.237 25.331);
+
     --border: oklch(0.269 0 0);
     --input: oklch(0.269 0 0);
     --ring: oklch(0.439 0 0);
+
     --chart-1: oklch(0.488 0.243 264.376);
     --chart-2: oklch(0.696 0.17 162.48);
     --chart-3: oklch(0.769 0.188 70.08);
     --chart-4: oklch(0.627 0.265 303.9);
     --chart-5: oklch(0.645 0.246 16.439);
+
     --sidebar: oklch(0.205 0 0);
     --sidebar-foreground: oklch(0.985 0 0);
     --sidebar-primary: oklch(0.985 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-primary-foreground: oklch(0.205 0 0);
     --sidebar-accent: oklch(0.269 0 0);
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(0.269 0 0);
     --sidebar-ring: oklch(0.439 0 0);
 }
 
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    /* background: var(--background); */
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    /* background: var(--accent); */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--ring);
+}
+
 @layer base {
     * {
-        @apply border-border;
+        @apply font-roboto border-border;
     }
 
     body {
         @apply bg-background text-foreground;
+    }
+
+    .ck-content h1,
+    .ck-content h2,
+    .ck-content h3,
+    .ck-content h4,
+    .ck-content h5,
+    .ck-content h6 {
+        color: var(--color-foreground);
+        font-weight: 600;
+    }
+
+    .ck-content a {
+        color: var(--color-accent);
+    }
+
+    .ck-content p {
+        color: var(--color-muted-foreground);
+    }
+
+    strong {
+        color: var(--color-muted-foreground) !important;
+    }
+
+    .ck-content ul,
+    .ck-content ol {
+        color: var(--color-muted-foreground);
+        list-style: disc;
+        padding-left: 1.5rem;
+    }
+
+    .ck-sticky-panel__content {
+        border-color: var(--border) !important;
+        border-radius: 10px 10px 0 0 !important;
+    }
+
+    .ck-button {
+        color: var(--foreground) !important;
+    }
+
+    .ck-button:hover {
+        color: var(--background) !important;
+    }
+
+    .ck-on {
+        color: var(--background) !important;
+    }
+
+    .ck-toolbar {
+        background-color: var(--background) !important;
+        border-color: var(--border) !important;
+        color: var(--foreground) !important;
+        border-radius: 10px 10px 0 0 !important;
+    }
+
+    .ck-editor__main > .ck-content {
+        min-height: 100px;
+        background-color: var(--background) !important;
+        border-color: var(--border) !important;
+        color: var(--foreground) !important;
+        border-radius: 0 0 10px 10px !important;
+
+        transition:
+            color 0.2s,
+            box-shadow 0.2s,
+            border-color 0.2s;
+    }
+
+    /* Focus state */
+    .ck.ck-focused {
+        border-color: var(--ring) !important;
+        box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent);
+        outline: none !important;
+    }
+
+    /* Hide native datepicker icon in most browsers */
+    input[type='date']::-webkit-calendar-picker-indicator {
+        display: none;
+        -webkit-appearance: none;
+    }
+    input[type='date']::-webkit-inner-spin-button,
+    input[type='date']::-webkit-clear-button {
+        display: none;
+    }
+}
+
+@theme {
+    --animate-wiggle: wiggle 1s ease-in-out infinite;
+    @keyframes wiggle {
+        0%,
+        100% {
+            transform: rotate(-3deg);
+        }
+        50% {
+            transform: rotate(3deg);
+        }
+    }
+}
+
+@theme {
+    --container: 100%;
+    --container-sm: 640px;
+    --container-md: 768px;
+    --container-lg: 1024px;
+    --container-xl: 1280px;
+    --container-2xl: 1280px;
+}
+
+@layer base {
+    .container-custom {
+        width: 100%;
+        padding-inline: 1rem;
+    }
+
+    @media (min-width: 640px) {
+        .container-custom {
+            max-width: var(--container-sm);
+        }
+    }
+    @media (min-width: 768px) {
+        .container-custom {
+            max-width: var(--container-md);
+        }
+    }
+    @media (min-width: 1024px) {
+        .container-custom {
+            max-width: var(--container-lg);
+        }
+    }
+    @media (min-width: 1280px) {
+        .container-custom {
+            max-width: var(--container-xl);
+        }
+    }
+    @media (min-width: 1536px) {
+        .container-custom {
+            max-width: var(--container-2xl);
+        }
     }
 }
