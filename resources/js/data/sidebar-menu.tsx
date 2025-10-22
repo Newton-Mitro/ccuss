@@ -7,151 +7,230 @@ export const sidebarMenu: SidebarItem[] = [
         path: '/dashboard',
     },
     {
-        name: 'Branch Management',
+        name: 'Branchs',
         icon: <i className="fa-solid fa-network-wired" />,
         children: [
-            { name: 'Branches', path: '/branches' },
-            { name: 'New Branch', path: '/branches/create' },
             {
-                name: 'Reports',
-                children: [
-                    { name: 'Monthly', path: '/reports/monthly' },
-                    { name: 'Annual', path: '/reports/annual' },
-                ],
+                name: 'Branches',
+                icon: <i className="fa-solid fa-network-wired" />,
+                path: '/branches',
+            },
+            {
+                name: 'New Branch',
+                icon: <i className="fa-solid fa-network-wired" />,
+                path: '/branches/create',
             },
         ],
     },
     {
-        name: 'Customers',
+        name: 'Customer Management',
         icon: <i className="fa-solid fa-users" />,
         children: [
-            { name: 'Customers', path: '/customers' },
-            { name: 'New Customer', path: '/customers/create' },
             {
-                name: 'Reports',
-                children: [
-                    { name: 'Monthly', path: '/reports/monthly' },
-                    { name: 'Annual', path: '/reports/annual' },
-                ],
+                name: 'Customers',
+                icon: <i className="fa-solid fa-users" />,
+                path: '/auth/customers',
+            },
+            {
+                name: 'Signatures',
+                icon: <i className="fa-solid fa-users" />,
+                path: '/auth/customers/signatures',
             },
         ],
     },
     {
-        name: 'General Ledgers',
+        name: 'General Accounting',
         icon: <i className="fa-solid fa-cash-register"></i>,
         children: [
-            { name: 'Ledgers', path: '/ledgers' },
-            { name: 'New Ledger', path: '/ledgers/create' },
+            {
+                name: 'Ledgers',
+                icon: <i className="fa-solid fa-cash-register"></i>,
+                path: '/ledgers',
+            },
+            {
+                name: 'Vouchers',
+                icon: <i className="fa-solid fa-cash-register"></i>,
+                children: [
+                    {
+                        name: 'Debit Vouchers',
+                        icon: <i className="fa-solid fa-cash-register"></i>,
+                        path: '/reports/monthly',
+                    },
+                    {
+                        name: 'Credit Vouchers',
+                        icon: <i className="fa-solid fa-cash-register"></i>,
+                        path: '/reports/annual',
+                    },
+                    {
+                        name: 'Journal Vouchers',
+                        icon: <i className="fa-solid fa-cash-register"></i>,
+                        path: '/reports/annual',
+                    },
+                    {
+                        name: 'Contra Vouchers',
+                        icon: <i className="fa-solid fa-cash-register"></i>,
+                        path: '/reports/annual',
+                    },
+                ],
+            },
             {
                 name: 'Reports',
+                icon: <i className="fa-solid fa-cash-register"></i>,
                 children: [
-                    { name: 'Monthly', path: '/reports/monthly' },
-                    { name: 'Annual', path: '/reports/annual' },
+                    {
+                        name: 'Monthly',
+                        icon: <i className="fa-solid fa-cash-register"></i>,
+                        path: '/reports/monthly',
+                    },
+                    {
+                        name: 'Annual',
+                        icon: <i className="fa-solid fa-cash-register"></i>,
+                        path: '/reports/annual',
+                    },
                 ],
             },
         ],
     },
+
     {
-        name: 'Manage Savings',
-        icon: <i className="fa-solid fa-sprout" />,
+        name: 'Subsidiary Accounting',
+        icon: <i className="fa-solid fa-piggy-bank"></i>,
         children: [
-            { name: 'All Customers', path: '/customers' },
-            { name: 'New Customer', path: '/customers/create' },
             {
-                name: 'Reports',
+                name: 'Saving Accounts',
+                icon: <i className="fa-solid fa-sprout" />,
                 children: [
-                    { name: 'Monthly', path: '/reports/monthly' },
-                    { name: 'Annual', path: '/reports/annual' },
+                    {
+                        name: 'All Customers',
+                        icon: <i className="fa-solid fa-sprout" />,
+                        path: '/customers',
+                    },
+                    {
+                        name: 'New Customer',
+                        icon: <i className="fa-solid fa-sprout" />,
+                        path: '/customers/create',
+                    },
                 ],
             },
-        ],
-    },
-    {
-        name: 'Manage Shares',
-        icon: <i className="fa-solid fa-money-bill-trend-up"></i>,
-        children: [
-            { name: 'All Customers', path: '/customers' },
-            { name: 'New Customer', path: '/customers/create' },
             {
-                name: 'Reports',
+                name: 'Share Accounts',
+                icon: <i className="fa-solid fa-money-bill-trend-up"></i>,
                 children: [
-                    { name: 'Monthly', path: '/reports/monthly' },
-                    { name: 'Annual', path: '/reports/annual' },
+                    {
+                        name: 'All Customers',
+                        icon: (
+                            <i className="fa-solid fa-money-bill-trend-up"></i>
+                        ),
+                        path: '/customers',
+                    },
+                    {
+                        name: 'New Customer',
+                        icon: (
+                            <i className="fa-solid fa-money-bill-trend-up"></i>
+                        ),
+                        path: '/customers/create',
+                    },
                 ],
             },
-        ],
-    },
-    {
-        name: 'Manage Loans',
-        icon: <i className="fa-solid fa-sack-dollar"></i>,
-        children: [
-            { name: 'All Customers', path: '/customers' },
-            { name: 'New Customer', path: '/customers/create' },
             {
-                name: 'Reports',
+                name: 'Customer Loans',
+                icon: <i className="fa-solid fa-sack-dollar"></i>,
                 children: [
-                    { name: 'Monthly', path: '/reports/monthly' },
-                    { name: 'Annual', path: '/reports/annual' },
+                    {
+                        name: 'Loan Accounts',
+                        icon: <i className="fa-solid fa-sack-dollar"></i>,
+                        path: '/customers',
+                    },
+                    {
+                        name: 'Loan Applications',
+                        icon: <i className="fa-solid fa-paperclip" />,
+                        path: '/customers',
+                    },
                 ],
             },
-        ],
-    },
-    {
-        name: 'Manage Cash',
-        icon: <i className="fa-solid fa-coins" />,
-        children: [
-            { name: 'All Customers', path: '/customers' },
-            { name: 'New Customer', path: '/customers/create' },
+
             {
-                name: 'Reports',
+                name: 'Cash and Treasury',
+                icon: <i className="fa-solid fa-coins" />,
                 children: [
-                    { name: 'Monthly', path: '/reports/monthly' },
-                    { name: 'Annual', path: '/reports/annual' },
+                    {
+                        name: 'All Customers',
+                        icon: <i className="fa-solid fa-coins" />,
+                        path: '/customers',
+                    },
+                    {
+                        name: 'New Customer',
+                        icon: <i className="fa-solid fa-coins" />,
+                        path: '/customers/create',
+                    },
                 ],
             },
-        ],
-    },
-    {
-        name: 'Asset Management',
-        icon: <i className="fa-solid fa-school" />,
-        children: [
-            { name: 'All Customers', path: '/customers' },
-            { name: 'New Customer', path: '/customers/create' },
             {
-                name: 'Reports',
+                name: 'Fixed Assets',
+                icon: <i className="fa-solid fa-school" />,
                 children: [
-                    { name: 'Monthly', path: '/reports/monthly' },
-                    { name: 'Annual', path: '/reports/annual' },
+                    {
+                        name: 'All Customers',
+                        icon: <i className="fa-solid fa-school" />,
+                        path: '/customers',
+                    },
+                    {
+                        name: 'New Customer',
+                        icon: <i className="fa-solid fa-school" />,
+                        path: '/customers/create',
+                    },
                 ],
             },
-        ],
-    },
-    {
-        name: 'Vendor Management',
-        icon: <i className="fa-solid fa-users-between-lines"></i>,
-        children: [
-            { name: 'All Customers', path: '/customers' },
-            { name: 'New Customer', path: '/customers/create' },
             {
-                name: 'Reports',
+                name: 'Vendors',
+                icon: <i className="fa-solid fa-users-between-lines"></i>,
                 children: [
-                    { name: 'Monthly', path: '/reports/monthly' },
-                    { name: 'Annual', path: '/reports/annual' },
+                    {
+                        name: 'All Customers',
+                        icon: (
+                            <i className="fa-solid fa-users-between-lines"></i>
+                        ),
+                        path: '/customers',
+                    },
+                    {
+                        name: 'New Customer',
+                        icon: (
+                            <i className="fa-solid fa-users-between-lines"></i>
+                        ),
+                        path: '/customers/create',
+                    },
                 ],
             },
-        ],
-    },
-    {
-        name: 'Cheque Management',
-        icon: <i className="fa-solid fa-landmark" />,
-        children: [
-            { name: 'All Customers', path: '/customers' },
-            { name: 'New Customer', path: '/customers/create' },
             {
-                name: 'Reports',
+                name: 'Cheque Book',
+                icon: <i className="fa-solid fa-landmark" />,
                 children: [
-                    { name: 'Monthly', path: '/reports/monthly' },
-                    { name: 'Annual', path: '/reports/annual' },
+                    {
+                        name: 'All Customers',
+                        icon: <i className="fa-solid fa-landmark" />,
+                        path: '/customers',
+                    },
+                    {
+                        name: 'New Customer',
+                        icon: <i className="fa-solid fa-landmark" />,
+                        path: '/customers/create',
+                    },
+                ],
+            },
+            {
+                name: 'Vouchers',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                children: [
+                    {
+                        name: 'Cash Collection',
+                        icon: <i className="fa-solid fa-piggy-bank"></i>,
+                        path: '/customers',
+                    },
+                    {
+                        name: 'Payments',
+                        icon: <i className="fa-solid fa-piggy-bank"></i>,
+                        path: '/customers/create',
+                    },
                 ],
             },
         ],
@@ -160,29 +239,20 @@ export const sidebarMenu: SidebarItem[] = [
         name: 'HR Management',
         icon: <i className="fa-solid fa-user-tie"></i>,
         children: [
-            { name: 'All Customers', path: '/customers' },
-            { name: 'New Customer', path: '/customers/create' },
             {
-                name: 'Reports',
-                children: [
-                    { name: 'Monthly', path: '/reports/monthly' },
-                    { name: 'Annual', path: '/reports/annual' },
-                ],
+                name: 'Employees',
+                icon: <i className="fa-solid fa-user-tie"></i>,
+                path: '/customers',
             },
-        ],
-    },
-    {
-        name: 'Loan Applications',
-        icon: <i className="fa-solid fa-paperclip" />,
-        children: [
-            { name: 'All Customers', path: '/customers' },
-            { name: 'New Customer', path: '/customers/create' },
             {
-                name: 'Reports',
-                children: [
-                    { name: 'Monthly', path: '/reports/monthly' },
-                    { name: 'Annual', path: '/reports/annual' },
-                ],
+                name: 'Leaves',
+                icon: <i className="fa-solid fa-user-tie"></i>,
+                path: '/customers/create',
+            },
+            {
+                name: 'Attendances',
+                icon: <i className="fa-solid fa-user-tie"></i>,
+                path: '/customers/create',
             },
         ],
     },
@@ -190,38 +260,32 @@ export const sidebarMenu: SidebarItem[] = [
         name: 'Users',
         icon: <i className="fa-solid fa-user-gear" />,
         children: [
-            { name: 'All Users', path: '/users' },
-            { name: 'New User', path: '/users/create' },
             {
-                name: 'Roles & Permissions',
-                children: [
-                    { name: 'Roles', path: '/users/roles' },
-                    { name: 'Permissions', path: '/users/permissions' },
-                ],
+                name: 'All Users',
+                icon: <i className="fa-solid fa-user-gear" />,
+                path: '/users',
             },
             {
-                name: 'Reports',
-                children: [
-                    { name: 'Monthly', path: '/reports/monthly' },
-                    { name: 'Annual', path: '/reports/annual' },
-                ],
+                name: 'Roles',
+                icon: <i className="fa-solid fa-user-gear" />,
+                path: '/users/roles',
+            },
+            {
+                name: 'Assign Roles',
+                icon: <i className="fa-solid fa-user-gear" />,
+                path: '/users/permissions',
+            },
+            {
+                name: 'Assign Permissions',
+                icon: <i className="fa-solid fa-user-gear" />,
+                path: '/users/permissions',
             },
         ],
     },
     {
         name: 'Audit Logs',
         icon: <i className="fa-solid fa-list-check" />,
-        children: [
-            { name: 'All Users', path: '/users' },
-            { name: 'New User', path: '/users/create' },
-            {
-                name: 'Reports',
-                children: [
-                    { name: 'Monthly', path: '/reports/monthly' },
-                    { name: 'Annual', path: '/reports/annual' },
-                ],
-            },
-        ],
+        path: '/settings/profile',
     },
     {
         name: 'Settings',

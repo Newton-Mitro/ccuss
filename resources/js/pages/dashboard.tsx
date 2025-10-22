@@ -17,6 +17,7 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import { Bar, Doughnut, Line, Radar } from 'react-chartjs-2';
 import CustomAuthLayout from '../layouts/custom-auth-layout';
+import { BreadcrumbItem } from '../types';
 
 // Register Chart.js modules
 ChartJS.register(
@@ -86,49 +87,49 @@ export default function DashboardPage() {
             label: 'Branches',
             value: stats.branches,
             icon: 'fa-code-branch',
-            route: '/branches',
+            route: '/auth/branches',
             color: themeColors.chart1,
         },
         {
             label: 'Customers',
             value: stats.customers,
             icon: 'fa-users',
-            route: '/customers',
+            route: '/auth/customers',
             color: themeColors.chart2,
         },
         {
             label: 'Savings',
             value: stats.savingsAccounts,
             icon: 'fa-piggy-bank',
-            route: '/savings',
+            route: '/auth/savings',
             color: themeColors.chart3,
         },
         {
             label: 'Shares',
             value: stats.shares,
             icon: 'fa-chart-pie',
-            route: '/shares',
+            route: '/auth/shares',
             color: themeColors.chart4,
         },
         {
             label: 'Loans',
             value: stats.loans,
             icon: 'fa-money-check-dollar',
-            route: '/loans',
+            route: '/auth/loans',
             color: themeColors.chart5,
         },
         {
             label: 'Vendors',
             value: stats.vendors,
             icon: 'fa-store',
-            route: '/vendors',
+            route: '/auth/vendors',
             color: themeColors.chart1,
         },
         {
             label: 'Assets',
             value: stats.assets,
             icon: 'fa-boxes-stacked',
-            route: '/assets',
+            route: '/auth/assets',
             color: themeColors.chart2,
         },
         {
@@ -142,21 +143,21 @@ export default function DashboardPage() {
             label: 'Audit Logs',
             value: stats.auditLogs,
             icon: 'fa-list-check',
-            route: '/audit-logs',
+            route: '/auth/audit-logs',
             color: themeColors.chart4,
         },
         {
             label: 'Users',
             value: stats.users,
             icon: 'fa-user-gear',
-            route: '/users',
+            route: '/auth/users',
             color: themeColors.chart5,
         },
         {
             label: 'Visitors',
             value: stats.totalVisitors,
             icon: 'fa-chart-line',
-            route: '/visitors',
+            route: '/auth/visitors',
             color: themeColors.chart1,
         },
     ];
@@ -271,28 +272,56 @@ export default function DashboardPage() {
         [stats, themeColors],
     );
 
+    // 🧮 Audit Log Chart
+    const groupedAuditLogs = auditLogs.reduce((acc: any, log: any) => {
+        acc[log.action] = (acc[log.action] || 0) + 1;
+        return acc;
+    }, {});
+
+    const auditChartData = {
+        labels: Object.keys(groupedAuditLogs),
+        datasets: [
+            {
+                label: 'Action Count',
+                data: Object.values(groupedAuditLogs),
+                backgroundColor: [
+                    themeColors.chart1,
+                    themeColors.chart2,
+                    themeColors.chart3,
+                    themeColors.chart4,
+                    themeColors.chart5,
+                ],
+                borderRadius: 6,
+            },
+        ],
+    };
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Dashboard', href: '/dashboard' },
+    ];
+
     return (
-        <CustomAuthLayout>
+        <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
-            <div className="h-[calc(100vh-100px)] space-y-8 overflow-auto p-6 transition-colors duration-300">
+            <div className="space-y-6 p-2 transition-colors duration-300 md:p-4">
                 {/* KPI Cards */}
-                <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
                     {kpiCards.map((card, idx) => (
                         <div
                             key={idx}
                             onClick={() => router.visit(card.route)}
-                            className="flex cursor-pointer items-center rounded-xl border p-4 shadow transition-all hover:scale-[1.02] hover:shadow-md"
+                            className="flex cursor-pointer items-center rounded-xl border bg-card p-4 shadow transition-all hover:scale-[1.02] hover:shadow-md"
                             style={{
                                 backgroundColor: `${card.color}15`,
                                 borderColor: `${card.color}40`,
                             }}
                         >
                             <i
-                                className={`fa-solid ${card.icon} mr-6 text-3xl`}
+                                className={`fa-solid ${card.icon} mr-4 text-3xl sm:mr-6`}
                                 style={{ color: card.color }}
                             />
                             <div>
-                                <div className="text-2xl font-bold">
+                                <div className="text-xl font-bold sm:text-2xl">
                                     {card.value}
                                 </div>
                                 <div className="text-sm opacity-70">
@@ -304,14 +333,15 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Charts */}
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div className="rounded-xl border p-4 shadow-sm">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="rounded-xl border bg-card p-4 shadow-sm">
                         <h2 className="mb-3 text-lg font-semibold">
                             Top Visited Routes
                         </h2>
                         <Bar data={routeVisitedData} options={chartOptions} />
                     </div>
-                    <div className="rounded-xl border p-4 shadow-sm">
+
+                    <div className="rounded-xl border bg-card p-4 shadow-sm">
                         <h2 className="mb-3 text-lg font-semibold">
                             Monthly Visitors
                         </h2>
@@ -320,13 +350,15 @@ export default function DashboardPage() {
                             options={chartOptions}
                         />
                     </div>
-                    <div className="rounded-xl border p-4 shadow-sm">
+
+                    <div className="rounded-xl border bg-card p-4 shadow-sm">
                         <h2 className="mb-3 text-lg font-semibold">
                             Branches vs Customers
                         </h2>
                         <Doughnut data={doughnutData} options={chartOptions} />
                     </div>
-                    <div className="rounded-xl border p-4 shadow-sm">
+
+                    <div className="rounded-xl border bg-card p-4 shadow-sm">
                         <h2 className="mb-3 text-lg font-semibold">
                             KPI Radar
                         </h2>
@@ -334,23 +366,40 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                {/* Audit Logs */}
-                <div className="rounded-xl border p-4 shadow-sm">
-                    <h2 className="mb-3 text-lg font-semibold">
-                        Recent Audit Logs
-                    </h2>
-                    <ul className="space-y-2 text-sm">
-                        {auditLogs.map((log: any) => (
-                            <li key={log.id} className="flex justify-between">
-                                <span>{log.action}</span>
-                                <span className="opacity-70">
-                                    {new Date(
-                                        log.created_at,
-                                    ).toLocaleTimeString()}
-                                </span>
-                            </li>
-                        ))}
-                    </ul>
+                <div className="grid grid-cols-1 gap-4 bg-card md:grid-cols-2">
+                    {/* 🧾 Audit Logs Section */}
+                    <div className="rounded-xl border p-4 shadow-sm">
+                        <h2 className="mb-3 text-lg font-semibold">
+                            Audit Log Activity
+                        </h2>
+                        <div className="mb-6">
+                            <Bar data={auditChartData} options={chartOptions} />
+                        </div>
+                    </div>
+
+                    {/* Audit Logs */}
+                    <div className="rounded-xl border p-4 shadow-sm">
+                        <h2 className="mb-3 text-lg font-semibold">
+                            Recent Audit Logs
+                        </h2>
+                        <ul className="space-y-2 text-sm">
+                            {auditLogs.map((log: any) => (
+                                <li
+                                    key={log.id}
+                                    className="flex flex-wrap justify-between border-b border-dashed border-muted-foreground/20 py-1"
+                                >
+                                    <span className="truncate">
+                                        {log.action}
+                                    </span>
+                                    <span className="ml-2 opacity-70">
+                                        {new Date(
+                                            log.created_at,
+                                        ).toLocaleTimeString()}
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 </div>
             </div>
         </CustomAuthLayout>

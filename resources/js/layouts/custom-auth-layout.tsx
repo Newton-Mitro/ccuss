@@ -3,7 +3,6 @@ import {
     DropdownMenuContent,
     DropdownMenuGroup,
     DropdownMenuItem,
-    DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
@@ -11,33 +10,26 @@ import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { cn } from '@/lib/utils';
 import { logout } from '@/routes';
-import { Link, router } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { LogOut, Menu, UserCircle } from 'lucide-react';
 import { useState } from 'react';
-import AppearanceToggleTab from '../components/appearance-tabs';
+import { Breadcrumbs } from '../components/breadcrumbs';
 import SidebarMenuItem from '../components/sidebar-menu-item';
 import { sidebarMenu } from '../data/sidebar-menu';
 import { edit } from '../routes/profile';
-import { User } from '../types';
+import { BreadcrumbItem, SharedData } from '../types';
 
 interface CustomAuthLayoutProps {
     children: React.ReactNode;
-    user?: User;
+    breadcrumbs?: BreadcrumbItem[];
 }
 
 export default function CustomAuthLayout({
     children,
-    user = {
-        id: 1,
-        name: 'John Doe',
-        email: 'john.doe@email.com',
-        avatar: '/logo.png',
-        email_verified_at: null,
-        created_at: '2023-03-12T09:32:56.000000Z',
-        updated_at: '2023-03-12T09:32:56.000000Z',
-    },
+    breadcrumbs,
 }: CustomAuthLayoutProps) {
     const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
+    const { auth } = usePage<SharedData>().props;
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const cleanup = useMobileNavigation();
 
@@ -99,30 +91,19 @@ export default function CustomAuthLayout({
                         >
                             <Menu size={18} />
                         </button>
-
-                        <nav className="flex items-center space-x-1 text-sm font-semibold text-primary">
-                            <a href="#" className="hover:underline">
-                                Dashboard
-                            </a>
-                            <span className="text-muted-foreground">/</span>
-                            <a href="#" className="hover:underline">
-                                Hero Slides
-                            </a>
-                        </nav>
+                        {breadcrumbs && (
+                            <Breadcrumbs breadcrumbs={breadcrumbs} />
+                        )}
                     </div>
 
                     <div className="flex items-center gap-3">
-                        {/* Theme Toggle */}
-                        <AppearanceToggleTab />
-
                         {/* User Dropdown */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <button className="flex items-center gap-2 rounded px-2 py-1 focus:outline-none">
-                                    <img
-                                        src={user.avatar}
-                                        alt={user.name}
-                                        className="h-8 w-8 rounded-full border border-border object-cover p-1"
+                                    <UserInfo
+                                        user={auth.user}
+                                        showEmail={true}
                                     />
                                 </button>
                             </DropdownMenuTrigger>
@@ -131,15 +112,6 @@ export default function CustomAuthLayout({
                                 align="end"
                                 className="w-52 bg-card text-card-foreground"
                             >
-                                <DropdownMenuLabel className="p-0 font-normal">
-                                    <div className="flex items-center gap-2 px-2 py-1.5 text-left text-sm">
-                                        <UserInfo
-                                            user={user}
-                                            showEmail={true}
-                                        />
-                                    </div>
-                                </DropdownMenuLabel>
-                                <DropdownMenuSeparator />
                                 <DropdownMenuGroup>
                                     <DropdownMenuItem asChild>
                                         <Link
@@ -170,7 +142,7 @@ export default function CustomAuthLayout({
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-y-auto bg-background p-6 transition-colors">
+                <main className="flex-1 overflow-y-auto bg-background p-2 transition-colors md:p-6">
                     {children}
                 </main>
             </div>
