@@ -10,7 +10,7 @@ export const sidebarMenu: SidebarItem[] = [
         name: 'Branch Management',
         icon: <i className="fa-solid fa-network-wired" />,
         children: [
-            { name: 'All Branches', path: '/branches' },
+            { name: 'Branches', path: '/branches' },
             { name: 'New Branch', path: '/branches/create' },
             {
                 name: 'Reports',
@@ -25,7 +25,7 @@ export const sidebarMenu: SidebarItem[] = [
         name: 'Customers',
         icon: <i className="fa-solid fa-users" />,
         children: [
-            { name: 'All Customers', path: '/customers' },
+            { name: 'Customers', path: '/customers' },
             { name: 'New Customer', path: '/customers/create' },
             {
                 name: 'Reports',
@@ -37,11 +37,11 @@ export const sidebarMenu: SidebarItem[] = [
         ],
     },
     {
-        name: 'General Ledger',
+        name: 'General Ledgers',
         icon: <i className="fa-solid fa-cash-register"></i>,
         children: [
-            { name: 'All Customers', path: '/customers' },
-            { name: 'New Customer', path: '/customers/create' },
+            { name: 'Ledgers', path: '/ledgers' },
+            { name: 'New Ledger', path: '/ledgers/create' },
             {
                 name: 'Reports',
                 children: [
@@ -226,11 +226,6 @@ export const sidebarMenu: SidebarItem[] = [
     {
         name: 'Settings',
         icon: <i className="fa-solid fa-gear" />,
-        children: [
-            { name: 'Profile', path: '/settings/profile' },
-            { name: 'Change Password', path: '/settings/change-password' },
-            { name: 'Two Factor Authentication', path: '/settings/2fa' },
-            { name: 'Appearance', path: '/settings/appearance' },
-        ],
+        path: '/settings/profile',
     },
 ];

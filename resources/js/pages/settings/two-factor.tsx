@@ -4,13 +4,13 @@ import TwoFactorSetupModal from '@/components/two-factor-setup-modal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useTwoFactorAuth } from '@/hooks/use-two-factor-auth';
-import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { disable, enable, show } from '@/routes/two-factor';
 import { type BreadcrumbItem } from '@/types';
 import { Form, Head } from '@inertiajs/react';
 import { ShieldBan, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
+import CustomAuthLayout from '../../layouts/custom-auth-layout';
 
 interface TwoFactorProps {
     requiresConfirmation?: boolean;
@@ -41,7 +41,7 @@ export default function TwoFactor({
     const [showSetupModal, setShowSetupModal] = useState<boolean>(false);
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Two-Factor Authentication" />
             <SettingsLayout>
                 <div className="space-y-6">
@@ -132,6 +132,6 @@ export default function TwoFactor({
                     />
                 </div>
             </SettingsLayout>
-        </AppLayout>
+        </CustomAuthLayout>
     );
 }

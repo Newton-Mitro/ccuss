@@ -1,51 +1,52 @@
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { UserInfo } from '@/components/user-info';
+import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { cn } from '@/lib/utils';
-import { LogOut, Menu, Moon, Sun } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { logout } from '@/routes';
+import { Link, router } from '@inertiajs/react';
+import { LogOut, Menu, UserCircle } from 'lucide-react';
+import { useState } from 'react';
+import AppearanceToggleTab from '../components/appearance-tabs';
 import SidebarMenuItem from '../components/sidebar-menu-item';
 import { sidebarMenu } from '../data/sidebar-menu';
+import { edit } from '../routes/profile';
+import { User } from '../types';
+
+interface CustomAuthLayoutProps {
+    children: React.ReactNode;
+    user?: User;
+}
 
 export default function CustomAuthLayout({
     children,
-}: {
-    children: React.ReactNode;
-}) {
+    user = {
+        id: 1,
+        name: 'John Doe',
+        email: 'john.doe@email.com',
+        avatar: '/logo.png',
+        email_verified_at: null,
+        created_at: '2023-03-12T09:32:56.000000Z',
+        updated_at: '2023-03-12T09:32:56.000000Z',
+    },
+}: CustomAuthLayoutProps) {
     const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
     const [sidebarOpen, setSidebarOpen] = useState(true);
-    const [darkMode, setDarkMode] = useState(() => {
-        if (typeof window === 'undefined') return false;
-        const saved = localStorage.getItem('theme');
-        const isDark = saved === 'dark';
-        document.documentElement.classList.toggle('dark', isDark);
-        return isDark;
-    });
-    const [userMenuOpen, setUserMenuOpen] = useState(false);
-    const userMenuRef = useRef<HTMLDivElement>(null);
-
-    // Close user menu on outside click
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (
-                userMenuRef.current &&
-                !userMenuRef.current.contains(event.target as Node)
-            ) {
-                setUserMenuOpen(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () =>
-            document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+    const cleanup = useMobileNavigation();
 
     const toggleMenu = (name: string) =>
         setOpenMenus((prev) => ({ ...prev, [name]: !prev[name] }));
 
-    const toggleTheme = () => {
-        setDarkMode((prev) => {
-            const newTheme = !prev;
-            document.documentElement.classList.toggle('dark', newTheme);
-            localStorage.setItem('theme', newTheme ? 'dark' : 'light');
-            return newTheme;
-        });
+    const handleLogout = () => {
+        cleanup();
+        router.post(logout(), {}, { preserveScroll: false });
     };
 
     return (
@@ -73,7 +74,7 @@ export default function CustomAuthLayout({
                 </div>
 
                 <nav className="h-[calc(100%-4rem)] overflow-y-auto px-2 py-4 text-sm">
-                    <ul className="space-y-1">
+                    <ul className="">
                         {sidebarMenu.map((item) => (
                             <SidebarMenuItem
                                 key={item.name}
@@ -110,43 +111,62 @@ export default function CustomAuthLayout({
                         </nav>
                     </div>
 
-                    <div
-                        className="relative flex items-center gap-3"
-                        ref={userMenuRef}
-                    >
-                        <button
-                            onClick={toggleTheme}
-                            className="rounded p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                        >
-                            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-                        </button>
+                    <div className="flex items-center gap-3">
+                        {/* Theme Toggle */}
+                        <AppearanceToggleTab />
 
-                        <button
-                            onClick={() => setUserMenuOpen((prev) => !prev)}
-                            className="flex items-center gap-2 rounded px-2 py-1"
-                        >
-                            <img
-                                src="/logo.png"
-                                alt="John Doe"
-                                className="h-8 w-8 rounded-full border border-border object-cover p-1 transition-colors hover:bg-muted-foreground"
-                            />
-                        </button>
+                        {/* User Dropdown */}
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button className="flex items-center gap-2 rounded px-2 py-1 focus:outline-none">
+                                    <img
+                                        src={user.avatar}
+                                        alt={user.name}
+                                        className="h-8 w-8 rounded-full border border-border object-cover p-1"
+                                    />
+                                </button>
+                            </DropdownMenuTrigger>
 
-                        {userMenuOpen && (
-                            <div className="absolute top-full right-0 z-50 mt-2 w-48 rounded border border-border bg-card shadow-lg">
-                                <div className="flex flex-col p-2">
-                                    <span className="px-3 py-1 text-sm font-medium">
-                                        John Doe
-                                    </span>
-                                    <span className="px-3 py-1 text-xs text-muted-foreground">
-                                        john.doe@email.com
-                                    </span>
-                                    <button className="mt-2 flex items-center gap-2 rounded px-3 py-1 text-sm text-destructive transition-colors hover:bg-muted hover:text-destructive-foreground">
-                                        <LogOut size={16} /> Logout
+                            <DropdownMenuContent
+                                align="end"
+                                className="w-52 bg-card text-card-foreground"
+                            >
+                                <DropdownMenuLabel className="p-0 font-normal">
+                                    <div className="flex items-center gap-2 px-2 py-1.5 text-left text-sm">
+                                        <UserInfo
+                                            user={user}
+                                            showEmail={true}
+                                        />
+                                    </div>
+                                </DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuGroup>
+                                    <DropdownMenuItem asChild>
+                                        <Link
+                                            href={edit()}
+                                            as="button"
+                                            prefetch
+                                            onClick={cleanup}
+                                            className="flex w-full items-center gap-2"
+                                        >
+                                            <UserCircle size={16} />
+                                            Profile
+                                        </Link>
+                                    </DropdownMenuItem>
+                                </DropdownMenuGroup>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem asChild>
+                                    <button
+                                        onClick={handleLogout}
+                                        data-test="logout-button"
+                                        className="flex w-full items-center gap-2 text-destructive hover:text-destructive-foreground"
+                                    >
+                                        <LogOut size={16} />
+                                        Log out
                                     </button>
-                                </div>
-                            </div>
-                        )}
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </header>
 
