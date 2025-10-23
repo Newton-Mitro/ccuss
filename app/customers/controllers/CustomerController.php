@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Customers;
+namespace App\customers\controllers;
 
 use App\Http\Controllers\Controller;
 use Inertia\Inertia;
@@ -13,14 +13,14 @@ class CustomerController extends Controller
     {
         // $customers = Customer::latest()->paginate(10);
 
-        return Inertia::render('customers/index', [
+        return Inertia::render('customer-management/customers/index', [
             'customers' => 0,
         ]);
     }
 
     public function create(): Response
     {
-        return Inertia::render('customers/create');
+        return Inertia::render('customer-management/customers/create');
     }
 
     public function store(StoreCustomerRequest $request): RedirectResponse
@@ -33,14 +33,14 @@ class CustomerController extends Controller
 
     public function show(Customer $customer): Response
     {
-        return Inertia::render('customers/show', [
+        return Inertia::render('customer-management/customers/show', [
             'customer' => $customer,
         ]);
     }
 
     public function edit(Customer $customer): Response
     {
-        return Inertia::render('customers/edit', [
+        return Inertia::render('customer-management/customers/edit', [
             'customer' => $customer,
         ]);
     }

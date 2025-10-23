@@ -47,7 +47,7 @@ export default function CustomAuthLayout({
             <aside
                 className={cn(
                     'flex-shrink-0 border-r transition-all duration-300',
-                    sidebarOpen ? 'w-64' : 'w-16',
+                    sidebarOpen ? 'w-72' : 'w-16',
                     'border-border bg-sidebar text-sidebar-foreground',
                 )}
             >

@@ -1,6 +1,6 @@
 <?php
 
-use App\customers\CustomerController;
+use App\customers\controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;

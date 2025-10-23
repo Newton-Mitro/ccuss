@@ -9,18 +9,7 @@ export const sidebarMenu: SidebarItem[] = [
     {
         name: 'Branchs',
         icon: <i className="fa-solid fa-network-wired" />,
-        children: [
-            {
-                name: 'Branches',
-                icon: <i className="fa-solid fa-network-wired" />,
-                path: '/branches',
-            },
-            {
-                name: 'New Branch',
-                icon: <i className="fa-solid fa-network-wired" />,
-                path: '/branches/create',
-            },
-        ],
+        path: '/branches',
     },
     {
         name: 'Customer Management',
@@ -28,13 +17,28 @@ export const sidebarMenu: SidebarItem[] = [
         children: [
             {
                 name: 'Customers',
-                icon: <i className="fa-solid fa-users" />,
+                icon: <i className="fa-solid fa-users-viewfinder"></i>,
                 path: '/auth/customers',
             },
             {
+                name: 'Addresses',
+                icon: <i className="fa-solid fa-map-location-dot"></i>,
+                path: '/auth/addresses',
+            },
+            {
+                name: 'Family Relationships',
+                icon: <i className="fa-solid fa-person-breastfeeding"></i>,
+                path: '/auth/families',
+            },
+            {
                 name: 'Signatures',
-                icon: <i className="fa-solid fa-users" />,
+                icon: <i className="fa-solid fa-signature"></i>,
                 path: '/auth/customers/signatures',
+            },
+            {
+                name: 'Onlne Users',
+                icon: <i className="fa-solid fa-street-view"></i>,
+                path: '/auth/customers/online-users',
             },
         ],
     },
@@ -44,7 +48,7 @@ export const sidebarMenu: SidebarItem[] = [
         children: [
             {
                 name: 'Ledgers',
-                icon: <i className="fa-solid fa-cash-register"></i>,
+                icon: <i className="fa-solid fa-list-check"></i>,
                 path: '/ledgers',
             },
             {
@@ -53,185 +57,315 @@ export const sidebarMenu: SidebarItem[] = [
                 children: [
                     {
                         name: 'Debit Vouchers',
-                        icon: <i className="fa-solid fa-cash-register"></i>,
-                        path: '/reports/monthly',
+                        icon: <i className="fa-solid fa-coins"></i>,
+                        path: '/debit-vouchers',
                     },
                     {
                         name: 'Credit Vouchers',
-                        icon: <i className="fa-solid fa-cash-register"></i>,
-                        path: '/reports/annual',
+                        icon: <i className="fa-solid fa-coins"></i>,
+                        path: '/credit-vouchers',
                     },
                     {
                         name: 'Journal Vouchers',
-                        icon: <i className="fa-solid fa-cash-register"></i>,
-                        path: '/reports/annual',
+                        icon: <i className="fa-solid fa-coins"></i>,
+                        path: '/journal-vouchers',
                     },
                     {
                         name: 'Contra Vouchers',
-                        icon: <i className="fa-solid fa-cash-register"></i>,
-                        path: '/reports/annual',
+                        icon: <i className="fa-solid fa-coins"></i>,
+                        path: '/contra-vouchers',
                     },
                 ],
             },
             {
                 name: 'Reports',
-                icon: <i className="fa-solid fa-cash-register"></i>,
+                icon: <i className="fa-solid fa-chart-simple"></i>,
                 children: [
                     {
-                        name: 'Monthly',
-                        icon: <i className="fa-solid fa-cash-register"></i>,
-                        path: '/reports/monthly',
+                        name: 'Trial Balance',
+                        icon: <i className="fa-solid fa-scale-balanced"></i>,
+                        path: '/reports/trial-balance',
                     },
                     {
-                        name: 'Annual',
-                        icon: <i className="fa-solid fa-cash-register"></i>,
-                        path: '/reports/annual',
+                        name: 'Income Statement',
+                        icon: <i className="fa-solid fa-scale-balanced"></i>,
+                        path: '/reports/income-statement',
+                    },
+                    {
+                        name: 'Balance Sheet',
+                        icon: <i className="fa-solid fa-scale-balanced"></i>,
+                        path: '/reports/balance-sheet',
+                    },
+                    {
+                        name: 'Cash Flow Statement',
+                        icon: <i className="fa-solid fa-scale-balanced"></i>,
+                        path: '/reports/cash-flow-statement',
+                    },
+                    {
+                        name: 'Statement of shareholders Equity',
+                        icon: <i className="fa-solid fa-scale-balanced"></i>,
+                        path: '/reports/statement-of-shareholders-equity',
                     },
                 ],
             },
         ],
     },
+    {
+        name: 'Manage Deposits',
+        icon: <i className="fa-solid fa-sprout" />,
+        children: [
+            {
+                name: 'Deposit Policies',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+            {
+                name: 'Deposit Tenures',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+
+            {
+                name: 'Saving Accounts',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+            {
+                name: 'Deposit Holders',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+            {
+                name: 'Deposit Nominees',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+            {
+                name: 'Deposit Schedules',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+        ],
+    },
+    {
+        name: 'Share Accounts',
+        icon: <i className="fa-solid fa-money-bill-trend-up"></i>,
+        children: [
+            {
+                name: 'Deposit Policies',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+            {
+                name: 'Deposit Tenures',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+
+            {
+                name: 'Saving Accounts',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+            {
+                name: 'Deposit Holders',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+            {
+                name: 'Deposit Nominees',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+            {
+                name: 'Deposit Schedules',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+        ],
+    },
+    {
+        name: 'Customer Loans',
+        icon: <i className="fa-solid fa-sack-dollar"></i>,
+        children: [
+            {
+                name: 'Deposit Policies',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+            {
+                name: 'Deposit Tenures',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+
+            {
+                name: 'Saving Accounts',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+            {
+                name: 'Deposit Holders',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+            {
+                name: 'Deposit Nominees',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+            {
+                name: 'Deposit Schedules',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+        ],
+    },
 
     {
-        name: 'Subsidiary Accounting',
+        name: 'Cash and Treasury',
+        icon: <i className="fa-solid fa-coins" />,
+        children: [
+            {
+                name: 'Deposit Policies',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+            {
+                name: 'Deposit Tenures',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+
+            {
+                name: 'Saving Accounts',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+            {
+                name: 'Deposit Holders',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+            {
+                name: 'Deposit Nominees',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+            {
+                name: 'Deposit Schedules',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+        ],
+    },
+    {
+        name: 'Fixed Assets',
+        icon: <i className="fa-solid fa-school" />,
+        children: [
+            {
+                name: 'Deposit Policies',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+            {
+                name: 'Deposit Tenures',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+
+            {
+                name: 'Saving Accounts',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+            {
+                name: 'Deposit Holders',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+            {
+                name: 'Deposit Nominees',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+            {
+                name: 'Deposit Schedules',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+        ],
+    },
+    {
+        name: 'Vendors',
+        icon: <i className="fa-solid fa-users-between-lines"></i>,
+        children: [
+            {
+                name: 'Deposit Policies',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+            {
+                name: 'Deposit Tenures',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+
+            {
+                name: 'Saving Accounts',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+            {
+                name: 'Deposit Holders',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+            {
+                name: 'Deposit Nominees',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+            {
+                name: 'Deposit Schedules',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/cash-collection',
+            },
+        ],
+    },
+    {
+        name: 'Cheque Book',
+        icon: <i className="fa-solid fa-landmark" />,
+        path: '/cheque-book',
+    },
+    {
+        name: 'Subsidiary Transactions',
         icon: <i className="fa-solid fa-piggy-bank"></i>,
         children: [
             {
-                name: 'Saving Accounts',
-                icon: <i className="fa-solid fa-sprout" />,
-                children: [
-                    {
-                        name: 'All Customers',
-                        icon: <i className="fa-solid fa-sprout" />,
-                        path: '/customers',
-                    },
-                    {
-                        name: 'New Customer',
-                        icon: <i className="fa-solid fa-sprout" />,
-                        path: '/customers/create',
-                    },
-                ],
-            },
-            {
-                name: 'Share Accounts',
-                icon: <i className="fa-solid fa-money-bill-trend-up"></i>,
-                children: [
-                    {
-                        name: 'All Customers',
-                        icon: (
-                            <i className="fa-solid fa-money-bill-trend-up"></i>
-                        ),
-                        path: '/customers',
-                    },
-                    {
-                        name: 'New Customer',
-                        icon: (
-                            <i className="fa-solid fa-money-bill-trend-up"></i>
-                        ),
-                        path: '/customers/create',
-                    },
-                ],
-            },
-            {
-                name: 'Customer Loans',
-                icon: <i className="fa-solid fa-sack-dollar"></i>,
-                children: [
-                    {
-                        name: 'Loan Accounts',
-                        icon: <i className="fa-solid fa-sack-dollar"></i>,
-                        path: '/customers',
-                    },
-                    {
-                        name: 'Loan Applications',
-                        icon: <i className="fa-solid fa-paperclip" />,
-                        path: '/customers',
-                    },
-                ],
-            },
-
-            {
-                name: 'Cash and Treasury',
-                icon: <i className="fa-solid fa-coins" />,
-                children: [
-                    {
-                        name: 'All Customers',
-                        icon: <i className="fa-solid fa-coins" />,
-                        path: '/customers',
-                    },
-                    {
-                        name: 'New Customer',
-                        icon: <i className="fa-solid fa-coins" />,
-                        path: '/customers/create',
-                    },
-                ],
-            },
-            {
-                name: 'Fixed Assets',
-                icon: <i className="fa-solid fa-school" />,
-                children: [
-                    {
-                        name: 'All Customers',
-                        icon: <i className="fa-solid fa-school" />,
-                        path: '/customers',
-                    },
-                    {
-                        name: 'New Customer',
-                        icon: <i className="fa-solid fa-school" />,
-                        path: '/customers/create',
-                    },
-                ],
-            },
-            {
-                name: 'Vendors',
-                icon: <i className="fa-solid fa-users-between-lines"></i>,
-                children: [
-                    {
-                        name: 'All Customers',
-                        icon: (
-                            <i className="fa-solid fa-users-between-lines"></i>
-                        ),
-                        path: '/customers',
-                    },
-                    {
-                        name: 'New Customer',
-                        icon: (
-                            <i className="fa-solid fa-users-between-lines"></i>
-                        ),
-                        path: '/customers/create',
-                    },
-                ],
-            },
-            {
-                name: 'Cheque Book',
-                icon: <i className="fa-solid fa-landmark" />,
-                children: [
-                    {
-                        name: 'All Customers',
-                        icon: <i className="fa-solid fa-landmark" />,
-                        path: '/customers',
-                    },
-                    {
-                        name: 'New Customer',
-                        icon: <i className="fa-solid fa-landmark" />,
-                        path: '/customers/create',
-                    },
-                ],
-            },
-            {
-                name: 'Vouchers',
+                name: 'Cash Collection',
                 icon: <i className="fa-solid fa-piggy-bank"></i>,
-                children: [
-                    {
-                        name: 'Cash Collection',
-                        icon: <i className="fa-solid fa-piggy-bank"></i>,
-                        path: '/customers',
-                    },
-                    {
-                        name: 'Payments',
-                        icon: <i className="fa-solid fa-piggy-bank"></i>,
-                        path: '/customers/create',
-                    },
-                ],
+                path: '/cash-collection',
+            },
+            {
+                name: 'Payments',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/payments',
+            },
+            {
+                name: 'Vault-Vault Transactions',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/vault-transfers',
+            },
+            {
+                name: 'Vault-Bank Transactions',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/vault-transfers',
+            },
+            {
+                name: 'Vault-Teller Transactions',
+                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                path: '/vault-transfers',
             },
         ],
     },
@@ -257,7 +391,7 @@ export const sidebarMenu: SidebarItem[] = [
         ],
     },
     {
-        name: 'Users',
+        name: 'User Auth',
         icon: <i className="fa-solid fa-user-gear" />,
         children: [
             {

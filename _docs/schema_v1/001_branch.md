@@ -1,14 +1,38 @@
-```sql
-CREATE TABLE branches (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    code VARCHAR(20) UNIQUE NOT NULL,         -- Unique branch code
-    name VARCHAR(100) NOT NULL,               -- Branch name
-    address VARCHAR(255),                     -- Full address
-    latitude DECIMAL(10,8) DEFAULT NULL,      -- Latitude for map/GPS
-    longitude DECIMAL(11,8) DEFAULT NULL,     -- Longitude for map/GPS
-    manager_id BIGINT UNSIGNED DEFAULT NULL,  -- FK to employees or users table
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (manager_id) REFERENCES users(id)  -- or users(id) if managers are in a users table
-);
+```php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('branches', function (Blueprint $table) {
+            $table->id();
+
+            $table->string('code', 20)->unique()->comment('Unique branch code');
+            $table->string('name', 100)->comment('Branch name');
+            $table->string('address', 255)->nullable()->comment('Full address');
+
+            $table->decimal('latitude', 10, 8)->nullable()->comment('Latitude for map/GPS');
+            $table->decimal('longitude', 11, 8)->nullable()->comment('Longitude for map/GPS');
+
+            $table->foreignId('manager_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete()
+                ->comment('Branch manager user ID');
+
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('branches');
+    }
+};
+
 ```

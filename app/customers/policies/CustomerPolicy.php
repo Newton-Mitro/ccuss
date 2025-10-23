@@ -1,6 +1,6 @@
 <?php
 
-namespace App\customers;
+namespace App\customers\policies;
 
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
