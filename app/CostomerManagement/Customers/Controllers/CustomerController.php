@@ -1,7 +1,10 @@
 <?php
 
-namespace App\customers\controllers;
+namespace App\CostomerManagement\Customers\Controllers;
 
+use App\CostomerManagement\Customers\Models\Customer;
+use App\CostomerManagement\Customers\Requests\StoreCustomerRequest;
+use App\CostomerManagement\Customers\Requests\UpdateCustomerRequest;
 use App\Http\Controllers\Controller;
 use Inertia\Inertia;
 use Inertia\Response;

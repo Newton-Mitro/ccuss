@@ -1,6 +1,8 @@
 <?php
 
-use App\customers\controllers\CustomerController;
+use App\Branches\Controllers\BranchController;
+use App\CostomerManagement\Addresses\Controllers\AddressController;
+use App\CostomerManagement\Customers\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -31,5 +33,6 @@ Route::prefix('auth')
     ->middleware(['auth', 'verified'])
     ->group(function () {
         Route::resource('customers', CustomerController::class);
-
+        Route::resource('addresses', AddressController::class);
+        Route::resource('branches', BranchController::class);
     });

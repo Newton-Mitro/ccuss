@@ -1,7 +1,8 @@
 <?php
 
-namespace App\customers\policies;
+namespace App\CostomerManagement\Customers\Policies;
 
+use App\CostomerManagement\Customers\Models\Customer;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 

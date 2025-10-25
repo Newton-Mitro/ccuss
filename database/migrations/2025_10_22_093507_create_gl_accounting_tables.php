@@ -1,10 +1,10 @@
-```php
+<?php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         /**
@@ -79,28 +79,41 @@ return new class extends Migration
                 ->comment('Linked GL account');
 
             $table->enum('subledger_type', [
-                'DEPOSIT', 'LOAN', 'SHARE', 'INSURANCE', 'CASH',
-                'FIXED_ASSET', 'PAYROLL', 'VENDOR', 'FEE', 'INTEREST',
-                'PROTECTION_PREMIUM', 'PROTECTION_RENEWAL', 'ADVANCE_DEPOSIT'
+                'DEPOSIT',
+                'LOAN',
+                'SHARE',
+                'INSURANCE',
+                'CASH',
+                'FIXED_ASSET',
+                'PAYROLL',
+                'VENDOR',
+                'FEE',
+                'INTEREST',
+                'PROTECTION_PREMIUM',
+                'PROTECTION_RENEWAL',
+                'ADVANCE_DEPOSIT'
             ])->nullable()->default(null)->comment('Type of subledger entry');
 
             $table->unsignedBigInteger('subledger_id')->nullable();
 
             $table->enum('associate_ledger_type', [
-                'FEE', 'FINE', 'PROVISION', 'INTEREST', 'DIVIDEND',
-                'REBATE', 'PROTECTION_PREMIUM', 'PROTECTION_RENEWAL'
+                'FEE',
+                'FINE',
+                'PROVISION',
+                'INTEREST',
+                'DIVIDEND',
+                'REBATE',
+                'PROTECTION_PREMIUM',
+                'PROTECTION_RENEWAL'
             ])->nullable()->default(null)->comment('Type of associated ledger (if any)');
 
             $table->unsignedBigInteger('associate_ledger_id')->nullable();
 
             $table->decimal('debit', 18, 2)->default(0);
             $table->decimal('credit', 18, 2)->default(0);
-
             $table->timestamps();
-
-            // ✅ Add constraint for valid debit/credit logic
-            $table->check("(debit = 0 AND credit > 0) OR (credit = 0 AND debit > 0)");
         });
+
     }
 
     public function down(): void
@@ -110,5 +123,3 @@ return new class extends Migration
         Schema::dropIfExists('gl_accounts');
     }
 };
-
-```

@@ -7,9 +7,9 @@ export const sidebarMenu: SidebarItem[] = [
         path: '/dashboard',
     },
     {
-        name: 'Branchs',
+        name: 'Branches',
         icon: <i className="fa-solid fa-network-wired" />,
-        path: '/branches',
+        path: '/auth/branches',
     },
     {
         name: 'Customer Management',
@@ -33,12 +33,12 @@ export const sidebarMenu: SidebarItem[] = [
             {
                 name: 'Signatures',
                 icon: <i className="fa-solid fa-signature"></i>,
-                path: '/auth/customers/signatures',
+                path: '/auth/signatures',
             },
             {
                 name: 'Onlne Users',
                 icon: <i className="fa-solid fa-street-view"></i>,
-                path: '/auth/customers/online-users',
+                path: '/auth/online-users',
             },
         ],
     },
@@ -117,33 +117,33 @@ export const sidebarMenu: SidebarItem[] = [
             {
                 name: 'Deposit Policies',
                 icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
+                path: '/deposit-policies',
             },
             {
                 name: 'Deposit Tenures',
                 icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
+                path: '/deposit-tenures',
             },
 
             {
                 name: 'Saving Accounts',
                 icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
+                path: '/saving-accounts',
             },
             {
                 name: 'Deposit Holders',
                 icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
+                path: '/deposit-holders',
             },
             {
                 name: 'Deposit Nominees',
                 icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
+                path: '/deposit-nominees',
             },
             {
                 name: 'Deposit Schedules',
                 icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
+                path: '/deposit-schedules',
             },
         ],
     },
@@ -156,32 +156,6 @@ export const sidebarMenu: SidebarItem[] = [
                 icon: <i className="fa-solid fa-piggy-bank"></i>,
                 path: '/cash-collection',
             },
-            {
-                name: 'Deposit Tenures',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-
-            {
-                name: 'Saving Accounts',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-            {
-                name: 'Deposit Holders',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-            {
-                name: 'Deposit Nominees',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-            {
-                name: 'Deposit Schedules',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
         ],
     },
     {
@@ -190,32 +164,6 @@ export const sidebarMenu: SidebarItem[] = [
         children: [
             {
                 name: 'Deposit Policies',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-            {
-                name: 'Deposit Tenures',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-
-            {
-                name: 'Saving Accounts',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-            {
-                name: 'Deposit Holders',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-            {
-                name: 'Deposit Nominees',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-            {
-                name: 'Deposit Schedules',
                 icon: <i className="fa-solid fa-piggy-bank"></i>,
                 path: '/cash-collection',
             },
@@ -231,32 +179,6 @@ export const sidebarMenu: SidebarItem[] = [
                 icon: <i className="fa-solid fa-piggy-bank"></i>,
                 path: '/cash-collection',
             },
-            {
-                name: 'Deposit Tenures',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-
-            {
-                name: 'Saving Accounts',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-            {
-                name: 'Deposit Holders',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-            {
-                name: 'Deposit Nominees',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-            {
-                name: 'Deposit Schedules',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
         ],
     },
     {
@@ -265,32 +187,6 @@ export const sidebarMenu: SidebarItem[] = [
         children: [
             {
                 name: 'Deposit Policies',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-            {
-                name: 'Deposit Tenures',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-
-            {
-                name: 'Saving Accounts',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-            {
-                name: 'Deposit Holders',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-            {
-                name: 'Deposit Nominees',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-            {
-                name: 'Deposit Schedules',
                 icon: <i className="fa-solid fa-piggy-bank"></i>,
                 path: '/cash-collection',
             },
@@ -303,33 +199,7 @@ export const sidebarMenu: SidebarItem[] = [
             {
                 name: 'Deposit Policies',
                 icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-            {
-                name: 'Deposit Tenures',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-
-            {
-                name: 'Saving Accounts',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-            {
-                name: 'Deposit Holders',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-            {
-                name: 'Deposit Nominees',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-            {
-                name: 'Deposit Schedules',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
+                path: '/deposit-policies',
             },
         ],
     },
@@ -347,26 +217,6 @@ export const sidebarMenu: SidebarItem[] = [
                 icon: <i className="fa-solid fa-piggy-bank"></i>,
                 path: '/cash-collection',
             },
-            {
-                name: 'Payments',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/payments',
-            },
-            {
-                name: 'Vault-Vault Transactions',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/vault-transfers',
-            },
-            {
-                name: 'Vault-Bank Transactions',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/vault-transfers',
-            },
-            {
-                name: 'Vault-Teller Transactions',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/vault-transfers',
-            },
         ],
     },
     {
@@ -376,17 +226,17 @@ export const sidebarMenu: SidebarItem[] = [
             {
                 name: 'Employees',
                 icon: <i className="fa-solid fa-user-tie"></i>,
-                path: '/customers',
+                path: '/employees',
             },
             {
                 name: 'Leaves',
                 icon: <i className="fa-solid fa-user-tie"></i>,
-                path: '/customers/create',
+                path: '/leaves',
             },
             {
                 name: 'Attendances',
                 icon: <i className="fa-solid fa-user-tie"></i>,
-                path: '/customers/create',
+                path: '/attendances',
             },
         ],
     },
@@ -419,7 +269,7 @@ export const sidebarMenu: SidebarItem[] = [
     {
         name: 'Audit Logs',
         icon: <i className="fa-solid fa-list-check" />,
-        path: '/settings/profile',
+        path: '/audit-logs',
     },
     {
         name: 'Settings',
