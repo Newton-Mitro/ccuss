@@ -1,8 +1,8 @@
 <?php
 
-use App\Branches\Controllers\BranchController;
-use App\CostomerManagement\Addresses\Controllers\AddressController;
-use App\CostomerManagement\Customers\Controllers\CustomerController;
+use App\Branch\Controllers\BranchController;
+use App\CostomerManagement\Address\Controllers\AddressController;
+use App\CostomerManagement\Customer\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;

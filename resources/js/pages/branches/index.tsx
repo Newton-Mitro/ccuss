@@ -4,86 +4,49 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Head, Link } from '@inertiajs/react';
-import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Eye, Pencil, Search, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import HeadingSmall from '../../components/heading-small';
 import CustomAuthLayout from '../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../types';
 
+interface Branch {
+    id: number;
+    code: string;
+    name: string;
+    address: string;
+    latitude: number;
+    longitude: number;
+    manager?: string;
+}
+
+interface BranchPageProps {
+    branches: {
+        data: Branch[];
+        links: { url: string | null; label: string; active: boolean }[];
+    };
+    filters: { search?: string };
+}
+
 export default function Index() {
-    // ✅ Mock branches data
-    const allBranches = [
-        {
-            id: 1,
-            code: 'BR001',
-            name: 'Head Office',
-            address: '12/A Gulshan Avenue, Dhaka',
-            latitude: 23.7925,
-            longitude: 90.4078,
-            manager: 'Mahmud Hasan',
-        },
-        {
-            id: 2,
-            code: 'BR002',
-            name: 'Uttara Branch',
-            address: 'Sector 4, Uttara, Dhaka',
-            latitude: 23.8759,
-            longitude: 90.3795,
-            manager: 'Sadia Rahman',
-        },
-        {
-            id: 3,
-            code: 'BR003',
-            name: 'Chittagong Branch',
-            address: 'Agrabad, Chittagong',
-            latitude: 22.3364,
-            longitude: 91.8317,
-            manager: 'Imran Chowdhury',
-        },
-        {
-            id: 4,
-            code: 'BR004',
-            name: 'Sylhet Branch',
-            address: 'Zindabazar, Sylhet',
-            latitude: 24.8949,
-            longitude: 91.8687,
-            manager: 'Rafiul Karim',
-        },
-        {
-            id: 5,
-            code: 'BR005',
-            name: 'Rajshahi Branch',
-            address: 'Shaheb Bazar, Rajshahi',
-            latitude: 24.3745,
-            longitude: 88.6042,
-            manager: 'Nusrat Jahan',
-        },
-    ];
+    const { branches, filters } = usePage().props as unknown as BranchPageProps;
 
-    const paginationLinks = [
-        { label: '1', url: '#', active: true },
-        { label: '2', url: '#', active: false },
-        { label: 'Next', url: '#', active: false },
-    ];
-
-    const [searchQuery, setSearchQuery] = useState('');
-    const [recordsPerPage, setRecordsPerPage] = useState(5);
-
-    const filteredBranches = allBranches.filter((b) => {
-        return (
-            b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            b.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            b.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            b.manager.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-    });
-
-    const paginatedBranches = filteredBranches.slice(0, recordsPerPage);
+    const [searchQuery, setSearchQuery] = useState(filters.search || '');
+    const [recordsPerPage, setRecordsPerPage] = useState(10);
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Branches', href: '/auth/branches' },
     ];
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        router.get(
+            '/auth/branches',
+            { search: searchQuery },
+            { preserveState: true },
+        );
+    };
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
@@ -104,15 +67,21 @@ export default function Index() {
                 </div>
 
                 {/* Search */}
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <input
-                        type="text"
-                        placeholder="Search branches..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="h-9 w-full max-w-sm rounded-md border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-                    />
-                </div>
+                <form
+                    onSubmit={handleSearch}
+                    className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+                >
+                    <div className="relative w-full max-w-sm">
+                        <Search className="absolute top-2.5 left-3 h-4 w-4 text-muted-foreground" />
+                        <input
+                            type="text"
+                            placeholder="Search branches..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="h-9 w-full rounded-md border border-border bg-background px-9 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+                        />
+                    </div>
+                </form>
 
                 {/* Table */}
                 <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border border-border md:h-[calc(100vh-300px)]">
@@ -138,8 +107,8 @@ export default function Index() {
                             </tr>
                         </thead>
                         <tbody className="flex flex-col md:table-row-group">
-                            {paginatedBranches.length > 0 ? (
-                                paginatedBranches.map((b) => (
+                            {branches.data.length > 0 ? (
+                                branches.data.map((b) => (
                                     <tr
                                         key={b.id}
                                         className="flex flex-col border-b border-border even:bg-muted/30 md:table-row md:flex-row"
@@ -150,7 +119,7 @@ export default function Index() {
                                             {b.address}
                                         </td>
                                         <td className="px-2 py-1">
-                                            {b.manager}
+                                            {b.manager ?? '-'}
                                         </td>
                                         <td className="px-2 py-1">
                                             {b.latitude}
@@ -237,6 +206,9 @@ export default function Index() {
                             <option value={5}>5</option>
                             <option value={10}>10</option>
                             <option value={20}>20</option>
+                            <option value={50}>50</option>
+                            <option value={100}>100</option>
+                            <option value={500}>500</option>
                         </select>
                         <span className="text-sm text-muted-foreground">
                             records
@@ -244,7 +216,7 @@ export default function Index() {
                     </div>
 
                     <div className="flex gap-1">
-                        {paginationLinks.map((link, i) => (
+                        {branches.links.map((link, i) => (
                             <Link
                                 key={i}
                                 href={link.url || '#'}

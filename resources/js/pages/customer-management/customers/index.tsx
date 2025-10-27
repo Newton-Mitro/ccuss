@@ -4,91 +4,37 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect } from 'react';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 
 export default function Index() {
-    // ✅ Mock Customers
-    const allCustomers = [
-        {
-            id: 1,
-            customer_no: 'CUST001',
-            name: 'John Doe',
-            type: 'Individual',
-            phone: '+8801712345678',
-            email: 'john.doe@example.com',
-            kyc_level: 'STD',
-            status: 'ACTIVE',
-        },
-        {
-            id: 2,
-            customer_no: 'CUST002',
-            name: 'Tech Innovators Ltd.',
-            type: 'Organization',
-            phone: '+8801811223344',
-            email: 'contact@techinnovators.com',
-            kyc_level: 'ENH',
-            status: 'ACTIVE',
-        },
-        {
-            id: 3,
-            customer_no: 'CUST003',
-            name: 'Fatima Akter',
-            type: 'Individual',
-            phone: '+8801555667788',
-            email: 'fatima.akter@example.com',
-            kyc_level: 'MIN',
-            status: 'PENDING',
-        },
-        {
-            id: 4,
-            customer_no: 'CUST004',
-            name: 'Ahsan Rahman',
-            type: 'Individual',
-            phone: '+8801777888999',
-            email: 'ahsan.rahman@example.com',
-            kyc_level: 'STD',
-            status: 'SUSPENDED',
-        },
-        {
-            id: 5,
-            customer_no: 'CUST005',
-            name: 'Green Earth Co.',
-            type: 'Organization',
-            phone: '+8801300112233',
-            email: 'hello@greenearth.com',
-            kyc_level: 'ENH',
-            status: 'ACTIVE',
-        },
-    ];
+    const { props } = usePage<
+        SharedData & {
+            customers: any;
+            filters: Record<string, string>;
+        }
+    >();
 
-    const paginationLinks = [
-        { label: '1', url: '#', active: true },
-        { label: '2', url: '#', active: false },
-        { label: 'Next', url: '#', active: false },
-    ];
-
-    const [searchQuery, setSearchQuery] = useState('');
-    const [filterStatus, setFilterStatus] = useState('all');
-    const [recordsPerPage, setRecordsPerPage] = useState(5);
-
-    const filteredCustomers = allCustomers.filter((c) => {
-        const matchesSearch =
-            c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            c.customer_no.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            c.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            c.phone.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesStatus =
-            filterStatus === 'all' ||
-            c.status.toLowerCase() === filterStatus.toLowerCase();
-        return matchesSearch && matchesStatus;
+    const { customers, filters } = props;
+    const { data, setData, get } = useForm({
+        search: filters.search || '',
+        status: filters.status || 'all',
+        per_page: Number(filters.per_page) || 10,
+        page: Number(filters.page) || 1,
     });
 
-    const paginatedCustomers = filteredCustomers.slice(0, recordsPerPage);
+    const handleSearch = () => {
+        get('/auth/customers', { preserveState: true });
+    };
+
+    useEffect(() => {
+        const delay = setTimeout(handleSearch, 400);
+        return () => clearTimeout(delay);
+    }, [data.search, data.status, data.per_page, data.page]);
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customers', href: '/auth/customers' },
@@ -117,14 +63,20 @@ export default function Index() {
                     <input
                         type="text"
                         placeholder="Search customers..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        value={data.search}
+                        onChange={(e) => {
+                            setData('search', e.target.value);
+                            setData('page', 1);
+                        }}
                         className="h-9 w-full max-w-sm rounded-md border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                     />
 
                     <select
-                        value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
+                        value={data.status}
+                        onChange={(e) => {
+                            setData('status', e.target.value);
+                            setData('page', 1);
+                        }}
                         className="h-9 w-full max-w-xs rounded-md border border-border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                     >
                         <option value="all">All Statuses</option>
@@ -138,7 +90,7 @@ export default function Index() {
                 {/* Table */}
                 <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border border-border md:h-[calc(100vh-300px)]">
                     <table className="w-full border-collapse">
-                        <thead className="sticky top-0 hidden bg-muted md:table-header-group">
+                        <thead className="sticky top-0 bg-muted">
                             <tr>
                                 {[
                                     'Customer No',
@@ -158,12 +110,12 @@ export default function Index() {
                                 ))}
                             </tr>
                         </thead>
-                        <tbody className="flex flex-col md:table-row-group">
-                            {paginatedCustomers.length > 0 ? (
-                                paginatedCustomers.map((c) => (
+                        <tbody>
+                            {customers.data.length > 0 ? (
+                                customers.data.map((c: any) => (
                                     <tr
                                         key={c.id}
-                                        className="flex flex-col border-b border-border even:bg-muted/30 md:table-row md:flex-row"
+                                        className="border-b border-border even:bg-muted/30"
                                     >
                                         <td className="px-2 py-1">
                                             {c.customer_no}
@@ -238,22 +190,25 @@ export default function Index() {
                     </table>
                 </div>
 
-                {/* Pagination & Show Records */}
+                {/* Pagination */}
                 <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
                     <div className="flex items-center gap-2">
                         <span className="text-sm text-muted-foreground">
                             Show
                         </span>
                         <select
-                            value={recordsPerPage}
-                            onChange={(e) =>
-                                setRecordsPerPage(Number(e.target.value))
-                            }
+                            value={data.per_page}
+                            onChange={(e) => {
+                                setData('per_page', Number(e.target.value));
+                                setData('page', 1);
+                            }}
                             className="h-9 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                         >
-                            <option value={5}>5</option>
-                            <option value={10}>10</option>
-                            <option value={20}>20</option>
+                            {[5, 10, 20, 50].map((n) => (
+                                <option key={n} value={n}>
+                                    {n}
+                                </option>
+                            ))}
                         </select>
                         <span className="text-sm text-muted-foreground">
                             records
@@ -261,7 +216,7 @@ export default function Index() {
                     </div>
 
                     <div className="flex gap-1">
-                        {paginationLinks.map((link, i) => (
+                        {customers.links.map((link: any, i: number) => (
                             <Link
                                 key={i}
                                 href={link.url || '#'}

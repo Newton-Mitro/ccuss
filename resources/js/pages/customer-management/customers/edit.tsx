@@ -61,7 +61,7 @@ function Edit({ customer }: EditProps) {
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customers', href: '/auth/customers' },
-        { title: 'Edit Customer', href: '' },
+        { title: `Edit Customer - ${customer.customer_no}`, href: '' },
     ];
 
     return (

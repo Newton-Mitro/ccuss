@@ -12,32 +12,156 @@ import { cn } from '@/lib/utils';
 import { logout } from '@/routes';
 import { Link, router, usePage } from '@inertiajs/react';
 import { LogOut, Menu, UserCircle } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Breadcrumbs } from '../components/breadcrumbs';
 import SidebarMenuItem from '../components/sidebar-menu-item';
 import { sidebarMenu } from '../data/sidebar-menu';
 import { edit } from '../routes/profile';
-import { BreadcrumbItem, SharedData } from '../types';
+import { BreadcrumbItem, SharedData, SidebarItem } from '../types';
 
 interface CustomAuthLayoutProps {
     children: React.ReactNode;
     breadcrumbs?: BreadcrumbItem[];
 }
 
+const STORAGE_KEY = 'app_sidebar_open_menus_v1';
+
 export default function CustomAuthLayout({
     children,
     breadcrumbs,
 }: CustomAuthLayoutProps) {
-    const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
-    const { auth } = usePage<SharedData>().props;
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const page = usePage<SharedData>();
+    const url = page.url ?? '';
+    const auth = page.props?.auth;
+
     const cleanup = useMobileNavigation();
 
-    const toggleMenu = (name: string) =>
-        setOpenMenus((prev) => ({ ...prev, [name]: !prev[name] }));
+    const [sidebarOpen, setSidebarOpen] = useState<boolean>(() => {
+        try {
+            if (typeof window === 'undefined') return true;
+            const v = localStorage.getItem('app_sidebar_open_state_v1');
+            return v ? JSON.parse(v) : true;
+        } catch {
+            return true;
+        }
+    });
+
+    const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
+
+    // --- Restore openMenus on mount ---
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                // ✅ defer to avoid synchronous state update warning
+                Promise.resolve().then(() => {
+                    setOpenMenus(JSON.parse(raw));
+                });
+            }
+        } catch (e) {
+            console.warn('Failed to load sidebar openMenus', e);
+        }
+    }, []);
+
+    // --- Persist openMenus whenever it changes ---
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(openMenus));
+        } catch (e) {
+            console.warn('Failed to save sidebar openMenus', e);
+        }
+    }, [openMenus]);
+
+    // --- Persist sidebar collapse state ---
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        try {
+            localStorage.setItem(
+                'app_sidebar_open_state_v1',
+                JSON.stringify(sidebarOpen),
+            );
+        } catch {
+            console.warn('Failed to save sidebar open state');
+        }
+    }, [sidebarOpen]);
+
+    // --- Auto-open parent menus that contain the active route ---
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const currentPath = String(url).split('?')[0]; // remove query params
+
+        // recursively collect parents containing the active path
+        const collectParents = (items: SidebarItem[]): string[] => {
+            const activeParents: string[] = [];
+            for (const item of items) {
+                if (!item) continue;
+
+                // direct match or child match
+                const isActive = item.path && currentPath.startsWith(item.path);
+
+                if (item.children && item.children.length > 0) {
+                    const childParents = collectParents(item.children);
+                    if (childParents.length > 0) {
+                        activeParents.push(item.name, ...childParents);
+                    }
+                }
+
+                if (isActive) {
+                    activeParents.push(item.name);
+                }
+            }
+            return activeParents;
+        };
+
+        const parents = collectParents(sidebarMenu);
+
+        if (parents.length > 0) {
+            // ✅ Use microtask to avoid React "setState in effect" warning
+            Promise.resolve().then(() => {
+                setOpenMenus((prev) => {
+                    const updated = { ...prev };
+                    parents.forEach((p) => (updated[p] = true));
+                    try {
+                        localStorage.setItem(
+                            STORAGE_KEY,
+                            JSON.stringify(updated),
+                        );
+                    } catch {
+                        console.warn('Failed to save sidebar openMenus');
+                    }
+                    return updated;
+                });
+            });
+        }
+    }, [url]);
+
+    const toggleMenu = (name: string) => {
+        setOpenMenus((prev) => {
+            const updated = { ...prev, [name]: !prev[name] };
+            try {
+                if (typeof window !== 'undefined') {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+                }
+            } catch {
+                console.warn('Failed to save sidebar openMenus');
+            }
+            return updated;
+        });
+    };
 
     const handleLogout = () => {
         cleanup();
+        try {
+            if (typeof window !== 'undefined') {
+                localStorage.removeItem(STORAGE_KEY);
+            }
+        } catch {
+            console.warn('Failed to remove sidebar openMenus');
+        }
         router.post(logout(), {}, { preserveScroll: false });
     };
 
@@ -66,14 +190,13 @@ export default function CustomAuthLayout({
                 </div>
 
                 <nav className="h-[calc(100%-4rem)] overflow-y-auto px-2 py-4 text-sm">
-                    <ul className="">
+                    <ul>
                         {sidebarMenu.map((item) => (
                             <SidebarMenuItem
                                 key={item.name}
                                 item={item}
                                 openMenus={openMenus}
                                 toggleMenu={toggleMenu}
-                                level={0}
                                 sidebarOpen={sidebarOpen}
                             />
                         ))}
@@ -102,7 +225,7 @@ export default function CustomAuthLayout({
                             <DropdownMenuTrigger asChild>
                                 <button className="flex items-center gap-2 rounded px-2 py-1 focus:outline-none">
                                     <UserInfo
-                                        user={auth.user}
+                                        user={auth?.user}
                                         showEmail={true}
                                     />
                                 </button>
