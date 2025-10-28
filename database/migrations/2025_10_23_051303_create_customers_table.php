@@ -29,7 +29,7 @@ return new class extends Migration {
 
             $table->enum('identification_type', ['NID', 'NBR', 'PASSPORT', 'DRIVING_LICENSE']);
             $table->string('identification_number', 50);
-            $table->string('photo', 255)->nullable();
+            $table->foreignId('photo')->nullable()->constrained('media')->nullOnDelete();
 
             // Organization info
             $table->string('registration_no', 150)->nullable();
@@ -117,7 +117,7 @@ return new class extends Migration {
         Schema::create('signatures', function (Blueprint $table) {
             $table->id();
             $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
-            $table->string('signature_path', 255);
+            $table->foreignId('signature')->constrained('media')->cascadeOnDelete();
             $table->timestamps();
         });
 

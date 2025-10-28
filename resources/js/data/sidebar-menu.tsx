@@ -5,11 +5,19 @@ export const sidebarMenu: SidebarItem[] = [
         name: 'Dashboard',
         icon: <i className="fa-solid fa-gauge-high" />,
         path: '/dashboard',
+        match_path: 'dashboard',
     },
     {
         name: 'Branches',
         icon: <i className="fa-solid fa-network-wired" />,
         path: '/auth/branches',
+        match_path: 'branches',
+    },
+    {
+        name: 'Media',
+        icon: <i className="fa-solid fa-network-wired" />,
+        path: '/auth/media',
+        match_path: 'media',
     },
     {
         name: 'Customer Management',
@@ -17,94 +25,109 @@ export const sidebarMenu: SidebarItem[] = [
         children: [
             {
                 name: 'Customers',
-                icon: <i className="fa-solid fa-users-viewfinder"></i>,
+                icon: <i className="fa-solid fa-users-viewfinder" />,
                 path: '/auth/customers',
+                match_path: 'customers',
             },
             {
                 name: 'Addresses',
-                icon: <i className="fa-solid fa-map-location-dot"></i>,
+                icon: <i className="fa-solid fa-map-location-dot" />,
                 path: '/auth/addresses',
+                match_path: 'addresses',
             },
             {
-                name: 'Family Relationships',
-                icon: <i className="fa-solid fa-person-breastfeeding"></i>,
-                path: '/auth/families',
+                name: 'Family Relations',
+                icon: <i className="fa-solid fa-person-breastfeeding" />,
+                path: '/auth/family-relations',
+                match_path: 'family-relations',
             },
             {
                 name: 'Signatures',
-                icon: <i className="fa-solid fa-signature"></i>,
+                icon: <i className="fa-solid fa-signature" />,
                 path: '/auth/signatures',
+                match_path: 'signatures',
             },
             {
-                name: 'Onlne Users',
-                icon: <i className="fa-solid fa-street-view"></i>,
+                name: 'Online Users',
+                icon: <i className="fa-solid fa-street-view" />,
                 path: '/auth/online-users',
+                match_path: 'online-users',
             },
         ],
     },
     {
         name: 'General Accounting',
-        icon: <i className="fa-solid fa-cash-register"></i>,
+        icon: <i className="fa-solid fa-cash-register" />,
         children: [
             {
                 name: 'Ledgers',
-                icon: <i className="fa-solid fa-list-check"></i>,
+                icon: <i className="fa-solid fa-list-check" />,
                 path: '/ledgers',
+                match_path: 'ledgers',
             },
             {
                 name: 'Vouchers',
-                icon: <i className="fa-solid fa-cash-register"></i>,
+                icon: <i className="fa-solid fa-cash-register" />,
                 children: [
                     {
                         name: 'Debit Vouchers',
-                        icon: <i className="fa-solid fa-coins"></i>,
+                        icon: <i className="fa-solid fa-coins" />,
                         path: '/debit-vouchers',
+                        match_path: 'debit-vouchers',
                     },
                     {
                         name: 'Credit Vouchers',
-                        icon: <i className="fa-solid fa-coins"></i>,
+                        icon: <i className="fa-solid fa-coins" />,
                         path: '/credit-vouchers',
+                        match_path: 'credit-vouchers',
                     },
                     {
                         name: 'Journal Vouchers',
-                        icon: <i className="fa-solid fa-coins"></i>,
+                        icon: <i className="fa-solid fa-coins" />,
                         path: '/journal-vouchers',
+                        match_path: 'journal-vouchers',
                     },
                     {
                         name: 'Contra Vouchers',
-                        icon: <i className="fa-solid fa-coins"></i>,
+                        icon: <i className="fa-solid fa-coins" />,
                         path: '/contra-vouchers',
+                        match_path: 'contra-vouchers',
                     },
                 ],
             },
             {
                 name: 'Reports',
-                icon: <i className="fa-solid fa-chart-simple"></i>,
+                icon: <i className="fa-solid fa-chart-simple" />,
                 children: [
                     {
                         name: 'Trial Balance',
-                        icon: <i className="fa-solid fa-scale-balanced"></i>,
+                        icon: <i className="fa-solid fa-scale-balanced" />,
                         path: '/reports/trial-balance',
+                        match_path: 'trial-balance',
                     },
                     {
                         name: 'Income Statement',
-                        icon: <i className="fa-solid fa-scale-balanced"></i>,
+                        icon: <i className="fa-solid fa-scale-balanced" />,
                         path: '/reports/income-statement',
+                        match_path: 'income-statement',
                     },
                     {
                         name: 'Balance Sheet',
-                        icon: <i className="fa-solid fa-scale-balanced"></i>,
+                        icon: <i className="fa-solid fa-scale-balanced" />,
                         path: '/reports/balance-sheet',
+                        match_path: 'balance-sheet',
                     },
                     {
                         name: 'Cash Flow Statement',
-                        icon: <i className="fa-solid fa-scale-balanced"></i>,
+                        icon: <i className="fa-solid fa-scale-balanced" />,
                         path: '/reports/cash-flow-statement',
+                        match_path: 'cash-flow-statement',
                     },
                     {
-                        name: 'Statement of shareholders Equity',
-                        icon: <i className="fa-solid fa-scale-balanced"></i>,
+                        name: 'Statement of Shareholders Equity',
+                        icon: <i className="fa-solid fa-scale-balanced" />,
                         path: '/reports/statement-of-shareholders-equity',
+                        match_path: 'statement-of-shareholders-equity',
                     },
                 ],
             },
@@ -116,90 +139,39 @@ export const sidebarMenu: SidebarItem[] = [
         children: [
             {
                 name: 'Deposit Policies',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                icon: <i className="fa-solid fa-piggy-bank" />,
                 path: '/deposit-policies',
+                match_path: 'deposit-policies',
             },
             {
                 name: 'Deposit Tenures',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                icon: <i className="fa-solid fa-piggy-bank" />,
                 path: '/deposit-tenures',
+                match_path: 'deposit-tenures',
             },
-
             {
                 name: 'Saving Accounts',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                icon: <i className="fa-solid fa-piggy-bank" />,
                 path: '/saving-accounts',
+                match_path: 'saving-accounts',
             },
             {
                 name: 'Deposit Holders',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                icon: <i className="fa-solid fa-piggy-bank" />,
                 path: '/deposit-holders',
+                match_path: 'deposit-holders',
             },
             {
                 name: 'Deposit Nominees',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                icon: <i className="fa-solid fa-piggy-bank" />,
                 path: '/deposit-nominees',
+                match_path: 'deposit-nominees',
             },
             {
                 name: 'Deposit Schedules',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
+                icon: <i className="fa-solid fa-piggy-bank" />,
                 path: '/deposit-schedules',
-            },
-        ],
-    },
-    {
-        name: 'Share Accounts',
-        icon: <i className="fa-solid fa-money-bill-trend-up"></i>,
-        children: [
-            {
-                name: 'Deposit Policies',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-        ],
-    },
-    {
-        name: 'Customer Loans',
-        icon: <i className="fa-solid fa-sack-dollar"></i>,
-        children: [
-            {
-                name: 'Deposit Policies',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-        ],
-    },
-
-    {
-        name: 'Cash and Treasury',
-        icon: <i className="fa-solid fa-coins" />,
-        children: [
-            {
-                name: 'Deposit Policies',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-        ],
-    },
-    {
-        name: 'Fixed Assets',
-        icon: <i className="fa-solid fa-school" />,
-        children: [
-            {
-                name: 'Deposit Policies',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-        ],
-    },
-    {
-        name: 'Vendors',
-        icon: <i className="fa-solid fa-users-between-lines"></i>,
-        children: [
-            {
-                name: 'Deposit Policies',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/deposit-policies',
+                match_path: 'deposit-schedules',
             },
         ],
     },
@@ -207,36 +179,29 @@ export const sidebarMenu: SidebarItem[] = [
         name: 'Cheque Book',
         icon: <i className="fa-solid fa-landmark" />,
         path: '/cheque-book',
-    },
-    {
-        name: 'Subsidiary Transactions',
-        icon: <i className="fa-solid fa-piggy-bank"></i>,
-        children: [
-            {
-                name: 'Cash Collection',
-                icon: <i className="fa-solid fa-piggy-bank"></i>,
-                path: '/cash-collection',
-            },
-        ],
+        match_path: 'cheque-book',
     },
     {
         name: 'HR Management',
-        icon: <i className="fa-solid fa-user-tie"></i>,
+        icon: <i className="fa-solid fa-user-tie" />,
         children: [
             {
                 name: 'Employees',
-                icon: <i className="fa-solid fa-user-tie"></i>,
+                icon: <i className="fa-solid fa-user-tie" />,
                 path: '/employees',
+                match_path: 'employees',
             },
             {
                 name: 'Leaves',
-                icon: <i className="fa-solid fa-user-tie"></i>,
+                icon: <i className="fa-solid fa-user-tie" />,
                 path: '/leaves',
+                match_path: 'leaves',
             },
             {
                 name: 'Attendances',
-                icon: <i className="fa-solid fa-user-tie"></i>,
+                icon: <i className="fa-solid fa-user-tie" />,
                 path: '/attendances',
+                match_path: 'attendances',
             },
         ],
     },
@@ -248,32 +213,32 @@ export const sidebarMenu: SidebarItem[] = [
                 name: 'All Users',
                 icon: <i className="fa-solid fa-user-gear" />,
                 path: '/users',
+                match_path: 'users',
             },
             {
                 name: 'Roles',
                 icon: <i className="fa-solid fa-user-gear" />,
                 path: '/users/roles',
+                match_path: 'roles',
             },
             {
                 name: 'Assign Roles',
                 icon: <i className="fa-solid fa-user-gear" />,
                 path: '/users/permissions',
+                match_path: 'permissions',
             },
             {
                 name: 'Assign Permissions',
                 icon: <i className="fa-solid fa-user-gear" />,
                 path: '/users/permissions',
+                match_path: 'permissions',
             },
         ],
-    },
-    {
-        name: 'Audit Logs',
-        icon: <i className="fa-solid fa-list-check" />,
-        path: '/audit-logs',
     },
     {
         name: 'Settings',
         icon: <i className="fa-solid fa-gear" />,
         path: '/settings/profile',
+        match_path: 'settings',
     },
 ];

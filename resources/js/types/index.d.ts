@@ -46,5 +46,6 @@ export interface SidebarItem {
     name: string;
     icon?: React.ReactNode;
     path?: string;
+    match_path?: string;
     children?: SidebarItem[];
 }

@@ -29,7 +29,8 @@ export default function SidebarMenuItem({
 
     // Recursive check for active menu
     const isActive = (item: SidebarItem): boolean => {
-        if (item.path && item.path === currentPath) return true;
+        if (item.match_path && currentPath.includes(item.match_path))
+            return true;
         if (item.children) {
             return item.children.some((child) => child && isActive(child));
         }
@@ -37,7 +38,8 @@ export default function SidebarMenuItem({
     };
 
     const active = isActive(item);
-    const isChildActive = item.path === currentPath;
+    const isChildActive =
+        item.match_path && currentPath.includes(item.match_path);
 
     const handleClick = () => {
         if (hasChildren) toggleMenu(item.name);

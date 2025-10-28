@@ -24,6 +24,15 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        User::firstOrCreate(
+            ['email' => 'test.user@email.com'],
+            [
+                'name' => 'Test User',
+                'password' => 'password',
+                'email_verified_at' => now(),
+            ]
+        );
+
         $this->call([
             BranchSeeder::class,
             CustomerSeeder::class,
