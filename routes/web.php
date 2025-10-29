@@ -36,8 +36,10 @@ Route::prefix('auth')
     ->middleware(['auth', 'verified'])
     ->group(function () {
         Route::resource('media', MediaController::class);
+        Route::get('/api/media', [MediaController::class, 'getMedia'])->name('get-media');
         Route::resource('branches', BranchController::class);
         Route::resource('customers', CustomerController::class);
+        Route::get('/api/search-customers', [CustomerController::class, 'searchCustomers'])->name('search-customers');
         Route::resource('addresses', AddressController::class);
         Route::resource('family-relations', FamilyRelationController::class);
         Route::resource('signatures', SignatureController::class);

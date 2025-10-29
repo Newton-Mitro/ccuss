@@ -12,7 +12,6 @@ use Illuminate\Http\Request;
 
 class SignatureController extends Controller
 {
-    // List all signatures
     public function index(): Response
     {
         $signatures = Signature::with('customer')->latest()->paginate(10)->withQueryString();
@@ -26,9 +25,7 @@ class SignatureController extends Controller
     // Show form to create a signature
     public function create(): Response
     {
-        return Inertia::render('customer-management/signatures/create', [
-            'customers' => Customer::all(),
-        ]);
+        return Inertia::render('customer-management/signatures/create');
     }
 
     // Store signature
@@ -63,7 +60,6 @@ class SignatureController extends Controller
     {
         return Inertia::render('customer-management/signatures/edit', [
             'signature' => $signature->load('customer'),
-            'customers' => Customer::all(),
         ]);
     }
 

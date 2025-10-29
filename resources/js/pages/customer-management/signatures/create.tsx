@@ -1,55 +1,43 @@
 import { Head, useForm } from '@inertiajs/react';
 import React, { useState } from 'react';
+import { CustomerSearch } from '../../../components/customer-search';
 import HeadingSmall from '../../../components/heading-small';
-import InputError from '../../../components/input-error';
+import { MediaSelector } from '../../../components/media-selector';
 import { Button } from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
+import { Media } from '../../../types/media';
+import MediaBrowserModal from '../../media/media_browser_modal';
 
-interface Customer {
-    id: number;
-    name: string;
-    customer_no?: string;
-}
-
-interface CreateSignatureProps {
-    customers: Customer[];
-}
-
-export default function Create({ customers }: CreateSignatureProps) {
+export default function Create() {
     const { data, setData, post, processing, errors } = useForm({
-        customer_id: '',
-        signature_file: null as File | null,
+        customer_id: null as number | null,
+        signature_id: null as number | null,
+        customer_name: '',
     });
 
-    const [customerSearch, setCustomerSearch] = useState('');
-    const [customerSuggestions, setCustomerSuggestions] = useState<Customer[]>(
-        [],
-    );
+    const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [query, setQuery] = useState('');
 
-    const handleCustomerSearch = (value: string) => {
-        setCustomerSearch(value);
-        const filtered = customers.filter((c) =>
-            c.name.toLowerCase().includes(value.toLowerCase()),
-        );
-        setCustomerSuggestions(filtered);
+    const handleMediaSelect = (media: Media) => {
+        setSelectedMedia(media);
+        setData('signature_id', media.id);
+        setIsModalOpen(false);
     };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            setData('signature_file', e.target.files[0]);
-        }
+    const handleMediaRemove = () => {
+        setSelectedMedia(null);
+        setData('signature_id', null);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const formData = new FormData();
-        formData.append('customer_id', String(data.customer_id));
-        if (data.signature_file) {
-            formData.append('signature_file', data.signature_file);
-        }
-        post('/auth/signatures', { data: formData, preserveScroll: true });
+        post('/auth/signatures', {
+            preserveScroll: true,
+        });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -63,56 +51,56 @@ export default function Create({ customers }: CreateSignatureProps) {
             <div className="animate-in space-y-8 px-4 py-6 text-foreground fade-in">
                 <HeadingSmall
                     title="Add Signature"
-                    description="Upload a signature for a customer."
+                    description="Select or upload a signature for a customer."
                 />
 
                 <form
                     onSubmit={handleSubmit}
-                    className="space-y-10 rounded-xl border border-border bg-card/80 p-8 shadow-md backdrop-blur-sm transition-all duration-300 hover:shadow-lg"
+                    className="space-y-5 rounded-xl border border-border bg-card/80 p-8 shadow-md backdrop-blur-sm transition-all duration-300 hover:shadow-lg"
                 >
                     {/* Customer Autocomplete */}
-                    <div className="relative">
+                    <div className="">
                         <Label>Customer</Label>
-                        <input
-                            type="text"
-                            value={customerSearch}
-                            onChange={(e) =>
-                                handleCustomerSearch(e.target.value)
-                            }
-                            placeholder="Type customer name..."
-                            className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                        <CustomerSearch
+                            query={query}
+                            onQueryChange={setQuery}
+                            onSelect={(customer) => {
+                                setData('customer_id', customer.id);
+                                setData('customer_name', customer.name);
+                                setQuery(customer.name); // show in search input
+                            }}
                         />
-                        <InputError message={errors.customer_id} />
-
-                        {customerSuggestions.length > 0 && customerSearch && (
-                            <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-border bg-background shadow-lg">
-                                {customerSuggestions.map((c) => (
-                                    <li
-                                        key={c.id}
-                                        className="cursor-pointer px-3 py-2 hover:bg-gray-100"
-                                        onClick={() => {
-                                            setData('customer_id', c.id);
-                                            setCustomerSearch(c.name);
-                                            setCustomerSuggestions([]);
-                                        }}
-                                    >
-                                        {c.name} ({c.customer_no})
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
                     </div>
 
-                    {/* Signature File Upload */}
+                    {/* Disabled Inputs for Selected Customer */}
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                        <div>
+                            <Label>Customer ID</Label>
+                            <Input
+                                value={data.customer_id}
+                                disabled
+                                className="bg-disabled mt-1 cursor-not-allowed"
+                            />
+                        </div>
+                        <div>
+                            <Label>Customer Name</Label>
+                            <Input
+                                value={data.customer_name}
+                                disabled
+                                className="bg-disabled mt-1 cursor-not-allowed"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Media Selector */}
                     <div>
-                        <Label>Signature File</Label>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileChange}
-                            className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                        <MediaSelector
+                            label="Signature"
+                            media={selectedMedia}
+                            onSelect={() => setIsModalOpen(true)}
+                            onRemove={handleMediaRemove}
+                            error={errors.signature_id}
                         />
-                        <InputError message={errors.signature_file} />
                     </div>
 
                     {/* Submit Button */}
@@ -126,6 +114,13 @@ export default function Create({ customers }: CreateSignatureProps) {
                         </Button>
                     </div>
                 </form>
+
+                {/* Media Browser Modal */}
+                <MediaBrowserModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onSelect={handleMediaSelect}
+                />
             </div>
         </CustomAuthLayout>
     );

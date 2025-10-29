@@ -16,7 +16,7 @@ class BranchSeeder extends Seeder
         }
 
         Branch::factory()
-            ->count(count: 5)
+            ->count(count: 10)
             ->create();
 
         $this->command->info('✅ 10 Branch records have been seeded successfully.');

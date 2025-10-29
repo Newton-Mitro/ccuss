@@ -1,4 +1,4 @@
-import { router } from '@inertiajs/react';
+import axios from 'axios';
 import {
     Copy,
     File,
@@ -9,56 +9,98 @@ import {
     Upload,
     X,
 } from 'lucide-react';
-import React, { useRef, useState } from 'react';
-import { route } from 'ziggy-js';
+import React, { useEffect, useRef, useState } from 'react';
 import HeadingSmall from '../../components/heading-small';
 import { Select } from '../../components/ui/select';
 import { Media } from '../../types/media';
-import { PaginatedData } from '../../types/paginated_data';
 
 interface MediaBrowserModalProps {
-    actionType: 'create' | 'edit' | 'company' | 'select';
     isOpen: boolean;
     onClose: () => void;
-    media: PaginatedData<Media>;
     onSelect: (media: Media) => void;
 }
 
 const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
-    actionType,
     isOpen,
     onClose,
-    media,
     onSelect,
 }) => {
     const [filter, setFilter] = useState<string>('all');
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [uploading, setUploading] = useState(false);
+    const [media, setMedia] = useState<any>({
+        data: [],
+        links: [],
+    });
+
+    const fetchMedia = async (type = filter, pageUrl?: string) => {
+        try {
+            const url = pageUrl || `/auth/api/media?type=${type}`;
+            const res = await axios.get(url);
+            setMedia(res.data);
+        } catch (err) {
+            console.error('Failed to fetch media:', err);
+        }
+    };
+
+    useEffect(() => {
+        if (isOpen) fetchMedia();
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (!e.target.files || e.target.files.length === 0) return;
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files?.length) return;
 
         const file = e.target.files[0];
         const formData = new FormData();
         formData.append('file', file);
 
         setUploading(true);
-        router.post(route('media.store'), formData, {
-            forceFormData: true,
-            preserveScroll: true,
-            onFinish: () => setUploading(false),
-        });
+
+        try {
+            const token = document
+                .querySelector('meta[name="csrf-token"]')
+                ?.getAttribute('content');
+
+            const res = await axios.post('/auth/media', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-CSRF-TOKEN': token || '',
+                },
+                withCredentials: true,
+            });
+
+            if (res.status !== 200 && res.status !== 201) {
+                throw new Error('Upload failed');
+            }
+
+            await fetchMedia(); // Refresh list
+        } catch (err) {
+            console.error('Upload error:', err);
+            alert('File upload failed — please try again.');
+        } finally {
+            setUploading(false);
+        }
     };
 
     const handleCopy = async (url: string) => {
         try {
             await navigator.clipboard.writeText(url);
-            alert('URL copied to clipboard!');
+            alert('✅ URL copied to clipboard!');
         } catch (err) {
-            console.error('Failed to copy: ', err);
+            console.error('Copy failed:', err);
         }
+    };
+
+    const handleFilterChange = (value: string) => {
+        setFilter(value);
+        fetchMedia(value);
+    };
+
+    const handlePageClick = (url: string) => {
+        if (!url) return;
+        fetchMedia(filter, url);
     };
 
     const renderPreview = (item: Media) => {
@@ -70,13 +112,15 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
                     className="h-32 w-full rounded object-cover"
                 />
             );
-        } else if (item.file_type === 'application/pdf') {
+        }
+        if (item.file_type === 'application/pdf') {
             return (
                 <div className="flex h-32 w-full items-center justify-center rounded bg-red-100 dark:bg-red-800/30">
                     <FileText className="h-12 w-12 text-red-600 dark:text-red-400" />
                 </div>
             );
-        } else if (
+        }
+        if (
             item.file_type.includes('word') ||
             item.file_type.includes('excel') ||
             item.file_type.includes('presentation')
@@ -86,45 +130,41 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
                     <FileText className="h-12 w-12 text-blue-600 dark:text-blue-400" />
                 </div>
             );
-        } else if (
-            item.file_type.includes('zip') ||
-            item.file_type.includes('rar')
-        ) {
+        }
+        if (item.file_type.includes('zip') || item.file_type.includes('rar')) {
             return (
                 <div className="flex h-32 w-full items-center justify-center rounded bg-yellow-100 dark:bg-yellow-800/30">
                     <FileArchive className="h-12 w-12 text-yellow-600 dark:text-yellow-400" />
                 </div>
             );
-        } else if (item.file_type.includes('audio')) {
+        }
+        if (item.file_type.includes('audio')) {
             return (
                 <div className="flex h-32 w-full items-center justify-center rounded bg-green-100 dark:bg-green-800/30">
                     <HeadphonesIcon className="h-12 w-12 text-green-600 dark:text-green-400" />
                 </div>
             );
-        } else if (item.file_type.includes('video')) {
+        }
+        if (item.file_type.includes('video')) {
             return (
                 <div className="flex h-32 w-full items-center justify-center rounded bg-purple-100 dark:bg-purple-800/30">
                     <Tv2Icon className="h-12 w-12 text-purple-600 dark:text-purple-400" />
                 </div>
             );
-        } else {
-            return (
-                <div className="flex h-32 w-full items-center justify-center rounded bg-gray-100 dark:bg-gray-800">
-                    <File className="h-12 w-12 text-gray-600 dark:text-gray-300" />
-                </div>
-            );
         }
+        return (
+            <div className="flex h-32 w-full items-center justify-center rounded bg-gray-100 dark:bg-gray-800">
+                <File className="h-12 w-12 text-gray-600 dark:text-gray-300" />
+            </div>
+        );
     };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2 backdrop-blur-sm">
             <div className="flex h-[80vh] w-full max-w-4xl flex-col overflow-hidden rounded-lg border bg-background shadow-lg md:h-[70vh] md:w-3/4 dark:bg-gray-900">
                 {/* Header */}
-                <div className="flex items-center justify-between border-b border-gray-200 px-4 py-2 dark:border-gray-700">
-                    <HeadingSmall
-                        title="Media Browser"
-                        description="Select media from the library"
-                    />
+                <div className="flex items-center justify-between border-b border-gray-200 px-4 py-4 dark:border-gray-700">
+                    <HeadingSmall title="Media Browser" />
                     <button
                         onClick={onClose}
                         className="text-gray-600 transition-colors duration-150 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white"
@@ -150,14 +190,7 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
 
                     <Select
                         value={filter}
-                        onChange={(e) => {
-                            setFilter(e.target.value);
-                            router.get(
-                                `${actionType}`,
-                                { type: e.target.value },
-                                { preserveScroll: true, preserveState: true },
-                            );
-                        }}
+                        onChange={(e) => handleFilterChange(e.target.value)}
                         className="w-64 rounded border px-2 text-sm dark:bg-gray-800 dark:text-gray-100"
                         options={[
                             { value: 'all', label: 'All Types' },
@@ -172,7 +205,7 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
                 {/* Media Grid */}
                 <div className="flex-1 overflow-y-auto p-3 md:p-4">
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-                        {media.data.map((item) => (
+                        {media.data.map((item: Media) => (
                             <div
                                 key={item.id}
                                 className="relative rounded border border-gray-200 bg-white p-2 hover:border-blue-500 dark:border-gray-700 dark:bg-neutral-900 dark:hover:border-blue-400"
@@ -205,7 +238,7 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
 
                 {/* Pagination */}
                 <div className="flex flex-wrap items-center justify-center gap-2 border-t border-gray-200 px-2 py-2 md:px-4 dark:border-gray-700">
-                    {media.links.map((link, i) => (
+                    {media.links.map((link: any, i: number) => (
                         <button
                             key={i}
                             disabled={!link.url}
@@ -214,18 +247,7 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
                                     ? 'bg-blue-600 text-white dark:bg-blue-500'
                                     : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
                             } disabled:opacity-50`}
-                            onClick={() => {
-                                if (!link.url) return;
-                                if (link.url)
-                                    router.get(
-                                        link.url,
-                                        {},
-                                        {
-                                            preserveScroll: true,
-                                            preserveState: true,
-                                        },
-                                    );
-                            }}
+                            onClick={() => handlePageClick(link.url)}
                             dangerouslySetInnerHTML={{ __html: link.label }}
                         />
                     ))}

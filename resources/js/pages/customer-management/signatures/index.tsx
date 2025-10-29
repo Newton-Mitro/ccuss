@@ -30,6 +30,7 @@ interface IndexProps {
 }
 
 export default function Index({ signatures, filters }: IndexProps) {
+    console.log(signatures);
     const { data, setData, get } = useForm({
         search: filters.search || '',
         page: 1,

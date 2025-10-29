@@ -9,14 +9,9 @@ import { Label } from '../../../components/ui/label';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 import { Media } from '../../../types/media';
-import { PaginatedData } from '../../../types/paginated_data';
 import MediaBrowserModal from '../../media/media_browser_modal';
 
-interface CreateProps {
-    media: PaginatedData<Media>;
-}
-
-const Create: React.FC<CreateProps> = ({ media }) => {
+const Create = () => {
     const [formData, setFormData] = useState({
         customer_no: '',
         type: 'Individual',
@@ -292,10 +287,8 @@ const Create: React.FC<CreateProps> = ({ media }) => {
                 </form>
             </div>
             <MediaBrowserModal
-                actionType="create"
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                media={media}
                 onSelect={handleMediaSelect}
             />
         </CustomAuthLayout>

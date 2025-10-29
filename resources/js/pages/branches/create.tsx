@@ -1,5 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
-import React from 'react';
+import React, { useState } from 'react';
+import { CustomerSearch } from '../../components/customer-search';
 import HeadingSmall from '../../components/heading-small';
 import InputError from '../../components/input-error';
 import { Button } from '../../components/ui/button';
@@ -7,6 +8,7 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import CustomAuthLayout from '../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../types';
+import { Customer } from '../../types/customer';
 
 function Create() {
     const { data, setData, post, processing, errors } = useForm({
@@ -15,8 +17,11 @@ function Create() {
         address: '',
         latitude: '',
         longitude: '',
-        manager_id: '',
+        manager_id: null as number | null,
+        manager_name: '', // optional: to show selected manager name
     });
+
+    const [query, setQuery] = useState('');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -40,11 +45,11 @@ function Create() {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="space-y-10 rounded-xl border border-border bg-card/80 p-8 shadow-md backdrop-blur-sm transition-all duration-300 hover:shadow-lg"
+                    className="space-y-5 rounded-xl border border-border bg-card/80 p-8 shadow-md backdrop-blur-sm transition-all duration-300 hover:shadow-lg"
                 >
                     {/* 🧱 Section: Basic Details */}
                     <div>
-                        <h3 className="mb-4 text-lg font-semibold text-primary">
+                        <h3 className="text-lg font-semibold text-primary">
                             Basic Details
                         </h3>
                         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -76,7 +81,7 @@ function Create() {
 
                     {/* 🧱 Section: Address & Location */}
                     <div>
-                        <h3 className="mb-4 text-lg font-semibold text-primary">
+                        <h3 className="text-lg font-semibold text-primary">
                             Address & Location
                         </h3>
                         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -123,27 +128,56 @@ function Create() {
                     </div>
 
                     {/* 🧱 Section: Management */}
-                    <div>
-                        <h3 className="mb-4 text-lg font-semibold text-primary">
+
+                    <div className="">
+                        <h3 className="text-lg font-semibold text-primary">
                             Management
                         </h3>
-                        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                            <div>
-                                <Label>Manager ID</Label>
-                                <Input
-                                    type="number"
-                                    value={data.manager_id}
-                                    onChange={(e) =>
-                                        setData('manager_id', e.target.value)
-                                    }
-                                    placeholder="Enter manager user ID"
-                                />
-                                <InputError message={errors.manager_id} />
+                        <div className="flex flex-col gap-5">
+                            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                                <div className="">
+                                    <Label>Search Branch Manager</Label>
+                                    <CustomerSearch
+                                        query={query}
+                                        onQueryChange={setQuery}
+                                        onSelect={(customer: Customer) => {
+                                            setData('manager_id', customer.id);
+                                            setData(
+                                                'manager_name',
+                                                customer.name,
+                                            );
+                                            setQuery(customer.name);
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                                <div>
+                                    <Label>Manager ID</Label>
+                                    <Input
+                                        type="number"
+                                        disabled
+                                        value={data.manager_id}
+                                        placeholder="Enter manager user ID"
+                                    />
+                                    <InputError message={errors.manager_id} />
+                                </div>
+
+                                <div>
+                                    <Label>Manager Name</Label>
+                                    <Input
+                                        type="text"
+                                        disabled
+                                        value={data.manager_name}
+                                        placeholder="Enter manager user ID"
+                                    />
+                                    <InputError message={errors.manager_id} />
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex justify-end pt-4">
+                    <div className="flex justify-end">
                         <Button
                             type="submit"
                             disabled={processing}

@@ -4,6 +4,7 @@ namespace App\Media\Controllers;
 use App\Http\Controllers\Controller;
 use App\Media\Models\Media;
 use App\Media\Requests\StoreMediaRequest;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Spatie\ImageOptimizer\OptimizerChainFactory;
@@ -14,6 +15,29 @@ use Illuminate\Http\RedirectResponse;
 
 class MediaController extends Controller
 {
+    public function getMedia(Request $request): JsonResponse
+    {
+        $perPage = $request->input('perPage', 10);
+        $type = $request->input('type', 'all');
+
+        // Only fetch media uploaded by the authenticated user
+        $query = Media::where('uploaded_by', Auth::id());
+
+        if ($type !== 'all') {
+            match ($type) {
+                'images' => $query->where('file_type', 'like', 'image/%'),
+                'videos' => $query->where('file_type', 'like', 'video/%'),
+                'audio' => $query->where('file_type', 'like', 'audio/%'),
+                'pdf' => $query->where('file_type', 'application/pdf'),
+                default => null,
+            };
+        }
+
+        $mediaItems = $query->latest()->paginate($perPage);
+
+        return response()->json($mediaItems);
+    }
+
     public function index(Request $request): Response
     {
         $perPage = $request->input('perPage', 20);

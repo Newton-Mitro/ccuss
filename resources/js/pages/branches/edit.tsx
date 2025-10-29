@@ -1,5 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
-import React from 'react';
+import React, { useState } from 'react';
+import { CustomerSearch } from '../../components/customer-search';
 import HeadingSmall from '../../components/heading-small';
 import InputError from '../../components/input-error';
 import { Button } from '../../components/ui/button';
@@ -7,32 +8,38 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import CustomAuthLayout from '../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../types';
+import { Customer } from '../../types/customer';
 
-interface EditProps {
+interface EditBranchProps {
     branch: {
         id: number;
         code: string;
         name: string;
-        address: string;
-        latitude: string | null;
-        longitude: string | null;
-        manager_id: string | null;
+        address?: string;
+        latitude?: string;
+        longitude?: string;
+        manager_id?: number;
+        manager?: Customer;
     };
 }
 
-function Edit({ branch }: EditProps) {
+function Edit({ branch }: EditBranchProps) {
+    console.log('Branch:', branch);
     const { data, setData, put, processing, errors } = useForm({
         code: branch.code,
         name: branch.name,
         address: branch.address || '',
         latitude: branch.latitude || '',
         longitude: branch.longitude || '',
-        manager_id: branch.manager_id || '',
+        manager_id: branch.manager_id || null,
+        manager_name: branch.manager.name || '',
     });
+
+    const [query, setQuery] = useState(branch?.manager?.name || '');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        put('/auth/branches/');
+        put(`/auth/branches/${branch.id}`);
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -42,21 +49,21 @@ function Edit({ branch }: EditProps) {
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title={`Edit Branch - ${branch.name}`} />
+            <Head title="Edit Branch" />
 
             <div className="animate-in space-y-8 px-4 py-6 text-foreground fade-in">
                 <HeadingSmall
-                    title={`Edit Branch: ${branch.name}`}
-                    description="Update branch details below."
+                    title="Edit Branch"
+                    description="Update the branch details below."
                 />
 
                 <form
                     onSubmit={handleSubmit}
-                    className="space-y-10 rounded-xl border border-border bg-card/80 p-8 shadow-md backdrop-blur-sm transition-all duration-300 hover:shadow-lg"
+                    className="space-y-5 rounded-xl border border-border bg-card/80 p-8 shadow-md backdrop-blur-sm transition-all duration-300 hover:shadow-lg"
                 >
-                    {/* 🧱 Section: Basic Details */}
+                    {/* Basic Details */}
                     <div>
-                        <h3 className="mb-4 text-lg font-semibold text-primary">
+                        <h3 className="text-lg font-semibold text-primary">
                             Basic Details
                         </h3>
                         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -67,7 +74,6 @@ function Edit({ branch }: EditProps) {
                                     onChange={(e) =>
                                         setData('code', e.target.value)
                                     }
-                                    placeholder="BR-001"
                                 />
                                 <InputError message={errors.code} />
                             </div>
@@ -79,16 +85,15 @@ function Edit({ branch }: EditProps) {
                                     onChange={(e) =>
                                         setData('name', e.target.value)
                                     }
-                                    placeholder="Downtown Branch"
                                 />
                                 <InputError message={errors.name} />
                             </div>
                         </div>
                     </div>
 
-                    {/* 🧱 Section: Address & Location */}
+                    {/* Address & Location */}
                     <div>
-                        <h3 className="mb-4 text-lg font-semibold text-primary">
+                        <h3 className="text-lg font-semibold text-primary">
                             Address & Location
                         </h3>
                         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -99,7 +104,6 @@ function Edit({ branch }: EditProps) {
                                     onChange={(e) =>
                                         setData('address', e.target.value)
                                     }
-                                    placeholder="123 Main Street, City"
                                 />
                                 <InputError message={errors.address} />
                             </div>
@@ -113,7 +117,6 @@ function Edit({ branch }: EditProps) {
                                     onChange={(e) =>
                                         setData('latitude', e.target.value)
                                     }
-                                    placeholder="e.g. 23.7808875"
                                 />
                                 <InputError message={errors.latitude} />
                             </div>
@@ -127,30 +130,49 @@ function Edit({ branch }: EditProps) {
                                     onChange={(e) =>
                                         setData('longitude', e.target.value)
                                     }
-                                    placeholder="e.g. 90.2792371"
                                 />
                                 <InputError message={errors.longitude} />
                             </div>
                         </div>
                     </div>
 
-                    {/* 🧱 Section: Management */}
-                    <div>
-                        <h3 className="mb-4 text-lg font-semibold text-primary">
-                            Management
-                        </h3>
+                    {/* Management */}
+                    <h3 className="text-lg font-semibold text-primary">
+                        Branch Manager
+                    </h3>
+
+                    <div className="flex flex-col gap-5">
+                        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                            <div>
+                                <Label>Search Manager</Label>
+                                <CustomerSearch
+                                    query={query}
+                                    onQueryChange={setQuery}
+                                    onSelect={(customer: Customer) => {
+                                        setData('manager_id', customer.id);
+                                        setData('manager_name', customer.name);
+                                        setQuery(customer.name);
+                                    }}
+                                />
+                            </div>
+                        </div>
+
                         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                             <div>
                                 <Label>Manager ID</Label>
                                 <Input
                                     type="number"
-                                    value={data.manager_id}
-                                    onChange={(e) =>
-                                        setData('manager_id', e.target.value)
-                                    }
-                                    placeholder="Enter manager user ID"
+                                    value={data.manager_id || ''}
+                                    disabled
                                 />
-                                <InputError message={errors.manager_id} />
+                            </div>
+                            <div>
+                                <Label>Manager Name</Label>
+                                <Input
+                                    type="text"
+                                    value={data.manager_name || ''}
+                                    disabled
+                                />
                             </div>
                         </div>
                     </div>
@@ -159,9 +181,9 @@ function Edit({ branch }: EditProps) {
                         <Button
                             type="submit"
                             disabled={processing}
-                            className="w-40 bg-primary text-primary-foreground transition-all duration-300 hover:bg-primary/90 hover:shadow-md"
+                            className="w-40 bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-md"
                         >
-                            {processing ? 'Saving...' : 'Update Branch'}
+                            {processing ? 'Updating...' : 'Update Branch'}
                         </Button>
                     </div>
                 </form>

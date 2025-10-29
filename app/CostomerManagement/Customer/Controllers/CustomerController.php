@@ -7,12 +7,45 @@ use App\CostomerManagement\Customer\Requests\StoreCustomerRequest;
 use App\CostomerManagement\Customer\Requests\UpdateCustomerRequest;
 use App\Http\Controllers\Controller;
 use App\Media\Models\Media;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
 class CustomerController extends Controller
 {
+    public function searchCustomers(Request $request): JsonResponse
+    {
+        $search = $request->query('search');
+
+        // If search is empty, return empty array
+        if (empty($search)) {
+            return response()->json(['data' => []]);
+        }
+
+        $query = Customer::query()->with('photo');
+
+        // Apply search filter
+        $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+                ->orWhere('customer_no', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%")
+                ->orWhere('phone', 'like', "%{$search}%");
+        });
+
+        // ✅ Status filter
+        $status = $request->input('status');
+        if ($status && $status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        // ✅ Get all results
+        $customers = $query->latest()->get();
+
+        return response()->json($customers);
+
+    }
+
     /**
      * Display a listing of customers.
      */

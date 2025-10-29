@@ -35,8 +35,7 @@ class CustomerFactory extends Factory
 
             'identification_type' => $this->faker->randomElement(['NID', 'NBR', 'PASSPORT', 'DRIVING_LICENSE']),
             'identification_number' => strtoupper(Str::random(10)),
-            'photo' => $this->faker->optional()->imageUrl(300, 300, 'people', true, 'photo'),
-
+            'photo_id' => null,
             'registration_no' => $type === 'Organization'
                 ? strtoupper('REG-' . $this->faker->numberBetween(1000, 9999))
                 : null,

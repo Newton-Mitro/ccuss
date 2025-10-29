@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\CostomerManagement\Customer\Models\Customer;
 use App\CostomerManagement\Signature\Models\Signature;
+use App\Media\Models\Media;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class SignatureFactory extends Factory
@@ -14,7 +15,7 @@ class SignatureFactory extends Factory
     {
         return [
             'customer_id' => Customer::inRandomOrder()->value('id') ?? Customer::factory(),
-            'signature_path' => $this->faker->imageUrl(400, 100, 'abstract', true, 'signature'),
+            'signature_id' => Media::inRandomOrder()->value('id') ?? Media::factory(),
         ];
     }
 }
