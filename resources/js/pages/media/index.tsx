@@ -54,13 +54,7 @@ const Index: React.FC<PageProps> = ({ mediaItems, filters }) => {
                     preserveScroll: true,
                     preserveState: true,
                     onSuccess: () => {
-                        Swal.fire({
-                            title: 'Deleted!',
-                            text: 'Media file has been deleted.',
-                            icon: 'success',
-                            background: isDark ? '#1f2937' : '#fff',
-                            color: isDark ? '#f9fafb' : '#111827',
-                        });
+                        toast.success('Media file deleted successfully.');
                     },
                     onError: (errors) => {
                         Object.values(errors).forEach((fieldErrors: any) => {

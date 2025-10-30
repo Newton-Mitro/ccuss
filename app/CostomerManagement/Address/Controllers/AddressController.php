@@ -15,11 +15,24 @@ class AddressController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Address::query()->with('customer');
+        $perPage = $request->input('per_page', 5);
+        $page = $request->input('page', 1);
+        $search = $request->input('search');
+        $type = $request->input('type', 'all');
 
-        // Search filter
-        if ($request->filled('search')) {
-            $search = $request->search;
+        // If search is empty, return an empty paginator (same as SignatureController)
+        if (empty($search)) {
+            $addresses = new \Illuminate\Pagination\LengthAwarePaginator(
+                [], // empty items
+                0,  // total items
+                $perPage,
+                $page,
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+        } else {
+            $query = Address::query()->with('customer');
+
+            // 🔍 Search filter
             $query->where(function ($q) use ($search) {
                 $q->whereHas('customer', function ($q2) use ($search) {
                     $q2->where('name', 'like', "%{$search}%")
@@ -28,34 +41,28 @@ class AddressController extends Controller
                     ->orWhere('line1', 'like', "%{$search}%")
                     ->orWhere('district', 'like', "%{$search}%");
             });
+
+            // 🏷️ Type filter
+            if (!empty($type) && $type !== 'all') {
+                $query->where('type', $type);
+            }
+
+            // 📄 Paginate with query string
+            $addresses = $query->latest()->paginate($perPage)->withQueryString();
         }
 
-        // Type filter
-        if ($request->filled('type') && $request->type !== 'all') {
-            $query->where('type', $request->type);
-        }
-
-        // Pagination
-        $perPage = $request->get('perPage', 5);
-        $addresses = $query->paginate($perPage)->withQueryString();
-
+        // ✅ Inertia response with filters
         return Inertia::render('customer-management/addresses/index', [
             'addresses' => $addresses,
-            'filters' => $request->only(['search', 'type', 'perPage', 'page']),
+            'filters' => $request->only(['search', 'type', 'per_page', 'page']),
         ]);
     }
 
-    /**
-     * Show the form for creating a new address.
-     */
     public function create(): Response
     {
         return Inertia::render('customer-management/addresses/create');
     }
 
-    /**
-     * Store a newly created address.
-     */
     public function store(StoreAddressRequest $request): RedirectResponse
     {
         Address::create($request->validated());
@@ -64,65 +71,32 @@ class AddressController extends Controller
             ->with('success', 'Address created successfully.');
     }
 
-    /**
-     * Display a specific address.
-     */
     public function show(Address $address): Response
     {
         $address->load('customer:id,name');
 
         return Inertia::render('customer-management/addresses/show', [
-            'address' => [
-                'id' => $address->id,
-                'customer_id' => $address->customer_id,
-                'customer_name' => $address->customer->name ?? 'N/A',
-                'line1' => $address->line1,
-                'line2' => $address->line2,
-                'division' => $address->division,
-                'district' => $address->district,
-                'upazila' => $address->upazila,
-                'union_ward' => $address->union_ward,
-                'village_locality' => $address->village_locality,
-                'postal_code' => $address->postal_code,
-                'country_code' => $address->country_code,
-                'type' => $address->type,
-                'created_at' => $address->created_at->toDateTimeString(),
-                'updated_at' => $address->updated_at->toDateTimeString(),
-            ],
+            'address' => $address,
         ]);
     }
 
-    /**
-     * Show the form for editing a specific address.
-     */
     public function edit(Address $address): Response
     {
-        $address->load('customer:id,name');
+        $address->load('customer');
 
         return Inertia::render('customer-management/addresses/edit', [
-            'address' => [
-                'id' => $address->id,
-                'customer_id' => $address->customer_id,
-                'customer_name' => $address->customer->name ?? 'N/A',
-                'line1' => $address->line1,
-                'line2' => $address->line2,
-                'division' => $address->division,
-                'district' => $address->district,
-                'upazila' => $address->upazila,
-                'union_ward' => $address->union_ward,
-                'village_locality' => $address->village_locality,
-                'postal_code' => $address->postal_code,
-                'country_code' => $address->country_code,
-                'type' => $address->type,
-                'created_at' => $address->created_at->toDateTimeString(),
-                'updated_at' => $address->updated_at->toDateTimeString(),
-            ],
+            'address' => $address,
         ]);
     }
 
-    /**
-     * Delete a specific address.
-     */
+    public function update(UpdateAddressRequest $request, Address $address): RedirectResponse
+    {
+        $address->update($request->validated());
+
+        return redirect()->route('addresses.index')
+            ->with('success', 'Address updated successfully.');
+    }
+
     public function destroy(Address $address): RedirectResponse
     {
         $address->delete();

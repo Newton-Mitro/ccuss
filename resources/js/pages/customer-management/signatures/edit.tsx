@@ -1,5 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import { CustomerSearch } from '../../../components/customer-search';
 import HeadingSmall from '../../../components/heading-small';
 import { MediaSelector } from '../../../components/media-selector';
@@ -9,10 +10,11 @@ import { Label } from '../../../components/ui/label';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 import { Media } from '../../../types/media';
+import { SignatureWithDetails } from '../../../types/signature';
 import MediaBrowserModal from '../../media/media_browser_modal';
 
 interface SignatureEditProps {
-    signature: any;
+    signature: SignatureWithDetails;
 }
 
 interface SignatureFormData {
@@ -27,14 +29,14 @@ export default function EditSignature({ signature }: SignatureEditProps) {
         useForm<SignatureFormData>({
             customer_id: signature.customer_id,
             customer_name: signature?.customer?.name || '',
-            signature_id: signature.media?.id || null,
+            signature_id: signature.signature?.id || null,
         });
 
     const [selectedMedia, setSelectedMedia] = useState<Media | null>(
-        signature.media || null,
+        signature.signature || null,
     );
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [query, setQuery] = useState(signature.customer_name);
+    const [query, setQuery] = useState(signature.customer?.name || '');
 
     const handleMediaSelect = (media: Media) => {
         setSelectedMedia(media);
@@ -47,10 +49,18 @@ export default function EditSignature({ signature }: SignatureEditProps) {
         setData('signature_id', null);
     };
 
+    // inside your component
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         put(`/auth/signatures/${signature.id}`, {
             preserveScroll: true,
+            onSuccess: () => {
+                toast.success('Signature updated successfully!');
+            },
+            onError: (errors) => {
+                toast.error('Failed to update the signature.');
+                console.error(errors);
+            },
         });
     };
 
@@ -62,7 +72,7 @@ export default function EditSignature({ signature }: SignatureEditProps) {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Edit Signature" />
-            <div className="animate-in space-y-8 px-4 py-6 text-foreground fade-in">
+            <div className="animate-in space-y-8 text-foreground fade-in">
                 <HeadingSmall
                     title="Edit Signature"
                     description="Update the customer or signature file."

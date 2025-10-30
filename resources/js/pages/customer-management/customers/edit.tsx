@@ -1,5 +1,6 @@
-import { Head } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { MediaSelector } from '../../../components/media-selector';
@@ -8,93 +9,73 @@ import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
+import { Customer } from '../../../types/customer';
 import { Media } from '../../../types/media';
 import MediaBrowserModal from '../../media/media_browser_modal';
 
-interface Customer {
-    id: number;
-    customer_no: string;
-    type: 'Individual' | 'Organization';
-    name: string;
-    phone: string;
-    email: string;
-    kyc_level: 'MIN' | 'STD' | 'ENH';
-    status: 'ACTIVE' | 'PENDING' | 'SUSPENDED' | 'CLOSED';
-    dob: string;
-    gender: string;
-    religion: string;
-    identification_type: string;
-    identification_number: string;
-    photo?: Partial<Media>;
-    registration_no?: string;
-}
-
 interface EditProps {
     customer: Customer;
-    errors?: Record<string, any>;
+}
+interface CustomerFormData {
+    customer_no: string;
+    type: string;
+    name: string;
+    phone?: string | null;
+    email?: string | null;
+    kyc_level: string;
+    status: string;
+    dob?: string | null;
+    gender?: string;
+    religion?: string;
+    identification_type: string;
+    identification_number: string;
+    photo_id?: number | null;
+    registration_no?: string | null;
 }
 
-const Edit: React.FC<EditProps> = ({ customer, errors = {} }) => {
-    const [formData, setFormData] = useState({
-        customer_no: customer.customer_no || '',
-        type: customer.type || 'Individual',
-        name: customer.name || '',
-        phone: customer.phone || '',
-        email: customer.email || '',
-        kyc_level: customer.kyc_level || 'MIN',
-        status: customer.status || 'ACTIVE',
-        dob: customer.dob || '',
-        gender: customer.gender || '',
-        religion: customer.religion || '',
-        identification_type: customer.identification_type || '',
-        identification_number: customer.identification_number || '',
-        photo: customer.photo?.id || null,
-        registration_no: customer.registration_no || '',
-    });
+const Edit: React.FC<EditProps> = ({ customer }) => {
+    console.log(customer);
+    const { data, setData, put, processing, errors } =
+        useForm<CustomerFormData>({
+            customer_no: customer.customer_no ?? '',
+            type: customer.type ?? 'Individual',
+            name: customer.name ?? '',
+            phone: customer.phone ?? null,
+            email: customer.email ?? null,
+            kyc_level: customer.kyc_level ?? 'MIN',
+            status: customer.status ?? 'ACTIVE',
+            dob: customer.dob ?? null,
+            gender: customer.gender ?? null,
+            religion: customer.religion ?? null,
+            identification_type: customer.identification_type ?? 'NID',
+            identification_number: customer.identification_number ?? '',
+            photo_id: customer.photo?.id ?? null,
+            registration_no: customer.registration_no ?? null,
+        });
 
-    // Initialize selectedMedia safely for TypeScript
     const [selectedMedia, setSelectedMedia] = useState<Media | null>(
-        customer.photo
-            ? {
-                  id: customer.photo.id!,
-                  url: customer.photo.url!,
-                  file_name: customer.photo.file_name || '',
-                  file_path: customer.photo.file_path || '',
-                  file_type: customer.photo.file_type || 'image/jpeg',
-                  alt_text: customer.photo.alt_text || '',
-                  uploaded_by: customer.photo.uploaded_by || 0,
-                  created_at: customer.photo.created_at || '',
-                  updated_at: customer.photo.updated_at || '',
-              }
-            : null,
+        customer.photo || null,
     );
-
     const [isModalOpen, setIsModalOpen] = useState(false);
-
-    const handleChange = (key: string, value: any) => {
-        setFormData((prev) => ({ ...prev, [key]: value }));
-    };
 
     const handleMediaSelect = (media: Media) => {
         setSelectedMedia(media);
-        handleChange('photo', media.id);
+        setData('photo_id', media.id);
+        setIsModalOpen(false);
     };
 
     const handleMediaRemove = () => {
         setSelectedMedia(null);
-        handleChange('photo', null);
+        setData('photo_id', null);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Updating customer:', formData);
-        // TODO: Replace console.log with actual API call
-        // Example:
-        // fetch(`/api/customers/${customer.id}`, {
-        //   method: 'PUT',
-        //   body: JSON.stringify(formData),
-        //   headers: { 'Content-Type': 'application/json' },
-        // });
+        put(`/auth/customers/${customer.id}`, {
+            preserveScroll: true,
+            onSuccess: () => toast.success('Customer updated successfully!'),
+            onError: () => toast.error('Please fix the errors in the form.'),
+        });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -106,7 +87,7 @@ const Edit: React.FC<EditProps> = ({ customer, errors = {} }) => {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Edit Customer: ${customer.name}`} />
 
-            <div className="w-6xl animate-in space-y-8 px-4 py-6 text-foreground fade-in">
+            <div className="animate-in space-y-8 px-4 py-6 text-foreground fade-in">
                 <HeadingSmall
                     title={`Edit Customer: ${customer.name}`}
                     description="Update the customer's details below."
@@ -116,14 +97,14 @@ const Edit: React.FC<EditProps> = ({ customer, errors = {} }) => {
                     onSubmit={handleSubmit}
                     className="space-y-2 rounded-xl border border-border bg-card/80 p-8 shadow-md backdrop-blur-sm transition-all duration-300 hover:shadow-lg"
                 >
-                    {/* Customer No & Type */}
+                    {/* Customer Info */}
                     <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
                         <div>
                             <Label>Customer No</Label>
                             <Input
-                                value={formData.customer_no}
+                                value={data.customer_no}
                                 onChange={(e) =>
-                                    handleChange('customer_no', e.target.value)
+                                    setData('customer_no', e.target.value)
                                 }
                                 placeholder="CUST-0001"
                             />
@@ -133,68 +114,72 @@ const Edit: React.FC<EditProps> = ({ customer, errors = {} }) => {
                         <div>
                             <Label>Customer Type</Label>
                             <select
-                                value={formData.type}
+                                value={data.type}
                                 onChange={(e) =>
-                                    handleChange('type', e.target.value)
+                                    setData('type', e.target.value)
                                 }
                                 className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
                             >
                                 <option>Individual</option>
                                 <option>Organization</option>
                             </select>
-                        </div>
-                    </div>
-
-                    {/* Name, Registration No (if org), Phone, Email */}
-                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-                        <div>
-                            <Label>Name</Label>
-                            <Input
-                                value={formData.name}
-                                onChange={(e) =>
-                                    handleChange('name', e.target.value)
-                                }
-                                placeholder="Full name"
-                            />
-                            <InputError message={errors.name} />
+                            <InputError message={errors.type} />
                         </div>
 
-                        {formData.type === 'Organization' && (
+                        {data.type === 'Organization' && (
                             <div>
                                 <Label>Registration No</Label>
                                 <Input
-                                    value={formData.registration_no}
+                                    value={data.registration_no}
                                     onChange={(e) =>
-                                        handleChange(
+                                        setData(
                                             'registration_no',
                                             e.target.value,
                                         )
                                     }
                                     placeholder="ORG-12345"
                                 />
+                                <InputError message={errors.registration_no} />
                             </div>
                         )}
+                    </div>
+
+                    {/* Name, Phone, Email */}
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+                        <div>
+                            <Label>Name</Label>
+                            <Input
+                                value={data.name}
+                                onChange={(e) =>
+                                    setData('name', e.target.value)
+                                }
+                                placeholder="Full name"
+                            />
+                            <InputError message={errors.name} />
+                        </div>
 
                         <div>
                             <Label>Phone</Label>
                             <Input
-                                value={formData.phone}
+                                value={data.phone}
                                 onChange={(e) =>
-                                    handleChange('phone', e.target.value)
+                                    setData('phone', e.target.value)
                                 }
                                 placeholder="+8801XXXXXXXXX"
                             />
+                            <InputError message={errors.phone} />
                         </div>
 
                         <div>
                             <Label>Email</Label>
                             <Input
-                                value={formData.email}
+                                value={data.email}
                                 onChange={(e) =>
-                                    handleChange('email', e.target.value)
+                                    setData('email', e.target.value)
                                 }
                                 placeholder="example@email.com"
                             />
+                            <InputError message={errors.email} />
                         </div>
                     </div>
 
@@ -204,19 +189,18 @@ const Edit: React.FC<EditProps> = ({ customer, errors = {} }) => {
                             <Label>Date of Birth</Label>
                             <Input
                                 type="date"
-                                value={formData.dob}
-                                onChange={(e) =>
-                                    handleChange('dob', e.target.value)
-                                }
+                                value={data.dob}
+                                onChange={(e) => setData('dob', e.target.value)}
                             />
+                            <InputError message={errors.dob} />
                         </div>
 
                         <div>
                             <Label>Gender</Label>
                             <select
-                                value={formData.gender}
+                                value={data.gender}
                                 onChange={(e) =>
-                                    handleChange('gender', e.target.value)
+                                    setData('gender', e.target.value)
                                 }
                                 className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
                             >
@@ -225,14 +209,15 @@ const Edit: React.FC<EditProps> = ({ customer, errors = {} }) => {
                                 <option>FEMALE</option>
                                 <option>OTHER</option>
                             </select>
+                            <InputError message={errors.gender} />
                         </div>
 
                         <div>
                             <Label>Religion</Label>
                             <select
-                                value={formData.religion}
+                                value={data.religion}
                                 onChange={(e) =>
-                                    handleChange('religion', e.target.value)
+                                    setData('religion', e.target.value)
                                 }
                                 className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
                             >
@@ -243,6 +228,7 @@ const Edit: React.FC<EditProps> = ({ customer, errors = {} }) => {
                                 <option>BUDDHISM</option>
                                 <option>OTHER</option>
                             </select>
+                            <InputError message={errors.religion} />
                         </div>
                     </div>
 
@@ -251,9 +237,9 @@ const Edit: React.FC<EditProps> = ({ customer, errors = {} }) => {
                         <div>
                             <Label>Identification Type</Label>
                             <select
-                                value={formData.identification_type}
+                                value={data.identification_type}
                                 onChange={(e) =>
-                                    handleChange(
+                                    setData(
                                         'identification_type',
                                         e.target.value,
                                     )
@@ -266,31 +252,35 @@ const Edit: React.FC<EditProps> = ({ customer, errors = {} }) => {
                                 <option>PASSPORT</option>
                                 <option>DRIVING_LICENSE</option>
                             </select>
+                            <InputError message={errors.identification_type} />
                         </div>
 
                         <div>
                             <Label>Identification Number</Label>
                             <Input
-                                value={formData.identification_number}
+                                value={data.identification_number}
                                 onChange={(e) =>
-                                    handleChange(
+                                    setData(
                                         'identification_number',
                                         e.target.value,
                                     )
                                 }
                                 placeholder="Enter ID number"
                             />
+                            <InputError
+                                message={errors.identification_number}
+                            />
                         </div>
                     </div>
 
-                    {/* KYC Level & Status */}
+                    {/* KYC & Status */}
                     <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
                         <div>
                             <Label>KYC Level</Label>
                             <select
-                                value={formData.kyc_level}
+                                value={data.kyc_level}
                                 onChange={(e) =>
-                                    handleChange('kyc_level', e.target.value)
+                                    setData('kyc_level', e.target.value)
                                 }
                                 className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
                             >
@@ -298,14 +288,15 @@ const Edit: React.FC<EditProps> = ({ customer, errors = {} }) => {
                                 <option>STD</option>
                                 <option>ENH</option>
                             </select>
+                            <InputError message={errors.kyc_level} />
                         </div>
 
                         <div>
                             <Label>Status</Label>
                             <select
-                                value={formData.status}
+                                value={data.status}
                                 onChange={(e) =>
-                                    handleChange('status', e.target.value)
+                                    setData('status', e.target.value)
                                 }
                                 className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
                             >
@@ -314,27 +305,29 @@ const Edit: React.FC<EditProps> = ({ customer, errors = {} }) => {
                                 <option>SUSPENDED</option>
                                 <option>CLOSED</option>
                             </select>
+                            <InputError message={errors.status} />
                         </div>
                     </div>
 
                     {/* Media Selector */}
-                    <div className="mt-">
+                    <div className="mt-4">
                         <MediaSelector
                             label="Photo"
                             media={selectedMedia}
                             onSelect={() => setIsModalOpen(true)}
                             onRemove={handleMediaRemove}
-                            error={errors.photo}
+                            error={errors.photo_id}
                         />
                     </div>
 
                     {/* Submit */}
-                    <div className="flex justify-end">
+                    <div className="mt-4 flex justify-end">
                         <Button
                             type="submit"
+                            disabled={processing}
                             className="w-40 bg-primary text-primary-foreground transition-all duration-300 hover:bg-primary/90 hover:shadow-md"
                         >
-                            Update Customer
+                            {processing ? 'Updating...' : 'Update Customer'}
                         </Button>
                     </div>
                 </form>

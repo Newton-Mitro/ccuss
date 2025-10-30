@@ -2,8 +2,9 @@
 
 namespace App\CostomerManagement\Signature\Controllers;
 
-use App\CostomerManagement\Customer\Models\Customer;
 use App\CostomerManagement\Signature\Models\Signature;
+use App\CostomerManagement\Signature\Requests\StoreSignatureRequest;
+use App\CostomerManagement\Signature\Requests\UpdateSignatureRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -12,81 +13,79 @@ use Illuminate\Http\Request;
 
 class SignatureController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $signatures = Signature::with('customer')->latest()->paginate(10)->withQueryString();
-
-        return Inertia::render('customer-management/signatures/index', [
-            'signatures' => $signatures,
-            'filters' => request()->only('search'),
-        ]);
+        $search = $request->input('search');
+        $perPage = $request->input('per_page', 10);
+        if (!empty($search)) {
+            $signatures = Signature::with(['customer'])->whereHas('customer', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")->orWhere('customer_no', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")->orWhere('phone', 'like', "%{$search}%");
+            })->latest()->paginate($perPage)->withQueryString();
+        } else {
+            // Return an empty LengthAwarePaginator instead of a plain collection 
+            $signatures = new \Illuminate\Pagination\LengthAwarePaginator(
+                [], // empty items 
+                0, // total items 
+                $perPage,
+                $request->input('page', 1),
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+        }
+        return Inertia::render('customer-management/signatures/index', ['signatures' => $signatures, 'filters' => $request->only(['search', 'per_page', 'page']),]);
     }
 
-    // Show form to create a signature
     public function create(): Response
     {
         return Inertia::render('customer-management/signatures/create');
     }
 
-    // Store signature
-    public function store(Request $request): RedirectResponse
+    public function store(StoreSignatureRequest $request): RedirectResponse
     {
-        $request->validate([
-            'customer_id' => 'required|exists:customers,id',
-            'signature_path' => 'required|file|mimes:png,jpg,jpeg|max:2048',
-        ]);
-
-        // Upload file
-        $path = $request->file('signature_path')->store('signatures', 'public');
-
         Signature::create([
             'customer_id' => $request->customer_id,
-            'signature_path' => $path,
+            'signature_id' => $request->signature_id,
         ]);
 
-        return redirect()->route('signatures.index')->with('success', 'Signature added successfully.');
+        return redirect()->route('signatures.index')
+            ->with('success', 'Signature added successfully.');
     }
 
-    // Show single signature
     public function show(Signature $signature): Response
     {
         return Inertia::render('customer-management/signatures/show', [
-            'signature' => $signature->load('customer'),
+            'signature' => $signature->load('customer', 'signature'),
         ]);
     }
 
-    // Show edit form
     public function edit(Signature $signature): Response
     {
         return Inertia::render('customer-management/signatures/edit', [
-            'signature' => $signature->load('customer'),
+            'signature' => $signature->load('customer', 'signature'),
         ]);
     }
 
-    // Update signature
-    public function update(Request $request, Signature $signature): RedirectResponse
+    public function update(UpdateSignatureRequest $request, Signature $signature): RedirectResponse
     {
-        $request->validate([
-            'customer_id' => 'required|exists:customers,id',
-            'signature_path' => 'nullable|file|mimes:png,jpg,jpeg|max:2048',
-        ]);
-
         $data = ['customer_id' => $request->customer_id];
 
-        if ($request->hasFile('signature_path')) {
-            $data['signature_path'] = $request->file('signature_path')->store('signatures', 'public');
+        if ($request->filled('signature_id')) {
+            $data['signature_id'] = $request->signature_id;
         }
 
         $signature->update($data);
 
-        return redirect()->route('signatures.index')->with('success', 'Signature updated successfully.');
+        return redirect()->route('signatures.index')
+            ->with('success', 'Signature updated successfully.');
     }
 
-    // Delete signature
+    /**
+     * Delete a signature.
+     */
     public function destroy(Signature $signature): RedirectResponse
     {
         $signature->delete();
 
-        return redirect()->route('signatures.index')->with('success', 'Signature deleted successfully.');
+        return redirect()->route('signatures.index')
+            ->with('success', 'Signature deleted successfully.');
     }
 }

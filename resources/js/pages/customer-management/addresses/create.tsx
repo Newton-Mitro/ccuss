@@ -1,5 +1,7 @@
-import { Head } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
+import { CustomerSearch } from '../../../components/customer-search';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
@@ -8,9 +10,10 @@ import { Label } from '../../../components/ui/label';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 
-function Create() {
-    const [formData, setFormData] = useState({
-        customer_id: '',
+export default function Create() {
+    const { data, setData, post, processing, errors } = useForm({
+        customer_id: null as number | null,
+        customer_name: '',
         line1: '',
         line2: '',
         division: '',
@@ -23,16 +26,14 @@ function Create() {
         type: 'CURRENT',
     });
 
-    const [errors] = useState<any>({});
-
-    const handleChange = (key: string, value: any) => {
-        setFormData((prev) => ({ ...prev, [key]: value }));
-    };
+    const [query, setQuery] = useState('');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Submitting Address:', formData);
-        // TODO: Send POST request to backend via Inertia
+        post('/auth/addresses', {
+            preserveScroll: true,
+            onSuccess: () => toast.success('Address created successfully!'),
+        });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -52,29 +53,52 @@ function Create() {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="space-y-10 rounded-xl border border-border bg-card/80 p-8 shadow-md backdrop-blur-sm transition-all duration-300 hover:shadow-lg"
+                    className="space-y-5 rounded-xl border border-border bg-card/80 p-8 shadow-md backdrop-blur-sm transition-all duration-300 hover:shadow-lg"
                 >
-                    {/* Customer ID */}
+                    {/* Customer Selection */}
                     <div>
-                        <Label>Customer ID</Label>
-                        <Input
-                            value={formData.customer_id}
-                            onChange={(e) =>
-                                handleChange('customer_id', e.target.value)
-                            }
-                            placeholder="Enter Customer ID"
-                        />
-                        <InputError message={errors.customer_id} />
+                        <h3 className="text-lg font-semibold text-primary">
+                            Customer
+                        </h3>
+                        <div className="mt-2">
+                            <CustomerSearch
+                                query={query}
+                                onQueryChange={setQuery}
+                                onSelect={(customer) => {
+                                    setData('customer_id', customer.id);
+                                    setData('customer_name', customer.name);
+                                    setQuery(customer.name);
+                                }}
+                            />
+                        </div>
+
+                        <div className="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2">
+                            <div>
+                                <Label>Customer ID</Label>
+                                <Input
+                                    value={data.customer_id ?? ''}
+                                    disabled
+                                    className="bg-disabled mt-1 cursor-not-allowed"
+                                />
+                                <InputError message={errors.customer_id} />
+                            </div>
+                            <div>
+                                <Label>Customer Name</Label>
+                                <Input
+                                    value={data.customer_name}
+                                    disabled
+                                    className="bg-disabled mt-1 cursor-not-allowed"
+                                />
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Address Lines */}
+                    {/* Address Fields */}
                     <div>
                         <Label>Address Line 1</Label>
                         <Input
-                            value={formData.line1}
-                            onChange={(e) =>
-                                handleChange('line1', e.target.value)
-                            }
+                            value={data.line1}
+                            onChange={(e) => setData('line1', e.target.value)}
                             placeholder="Street, Road, House No"
                         />
                         <InputError message={errors.line1} />
@@ -83,22 +107,20 @@ function Create() {
                     <div>
                         <Label>Address Line 2</Label>
                         <Input
-                            value={formData.line2}
-                            onChange={(e) =>
-                                handleChange('line2', e.target.value)
-                            }
+                            value={data.line2}
+                            onChange={(e) => setData('line2', e.target.value)}
                             placeholder="Apartment, Building, etc."
                         />
+                        <InputError message={errors.line2} />
                     </div>
 
-                    {/* Location */}
                     <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
                         <div>
                             <Label>Division</Label>
                             <Input
-                                value={formData.division}
+                                value={data.division}
                                 onChange={(e) =>
-                                    handleChange('division', e.target.value)
+                                    setData('division', e.target.value)
                                 }
                                 placeholder="Division"
                             />
@@ -108,9 +130,9 @@ function Create() {
                         <div>
                             <Label>District</Label>
                             <Input
-                                value={formData.district}
+                                value={data.district}
                                 onChange={(e) =>
-                                    handleChange('district', e.target.value)
+                                    setData('district', e.target.value)
                                 }
                                 placeholder="District"
                             />
@@ -120,12 +142,13 @@ function Create() {
                         <div>
                             <Label>Upazila</Label>
                             <Input
-                                value={formData.upazila}
+                                value={data.upazila}
                                 onChange={(e) =>
-                                    handleChange('upazila', e.target.value)
+                                    setData('upazila', e.target.value)
                                 }
                                 placeholder="Upazila"
                             />
+                            <InputError message={errors.upazila} />
                         </div>
                     </div>
 
@@ -133,9 +156,9 @@ function Create() {
                         <div>
                             <Label>Union/Ward</Label>
                             <Input
-                                value={formData.union_ward}
+                                value={data.union_ward}
                                 onChange={(e) =>
-                                    handleChange('union_ward', e.target.value)
+                                    setData('union_ward', e.target.value)
                                 }
                                 placeholder="Union or Ward"
                             />
@@ -144,12 +167,9 @@ function Create() {
                         <div>
                             <Label>Village/Locality</Label>
                             <Input
-                                value={formData.village_locality}
+                                value={data.village_locality}
                                 onChange={(e) =>
-                                    handleChange(
-                                        'village_locality',
-                                        e.target.value,
-                                    )
+                                    setData('village_locality', e.target.value)
                                 }
                                 placeholder="Village / Locality"
                             />
@@ -158,23 +178,22 @@ function Create() {
                         <div>
                             <Label>Postal Code</Label>
                             <Input
-                                value={formData.postal_code}
+                                value={data.postal_code}
                                 onChange={(e) =>
-                                    handleChange('postal_code', e.target.value)
+                                    setData('postal_code', e.target.value)
                                 }
                                 placeholder="Postal Code"
                             />
                         </div>
                     </div>
 
-                    {/* Country & Type */}
                     <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                         <div>
                             <Label>Country Code</Label>
                             <Input
-                                value={formData.country_code}
+                                value={data.country_code}
                                 onChange={(e) =>
-                                    handleChange('country_code', e.target.value)
+                                    setData('country_code', e.target.value)
                                 }
                             />
                         </div>
@@ -182,9 +201,9 @@ function Create() {
                         <div>
                             <Label>Address Type</Label>
                             <select
-                                value={formData.type}
+                                value={data.type}
                                 onChange={(e) =>
-                                    handleChange('type', e.target.value)
+                                    setData('type', e.target.value)
                                 }
                                 className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
                             >
@@ -202,9 +221,10 @@ function Create() {
                     <div className="flex justify-end pt-4">
                         <Button
                             type="submit"
+                            disabled={processing}
                             className="w-40 bg-primary text-primary-foreground transition-all duration-300 hover:bg-primary/90 hover:shadow-md"
                         >
-                            Create Address
+                            {processing ? 'Saving...' : 'Create Address'}
                         </Button>
                     </div>
                 </form>
@@ -212,5 +232,3 @@ function Create() {
         </CustomAuthLayout>
     );
 }
-
-export default Create;

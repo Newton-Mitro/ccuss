@@ -4,27 +4,10 @@ import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
+import { Customer } from '../../../types/customer';
 
 interface ShowProps {
-    customer: {
-        id: number;
-        customer_no: string;
-        type: string;
-        name: string;
-        phone: string;
-        email: string;
-        kyc_level: string;
-        status: string;
-        dob: string;
-        gender: string;
-        religion: string;
-        identification_type: string;
-        identification_number: string;
-        photo: string;
-        registration_no: string;
-        created_at?: string;
-        updated_at?: string;
-    };
+    customer: Customer;
 }
 
 function Show({ customer }: ShowProps) {
@@ -141,7 +124,7 @@ function Show({ customer }: ShowProps) {
                             <Label>Photo</Label>
                             {customer.photo ? (
                                 <img
-                                    src={customer.photo}
+                                    src={customer.photo.url}
                                     alt={customer.name}
                                     className="mt-2 h-28 w-28 rounded-md border border-border object-cover"
                                 />

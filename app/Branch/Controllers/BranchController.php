@@ -22,13 +22,14 @@ class BranchController extends Controller
                 ->orWhere('code', 'like', "%{$search}%");
         }
 
-        $branches = $query->latest()->paginate(10)->withQueryString();
+        $branches = $query->latest()
+            ->paginate(
+                $request->input('per_page', 10)
+            )->withQueryString();
 
         return Inertia::render('branches/index', [
             'branches' => $branches,
-            'filters' => [
-                'search' => $search,
-            ],
+            'filters' => $request->only(['search', 'per_page', 'page']),
         ]);
     }
 
@@ -49,7 +50,7 @@ class BranchController extends Controller
     public function show(Branch $branch): Response
     {
         return Inertia::render('branches/show', [
-            'branch' => $branch,
+            'branch' => $branch->load('manager'),
         ]);
     }
 

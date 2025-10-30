@@ -1,55 +1,78 @@
-import { Head, Link, useForm } from '@inertiajs/react';
-import debounce from 'lodash/debounce';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
+import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
+import { SignatureWithDetails } from '../../../types/signature';
 
-interface Customer {
-    id: number;
-    name: string;
-    customer_no?: string;
-}
+export default function Index() {
+    const { props } = usePage<
+        SharedData & {
+            signatures: {
+                data: SignatureWithDetails[];
+                links: { url: string | null; label: string; active: boolean }[];
+            };
+            filters: Record<string, string | number>;
+        }
+    >();
 
-interface Signature {
-    id: number;
-    customer: Customer;
-    signature_path: string;
-    created_at: string;
-}
+    const { signatures, filters } = props;
 
-interface IndexProps {
-    signatures: {
-        data: Signature[];
-        links: { url: string | null; label: string; active: boolean }[];
-    };
-    filters: {
-        search?: string;
-    };
-}
-
-export default function Index({ signatures, filters }: IndexProps) {
-    console.log(signatures);
     const { data, setData, get } = useForm({
         search: filters.search || '',
-        page: 1,
-        perPage: 10,
+        per_page: Number(filters.per_page) || 10,
+        page: Number(filters.page) || 1,
     });
 
-    const handleSearchChange = (value: string) => {
-        setData('search', value);
-        setData('page', 1);
-        fetchSignatures();
+    // Debounced search
+    const handleSearch = () => {
+        get('/auth/signatures', {
+            preserveState: true,
+            replace: true,
+        });
     };
 
-    const fetchSignatures = debounce(() => {
-        get('/auth/signatures', { preserveState: true, replace: true });
-    }, 400);
-
     useEffect(() => {
-        get('/auth/signatures', { preserveState: true, replace: true });
-    }, [data.page, data.perPage]);
+        const delay = setTimeout(handleSearch, 400);
+        return () => clearTimeout(delay);
+    }, [data.search, data.per_page, data.page]);
+
+    // SweetAlert2 delete
+    const handleDelete = (id: number, name: string) => {
+        const isDark = document.documentElement.classList.contains('dark');
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `Signature of "${name}" will be permanently deleted!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: isDark ? '#ef4444' : '#d33',
+            cancelButtonColor: isDark ? '#3b82f6' : '#3085d6',
+            background: isDark ? '#1f2937' : '#fff',
+            color: isDark ? '#f9fafb' : '#111827',
+            confirmButtonText: 'Yes, delete it!',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.delete(`/auth/signatures/${id}`, {
+                    preserveScroll: true,
+                    preserveState: true,
+                    onSuccess: () =>
+                        toast.success(`Signature deleted successfully!`),
+                    onError: () =>
+                        toast.error('Failed to delete the signature.'),
+                });
+            }
+        });
+    };
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Signatures', href: '/auth/signatures' },
@@ -58,28 +81,31 @@ export default function Index({ signatures, filters }: IndexProps) {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Customer Signatures" />
-            <div className="space-y-4 p-2 text-foreground">
+            <div className="space-y-4 text-foreground">
                 {/* Header */}
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
                         title="Customer Signatures"
                         description="Manage all customer signatures."
                     />
-                    <Link
+                    <a
                         href="/auth/signatures/create"
                         className="inline-block rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                     >
                         Add Signature
-                    </Link>
+                    </a>
                 </div>
 
-                {/* Search */}
+                {/* Search & Per Page */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <input
                         type="text"
-                        value={data.search}
-                        onChange={(e) => handleSearchChange(e.target.value)}
                         placeholder="Search by customer name..."
+                        value={data.search}
+                        onChange={(e) => {
+                            setData('search', e.target.value);
+                            setData('page', 1);
+                        }}
                         className="h-9 w-full max-w-sm rounded-md border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                     />
                 </div>
@@ -87,70 +113,105 @@ export default function Index({ signatures, filters }: IndexProps) {
                 {/* Table */}
                 <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border border-border md:h-[calc(100vh-300px)]">
                     <table className="w-full border-collapse">
-                        <thead className="sticky top-0 hidden bg-muted md:table-header-group">
+                        <thead className="sticky top-0 bg-muted">
                             <tr>
                                 {[
                                     '#',
-                                    'Customer',
+                                    'Customer No',
+                                    'Customer Name',
                                     'Uploaded At',
                                     'Actions',
-                                ].map((h) => (
+                                ].map((header) => (
                                     <th
-                                        key={h}
+                                        key={header}
                                         className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground"
                                     >
-                                        {h}
+                                        {header}
                                     </th>
                                 ))}
                             </tr>
                         </thead>
-                        <tbody className="flex flex-col md:table-row-group">
+                        <tbody>
                             {signatures.data.length > 0 ? (
-                                signatures.data.map((s, index) => (
+                                signatures.data.map((s, i) => (
                                     <tr
                                         key={s.id}
-                                        className="flex flex-col border-b border-border even:bg-muted/30 md:table-row md:flex-row"
+                                        className="border-b border-border even:bg-muted/30"
                                     >
+                                        <td className="px-2 py-1">{i + 1}</td>
                                         <td className="px-2 py-1">
-                                            {index + 1}
+                                            {s.customer?.customer_no}
                                         </td>
                                         <td className="px-2 py-1 font-medium">
                                             {s.customer?.name}
                                         </td>
-
                                         <td className="px-2 py-1">
                                             {new Date(
                                                 s.created_at,
                                             ).toLocaleDateString()}
                                         </td>
-                                        <td className="flex space-x-2 px-2 py-1">
-                                            <Link
-                                                href={`/auth/signatures/${s.id}`}
-                                                className="text-primary hover:text-primary/80"
-                                            >
-                                                <Eye className="h-5 w-5" />
-                                            </Link>
-                                            <Link
-                                                href={`/auth/signatures/${s.id}/edit`}
-                                                className="text-green-600 hover:text-green-500"
-                                            >
-                                                <Pencil className="h-5 w-5" />
-                                            </Link>
-                                            <Link
-                                                href={`/auth/signatures/${s.id}/delete`}
-                                                method="delete"
-                                                as="button"
-                                                className="text-destructive hover:text-destructive/80"
-                                            >
-                                                <Trash2 className="h-5 w-5" />
-                                            </Link>
+                                        <td className="px-2 py-1">
+                                            <TooltipProvider>
+                                                <div className="flex space-x-2">
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <a
+                                                                href={`/auth/signatures/${s.id}`}
+                                                                className="text-primary hover:text-primary/80"
+                                                            >
+                                                                <Eye className="h-5 w-5" />
+                                                            </a>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            View
+                                                        </TooltipContent>
+                                                    </Tooltip>
+
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <a
+                                                                href={`/auth/signatures/${s.id}/edit`}
+                                                                className="text-green-600 hover:text-green-500"
+                                                            >
+                                                                <Pencil className="h-5 w-5" />
+                                                            </a>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            Edit
+                                                        </TooltipContent>
+                                                    </Tooltip>
+
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    handleDelete(
+                                                                        s.id,
+                                                                        s
+                                                                            .customer
+                                                                            ?.name ||
+                                                                            '',
+                                                                    )
+                                                                }
+                                                                className="text-destructive hover:text-destructive/80"
+                                                            >
+                                                                <Trash2 className="h-5 w-5" />
+                                                            </button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            Delete
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </div>
+                                            </TooltipProvider>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={5}
+                                        colSpan={4}
                                         className="px-4 py-6 text-center text-muted-foreground"
                                     >
                                         No signatures found.
@@ -162,23 +223,44 @@ export default function Index({ signatures, filters }: IndexProps) {
                 </div>
 
                 {/* Pagination */}
-                <div className="mt-4 flex justify-center">
-                    {signatures.links.map((link, i) => (
-                        <button
-                            key={i}
-                            disabled={!link.url}
-                            onClick={() =>
-                                link.url &&
-                                get(link.url, { preserveState: true })
-                            }
-                            className={`mx-1 rounded px-3 py-1 ${
-                                link.active
-                                    ? 'bg-primary text-primary-foreground'
-                                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                            }`}
-                            dangerouslySetInnerHTML={{ __html: link.label }}
-                        />
-                    ))}
+                <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">
+                            Show
+                        </span>
+                        <select
+                            value={data.per_page}
+                            onChange={(e) => {
+                                setData('per_page', Number(e.target.value));
+                                setData('page', 1);
+                            }}
+                            className="h-9 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+                        >
+                            {[5, 10, 20, 50].map((n) => (
+                                <option key={n} value={n}>
+                                    {n}
+                                </option>
+                            ))}
+                        </select>
+                        <span className="text-sm text-muted-foreground">
+                            records
+                        </span>
+                    </div>
+
+                    <div className="flex gap-1">
+                        {signatures.links.map((link, i) => (
+                            <a
+                                key={i}
+                                href={link.url || '#'}
+                                className={`rounded-full px-3 py-1 text-sm transition-colors ${
+                                    link.active
+                                        ? 'bg-primary text-primary-foreground'
+                                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                                }`}
+                                dangerouslySetInnerHTML={{ __html: link.label }}
+                            />
+                        ))}
+                    </div>
                 </div>
             </div>
         </CustomAuthLayout>

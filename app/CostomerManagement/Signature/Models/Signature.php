@@ -14,7 +14,7 @@ class Signature extends Model
 
     protected $fillable = [
         'customer_id',
-        'signature_path',
+        'signature_id',
     ];
 
     public function customer()
@@ -22,9 +22,9 @@ class Signature extends Model
         return $this->belongsTo(Customer::class);
     }
 
-    public function media()
+    public function signature()
     {
-        return $this->belongsTo(Media::class, 'signature');
+        return $this->belongsTo(Media::class, 'signature_id');
     }
 
     protected static function newFactory()

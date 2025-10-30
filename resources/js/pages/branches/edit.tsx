@@ -1,5 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import { CustomerSearch } from '../../components/customer-search';
 import HeadingSmall from '../../components/heading-small';
 import InputError from '../../components/input-error';
@@ -8,19 +9,11 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import CustomAuthLayout from '../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../types';
+import { Branch } from '../../types/branch';
 import { Customer } from '../../types/customer';
 
 interface EditBranchProps {
-    branch: {
-        id: number;
-        code: string;
-        name: string;
-        address?: string;
-        latitude?: string;
-        longitude?: string;
-        manager_id?: number;
-        manager?: Customer;
-    };
+    branch: Branch;
 }
 
 function Edit({ branch }: EditBranchProps) {
@@ -39,7 +32,13 @@ function Edit({ branch }: EditBranchProps) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        put(`/auth/branches/${branch.id}`);
+        put(`/auth/branches/${branch.id}`, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => {
+                toast.success('Branch updated successfully!');
+            },
+        });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [

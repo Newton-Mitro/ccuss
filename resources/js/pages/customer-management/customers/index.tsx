@@ -4,12 +4,15 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
+import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
+import { Customer } from '../../../types/customer';
 
 export default function Index() {
     const { props } = usePage<
@@ -27,6 +30,7 @@ export default function Index() {
         page: Number(filters.page) || 1,
     });
 
+    // Search & filters
     const handleSearch = () => {
         get('/auth/customers', { preserveState: true });
     };
@@ -35,6 +39,39 @@ export default function Index() {
         const delay = setTimeout(handleSearch, 400);
         return () => clearTimeout(delay);
     }, [data.search, data.status, data.per_page, data.page]);
+
+    // SweetAlert2 delete
+    const handleDelete = (id: number, name: string) => {
+        const isDark = document.documentElement.classList.contains('dark');
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `Customer "${name}" will be permanently deleted!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: isDark ? '#ef4444' : '#d33',
+            cancelButtonColor: isDark ? '#3b82f6' : '#3085d6',
+            background: isDark ? '#1f2937' : '#fff',
+            color: isDark ? '#f9fafb' : '#111827',
+            confirmButtonText: 'Yes, delete it!',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.delete(`/auth/customers/${id}`, {
+                    preserveScroll: true,
+                    preserveState: true,
+                    onSuccess: () => {
+                        toast.success(
+                            `Customer "${name}" deleted successfully!`,
+                        );
+                    },
+                    onError: (errors) => {
+                        toast.error('Failed to delete the customer.');
+                        console.error(errors);
+                    },
+                });
+            }
+        });
+    };
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customers', href: '/auth/customers' },
@@ -50,12 +87,12 @@ export default function Index() {
                         title="Customers"
                         description="Manage your customers and their KYC information"
                     />
-                    <Link
+                    <a
                         href="/auth/customers/create"
                         className="inline-block rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                     >
                         Add Customer
-                    </Link>
+                    </a>
                 </div>
 
                 {/* Search & Filter */}
@@ -112,7 +149,7 @@ export default function Index() {
                         </thead>
                         <tbody>
                             {customers.data.length > 0 ? (
-                                customers.data.map((c: any) => (
+                                customers.data.map((c: Customer) => (
                                     <tr
                                         key={c.id}
                                         className="border-b border-border even:bg-muted/30"
@@ -132,12 +169,12 @@ export default function Index() {
                                                 <div className="flex space-x-2">
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
-                                                            <Link
+                                                            <a
                                                                 href={`/auth/customers/${c.id}`}
                                                                 className="text-primary hover:text-primary/80"
                                                             >
                                                                 <Eye className="h-5 w-5" />
-                                                            </Link>
+                                                            </a>
                                                         </TooltipTrigger>
                                                         <TooltipContent>
                                                             View
@@ -146,12 +183,12 @@ export default function Index() {
 
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
-                                                            <Link
+                                                            <a
                                                                 href={`/auth/customers/${c.id}/edit`}
                                                                 className="text-green-600 hover:text-green-500 dark:text-green-400"
                                                             >
                                                                 <Pencil className="h-5 w-5" />
-                                                            </Link>
+                                                            </a>
                                                         </TooltipTrigger>
                                                         <TooltipContent>
                                                             Edit
@@ -160,12 +197,18 @@ export default function Index() {
 
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
-                                                            <Link
-                                                                href={`/auth/customers/${c.id}/delete`}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    handleDelete(
+                                                                        c.id,
+                                                                        c.name,
+                                                                    )
+                                                                }
                                                                 className="text-destructive hover:text-destructive/80"
                                                             >
                                                                 <Trash2 className="h-5 w-5" />
-                                                            </Link>
+                                                            </button>
                                                         </TooltipTrigger>
                                                         <TooltipContent>
                                                             Delete
@@ -217,7 +260,7 @@ export default function Index() {
 
                     <div className="flex gap-1">
                         {customers.links.map((link: any, i: number) => (
-                            <Link
+                            <a
                                 key={i}
                                 href={link.url || '#'}
                                 className={`rounded-full px-3 py-1 text-sm transition-colors ${

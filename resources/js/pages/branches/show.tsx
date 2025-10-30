@@ -1,21 +1,12 @@
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, Clock, Hash, MapPin, User } from 'lucide-react';
+import { ArrowLeft, Clock, Hash, MapPin } from 'lucide-react';
 import HeadingSmall from '../../components/heading-small';
 import CustomAuthLayout from '../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../types';
+import { Branch } from '../../types/branch';
 
 interface ShowProps {
-    branch: {
-        id: number;
-        code: string;
-        name: string;
-        address: string;
-        latitude: string | null;
-        longitude: string | null;
-        manager_id: string | null;
-        created_at: string;
-        updated_at: string;
-    };
+    branch: Branch;
 }
 
 export default function Show({ branch }: ShowProps) {
@@ -30,7 +21,7 @@ export default function Show({ branch }: ShowProps) {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Branch: ${branch.name}`} />
 
-            <div className="space-y-8 px-4 py-6 text-foreground">
+            <div className="space-y-8 text-foreground">
                 {/* Header */}
                 <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                     <HeadingSmall
@@ -73,32 +64,12 @@ export default function Show({ branch }: ShowProps) {
                                     branch.updated_at,
                                 ).toLocaleDateString()}
                             </div>
-                            {branch.manager_id && (
-                                <div className="flex items-center gap-1">
-                                    <User className="h-4 w-4" />
-                                    Manager ID: {branch.manager_id}
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>
 
                 {/* Information Grid */}
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-                    <div className="rounded-xl border border-border bg-card p-4 shadow-sm transition-transform">
-                        <h4 className="mb-2 font-semibold text-muted-foreground">
-                            Branch Code
-                        </h4>
-                        <p className="text-lg font-medium">{branch.code}</p>
-                    </div>
-
-                    <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-                        <h4 className="mb-2 font-semibold text-muted-foreground">
-                            Branch Name
-                        </h4>
-                        <p className="text-lg font-medium">{branch.name}</p>
-                    </div>
-
                     <div className="rounded-xl border border-border bg-card p-4 shadow-sm md:col-span-2 lg:col-span-3">
                         <h4 className="mb-2 font-semibold text-muted-foreground">
                             Address
@@ -122,6 +93,15 @@ export default function Show({ branch }: ShowProps) {
                         </h4>
                         <p>{branch.longitude ?? '-'}</p>
                     </div>
+
+                    <div className="rounded-xl border border-border bg-card p-4 shadow-sm transition-transform">
+                        <h4 className="mb-2 font-semibold text-muted-foreground">
+                            Manager
+                        </h4>
+                        <p className="text-lg font-medium">
+                            {branch?.manager?.name}
+                        </p>
+                    </div>
                 </div>
 
                 {/* Optional Map Section */}
@@ -133,7 +113,7 @@ export default function Show({ branch }: ShowProps) {
                         <iframe
                             title="Branch Map"
                             src={`https://maps.google.com/maps?q=${branch.latitude},${branch.longitude}&z=15&output=embed`}
-                            className="h-64 w-full rounded-lg border border-border"
+                            className="h-72 w-full rounded-lg border border-border"
                             loading="lazy"
                         />
                     </div>

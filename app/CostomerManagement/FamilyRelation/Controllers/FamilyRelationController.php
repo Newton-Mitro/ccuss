@@ -15,24 +15,45 @@ class FamilyRelationController extends Controller
 {
     public function index(): Response
     {
-        // Fetch family relations with optional search & pagination
-        $relations = FamilyRelation::with(['customer', 'relative'])
+
+        $filters = request()->only('search', 'per_page', 'page');
+        $perPage = $filters['per_page'] ?? 10;
+
+        // If search is empty, return empty paginator
+        if (empty($filters['search'])) {
+            $relations = FamilyRelation::query()->whereRaw('0 = 1')->paginate($perPage);
+            return Inertia::render('customer-management/family-relations/index', [
+                'familyRelations' => $relations,
+                'filters' => $filters,
+            ]);
+        }
+
+        $search = $filters['search'];
+        $query = FamilyRelation::with(['customer', 'relative'])
             ->latest()
-            ->paginate(10)
-            ->withQueryString();
+            ->where(function ($q) use ($search) {
+                $q->whereHas('customer', function ($q2) use ($search) {
+                    $q2->where('name', 'like', "%{$search}%")
+                        ->orWhere('customer_no', 'like', "%{$search}%");
+                })
+                    ->orWhereHas('relative', function ($q2) use ($search) {
+                        $q2->where('name', 'like', "%{$search}%")
+                            ->orWhere('customer_no', 'like', "%{$search}%");
+                    });
+            });
+
+        $relations = $query->paginate($perPage)->withQueryString();
+
 
         return Inertia::render('customer-management/family-relations/index', [
-            'relations' => $relations,
-            'filters' => request()->only('search'),
+            'familyRelations' => $relations,
+            'filters' => $filters,
         ]);
     }
 
     public function create(): Response
     {
-        return Inertia::render('customer-management/family-relations/create', [
-            // You can pass data like customers list for selection
-            'customers' => Customer::all(),
-        ]);
+        return Inertia::render('customer-management/family-relations/create');
     }
 
     public function store(StoreFamilyRelationRequest $request): RedirectResponse
@@ -47,15 +68,14 @@ class FamilyRelationController extends Controller
     public function show(FamilyRelation $familyRelation): Response
     {
         return Inertia::render('customer-management/family-relations/show', [
-            'relation' => $familyRelation->load(['customer', 'relative']),
+            'familyRelation' => $familyRelation->load(['customer', 'relative']),
         ]);
     }
 
     public function edit(FamilyRelation $familyRelation): Response
     {
         return Inertia::render('customer-management/family-relations/edit', [
-            'relation' => $familyRelation->load(['customer', 'relative']),
-            'customers' => Customer::all(),
+            'familyRelation' => $familyRelation->load(['customer', 'relative']),
         ]);
     }
 

@@ -1,5 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import { CustomerSearch } from '../../components/customer-search';
 import HeadingSmall from '../../components/heading-small';
 import InputError from '../../components/input-error';
@@ -25,7 +26,13 @@ function Create() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/auth/branches');
+        post('/auth/branches', {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => {
+                toast.success('Branch created successfully!');
+            },
+        });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [

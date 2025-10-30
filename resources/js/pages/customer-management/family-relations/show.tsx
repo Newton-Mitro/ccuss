@@ -4,19 +4,7 @@ import { Card, CardContent } from '../../../components/ui/card';
 import { Label } from '../../../components/ui/label';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-
-interface Customer {
-    id: number;
-    name: string;
-    customer_no: string;
-}
-
-interface FamilyRelation {
-    id: number;
-    customer: Customer;
-    relative: Customer;
-    relation_type: string;
-}
+import { FamilyRelation } from '../../../types/family_relation';
 
 interface ViewFamilyRelationProps {
     relation: FamilyRelation;

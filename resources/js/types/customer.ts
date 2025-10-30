@@ -13,19 +13,13 @@ export interface Customer {
 
     // Personal info
     dob?: string | null; // Date in ISO format (YYYY-MM-DD)
-    gender?: 'MALE' | 'FEMALE' | 'OTHER' | null;
-    religion?:
-        | 'CHRISTIANITY'
-        | 'ISLAM'
-        | 'HINDUISM'
-        | 'BUDDHISM'
-        | 'OTHER'
-        | null;
+    gender?: 'MALE' | 'FEMALE' | 'OTHER';
+    religion?: 'CHRISTIANITY' | 'ISLAM' | 'HINDUISM' | 'BUDDHISM' | 'OTHER';
 
     identification_type: 'NID' | 'NBR' | 'PASSPORT' | 'DRIVING_LICENSE';
     identification_number: string;
     photo_id?: number | null; // Foreign key to media table
-    photo_media?: Media | null;
+    photo?: Media | null;
 
     // Organization info
     registration_no?: string | null;

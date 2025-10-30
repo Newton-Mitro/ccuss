@@ -1,56 +1,23 @@
 import { Head, useForm } from '@inertiajs/react';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
+import toast from 'react-hot-toast';
+import { CustomerSearch } from '../../../components/customer-search';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-
-interface Customer {
-    id: number;
-    name: string;
-    customer_no: string;
-}
-
-interface FamilyRelation {
-    id: number;
-    customer_id: number;
-    relative_id: number;
-    relation_type: string;
-}
+import { FamilyRelation } from '../../../types/family_relation';
 
 interface EditFamilyRelationProps {
-    customers: Customer[];
-    relation: FamilyRelation;
+    familyRelation: FamilyRelation;
 }
 
-export default function Edit({ customers, relation }: EditFamilyRelationProps) {
-    const { data, setData, put, processing, errors } = useForm({
-        customer_id: relation.customer_id,
-        relative_id: relation.relative_id,
-        relation_type: relation.relation_type,
-    });
-
-    const [customerSearch, setCustomerSearch] = useState(
-        customers.find((c) => c.id === relation.customer_id)?.name || '',
-    );
-    const [relativeSearch, setRelativeSearch] = useState(
-        customers.find((c) => c.id === relation.relative_id)?.name || '',
-    );
-
-    const [customerSuggestions, setCustomerSuggestions] = useState<Customer[]>(
-        [],
-    );
-    const [relativeSuggestions, setRelativeSuggestions] = useState<Customer[]>(
-        [],
-    );
-    const [activeCustomerIndex, setActiveCustomerIndex] = useState(-1);
-    const [activeRelativeIndex, setActiveRelativeIndex] = useState(-1);
-
-    const customerRef = useRef<HTMLDivElement>(null);
-    const relativeRef = useRef<HTMLDivElement>(null);
-
+export default function EditFamilyRelation({
+    familyRelation,
+}: EditFamilyRelationProps) {
     const relations = [
         'FATHER',
         'MOTHER',
@@ -78,82 +45,29 @@ export default function Edit({ customers, relation }: EditFamilyRelationProps) {
         'SISTER-IN-LAW',
     ];
 
-    const filterSuggestions = (value: string) =>
-        customers.filter((c) =>
-            c.name.toLowerCase().includes(value.toLowerCase()),
-        );
+    const { data, setData, put, processing, errors } = useForm({
+        customer_id: familyRelation.customer_id,
+        customer_name: familyRelation?.customer?.name,
+        relative_id: familyRelation.relative_id,
+        relative_name: familyRelation?.relative?.name,
+        relation_type: familyRelation.relation_type,
+        reverse_relation_type: familyRelation.reverse_relation_type,
+    });
 
-    const handleCustomerSearch = (value: string) => {
-        setCustomerSearch(value);
-        setCustomerSuggestions(filterSuggestions(value));
-        setActiveCustomerIndex(-1);
-    };
-
-    const handleRelativeSearch = (value: string) => {
-        setRelativeSearch(value);
-        setRelativeSuggestions(filterSuggestions(value));
-        setActiveRelativeIndex(-1);
-    };
-
-    const handleKeyDown = (
-        e: React.KeyboardEvent,
-        type: 'customer' | 'relative',
-    ) => {
-        const suggestions =
-            type === 'customer' ? customerSuggestions : relativeSuggestions;
-        const activeIndex =
-            type === 'customer' ? activeCustomerIndex : activeRelativeIndex;
-        const setActive =
-            type === 'customer'
-                ? setActiveCustomerIndex
-                : setActiveRelativeIndex;
-        const setValue =
-            type === 'customer' ? setCustomerSearch : setRelativeSearch;
-        const setId = (id: number) =>
-            setData(type === 'customer' ? 'customer_id' : 'relative_id', id);
-
-        if (!suggestions.length) return;
-
-        if (e.key === 'ArrowDown') {
-            setActive(
-                activeIndex < suggestions.length - 1 ? activeIndex + 1 : 0,
-            );
-        } else if (e.key === 'ArrowUp') {
-            setActive(
-                activeIndex > 0 ? activeIndex - 1 : suggestions.length - 1,
-            );
-        } else if (e.key === 'Enter' && activeIndex >= 0) {
-            setValue(suggestions[activeIndex].name);
-            setId(suggestions[activeIndex].id);
-            type === 'customer'
-                ? setCustomerSuggestions([])
-                : setRelativeSuggestions([]);
-        }
-    };
-
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (
-                customerRef.current &&
-                !customerRef.current.contains(event.target as Node)
-            ) {
-                setCustomerSuggestions([]);
-            }
-            if (
-                relativeRef.current &&
-                !relativeRef.current.contains(event.target as Node)
-            ) {
-                setRelativeSuggestions([]);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () =>
-            document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+    const [customerQuery, setCustomerQuery] = useState(
+        familyRelation?.customer?.name,
+    );
+    const [relativeQuery, setRelativeQuery] = useState(
+        familyRelation?.relative?.name,
+    );
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        put(route('family-relations.update', relation.id));
+        put(`/auth/family-relations/${familyRelation.id}`, {
+            preserveScroll: true,
+            onSuccess: () =>
+                toast.success('Family relation updated successfully!'),
+        });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -164,102 +78,138 @@ export default function Edit({ customers, relation }: EditFamilyRelationProps) {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Edit Family Relation" />
+
             <div className="animate-in space-y-8 px-4 py-6 text-foreground fade-in">
                 <HeadingSmall
                     title="Edit Family Relation"
-                    description="Update a customer-family relation."
+                    description="Update the customer, relative, or relationship information."
                 />
 
                 <form
                     onSubmit={handleSubmit}
-                    className="space-y-10 rounded-xl border border-border bg-card/80 p-8 shadow-md backdrop-blur-sm transition-all duration-300 hover:shadow-lg"
+                    className="space-y-5 rounded-xl border border-border bg-card/80 p-8 shadow-md backdrop-blur-sm transition-all duration-300 hover:shadow-lg"
                 >
-                    {/* Customer Autocomplete */}
-                    <div className="relative" ref={customerRef}>
-                        <Label>Customer</Label>
-                        <input
-                            type="text"
-                            value={customerSearch}
-                            onChange={(e) =>
-                                handleCustomerSearch(e.target.value)
-                            }
-                            onKeyDown={(e) => handleKeyDown(e, 'customer')}
-                            placeholder="Type customer name..."
-                            className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                        />
-                        <InputError message={errors.customer_id} />
-
-                        {customerSuggestions.length > 0 && (
-                            <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-border bg-background shadow-lg">
-                                {customerSuggestions.map((c, idx) => (
-                                    <li
-                                        key={c.id}
-                                        className={`cursor-pointer px-3 py-2 hover:bg-gray-100 ${idx === activeCustomerIndex ? 'bg-gray-200' : ''}`}
-                                        onClick={() => {
-                                            setCustomerSearch(c.name);
-                                            setData('customer_id', c.id);
-                                            setCustomerSuggestions([]);
-                                        }}
-                                    >
-                                        {c.name} ({c.customer_no})
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </div>
-
-                    {/* Relative Autocomplete */}
-                    <div className="relative" ref={relativeRef}>
-                        <Label>Relative</Label>
-                        <input
-                            type="text"
-                            value={relativeSearch}
-                            onChange={(e) =>
-                                handleRelativeSearch(e.target.value)
-                            }
-                            onKeyDown={(e) => handleKeyDown(e, 'relative')}
-                            placeholder="Type relative name..."
-                            className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                        />
-                        <InputError message={errors.relative_id} />
-
-                        {relativeSuggestions.length > 0 && (
-                            <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-border bg-background shadow-lg">
-                                {relativeSuggestions.map((c, idx) => (
-                                    <li
-                                        key={c.id}
-                                        className={`cursor-pointer px-3 py-2 hover:bg-gray-100 ${idx === activeRelativeIndex ? 'bg-gray-200' : ''}`}
-                                        onClick={() => {
-                                            setRelativeSearch(c.name);
-                                            setData('relative_id', c.id);
-                                            setRelativeSuggestions([]);
-                                        }}
-                                    >
-                                        {c.name} ({c.customer_no})
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </div>
-
-                    {/* Relation Type */}
+                    {/* Customer Selection */}
                     <div>
-                        <Label>Relation Type</Label>
-                        <select
-                            value={data.relation_type}
-                            onChange={(e) =>
-                                setData('relation_type', e.target.value)
-                            }
-                            className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                        >
-                            <option value="">Select Relation Type</option>
-                            {relations.map((r) => (
-                                <option key={r} value={r}>
-                                    {r.replaceAll('_', ' ')}
+                        <h3 className="text-lg font-semibold text-primary">
+                            Customer
+                        </h3>
+                        <div className="mt-2">
+                            <CustomerSearch
+                                query={customerQuery}
+                                onQueryChange={setCustomerQuery}
+                                onSelect={(customer) => {
+                                    setData('customer_id', customer.id);
+                                    setData('customer_name', customer.name);
+                                    setCustomerQuery(customer.name);
+                                }}
+                            />
+                        </div>
+
+                        <div className="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2">
+                            <div>
+                                <Label>Customer ID</Label>
+                                <Input
+                                    value={data.customer_id}
+                                    disabled
+                                    className="bg-disabled mt-1 cursor-not-allowed"
+                                />
+                                <InputError message={errors.customer_id} />
+                            </div>
+                            <div>
+                                <Label>Customer Name</Label>
+                                <Input
+                                    value={data.customer_name}
+                                    disabled
+                                    className="bg-disabled mt-1 cursor-not-allowed"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Relative Selection */}
+                    <div>
+                        <h3 className="text-lg font-semibold text-primary">
+                            Relative
+                        </h3>
+                        <div className="mt-2">
+                            <CustomerSearch
+                                query={relativeQuery}
+                                onQueryChange={setRelativeQuery}
+                                onSelect={(relative) => {
+                                    setData('relative_id', relative.id);
+                                    setData('relative_name', relative.name);
+                                    setRelativeQuery(relative.name);
+                                }}
+                            />
+                        </div>
+
+                        <div className="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2">
+                            <div>
+                                <Label>Relative ID</Label>
+                                <Input
+                                    value={data.relative_id}
+                                    disabled
+                                    className="bg-disabled mt-1 cursor-not-allowed"
+                                />
+                                <InputError message={errors.relative_id} />
+                            </div>
+                            <div>
+                                <Label>Relative Name</Label>
+                                <Input
+                                    value={data.relative_name}
+                                    disabled
+                                    className="bg-disabled mt-1 cursor-not-allowed"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Relation Type Dropdowns */}
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                        <div>
+                            <Label>Relation Type</Label>
+                            <select
+                                value={data.relation_type}
+                                onChange={(e) =>
+                                    setData('relation_type', e.target.value)
+                                }
+                                className="mt-1 w-full rounded border border-border bg-background p-2"
+                            >
+                                <option value="">Select Relation Type</option>
+                                {relations.map((r) => (
+                                    <option key={r} value={r}>
+                                        {r}
+                                    </option>
+                                ))}
+                            </select>
+                            <InputError message={errors.relation_type} />
+                        </div>
+                        <div>
+                            <Label>Reverse Relation Type</Label>
+                            <select
+                                value={data.reverse_relation_type}
+                                onChange={(e) =>
+                                    setData(
+                                        'reverse_relation_type',
+                                        e.target.value,
+                                    )
+                                }
+                                className="mt-1 w-full rounded border border-border bg-background p-2"
+                            >
+                                <option value="">
+                                    Select Reverse Relation Type
                                 </option>
-                            ))}
-                        </select>
-                        <InputError message={errors.relation_type} />
+                                {relations.map((r) => (
+                                    <option key={r} value={r}>
+                                        {r}
+                                    </option>
+                                ))}
+                            </select>
+                            <InputError
+                                message={errors.reverse_relation_type}
+                            />
+                        </div>
                     </div>
 
                     {/* Submit Button */}
@@ -269,7 +219,7 @@ export default function Edit({ customers, relation }: EditFamilyRelationProps) {
                             disabled={processing}
                             className="w-40 bg-primary text-primary-foreground transition-all duration-300 hover:bg-primary/90 hover:shadow-md"
                         >
-                            {processing ? 'Saving...' : 'Update Relation'}
+                            {processing ? 'Updating...' : 'Update Relation'}
                         </Button>
                     </div>
                 </form>

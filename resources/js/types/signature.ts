@@ -13,5 +13,5 @@ export interface Signature {
 
 export interface SignatureWithDetails extends Signature {
     customer?: Customer;
-    media?: Media; // Corresponds to the 'signature' foreign key
+    signature?: Media; // Corresponds to the 'signature' foreign key
 }

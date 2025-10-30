@@ -1,30 +1,10 @@
 import { Head } from '@inertiajs/react';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
+import { Address } from '../../../types/address';
 
 interface ShowProps {
-    address: {
-        id: number;
-        customer_id: string;
-        line1: string;
-        line2?: string;
-        division: string;
-        district: string;
-        upazila?: string;
-        union_ward?: string;
-        village_locality?: string;
-        postal_code?: string;
-        country_code: string;
-        type:
-            | 'CURRENT'
-            | 'PERMANENT'
-            | 'MAILING'
-            | 'WORK'
-            | 'REGISTERED'
-            | 'OTHER';
-        created_at: string;
-        updated_at: string;
-    };
+    address: Address;
 }
 
 export default function Show({ address }: ShowProps) {

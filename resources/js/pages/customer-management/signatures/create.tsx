@@ -1,7 +1,9 @@
 import { Head, useForm } from '@inertiajs/react';
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import { CustomerSearch } from '../../../components/customer-search';
 import HeadingSmall from '../../../components/heading-small';
+import InputError from '../../../components/input-error';
 import { MediaSelector } from '../../../components/media-selector';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
@@ -18,9 +20,9 @@ export default function Create() {
         customer_name: '',
     });
 
+    const [query, setQuery] = useState('');
     const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [query, setQuery] = useState('');
 
     const handleMediaSelect = (media: Media) => {
         setSelectedMedia(media);
@@ -37,6 +39,7 @@ export default function Create() {
         e.preventDefault();
         post('/auth/signatures', {
             preserveScroll: true,
+            onSuccess: () => toast.success('Signature saved successfully!'),
         });
     };
 
@@ -48,59 +51,69 @@ export default function Create() {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Add Signature" />
+
             <div className="animate-in space-y-8 px-4 py-6 text-foreground fade-in">
                 <HeadingSmall
                     title="Add Signature"
-                    description="Select or upload a signature for a customer."
+                    description="Select a customer and upload or select a signature."
                 />
 
                 <form
                     onSubmit={handleSubmit}
                     className="space-y-5 rounded-xl border border-border bg-card/80 p-8 shadow-md backdrop-blur-sm transition-all duration-300 hover:shadow-lg"
                 >
-                    {/* Customer Autocomplete */}
-                    <div className="">
-                        <Label>Customer</Label>
-                        <CustomerSearch
-                            query={query}
-                            onQueryChange={setQuery}
-                            onSelect={(customer) => {
-                                setData('customer_id', customer.id);
-                                setData('customer_name', customer.name);
-                                setQuery(customer.name); // show in search input
-                            }}
-                        />
-                    </div>
-
-                    {/* Disabled Inputs for Selected Customer */}
-                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                        <div>
-                            <Label>Customer ID</Label>
-                            <Input
-                                value={data.customer_id}
-                                disabled
-                                className="bg-disabled mt-1 cursor-not-allowed"
-                            />
-                        </div>
-                        <div>
-                            <Label>Customer Name</Label>
-                            <Input
-                                value={data.customer_name}
-                                disabled
-                                className="bg-disabled mt-1 cursor-not-allowed"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Media Selector */}
+                    {/* Customer Selection */}
                     <div>
-                        <MediaSelector
-                            label="Signature"
-                            media={selectedMedia}
-                            onSelect={() => setIsModalOpen(true)}
-                            onRemove={handleMediaRemove}
-                            error={errors.signature_id}
-                        />
+                        <h3 className="text-lg font-semibold text-primary">
+                            Customer
+                        </h3>
+                        <div className="mt-2">
+                            <CustomerSearch
+                                query={query}
+                                onQueryChange={setQuery}
+                                onSelect={(customer) => {
+                                    setData('customer_id', customer.id);
+                                    setData('customer_name', customer.name);
+                                    setQuery(customer.name);
+                                }}
+                            />
+                        </div>
+
+                        <div className="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2">
+                            <div>
+                                <Label>Customer ID</Label>
+                                <Input
+                                    value={data.customer_id}
+                                    disabled
+                                    className="bg-disabled mt-1 cursor-not-allowed"
+                                />
+                                <InputError message={errors.customer_id} />
+                            </div>
+                            <div>
+                                <Label>Customer Name</Label>
+                                <Input
+                                    value={data.customer_name}
+                                    disabled
+                                    className="bg-disabled mt-1 cursor-not-allowed"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Signature Selection */}
+                    <div>
+                        <h3 className="text-lg font-semibold text-primary">
+                            Signature
+                        </h3>
+                        <div className="mt-2">
+                            <MediaSelector
+                                label="Select Signature"
+                                media={selectedMedia}
+                                onSelect={() => setIsModalOpen(true)}
+                                onRemove={handleMediaRemove}
+                                error={errors.signature_id}
+                            />
+                        </div>
                     </div>
 
                     {/* Submit Button */}

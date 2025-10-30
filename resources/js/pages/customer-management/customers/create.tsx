@@ -1,5 +1,6 @@
-import { Head } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { MediaSelector } from '../../../components/media-selector';
@@ -12,7 +13,7 @@ import { Media } from '../../../types/media';
 import MediaBrowserModal from '../../media/media_browser_modal';
 
 const Create = () => {
-    const [formData, setFormData] = useState({
+    const { data, setData, post, processing, errors } = useForm({
         customer_no: '',
         type: 'Individual',
         name: '',
@@ -31,26 +32,25 @@ const Create = () => {
 
     const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [errors] = useState<any>({});
-
-    const handleChange = (key: string, value: any) => {
-        setFormData((prev) => ({ ...prev, [key]: value }));
-    };
 
     const handleMediaSelect = (media: Media) => {
         setSelectedMedia(media);
-        handleChange('photo', media.id);
+        setData('photo', media.id);
+        setIsModalOpen(false);
     };
 
     const handleMediaRemove = () => {
         setSelectedMedia(null);
-        handleChange('photo', null);
+        setData('photo', null);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Submitting:', formData);
-        // TODO: Submit via Inertia.post or API
+        post('/auth/customers', {
+            preserveScroll: true,
+            onSuccess: () => toast.success('Customer created successfully!'),
+            onError: () => toast.error('Please fix the errors in the form.'),
+        });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -62,7 +62,7 @@ const Create = () => {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Customer" />
 
-            <div className="w-6xl animate-in space-y-8 px-4 py-6 text-foreground fade-in">
+            <div className="animate-in space-y-8 text-foreground fade-in">
                 <HeadingSmall
                     title="Create Customer"
                     description="Fill in the customer's details below to onboard a new user."
@@ -72,13 +72,14 @@ const Create = () => {
                     onSubmit={handleSubmit}
                     className="space-y-2 rounded-xl border border-border bg-card/80 p-8 shadow-md backdrop-blur-sm transition-all duration-300 hover:shadow-lg"
                 >
+                    {/* Customer Info */}
                     <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
                         <div>
                             <Label>Customer No</Label>
                             <Input
-                                value={formData.customer_no}
+                                value={data.customer_no}
                                 onChange={(e) =>
-                                    handleChange('customer_no', e.target.value)
+                                    setData('customer_no', e.target.value)
                                 }
                                 placeholder="CUST-0001"
                             />
@@ -88,9 +89,9 @@ const Create = () => {
                         <div>
                             <Label>Customer Type</Label>
                             <select
-                                value={formData.type}
+                                value={data.type}
                                 onChange={(e) =>
-                                    handleChange('type', e.target.value)
+                                    setData('type', e.target.value)
                                 }
                                 className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
                             >
@@ -98,76 +99,82 @@ const Create = () => {
                                 <option>Organization</option>
                             </select>
                         </div>
-                    </div>
 
-                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-                        <div>
-                            <Label>Name</Label>
-                            <Input
-                                value={formData.name}
-                                onChange={(e) =>
-                                    handleChange('name', e.target.value)
-                                }
-                                placeholder="Full name"
-                            />
-                            <InputError message={errors.name} />
-                        </div>
-
-                        {formData.type === 'Organization' && (
-                            <div className="">
+                        {data.type === 'Organization' && (
+                            <div>
                                 <Label>Registration No</Label>
                                 <Input
-                                    value={formData.registration_no}
+                                    value={data.registration_no}
                                     onChange={(e) =>
-                                        handleChange(
+                                        setData(
                                             'registration_no',
                                             e.target.value,
                                         )
                                     }
                                     placeholder="ORG-12345"
                                 />
+                                <InputError message={errors.registration_no} />
                             </div>
                         )}
+                    </div>
+
+                    {/* Contact Info */}
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+                        <div>
+                            <Label>Name</Label>
+                            <Input
+                                value={data.name}
+                                onChange={(e) =>
+                                    setData('name', e.target.value)
+                                }
+                                placeholder="Full name"
+                            />
+                            <InputError message={errors.name} />
+                        </div>
 
                         <div>
                             <Label>Phone</Label>
                             <Input
-                                value={formData.phone}
+                                value={data.phone}
                                 onChange={(e) =>
-                                    handleChange('phone', e.target.value)
+                                    setData('phone', e.target.value)
                                 }
                                 placeholder="+8801XXXXXXXXX"
                             />
+                            <InputError message={errors.phone} />
                         </div>
 
                         <div>
                             <Label>Email</Label>
                             <Input
-                                value={formData.email}
+                                value={data.email}
                                 onChange={(e) =>
-                                    handleChange('email', e.target.value)
+                                    setData('email', e.target.value)
                                 }
                                 placeholder="example@email.com"
                             />
+                            <InputError message={errors.email} />
                         </div>
+                    </div>
 
+                    {/* Personal Info */}
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
                         <div>
                             <Label>Date of Birth</Label>
                             <Input
                                 type="date"
-                                value={formData.dob}
-                                onChange={(e) =>
-                                    handleChange('dob', e.target.value)
-                                }
+                                value={data.dob}
+                                onChange={(e) => setData('dob', e.target.value)}
                             />
+                            <InputError message={errors.dob} />
                         </div>
 
                         <div>
                             <Label>Gender</Label>
                             <select
-                                value={formData.gender}
+                                value={data.gender}
                                 onChange={(e) =>
-                                    handleChange('gender', e.target.value)
+                                    setData('gender', e.target.value)
                                 }
                                 className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
                             >
@@ -176,14 +183,15 @@ const Create = () => {
                                 <option>FEMALE</option>
                                 <option>OTHER</option>
                             </select>
+                            <InputError message={errors.gender} />
                         </div>
 
                         <div>
                             <Label>Religion</Label>
                             <select
-                                value={formData.religion}
+                                value={data.religion}
                                 onChange={(e) =>
-                                    handleChange('religion', e.target.value)
+                                    setData('religion', e.target.value)
                                 }
                                 className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
                             >
@@ -194,16 +202,18 @@ const Create = () => {
                                 <option>BUDDHISM</option>
                                 <option>OTHER</option>
                             </select>
+                            <InputError message={errors.religion} />
                         </div>
                     </div>
 
+                    {/* Identification */}
                     <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
                         <div>
                             <Label>Identification Type</Label>
                             <select
-                                value={formData.identification_type}
+                                value={data.identification_type}
                                 onChange={(e) =>
-                                    handleChange(
+                                    setData(
                                         'identification_type',
                                         e.target.value,
                                     )
@@ -216,30 +226,35 @@ const Create = () => {
                                 <option>PASSPORT</option>
                                 <option>DRIVING_LICENSE</option>
                             </select>
+                            <InputError message={errors.identification_type} />
                         </div>
 
                         <div>
                             <Label>Identification Number</Label>
                             <Input
-                                value={formData.identification_number}
+                                value={data.identification_number}
                                 onChange={(e) =>
-                                    handleChange(
+                                    setData(
                                         'identification_number',
                                         e.target.value,
                                     )
                                 }
                                 placeholder="Enter ID number"
                             />
+                            <InputError
+                                message={errors.identification_number}
+                            />
                         </div>
                     </div>
 
+                    {/* KYC & Status */}
                     <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
                         <div>
                             <Label>KYC Level</Label>
                             <select
-                                value={formData.kyc_level}
+                                value={data.kyc_level}
                                 onChange={(e) =>
-                                    handleChange('kyc_level', e.target.value)
+                                    setData('kyc_level', e.target.value)
                                 }
                                 className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
                             >
@@ -247,14 +262,15 @@ const Create = () => {
                                 <option>STD</option>
                                 <option>ENH</option>
                             </select>
+                            <InputError message={errors.kyc_level} />
                         </div>
 
                         <div>
                             <Label>Status</Label>
                             <select
-                                value={formData.status}
+                                value={data.status}
                                 onChange={(e) =>
-                                    handleChange('status', e.target.value)
+                                    setData('status', e.target.value)
                                 }
                                 className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
                             >
@@ -263,10 +279,12 @@ const Create = () => {
                                 <option>SUSPENDED</option>
                                 <option>CLOSED</option>
                             </select>
+                            <InputError message={errors.status} />
                         </div>
                     </div>
 
-                    <div className="mt-">
+                    {/* Photo */}
+                    <div className="mt-4">
                         <MediaSelector
                             label="Photo"
                             media={selectedMedia}
@@ -276,16 +294,19 @@ const Create = () => {
                         />
                     </div>
 
-                    <div className="flex justify-end">
+                    {/* Submit */}
+                    <div className="mt-4 flex justify-end">
                         <Button
                             type="submit"
+                            disabled={processing}
                             className="w-40 bg-primary text-primary-foreground transition-all duration-300 hover:bg-primary/90 hover:shadow-md"
                         >
-                            Create Customer
+                            {processing ? 'Saving...' : 'Create Customer'}
                         </Button>
                     </div>
                 </form>
             </div>
+
             <MediaBrowserModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}

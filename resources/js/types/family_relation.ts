@@ -1,7 +1,11 @@
+import { Customer } from './customer';
+
 export interface FamilyRelation {
     id: number;
     customer_id: number; // Foreign key -> customers.id
+    customer?: Customer;
     relative_id: number; // Foreign key -> customers.id
+    relative?: Customer;
 
     relation_type:
         | 'FATHER'

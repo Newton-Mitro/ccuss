@@ -1,24 +1,13 @@
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
+import { ArrowLeft, Edit2 } from 'lucide-react';
 import HeadingSmall from '../../../components/heading-small';
+import ImageZoom from '../../../components/image-zoom';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-
-interface Customer {
-    id: number;
-    name: string;
-    customer_no?: string;
-}
-
-interface Signature {
-    id: number;
-    customer: Customer;
-    signature_path: string;
-    created_at: string;
-    updated_at: string;
-}
+import { SignatureWithDetails } from '../../../types/signature';
 
 interface ViewSignatureProps {
-    signature: Signature;
+    signature: SignatureWithDetails;
 }
 
 export default function View({ signature }: ViewSignatureProps) {
@@ -31,11 +20,39 @@ export default function View({ signature }: ViewSignatureProps) {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="View Signature" />
 
-            <div className="animate-in space-y-8 px-4 py-6 text-foreground fade-in">
-                <HeadingSmall
-                    title="View Signature"
-                    description={`Signature of ${signature.customer.name}`}
-                />
+            <div className="animate-in space-y-8 text-foreground fade-in">
+                <div className="flex items-center justify-between">
+                    <HeadingSmall
+                        title="View Signature"
+                        description={`Signature of ${signature.customer.name}`}
+                    />
+
+                    <div className="flex gap-2">
+                        {/* Back Button */}
+                        <button
+                            type="button"
+                            onClick={() => router.get('/auth/signatures')}
+                            className="flex items-center gap-1 rounded bg-gray-200 px-3 py-1 text-gray-700 transition hover:bg-gray-300"
+                        >
+                            <ArrowLeft size={16} />
+                            Back
+                        </button>
+
+                        {/* Edit Button */}
+                        <button
+                            type="button"
+                            onClick={() =>
+                                router.get(
+                                    `/auth/signatures/${signature.id}/edit`,
+                                )
+                            }
+                            className="flex items-center gap-1 rounded bg-primary px-3 py-1 text-primary-foreground transition hover:bg-primary/90"
+                        >
+                            <Edit2 size={16} />
+                            Edit
+                        </button>
+                    </div>
+                </div>
 
                 <div className="space-y-6 rounded-xl border border-border bg-card/80 p-6 shadow-md backdrop-blur-sm">
                     {/* Customer Info */}
@@ -54,11 +71,18 @@ export default function View({ signature }: ViewSignatureProps) {
                         <h3 className="text-sm font-medium text-muted-foreground">
                             Signature
                         </h3>
-                        <img
-                            src={signature.signature_path}
-                            alt={`Signature of ${signature.customer.name}`}
-                            className="mt-2 max-h-48 w-auto rounded border border-border"
-                        />
+                        {!signature?.signature?.url ? (
+                            <p className="mt-1 text-lg font-semibold text-foreground">
+                                No signature uploaded
+                            </p>
+                        ) : (
+                            <ImageZoom
+                                src={signature.signature.url}
+                                alt={`Signature of ${signature.customer.name}`}
+                                maxHeight="300px"
+                                maxWidth="400px"
+                            />
+                        )}
                     </div>
 
                     {/* Timestamps */}

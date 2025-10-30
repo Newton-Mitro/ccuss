@@ -1,3 +1,5 @@
+import { Customer } from './customer';
+
 export interface Branch {
     id: number;
 
@@ -9,6 +11,7 @@ export interface Branch {
     longitude?: number | null; // Optional GPS longitude
 
     manager_id?: number | null; // Foreign key (users.id)
+    manager?: Customer;
 
     created_at: string; // ISO date string
     updated_at: string; // ISO date string

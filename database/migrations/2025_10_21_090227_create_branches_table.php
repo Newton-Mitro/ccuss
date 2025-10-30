@@ -19,9 +19,7 @@ return new class extends Migration {
 
             $table->foreignId('manager_id')
                 ->nullable()
-                ->constrained('users')
-                ->nullOnDelete()
-                ->comment('Branch manager user ID');
+                ->comment('Branch manager customer ID (no constraint)');
 
             $table->timestamps();
         });

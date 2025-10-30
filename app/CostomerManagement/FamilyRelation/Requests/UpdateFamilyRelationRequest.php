@@ -6,23 +6,52 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateFamilyRelationRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
+        $relations = [
+            'FATHER',
+            'MOTHER',
+            'SON',
+            'DAUGHTER',
+            'BROTHER',
+            'COUSIN_BROTHER',
+            'COUSIN_SISTER',
+            'SISTER',
+            'HUSBAND',
+            'WIFE',
+            'GRANDFATHER',
+            'GRANDMOTHER',
+            'GRANDSON',
+            'GRANDDAUGHTER',
+            'UNCLE',
+            'AUNT',
+            'NEPHEW',
+            'NIECE',
+            'FATHER-IN-LAW',
+            'MOTHER-IN-LAW',
+            'SON-IN-LAW',
+            'DAUGHTER-IN-LAW',
+            'BROTHER-IN-LAW',
+            'SISTER-IN-LAW',
+        ];
+
         return [
-            //
+            'customer_id' => ['required', 'exists:customers,id'],
+            'relative_id' => ['required', 'exists:customers,id', 'different:customer_id'],
+            'relation_type' => ['required', 'in:' . implode(',', $relations)],
+            'reverse_relation_type' => ['required', 'in:' . implode(',', $relations)],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'relative_id.different' => 'Customer and relative must be different.',
         ];
     }
 }

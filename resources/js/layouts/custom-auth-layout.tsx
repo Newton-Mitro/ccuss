@@ -13,6 +13,7 @@ import { logout } from '@/routes';
 import { Link, router, usePage } from '@inertiajs/react';
 import { LogOut, Menu, UserCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { Toaster } from 'react-hot-toast';
 import { Breadcrumbs } from '../components/breadcrumbs';
 import SidebarMenuItem from '../components/sidebar-menu-item';
 import { sidebarMenu } from '../data/sidebar-menu';
@@ -267,6 +268,33 @@ export default function CustomAuthLayout({
 
                 <main className="flex-1 overflow-y-auto bg-background p-2 transition-colors md:p-6">
                     {children}
+                    <Toaster
+                        position="top-center"
+                        reverseOrder={false}
+                        gutter={8}
+                        containerClassName=""
+                        containerStyle={{}}
+                        toasterId="default"
+                        toastOptions={{
+                            // Define default options
+                            className: '',
+                            duration: 5000,
+                            removeDelay: 1000,
+                            style: {
+                                background: '#363636',
+                                color: '#fff',
+                            },
+
+                            // Default options for specific types
+                            success: {
+                                duration: 3000,
+                                iconTheme: {
+                                    primary: 'green',
+                                    secondary: 'black',
+                                },
+                            },
+                        }}
+                    />
                 </main>
             </div>
         </div>
