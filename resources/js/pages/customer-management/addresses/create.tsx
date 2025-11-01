@@ -45,7 +45,7 @@ export default function Create() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Address" />
 
-            <div className="animate-in space-y-8 px-4 py-6 text-foreground fade-in">
+            <div className="animate-in space-y-8 text-foreground fade-in">
                 <HeadingSmall
                     title="Create Address"
                     description="Add a new address for a customer"
@@ -53,7 +53,7 @@ export default function Create() {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="space-y-5 rounded-xl border border-border bg-card/80 p-8 shadow-md backdrop-blur-sm transition-all duration-300 hover:shadow-lg"
+                    className="space-y-5 rounded-xl border border-border bg-card/80 p-8 shadow backdrop-blur-sm transition-all duration-300"
                 >
                     {/* Customer Selection */}
                     <div>

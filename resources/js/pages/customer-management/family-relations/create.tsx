@@ -68,7 +68,7 @@ export default function CreateFamilyRelation() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Add Family Relation" />
 
-            <div className="animate-in space-y-8 px-4 py-6 text-foreground fade-in">
+            <div className="animate-in space-y-8 text-foreground fade-in">
                 <HeadingSmall
                     title="Add Family Relation"
                     description="Select a customer and a relative, then choose the relationship."
@@ -76,7 +76,7 @@ export default function CreateFamilyRelation() {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="space-y-5 rounded-xl border border-border bg-card/80 p-8 shadow-md backdrop-blur-sm transition-all duration-300 hover:shadow-lg"
+                    className="space-y-5 rounded-xl border border-border bg-card/80 p-8 shadow backdrop-blur-sm transition-all duration-300"
                 >
                     {/* Customer Selection */}
                     <div>

@@ -41,6 +41,16 @@ class SignatureController extends Controller
 
     public function store(StoreSignatureRequest $request): RedirectResponse
     {
+        // Check if a signature already exists for this customer
+        $exists = Signature::where('customer_id', $request->customer_id)->exists();
+
+        if ($exists) {
+            return redirect()
+                ->back()
+                ->withErrors(['customer_id' => 'This customer already has a signature.'])
+                ->withInput();
+        }
+
         Signature::create([
             'customer_id' => $request->customer_id,
             'signature_id' => $request->signature_id,
@@ -78,9 +88,6 @@ class SignatureController extends Controller
             ->with('success', 'Signature updated successfully.');
     }
 
-    /**
-     * Delete a signature.
-     */
     public function destroy(Signature $signature): RedirectResponse
     {
         $signature->delete();

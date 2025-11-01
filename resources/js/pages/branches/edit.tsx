@@ -50,7 +50,7 @@ function Edit({ branch }: EditBranchProps) {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Edit Branch" />
 
-            <div className="animate-in space-y-8 px-4 py-6 text-foreground fade-in">
+            <div className="animate-in space-y-8 text-foreground fade-in">
                 <HeadingSmall
                     title="Edit Branch"
                     description="Update the branch details below."
@@ -58,7 +58,7 @@ function Edit({ branch }: EditBranchProps) {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="space-y-5 rounded-xl border border-border bg-card/80 p-8 shadow-md backdrop-blur-sm transition-all duration-300 hover:shadow-lg"
+                    className="space-y-5 rounded-xl border border-border bg-card/80 p-8 shadow backdrop-blur-sm transition-all duration-300"
                 >
                     {/* Basic Details */}
                     <div>

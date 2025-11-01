@@ -54,7 +54,7 @@ export default function View({ signature }: ViewSignatureProps) {
                     </div>
                 </div>
 
-                <div className="space-y-6 rounded-xl border border-border bg-card/80 p-6 shadow-md backdrop-blur-sm">
+                <div className="space-y-6 rounded-xl border border-border bg-card/80 p-6 shadow backdrop-blur-sm">
                     {/* Customer Info */}
                     <div>
                         <h3 className="text-sm font-medium text-muted-foreground">

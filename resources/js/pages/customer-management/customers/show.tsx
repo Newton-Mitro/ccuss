@@ -11,6 +11,7 @@ interface ShowProps {
 }
 
 function Show({ customer }: ShowProps) {
+    console.log(customer);
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customers', href: '/auth/customers' },
         { title: 'Customer Details', href: '' },
@@ -20,7 +21,7 @@ function Show({ customer }: ShowProps) {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Customer - ${customer.name}`} />
 
-            <div className="space-y-8 p-4 text-foreground">
+            <div className="space-y-8 text-foreground">
                 <HeadingSmall
                     title={`Customer Details`}
                     description="View complete customer information"

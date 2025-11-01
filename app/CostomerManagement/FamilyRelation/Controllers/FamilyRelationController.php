@@ -58,7 +58,28 @@ class FamilyRelationController extends Controller
 
     public function store(StoreFamilyRelationRequest $request): RedirectResponse
     {
-        FamilyRelation::create($request->validated());
+        $data = $request->validated();
+
+        // ✅ Check if relation already exists between same customer & relative
+        $exists = FamilyRelation::where(function ($q) use ($data) {
+            $q->where('customer_id', $data['customer_id'])
+                ->where('relative_id', $data['relative_id']);
+        })
+            ->orWhere(function ($q) use ($data) {
+                $q->where('customer_id', $data['relative_id'])
+                    ->where('relative_id', $data['customer_id']);
+            })
+            ->exists();
+
+        if ($exists) {
+            return redirect()
+                ->back()
+                ->withErrors(['relation' => 'This family relation already exists.'])
+                ->withInput();
+        }
+
+        // ✅ Otherwise, create new record
+        FamilyRelation::create($data);
 
         return redirect()
             ->route('family-relations.index')
@@ -81,7 +102,22 @@ class FamilyRelationController extends Controller
 
     public function update(UpdateFamilyRelationRequest $request, FamilyRelation $familyRelation): RedirectResponse
     {
-        $familyRelation->update($request->validated());
+        $data = $request->validated();
+
+        // ✅ Check if this relation already exists (excluding the current one)
+        $exists = FamilyRelation::where('customer_id', $data['customer_id'])
+            ->where('relative_id', $data['relative_id'])
+            ->where('id', '!=', $familyRelation->id)
+            ->exists();
+
+        if ($exists) {
+            return redirect()
+                ->back()
+                ->withErrors(['relative_id' => 'This relationship is already defined between these two people.'])
+                ->withInput();
+        }
+
+        $familyRelation->update($data);
 
         return redirect()
             ->route('family-relations.index')

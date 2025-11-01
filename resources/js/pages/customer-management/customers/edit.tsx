@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { MediaSelector } from '../../../components/media-selector';
+import AppDatePicker from '../../../components/ui/app_date_picker';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
@@ -44,7 +45,7 @@ const Edit: React.FC<EditProps> = ({ customer }) => {
             email: customer.email ?? null,
             kyc_level: customer.kyc_level ?? 'MIN',
             status: customer.status ?? 'ACTIVE',
-            dob: customer.dob ?? null,
+            dob: customer.dob ? customer.dob.split('T')[0] : '',
             gender: customer.gender ?? null,
             religion: customer.religion ?? null,
             identification_type: customer.identification_type ?? 'NID',
@@ -87,7 +88,7 @@ const Edit: React.FC<EditProps> = ({ customer }) => {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Edit Customer: ${customer.name}`} />
 
-            <div className="animate-in space-y-8 px-4 py-6 text-foreground fade-in">
+            <div className="animate-in space-y-8 text-foreground fade-in">
                 <HeadingSmall
                     title={`Edit Customer: ${customer.name}`}
                     description="Update the customer's details below."
@@ -95,7 +96,7 @@ const Edit: React.FC<EditProps> = ({ customer }) => {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="space-y-2 rounded-xl border border-border bg-card/80 p-8 shadow-md backdrop-blur-sm transition-all duration-300 hover:shadow-lg"
+                    className="space-y-2 rounded-xl border border-border bg-card/80 p-8 shadow backdrop-blur-sm transition-all duration-300"
                 >
                     {/* Customer Info */}
                     <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -185,12 +186,12 @@ const Edit: React.FC<EditProps> = ({ customer }) => {
 
                     {/* DOB, Gender, Religion */}
                     <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-                        <div>
-                            <Label>Date of Birth</Label>
-                            <Input
-                                type="date"
+                        <div className="">
+                            <AppDatePicker
+                                label="Date of Birth"
                                 value={data.dob}
-                                onChange={(e) => setData('dob', e.target.value)}
+                                onChange={(val) => setData('dob', val)}
+                                error={errors.dob}
                             />
                             <InputError message={errors.dob} />
                         </div>

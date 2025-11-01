@@ -80,7 +80,7 @@ export default function EditSignature({ signature }: SignatureEditProps) {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="space-y-5 rounded-xl border border-border bg-card/80 p-8 shadow-md backdrop-blur-sm transition-all duration-300 hover:shadow-lg"
+                    className="space-y-5 rounded-xl border border-border bg-card/80 p-8 shadow backdrop-blur-sm transition-all duration-300"
                 >
                     {/* Customer Autocomplete */}
                     <div className="">

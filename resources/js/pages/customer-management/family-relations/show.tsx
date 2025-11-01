@@ -7,10 +7,11 @@ import { BreadcrumbItem } from '../../../types';
 import { FamilyRelation } from '../../../types/family_relation';
 
 interface ViewFamilyRelationProps {
-    relation: FamilyRelation;
+    familyRelation: FamilyRelation;
 }
 
-export default function View({ relation }: ViewFamilyRelationProps) {
+export default function View({ familyRelation }: ViewFamilyRelationProps) {
+    console.log(familyRelation);
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Family Relations', href: '/auth/family-relations' },
         { title: 'View Relation', href: '' },
@@ -20,34 +21,37 @@ export default function View({ relation }: ViewFamilyRelationProps) {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="View Family Relation" />
 
-            <div className="animate-in space-y-8 px-4 py-6 text-foreground fade-in">
+            <div className="animate-in space-y-8 text-foreground fade-in">
                 <HeadingSmall
                     title="Family Relation Details"
                     description="View details of the customer-family relation."
                 />
 
-                <Card className="rounded-xl border border-border bg-card/80 shadow-md backdrop-blur-sm transition-all duration-300 hover:shadow-lg">
+                <Card className="rounded-xl border border-border bg-card/80 shadow backdrop-blur-sm transition-all duration-300">
                     <CardContent className="space-y-6 p-8">
                         <div>
                             <Label>Customer</Label>
                             <div className="mt-1 text-sm text-foreground">
-                                {relation.customer.name} (
-                                {relation.customer.customer_no})
+                                {familyRelation.customer.name} (
+                                {familyRelation.customer.customer_no})
                             </div>
                         </div>
 
                         <div>
                             <Label>Relative</Label>
                             <div className="mt-1 text-sm text-foreground">
-                                {relation.relative.name} (
-                                {relation.relative.customer_no})
+                                {familyRelation.relative.name} (
+                                {familyRelation.relative.customer_no})
                             </div>
                         </div>
 
                         <div>
                             <Label>Relation Type</Label>
                             <div className="mt-1 text-sm text-foreground">
-                                {relation.relation_type.replaceAll('_', ' ')}
+                                {familyRelation.relation_type.replaceAll(
+                                    '_',
+                                    ' ',
+                                )}
                             </div>
                         </div>
                     </CardContent>

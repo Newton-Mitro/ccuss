@@ -65,9 +65,25 @@ class AddressController extends Controller
 
     public function store(StoreAddressRequest $request): RedirectResponse
     {
-        Address::create($request->validated());
+        $data = $request->validated();
 
-        return redirect()->route('addresses.index')
+        // ✅ Check if this person already has an address of this type
+        $exists = Address::where('customer_id', $data['customer_id'])
+            ->where('type', $data['type'])
+            ->exists();
+
+        if ($exists) {
+            return redirect()
+                ->back()
+                ->withErrors(['type' => 'This person already has an address of this type.'])
+                ->withInput();
+        }
+
+        // ✅ Otherwise, create a new address
+        Address::create($data);
+
+        return redirect()
+            ->route('addresses.index')
             ->with('success', 'Address created successfully.');
     }
 
@@ -91,9 +107,25 @@ class AddressController extends Controller
 
     public function update(UpdateAddressRequest $request, Address $address): RedirectResponse
     {
-        $address->update($request->validated());
+        $data = $request->validated();
 
-        return redirect()->route('addresses.index')
+        // ✅ Check if another address with the same customer & type already exists
+        $exists = Address::where('customer_id', $data['customer_id'])
+            ->where('type', $data['type'])
+            ->where('id', '!=', $address->id)
+            ->exists();
+
+        if ($exists) {
+            return redirect()
+                ->back()
+                ->withErrors(['type' => 'This person already has an address of this type.'])
+                ->withInput();
+        }
+
+        $address->update($data);
+
+        return redirect()
+            ->route('addresses.index')
             ->with('success', 'Address updated successfully.');
     }
 

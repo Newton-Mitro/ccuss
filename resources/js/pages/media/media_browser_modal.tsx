@@ -1,15 +1,22 @@
+import { router } from '@inertiajs/react';
 import axios from 'axios';
+import React, { useEffect, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
+
 import {
     Copy,
     File,
     FileArchive,
     FileText,
     HeadphonesIcon,
+    Trash2Icon,
     Tv2Icon,
     Upload,
     X,
 } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../components/heading-small';
 import { Select } from '../../components/ui/select';
 import { Media } from '../../types/media';
@@ -26,16 +33,23 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
     onSelect,
 }) => {
     const [filter, setFilter] = useState<string>('all');
-    const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const [perPage, setPerPage] = useState<number>(20);
     const [uploading, setUploading] = useState(false);
     const [media, setMedia] = useState<any>({
         data: [],
         links: [],
     });
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-    const fetchMedia = async (type = filter, pageUrl?: string) => {
+    // Fetch media from backend
+    const fetchMedia = async (
+        type = filter,
+        pageUrl?: string,
+        perPageValue = perPage,
+    ) => {
         try {
-            const url = pageUrl || `/auth/api/media?type=${type}`;
+            const baseUrl = `/auth/api/media?type=${type}&per_page=${perPageValue}`;
+            const url = pageUrl || baseUrl;
             const res = await axios.get(url);
             setMedia(res.data);
         } catch (err) {
@@ -47,11 +61,52 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
         if (isOpen) fetchMedia();
     }, [isOpen]);
 
+    useEffect(() => {
+        if (isOpen) fetchMedia(filter, undefined, perPage);
+    }, [perPage]);
+
     if (!isOpen) return null;
+
+    const deleteMedia = (id: number) => {
+        const isDark = document.documentElement.classList.contains('dark');
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'This media file will be permanently deleted.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: isDark ? '#ef4444' : '#d33',
+            cancelButtonColor: isDark ? '#3b82f6' : '#3085d6',
+            background: isDark ? '#1f2937' : '#fff',
+            color: isDark ? '#f9fafb' : '#111827',
+            confirmButtonText: 'Yes, delete it!',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.delete(route('media.destroy', id), {
+                    preserveScroll: true,
+                    preserveState: true,
+                    onSuccess: () => {
+                        toast.success('Media file deleted successfully.');
+                        fetchMedia(); // refresh after delete
+                    },
+                    onError: (errors) => {
+                        Object.values(errors).forEach((fieldErrors: any) => {
+                            if (Array.isArray(fieldErrors)) {
+                                fieldErrors.forEach((msg: string) =>
+                                    toast.error(msg),
+                                );
+                            } else {
+                                toast.error(fieldErrors);
+                            }
+                        });
+                    },
+                });
+            }
+        });
+    };
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files?.length) return;
-
         const file = e.target.files[0];
         const formData = new FormData();
         formData.append('file', file);
@@ -71,14 +126,15 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
                 withCredentials: true,
             });
 
-            if (res.status !== 200 && res.status !== 201) {
+            if (![200, 201].includes(res.status)) {
                 throw new Error('Upload failed');
             }
 
-            await fetchMedia(); // Refresh list
+            await fetchMedia();
+            toast.success('File uploaded successfully!');
         } catch (err) {
             console.error('Upload error:', err);
-            alert('File upload failed — please try again.');
+            toast.error('File upload failed — please try again.');
         } finally {
             setUploading(false);
         }
@@ -87,9 +143,10 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
     const handleCopy = async (url: string) => {
         try {
             await navigator.clipboard.writeText(url);
-            alert('✅ URL copied to clipboard!');
+            toast.success('URL copied to clipboard!');
         } catch (err) {
             console.error('Copy failed:', err);
+            toast.error('Failed to copy URL.');
         }
     };
 
@@ -224,33 +281,64 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
                                     </p>
                                 </div>
 
-                                {/* Copy URL */}
-                                <button
-                                    onClick={() => handleCopy(item.url)}
-                                    className="absolute top-2 right-2 flex items-center gap-1 rounded bg-gray-900 p-1 shadow hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600"
-                                >
-                                    <Copy className="h-3 w-3 text-white" />
-                                </button>
+                                {/* Copy URL / Delete */}
+                                <div className="absolute top-2 right-2 flex gap-1">
+                                    <button
+                                        onClick={() => handleCopy(item.url)}
+                                        className="flex items-center gap-1 rounded bg-gray-900 p-1 shadow hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600"
+                                    >
+                                        <Copy className="h-3 w-3 text-white" />
+                                    </button>
+
+                                    <button
+                                        onClick={() => deleteMedia(item.id)}
+                                        className="flex items-center gap-1 rounded bg-red-600 p-1 shadow hover:bg-red-500 dark:bg-red-700 dark:hover:bg-red-600"
+                                    >
+                                        <Trash2Icon className="h-3 w-3 text-white" />
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>
                 </div>
 
                 {/* Pagination */}
-                <div className="flex flex-wrap items-center justify-center gap-2 border-t border-gray-200 px-2 py-2 md:px-4 dark:border-gray-700">
-                    {media.links.map((link: any, i: number) => (
-                        <button
-                            key={i}
-                            disabled={!link.url}
-                            className={`rounded px-2 py-1 text-xs sm:px-3 sm:py-1 sm:text-sm ${
-                                link.active
-                                    ? 'bg-blue-600 text-white dark:bg-blue-500'
-                                    : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
-                            } disabled:opacity-50`}
-                            onClick={() => handlePageClick(link.url)}
-                            dangerouslySetInnerHTML={{ __html: link.label }}
-                        />
-                    ))}
+                <div className="flex flex-col items-center justify-between gap-2 border-t border-gray-200 px-2 py-3 md:flex-row md:px-4 dark:border-gray-700">
+                    <div className="flex items-center gap-2 text-sm">
+                        <span className="text-gray-600 dark:text-gray-300">
+                            Show
+                        </span>
+                        <select
+                            value={perPage}
+                            onChange={(e) => setPerPage(Number(e.target.value))}
+                            className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
+                        >
+                            {[5, 10, 20, 50, 100].map((n) => (
+                                <option key={n} value={n}>
+                                    {n}
+                                </option>
+                            ))}
+                        </select>
+                        <span className="text-gray-600 dark:text-gray-300">
+                            records
+                        </span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-center gap-1">
+                        {media.links.map((link: any, i: number) => (
+                            <button
+                                key={i}
+                                disabled={!link.url}
+                                className={`rounded px-2 py-1 text-xs sm:px-3 sm:py-1 sm:text-sm ${
+                                    link.active
+                                        ? 'bg-blue-600 text-white dark:bg-blue-500'
+                                        : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                                } disabled:opacity-50`}
+                                onClick={() => handlePageClick(link.url)}
+                                dangerouslySetInnerHTML={{ __html: link.label }}
+                            />
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>

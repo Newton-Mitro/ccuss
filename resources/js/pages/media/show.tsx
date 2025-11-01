@@ -2,7 +2,7 @@ import { Head } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../components/heading-small';
 import { Button } from '../../components/ui/button';
-import AppLayout from '../../layouts/app-layout';
+import CustomAuthLayout from '../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../types';
 import { Media } from '../../types/media';
 
@@ -11,6 +11,7 @@ interface ShowProps {
 }
 
 export default function Show({ media }: ShowProps) {
+    console.log(media);
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard', href: '/dashboard' },
         { title: 'Medias', href: route('media.index') },
@@ -72,9 +73,9 @@ export default function Show({ media }: ShowProps) {
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Media: ${media.alt_text || media.file_type}`} />
-            <div className="h-[calc(100vh-100px)] space-y-8 overflow-auto p-6 md:w-4xl">
+            <div className="h-[calc(100vh-100px)] space-y-8 overflow-auto md:w-4xl">
                 {/* Header */}
                 <HeadingSmall
                     title={media.alt_text || 'Media Details'}
@@ -119,6 +120,6 @@ export default function Show({ media }: ShowProps) {
                     </div>
                 </div>
             </div>
-        </AppLayout>
+        </CustomAuthLayout>
     );
 }

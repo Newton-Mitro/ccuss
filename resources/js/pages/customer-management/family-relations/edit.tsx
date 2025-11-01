@@ -50,8 +50,8 @@ export default function EditFamilyRelation({
         customer_name: familyRelation?.customer?.name,
         relative_id: familyRelation.relative_id,
         relative_name: familyRelation?.relative?.name,
-        relation_type: familyRelation.relation_type,
-        reverse_relation_type: familyRelation.reverse_relation_type,
+        relation_type: familyRelation.relation_type as string,
+        reverse_relation_type: familyRelation.reverse_relation_type as string,
     });
 
     const [customerQuery, setCustomerQuery] = useState(
@@ -79,7 +79,7 @@ export default function EditFamilyRelation({
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Edit Family Relation" />
 
-            <div className="animate-in space-y-8 px-4 py-6 text-foreground fade-in">
+            <div className="animate-in space-y-8 text-foreground fade-in">
                 <HeadingSmall
                     title="Edit Family Relation"
                     description="Update the customer, relative, or relationship information."
@@ -87,7 +87,7 @@ export default function EditFamilyRelation({
 
                 <form
                     onSubmit={handleSubmit}
-                    className="space-y-5 rounded-xl border border-border bg-card/80 p-8 shadow-md backdrop-blur-sm transition-all duration-300 hover:shadow-lg"
+                    className="space-y-5 rounded-xl border border-border bg-card/80 p-8 shadow backdrop-blur-sm transition-all duration-300"
                 >
                     {/* Customer Selection */}
                     <div>

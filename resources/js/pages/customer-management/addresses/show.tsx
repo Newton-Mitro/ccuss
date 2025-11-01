@@ -39,7 +39,7 @@ export default function Show({ address }: ShowProps) {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Address #${address.id}`} />
 
-            <div className="animate-in space-y-6 px-4 py-6 text-foreground">
+            <div className="animate-in space-y-6 text-foreground">
                 <h1 className="text-2xl font-semibold">Address Details</h1>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-2">
                     {fields.map((field, idx) => (

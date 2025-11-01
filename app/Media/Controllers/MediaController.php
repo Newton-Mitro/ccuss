@@ -17,7 +17,7 @@ class MediaController extends Controller
 {
     public function getMedia(Request $request): JsonResponse
     {
-        $perPage = $request->input('perPage', 10);
+        $perPage = $request->input('per_page', 10);
         $type = $request->input('type', 'all');
 
         // Only fetch media uploaded by the authenticated user
@@ -40,7 +40,7 @@ class MediaController extends Controller
 
     public function index(Request $request): Response
     {
-        $perPage = $request->input('perPage', 20);
+        $perPage = $request->input('per_page', 10);
         $type = $request->input('type', 'all');
 
         // Only media uploaded by the authenticated user
@@ -103,6 +103,14 @@ class MediaController extends Controller
         }
 
         return redirect()->back()->with('error', 'No file uploaded.');
+    }
+
+    public function show(Media $medium): Response
+    {
+
+        return Inertia::render('media/show', [
+            'media' => $medium,
+        ]);
     }
 
     public function destroy(Media $medium): RedirectResponse
