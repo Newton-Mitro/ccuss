@@ -96,7 +96,7 @@ const Edit: React.FC<EditProps> = ({ customer }) => {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="space-y-2 rounded-xl border border-border bg-card/80 p-8 shadow backdrop-blur-sm transition-all duration-300"
+                    className="space-y-5 rounded-xl border border-border bg-card/80 p-8 shadow backdrop-blur-sm transition-all duration-300"
                 >
                     {/* Customer Info */}
                     <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">

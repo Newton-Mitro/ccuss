@@ -46,9 +46,6 @@ class CustomerController extends Controller
 
     }
 
-    /**
-     * Display a listing of customers.
-     */
     public function index(Request $request): Response
     {
         $query = Customer::query()
@@ -81,9 +78,6 @@ class CustomerController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new customer.
-     */
     public function create(Request $request): Response
     {
         $media = $this->filterMedia($request);
@@ -93,27 +87,73 @@ class CustomerController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created customer.
-     */
     public function store(StoreCustomerRequest $request): RedirectResponse
     {
         $data = $request->validated();
 
-        $customer = Customer::create($data);
-
-        // ✅ Attach media if selected
-        if (!empty($data['media'])) {
-            $customer->media()->associate(Media::find($data['media']))->save();
+        // ✅ Require at least phone or email
+        if (empty($data['phone']) && empty($data['email'])) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Please provide at least a phone number or an email address.');
         }
+
+        // ✅ Check if customer already exists (by identification number, email, or phone)
+        $exists = Customer::where(function ($q) use ($data) {
+            $q->where('identification_number', $data['identification_number']);
+
+            if (!empty($data['email'])) {
+                $q->orWhere('email', $data['email']);
+            }
+
+            if (!empty($data['phone'])) {
+                $q->orWhere('phone', $data['phone']);
+            }
+        })->exists();
+
+        if ($exists) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'A customer with the same identification number, email, or phone already exists.');
+        }
+
+        // ✅ Generate intelligent customer number
+        $typePrefix = strtoupper(substr($data['type'], 0, 3)); // IND or ORG
+        $genderPrefix = $data['type'] === 'Individual'
+            ? strtoupper(substr($data['gender'] ?? 'X', 0, 1)) // M, F, O, or X
+            : ''; // skip gender for org
+        $idPrefix = match ($data['identification_type']) {
+            'NID' => 'NID',
+            'PASSPORT' => 'PAS',
+            'DRIVING_LICENSE' => 'DRV',
+            'NBR' => 'NBR',
+            default => 'UNK',
+        };
+
+        // ✅ Generate customer number prefix
+        $typePrefix = strtoupper(substr($data['type'], 0, 1)); // I or O
+        $genderPrefix = $data['type'] === 'Individual'
+            ? strtoupper(substr($data['gender'] ?? 'X', 0, 1)) // M, F, O, or X
+            : ''; // skip for orgs
+        $idPrefix = strtoupper(substr($data['identification_type'], 0, 1)); // N, P, D, etc.
+
+        // ✅ Sequential number
+        $latestCustomer = Customer::latest('id')->first();
+        $nextNumber = $latestCustomer ? $latestCustomer->id + 1 : 1;
+        $formattedNumber = str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+
+        // ✅ Build final customer_no (e.g., IND-M-NID-00001)
+        $parts = array_filter([$typePrefix, $genderPrefix, $idPrefix]);
+        $data['customer_no'] = implode('', $parts) . '' . $formattedNumber;
+
+        // ✅ Create new customer
+        $customer = Customer::create($data);
 
         return redirect()->route('customers.index')
             ->with('success', 'Customer created successfully.');
     }
 
-    /**
-     * Display the specified customer.
-     */
+
     public function show(Customer $customer): Response
     {
         $customer->load('photo');
@@ -123,9 +163,6 @@ class CustomerController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for editing the specified customer.
-     */
     public function edit(Request $request, Customer $customer): Response
     {
         $media = $this->filterMedia($request);
@@ -138,32 +175,64 @@ class CustomerController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified customer.
-     */
     public function update(UpdateCustomerRequest $request, Customer $customer): RedirectResponse
     {
         $data = $request->validated();
 
-        $customer->update($data);
-
-        // ✅ Update media association
-        if (isset($data['media'])) {
-            $media = $data['media']
-                ? Media::find($data['media'])
-                : null;
-
-            $customer->media()->associate($media);
-            $customer->save();
+        // ✅ Require at least phone or email
+        if (empty($data['phone']) && empty($data['email'])) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Please provide at least a phone number or an email address.');
         }
+
+        // ✅ Check for duplicate record (excluding current customer)
+        $exists = Customer::where(function ($q) use ($data, $customer) {
+            $q->where('identification_number', $data['identification_number']);
+
+            if (!empty($data['email'])) {
+                $q->orWhere('email', $data['email']);
+            }
+
+            if (!empty($data['phone'])) {
+                $q->orWhere('phone', $data['phone']);
+            }
+        })
+            ->where('id', '!=', $customer->id)
+            ->exists();
+
+        if ($exists) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Another customer with the same identification number, email, or phone already exists.');
+        }
+
+        // ✅ Rebuild customer_no if key fields changed
+        $shouldRegenerateNo =
+            $data['type'] !== $customer->type ||
+            $data['identification_type'] !== $customer->identification_type ||
+            ($data['type'] === 'Individual' && $data['gender'] !== $customer->gender);
+
+        if ($shouldRegenerateNo) {
+            $typePrefix = strtoupper(substr($data['type'], 0, 1)); // I or O
+            $genderPrefix = $data['type'] === 'Individual'
+                ? strtoupper(substr($data['gender'] ?? 'X', 0, 1)) // M, F, O, or X
+                : '';
+            $idPrefix = strtoupper(substr($data['identification_type'], 0, 1)); // N, P, D, etc.
+
+            $formattedNumber = str_pad($customer->id, 5, '0', STR_PAD_LEFT);
+            $parts = array_filter([$typePrefix, $genderPrefix, $idPrefix]);
+            $data['customer_no'] = implode('', $parts) . '' . $formattedNumber;
+        }
+
+        // ✅ Update record
+        $customer->update($data);
 
         return redirect()->route('customers.index')
             ->with('success', 'Customer updated successfully.');
     }
 
-    /**
-     * Remove the specified customer.
-     */
+
     public function destroy(Customer $customer): RedirectResponse
     {
         $customer->delete();
@@ -172,9 +241,6 @@ class CustomerController extends Controller
             ->with('success', 'Customer deleted successfully.');
     }
 
-    /**
-     * Filter media library by file type or pagination.
-     */
     private function filterMedia(Request $request)
     {
         $type = $request->input('type', 'all');

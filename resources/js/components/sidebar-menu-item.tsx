@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import { Link, usePage } from '@inertiajs/react';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronRight } from 'lucide-react';
 import { SidebarItem } from '../types';
 
 interface SidebarMenuItemProps {
@@ -9,6 +10,18 @@ interface SidebarMenuItemProps {
     toggleMenu: (name: string) => void;
     sidebarOpen: boolean;
 }
+
+// 🎨 Define consistent color palette
+const borderColors = [
+    'border-l-red-400',
+    'border-l-blue-400',
+    'border-l-green-400',
+    'border-l-yellow-400',
+    'border-l-purple-400',
+    'border-l-pink-400',
+    'border-l-cyan-400',
+    'border-l-amber-400',
+];
 
 export default function SidebarMenuItem({
     item,
@@ -24,16 +37,11 @@ export default function SidebarMenuItem({
         Array.isArray(item.children) && item.children.length > 0;
     const isOpen = openMenus[item.name] || false;
 
-    // Strip query params from current URL for proper active check
     const currentPath = url.split('?')[0];
 
-    // Recursive check for active menu
-    const isActive = (item: SidebarItem): boolean => {
-        if (item.match_path && currentPath.includes(item.match_path))
-            return true;
-        if (item.children) {
-            return item.children.some((child) => child && isActive(child));
-        }
+    const isActive = (i: SidebarItem): boolean => {
+        if (i.match_path && currentPath.includes(i.match_path)) return true;
+        if (i.children) return i.children.some((c) => c && isActive(c));
         return false;
     };
 
@@ -45,13 +53,20 @@ export default function SidebarMenuItem({
         if (hasChildren) toggleMenu(item.name);
     };
 
-    // Colors
+    // Pick unique border color (based on name hash)
+    const colorIndex =
+        Math.abs(
+            item.name
+                .split('')
+                .reduce((acc, char) => acc + char.charCodeAt(0), 0),
+        ) % borderColors.length;
+    const borderColor = borderColors[colorIndex];
+
     const parentBg = 'bg-accent/30 text-accent-foreground';
     const childBg = 'bg-primary text-primary-foreground';
     const defaultBg =
         'text-foreground/80 hover:bg-accent hover:text-accent-foreground';
-
-    const paddingLeft = 12; // fixed for all items to left-align
+    const paddingLeft = 12;
 
     return (
         <li>
@@ -92,31 +107,43 @@ export default function SidebarMenuItem({
                         )}
                         {sidebarOpen && <span>{item.name}</span>}
                     </div>
-                    {hasChildren &&
-                        sidebarOpen &&
-                        (isOpen ? (
-                            <ChevronDown size={14} />
-                        ) : (
+                    {hasChildren && sidebarOpen && (
+                        <motion.div
+                            animate={{ rotate: isOpen ? 90 : 0 }}
+                            transition={{ duration: 0.25 }}
+                        >
                             <ChevronRight size={14} />
-                        ))}
+                        </motion.div>
+                    )}
                 </button>
             )}
 
-            {hasChildren && isOpen && (
-                <ul className="flex flex-col gap-1 border-l">
-                    {item.children?.map((child) =>
-                        child ? (
-                            <SidebarMenuItem
-                                key={child.name}
-                                item={child}
-                                openMenus={openMenus}
-                                toggleMenu={toggleMenu}
-                                sidebarOpen={sidebarOpen}
-                            />
-                        ) : null,
-                    )}
-                </ul>
-            )}
+            <AnimatePresence initial={false}>
+                {hasChildren && isOpen && (
+                    <motion.ul
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25, ease: 'easeInOut' }}
+                        className={cn(
+                            'flex flex-col gap-1 border-l',
+                            borderColor, // 🎨 dynamic color class
+                        )}
+                    >
+                        {item.children?.map((child) =>
+                            child ? (
+                                <SidebarMenuItem
+                                    key={child.name}
+                                    item={child}
+                                    openMenus={openMenus}
+                                    toggleMenu={toggleMenu}
+                                    sidebarOpen={sidebarOpen}
+                                />
+                            ) : null,
+                        )}
+                    </motion.ul>
+                )}
+            </AnimatePresence>
         </li>
     );
 }

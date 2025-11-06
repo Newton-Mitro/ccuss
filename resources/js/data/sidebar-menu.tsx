@@ -9,13 +9,13 @@ export const sidebarMenu: SidebarItem[] = [
     },
     {
         name: 'Branches',
-        icon: <i className="fa-solid fa-network-wired" />,
+        icon: <i className="fa-solid fa-location-dot" />,
         path: '/auth/branches',
         match_path: 'branches',
     },
     {
         name: 'Media',
-        icon: <i className="fa-solid fa-network-wired" />,
+        icon: <i className="fa-solid fa-photo-film"></i>,
         path: '/auth/media',
         match_path: 'media',
     },

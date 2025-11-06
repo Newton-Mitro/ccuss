@@ -27,6 +27,7 @@ export default function Index() {
 
     const { signatures, filters } = props;
 
+    console.log('signatures', signatures);
     const { data, setData, get } = useForm({
         search: filters.search || '',
         per_page: Number(filters.per_page) || 10,

@@ -107,9 +107,12 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files?.length) return;
-        const file = e.target.files[0];
+
+        const files = Array.from(e.target.files);
         const formData = new FormData();
-        formData.append('file', file);
+
+        // ✅ Append multiple files
+        files.forEach((file) => formData.append('files[]', file));
 
         setUploading(true);
 
@@ -124,19 +127,32 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
                     'X-CSRF-TOKEN': token || '',
                 },
                 withCredentials: true,
+                onUploadProgress: (progressEvent) => {
+                    const percent = Math.round(
+                        (progressEvent.loaded * 100) /
+                            (progressEvent.total || 1),
+                    );
+                    toast.loading(`Uploading... ${percent}%`, {
+                        id: 'upload-progress',
+                    });
+                },
             });
+
+            toast.dismiss('upload-progress');
 
             if (![200, 201].includes(res.status)) {
                 throw new Error('Upload failed');
             }
 
             await fetchMedia();
-            toast.success('File uploaded successfully!');
+            toast.success(`${files.length} file(s) uploaded successfully!`);
         } catch (err) {
             console.error('Upload error:', err);
-            toast.error('File upload failed — please try again.');
+            toast.dismiss('upload-progress');
+            toast.error('Upload failed — please try again.');
         } finally {
             setUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = ''; // ✅ reset file input
         }
     };
 
@@ -240,6 +256,7 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
                             className="hidden"
                             accept="image/*,video/*,application/pdf,audio/*"
                             ref={fileInputRef}
+                            multiple // ✅ allow multiple file selection
                             onChange={handleFileChange}
                             disabled={uploading}
                         />

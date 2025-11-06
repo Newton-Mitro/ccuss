@@ -14,15 +14,7 @@ class UpdateCustomerRequest extends FormRequest
 
     public function rules(): array
     {
-        $customerId = $this->route('customer'); // make sure route parameter name matches
-
         return [
-            'customer_no' => [
-                'required',
-                'string',
-                'max:50',
-                Rule::unique('customers', 'customer_no')->ignore($customerId),
-            ],
             'type' => ['required', Rule::in(['Individual', 'Organization'])],
             'name' => ['required', 'string', 'max:150'],
             'phone' => ['nullable', 'string', 'max:50'],

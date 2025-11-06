@@ -73,37 +73,54 @@ class MediaController extends Controller
         ]);
     }
 
+
     public function store(StoreMediaRequest $request): RedirectResponse
     {
-        if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            $mimeType = $file->getClientMimeType();
-            $extension = $file->getClientOriginalExtension();
-            $fileName = uniqid() . '.' . $extension;
-            $filePath = 'uploads/' . $fileName;
+        if ($request->hasFile('files')) {
+            $files = $request->file('files');
+            $uploadedFiles = [];
 
-            Storage::disk('public')->putFileAs('uploads', $file, $fileName);
+            foreach ($files as $file) {
+                $mimeType = $file->getClientMimeType();
+                $extension = $file->getClientOriginalExtension();
+                $fileName = uniqid() . '.' . $extension;
+                $filePath = 'uploads/' . $fileName;
 
-            if (str_starts_with($mimeType, 'image/')) {
-                $optimizerChain = OptimizerChainFactory::create();
-                $optimizerChain->optimize(storage_path('app/public/' . $filePath));
+                // Store file in public disk
+                Storage::disk('public')->putFileAs('uploads', $file, $fileName);
+
+                // Optimize if it's an image
+                if (str_starts_with($mimeType, 'image/')) {
+                    $optimizerChain = OptimizerChainFactory::create();
+                    $optimizerChain->optimize(storage_path('app/public/' . $filePath));
+                }
+
+                // Use provided alt_texts or fallback to filename
+                $altTextInput = $request->input('alt_text');
+                $altText = is_array($altTextInput)
+                    ? ($altTextInput[$file->getClientOriginalName()] ?? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME))
+                    : ($altTextInput ?? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
+
+                // Create DB record
+                $media = Media::create([
+                    'file_name' => $fileName,
+                    'file_path' => $filePath,
+                    'file_type' => $mimeType,
+                    'alt_text' => $altText,
+                    'uploaded_by' => Auth::id(),
+                ]);
+
+                $uploadedFiles[] = $media;
             }
 
-            $altText = $request->input('alt_text') ?? pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-
-            Media::create([
-                'file_name' => $fileName,
-                'file_path' => $filePath,
-                'file_type' => $mimeType,
-                'alt_text' => $altText,
-                'uploaded_by' => Auth::id(),
-            ]);
-
-            return redirect()->back()->with('success', 'Media uploaded successfully.');
+            return redirect()
+                ->back()
+                ->with('success', count($uploadedFiles) . ' file(s) uploaded successfully.');
         }
 
-        return redirect()->back()->with('error', 'No file uploaded.');
+        return redirect()->back()->with('error', 'No files uploaded.');
     }
+
 
     public function show(Media $medium): Response
     {

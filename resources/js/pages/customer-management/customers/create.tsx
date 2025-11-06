@@ -27,7 +27,7 @@ const Create = () => {
         religion: '',
         identification_type: '',
         identification_number: '',
-        photo: null as number | null,
+        photo_id: null as number | null,
         registration_no: '',
     });
 
@@ -36,13 +36,13 @@ const Create = () => {
 
     const handleMediaSelect = (media: Media) => {
         setSelectedMedia(media);
-        setData('photo', media.id);
+        setData('photo_id', media.id);
         setIsModalOpen(false);
     };
 
     const handleMediaRemove = () => {
         setSelectedMedia(null);
-        setData('photo', null);
+        setData('photo_id', null);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -71,22 +71,10 @@ const Create = () => {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="space-y-2 rounded-xl border border-border bg-card/80 p-8 shadow backdrop-blur-sm transition-all duration-300"
+                    className="space-y-5 rounded-xl border border-border bg-card/80 p-8 shadow backdrop-blur-sm transition-all duration-300"
                 >
-                    {/* Customer Info */}
+                    {/* Contact Info */}
                     <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-                        <div>
-                            <Label>Customer No</Label>
-                            <Input
-                                value={data.customer_no}
-                                onChange={(e) =>
-                                    setData('customer_no', e.target.value)
-                                }
-                                placeholder="CUST-0001"
-                            />
-                            <InputError message={errors.customer_no} />
-                        </div>
-
                         <div>
                             <Label>Customer Type</Label>
                             <select
@@ -117,10 +105,6 @@ const Create = () => {
                                 <InputError message={errors.registration_no} />
                             </div>
                         )}
-                    </div>
-
-                    {/* Contact Info */}
-                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
                         <div>
                             <Label>Name</Label>
                             <Input
@@ -156,10 +140,6 @@ const Create = () => {
                             />
                             <InputError message={errors.email} />
                         </div>
-                    </div>
-
-                    {/* Personal Info */}
-                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
                         <div className="">
                             <AppDatePicker
                                 label="Date of Birth"
@@ -290,7 +270,7 @@ const Create = () => {
                             media={selectedMedia}
                             onSelect={() => setIsModalOpen(true)}
                             onRemove={handleMediaRemove}
-                            error={errors.photo}
+                            error={errors.photo_id}
                         />
                     </div>
 

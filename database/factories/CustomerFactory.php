@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\CostomerManagement\Customer\Models\Customer;
+use App\Media\Models\Media;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -13,6 +14,7 @@ class CustomerFactory extends Factory
     public function definition(): array
     {
         $type = $this->faker->randomElement(['Individual', 'Organization']);
+        $photo = Media::inRandomOrder()->first() ?? Media::factory()->create();
 
         return [
             'customer_no' => strtoupper(Str::random(3)) . '-' . $this->faker->unique()->numberBetween(10000, 99999),
@@ -35,7 +37,7 @@ class CustomerFactory extends Factory
 
             'identification_type' => $this->faker->randomElement(['NID', 'NBR', 'PASSPORT', 'DRIVING_LICENSE']),
             'identification_number' => strtoupper(Str::random(10)),
-            'photo_id' => null,
+            'photo_id' => $photo->id,
             'registration_no' => $type === 'Organization'
                 ? strtoupper('REG-' . $this->faker->numberBetween(1000, 9999))
                 : null,

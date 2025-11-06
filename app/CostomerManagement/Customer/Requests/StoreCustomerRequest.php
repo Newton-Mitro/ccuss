@@ -15,7 +15,6 @@ class StoreCustomerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'customer_no' => ['required', 'string', 'max:50', 'unique:customers,customer_no'],
             'type' => ['required', Rule::in(['Individual', 'Organization'])],
             'name' => ['required', 'string', 'max:150'],
             'phone' => ['nullable', 'string', 'max:50'],
@@ -25,8 +24,8 @@ class StoreCustomerRequest extends FormRequest
 
             // Personal info
             'dob' => ['nullable', 'date'],
-            'gender' => ['nullable', Rule::in(['MALE', 'FEMALE', 'OTHER'])],
-            'religion' => ['nullable', Rule::in(['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER'])],
+            'gender' => ['required', Rule::in(['MALE', 'FEMALE', 'OTHER'])],
+            'religion' => ['required', Rule::in(['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER'])],
 
             'identification_type' => ['required', Rule::in(['NID', 'NBR', 'PASSPORT', 'DRIVING_LICENSE'])],
             'identification_number' => ['required', 'string', 'max:50'],

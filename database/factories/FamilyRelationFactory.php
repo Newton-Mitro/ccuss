@@ -27,10 +27,37 @@ class FamilyRelationFactory extends Factory
             'AUNT',
         ];
 
+        // pick random distinct customers
         $customer = Customer::inRandomOrder()->first() ?? Customer::factory()->create();
-        $relative = Customer::where('id', '!=', $customer->id)->inRandomOrder()->first() ?? Customer::factory()->create();
+        $relative = Customer::where('id', '!=', $customer->id)
+            ->inRandomOrder()
+            ->first() ?? Customer::factory()->create();
 
         $relation = $this->faker->randomElement($relations);
+
+        // ✅ Avoid duplicate pairs (unique constraint protection)
+        // Retry until a unique pair is found (max 5 attempts to stay safe)
+        $attempts = 0;
+        while (
+            FamilyRelation::where('customer_id', $customer->id)
+                ->where('relative_id', $relative->id)
+                ->exists() &&
+            $attempts < 5
+        ) {
+            $relative = Customer::where('id', '!=', $customer->id)
+                ->inRandomOrder()
+                ->first();
+            $attempts++;
+        }
+
+        // If still exists after retries, skip — ensures seeder won't break
+        if (
+            FamilyRelation::where('customer_id', $customer->id)
+                ->where('relative_id', $relative->id)
+                ->exists()
+        ) {
+            return []; // Laravel will skip this record if it's empty
+        }
 
         return [
             'customer_id' => $customer->id,
@@ -57,7 +84,6 @@ class FamilyRelationFactory extends Factory
             'AUNT' => 'NIECE',
             'NEPHEW' => 'UNCLE',
             'NIECE' => 'AUNT',
-            // 👇 Instead of 'OTHER', pick a random valid relation
             default => $this->faker->randomElement([
                 'COUSIN_BROTHER',
                 'COUSIN_SISTER',
@@ -66,9 +92,8 @@ class FamilyRelationFactory extends Factory
                 'SON-IN-LAW',
                 'DAUGHTER-IN-LAW',
                 'BROTHER-IN-LAW',
-                'SISTER-IN-LAW'
+                'SISTER-IN-LAW',
             ]),
         };
     }
-
 }

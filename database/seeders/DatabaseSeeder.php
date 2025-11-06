@@ -8,13 +8,8 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
         User::firstOrCreate(
             ['email' => 'super.admin@email.com'],
             [
@@ -33,7 +28,10 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        User::factory(10)->create();
+
         $this->call([
+            ImageMediaSeeder::class,
             BranchSeeder::class,
             CustomerSeeder::class,
         ]);

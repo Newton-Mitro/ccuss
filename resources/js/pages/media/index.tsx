@@ -79,15 +79,18 @@ const Index: React.FC<PageProps> = ({ mediaItems, filters }) => {
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files?.length) return;
 
-        const file = e.target.files[0];
         const formData = new FormData();
-        formData.append('file', file);
+        // ✅ Append all selected files
+        Array.from(e.target.files).forEach((file) => {
+            formData.append('files[]', file);
+        });
 
         setUploading(true);
+
         router.post(route('media.store'), formData, {
             forceFormData: true,
             preserveScroll: true,
-            onSuccess: () => toast.success('Media uploaded successfully.'),
+            onSuccess: () => toast.success('Files uploaded successfully.'),
             onError: (errors) => {
                 Object.values(errors).forEach((fieldErrors: any) => {
                     if (Array.isArray(fieldErrors)) {
@@ -210,6 +213,7 @@ const Index: React.FC<PageProps> = ({ mediaItems, filters }) => {
                             ref={fileInputRef}
                             type="file"
                             className="hidden"
+                            multiple // ✅ allow selecting multiple files
                             onChange={handleFileChange}
                             disabled={uploading}
                             accept="image/*,video/*,application/pdf,audio/*"
