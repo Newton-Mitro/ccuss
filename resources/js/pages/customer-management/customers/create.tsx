@@ -89,22 +89,6 @@ const Create = () => {
                             </select>
                         </div>
 
-                        {data.type === 'Organization' && (
-                            <div>
-                                <Label>Registration No</Label>
-                                <Input
-                                    value={data.registration_no}
-                                    onChange={(e) =>
-                                        setData(
-                                            'registration_no',
-                                            e.target.value,
-                                        )
-                                    }
-                                    placeholder="ORG-12345"
-                                />
-                                <InputError message={errors.registration_no} />
-                            </div>
-                        )}
                         <div>
                             <Label>Name</Label>
                             <Input
@@ -140,50 +124,67 @@ const Create = () => {
                             />
                             <InputError message={errors.email} />
                         </div>
-                        <div className="">
-                            <AppDatePicker
-                                label="Date of Birth"
-                                value={data.dob}
-                                onChange={(val) => setData('dob', val)}
-                                error={errors.dob}
-                            />
-                        </div>
-
-                        <div>
-                            <Label>Gender</Label>
-                            <select
-                                value={data.gender}
-                                onChange={(e) =>
-                                    setData('gender', e.target.value)
-                                }
-                                className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                            >
-                                <option value="">Select</option>
-                                <option>MALE</option>
-                                <option>FEMALE</option>
-                                <option>OTHER</option>
-                            </select>
-                            <InputError message={errors.gender} />
-                        </div>
-
-                        <div>
-                            <Label>Religion</Label>
-                            <select
-                                value={data.religion}
-                                onChange={(e) =>
-                                    setData('religion', e.target.value)
-                                }
-                                className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                            >
-                                <option value="">Select</option>
-                                <option>CHRISTIANITY</option>
-                                <option>ISLAM</option>
-                                <option>HINDUISM</option>
-                                <option>BUDDHISM</option>
-                                <option>OTHER</option>
-                            </select>
-                            <InputError message={errors.religion} />
-                        </div>
+                        {data.type === 'Organization' ? (
+                            <div>
+                                <Label>Registration No</Label>
+                                <Input
+                                    value={data.registration_no}
+                                    onChange={(e) =>
+                                        setData(
+                                            'registration_no',
+                                            e.target.value,
+                                        )
+                                    }
+                                    placeholder="ORG-12345"
+                                />
+                                <InputError message={errors.registration_no} />
+                            </div>
+                        ) : (
+                            <>
+                                <div className="">
+                                    <AppDatePicker
+                                        label="Date of Birth"
+                                        value={data.dob}
+                                        onChange={(val) => setData('dob', val)}
+                                        error={errors.dob}
+                                    />
+                                </div>
+                                <div>
+                                    <Label>Gender</Label>
+                                    <select
+                                        value={data.gender}
+                                        onChange={(e) =>
+                                            setData('gender', e.target.value)
+                                        }
+                                        className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                                    >
+                                        <option value="">Select</option>
+                                        <option>MALE</option>
+                                        <option>FEMALE</option>
+                                        <option>OTHER</option>
+                                    </select>
+                                    <InputError message={errors.gender} />
+                                </div>
+                                <div>
+                                    <Label>Religion</Label>
+                                    <select
+                                        value={data.religion}
+                                        onChange={(e) =>
+                                            setData('religion', e.target.value)
+                                        }
+                                        className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                                    >
+                                        <option value="">Select</option>
+                                        <option>CHRISTIANITY</option>
+                                        <option>ISLAM</option>
+                                        <option>HINDUISM</option>
+                                        <option>BUDDHISM</option>
+                                        <option>OTHER</option>
+                                    </select>
+                                    <InputError message={errors.religion} />
+                                </div>
+                            </>
+                        )}
                     </div>
 
                     {/* Identification */}
@@ -202,7 +203,7 @@ const Create = () => {
                             >
                                 <option value="">Select</option>
                                 <option>NID</option>
-                                <option>NBR</option>
+                                <option>BRN</option>
                                 <option>PASSPORT</option>
                                 <option>DRIVING_LICENSE</option>
                             </select>
@@ -225,10 +226,6 @@ const Create = () => {
                                 message={errors.identification_number}
                             />
                         </div>
-                    </div>
-
-                    {/* KYC & Status */}
-                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
                         <div>
                             <Label>KYC Level</Label>
                             <select

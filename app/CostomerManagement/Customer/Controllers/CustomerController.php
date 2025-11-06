@@ -98,7 +98,7 @@ class CustomerController extends Controller
                 ->with('error', 'Please provide at least a phone number or an email address.');
         }
 
-        // ✅ Check if customer already exists (by identification number, email, or phone)
+        // ✅ Check if customer already exists
         $exists = Customer::where(function ($q) use ($data) {
             $q->where('identification_number', $data['identification_number']);
 
@@ -117,34 +117,36 @@ class CustomerController extends Controller
                 ->with('error', 'A customer with the same identification number, email, or phone already exists.');
         }
 
-        // ✅ Generate intelligent customer number
-        $typePrefix = strtoupper(substr($data['type'], 0, 3)); // IND or ORG
-        $genderPrefix = $data['type'] === 'Individual'
-            ? strtoupper(substr($data['gender'] ?? 'X', 0, 1)) // M, F, O, or X
-            : ''; // skip gender for org
-        $idPrefix = match ($data['identification_type']) {
-            'NID' => 'NID',
-            'PASSPORT' => 'PAS',
-            'DRIVING_LICENSE' => 'DRV',
-            'NBR' => 'NBR',
-            default => 'UNK',
-        };
+        // ✅ Determine type prefix
+        $typePrefix = $data['type'] === 'Individual' ? 'I' : 'ORG';
 
-        // ✅ Generate customer number prefix
-        $typePrefix = strtoupper(substr($data['type'], 0, 1)); // I or O
+        // ✅ Determine gender prefix (only for Individual)
         $genderPrefix = $data['type'] === 'Individual'
-            ? strtoupper(substr($data['gender'] ?? 'X', 0, 1)) // M, F, O, or X
-            : ''; // skip for orgs
-        $idPrefix = strtoupper(substr($data['identification_type'], 0, 1)); // N, P, D, etc.
+            ? strtoupper(substr($data['gender'] ?? 'X', 0, 1)) // M / F / O / X
+            : '';
 
-        // ✅ Sequential number
+        // ✅ Determine ID type prefix (3-char abbreviation)
+        $idPrefix = $data['type'] === 'Individual'
+            ? match ($data['identification_type']) {
+                'NID' => 'N',
+                'PASSPORT' => 'P',
+                'DRIVING_LICENSE' => 'D',
+                'BRN' => 'B',
+                default => 'U',
+            } : '';
+
+        // ✅ Generate next sequential number
         $latestCustomer = Customer::latest('id')->first();
         $nextNumber = $latestCustomer ? $latestCustomer->id + 1 : 1;
         $formattedNumber = str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
 
-        // ✅ Build final customer_no (e.g., IND-M-NID-00001)
-        $parts = array_filter([$typePrefix, $genderPrefix, $idPrefix]);
-        $data['customer_no'] = implode('', $parts) . '' . $formattedNumber;
+        // ✅ Build final customer_no
+        // Example: IND-M-NID-00001 or ORG-BRN-00002
+        $parts = $data['type'] === 'Individual'
+            ? [$typePrefix, $genderPrefix, $idPrefix, $formattedNumber]
+            : [$typePrefix, $idPrefix, $formattedNumber];
+
+        $data['customer_no'] = strtoupper(implode('', $parts));
 
         // ✅ Create new customer
         $customer = Customer::create($data);
@@ -152,7 +154,6 @@ class CustomerController extends Controller
         return redirect()->route('customers.index')
             ->with('success', 'Customer created successfully.');
     }
-
 
     public function show(Customer $customer): Response
     {
@@ -186,8 +187,8 @@ class CustomerController extends Controller
                 ->with('error', 'Please provide at least a phone number or an email address.');
         }
 
-        // ✅ Check for duplicate record (excluding current customer)
-        $exists = Customer::where(function ($q) use ($data, $customer) {
+        // ✅ Check for duplicate (excluding current customer)
+        $exists = Customer::where(function ($q) use ($data) {
             $q->where('identification_number', $data['identification_number']);
 
             if (!empty($data['email'])) {
@@ -207,22 +208,41 @@ class CustomerController extends Controller
                 ->with('error', 'Another customer with the same identification number, email, or phone already exists.');
         }
 
-        // ✅ Rebuild customer_no if key fields changed
+        // ✅ Check if we need to regenerate customer_no
         $shouldRegenerateNo =
             $data['type'] !== $customer->type ||
             $data['identification_type'] !== $customer->identification_type ||
             ($data['type'] === 'Individual' && $data['gender'] !== $customer->gender);
 
         if ($shouldRegenerateNo) {
-            $typePrefix = strtoupper(substr($data['type'], 0, 1)); // I or O
-            $genderPrefix = $data['type'] === 'Individual'
-                ? strtoupper(substr($data['gender'] ?? 'X', 0, 1)) // M, F, O, or X
-                : '';
-            $idPrefix = strtoupper(substr($data['identification_type'], 0, 1)); // N, P, D, etc.
+            // ✅ Determine type prefix
+            $typePrefix = $data['type'] === 'Individual' ? 'I' : 'ORG';
 
+            // ✅ Determine gender prefix (for Individuals only)
+            $genderPrefix = $data['type'] === 'Individual'
+                ? strtoupper(substr($data['gender'] ?? 'X', 0, 1))
+                : '';
+
+            // ✅ Determine ID type prefix
+            $idPrefix = $data['type'] === 'Individual'
+                ? match ($data['identification_type']) {
+                    'NID' => 'N',
+                    'PASSPORT' => 'P',
+                    'DRIVING_LICENSE' => 'D',
+                    'BRN' => 'B',
+                    default => 'U',
+                }
+                : '';
+
+            // ✅ Keep existing numeric ID sequence
             $formattedNumber = str_pad($customer->id, 5, '0', STR_PAD_LEFT);
-            $parts = array_filter([$typePrefix, $genderPrefix, $idPrefix]);
-            $data['customer_no'] = implode('', $parts) . '' . $formattedNumber;
+
+            // ✅ Build new customer_no
+            $parts = $data['type'] === 'Individual'
+                ? [$typePrefix, $genderPrefix, $idPrefix, $formattedNumber]
+                : [$typePrefix, $idPrefix, $formattedNumber];
+
+            $data['customer_no'] = strtoupper(implode('', $parts));
         }
 
         // ✅ Update record
@@ -231,7 +251,6 @@ class CustomerController extends Controller
         return redirect()->route('customers.index')
             ->with('success', 'Customer updated successfully.');
     }
-
 
     public function destroy(Customer $customer): RedirectResponse
     {

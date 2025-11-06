@@ -35,7 +35,7 @@ class CustomerFactory extends Factory
                 ? $this->faker->randomElement(['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER'])
                 : null,
 
-            'identification_type' => $this->faker->randomElement(['NID', 'NBR', 'PASSPORT', 'DRIVING_LICENSE']),
+            'identification_type' => $this->faker->randomElement(['NID', 'BRN', 'PASSPORT', 'DRIVING_LICENSE']),
             'identification_number' => strtoupper(Str::random(10)),
             'photo_id' => $photo->id,
             'registration_no' => $type === 'Organization'

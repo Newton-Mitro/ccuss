@@ -16,7 +16,7 @@ export interface Customer {
     gender?: 'MALE' | 'FEMALE' | 'OTHER';
     religion?: 'CHRISTIANITY' | 'ISLAM' | 'HINDUISM' | 'BUDDHISM' | 'OTHER';
 
-    identification_type: 'NID' | 'NBR' | 'PASSPORT' | 'DRIVING_LICENSE';
+    identification_type: 'NID' | 'BRN' | 'PASSPORT' | 'DRIVING_LICENSE';
     identification_number: string;
     photo_id?: number | null; // Foreign key to media table
     photo?: Media | null;

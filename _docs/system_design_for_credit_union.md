@@ -126,7 +126,7 @@ CREATE TABLE customers (
     dob DATE,
     gender ENUM('MALE','FEMALE','OTHER') DEFAULT NULL,
     religion ENUM('CHRISTIANITY','ISLAM','HINDUISM','BUDDHISM','OTHER') DEFAULT NULL,
-    identification_type ENUM('NID','NBR','PASSPORT','DRIVING_LICENSE') NOT NULL,
+    identification_type ENUM('NID','BRN','PASSPORT','DRIVING_LICENSE') NOT NULL,
     identification_number VARCHAR(50) NOT NULL,
     photo VARCHAR(255),
 

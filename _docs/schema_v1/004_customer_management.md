@@ -22,7 +22,7 @@ return new class extends Migration {
             $table->enum('gender', ['MALE', 'FEMALE', 'OTHER'])->nullable();
             $table->enum('religion', ['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER'])->nullable();
 
-            $table->enum('identification_type', ['NID', 'NBR', 'PASSPORT', 'DRIVING_LICENSE']);
+            $table->enum('identification_type', ['NID', 'BRN', 'PASSPORT', 'DRIVING_LICENSE']);
             $table->string('identification_number', 50);
             $table->string('photo', 255)->nullable();
 

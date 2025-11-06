@@ -24,10 +24,10 @@ class StoreCustomerRequest extends FormRequest
 
             // Personal info
             'dob' => ['nullable', 'date'],
-            'gender' => ['required', Rule::in(['MALE', 'FEMALE', 'OTHER'])],
-            'religion' => ['required', Rule::in(['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER'])],
+            'gender' => ['nullable', Rule::in(['MALE', 'FEMALE', 'OTHER'])],
+            'religion' => ['nullable', Rule::in(['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER'])],
 
-            'identification_type' => ['required', Rule::in(['NID', 'NBR', 'PASSPORT', 'DRIVING_LICENSE'])],
+            'identification_type' => ['required', Rule::in(['NID', 'BRN', 'PASSPORT', 'DRIVING_LICENSE'])],
             'identification_number' => ['required', 'string', 'max:50'],
             'photo_id' => ['nullable', 'exists:media,id'],
 
