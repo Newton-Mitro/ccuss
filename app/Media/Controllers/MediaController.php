@@ -34,8 +34,21 @@ class MediaController extends Controller
         }
 
         $mediaItems = $query->latest()->paginate($perPage);
+        $mediaItems->withPath('/auth/api/media');
 
-        return response()->json($mediaItems);
+        return response()->json([
+            'data' => $mediaItems->items(),
+            'links' => $mediaItems->linkCollection(),
+            'meta' => [
+                'current_page' => $mediaItems->currentPage(),
+                'last_page' => $mediaItems->lastPage(),
+                'per_page' => $mediaItems->perPage(),
+                'total' => $mediaItems->total(),
+            ],
+            'filters' => [
+                'type' => $type,
+            ],
+        ]);
     }
 
     public function index(Request $request): Response

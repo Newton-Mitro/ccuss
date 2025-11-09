@@ -1,9 +1,5 @@
 import { router } from '@inertiajs/react';
 import axios from 'axios';
-import React, { useEffect, useRef, useState } from 'react';
-import toast from 'react-hot-toast';
-import Swal from 'sweetalert2';
-
 import {
     Copy,
     File,
@@ -15,7 +11,9 @@ import {
     Upload,
     X,
 } from 'lucide-react';
-
+import React, { useEffect, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../components/heading-small';
 import { Select } from '../../components/ui/select';
@@ -33,23 +31,23 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
     onSelect,
 }) => {
     const [filter, setFilter] = useState<string>('all');
-    const [perPage, setPerPage] = useState<number>(20);
+    const [perPage, setPerPage] = useState<number>(5);
     const [uploading, setUploading] = useState(false);
-    const [media, setMedia] = useState<any>({
-        data: [],
-        links: [],
-    });
+    const [media, setMedia] = useState<any>({ data: [], links: [] });
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-    // Fetch media from backend
+    /** 🔹 Fetch media list */
     const fetchMedia = async (
         type = filter,
         pageUrl?: string,
         perPageValue = perPage,
     ) => {
         try {
+            // ✅ Base URL always includes filter & per_page
             const baseUrl = `/auth/api/media?type=${type}&per_page=${perPageValue}`;
+            // ✅ Use provided page URL or default
             const url = pageUrl || baseUrl;
+
             const res = await axios.get(url);
             setMedia(res.data);
         } catch (err) {
@@ -67,6 +65,7 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
 
     if (!isOpen) return null;
 
+    /** 🔹 Delete media */
     const deleteMedia = (id: number) => {
         const isDark = document.documentElement.classList.contains('dark');
 
@@ -87,7 +86,7 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
                     preserveState: true,
                     onSuccess: () => {
                         toast.success('Media file deleted successfully.');
-                        fetchMedia(); // refresh after delete
+                        fetchMedia();
                     },
                     onError: (errors) => {
                         Object.values(errors).forEach((fieldErrors: any) => {
@@ -105,15 +104,13 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
         });
     };
 
+    /** 🔹 Handle upload */
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files?.length) return;
 
         const files = Array.from(e.target.files);
         const formData = new FormData();
-
-        // ✅ Append multiple files
         files.forEach((file) => formData.append('files[]', file));
-
         setUploading(true);
 
         try {
@@ -140,10 +137,8 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
 
             toast.dismiss('upload-progress');
 
-            if (![200, 201].includes(res.status)) {
+            if (![200, 201].includes(res.status))
                 throw new Error('Upload failed');
-            }
-
             await fetchMedia();
             toast.success(`${files.length} file(s) uploaded successfully!`);
         } catch (err) {
@@ -152,30 +147,41 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
             toast.error('Upload failed — please try again.');
         } finally {
             setUploading(false);
-            if (fileInputRef.current) fileInputRef.current.value = ''; // ✅ reset file input
+            if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
 
+    /** 🔹 Copy media URL */
     const handleCopy = async (url: string) => {
         try {
             await navigator.clipboard.writeText(url);
             toast.success('URL copied to clipboard!');
         } catch (err) {
-            console.error('Copy failed:', err);
-            toast.error('Failed to copy URL.');
+            toast.error(err);
         }
     };
 
+    /** 🔹 Filter by type */
     const handleFilterChange = (value: string) => {
         setFilter(value);
         fetchMedia(value);
     };
 
+    /** 🔹 Pagination click */
     const handlePageClick = (url: string) => {
         if (!url) return;
-        fetchMedia(filter, url);
+
+        // ✅ Make sure the URL is relative
+        const relativeUrl = url.replace(window.location.origin, '');
+
+        // ✅ Add current filter and perPage params manually
+        const separator = relativeUrl.includes('?') ? '&' : '?';
+        const fullUrl = `${relativeUrl}${separator}type=${filter}&per_page=${perPage}`;
+
+        fetchMedia(filter, fullUrl);
     };
 
+    /** 🔹 File preview renderer */
     const renderPreview = (item: Media) => {
         if (item.file_type.startsWith('image/')) {
             return (
@@ -188,7 +194,7 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
         }
         if (item.file_type === 'application/pdf') {
             return (
-                <div className="flex h-32 w-full items-center justify-center rounded bg-red-100 dark:bg-red-800/30">
+                <div className="flex h-32 items-center justify-center rounded bg-red-100 dark:bg-red-800/30">
                     <FileText className="h-12 w-12 text-red-600 dark:text-red-400" />
                 </div>
             );
@@ -199,34 +205,34 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
             item.file_type.includes('presentation')
         ) {
             return (
-                <div className="flex h-32 w-full items-center justify-center rounded bg-blue-100 dark:bg-blue-800/30">
+                <div className="flex h-32 items-center justify-center rounded bg-blue-100 dark:bg-blue-800/30">
                     <FileText className="h-12 w-12 text-blue-600 dark:text-blue-400" />
                 </div>
             );
         }
         if (item.file_type.includes('zip') || item.file_type.includes('rar')) {
             return (
-                <div className="flex h-32 w-full items-center justify-center rounded bg-yellow-100 dark:bg-yellow-800/30">
+                <div className="flex h-32 items-center justify-center rounded bg-yellow-100 dark:bg-yellow-800/30">
                     <FileArchive className="h-12 w-12 text-yellow-600 dark:text-yellow-400" />
                 </div>
             );
         }
         if (item.file_type.includes('audio')) {
             return (
-                <div className="flex h-32 w-full items-center justify-center rounded bg-green-100 dark:bg-green-800/30">
+                <div className="flex h-32 items-center justify-center rounded bg-green-100 dark:bg-green-800/30">
                     <HeadphonesIcon className="h-12 w-12 text-green-600 dark:text-green-400" />
                 </div>
             );
         }
         if (item.file_type.includes('video')) {
             return (
-                <div className="flex h-32 w-full items-center justify-center rounded bg-purple-100 dark:bg-purple-800/30">
+                <div className="flex h-32 items-center justify-center rounded bg-purple-100 dark:bg-purple-800/30">
                     <Tv2Icon className="h-12 w-12 text-purple-600 dark:text-purple-400" />
                 </div>
             );
         }
         return (
-            <div className="flex h-32 w-full items-center justify-center rounded bg-gray-100 dark:bg-gray-800">
+            <div className="flex h-32 items-center justify-center rounded bg-gray-100 dark:bg-gray-800">
                 <File className="h-12 w-12 text-gray-600 dark:text-gray-300" />
             </div>
         );
@@ -240,7 +246,7 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
                     <HeadingSmall title="Media Browser" />
                     <button
                         onClick={onClose}
-                        className="text-gray-600 transition-colors duration-150 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white"
+                        className="text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white"
                     >
                         <X className="h-6 w-6" />
                     </button>
@@ -248,7 +254,7 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
 
                 {/* Upload & Filter */}
                 <div className="flex flex-col gap-2 border-b border-gray-200 px-4 py-2 sm:flex-row sm:items-center sm:justify-between dark:border-gray-700">
-                    <label className="flex cursor-pointer items-center gap-2 rounded bg-blue-700 px-3 py-1 text-sm font-medium text-white transition-colors duration-150 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500">
+                    <label className="flex cursor-pointer items-center gap-2 rounded bg-blue-700 px-3 py-1 text-sm font-medium text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500">
                         <Upload className="h-4 w-4" />
                         <span>{uploading ? 'Uploading...' : 'Upload'}</span>
                         <input
@@ -256,7 +262,7 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
                             className="hidden"
                             accept="image/*,video/*,application/pdf,audio/*"
                             ref={fileInputRef}
-                            multiple // ✅ allow multiple file selection
+                            multiple
                             onChange={handleFileChange}
                             disabled={uploading}
                         />
@@ -297,19 +303,16 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
                                         {item.file_type}
                                     </p>
                                 </div>
-
-                                {/* Copy URL / Delete */}
                                 <div className="absolute top-2 right-2 flex gap-1">
                                     <button
                                         onClick={() => handleCopy(item.url)}
-                                        className="flex items-center gap-1 rounded bg-gray-900 p-1 shadow hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600"
+                                        className="rounded bg-gray-900 p-1 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600"
                                     >
                                         <Copy className="h-3 w-3 text-white" />
                                     </button>
-
                                     <button
                                         onClick={() => deleteMedia(item.id)}
-                                        className="flex items-center gap-1 rounded bg-red-600 p-1 shadow hover:bg-red-500 dark:bg-red-700 dark:hover:bg-red-600"
+                                        className="rounded bg-red-600 p-1 hover:bg-red-500 dark:bg-red-700 dark:hover:bg-red-600"
                                     >
                                         <Trash2Icon className="h-3 w-3 text-white" />
                                     </button>
