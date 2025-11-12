@@ -1,10 +1,10 @@
 <?php
 
-namespace App\CostomerManagement\OnlineUser\Requests;
+namespace App\CostomerManagement\OnlineClient\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreOnlineUserRequest extends FormRequest
+class UpdateOnlineClientRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

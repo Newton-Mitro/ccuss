@@ -20,15 +20,15 @@ class FamilyRelationController extends Controller
         $perPage = $filters['per_page'] ?? 10;
 
         // If search is empty, return empty paginator
-        if (empty($filters['search'])) {
-            $relations = FamilyRelation::query()->whereRaw('0 = 1')->paginate($perPage);
-            return Inertia::render('customer-management/family-relations/index', [
-                'familyRelations' => $relations,
-                'filters' => $filters,
-            ]);
-        }
+        // if (empty($filters['search'])) {
+        //     $relations = FamilyRelation::query()->whereRaw('0 = 1')->paginate($perPage);
+        //     return Inertia::render('customer-management/family-relations/index', [
+        //         'familyRelations' => $relations,
+        //         'filters' => $filters,
+        //     ]);
+        // }
 
-        $search = $filters['search'];
+        $search = $filters['search'] ?? '';
         $query = FamilyRelation::with(['customer', 'relative'])
             ->latest()
             ->where(function ($q) use ($search) {

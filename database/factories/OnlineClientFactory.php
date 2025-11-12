@@ -3,13 +3,13 @@
 namespace Database\Factories;
 
 use App\CostomerManagement\Customer\Models\Customer;
-use App\CostomerManagement\OnlineUser\Models\OnlineUser;
+use App\CostomerManagement\OnlineClient\Models\OnlineClient;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 
-class OnlineUserFactory extends Factory
+class OnlineClientFactory extends Factory
 {
-    protected $model = OnlineUser::class;
+    protected $model = OnlineClient::class;
 
     public function definition(): array
     {

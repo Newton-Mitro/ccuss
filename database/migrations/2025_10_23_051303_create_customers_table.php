@@ -126,7 +126,7 @@ return new class extends Migration {
          *  ONLINE USERS TABLE
          * -------------------------------
          */
-        Schema::create('online_users', function (Blueprint $table) {
+        Schema::create('online_clients', function (Blueprint $table) {
             $table->id();
             $table->foreignId('customer_id')->unique()->constrained('customers')->cascadeOnDelete();
 
@@ -144,7 +144,7 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('online_users');
+        Schema::dropIfExists('online_clients');
         Schema::dropIfExists('signatures');
         Schema::dropIfExists('family_relations');
         Schema::dropIfExists('addresses');

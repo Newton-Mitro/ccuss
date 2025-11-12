@@ -1,9 +1,10 @@
 import { Customer } from './customer';
 
-export interface OnlineUser {
+export interface OnlineClient {
     id: number;
 
     customer_id: number; // FK → customers.id
+    customer?: Customer;
 
     username: string;
     email?: string | null;
@@ -15,8 +16,4 @@ export interface OnlineUser {
 
     created_at: string;
     updated_at: string;
-}
-
-export interface OnlineUserWithCustomer extends OnlineUser {
-    customer?: Customer;
 }

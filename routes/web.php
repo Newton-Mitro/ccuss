@@ -4,8 +4,10 @@ use App\Branch\Controllers\BranchController;
 use App\CostomerManagement\Address\Controllers\AddressController;
 use App\CostomerManagement\Customer\Controllers\CustomerController;
 use App\CostomerManagement\FamilyRelation\Controllers\FamilyRelationController;
+use App\CostomerManagement\OnlineClient\Controllers\OnlineClientController;
 use App\CostomerManagement\Signature\Controllers\SignatureController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GlAccountController;
 use App\Media\Controllers\MediaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -43,5 +45,14 @@ Route::prefix('auth')
         Route::resource('addresses', AddressController::class);
         Route::resource('family-relations', FamilyRelationController::class);
         Route::resource('signatures', SignatureController::class);
+        Route::resource('online-clients', OnlineClientController::class);
 
     });
+
+Route::prefix('auth')->middleware(['auth',])->group(function () {
+    Route::get('/gl-accounts', [GlAccountController::class, 'index'])->name('gl-accounts.index');
+    Route::post('/gl-accounts', [GlAccountController::class, 'store'])->name('gl-accounts.store');
+    Route::delete('/gl-accounts/{glAccount}', [GlAccountController::class, 'destroy'])->name('gl-accounts.destroy');
+    Route::put('/gl-accounts/move', [GlAccountController::class, 'move'])->name('gl-accounts.move');
+
+});

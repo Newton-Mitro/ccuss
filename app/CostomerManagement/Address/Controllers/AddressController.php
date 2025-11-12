@@ -20,36 +20,25 @@ class AddressController extends Controller
         $search = $request->input('search');
         $type = $request->input('type', 'all');
 
-        // If search is empty, return an empty paginator (same as SignatureController)
-        if (empty($search)) {
-            $addresses = new \Illuminate\Pagination\LengthAwarePaginator(
-                [], // empty items
-                0,  // total items
-                $perPage,
-                $page,
-                ['path' => $request->url(), 'query' => $request->query()]
-            );
-        } else {
-            $query = Address::query()->with('customer');
+        $query = Address::query()->with('customer');
 
-            // 🔍 Search filter
-            $query->where(function ($q) use ($search) {
-                $q->whereHas('customer', function ($q2) use ($search) {
-                    $q2->where('name', 'like', "%{$search}%")
-                        ->orWhere('customer_no', 'like', "%{$search}%");
-                })
-                    ->orWhere('line1', 'like', "%{$search}%")
-                    ->orWhere('district', 'like', "%{$search}%");
-            });
+        // 🔍 Search filter
+        $query->where(function ($q) use ($search) {
+            $q->whereHas('customer', function ($q2) use ($search) {
+                $q2->where('name', 'like', "%{$search}%")
+                    ->orWhere('customer_no', 'like', "%{$search}%");
+            })
+                ->orWhere('line1', 'like', "%{$search}%")
+                ->orWhere('district', 'like', "%{$search}%");
+        });
 
-            // 🏷️ Type filter
-            if (!empty($type) && $type !== 'all') {
-                $query->where('type', $type);
-            }
-
-            // 📄 Paginate with query string
-            $addresses = $query->latest()->paginate($perPage)->withQueryString();
+        // 🏷️ Type filter
+        if (!empty($type) && $type !== 'all') {
+            $query->where('type', $type);
         }
+
+        // 📄 Paginate with query string
+        $addresses = $query->latest()->paginate($perPage)->withQueryString();
 
         // ✅ Inertia response with filters
         return Inertia::render('customer-management/addresses/index', [

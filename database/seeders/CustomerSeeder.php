@@ -6,6 +6,7 @@ namespace Database\Seeders;
 use App\CostomerManagement\Address\Models\Address;
 use App\CostomerManagement\Customer\Models\Customer;
 use App\CostomerManagement\FamilyRelation\Models\FamilyRelation;
+use App\CostomerManagement\OnlineClient\Models\OnlineClient;
 use App\CostomerManagement\OnlineUser\Models\OnlineUser;
 use App\CostomerManagement\Signature\Models\Signature;
 use Illuminate\Database\Seeder;
@@ -23,7 +24,7 @@ class CustomerSeeder extends Seeder
             Signature::factory()->create(['customer_id' => $customer->id]);
 
             // Add online user (1:1)
-            OnlineUser::factory()->create(['customer_id' => $customer->id]);
+            OnlineClient::factory()->create(['customer_id' => $customer->id]);
         });
 
         // Add family relations
