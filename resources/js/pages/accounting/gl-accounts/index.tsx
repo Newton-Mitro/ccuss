@@ -28,6 +28,7 @@ import {
     useDroppable,
 } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
+import { route } from 'ziggy-js';
 
 const TYPE_COLORS = {
     ASSET: 'bg-green-100 text-green-800',
@@ -39,18 +40,17 @@ const TYPE_COLORS = {
 
 /* ----------------- DND COMPONENTS ----------------- */
 function DraggableItem({ id, children }) {
-    const { attributes, listeners, setNodeRef, transform, transition } =
-        useDraggable({ id });
+    const { attributes, listeners, setNodeRef, transform } = useDraggable({
+        id,
+    });
 
     const style = {
         transform: CSS.Translate.toString(transform),
-        transition,
-        cursor: 'grab',
     };
 
     return (
-        <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
-            {children}
+        <div ref={setNodeRef} style={style}>
+            {children({ listeners, attributes })}
         </div>
     );
 }
@@ -116,13 +116,20 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
         e.preventDefault();
         if (editingAccount) {
             put(route('gl-accounts.update', editingAccount.id), {
+                data, // your form data
                 preserveScroll: true,
                 onSuccess: closeModal,
+                onError: (err) => {
+                    console.log('Update error:', err);
+                    toast.error('Failed to update GL account.');
+                },
             });
         } else {
             post(route('gl-accounts.store'), {
+                data,
                 preserveScroll: true,
                 onSuccess: closeModal,
+                onError: (err) => toast.error('Failed to create GL account.'),
             });
         }
     };
@@ -184,7 +191,7 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
         const targetGroupId = over.id.replace('group-', '');
 
         if (active.id.startsWith('gl-') && over.id.startsWith('group-')) {
-            router.put(
+            router.post(
                 route('gl-accounts.move'),
                 { gl_id: draggedId, parent_id: targetGroupId },
                 {
@@ -277,7 +284,74 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
                             </DroppableGroup>
                         ) : (
                             <DraggableItem id={`gl-${acc.id}`}>
-                                {content}
+                                {({ listeners, attributes }) => (
+                                    <div
+                                        className={`flex items-center justify-between rounded-lg px-3 py-1 hover:bg-accent/10`}
+                                        style={{
+                                            marginLeft: `${level * 1.5}rem`,
+                                        }}
+                                    >
+                                        {/* Left: drag handle + account info */}
+                                        <div className="flex items-center gap-2">
+                                            {/* Drag handle */}
+                                            <div
+                                                {...listeners}
+                                                {...attributes}
+                                                className="cursor-grab p-1 active:cursor-grabbing"
+                                                onClick={(e) =>
+                                                    e.stopPropagation()
+                                                }
+                                            >
+                                                <FileIcon className="h-4 w-4 text-muted-foreground" />
+                                            </div>
+
+                                            {/* Account code & name */}
+                                            <span className="text-sm text-foreground">
+                                                {acc.code} — {acc.name}
+                                            </span>
+
+                                            {/* Type badge */}
+                                            <span
+                                                className={`ml-2 rounded px-2 py-0.5 text-xs font-medium ${
+                                                    TYPE_COLORS[acc.type] ||
+                                                    'bg-gray-100 text-gray-800'
+                                                }`}
+                                            >
+                                                {acc.type}
+                                            </span>
+                                        </div>
+
+                                        {/* Right: Edit / Delete buttons */}
+                                        <div className="flex gap-2">
+                                            <Button
+                                                size="sm"
+                                                variant="secondary"
+                                                className="flex items-center gap-1"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    openModal(acc);
+                                                }}
+                                            >
+                                                <Edit2Icon className="h-3 w-3" />
+                                            </Button>
+
+                                            {acc.category === 'GL' && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        handleDelete(
+                                                            acc.id,
+                                                            acc.name,
+                                                        )
+                                                    }
+                                                    className="text-destructive hover:text-destructive/80"
+                                                >
+                                                    <Trash2 className="h-5 w-5" />
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                             </DraggableItem>
                         )}
                     </li>
@@ -327,7 +401,7 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
                     </div>
                 </div>
 
-                <Card className="max-h-[600px] overflow-y-auto rounded-xl border border-border p-6 shadow-lg">
+                <Card className="h-[calc(100vh-240px)] overflow-y-auto rounded-xl border border-border p-6 shadow-lg">
                     <DndContext
                         onDragEnd={handleDragEnd}
                         collisionDetection={closestCenter}

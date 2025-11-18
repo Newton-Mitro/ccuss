@@ -601,9 +601,13 @@ function SidebarMenuSkeleton({
 }: React.ComponentProps<"div"> & {
   showIcon?: boolean
 }) {
-  // Random width between 50 to 90%.
-  const width = React.useMemo(() => {
-    return `${Math.floor(Math.random() * 40) + 50}%`
+  // Define state with default fixed value
+  const [width, setWidth] = React.useState("70%")
+
+  // Run AFTER first render (safe for impure functions)
+  React.useEffect(() => {
+    const randomWidth = `${Math.floor(Math.random() * 40) + 50}%`
+    setWidth(randomWidth)
   }, [])
 
   return (
@@ -619,6 +623,7 @@ function SidebarMenuSkeleton({
           data-sidebar="menu-skeleton-icon"
         />
       )}
+
       <Skeleton
         className="h-4 max-w-(--skeleton-width) flex-1"
         data-sidebar="menu-skeleton-text"
@@ -631,6 +636,8 @@ function SidebarMenuSkeleton({
     </div>
   )
 }
+
+
 
 function SidebarMenuSub({ className, ...props }: React.ComponentProps<"ul">) {
   return (

@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Accounting\GlAccount\Controllers;
 
-use App\Models\GlAccount;
+use App\Accounting\GlAccount\Models\GlAccount;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -44,7 +46,6 @@ class GlAccountController extends Controller
         ]);
 
         $parent = GlAccount::find($data['parent_id']);
-        $data['is_leaf'] = $data['category'] === 'GL'; // GL accounts are leaf by default
 
         $glAccount = GlAccount::create($data);
 
@@ -69,25 +70,41 @@ class GlAccountController extends Controller
         return back()->with('success', 'GL account moved successfully!');
     }
 
-
-    public function update(Request $request, GlAccount $glAccount)
+    public function update(Request $request, GlAccount $gl_account)
     {
-        $data = $request->validate([
-            'code' => 'required|string|max:50|unique:gl_accounts,code,' . $glAccount->id,
+        // dd($gl_account);
+        // dd($request->all());
+        // Normalize values before comparison
+        $request->merge([
+            'category' => strtoupper(trim($request->category)),
+            'code' => trim($request->code),
+        ]);
+
+        $rules = [
             'name' => 'required|string|max:100',
             'type' => 'required|in:ASSET,LIABILITY,EQUITY,INCOME,EXPENSE',
             'category' => 'required|in:GL,GROUP',
             'parent_id' => 'nullable|exists:gl_accounts,id',
-        ]);
+        ];
 
-        $glAccount->update($data);
-
-        // Update parent is_leaf status
-        if ($glAccount->parent) {
-            $glAccount->parent->update(['is_leaf' => $glAccount->parent->children()->count() > 0 ? false : true]);
+        // Check uniqueness ONLY if code changed
+        if ($request->code !== $gl_account->code) {
+            $rules['code'] = [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('gl_accounts', 'code')->ignore($gl_account->id),
+            ];
+        } else {
+            $rules['code'] = ['required', 'string', 'max:50'];
         }
 
-        return redirect()->back()->with('success', 'GL Account updated successfully.');
+        $data = $request->validate($rules);
+
+        $gl_account->update($data);
+
+
+        return back()->with('success', 'GL Account updated successfully.');
     }
 
     public function destroy(GlAccount $glAccount)

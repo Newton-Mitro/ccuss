@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\GlAccount;
+use App\Accounting\GlAccount\Models\GlAccount;
 use Illuminate\Database\Seeder;
 
 class GlAccountSeeder extends Seeder

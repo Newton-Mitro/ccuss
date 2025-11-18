@@ -1,5 +1,7 @@
 <?php
 
+use App\Accounting\GlAccount\Controllers\GlAccountController;
+use App\Accounting\Voucher\Controllers\JournalEntryController;
 use App\Branch\Controllers\BranchController;
 use App\CostomerManagement\Address\Controllers\AddressController;
 use App\CostomerManagement\Customer\Controllers\CustomerController;
@@ -7,7 +9,6 @@ use App\CostomerManagement\FamilyRelation\Controllers\FamilyRelationController;
 use App\CostomerManagement\OnlineClient\Controllers\OnlineClientController;
 use App\CostomerManagement\Signature\Controllers\SignatureController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\GlAccountController;
 use App\Media\Controllers\MediaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -50,9 +51,30 @@ Route::prefix('auth')
     });
 
 Route::prefix('auth')->middleware(['auth',])->group(function () {
-    Route::get('/gl-accounts', [GlAccountController::class, 'index'])->name('gl-accounts.index');
-    Route::post('/gl-accounts', [GlAccountController::class, 'store'])->name('gl-accounts.store');
-    Route::delete('/gl-accounts/{glAccount}', [GlAccountController::class, 'destroy'])->name('gl-accounts.destroy');
-    Route::put('/gl-accounts/move', [GlAccountController::class, 'move'])->name('gl-accounts.move');
+    Route::get('/gl_accounts', [GlAccountController::class, 'index'])->name('gl-accounts.index');
+    Route::post('/gl_accounts', [GlAccountController::class, 'store'])->name('gl-accounts.store');
+    Route::put('/gl_accounts/{gl_account}', [GlAccountController::class, 'update'])->name('gl-accounts.update');
+    Route::delete('/gl_accounts/{gl_account}', [GlAccountController::class, 'destroy'])->name('gl-accounts.destroy');
+    Route::post('/gl_accounts/move', [GlAccountController::class, 'move'])->name('gl-accounts.move');
+});
 
+Route::prefix('auth')->middleware(['auth',])->group(function () {
+    // Voucher listing
+    Route::get('vouchers/list', [JournalEntryController::class, 'index'])->name('vouchers.index');
+
+    // Voucher create routes per type
+    Route::get('vouchers/debit/create', [JournalEntryController::class, 'createDebitVoucher'])->name('vouchers.create.debit');
+    Route::get('vouchers/credit/create', [JournalEntryController::class, 'createCreditVoucher'])->name('vouchers.create.credit');
+    Route::get('vouchers/journal/create', [JournalEntryController::class, 'createJournalVoucher'])->name('vouchers.create.journal');
+    Route::get('vouchers/contra/create', [JournalEntryController::class, 'createContraVoucher'])->name('vouchers.create.contra');
+    // Transfer can reuse store with type 'transfer' in request
+
+    // Store voucher (handles all types dynamically)
+    Route::post('vouchers', [JournalEntryController::class, 'store'])->name('vouchers.store');
+
+    // Show, edit, update, destroy resource routes
+    Route::get('vouchers/{voucher}', [JournalEntryController::class, 'show'])->name('vouchers.show');
+    Route::get('vouchers/{voucher}/edit', [JournalEntryController::class, 'edit'])->name('vouchers.edit');
+    Route::put('vouchers/{voucher}', [JournalEntryController::class, 'update'])->name('vouchers.update');
+    Route::delete('vouchers/{voucher}', [JournalEntryController::class, 'destroy'])->name('vouchers.destroy');
 });

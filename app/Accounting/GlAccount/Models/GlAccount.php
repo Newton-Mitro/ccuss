@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Accounting\GlAccount\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,8 +13,9 @@ class GlAccount extends Model
         'code',
         'name',
         'type',
-        'is_leaf',
+        'category',
         'parent_id',
+
     ];
 
     // 🔗 Parent relation

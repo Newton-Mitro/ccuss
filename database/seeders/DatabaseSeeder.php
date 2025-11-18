@@ -36,6 +36,7 @@ class DatabaseSeeder extends Seeder
             BranchSeeder::class,
             CustomerSeeder::class,
             GlAccountSeeder::class,
+            JournalEntrySeeder::class,
         ]);
 
     }
