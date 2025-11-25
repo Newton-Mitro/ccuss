@@ -91,24 +91,13 @@ export const LedgerSearch: React.FC<LedgerSearchProps> = ({
                             className="flex cursor-pointer items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
                             onClick={() => {
                                 onSelect(ledger);
-                                onQueryChange(
-                                    ledger.full_display ??
-                                        `${ledger.code ?? ''} ${ledger.name}`,
-                                );
+                                onQueryChange(ledger.name);
                                 setShowDropdown(false);
                             }}
                         >
                             {ledger.code && (
                                 <span className="font-mono text-xs text-gray-500">
-                                    {ledger.code}
-                                </span>
-                            )}
-
-                            <span className="flex-1">{ledger.name}</span>
-
-                            {ledger.full_display && (
-                                <span className="ml-auto text-xs text-gray-400">
-                                    {ledger.full_display}
+                                    {ledger.name}
                                 </span>
                             )}
                         </li>

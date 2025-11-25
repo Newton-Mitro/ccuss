@@ -11,6 +11,31 @@ use Inertia\Response;
 
 class GlAccountController extends Controller
 {
+    public function ledgerSearch(Request $request)
+    {
+        $search = trim($request->input('search', ''));
+
+        if (!$search) {
+            return response()->json([]);
+        }
+
+        $results = GlAccount::query()
+            ->where('name', 'like', "%{$search}%")
+            ->orWhere('code', 'like', "%{$search}%")
+            ->limit(20)
+            ->get()
+            ->map(function ($ledger) {
+                return [
+                    'id' => $ledger->id,
+                    'name' => $ledger->name,
+                    'code' => $ledger->code,
+                    'full_display' => "{$ledger->code} - {$ledger->name}",
+                ];
+            });
+
+        return response()->json($results);
+    }
+
     public function index(): Response
     {
         // Load all top-level accounts with children recursively for tree rendering

@@ -52,6 +52,8 @@ Route::prefix('auth')
 
 Route::prefix('auth')->middleware(['auth',])->group(function () {
     Route::get('/gl_accounts', [GlAccountController::class, 'index'])->name('gl-accounts.index');
+    Route::get('/api/search-ledger', [GlAccountController::class, 'ledgerSearch'])->name('gl-accounts.search');
+
     Route::post('/gl_accounts', [GlAccountController::class, 'store'])->name('gl-accounts.store');
     Route::put('/gl_accounts/{gl_account}', [GlAccountController::class, 'update'])->name('gl-accounts.update');
     Route::delete('/gl_accounts/{gl_account}', [GlAccountController::class, 'destroy'])->name('gl-accounts.destroy');

@@ -10,9 +10,7 @@ use Inertia\Inertia;
 
 class JournalEntryController extends Controller
 {
-    /**
-     * Display a paginated list of journal entries.
-     */
+
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 10);
@@ -45,43 +43,26 @@ class JournalEntryController extends Controller
         ]);
     }
 
-
-
-    /**
-     * Show form to create a debit voucher.
-     */
     public function createDebitVoucher()
     {
         return Inertia::render('accounting/vouchers/debit_voucher');
     }
 
-    /**
-     * Show form to create a credit voucher.
-     */
     public function createCreditVoucher()
     {
         return Inertia::render('accounting/vouchers/credit_voucher');
     }
 
-    /**
-     * Show form to create a journal voucher.
-     */
     public function createJournalVoucher()
     {
         return Inertia::render('accounting/vouchers/journal_voucher');
     }
 
-    /**
-     * Show form to create a contra voucher.
-     */
     public function createContraVoucher()
     {
         return Inertia::render('accounting/vouchers/contra_voucher');
     }
 
-    /**
-     * Store a new journal entry.
-     */
     public function store(Request $request)
     {
         $type = $request->type;
@@ -155,9 +136,6 @@ class JournalEntryController extends Controller
             ->with('success', ucfirst($type) . ' voucher created successfully.');
     }
 
-    /**
-     * Display a single journal entry.
-     */
     public function show(JournalEntry $voucher)
     {
         return Inertia::render('accounting/vouchers/show', [
@@ -165,9 +143,6 @@ class JournalEntryController extends Controller
         ]);
     }
 
-    /**
-     * Show form to edit a journal entry.
-     */
     public function edit(JournalEntry $voucher)
     {
         return Inertia::render('accounting/vouchers/edit', [
@@ -176,9 +151,6 @@ class JournalEntryController extends Controller
         ]);
     }
 
-    /**
-     * Update journal entry details.
-     */
     public function update(Request $request, JournalEntry $voucher)
     {
         $data = $request->validate([
@@ -195,9 +167,6 @@ class JournalEntryController extends Controller
             ->with('success', 'Voucher updated successfully.');
     }
 
-    /**
-     * Delete a journal entry.
-     */
     public function destroy(JournalEntry $voucher)
     {
         $voucher->delete();
