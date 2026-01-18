@@ -1,3 +1,60 @@
+```php
+Schema::create('cash_locations', function (Blueprint $table) {
+    $table->id();
+    $table->string('code')->unique();
+    $table->string('name');
+    $table->enum('type', ['TELLER','VAULT','ATM']);
+    $table->boolean('is_active')->default(true);
+    $table->timestamps();
+});
+
+Schema::create('teller_sessions', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('cash_location_id')->constrained();
+    $table->foreignId('user_id')->constrained();
+    $table->foreignId('fiscal_period_id')->constrained();
+    $table->timestamp('opened_at');
+    $table->decimal('opening_balance', 14, 2);
+    $table->timestamp('closed_at')->nullable();
+    $table->decimal('closing_balance', 14, 2)->nullable();
+    $table->enum('status', ['OPEN','CLOSED']);
+});
+
+Schema::create('banks', function (Blueprint $table) {
+    $table->id();
+    $table->string('name');
+    $table->string('swift_code')->nullable();
+    $table->timestamps();
+});
+
+Schema::create('bank_accounts', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('bank_id')->constrained();
+    $table->string('account_no');
+    $table->string('currency', 3);
+    $table->timestamps();
+});
+
+Schema::create('petty_cash_funds', function (Blueprint $table) {
+    $table->id();
+    $table->string('name');
+    $table->foreignId('custodian_id')->constrained('users');
+    $table->decimal('imprest_amount', 14, 2);
+    $table->timestamps();
+});
+
+Schema::create('petty_cash_expenses', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('petty_cash_fund_id')->constrained();
+    $table->date('expense_date');
+    $table->decimal('amount', 14, 2);
+    $table->string('description');
+    $table->foreignId('voucher_id')->nullable()->constrained();
+    $table->timestamps();
+});
+
+```
+
 ```sql
 CREATE TABLE cash_accounts (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

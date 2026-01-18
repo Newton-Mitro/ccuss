@@ -1,3 +1,32 @@
+```php
+Schema::create('cheque_books', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('bank_account_id')->constrained();
+    $table->string('series_start');
+    $table->string('series_end');
+    $table->date('issued_date');
+    $table->timestamps();
+});
+
+Schema::create('cheques', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('cheque_book_id')->constrained();
+    $table->string('cheque_no')->unique();
+    $table->date('cheque_date');
+    $table->decimal('amount', 14, 2)->nullable();
+    $table->enum('status', [
+        'ISSUED',
+        'DEPOSITED',
+        'CLEARED',
+        'BOUNCED',
+        'CANCELLED'
+    ]);
+    $table->foreignId('voucher_id')->nullable()->constrained();
+    $table->timestamps();
+});
+
+```
+
 ```sql
 CREATE TABLE cheque_books (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

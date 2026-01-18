@@ -1,178 +1,310 @@
-# HR Management Module Schema
+```php
+<?php
 
-This schema covers **employees, attendance, leave management, leave balances, overtime, and payroll**.
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
----
+return new class extends Migration {
 
-## 1. Departments
+    public function up(): void
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | 1. Departments
+        |--------------------------------------------------------------------------
+        */
+        Schema::create('departments', function (Blueprint $table) {
+            $table->id();
+            $table->string('name', 50);
+            $table->text('description')->nullable();
+            $table->timestamp('created_at')->useCurrent();
+        });
 
-```sql
--- ================================
--- 1. Departments & Employees
--- ================================
-CREATE TABLE departments (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+        /*
+        |--------------------------------------------------------------------------
+        | Employees
+        |--------------------------------------------------------------------------
+        */
+        Schema::create('employees', function (Blueprint $table) {
+            $table->id();
 
-CREATE TABLE employees (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    first_name VARCHAR(50) NOT NULL,
-    last_name VARCHAR(50) NOT NULL,
-    employee_code VARCHAR(20) UNIQUE NOT NULL,
-    department_id BIGINT UNSIGNED,
-    designation VARCHAR(50),
-    joining_date DATE NOT NULL,
-    status ENUM('ACTIVE','INACTIVE','RESIGNED','TERMINATED') DEFAULT 'ACTIVE',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (department_id) REFERENCES departments(id)
-);
+            $table->string('first_name', 50);
+            $table->string('last_name', 50);
+            $table->string('employee_code', 20)->unique();
 
--- ================================
--- 2. Attendance & Leave
--- ================================
-CREATE TABLE employee_attendances (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    employee_id BIGINT UNSIGNED NOT NULL,
-    attendance_date DATE NOT NULL,
-    check_in TIME DEFAULT NULL,
-    check_out TIME DEFAULT NULL,
-    status ENUM('PRESENT','ABSENT','ON_LEAVE','HOLIDAY') DEFAULT 'PRESENT',
-    work_hours DECIMAL(5,2) DEFAULT 0.00,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (employee_id) REFERENCES employees(id),
-    UNIQUE(employee_id, attendance_date)
-);
+            $table->foreignId('department_id')
+                ->nullable()
+                ->constrained()
+                ->nullOnDelete();
 
-CREATE TABLE leave_types (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    description TEXT,
-    max_days_per_year INT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+            $table->string('designation', 50)->nullable();
+            $table->date('joining_date');
 
-CREATE TABLE employee_leaves (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    employee_id BIGINT UNSIGNED NOT NULL,
-    leave_type_id BIGINT UNSIGNED NOT NULL,
-    start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
-    total_days DECIMAL(5,2) DEFAULT 0.00,   -- Supports half days
-    leave_hours DECIMAL(5,2) DEFAULT 0.00,  -- For hour-based leave
-    status ENUM('PENDING','APPROVED','REJECTED','CANCELLED') DEFAULT 'PENDING',
-    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    approved_by BIGINT UNSIGNED DEFAULT NULL,
-    approved_at TIMESTAMP DEFAULT NULL,
-    FOREIGN KEY (employee_id) REFERENCES employees(id),
-    FOREIGN KEY (leave_type_id) REFERENCES leave_types(id),
-    FOREIGN KEY (approved_by) REFERENCES employees(id)
-);
+            $table->enum('status', [
+                'ACTIVE','INACTIVE','RESIGNED','TERMINATED'
+            ])->default('ACTIVE');
 
-CREATE TABLE employee_leave_balances (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    employee_id BIGINT UNSIGNED NOT NULL,
-    leave_type_id BIGINT UNSIGNED NOT NULL,
-    total_allocated_hours DECIMAL(5,2) DEFAULT 0.00,
-    used_hours DECIMAL(5,2) DEFAULT 0.00,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (employee_id) REFERENCES employees(id),
-    FOREIGN KEY (leave_type_id) REFERENCES leave_types(id),
-    UNIQUE(employee_id, leave_type_id)
-);
+            $table->timestamps();
+        });
 
--- ================================
--- 3. Overtime
--- ================================
-CREATE TABLE employee_overtime (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    employee_id BIGINT UNSIGNED NOT NULL,
-    overtime_date DATE NOT NULL,
-    hours DECIMAL(5,2) NOT NULL,
-    rate DECIMAL(18,2) NOT NULL,
-    amount DECIMAL(18,2) GENERATED ALWAYS AS (hours * rate) STORED,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (employee_id) REFERENCES employees(id)
-);
+        /*
+        |--------------------------------------------------------------------------
+        | 2. Attendance
+        |--------------------------------------------------------------------------
+        */
+        Schema::create('employee_attendances', function (Blueprint $table) {
+            $table->id();
 
--- ================================
--- 4. Payroll & Salaries
--- ================================
-CREATE TABLE employee_salaries (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    employee_id BIGINT UNSIGNED NOT NULL,
-    basic_salary DECIMAL(18,2) NOT NULL,
-    allowances JSON DEFAULT NULL,    -- {"housing":200,"transport":50}
-    deductions JSON DEFAULT NULL,    -- {"tax":50,"loan":100}
-    gross_salary DECIMAL(18,2) GENERATED ALWAYS AS (
-        basic_salary +
-        COALESCE(JSON_EXTRACT(allowances, '$'),0)
-    ) STORED,
-    net_salary DECIMAL(18,2) GENERATED ALWAYS AS (
-        gross_salary -
-        COALESCE(JSON_EXTRACT(deductions, '$'),0)
-    ) STORED,
-    salary_month DATE NOT NULL,
-    status ENUM('PENDING','PAID') DEFAULT 'PENDING',
-    paid_at TIMESTAMP DEFAULT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (employee_id) REFERENCES employees(id),
-    UNIQUE(employee_id, salary_month)
-);
+            $table->foreignId('employee_id')
+                ->constrained()
+                ->cascadeOnDelete();
 
--- ================================
--- 5. Salary Transactions / Ledger
--- ================================
-CREATE TABLE employee_salary_transactions (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    employee_id BIGINT UNSIGNED NOT NULL,
-    salary_id BIGINT UNSIGNED DEFAULT NULL,   -- Links to monthly salary record
-    transaction_date DATE NOT NULL,
-    description VARCHAR(255),
-    debit DECIMAL(18,2) DEFAULT 0.00,        -- Reductions: deductions, advance settlements
-    credit DECIMAL(18,2) DEFAULT 0.00,       -- Payments/credits: salary, bonuses
-    balance DECIMAL(18,2) DEFAULT 0.00,
-    transaction_type ENUM(
-        'SALARY','ALLOWANCE','DEDUCTION','ADVANCE_SETTLEMENT','BONUS','ADJUSTMENT'
-    ) DEFAULT 'SALARY',
-    reference_no VARCHAR(50),
-    gl_entry_id BIGINT UNSIGNED DEFAULT NULL, -- GL journal entry link
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (employee_id) REFERENCES employees(id),
-    FOREIGN KEY (salary_id) REFERENCES employee_salaries(id)
-);
+            $table->date('attendance_date');
+            $table->time('check_in')->nullable();
+            $table->time('check_out')->nullable();
 
--- ================================
--- 6. Advance Salaries
--- ================================
-CREATE TABLE employee_advance_salaries (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    employee_id BIGINT UNSIGNED NOT NULL,
-    advance_date DATE NOT NULL,
-    amount DECIMAL(18,2) NOT NULL,
-    balance DECIMAL(18,2) NOT NULL,
-    reason VARCHAR(255),
-    status ENUM('ACTIVE','SETTLED','CANCELLED') DEFAULT 'ACTIVE',
-    gl_account_id BIGINT UNSIGNED NOT NULL,  -- Link to Prepaid Salaries in GL
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (employee_id) REFERENCES employees(id)
-);
+            $table->enum('status', [
+                'PRESENT','ABSENT','ON_LEAVE','HOLIDAY'
+            ])->default('PRESENT');
 
-CREATE TABLE employee_advance_salary_transactions (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    advance_salary_id BIGINT UNSIGNED NOT NULL,
-    txn_date DATE NOT NULL,
-    description VARCHAR(255),
-    debit DECIMAL(18,2) DEFAULT 0.00,   -- Deduction from balance during payroll
-    credit DECIMAL(18,2) DEFAULT 0.00,  -- Additional top-up
-    balance DECIMAL(18,2) NOT NULL,
-    gl_entry_id BIGINT UNSIGNED NOT NULL,
-    reference_no VARCHAR(50),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (advance_salary_id) REFERENCES employee_advance_salaries(id)
-);
+            $table->decimal('work_hours', 5, 2)->default(0);
+
+            $table->timestamp('created_at')->useCurrent();
+
+            $table->unique(['employee_id', 'attendance_date']);
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Leave Types
+        |--------------------------------------------------------------------------
+        */
+        Schema::create('leave_types', function (Blueprint $table) {
+            $table->id();
+
+            $table->string('name', 50);
+            $table->text('description')->nullable();
+            $table->integer('max_days_per_year')->default(0);
+
+            $table->timestamp('created_at')->useCurrent();
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Employee Leaves
+        |--------------------------------------------------------------------------
+        */
+        Schema::create('employee_leaves', function (Blueprint $table) {
+            $table->id();
+
+            $table->foreignId('employee_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->foreignId('leave_type_id')
+                ->constrained()
+                ->restrictOnDelete();
+
+            $table->date('start_date');
+            $table->date('end_date');
+
+            $table->decimal('total_days', 5, 2)->default(0);
+            $table->decimal('leave_hours', 5, 2)->default(0);
+
+            $table->enum('status', [
+                'PENDING','APPROVED','REJECTED','CANCELLED'
+            ])->default('PENDING');
+
+            $table->timestamp('applied_at')->useCurrent();
+
+            $table->foreignId('approved_by')
+                ->nullable()
+                ->constrained('employees')
+                ->nullOnDelete();
+
+            $table->timestamp('approved_at')->nullable();
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Leave Balances
+        |--------------------------------------------------------------------------
+        */
+        Schema::create('employee_leave_balances', function (Blueprint $table) {
+            $table->id();
+
+            $table->foreignId('employee_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->foreignId('leave_type_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->decimal('total_allocated_hours', 5, 2)->default(0);
+            $table->decimal('used_hours', 5, 2)->default(0);
+
+            $table->timestamp('created_at')->useCurrent();
+
+            $table->unique(['employee_id', 'leave_type_id']);
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | 3. Overtime
+        |--------------------------------------------------------------------------
+        */
+        Schema::create('employee_overtime', function (Blueprint $table) {
+            $table->id();
+
+            $table->foreignId('employee_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->date('overtime_date');
+            $table->decimal('hours', 5, 2);
+            $table->decimal('rate', 18, 2);
+
+            $table->decimal('amount', 18, 2)
+                ->storedAs('hours * rate');
+
+            $table->timestamp('created_at')->useCurrent();
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | 4. Salaries
+        |--------------------------------------------------------------------------
+        */
+        Schema::create('employee_salaries', function (Blueprint $table) {
+            $table->id();
+
+            $table->foreignId('employee_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->decimal('basic_salary', 18, 2);
+            $table->json('allowances')->nullable();
+            $table->json('deductions')->nullable();
+
+            $table->decimal('gross_salary', 18, 2)
+                ->storedAs('basic_salary');
+
+            $table->decimal('net_salary', 18, 2)
+                ->storedAs('basic_salary');
+
+            $table->date('salary_month');
+
+            $table->enum('status', ['PENDING','PAID'])->default('PENDING');
+            $table->timestamp('paid_at')->nullable();
+
+            $table->timestamp('created_at')->useCurrent();
+
+            $table->unique(['employee_id', 'salary_month']);
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | 5. Salary Transactions / Ledger
+        |--------------------------------------------------------------------------
+        */
+        Schema::create('employee_salary_transactions', function (Blueprint $table) {
+            $table->id();
+
+            $table->foreignId('employee_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->foreignId('salary_id')
+                ->nullable()
+                ->constrained('employee_salaries')
+                ->nullOnDelete();
+
+            $table->date('transaction_date');
+            $table->string('description')->nullable();
+
+            $table->decimal('debit', 18, 2)->default(0);
+            $table->decimal('credit', 18, 2)->default(0);
+            $table->decimal('balance', 18, 2)->default(0);
+
+            $table->enum('transaction_type', [
+                'SALARY','ALLOWANCE','DEDUCTION',
+                'ADVANCE_SETTLEMENT','BONUS','ADJUSTMENT'
+            ])->default('SALARY');
+
+            $table->string('reference_no', 50)->nullable();
+            $table->unsignedBigInteger('gl_entry_id')->nullable();
+
+            $table->timestamp('created_at')->useCurrent();
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | 6. Advance Salaries
+        |--------------------------------------------------------------------------
+        */
+        Schema::create('employee_advance_salaries', function (Blueprint $table) {
+            $table->id();
+
+            $table->foreignId('employee_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->date('advance_date');
+            $table->decimal('amount', 18, 2);
+            $table->decimal('balance', 18, 2);
+
+            $table->string('reason')->nullable();
+
+            $table->enum('status', [
+                'ACTIVE','SETTLED','CANCELLED'
+            ])->default('ACTIVE');
+
+            $table->unsignedBigInteger('gl_account_id');
+
+            $table->timestamps();
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Advance Salary Transactions
+        |--------------------------------------------------------------------------
+        */
+        Schema::create('employee_advance_salary_transactions', function (Blueprint $table) {
+            $table->id();
+
+            $table->foreignId('advance_salary_id')
+                ->constrained('employee_advance_salaries')
+                ->cascadeOnDelete();
+
+            $table->date('txn_date');
+            $table->string('description')->nullable();
+
+            $table->decimal('debit', 18, 2)->default(0);
+            $table->decimal('credit', 18, 2)->default(0);
+            $table->decimal('balance', 18, 2);
+
+            $table->unsignedBigInteger('gl_entry_id');
+            $table->string('reference_no', 50)->nullable();
+
+            $table->timestamp('created_at')->useCurrent();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('employee_advance_salary_transactions');
+        Schema::dropIfExists('employee_advance_salaries');
+        Schema::dropIfExists('employee_salary_transactions');
+        Schema::dropIfExists('employee_salaries');
+        Schema::dropIfExists('employee_overtime');
+        Schema::dropIfExists('employee_leave_balances');
+        Schema::dropIfExists('employee_leaves');
+        Schema::dropIfExists('leave_types');
+        Schema::dropIfExists('employee_attendances');
+        Schema::dropIfExists('employees');
+        Schema::dropIfExists('departments');
+    }
+};
 ```
