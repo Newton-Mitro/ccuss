@@ -1,7 +1,7 @@
 ```php
 Schema::create('deposit_products', function (Blueprint $table) {
     $table->id();
-    $table->string('code')->unique(); // SAV, RD, FD, TERM, SHARE
+    $table->string('code')->unique(); // Ex. SAV, HDS_SAV, STD_SAV, FDS_SAV, BS_RD, SS_RD, MD_RD, MDS_RD, KDS_RD, MAR_D_RD, PBS_RD, FD, DDS_FD, SHARE
     $table->string('name');
 
     $table->enum('category', ['SAVINGS','SHARE','TERM','RECURRING']);
@@ -132,22 +132,5 @@ Schema::create('deposit_fine_policies', function (Blueprint $table) {
 });
 
 
-Schema::create('deposit_account_fines', function (Blueprint $table) {
-    $table->id();
-    $table->foreignId('deposit_account_id')->constrained();
-    $table->foreignId('deposit_fine_policy_id')->constrained();
-
-    $table->date('event_date');
-    $table->decimal('fine_amount', 15, 2);
-
-    $table->enum('status', ['PENDING','WAIVED','POSTED'])->default('PENDING');
-    $table->foreignId('voucher_id')->nullable()->constrained();
-
-    $table->foreignId('waived_by')->nullable()->constrained('users');
-    $table->timestamp('waived_at')->nullable();
-
-    $table->text('remarks')->nullable();
-    $table->timestamps();
-});
 
 ```

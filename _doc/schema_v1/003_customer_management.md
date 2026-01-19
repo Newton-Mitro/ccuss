@@ -15,20 +15,17 @@ return new class extends Migration {
             $table->string('phone', 50)->nullable();
             $table->string('email', 100)->nullable();
 
-            $table->enum('kyc_level', ['MIN', 'STD', 'ENH'])->default('MIN');
-            $table->enum('status', ['PENDING', 'ACTIVE', 'SUSPENDED', 'CLOSED'])->default('ACTIVE');
-
             // Personal info
             $table->date('dob')->nullable();
             $table->enum('gender', ['MALE', 'FEMALE', 'OTHER'])->nullable();
             $table->enum('religion', ['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER'])->nullable();
 
-            $table->enum('identification_type', ['NID', 'BRN', 'PASSPORT', 'DRIVING_LICENSE']);
+            $table->enum('identification_type', ['NID', 'BRN', 'REGISTRATION_NO', 'PASSPORT', 'DRIVING_LICENSE']);
             $table->string('identification_number', 50);
             $table->string('photo', 255)->nullable();
 
-            // Organization info
-            $table->string('registration_no', 150)->nullable();
+            $table->enum('kyc_status', ['PENDING', 'VERIFIED', 'REJECTED'])->default('PENDING');
+            $table->enum('status', ['PENDING', 'ACTIVE', 'SUSPENDED', 'CLOSED'])->default('ACTIVE');
 
             $table->timestamps();
         });
@@ -58,7 +55,17 @@ return new class extends Migration {
         Schema::create('customer_family_relations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
-            $table->foreignId('relative_id')->constrained('customers')->cascadeOnDelete();
+
+            $table->foreignId('relative_id')->nullable();
+            $table->string('name', 150);
+            $table->string('phone', 50)->nullable();
+            $table->string('email', 100)->nullable();
+            $table->date('dob')->nullable();
+            $table->enum('gender', ['MALE', 'FEMALE', 'OTHER'])->nullable();
+            $table->enum('religion', ['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER'])->nullable();
+            $table->enum('identification_type', ['NID', 'BRN', 'PASSPORT', 'DRIVING_LICENSE']);
+            $table->string('identification_number', 50);
+            $table->string('photo', 255)->nullable();
 
             $relations = [
                 'FATHER','MOTHER','SON','DAUGHTER','BROTHER','COUSIN_BROTHER','COUSIN_SISTER','SISTER','HUSBAND','WIFE',
@@ -86,11 +93,33 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        Schema::create('introducers', function (Blueprint $table) {
+        Schema::create('customer_introductions', function (Blueprint $table) {
             $table->id();
+
+            $table->foreignId('introduced_customer_id')->constrained('customers')->cascadeOnDelete();
+            $table->foreignId('introducer_customer_id')->constrained('customers');
+            $table->foreignId('introducer_account_id')->constrained('deposit_accounts');
+
+            $table->enum('relationship_type', [ 'FAMILY', 'FRIEND', 'BUSINESS', 'COLLEAGUE', 'OTHER'])->default('OTHER');
+
+            $table->enum('verification_status', ['PENDING', 'VERIFIED', 'REJECTED'])->default('PENDING');
+            $table->foreignId('verified_by')->nullable()->constrained('users'); // bank officer
+            $table->timestamp('verified_at')->nullable();
+            $table->text('remarks')->nullable();
+
+            $table->timestamps();
+        });
+
+        Schema::create('kyc_verifications', function (Blueprint $table) {
+            $table->id();
+
             $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
-            $table->foreignId('introducer_id')->constrained('customers');
-            $table->decimal('commission_rate', 18, 2)->default(0);
+
+            $table->enum('verification_type', ['INTRODUCER', 'NID', 'BRN', 'REGISTRATION_NO', 'PASSPORT', 'DRIVING_LICENSE']);
+            $table->enum('status', ['PENDING', 'APPROVED', 'REJECTED']);
+
+            $table->foreignId('verified_by')->nullable()->constrained('users');
+            $table->timestamp('verified_at')->nullable();
 
             $table->timestamps();
         });

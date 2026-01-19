@@ -9,9 +9,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        /**
-         * Roles
-         */
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
             $table->string('name', 50)->unique();
@@ -19,9 +16,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        /**
-         * Permissions
-         */
         Schema::create('permissions', function (Blueprint $table) {
             $table->id();
             $table->string('name', 100)->unique();
@@ -29,10 +23,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        /**
-         * Permission ↔ Role (Pivot)
-         * Laravel convention: permission_role
-         */
         Schema::create('permission_role', function (Blueprint $table) {
             $table->foreignId('permission_id')
                   ->constrained()
@@ -47,9 +37,6 @@ return new class extends Migration
             $table->unique(['permission_id', 'role_id']);
         });
 
-        /**
-         * Users
-         */
         Schema::create('users', function (Blueprint $table) {
             $table->id();
 
@@ -71,10 +58,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        /**
-         * Role ↔ User (Pivot)
-         * Laravel convention: role_user
-         */
         Schema::create('role_user', function (Blueprint $table) {
             $table->foreignId('role_id')
                   ->constrained()

@@ -1,4 +1,4 @@
-```sql
+```php
 <?php
 
 use Illuminate\Database\Migrations\Migration;
@@ -26,9 +26,7 @@ return new class extends Migration {
             $table->text('purpose')->nullable();
             $table->date('application_date');
 
-            $table->enum('status', [
-                'PENDING','APPROVED','REJECTED','DISBURSED','CLOSED'
-            ])->default('PENDING');
+            $table->enum('status', ['PENDING','APPROVED','REJECTED','DISBURSED','CLOSED'])->default('PENDING');
 
             $table->timestamps();
         });
@@ -66,9 +64,7 @@ return new class extends Migration {
             $table->foreignId('loan_account_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('deposit_account_id')->constrained()->restrictOnDelete();
 
-            $table->enum('collateral_type', [
-                'SURETY','LIEN','ASSET','PROPERTY','BLANK_CHEQUE'
-            ]);
+            $table->enum('collateral_type', ['SURETY','LIEN','ASSET','PROPERTY','BLANK_CHEQUE']);
 
             $table->string('reference')->nullable();
             $table->decimal('value', 18, 2);
@@ -107,9 +103,7 @@ return new class extends Migration {
             $table->string('employer_name', 100)->nullable();
             $table->string('designation', 50)->nullable();
 
-            $table->enum('employment_type', [
-                'PERMANENT','CONTRACT','SELF_EMPLOYED','OTHER'
-            ])->default('OTHER');
+            $table->enum('employment_type', ['PERMANENT','CONTRACT','SELF_EMPLOYED','OTHER'])->default('OTHER');
 
             $table->decimal('monthly_income', 18, 2)->nullable();
             $table->integer('years_of_service')->nullable();
@@ -233,9 +227,7 @@ return new class extends Migration {
             $table->foreignId('loan_application_id')->constrained()->cascadeOnDelete();
             $table->foreignId('changed_by')->constrained('users')->restrictOnDelete();
 
-            $table->enum('status', [
-                'PENDING','APPROVED','REJECTED','DISBURSED','CLOSED'
-            ]);
+            $table->enum('status', ['PENDING','APPROVED','REJECTED','DISBURSED','CLOSED']);
 
             $table->timestamp('changed_at')->useCurrent();
         });
@@ -257,63 +249,6 @@ return new class extends Migration {
         Schema::dropIfExists('loan_applications');
     }
 };
-```
-
-## ER Diagram
-
-```mermaid
-erDiagram
-    CUSTOMERS ||--o{ LOAN_APPLICATIONS : applies
-    LOAN_POLICIES ||--o{ LOAN_APPLICATIONS : defines
-    LOAN_ACCOUNTS ||--o{ LOAN_APPLICATIONS : created_from
-    USERS ||--o{ LOAN_APPROVALS : approves
-    USERS ||--o{ LOAN_APPLICATION_STATUS_HISTORY : changes_status
-
-    LOAN_APPLICATIONS ||--o{ LOAN_COLLATERALS : has
-    LOAN_APPLICATIONS ||--o{ LOAN_GUARANTORS : has
-    LOAN_APPLICATIONS ||--o{ LOAN_APPLICANT_WORK_DETAILS : has
-    LOAN_APPLICATIONS ||--o{ LOAN_APPLICANT_ASSETS : has
-    LOAN_APPLICATIONS ||--o{ LOAN_APPLICANT_INCOMES : has
-    LOAN_APPLICATIONS ||--o{ LOAN_APPLICANT_EXPENSES : has
-    LOAN_APPLICATIONS ||--o{ LOAN_APPLICATION_SUPPORTING_DOCS : has
-    LOAN_APPLICATIONS ||--o{ LOAN_APPROVALS : approvals
-    LOAN_APPLICATIONS ||--o{ LOAN_DISBURSEMENTS : disbursed
-    LOAN_APPLICATIONS ||--o{ LOAN_APPLICATION_STATUS_HISTORY : status_updates
-
-    DEPOSIT_ACCOUNTS ||--o{ LOAN_COLLATERALS : linked_to
-
-```
-
-```mermaid
-erDiagram
-    %% Core entities
-    CUSTOMERS ||--o{ LOAN_APPLICATIONS : applies
-    LOAN_POLICIES ||--o{ LOAN_APPLICATIONS : defines
-    LOAN_ACCOUNTS ||--o{ LOAN_APPLICATIONS : created_from
-    USERS ||--o{ LOAN_APPROVALS : approves
-    USERS ||--o{ LOAN_APPLICATION_STATUS_HISTORY : changes_status
-    DEPOSIT_ACCOUNTS ||--o{ LOAN_COLLATERALS : linked_to
-
-    %% Application details
-    LOAN_APPLICATIONS ||--o{ LOAN_COLLATERALS : has
-    LOAN_APPLICATIONS ||--o{ LOAN_GUARANTORS : has
-    LOAN_APPLICATIONS ||--o{ LOAN_APPLICANT_WORK_DETAILS : has
-    LOAN_APPLICATIONS ||--o{ LOAN_APPLICANT_ASSETS : has
-    LOAN_APPLICATIONS ||--o{ LOAN_APPLICANT_INCOMES : has
-    LOAN_APPLICATIONS ||--o{ LOAN_APPLICANT_EXPENSES : has
-    LOAN_APPLICATIONS ||--o{ LOAN_APPLICATION_SUPPORTING_DOCS : has
-    LOAN_APPLICATIONS ||--o{ LOAN_APPROVALS : approvals
-    LOAN_APPLICATIONS ||--o{ LOAN_DISBURSEMENTS : disbursed
-    LOAN_APPLICATIONS ||--o{ LOAN_APPLICATION_STATUS_HISTORY : status_updates
-
-    %% Loan accounts & repayment
-    LOAN_POLICIES ||--o{ LOAN_ACCOUNTS : defines
-    LOAN_ACCOUNTS ||--o{ LOAN_SCHEDULES : schedules
-    LOAN_ACCOUNTS ||--o{ LOAN_PAYMENTS : receives
-    LOAN_ACCOUNTS ||--o{ LOAN_PENALTIES : incurs
-    LOAN_ACCOUNTS ||--o{ LOAN_INTEREST_PROVISIONS : accrues
-    LOAN_ACCOUNTS ||--o{ LOAN_REPAYMENT_REBATES : gets
-    LOAN_SCHEDULES ||--o{ LOAN_PENALTIES : related_to
 ```
 
 ## Lifecycle Flow

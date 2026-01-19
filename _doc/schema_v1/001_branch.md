@@ -51,9 +51,9 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('branches');
         Schema::dropIfExists('fiscal_periods');
         Schema::dropIfExists('fiscal_years');
+        Schema::dropIfExists('branches');
     }
 };
 

@@ -70,11 +70,11 @@ return new class extends Migration
         });
 
         /**
-         * Deposit Account Transactions
+         * Deposit Account Transactions (Mandatory - Source of truth)
          */
         Schema::create('deposit_account_transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('gl_deposit_payable_id')->nullable()->constrained('gl_accounts');
+            $table->foreignId('gl_deposit_payable_id')->nullable()->constrained('accounts');
             $table->foreignId('deposit_account_id')->constrained()->cascadeOnDelete();
             $table->foreignId('related_schedule_id')->nullable()->constrained('deposit_account_schedules');
 
@@ -100,23 +100,47 @@ return new class extends Migration
          */
         Schema::create('deposit_account_fees', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('gl_fee_income_id')->nullable()->constrained('gl_accounts');
+            $table->foreignId('gl_fee_income_id')->nullable()->constrained('accounts');
             $table->foreignId('deposit_account_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('related_schedule_id')->nullable()->constrained('deposit_account_schedules');
 
             $table->date('txn_date');
             $table->string('description')->nullable();
             $table->enum('fee_type', [
-                'LATE_PAYMENT',
                 'INACTIVITY',
                 'MAINTENANCE',
                 'CLOSURE',
                 'TRANSFER',
                 'OTHER'
-            ])->default('LATE_PAYMENT');
+            ])->default('MAINTENANCE');
             $table->decimal('amount', 18, 2);
-            $table->boolean('settled')->default(false);
+            $table->enum('status', ['PENDING','WAIVED','POSTED'])->default('PENDING');
 
+            $table->timestamps();
+        });
+
+
+        Schema::create('deposit_account_fines', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('deposit_account_id')->constrained();
+            $table->foreignId('deposit_fine_policy_id')->constrained();
+            $table->foreignId('related_schedule_id')->nullable()->constrained('deposit_account_schedules');
+
+            $table->enum('fine_type', [
+                'LATE_PAYMENT',
+                'CLOSURE',
+                'OTHER'
+            ])->default('LATE_PAYMENT');
+
+            $table->date('event_date');
+            $table->decimal('fine_amount', 15, 2);
+
+            $table->enum('status', ['PENDING','WAIVED','POSTED'])->default('PENDING');
+            $table->foreignId('voucher_id')->nullable()->constrained();
+
+            $table->foreignId('waived_by')->nullable()->constrained('users');
+            $table->timestamp('waived_at')->nullable();
+
+            $table->text('remarks')->nullable();
             $table->timestamps();
         });
 
@@ -143,8 +167,8 @@ return new class extends Migration
                   ->cascadeOnDelete();
 
             $table->foreignId('deposit_account_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('gl_interest_payable_id')->nullable()->constrained('gl_accounts');
-            $table->foreignId('gl_interest_expense_id')->nullable()->constrained('gl_accounts');
+            $table->foreignId('gl_interest_payable_id')->nullable()->constrained('accounts');
+            $table->foreignId('gl_interest_expense_id')->nullable()->constrained('accounts');
 
             $table->date('provision_date');
             $table->decimal('accrued_interest', 18, 2);

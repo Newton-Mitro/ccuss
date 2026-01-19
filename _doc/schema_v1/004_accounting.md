@@ -1,14 +1,3 @@
-Invoice → Journal → Journal Entries → Trial Balance → Financial Statements
-Payments simply generate journals — no magic numbers, no hidden state.
-
-## What we can do next (your call)
-
-    - Convert this into Laravel migrations + models
-    - Generate a Mermaid ER diagram
-    - Add RBAC + approval workflow
-    - Design Profit & Loss / Balance Sheet SQL views
-    - Optimize it for high-volume fintech scale
-
 ```php
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -18,11 +7,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        /**
-         * -------------------------------
-         *  GL ACCOUNTS TABLE
-         * -------------------------------
-         */
         Schema::create('accounts', function (Blueprint $table) {
             $table->id();
             $table->string('code', 50)->unique()->comment('Unique GL code');
@@ -43,11 +27,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        /**
-         * -------------------------------
-         *  JOURNAL ENTRIES TABLE
-         * -------------------------------
-         */
         Schema::create('vouchers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('fiscal_year_id')->constrained()->nullOnDelete();
@@ -72,11 +51,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        /**
-         * -------------------------------
-         *  JOURNAL LINES TABLE
-         * -------------------------------
-         */
         Schema::create('voucher_lines', function (Blueprint $table) {
             $table->id();
 
@@ -143,13 +117,13 @@ a.id AS account_id,
 a.code AS account_code,
 a.name AS account_name,
 a.type AS account_type,
-SUM(je.debit) AS total_debit,
-SUM(je.credit) AS total_credit,
-(SUM(je.debit) - SUM(je.credit)) AS balance
+SUM(ve.debit) AS total_debit,
+SUM(ve.credit) AS total_credit,
+(SUM(ve.debit) - SUM(ve.credit)) AS balance
 FROM accounts a
-LEFT JOIN journal_entries je ON je.account_id = a.id
-LEFT JOIN journals j ON j.id = je.journal_id
-WHERE j.status = 'POSTED'
+LEFT JOIN voucher_entries ve ON ve.account_id = a.id
+LEFT JOIN vouchers v ON v.id = ve.journal_id
+WHERE v.status = 'POSTED'
 GROUP BY a.id, a.code, a.name, a.type;
 
 
@@ -167,11 +141,11 @@ WHEN a.type = 'EXPENSE' THEN 'EXPENSE'
 END AS category,
 a.id AS account_id,
 a.name AS account_name,
-SUM(je.credit - je.debit) AS amount
+SUM(ve.credit - ve.debit) AS amount
 FROM accounts a
-JOIN journal_entries je ON je.account_id = a.id
-JOIN journals j ON j.id = je.journal_id
-WHERE j.status = 'POSTED'
+JOIN voucher_entries ve ON ve.account_id = a.id
+JOIN vouchers v ON v.id = ve.journal_id
+WHERE v.status = 'POSTED'
 AND a.type IN ('INCOME', 'EXPENSE')
 GROUP BY category, a.id, a.name;
 
@@ -188,13 +162,13 @@ a.type AS category,
 a.id AS account_id,
 a.name AS account_name,
 CASE
-WHEN a.type = 'ASSET' THEN SUM(je.debit - je.credit)
-ELSE SUM(je.credit - je.debit)
+WHEN a.type = 'ASSET' THEN SUM(ve.debit - ve.credit)
+ELSE SUM(ve.credit - ve.debit)
 END AS balance
 FROM accounts a
-JOIN journal_entries je ON je.account_id = a.id
-JOIN journals j ON j.id = je.journal_id
-WHERE j.status = 'POSTED'
+JOIN voucher_entries ve ON ve.account_id = a.id
+JOIN vouchers v ON v.id = ve.journal_id
+WHERE v.status = 'POSTED'
 AND a.type IN ('ASSET', 'LIABILITY', 'EQUITY')
 GROUP BY a.type, a.id, a.name;
 
@@ -203,7 +177,7 @@ GROUP BY a.type, a.id, a.name;
 // Notes
 // ================================
 // 1. Views are read-only
-// 2. Always filter journals by status = POSTED
+// 2. Always filter vouchers by status = POSTED
 // 3. Can be wrapped in Laravel migrations using DB::statement()
 // 4. Date filters can be applied at query time
 ```
@@ -339,10 +313,10 @@ erDiagram
 
 **What it delivers**
 
--   Debit total per account
--   Credit total per account
--   Net balance
--   Only includes POSTED journals (non-negotiable for audit integrity)
+- Debit total per account
+- Credit total per account
+- Net balance
+- Only includes POSTED vouchers (non-negotiable for audit integrity)
 
 This view is the backbone for:
 
@@ -356,19 +330,18 @@ This view is the backbone for:
 
 **What it delivers**
 
--   Income vs Expense accounts
--   Clean aggregation per account
--   Net amount ready for:
-
-    -   Gross profit
-    -   Net profit
-    -   Trend analysis
+- Income vs Expense accounts
+- Clean aggregation per account
+- Net amount ready for:
+    - Gross profit
+    - Net profit
+    - Trend analysis
 
 Perfect for:
 
--   Monthly P&L
--   Department rollups
--   Dashboard KPIs
+- Monthly P&L
+- Department rollups
+- Dashboard KPIs
 
 ## 3️⃣ Balance Sheet (view_balance_sheet)
 
@@ -376,10 +349,10 @@ Perfect for:
 
 **What it delivers**
 
--   Assets
--   Liabilities
--   Equity
--   Correct sign handling (assets vs claims)
+- Assets
+- Liabilities
+- Equity
+- Correct sign handling (assets vs claims)
 
 This guarantees:
 
