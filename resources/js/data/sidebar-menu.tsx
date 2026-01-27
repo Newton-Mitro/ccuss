@@ -8,19 +8,37 @@ export const sidebarMenu: SidebarItem[] = [
         match_path: 'dashboard',
     },
     {
-        name: 'Branches',
-        icon: <i className="fa-solid fa-location-dot" />,
-        path: '/auth/branches',
-        match_path: 'branches',
-    },
-    {
-        name: 'Media',
+        name: 'All Media',
         icon: <i className="fa-solid fa-photo-film"></i>,
         path: '/auth/media',
         match_path: 'media',
     },
     {
-        name: 'Customer Management',
+        name: 'Organizational Structure',
+        icon: <i className="fa-solid fa-photo-film"></i>,
+        children: [
+            {
+                name: 'Branches',
+                icon: <i className="fa-solid fa-location-dot" />,
+                path: '/auth/branches',
+                match_path: 'branches',
+            },
+            {
+                name: 'Fiscal Years',
+                icon: <i className="fa-solid fa-map-location-dot" />,
+                path: '/auth/fiscal-years',
+                match_path: 'fiscal-years',
+            },
+            {
+                name: 'Fiscal Periods',
+                icon: <i className="fa-solid fa-person-breastfeeding" />,
+                path: '/auth/fiscal-periods',
+                match_path: 'fiscal-periods',
+            },
+        ],
+    },
+    {
+        name: 'Customer Mgmt.',
         icon: <i className="fa-solid fa-users" />,
         children: [
             {
@@ -48,7 +66,7 @@ export const sidebarMenu: SidebarItem[] = [
                 match_path: 'signatures',
             },
             {
-                name: 'Online Client',
+                name: 'Online Service Registrations',
                 icon: <i className="fa-solid fa-street-view" />,
                 path: '/auth/online-clients',
                 match_path: 'online-clients',
@@ -140,41 +158,53 @@ export const sidebarMenu: SidebarItem[] = [
         ],
     },
     {
-        name: 'Manage Deposits',
+        name: 'Deposit Product Mgmt.',
         icon: <i className="fa-solid fa-sprout" />,
         children: [
             {
-                name: 'Deposit Policies',
+                name: 'Deposit Products',
                 icon: <i className="fa-solid fa-piggy-bank" />,
                 path: '/deposit-policies',
                 match_path: 'deposit-policies',
             },
             {
-                name: 'Deposit Tenures',
+                name: 'Tenure Wise Interest Rates',
                 icon: <i className="fa-solid fa-piggy-bank" />,
                 path: '/deposit-tenures',
                 match_path: 'deposit-tenures',
             },
             {
-                name: 'Saving Accounts',
+                name: 'Opening Policies',
                 icon: <i className="fa-solid fa-piggy-bank" />,
                 path: '/saving-accounts',
                 match_path: 'saving-accounts',
             },
             {
-                name: 'Deposit Holders',
+                name: 'Transaction Policies',
                 icon: <i className="fa-solid fa-piggy-bank" />,
                 path: '/deposit-holders',
                 match_path: 'deposit-holders',
             },
             {
-                name: 'Deposit Nominees',
+                name: 'Interest Policies',
                 icon: <i className="fa-solid fa-piggy-bank" />,
                 path: '/deposit-nominees',
                 match_path: 'deposit-nominees',
             },
             {
-                name: 'Deposit Schedules',
+                name: 'Closing Policies',
+                icon: <i className="fa-solid fa-piggy-bank" />,
+                path: '/deposit-schedules',
+                match_path: 'deposit-schedules',
+            },
+            {
+                name: 'Fine Policies',
+                icon: <i className="fa-solid fa-piggy-bank" />,
+                path: '/deposit-schedules',
+                match_path: 'deposit-schedules',
+            },
+            {
+                name: 'Product Ldeger Mappings',
                 icon: <i className="fa-solid fa-piggy-bank" />,
                 path: '/deposit-schedules',
                 match_path: 'deposit-schedules',
@@ -182,13 +212,169 @@ export const sidebarMenu: SidebarItem[] = [
         ],
     },
     {
-        name: 'Cheque Book',
-        icon: <i className="fa-solid fa-landmark" />,
-        path: '/cheque-book',
-        match_path: 'cheque-book',
+        name: 'Deposit Account Mgmt.',
+        icon: <i className="fa-solid fa-sprout" />,
+        children: [
+            {
+                name: 'Deposit Accounts',
+                icon: <i className="fa-solid fa-piggy-bank" />,
+                path: '/deposit-policies',
+                match_path: 'deposit-policies',
+            },
+            {
+                name: 'Deposit Schedules',
+                icon: <i className="fa-solid fa-piggy-bank" />,
+                path: '/deposit-tenures',
+                match_path: 'deposit-tenures',
+            },
+            {
+                name: 'Customer Cheque Books',
+                icon: <i className="fa-solid fa-piggy-bank" />,
+                path: '/deposit-tenures',
+                match_path: 'deposit-tenures',
+            },
+            {
+                name: 'Passbook Printing',
+                icon: <i className="fa-solid fa-piggy-bank" />,
+                path: '/deposit-tenures',
+                match_path: 'deposit-tenures',
+            },
+        ],
     },
     {
-        name: 'HR Management',
+        name: 'Loan Product Mgmt.',
+        icon: <i className="fa-solid fa-sprout" />,
+        children: [
+            {
+                name: 'Loan Products',
+                icon: <i className="fa-solid fa-piggy-bank" />,
+                path: '/deposit-policies',
+                match_path: 'deposit-policies',
+            },
+            {
+                name: 'Tenure Wise Interest Rates',
+                icon: <i className="fa-solid fa-piggy-bank" />,
+                path: '/deposit-tenures',
+                match_path: 'deposit-tenures',
+            },
+            {
+                name: 'Opening Policies',
+                icon: <i className="fa-solid fa-piggy-bank" />,
+                path: '/saving-accounts',
+                match_path: 'saving-accounts',
+            },
+            {
+                name: 'Transaction Policies',
+                icon: <i className="fa-solid fa-piggy-bank" />,
+                path: '/deposit-holders',
+                match_path: 'deposit-holders',
+            },
+            {
+                name: 'Interest Policies',
+                icon: <i className="fa-solid fa-piggy-bank" />,
+                path: '/deposit-nominees',
+                match_path: 'deposit-nominees',
+            },
+            {
+                name: 'Closing Policies',
+                icon: <i className="fa-solid fa-piggy-bank" />,
+                path: '/deposit-schedules',
+                match_path: 'deposit-schedules',
+            },
+            {
+                name: 'Fine Policies',
+                icon: <i className="fa-solid fa-piggy-bank" />,
+                path: '/deposit-schedules',
+                match_path: 'deposit-schedules',
+            },
+            {
+                name: 'Product Ldeger Mappings',
+                icon: <i className="fa-solid fa-piggy-bank" />,
+                path: '/deposit-schedules',
+                match_path: 'deposit-schedules',
+            },
+        ],
+    },
+    {
+        name: 'Loan Account Mgmt.',
+        icon: <i className="fa-solid fa-sprout" />,
+        children: [
+            {
+                name: 'Loan Accounts',
+                icon: <i className="fa-solid fa-piggy-bank" />,
+                path: '/deposit-policies',
+                match_path: 'deposit-policies',
+            },
+            {
+                name: 'Loan Schedules',
+                icon: <i className="fa-solid fa-piggy-bank" />,
+                path: '/deposit-tenures',
+                match_path: 'deposit-tenures',
+            },
+            {
+                name: 'Loan Collaters',
+                icon: <i className="fa-solid fa-piggy-bank" />,
+                path: '/saving-accounts',
+                match_path: 'saving-accounts',
+            },
+        ],
+    },
+    {
+        name: 'Loan Application Mgmt.',
+        icon: <i className="fa-solid fa-sprout" />,
+        children: [
+            {
+                name: 'Loan Applications',
+                icon: <i className="fa-solid fa-piggy-bank" />,
+                path: '/deposit-policies',
+                match_path: 'deposit-policies',
+            },
+            {
+                name: 'Surity Requests',
+                icon: <i className="fa-solid fa-piggy-bank" />,
+                path: '/deposit-tenures',
+                match_path: 'deposit-tenures',
+            },
+            {
+                name: 'Collaterals',
+                icon: <i className="fa-solid fa-piggy-bank" />,
+                path: '/saving-accounts',
+                match_path: 'saving-accounts',
+            },
+        ],
+    },
+    {
+        name: 'Cash Mgmt.',
+        icon: <i className="fa-solid fa-user-tie" />,
+        children: [
+            {
+                name: 'Cash at Hand',
+                icon: <i className="fa-solid fa-user-tie" />,
+                path: '/employees',
+                match_path: 'employees',
+            },
+            {
+                name: 'Petty Cash',
+                icon: <i className="fa-solid fa-user-tie" />,
+                path: '/attendances',
+                match_path: 'attendances',
+            },
+            {
+                name: 'Cash at Bank',
+                icon: <i className="fa-solid fa-user-tie" />,
+                path: '/leaves',
+                match_path: 'leaves',
+            },
+            {
+                name: 'Bank Cheque Books',
+                icon: <i className="fa-solid fa-landmark" />,
+                path: '/cheque-book',
+                match_path: 'cheque-book',
+            },
+        ],
+    },
+    {
+        name: 'HR Mgmt.',
         icon: <i className="fa-solid fa-user-tie" />,
         children: [
             {
@@ -210,6 +396,18 @@ export const sidebarMenu: SidebarItem[] = [
                 match_path: 'attendances',
             },
         ],
+    },
+    {
+        name: 'Fixed Assets',
+        icon: <i className="fa-solid fa-user-gear" />,
+        path: '/users/roles',
+        match_path: 'roles',
+    },
+    {
+        name: 'Vendors/Suppliers',
+        icon: <i className="fa-solid fa-user-gear" />,
+        path: '/users/roles',
+        match_path: 'roles',
     },
     {
         name: 'User Auth',
@@ -248,7 +446,13 @@ export const sidebarMenu: SidebarItem[] = [
         ],
     },
     {
-        name: 'Settings',
+        name: 'Audit Trails',
+        icon: <i className="fa-solid fa-user-gear" />,
+        path: '/users/roles',
+        match_path: 'roles',
+    },
+    {
+        name: 'User Settings',
         icon: <i className="fa-solid fa-gear" />,
         path: '/settings/profile',
         match_path: 'settings',
