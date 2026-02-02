@@ -161,6 +161,7 @@ class CustomerController extends Controller
 
         return Inertia::render('customer-management/customers/show', [
             'customer' => $customer,
+            'backUrl' => url()->previous(),
         ]);
     }
 
@@ -173,6 +174,7 @@ class CustomerController extends Controller
         return Inertia::render('customer-management/customers/edit', [
             'customer' => $customer,
             'media' => $media,
+            'backUrl' => url()->previous(),
         ]);
     }
 
@@ -248,7 +250,7 @@ class CustomerController extends Controller
         // ✅ Update record
         $customer->update($data);
 
-        return redirect()->route('customers.index')
+        return redirect()->back()
             ->with('success', 'Customer updated successfully.');
     }
 

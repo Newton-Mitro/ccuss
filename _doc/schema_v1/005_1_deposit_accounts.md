@@ -9,14 +9,30 @@ return new class extends Migration
 {
     public function up(): void
     {
+        Schema::create('account_sequences', function (Blueprint $table) {
+            $table->id();
+            $table->string('branch_code', 10);
+            $table->string('product_code', 10);
+            $table->string('account_type', 10);
+            $table->integer('year');
+            $table->unsignedBigInteger('last_number')->default(0);
+
+            $table->unique([
+                'branch_code',
+                'product_code',
+                'account_type',
+                'year'
+            ]);
+        });
+
         /**
          * Deposit Accounts
          */
         Schema::create('deposit_accounts', function (Blueprint $table) {
             $table->id();
             $table->string('account_no', 50)->unique();
-            $table->string('account_name', 100)->unique();
-            $table->foreignId('policy_id')->constrained('deposit_policies');
+            $table->string('account_name', 100);
+            $table->foreignId('deposit_product_id')->constrained('deposit_products');
             $table->date('opened_date');
             $table->date('maturity_date')->nullable();
             $table->integer('tenure_months')->nullable();
@@ -33,7 +49,8 @@ return new class extends Migration
         Schema::create('deposit_account_holders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('deposit_account_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('holder_customer_id')->constrained('customers')->cascadeOnDelete();
+            $table->foreignId('holder_customer_id')->nullable()->constrained('customers');
+             $table->string('name', 100);
             $table->enum('role', [
                 'PRIMARY_HOLDER',
                 'JOINT_HOLDER',
@@ -50,7 +67,13 @@ return new class extends Migration
             $table->foreignId('deposit_account_id')->constrained()->cascadeOnDelete();
             $table->foreignId('nominee_customer_id')->nullable()->constrained('customers');
             $table->string('name', 100);
-            $table->string('relation', 100);
+            $table->enum('gender', ['MALE', 'FEMALE', 'OTHER'])->nullable();
+            $relations = [
+                'FATHER','MOTHER','SON','DAUGHTER','BROTHER','COUSIN_BROTHER','COUSIN_SISTER','SISTER','HUSBAND','WIFE',
+                'GRANDFATHER','GRANDMOTHER','GRANDSON','GRANDDAUGHTER','UNCLE','AUNT','NEPHEW','NIECE',
+                'FATHER-IN-LAW','MOTHER-IN-LAW','SON-IN-LAW','DAUGHTER-IN-LAW','BROTHER-IN-LAW','SISTER-IN-LAW'
+            ];
+            $table->enum('relation', $relations);
             $table->decimal('share_percentage', 5, 2)->default(0);
             $table->timestamps();
         });

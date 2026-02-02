@@ -1,80 +1,58 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import HeadingSmall from '../../../components/heading-small';
 import { Button } from '../../../components/ui/button';
-import { Label } from '../../../components/ui/label';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 import { Customer } from '../../../types/customer';
 
 interface ShowProps {
     customer: Customer;
+    backUrl: string;
 }
 
-function Show({ customer }: ShowProps) {
-    console.log(customer);
+function Show({ customer, backUrl }: ShowProps) {
+    const handleBack = () => {
+        router.visit(backUrl, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customers', href: '/auth/customers' },
-        { title: 'Customer Details', href: '' },
+        { title: customer.name, href: '' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Customer - ${customer.name}`} />
 
-            <div className="space-y-8 text-foreground">
-                <HeadingSmall
-                    title={`Customer Details`}
-                    description="View complete customer information"
-                />
-
-                <div className="space-y-6 rounded-lg border border-border bg-card p-6 shadow-sm">
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <div>
-                            <Label>Customer No</Label>
-                            <p className="rounded-md border border-border bg-muted/10 p-2">
-                                {customer.customer_no}
-                            </p>
-                        </div>
-
-                        <div>
-                            <Label>Customer Type</Label>
-                            <p className="rounded-md border border-border bg-muted/10 p-2">
-                                {customer.type}
-                            </p>
-                        </div>
+            <div className="space-y-10">
+                {/* ================= Header ================= */}
+                <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+                    <div className="flex items-center gap-5">
+                        {customer.photo ? (
+                            <img
+                                src={customer.photo.url}
+                                alt={customer.name}
+                                className="h-24 w-24 rounded-full object-cover"
+                            />
+                        ) : (
+                            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-muted text-xl font-semibold">
+                                {customer.name.charAt(0)}
+                            </div>
+                        )}
 
                         <div>
-                            <Label>Name</Label>
-                            <p className="rounded-md border border-border bg-muted/10 p-2">
+                            <h1 className="text-2xl font-semibold">
                                 {customer.name}
+                            </h1>
+                            <p className="text-sm text-muted-foreground">
+                                Customer No · {customer.customer_no}
                             </p>
-                        </div>
 
-                        <div>
-                            <Label>Phone</Label>
-                            <p className="rounded-md border border-border bg-muted/10 p-2">
-                                {customer.phone || '—'}
-                            </p>
-                        </div>
-
-                        <div>
-                            <Label>Email</Label>
-                            <p className="rounded-md border border-border bg-muted/10 p-2">
-                                {customer.email || '—'}
-                            </p>
-                        </div>
-
-                        <div>
-                            <Label>KYC Level</Label>
-                            <p className="rounded-md border border-border bg-muted/10 p-2">
-                                {customer.kyc_level}
-                            </p>
-                        </div>
-
-                        <div>
-                            <Label>Status</Label>
                             <p
-                                className={`rounded-md border border-border p-2 font-medium ${
+                                className={`mt-1 text-sm font-medium ${
                                     customer.status === 'ACTIVE'
                                         ? 'text-green-600'
                                         : customer.status === 'SUSPENDED'
@@ -85,104 +63,108 @@ function Show({ customer }: ShowProps) {
                                 {customer.status}
                             </p>
                         </div>
-
-                        <div>
-                            <Label>Date of Birth</Label>
-                            <p className="rounded-md border border-border bg-muted/10 p-2">
-                                {customer.dob || '—'}
-                            </p>
-                        </div>
-
-                        <div>
-                            <Label>Gender</Label>
-                            <p className="rounded-md border border-border bg-muted/10 p-2">
-                                {customer.gender || '—'}
-                            </p>
-                        </div>
-
-                        <div>
-                            <Label>Religion</Label>
-                            <p className="rounded-md border border-border bg-muted/10 p-2">
-                                {customer.religion || '—'}
-                            </p>
-                        </div>
-
-                        <div>
-                            <Label>Identification Type</Label>
-                            <p className="rounded-md border border-border bg-muted/10 p-2">
-                                {customer.identification_type || '—'}
-                            </p>
-                        </div>
-
-                        <div>
-                            <Label>Identification Number</Label>
-                            <p className="rounded-md border border-border bg-muted/10 p-2">
-                                {customer.identification_number || '—'}
-                            </p>
-                        </div>
-
-                        <div>
-                            <Label>Photo</Label>
-                            {customer.photo ? (
-                                <img
-                                    src={customer.photo.url}
-                                    alt={customer.name}
-                                    className="mt-2 h-28 w-28 rounded-md border border-border object-cover"
-                                />
-                            ) : (
-                                <p className="rounded-md border border-border bg-muted/10 p-2">
-                                    No photo available
-                                </p>
-                            )}
-                        </div>
-
-                        {customer.type === 'Organization' && (
-                            <div className="md:col-span-2">
-                                <Label>Registration No</Label>
-                                <p className="rounded-md border border-border bg-muted/10 p-2">
-                                    {customer.registration_no || '—'}
-                                </p>
-                            </div>
-                        )}
                     </div>
 
-                    {/* Metadata */}
-                    <div className="pt-4 text-sm text-muted-foreground">
-                        <p>
-                            Created:{' '}
-                            <span className="text-foreground">
-                                {customer.created_at || '—'}
-                            </span>
-                        </p>
-                        <p>
-                            Updated:{' '}
-                            <span className="text-foreground">
-                                {customer.updated_at || '—'}
-                            </span>
-                        </p>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex justify-end gap-3 pt-6">
+                    <div className="flex gap-3">
                         <Link href={`/auth/customers/${customer.id}/edit`}>
-                            <Button
-                                variant="outline"
-                                className="border-border text-foreground hover:bg-muted"
-                            >
-                                Edit Customer
-                            </Button>
+                            <Button variant="outline">Edit Profile</Button>
                         </Link>
 
-                        <Link href="/auth/customers">
-                            <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                                Back to List
-                            </Button>
-                        </Link>
+                        <Button onClick={handleBack}>Back</Button>
                     </div>
                 </div>
+
+                {/* ================= Basic Info ================= */}
+                <section>
+                    <HeadingSmall
+                        title="Basic Information"
+                        description="Personal and contact details"
+                    />
+
+                    <div className="mt-6 grid grid-cols-1 gap-x-10 gap-y-6 md:grid-cols-2">
+                        <Info label="Customer Type" value={customer.type} />
+                        <Info label="Phone" value={customer.phone} />
+                        <Info label="Email" value={customer.email} />
+                        <Info label="KYC Level" value={customer.kyc_level} />
+                        <Info label="Date of Birth" value={customer.dob} />
+                        <Info label="Gender" value={customer.gender} />
+                        <Info label="Religion" value={customer.religion} />
+                    </div>
+                </section>
+
+                {/* ================= Identification ================= */}
+                <section>
+                    <HeadingSmall
+                        title="Identification"
+                        description="Verification and legal identity"
+                    />
+
+                    <div className="mt-6 grid grid-cols-1 gap-x-10 gap-y-6 md:grid-cols-2">
+                        <Info
+                            label="Identification Type"
+                            value={customer.identification_type}
+                        />
+                        <Info
+                            label="Identification Number"
+                            value={customer.identification_number}
+                        />
+
+                        {customer.type === 'Organization' && (
+                            <Info
+                                label="Registration No"
+                                value={customer.registration_no}
+                                full
+                            />
+                        )}
+                    </div>
+                </section>
+
+                {/* ================= Metadata ================= */}
+                <section className="text-xs text-muted-foreground">
+                    <p>
+                        Created:{' '}
+                        <span className="text-foreground">
+                            {formatDateTime(customer.created_at)}
+                        </span>
+                    </p>
+                    <p>
+                        Updated:{' '}
+                        <span className="text-foreground">
+                            {formatDateTime(customer.updated_at)}
+                        </span>
+                    </p>
+                </section>
             </div>
         </CustomAuthLayout>
     );
 }
 
 export default Show;
+
+function Info({
+    label,
+    value,
+    full = false,
+}: {
+    label: string;
+    value?: string | null;
+    full?: boolean;
+}) {
+    return (
+        <div className={full ? 'md:col-span-2' : ''}>
+            <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                {label}
+            </p>
+            <p className="mt-1 text-sm text-foreground">{value || '—'}</p>
+        </div>
+    );
+}
+
+function formatDateTime(value?: string | null) {
+    if (!value) return '—';
+
+    return new Intl.DateTimeFormat('en-US', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+    }).format(new Date(value));
+}
