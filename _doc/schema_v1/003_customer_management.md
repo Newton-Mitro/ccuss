@@ -223,8 +223,11 @@ return new class extends Migration {
         Schema::create('kyc_verifications', function (Blueprint $table) {
             $table->id();
             $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
-            $table->enum('verification_type', ['INTRODUCER', 'NID', 'BRN', 'REGISTRATION_NO', 'PASSPORT', 'DRIVING_LICENSE']);
-            $table->enum('status', ['PENDING', 'APPROVED', 'REJECTED']);
+            $table->boolean('id_verified')->default(false);
+            $table->boolean('present_address_verified')->default(false);
+            $table->boolean('parmanent_address_verified')->default(false);
+            $table->boolean('religion_verified')->default(false);
+            $table->boolean('introducer_verified')->default(false);
             $table->foreignId('verified_by')->nullable()->constrained('users');
             $table->timestamp('verified_at')->nullable();
             $table->timestamps();
