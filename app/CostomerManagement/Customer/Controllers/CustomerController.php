@@ -84,6 +84,7 @@ class CustomerController extends Controller
 
         return Inertia::render('customer-management/customers/create', [
             'media' => $media,
+            'backUrl' => url()->previous(),
         ]);
     }
 
@@ -157,13 +158,20 @@ class CustomerController extends Controller
 
     public function show(Customer $customer): Response
     {
-        $customer->load('photo');
+        // Eager load all related data
+        $customer->load([
+            'photo',                 // Customer photo
+            'addresses',             // Customer addresses
+            'familyRelations',       // Family relations
+            // 'introducers',           // Introducer info
+        ]);
 
         return Inertia::render('customer-management/customers/show', [
             'customer' => $customer,
             'backUrl' => url()->previous(),
         ]);
     }
+
 
     public function edit(Request $request, Customer $customer): Response
     {

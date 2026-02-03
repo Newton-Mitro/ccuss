@@ -4,8 +4,8 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { Eye, Pencil, Trash2, UserPlus } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
@@ -23,6 +23,7 @@ export default function Index() {
     >();
 
     const { customers, filters } = props;
+
     const { data, setData, get } = useForm({
         search: filters.search || '',
         status: filters.status || 'all',
@@ -30,17 +31,13 @@ export default function Index() {
         page: Number(filters.page) || 1,
     });
 
-    // Search & filters
-    const handleSearch = () => {
-        get('/auth/customers', { preserveState: true });
-    };
-
     useEffect(() => {
-        const delay = setTimeout(handleSearch, 400);
+        const delay = setTimeout(() => {
+            get('/auth/customers', { preserveState: true });
+        }, 400);
         return () => clearTimeout(delay);
     }, [data.search, data.status, data.per_page, data.page]);
 
-    // SweetAlert2 delete
     const handleDelete = (id: number, name: string) => {
         const isDark = document.documentElement.classList.contains('dark');
 
@@ -59,15 +56,12 @@ export default function Index() {
                 router.delete(`/auth/customers/${id}`, {
                     preserveScroll: true,
                     preserveState: true,
-                    onSuccess: () => {
+                    onSuccess: () =>
                         toast.success(
                             `Customer "${name}" deleted successfully!`,
-                        );
-                    },
-                    onError: (errors) => {
-                        toast.error('Failed to delete the customer.');
-                        console.error(errors);
-                    },
+                        ),
+                    onError: () =>
+                        toast.error('Failed to delete the customer.'),
                 });
             }
         });
@@ -80,22 +74,28 @@ export default function Index() {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Customers" />
-            <div className="space-y-4 p-2 text-foreground">
+
+            <div className="space-y-4 p-2">
                 {/* Header */}
-                <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <HeadingSmall
                         title="Customers"
-                        description="Manage your customers and their KYC information"
+                        description="Manage your customers."
                     />
-                    <a
-                        href="/auth/customers/create"
-                        className="inline-block rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-                    >
-                        Add Customer
-                    </a>
+                    <div className="flex gap-2">
+                        <Link
+                            href="/auth/customers/create"
+                            className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition hover:bg-primary/90"
+                        >
+                            <UserPlus className="h-4 w-4" />
+                            <span className="hidden sm:inline">
+                                Create Customer
+                            </span>
+                        </Link>
+                    </div>
                 </div>
 
-                {/* Search & Filter */}
+                {/* Search & Filters */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <input
                         type="text"
@@ -105,7 +105,7 @@ export default function Index() {
                             setData('search', e.target.value);
                             setData('page', 1);
                         }}
-                        className="h-9 w-full max-w-sm rounded-md border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+                        className="h-9 w-full max-w-sm rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
                     />
 
                     <select
@@ -114,7 +114,7 @@ export default function Index() {
                             setData('status', e.target.value);
                             setData('page', 1);
                         }}
-                        className="h-9 w-full max-w-xs rounded-md border border-border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+                        className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-ring focus:outline-none sm:max-w-xs"
                     >
                         <option value="all">All Statuses</option>
                         <option value="ACTIVE">Active</option>
@@ -124,8 +124,10 @@ export default function Index() {
                     </select>
                 </div>
 
-                {/* Table */}
-                <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border border-border md:h-[calc(100vh-300px)]">
+                {/* ===================== */}
+                {/* Desktop Table */}
+                {/* ===================== */}
+                <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border border-border md:block">
                     <table className="w-full border-collapse">
                         <thead className="sticky top-0 bg-muted">
                             <tr>
@@ -137,104 +139,140 @@ export default function Index() {
                                     'Email',
                                     'Status',
                                     'Actions',
-                                ].map((header) => (
+                                ].map((h) => (
                                     <th
-                                        key={header}
+                                        key={h}
                                         className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground"
                                     >
-                                        {header}
+                                        {h}
                                     </th>
                                 ))}
                             </tr>
                         </thead>
                         <tbody>
-                            {customers.data.length > 0 ? (
-                                customers.data.map((c: Customer) => (
-                                    <tr
-                                        key={c.id}
-                                        className="border-b border-border even:bg-muted/30"
-                                    >
-                                        <td className="px-2 py-1">
-                                            {c.customer_no}
-                                        </td>
-                                        <td className="px-2 py-1">{c.name}</td>
-                                        <td className="px-2 py-1">{c.type}</td>
-                                        <td className="px-2 py-1">{c.phone}</td>
-                                        <td className="px-2 py-1">{c.email}</td>
-                                        <td className="px-2 py-1">
-                                            {c.status}
-                                        </td>
-                                        <td className="px-2 py-1">
-                                            <TooltipProvider>
-                                                <div className="flex space-x-2">
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <a
-                                                                href={`/auth/customers/${c.id}`}
-                                                                className="text-primary hover:text-primary/80"
-                                                            >
-                                                                <Eye className="h-5 w-5" />
-                                                            </a>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                            View
-                                                        </TooltipContent>
-                                                    </Tooltip>
+                            {customers.data.map((c: Customer) => (
+                                <tr
+                                    key={c.id}
+                                    className="border-b border-border even:bg-muted/30"
+                                >
+                                    <td className="px-2 py-1">
+                                        {c.customer_no}
+                                    </td>
+                                    <td className="px-2 py-1">{c.name}</td>
+                                    <td className="px-2 py-1">{c.type}</td>
+                                    <td className="px-2 py-1">{c.phone}</td>
+                                    <td className="px-2 py-1">{c.email}</td>
+                                    <td className="px-2 py-1">{c.status}</td>
+                                    <td className="px-2 py-1 whitespace-nowrap">
+                                        <TooltipProvider>
+                                            <div className="flex gap-2">
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Link
+                                                            href={`/auth/customers/${c.id}`}
+                                                            className="text-primary"
+                                                        >
+                                                            <Eye className="h-5 w-5" />
+                                                        </Link>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        View
+                                                    </TooltipContent>
+                                                </Tooltip>
 
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <a
-                                                                href={`/auth/customers/${c.id}/edit`}
-                                                                className="text-green-600 hover:text-green-500 dark:text-green-400"
-                                                            >
-                                                                <Pencil className="h-5 w-5" />
-                                                            </a>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                            Edit
-                                                        </TooltipContent>
-                                                    </Tooltip>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Link
+                                                            href={`/auth/customers/${c.id}/edit`}
+                                                            className="text-green-600 dark:text-green-400"
+                                                        >
+                                                            <Pencil className="h-5 w-5" />
+                                                        </Link>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        Edit
+                                                    </TooltipContent>
+                                                </Tooltip>
 
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    handleDelete(
-                                                                        c.id,
-                                                                        c.name,
-                                                                    )
-                                                                }
-                                                                className="text-destructive hover:text-destructive/80"
-                                                            >
-                                                                <Trash2 className="h-5 w-5" />
-                                                            </button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                            Delete
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </div>
-                                            </TooltipProvider>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td
-                                        colSpan={7}
-                                        className="px-4 py-6 text-center text-muted-foreground"
-                                    >
-                                        No customers found.
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <button
+                                                            onClick={() =>
+                                                                handleDelete(
+                                                                    c.id,
+                                                                    c.name,
+                                                                )
+                                                            }
+                                                            className="text-destructive"
+                                                        >
+                                                            <Trash2 className="h-5 w-5" />
+                                                        </button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        Delete
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </div>
+                                        </TooltipProvider>
                                     </td>
                                 </tr>
-                            )}
+                            ))}
                         </tbody>
                     </table>
                 </div>
 
+                {/* ===================== */}
+                {/* Mobile Cards */}
+                {/* ===================== */}
+                <div className="space-y-3 md:hidden">
+                    {customers.data.map((c: Customer) => (
+                        <div
+                            key={c.id}
+                            className="space-y-2 rounded-md border border-border bg-card p-3"
+                        >
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <p className="font-medium">{c.name}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        {c.customer_no} · {c.type}
+                                    </p>
+                                </div>
+                                <span className="rounded-full bg-muted px-2 py-0.5 text-xs">
+                                    {c.status}
+                                </span>
+                            </div>
+
+                            <div className="space-y-1 text-xs text-muted-foreground">
+                                <p>📞 {c.phone || '—'}</p>
+                                <p>✉️ {c.email || '—'}</p>
+                            </div>
+
+                            <div className="flex justify-end gap-4 pt-2">
+                                <Link
+                                    href={`/auth/customers/${c.id}`}
+                                    className="text-primary"
+                                >
+                                    <Eye className="h-5 w-5" />
+                                </Link>
+                                <Link
+                                    href={`/auth/customers/${c.id}/edit`}
+                                    className="text-green-600 dark:text-green-400"
+                                >
+                                    <Pencil className="h-5 w-5" />
+                                </Link>
+                                <button
+                                    onClick={() => handleDelete(c.id, c.name)}
+                                    className="text-destructive"
+                                >
+                                    <Trash2 className="h-5 w-5" />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
                 {/* Pagination */}
-                <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
+                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                     <div className="flex items-center gap-2">
                         <span className="text-sm text-muted-foreground">
                             Show
@@ -245,7 +283,7 @@ export default function Index() {
                                 setData('per_page', Number(e.target.value));
                                 setData('page', 1);
                             }}
-                            className="h-9 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+                            className="h-9 rounded-md border border-border bg-background px-3 text-sm"
                         >
                             {[5, 10, 20, 50].map((n) => (
                                 <option key={n} value={n}>
@@ -253,22 +291,21 @@ export default function Index() {
                                 </option>
                             ))}
                         </select>
-                        <span className="text-sm text-muted-foreground">
-                            records
-                        </span>
                     </div>
 
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 overflow-x-auto">
                         {customers.links.map((link: any, i: number) => (
                             <a
                                 key={i}
                                 href={link.url || '#'}
-                                className={`rounded-full px-3 py-1 text-sm transition-colors ${
+                                className={`rounded-full px-3 py-1 text-sm ${
                                     link.active
                                         ? 'bg-primary text-primary-foreground'
-                                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                                        : 'bg-muted text-muted-foreground'
                                 }`}
-                                dangerouslySetInnerHTML={{ __html: link.label }}
+                                dangerouslySetInnerHTML={{
+                                    __html: link.label,
+                                }}
                             />
                         ))}
                     </div>

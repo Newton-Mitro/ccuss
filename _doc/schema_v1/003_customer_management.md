@@ -1,3 +1,122 @@
+# Customer Onboarding & KYC Working Flow
+
+---
+
+## 1️⃣ Customer Creation
+
+- Admin/agent creates a new Customer.
+- Customer type: **Individual** or **Organization**.
+- If Organization, **identification type = REGISTRATION_NO**.
+- Fill in:
+    - **Personal info:** name, phone, email, DOB, gender, religion.
+    - **Identification info:** type + number.
+    - **Optional:** photo.
+- Save **created_by = current user**.
+- Customer **status = PENDING**, **kyc_status = PENDING**.
+
+---
+
+## 2️⃣ Customer Addresses
+
+- Admin adds Customer Addresses (can be multiple).
+- Address types: **CURRENT**, **PERMANENT**, **MAILING**, **WORK**, etc.
+- Include:
+    - Division, district, upazila, postal code, union/ward, village/locality, country.
+- Save **created_by**.
+
+---
+
+## 3️⃣ Customer Family Relations
+
+- Admin can add family members / relatives.
+- Each relative can be:
+    - Another customer (`relative_id`)
+    - Raw info (name, phone, email, etc.)
+- Store **relation_type** and **reverse_relation_type**.
+- Save **created_by**.
+
+---
+
+## 4️⃣ Customer Signatures
+
+- Upload signature image.
+- Store:
+    - `file_name`, `signature_path`, `mime`
+- Save **created_by**.
+
+---
+
+## 5️⃣ Online Users (Optional)
+
+- Create online login credentials for the customer.
+- Fields: `username`, `email`, `phone`, `password`.
+- Save **created_by**.
+
+---
+
+## 6️⃣ Introducer Verification (Optional)
+
+- If an introducer exists:
+    - Link **introducer customer**, **introduced customer**, and **deposit account**.
+    - Specify **relationship_type:** FAMILY, FRIEND, BUSINESS, COLLEAGUE, OTHER.
+- Verification by bank officer:
+    - `verification_status: PENDING → VERIFIED / REJECTED`
+    - Save **verified_by** and **verified_at**.
+
+---
+
+## 7️⃣ KYC Verification
+
+- Each KYC type:
+    - NID, BRN, REG_NO, PASSPORT, DRIVING_LICENSE, INTRODUCER
+- Status: `PENDING → APPROVED / REJECTED`
+- Verified by bank officer:
+    - Save **verified_by** and **verified_at**.
+
+---
+
+## 8️⃣ Status Update
+
+- After KYC completion:
+    - If all required KYC approved → `kyc_status = VERIFIED`
+    - Customer status → **ACTIVE**
+- Any rejection → `kyc_status = REJECTED`
+    - Customer cannot perform transactions.
+
+---
+
+## 9️⃣ Audit Trail
+
+- Every table includes:
+    - `created_by` – who created the record
+    - `updated_by` – who last updated
+    - `kyc_verified_by` – who verified the KYC (for customer)
+
+```mermaid
+flowchart TD
+    A["Admin/Agent"] --> B["Create Customer"]
+    B --> C["Add Addresses"]
+    B --> D["Add Family Relations"]
+    B --> E["Upload Signature"]
+    B --> F["Create Online User Account"]
+    B --> G["Assign Introducer (Optional)"]
+    G --> H["Verify Introducer by Bank Officer"]
+    B --> I["KYC Verification"]
+    I --> J{"All KYC Approved?"}
+    J -->|Yes| K["kyc_status = VERIFIED, status = ACTIVE"]
+    J -->|No| L["kyc_status = REJECTED, status = PENDING"]
+
+    %% Audit Trails
+    A -.->|Audit| B
+    A -.->|Audit| C
+    A -.->|Audit| D
+    A -.->|Audit| E
+    A -.->|Audit| F
+    H -.->|Audit / Verified By| U["Bank Officer"]
+    I -.->|Verified By| U
+
+```
+
 ```php
 <?php
 use Illuminate\Database\Migrations\Migration;
@@ -22,6 +141,8 @@ return new class extends Migration {
             $table->string('photo', 255)->nullable();
             $table->enum('kyc_status', ['PENDING', 'VERIFIED', 'REJECTED'])->default('PENDING');
             $table->enum('status', ['PENDING', 'ACTIVE', 'SUSPENDED', 'CLOSED'])->default('ACTIVE');
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
 
@@ -38,6 +159,8 @@ return new class extends Migration {
             $table->string('postal_code', 20)->nullable();
             $table->char('country_code', 2)->default('BD');
             $table->enum('type', ['CURRENT', 'PERMANENT', 'MAILING', 'WORK', 'REGISTERED', 'OTHER'])->default('CURRENT');
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
 
@@ -65,6 +188,9 @@ return new class extends Migration {
             $table->unique(['customer_id', 'relative_id'], 'uq_customer_relative');
             $table->index('relative_id');
             $table->index('relation_type');
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamps();
         });
 
         Schema::create('customer_signatures', function (Blueprint $table) {
@@ -74,10 +200,12 @@ return new class extends Migration {
             $table->string('signature_path');
             $table->string('mime');
             $table->string('alt_text')->nullable();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
 
-        Schema::create('customer_introductions', function (Blueprint $table) {
+        Schema::create('customer_introducers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('introduced_customer_id')->constrained('customers')->cascadeOnDelete();
             $table->foreignId('introducer_customer_id')->constrained('customers');
@@ -87,6 +215,8 @@ return new class extends Migration {
             $table->foreignId('verified_by')->nullable()->constrained('users'); // bank officer
             $table->timestamp('verified_at')->nullable();
             $table->text('remarks')->nullable();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
 
@@ -100,7 +230,7 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        Schema::create('online_users', function (Blueprint $table) {
+        Schema::create('online_service_users', function (Blueprint $table) {
             $table->id();
             $table->foreignId('customer_id')->unique()->constrained('customers')->cascadeOnDelete();
             $table->string('username', 100)->unique();
@@ -109,6 +239,8 @@ return new class extends Migration {
             $table->string('password', 255);
             $table->timestamp('last_login_at')->nullable();
             $table->enum('status', ['ACTIVE', 'SUSPENDED', 'CLOSED'])->default('ACTIVE');
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
     }
@@ -119,9 +251,9 @@ return new class extends Migration {
         Schema::dropIfExists('customer_addresses');
         Schema::dropIfExists('customer_family_relations');
         Schema::dropIfExists('customer_signatures');
-        Schema::dropIfExists('introducers');
+        Schema::dropIfExists('customer_introducers');
         Schema::dropIfExists('kyc_verifications');
-        Schema::dropIfExists('online_users');
+        Schema::dropIfExists('online_service_users');
     }
 };
 ```

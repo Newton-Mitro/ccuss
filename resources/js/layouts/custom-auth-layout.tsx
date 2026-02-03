@@ -36,8 +36,6 @@ export default function CustomAuthLayout({
     const auth = page.props?.auth;
 
     const cleanup = useMobileNavigation();
-    const [sidebarMenuItems, setSidebarMenuItems] =
-        useState<SidebarItem[]>(sidebarMenu);
 
     const [sidebarOpen, setSidebarOpen] = useState<boolean>(() => {
         try {
@@ -194,7 +192,7 @@ export default function CustomAuthLayout({
 
                 <nav className="h-[calc(100%-4rem)] overflow-y-auto px-2 py-4 text-sm">
                     <ul>
-                        {sidebarMenuItems.map((item) => (
+                        {sidebarMenu.map((item) => (
                             <SidebarMenuItem
                                 key={item.name}
                                 item={item}

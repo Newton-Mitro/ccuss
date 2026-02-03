@@ -8,7 +8,7 @@ export interface Customer {
     name: string;
     phone?: string | null;
     email?: string | null;
-    kyc_level: 'MIN' | 'STD' | 'ENH' | string; // KYC level
+    kyc_status: 'MIN' | 'STD' | 'ENH' | string; // KYC level
     status: 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'CLOSED' | string; // Current customer status
 
     // Personal info
