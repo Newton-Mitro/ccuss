@@ -1,40 +1,210 @@
-import { Media } from './media';
+export type VerificationStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
+export type RecordStatus = 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'CLOSED';
 
-export interface Customer {
-    id: number;
+/* ===========================
+ * Customers
+ * =========================== */
 
-    customer_no: string; // Unique customer number
-    type: 'Individual' | 'Organization' | string; // Customer type
+import { AuditFields, ID, Timestamp } from './base_types';
+
+export type CustomerType = 'Individual' | 'Organization';
+
+export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
+
+export type Religion =
+    | 'CHRISTIANITY'
+    | 'ISLAM'
+    | 'HINDUISM'
+    | 'BUDDHISM'
+    | 'OTHER';
+
+export type IdentificationType =
+    | 'NID'
+    | 'BRN'
+    | 'REGISTRATION_NO'
+    | 'PASSPORT'
+    | 'DRIVING_LICENSE';
+
+export type KycLevel = 'MIN' | 'STD' | 'ENH';
+export type KycStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
+
+export interface Customer extends AuditFields {
+    id: ID;
+    customer_no: string;
+    type: CustomerType;
+
     name: string;
     phone?: string | null;
     email?: string | null;
-    kyc_status: 'MIN' | 'STD' | 'ENH' | string; // KYC level
-    status: 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'CLOSED' | string; // Current customer status
+    dob?: string | null;
 
-    // Personal info
-    dob?: string | null; // Date in ISO format (YYYY-MM-DD)
-    gender?: 'MALE' | 'FEMALE' | 'OTHER' | string;
-    religion?:
-        | 'CHRISTIANITY'
-        | 'ISLAM'
-        | 'HINDUISM'
-        | 'BUDDHISM'
-        | 'OTHER'
-        | string;
+    gender?: Gender | null;
+    religion?: Religion | null;
 
-    identification_type:
-        | 'NID'
-        | 'BRN'
-        | 'PASSPORT'
-        | 'DRIVING_LICENSE'
-        | string;
+    identification_type: IdentificationType;
     identification_number: string;
-    photo_id?: number | null; // Foreign key to media table
-    photo?: Media | null;
 
-    // Organization info
-    registration_no?: string | null;
+    kyc_level: KycLevel;
+    kyc_status: KycStatus;
 
-    created_at: string;
-    updated_at: string;
+    kyc_verified_by?: ID | null;
+    kyc_verified_at?: Timestamp | null;
+
+    status: RecordStatus;
+}
+
+/* ===========================
+ * Customer Addresses
+ * =========================== */
+
+export type AddressType =
+    | 'CURRENT'
+    | 'PERMANENT'
+    | 'MAILING'
+    | 'WORK'
+    | 'REGISTERED'
+    | 'OTHER';
+
+export interface CustomerAddress extends AuditFields {
+    id: ID;
+    customer_id: ID;
+
+    line1: string;
+    line2?: string | null;
+
+    division?: string | null;
+    district?: string | null;
+    upazila?: string | null;
+    union_ward?: string | null;
+    postal_code?: string | null;
+    country: string;
+
+    type: AddressType;
+
+    verification_status: VerificationStatus;
+    verified_by?: ID | null;
+    verified_at?: Timestamp | null;
+    remarks?: string | null;
+}
+
+/* ===========================
+ * Customer Family Relations
+ * =========================== */
+
+export type RelationType =
+    | 'FATHER'
+    | 'MOTHER'
+    | 'SON'
+    | 'DAUGHTER'
+    | 'BROTHER'
+    | 'SISTER'
+    | 'HUSBAND'
+    | 'WIFE'
+    | 'GRANDFATHER'
+    | 'GRANDMOTHER'
+    | 'UNCLE'
+    | 'AUNT'
+    | 'NEPHEW'
+    | 'NIECE'
+    | 'FATHER_IN_LAW'
+    | 'MOTHER_IN_LAW'
+    | 'SON_IN_LAW'
+    | 'DAUGHTER_IN_LAW'
+    | 'BROTHER_IN_LAW'
+    | 'SISTER_IN_LAW';
+
+export interface CustomerFamilyRelation extends AuditFields {
+    id: ID;
+    customer_id: ID;
+
+    // Linked customer (optional)
+    relative_id?: ID | null;
+
+    // Raw identity (used when relative_id is null)
+    name: string;
+    phone?: string | null;
+    email?: string | null;
+    dob?: string | null;
+
+    gender?: Gender | null;
+    religion?: Religion | null;
+
+    identification_type: Exclude<IdentificationType, 'REGISTRATION_NO'>;
+    identification_number: string;
+
+    photo?: string | null;
+
+    relation_type: RelationType;
+}
+
+/* ===========================
+ * Customer Photos
+ * =========================== */
+
+export interface CustomerPhoto extends AuditFields {
+    id: ID;
+    customer_id: ID;
+
+    file_name: string;
+    file_path: string;
+    mime: string;
+    alt_text?: string | null;
+}
+
+/* ===========================
+ * Customer Signatures
+ * =========================== */
+
+export interface CustomerSignature extends AuditFields {
+    id: ID;
+    customer_id: ID;
+
+    file_name: string;
+    file_path: string;
+    mime: string;
+    alt_text?: string | null;
+}
+
+/* ===========================
+ * Customer Introducers
+ * =========================== */
+
+export type IntroducerRelationshipType =
+    | 'FAMILY'
+    | 'FRIEND'
+    | 'BUSINESS'
+    | 'COLLEAGUE'
+    | 'OTHER';
+
+export interface CustomerIntroducer extends AuditFields {
+    id: ID;
+
+    introduced_customer_id: ID;
+    introducer_customer_id: ID;
+    introducer_account_id: ID;
+
+    relationship_type: IntroducerRelationshipType;
+
+    verification_status: VerificationStatus;
+    verified_by?: ID | null;
+    verified_at?: Timestamp | null;
+    remarks?: string | null;
+}
+
+/* ===========================
+ * Online Service Users
+ * =========================== */
+
+export interface OnlineServiceUser extends AuditFields {
+    id: ID;
+    customer_id: ID;
+
+    username: string;
+    email?: string | null;
+    phone?: string | null;
+
+    password: string; // hashed
+    last_login_at?: Timestamp | null;
+
+    status: Exclude<RecordStatus, 'PENDING'>;
 }

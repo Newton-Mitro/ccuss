@@ -1,13 +1,8 @@
 import axios from 'axios';
+import { Search } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
+import { Customer } from '../types/customer';
 import InputError from './input-error';
-
-interface Customer {
-    id: number;
-    name: string;
-    customer_no?: string;
-    photo_url?: string | null;
-}
 
 interface CustomerSearchProps {
     query: string;
@@ -26,34 +21,54 @@ export const CustomerSearch: React.FC<CustomerSearchProps> = ({
 }) => {
     const [results, setResults] = useState<Customer[]>([]);
     const [showDropdown, setShowDropdown] = useState(false);
+    const [loading, setLoading] = useState(false);
+
     const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-    // Fetch customers when query changes (debounced)
-    useEffect(() => {
+    /**
+     * -----------------------
+     * API SEARCH
+     * -----------------------
+     */
+    const searchCustomers = async () => {
         if (!query?.trim()) {
-            queueMicrotask(() => {
-                setResults([]);
-                setShowDropdown(false);
-            });
+            setResults([]);
+            setShowDropdown(false);
             return;
         }
 
-        const timeout = setTimeout(() => {
-            axios
-                .get('/auth/api/search-customers', {
-                    params: { search: query },
-                })
-                .then((res) => {
-                    setResults(res.data || []);
-                    setShowDropdown(true);
-                })
-                .catch(console.error);
-        }, 300);
+        try {
+            setLoading(true);
+            const res = await axios.get('/auth/api/search-customers', {
+                params: { search: query },
+            });
 
-        return () => clearTimeout(timeout);
-    }, [query]);
+            setResults(res.data || []);
+            setShowDropdown(true);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    // Close dropdown on outside click
+    /**
+     * -----------------------
+     * ENTER KEY HANDLER
+     * -----------------------
+     */
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            searchCustomers();
+        }
+    };
+
+    /**
+     * -----------------------
+     * OUTSIDE CLICK
+     * -----------------------
+     */
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (
@@ -63,6 +78,7 @@ export const CustomerSearch: React.FC<CustomerSearchProps> = ({
                 setShowDropdown(false);
             }
         };
+
         document.addEventListener('mousedown', handleClickOutside);
         return () =>
             document.removeEventListener('mousedown', handleClickOutside);
@@ -70,34 +86,46 @@ export const CustomerSearch: React.FC<CustomerSearchProps> = ({
 
     return (
         <div className="relative w-full" ref={dropdownRef}>
-            <input
-                type="text"
-                value={query}
-                onChange={(e) => onQueryChange(e.target.value)}
-                placeholder={placeholder}
-                className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
-            />
+            {/* INPUT + SEARCH BUTTON */}
+            <div className="relative">
+                <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => onQueryChange(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={placeholder}
+                    className="h-8 w-full rounded-md border border-border bg-background px-3 pr-10 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                />
+
+                <button
+                    type="button"
+                    onClick={searchCustomers}
+                    className="absolute top-1/2 right-1 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-primary"
+                    title="Search"
+                >
+                    {loading ? (
+                        <span className="animate-spin text-xs">⏳</span>
+                    ) : (
+                        <Search size={14} />
+                    )}
+                </button>
+            </div>
+
             <InputError message={error} />
 
+            {/* RESULTS */}
             {showDropdown && results.length > 0 && (
                 <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-border bg-background shadow-lg">
                     {results.map((customer) => (
                         <li
                             key={customer.id}
-                            className="flex cursor-pointer items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            className="flex cursor-pointer items-center gap-2 px-3 py-2 text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
                             onClick={() => {
                                 onSelect(customer);
                                 onQueryChange(customer.name);
                                 setShowDropdown(false);
                             }}
                         >
-                            {customer.photo_url && (
-                                <img
-                                    src={customer.photo_url}
-                                    alt={customer.name}
-                                    className="h-6 w-6 rounded-full object-cover"
-                                />
-                            )}
                             <span>{customer.name}</span>
                             {customer.customer_no && (
                                 <span className="ml-auto text-xs text-gray-500">
@@ -109,8 +137,9 @@ export const CustomerSearch: React.FC<CustomerSearchProps> = ({
                 </ul>
             )}
 
-            {showDropdown && query && results.length === 0 && (
-                <div className="absolute z-10 mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-gray-500">
+            {/* EMPTY STATE */}
+            {showDropdown && !loading && query && results.length === 0 && (
+                <div className="absolute z-10 mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-gray-500">
                     No customers found.
                 </div>
             )}

@@ -3,11 +3,11 @@
 use App\Accounting\GlAccount\Controllers\GlAccountController;
 use App\Accounting\Voucher\Controllers\JournalEntryController;
 use App\Branch\Controllers\BranchController;
-use App\CostomerManagement\Address\Controllers\AddressController;
-use App\CostomerManagement\Customer\Controllers\CustomerController;
-use App\CostomerManagement\FamilyRelation\Controllers\FamilyRelationController;
-use App\CostomerManagement\OnlineClient\Controllers\OnlineClientController;
-use App\CostomerManagement\Signature\Controllers\SignatureController;
+use App\CostomerMgmt\Controllers\CustomerAddressController;
+use App\CostomerMgmt\Controllers\CustomerController;
+use App\CostomerMgmt\Controllers\CustomerFamilyRelationController;
+use App\CostomerMgmt\Controllers\CustomerSignatureController;
+use App\CostomerMgmt\Controllers\OnlineServiceUserController;
 use App\Http\Controllers\DashboardController;
 use App\Media\Controllers\MediaController;
 use Illuminate\Http\Request;
@@ -43,10 +43,10 @@ Route::prefix('auth')
         Route::resource('branches', BranchController::class);
         Route::resource('customers', CustomerController::class);
         Route::get('/api/search-customers', [CustomerController::class, 'searchCustomers'])->name('search-customers');
-        Route::resource('addresses', AddressController::class);
-        Route::resource('family-relations', FamilyRelationController::class);
-        Route::resource('signatures', SignatureController::class);
-        Route::resource('online-clients', OnlineClientController::class);
+        Route::resource('addresses', CustomerAddressController::class);
+        Route::resource('family-relations', CustomerFamilyRelationController::class);
+        Route::resource('signatures', CustomerSignatureController::class);
+        Route::resource('online-clients', OnlineServiceUserController::class);
 
     });
 

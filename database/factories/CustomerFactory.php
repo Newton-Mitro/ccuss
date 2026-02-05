@@ -2,8 +2,7 @@
 
 namespace Database\Factories;
 
-use App\CostomerManagement\Customer\Models\Customer;
-use App\Media\Models\Media;
+use App\CostomerMgmt\Models\Customer;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -14,33 +13,57 @@ class CustomerFactory extends Factory
     public function definition(): array
     {
         $type = $this->faker->randomElement(['Individual', 'Organization']);
-        $photo = Media::inRandomOrder()->first() ?? Media::factory()->create();
 
         return [
-            'customer_no' => strtoupper(Str::random(3)) . '-' . $this->faker->unique()->numberBetween(10000, 99999),
+            'customer_no' => 'CUST-' . $this->faker->unique()->numerify('#####'),
+
             'type' => $type,
+
             'name' => $type === 'Individual'
                 ? $this->faker->name()
                 : $this->faker->company(),
-            'phone' => $this->faker->optional()->phoneNumber(),
-            'email' => $this->faker->optional()->safeEmail(),
-            'kyc_level' => $this->faker->randomElement(['MIN', 'STD', 'ENH']),
-            'status' => $this->faker->randomElement(['PENDING', 'ACTIVE', 'SUSPENDED', 'CLOSED']),
 
-            'dob' => $type === 'Individual' ? $this->faker->date('Y-m-d', '-20 years') : null,
+            'phone' => $this->faker->phoneNumber(),
+            'email' => $this->faker->safeEmail(),
+
+            // Individual-only fields
+            'dob' => $type === 'Individual'
+                ? $this->faker->dateTimeBetween('-65 years', '-18 years')->format('Y-m-d')
+                : null,
+
             'gender' => $type === 'Individual'
                 ? $this->faker->randomElement(['MALE', 'FEMALE', 'OTHER'])
                 : null,
+
             'religion' => $type === 'Individual'
-                ? $this->faker->randomElement(['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER'])
+                ? $this->faker->randomElement([
+                    'CHRISTIANITY',
+                    'ISLAM',
+                    'HINDUISM',
+                    'BUDDHISM',
+                    'OTHER'
+                ])
                 : null,
 
-            'identification_type' => $this->faker->randomElement(['NID', 'BRN', 'PASSPORT', 'DRIVING_LICENSE']),
-            'identification_number' => strtoupper(Str::random(10)),
-            'photo_id' => $photo->id,
-            'registration_no' => $type === 'Organization'
-                ? strtoupper('REG-' . $this->faker->numberBetween(1000, 9999))
-                : null,
+            // Identification (required for both)
+            'identification_type' => $this->faker->randomElement([
+                'NID',
+                'BRN',
+                'REGISTRATION_NO',
+                'PASSPORT',
+                'DRIVING_LICENSE'
+            ]),
+
+            'identification_number' => strtoupper(Str::random(12)),
+
+            // KYC + lifecycle
+            'kyc_level' => $this->faker->randomElement(['MIN', 'STD', 'ENH']),
+            'status' => $this->faker->randomElement([
+                'PENDING',
+                'ACTIVE',
+                'SUSPENDED',
+                'CLOSED'
+            ]),
         ];
     }
 }

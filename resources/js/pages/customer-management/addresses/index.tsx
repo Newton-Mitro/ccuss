@@ -6,52 +6,51 @@ import {
 } from '@/components/ui/tooltip';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
-import { useEffect } from 'react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
+import { CustomerSearch } from '../../../components/customer-search';
 import HeadingSmall from '../../../components/heading-small';
+import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
-import { AddressWithCustomer } from '../../../types/address'; // make sure you have this type
 
 export default function Index() {
     const { props } = usePage<
         SharedData & {
             addresses: {
-                data: AddressWithCustomer[];
-                links: { url: string | null; label: string; active: boolean }[];
+                data: any[];
+                links: {
+                    url: string | null;
+                    label: string;
+                    active: boolean;
+                }[];
             };
-            filters: Record<string, string | number>;
         }
     >();
 
-    const { addresses, filters } = props;
+    const { addresses } = props;
+    const [query, setQuery] = useState('');
 
-    console.log('addresses', addresses);
-
-    const { data, setData, get } = useForm({
-        search: filters.search || '',
-        type: filters.type || 'all',
-        per_page: Number(filters.per_page) || 5,
-        page: Number(filters.page) || 1,
+    const { data, setData } = useForm({
+        id: 0,
+        customer_no: '',
+        type: '',
+        name: '',
+        phone: '',
+        email: '',
+        identification_type: '',
+        identification_number: '',
     });
 
-    // Debounced search — fires get() only after typing stops for 400ms
-    const handleSearch = () => {
-        get('/auth/addresses', {
-            preserveState: true,
-            replace: true,
-        });
-    };
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Addresses', href: '/auth/addresses' },
+    ];
 
-    useEffect(() => {
-        const delay = setTimeout(handleSearch, 400);
-        return () => clearTimeout(delay);
-    }, [data.search, data.type, data.per_page, data.page]);
-
-    // Delete confirmation
     const handleDelete = (id: number, name: string) => {
         const isDark = document.documentElement.classList.contains('dark');
+
         Swal.fire({
             title: 'Are you sure?',
             text: `Address of "${name}" will be permanently deleted!`,
@@ -66,33 +65,28 @@ export default function Index() {
             if (result.isConfirmed) {
                 router.delete(`/auth/addresses/${id}`, {
                     preserveScroll: true,
-                    preserveState: true,
                     onSuccess: () =>
-                        toast.success('Address deleted successfully!'),
-                    onError: () => toast.error('Failed to delete address.'),
+                        toast.success('Address deleted successfully'),
                 });
             }
         });
     };
 
-    const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Addresses', href: '/auth/addresses' },
-    ];
-
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Customer Addresses" />
 
-            <div className="space-y-4 text-foreground">
+            <div className="space-y-6 text-foreground">
                 {/* Header */}
-                <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <HeadingSmall
                         title="Customer Addresses"
-                        description="Manage all customer addresses."
+                        description="Manage all customer addresses"
                     />
+
                     <Link
                         href="/auth/addresses/create"
-                        className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                        className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                     >
                         <Plus className="h-4 w-4" />
                         Add Address
@@ -100,88 +94,111 @@ export default function Index() {
                 </div>
 
                 {/* Filters */}
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    {/* Search */}
-                    <input
-                        type="text"
-                        placeholder="Search by customer name, address, or district..."
-                        value={data.search}
-                        onChange={(e) => {
-                            setData('search', e.target.value);
-                            setData('page', 1);
-                        }}
-                        className="h-9 w-full max-w-sm rounded-md border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-                    />
+                <form className="space-y-5 rounded-md border border-border bg-card/80 p-4 sm:p-6 lg:p-8">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <div>
+                            <Label className="text-xs">Search Customer</Label>
+                            <CustomerSearch
+                                query={query}
+                                onQueryChange={setQuery}
+                                onSelect={(customer) => {
+                                    setData({
+                                        id: customer.id,
+                                        customer_no: customer.customer_no,
+                                        type: customer.type,
+                                        name: customer.name,
+                                        phone: customer.phone,
+                                        email: customer.email,
+                                        identification_type:
+                                            customer.identification_type,
+                                        identification_number:
+                                            customer.identification_number,
+                                    });
+                                    setQuery(customer.name);
+                                }}
+                            />
+                        </div>
 
-                    {/* Type filter */}
-                    <select
-                        value={data.type}
-                        onChange={(e) => setData('type', e.target.value)}
-                        className="h-9 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-                    >
-                        <option value="all">All Types</option>
-                        <option value="CURRENT">Current</option>
-                        <option value="PERMANENT">Permanent</option>
-                        <option value="MAILING">Mailing</option>
-                        <option value="WORK">Work</option>
-                        <option value="REGISTERED">Registered</option>
-                        <option value="OTHER">Other</option>
-                    </select>
-                </div>
+                        {[
+                            ['Customer No', data.customer_no],
+                            ['Type', data.type],
+                            ['Name', data.name],
+                            ['Phone', data.phone],
+                            ['Email', data.email],
+                            ['Identification Type', data.identification_type],
+                            [
+                                'Identification Number',
+                                data.identification_number,
+                            ],
+                        ].map(([label, value]) => (
+                            <div key={label}>
+                                <Label className="text-xs">{label}</Label>
+                                <Input
+                                    value={value}
+                                    disabled
+                                    className="h-8 text-sm"
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </form>
 
-                {/* Table */}
-                <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border border-border md:h-[calc(100vh-300px)]">
-                    <table className="w-full border-collapse">
-                        <thead className="sticky top-0 bg-muted">
+                {/* ================= TABLE (Desktop) ================= */}
+                <div className="hidden overflow-x-auto rounded-md border border-border md:block">
+                    <table className="w-full">
+                        <thead className="bg-muted">
                             <tr>
                                 {[
                                     '#',
                                     'Customer No',
-                                    'Customer Name',
+                                    'Name',
                                     'Address',
                                     'District',
                                     'Type',
                                     'Actions',
-                                ].map((header) => (
+                                ].map((h) => (
                                     <th
-                                        key={header}
-                                        className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground"
+                                        key={h}
+                                        className="px-3 py-2 text-left text-sm font-medium text-muted-foreground"
                                     >
-                                        {header}
+                                        {h}
                                     </th>
                                 ))}
                             </tr>
                         </thead>
+
                         <tbody>
                             {addresses.data.length > 0 ? (
                                 addresses.data.map((a, i) => (
                                     <tr
                                         key={a.id}
-                                        className="border-b border-border even:bg-muted/30"
+                                        className="border-t even:bg-muted/30"
                                     >
-                                        <td className="px-2 py-1">{i + 1}</td>
-                                        <td className="px-2 py-1 font-medium">
+                                        <td className="px-3 py-2">{i + 1}</td>
+                                        <td className="px-3 py-2 font-medium">
                                             {a.customer?.customer_no}
                                         </td>
-                                        <td className="px-2 py-1 font-medium">
+                                        <td className="px-3 py-2 font-medium">
                                             {a.customer?.name}
                                         </td>
-                                        <td className="px-2 py-1">{a.line1}</td>
-                                        <td className="px-2 py-1">
+                                        <td className="px-3 py-2">{a.line1}</td>
+                                        <td className="hidden px-3 py-2 lg:table-cell">
                                             {a.district}
                                         </td>
-                                        <td className="px-2 py-1">{a.type}</td>
-                                        <td className="px-2 py-1">
+                                        <td className="hidden px-3 py-2 xl:table-cell">
+                                            {a.type}
+                                        </td>
+                                        <td className="px-3 py-2">
                                             <TooltipProvider>
-                                                <div className="flex space-x-2">
+                                                <div className="flex gap-2">
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
-                                                            <a
+                                                            <Link
                                                                 href={`/auth/addresses/${a.id}`}
-                                                                className="text-primary hover:text-primary/80"
+                                                                className="text-primary"
                                                             >
                                                                 <Eye className="h-5 w-5" />
-                                                            </a>
+                                                            </Link>
                                                         </TooltipTrigger>
                                                         <TooltipContent>
                                                             View
@@ -190,12 +207,12 @@ export default function Index() {
 
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
-                                                            <a
+                                                            <Link
                                                                 href={`/auth/addresses/${a.id}/edit`}
-                                                                className="text-green-600 hover:text-green-500"
+                                                                className="text-green-600"
                                                             >
                                                                 <Pencil className="h-5 w-5" />
-                                                            </a>
+                                                            </Link>
                                                         </TooltipTrigger>
                                                         <TooltipContent>
                                                             Edit
@@ -205,7 +222,6 @@ export default function Index() {
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <button
-                                                                type="button"
                                                                 onClick={() =>
                                                                     handleDelete(
                                                                         a.id,
@@ -215,7 +231,7 @@ export default function Index() {
                                                                             '',
                                                                     )
                                                                 }
-                                                                className="text-destructive hover:text-destructive/80"
+                                                                className="text-destructive"
                                                             >
                                                                 <Trash2 className="h-5 w-5" />
                                                             </button>
@@ -232,10 +248,10 @@ export default function Index() {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={6}
-                                        className="px-4 py-6 text-center text-muted-foreground"
+                                        colSpan={7}
+                                        className="py-6 text-center text-muted-foreground"
                                     >
-                                        No addresses found.
+                                        No addresses found
                                     </td>
                                 </tr>
                             )}
@@ -243,47 +259,59 @@ export default function Index() {
                     </table>
                 </div>
 
-                {/* Pagination */}
-                <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
-                    {/* Per page */}
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">
-                            Show
-                        </span>
-                        <select
-                            value={data.per_page}
-                            onChange={(e) => {
-                                setData('per_page', Number(e.target.value));
-                                setData('page', 1);
-                            }}
-                            className="h-9 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+                {/* ================= MOBILE CARDS ================= */}
+                <div className="space-y-3 md:hidden">
+                    {addresses.data.map((a) => (
+                        <div
+                            key={a.id}
+                            className="space-y-3 rounded-md border border-border bg-card p-4"
                         >
-                            {[5, 10, 20, 50].map((n) => (
-                                <option key={n} value={n}>
-                                    {n}
-                                </option>
-                            ))}
-                        </select>
-                        <span className="text-sm text-muted-foreground">
-                            records
-                        </span>
-                    </div>
+                            <div className="flex justify-between">
+                                <div className="font-medium">
+                                    {a.customer?.name}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                    #{a.customer?.customer_no}
+                                </div>
+                            </div>
 
-                    {/* Pagination links */}
-                    <div className="flex gap-1">
-                        {addresses.links.map((link, i) => (
-                            <a
-                                key={i}
-                                href={link.url || '#'}
-                                className={`rounded-full px-3 py-1 text-sm transition-colors ${
-                                    link.active
-                                        ? 'bg-primary text-primary-foreground'
-                                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                                }`}
-                                dangerouslySetInnerHTML={{ __html: link.label }}
-                            />
-                        ))}
-                    </div>
+                            <div className="text-sm text-muted-foreground">
+                                {a.line1}
+                            </div>
+
+                            <div className="text-xs text-muted-foreground">
+                                {a.district} • {a.type}
+                            </div>
+
+                            <div className="flex justify-end gap-3 pt-2">
+                                <Link
+                                    href={`/auth/addresses/${a.id}`}
+                                    className="text-primary"
+                                >
+                                    <Eye className="h-5 w-5" />
+                                </Link>
+
+                                <Link
+                                    href={`/auth/addresses/${a.id}/edit`}
+                                    className="text-green-600"
+                                >
+                                    <Pencil className="h-5 w-5" />
+                                </Link>
+
+                                <button
+                                    onClick={() =>
+                                        handleDelete(
+                                            a.id,
+                                            a.customer?.name || '',
+                                        )
+                                    }
+                                    className="text-destructive"
+                                >
+                                    <Trash2 className="h-5 w-5" />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         </CustomAuthLayout>
