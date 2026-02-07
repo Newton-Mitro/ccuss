@@ -119,17 +119,37 @@ export const CustomerSearch: React.FC<CustomerSearchProps> = ({
                     {results.map((customer) => (
                         <li
                             key={customer.id}
-                            className="flex cursor-pointer items-center gap-2 px-3 py-2 text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
+                            className="flex cursor-pointer items-center gap-2 px-3 py-2 text-xs hover:bg-muted"
                             onClick={() => {
                                 onSelect(customer);
                                 onQueryChange(customer.name);
                                 setShowDropdown(false);
                             }}
                         >
-                            <span>{customer.name}</span>
+                            {/* Avatar */}
+                            <div className="h-6 w-6 shrink-0 overflow-hidden rounded-full border bg-muted">
+                                {customer.photo?.url ? (
+                                    <img
+                                        src={customer.photo.url}
+                                        alt={customer.name}
+                                        className="h-full w-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="flex h-full w-full items-center justify-center text-[10px] font-medium text-muted-foreground">
+                                        {customer.name?.charAt(0) ?? '?'}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Name */}
+                            <span className="truncate font-medium">
+                                {customer.name}
+                            </span>
+
+                            {/* Customer No */}
                             {customer.customer_no && (
-                                <span className="ml-auto text-xs text-gray-500">
-                                    ({customer.customer_no})
+                                <span className="ml-auto shrink-0 text-[11px] text-muted-foreground">
+                                    #{customer.customer_no}
                                 </span>
                             )}
                         </li>

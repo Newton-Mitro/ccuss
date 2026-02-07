@@ -43,6 +43,7 @@ Route::prefix('auth')
         Route::resource('branches', BranchController::class);
         Route::resource('customers', CustomerController::class);
         Route::get('/api/search-customers', [CustomerController::class, 'searchCustomers'])->name('search-customers');
+        Route::get('/api/customer-addresses', [CustomerAddressController::class, 'getCustomerAddresses'])->name('customer-addresses');
         Route::resource('addresses', CustomerAddressController::class);
         Route::resource('family-relations', CustomerFamilyRelationController::class);
         Route::resource('signatures', CustomerSignatureController::class);

@@ -19,14 +19,13 @@ class StoreAddressRequest extends FormRequest
             'line1' => ['required', 'string', 'max:255'],
             'line2' => ['nullable', 'string', 'max:255'],
 
-            'division' => ['required', 'string', 'max:100'],
-            'district' => ['required', 'string', 'max:100'],
+            'division' => ['nullable', 'string', 'max:100'],
+            'district' => ['nullable', 'string', 'max:100'],
             'upazila' => ['nullable', 'string', 'max:100'],
             'union_ward' => ['nullable', 'string', 'max:100'],
-            'village_locality' => ['nullable', 'string', 'max:150'],
             'postal_code' => ['nullable', 'string', 'max:20'],
 
-            'country_code' => ['required', 'string', 'size:2'],
+            'country' => ['nullable', 'string', 'size:2'],
 
             'type' => ['required', 'in:CURRENT,PERMANENT,MAILING,WORK,REGISTERED,OTHER'],
         ];
