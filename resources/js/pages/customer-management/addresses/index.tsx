@@ -150,7 +150,7 @@ export default function Index() {
                                     </p>
                                 </div>
 
-                                <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2">
+                                <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2 lg:grid-cols-3">
                                     <div>
                                         <span className="text-muted-foreground">
                                             Customer No
@@ -202,7 +202,7 @@ export default function Index() {
                     </button>
                 </div>
 
-                {/* ================= RESPONSIVE TABLE / CARDS ================= */}
+                {/* ================= TABLE / CARDS ================= */}
                 {addresses.length ? (
                     <div className="grid gap-4">
                         {/* Desktop Table */}
@@ -212,9 +212,13 @@ export default function Index() {
                                     <tr>
                                         {[
                                             '#',
-                                            'Address',
+                                            'Line 1',
+                                            'Line 2',
+                                            'Division',
                                             'District',
+                                            'Country',
                                             'Type',
+                                            'Verification',
                                             'Actions',
                                         ].map((h) => (
                                             <th
@@ -239,10 +243,22 @@ export default function Index() {
                                                 {a.line1}
                                             </td>
                                             <td className="px-3 py-2">
+                                                {a.line2}
+                                            </td>
+                                            <td className="px-3 py-2">
+                                                {a.division}
+                                            </td>
+                                            <td className="px-3 py-2">
                                                 {a.district}
                                             </td>
                                             <td className="px-3 py-2">
+                                                {a.country}
+                                            </td>
+                                            <td className="px-3 py-2">
                                                 {a.type}
+                                            </td>
+                                            <td className="px-3 py-2">
+                                                {a.verification_status}
                                             </td>
                                             <td className="px-3 py-2">
                                                 <TooltipProvider>
@@ -336,10 +352,17 @@ export default function Index() {
                                     <div className="flex items-start justify-between">
                                         <div className="space-y-1 text-sm">
                                             <p className="font-semibold">
-                                                {i + 1}. {a.line1}
+                                                {i + 1}. {a.line1}, {a.line2} -{' '}
+                                                {a.district}
                                             </p>
                                             <p className="text-xs text-muted-foreground">
-                                                {a.district} • {a.type}
+                                                {a.type} |{' '}
+                                                {a.verification_status}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {a.division}, {a.upazila},{' '}
+                                                {a.union_ward}, {a.postal_code},{' '}
+                                                {a.country}
                                             </p>
                                         </div>
                                         <div className="flex gap-2">
