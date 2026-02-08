@@ -6,93 +6,100 @@ use App\CostomerMgmt\Models\CustomerSignature;
 use App\CostomerMgmt\Requests\StoreSignatureRequest;
 use App\CostomerMgmt\Requests\UpdateSignatureRequest;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\Request;
 
 class CustomerSignatureController extends Controller
 {
     public function index(Request $request): Response
     {
-        $search = $request->input('search');
-        $perPage = $request->input('per_page', 10);
-        if (!empty($search)) {
-            $signatures = CustomerSignature::with(['customer'])->whereHas('customer', function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")->orWhere('customer_no', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")->orWhere('phone', 'like', "%{$search}%");
-            })->latest()->paginate($perPage)->withQueryString();
-        } else {
-            // Return an empty LengthAwarePaginator instead of a plain collection 
-            $signatures = new \Illuminate\Pagination\LengthAwarePaginator(
-                [], // empty items 
-                0, // total items 
-                $perPage,
-                $request->input('page', 1),
-                ['path' => $request->url(), 'query' => $request->query()]
-            );
+        return Inertia::render('customer-management/signatures/index');
+    }
+
+    public function getCustomerSignature(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'customer_id' => ['required', 'integer', 'exists:customers,id'],
+        ]);
+
+        $signature = CustomerSignature::with('customer:id,name,customer_no')
+            ->where('customer_id', $validated['customer_id'])
+            ->latest()
+            ->first();
+
+        if (!$signature) {
+            return response()->json([
+                'message' => 'No signature found for this customer'
+            ], 404);
         }
-        return Inertia::render('customer-management/signatures/index', ['signatures' => $signatures, 'filters' => $request->only(['search', 'per_page', 'page']),]);
+
+        return response()->json([
+            'data' => $signature
+        ]);
     }
 
-    public function create(): Response
-    {
-        return Inertia::render('customer-management/signatures/create');
-    }
 
-    public function store(StoreSignatureRequest $request): RedirectResponse
+    public function store(StoreSignatureRequest $request): JsonResponse
     {
-        // Check if a signature already exists for this customer
-        $exists = CustomerSignature::where('customer_id', $request->customer_id)->exists();
+        $data = $request->validated();
+
+        // One signature per customer
+        $exists = CustomerSignature::where('customer_id', $data['customer_id'])
+            ->exists();
 
         if ($exists) {
-            return redirect()
-                ->back()
-                ->withErrors(['customer_id' => 'This customer already has a signature.'])
-                ->withInput();
+            return response()->json([
+                'error' => 'This customer already has a signature.'
+            ], 422);
         }
 
-        CustomerSignature::create([
-            'customer_id' => $request->customer_id,
-            'signature_id' => $request->signature_id,
+        $signature = CustomerSignature::create([
+            'customer_id' => $data['customer_id'],
+            'signature_id' => $data['signature_id'],
         ]);
 
-        return redirect()->route('signatures.index')
-            ->with('success', 'Signature added successfully.');
-    }
-
-    public function show(CustomerSignature $signature): Response
-    {
-        return Inertia::render('customer-management/signatures/show', [
-            'signature' => $signature->load('customer'),
+        return response()->json([
+            'message' => 'Signature created successfully.',
+            'signature' => $signature->load('customer:id,name,customer_no'),
         ]);
     }
 
-    public function edit(CustomerSignature $signature): Response
-    {
-        return Inertia::render('customer-management/signatures/edit', [
-            'signature' => $signature->load('customer', 'signature'),
-        ]);
-    }
+    public function update(
+        UpdateSignatureRequest $request,
+        CustomerSignature $signature
+    ): JsonResponse {
+        $data = $request->validated();
 
-    public function update(UpdateSignatureRequest $request, CustomerSignature $signature): RedirectResponse
-    {
-        $data = ['customer_id' => $request->customer_id];
+        // Prevent assigning another customer's signature
+        $exists = CustomerSignature::where('customer_id', $data['customer_id'])
+            ->where('id', '!=', $signature->id)
+            ->exists();
 
-        if ($request->filled('signature_id')) {
-            $data['signature_id'] = $request->signature_id;
+        if ($exists) {
+            return response()->json([
+                'error' => 'This customer already has a signature.'
+            ], 422);
         }
 
-        $signature->update($data);
+        $signature->update([
+            'customer_id' => $data['customer_id'],
+            'signature_id' => $data['signature_id'] ?? $signature->signature_id,
+        ]);
 
-        return redirect()->route('signatures.index')
-            ->with('success', 'Signature updated successfully.');
+        return response()->json([
+            'message' => 'Signature updated successfully.',
+            'signature' => $signature->load('customer:id,name,customer_no'),
+        ]);
     }
 
-    public function destroy(CustomerSignature $signature): RedirectResponse
+    public function destroy(CustomerSignature $signature): JsonResponse
     {
         $signature->delete();
 
-        return redirect()->route('signatures.index')
-            ->with('success', 'Signature deleted successfully.');
+        return response()->json([
+            'message' => 'Signature deleted successfully.',
+        ]);
     }
 }

@@ -14,16 +14,18 @@ import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-import { Address } from '../../../types/address';
-import { Customer } from '../../../types/customer';
-import { FamilyRelation } from '../../../types/family_relation';
-import { Introducer } from '../../../types/introducer';
+import {
+    Customer,
+    CustomerAddress,
+    CustomerFamilyRelation,
+    CustomerIntroducer,
+} from '../../../types/customer';
 
 interface ShowProps {
     customer: Customer & {
-        addresses?: Address[];
-        family_relations?: FamilyRelation[];
-        introducers?: Introducer[];
+        addresses?: CustomerAddress[];
+        family_relations?: CustomerFamilyRelation[];
+        introducers?: CustomerIntroducer[];
     };
     backUrl: string;
 }
@@ -96,7 +98,7 @@ function Show({ customer, backUrl }: ShowProps) {
                                 {customer.name}
                             </h1>
                             <p className="text-xs text-gray-500 dark:text-gray-400">
-                                Customer No · {customer.customer_no}
+                                {customer.customer_no} | {customer.type}
                             </p>
                             <p
                                 className={`mt-1 text-xs font-medium ${getStatusColor(customer.status)}`}
@@ -150,7 +152,6 @@ function Show({ customer, backUrl }: ShowProps) {
                     icon={<UserIcon size={16} />}
                 >
                     <InfoGrid>
-                        <Info label="Type" value={customer.type} />
                         {isIndividual && (
                             <Info label="Date of Birth" value={customer.dob} />
                         )}
@@ -211,45 +212,48 @@ function Show({ customer, backUrl }: ShowProps) {
                 </SectionCard>
 
                 {/* ================= Addresses ================= */}
+
                 {customer.addresses?.length > 0 && (
                     <SectionCard
                         title="Addresses"
                         icon={<HomeIcon size={16} />}
                     >
-                        <div className="grid gap-2">
-                            {customer.addresses.map((addr) => (
-                                <Card key={addr.id}>
-                                    <Info label="Type" value={addr.type} />
-                                    <Info label="Line 1" value={addr.line1} />
-                                    {addr.line2 && (
-                                        <Info
-                                            label="Line 2"
-                                            value={addr.line2}
-                                        />
-                                    )}
-                                    <Info
-                                        label="Division"
-                                        value={addr.division}
-                                    />
-                                    <Info
-                                        label="District"
-                                        value={addr.district}
-                                    />
-                                    {addr.upazila && (
-                                        <Info
-                                            label="Upazila"
-                                            value={addr.upazila}
-                                        />
-                                    )}
-                                    {addr.postal_code && (
-                                        <Info
-                                            label="Postal Code"
-                                            value={addr.postal_code}
-                                        />
-                                    )}
-                                </Card>
-                            ))}
-                        </div>
+                        {customer.addresses.length && (
+                            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                                {customer.addresses.map((address, index) => (
+                                    <div
+                                        key={address.id}
+                                        className="rounded-md border bg-card p-3"
+                                    >
+                                        <div className="flex flex-col gap-4 rounded-md border bg-background/60 p-3 md:flex-row">
+                                            <div className="flex items-start justify-between">
+                                                <div className="space-y-1 text-sm">
+                                                    <p className="font-semibold">
+                                                        {index + 1}.{' '}
+                                                        {address.line1},{' '}
+                                                        {address.line2} –{' '}
+                                                        {address.district}
+                                                    </p>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        {address.type} |{' '}
+                                                        {
+                                                            address.verification_status
+                                                        }
+                                                    </p>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        {address.division},{' '}
+                                                        {address.upazila},{' '}
+                                                        {address.union_ward},{' '}
+                                                        {address.postal_code},{' '}
+                                                        {address.country}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </SectionCard>
                 )}
 
@@ -259,32 +263,98 @@ function Show({ customer, backUrl }: ShowProps) {
                         title="Family Relations"
                         icon={<UsersIcon size={16} />}
                     >
-                        <div className="grid gap-2">
-                            {customer.family_relations.map((rel) => (
-                                <Card key={rel.id}>
-                                    <Info label="Name" value={rel.name} />
-                                    <Info
-                                        label="Relation"
-                                        value={rel.relation_type}
-                                    />
-                                    {rel.phone && (
-                                        <Info label="Phone" value={rel.phone} />
-                                    )}
-                                    {rel.email && (
-                                        <Info label="Email" value={rel.email} />
-                                    )}
-                                    {rel.dob && (
-                                        <Info label="DOB" value={rel.dob} />
-                                    )}
-                                    {rel.gender && (
-                                        <Info
-                                            label="Gender"
-                                            value={rel.gender}
-                                        />
-                                    )}
-                                </Card>
-                            ))}
-                        </div>
+                        {customer.addresses.length && (
+                            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                                {customer.family_relations.map(
+                                    (family_relation) => (
+                                        <div
+                                            key={family_relation.id}
+                                            className="rounded-md border bg-card p-3"
+                                        >
+                                            <div className="flex flex-col gap-4 rounded-md border bg-background/60 p-3 md:flex-row">
+                                                <div className="h-20 w-20 overflow-hidden rounded-full border bg-muted">
+                                                    {family_relation.photo
+                                                        ?.url ? (
+                                                        <img
+                                                            src={
+                                                                family_relation
+                                                                    .photo.url
+                                                            }
+                                                            alt={
+                                                                family_relation.name
+                                                            }
+                                                            className="h-full w-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
+                                                            {family_relation.name?.charAt(
+                                                                0,
+                                                            ) ?? '-'}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <div className="flex-1 space-y-2">
+                                                    <div>
+                                                        <p className="text-sm font-semibold">
+                                                            {
+                                                                family_relation.name
+                                                            }
+                                                        </p>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            {
+                                                                family_relation.gender
+                                                            }{' '}
+                                                            •{' '}
+                                                            {
+                                                                family_relation.relation_type
+                                                            }
+                                                            •{' '}
+                                                            {
+                                                                family_relation.religion
+                                                            }
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-3">
+                                                        <Info
+                                                            label="Date of Birth"
+                                                            value={
+                                                                family_relation.dob
+                                                            }
+                                                        />
+                                                        <Info
+                                                            label="Identification Type"
+                                                            value={
+                                                                family_relation.identification_type
+                                                            }
+                                                        />
+                                                        <Info
+                                                            label="Identification No"
+                                                            value={
+                                                                family_relation.identification_number
+                                                            }
+                                                        />
+                                                        <Info
+                                                            label="Phone"
+                                                            value={
+                                                                family_relation.phone
+                                                            }
+                                                        />
+                                                        <Info
+                                                            label="Email"
+                                                            value={
+                                                                family_relation.email
+                                                            }
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ),
+                                )}
+                            </div>
+                        )}
                     </SectionCard>
                 )}
 

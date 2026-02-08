@@ -161,7 +161,7 @@ class CustomerController extends Controller
             'photo',                 // Customer photo
             'addresses',             // Customer addresses
             'familyRelations',       // Family relations
-            // 'introducers',           // Introducer info
+            'introducers',           // Introducer info
         ]);
 
         return Inertia::render('customer-management/customers/show', [

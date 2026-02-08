@@ -13,13 +13,11 @@ use Inertia\Response;
 
 class CustomerAddressController extends Controller
 {
-    // Show addresses page
     public function index(Request $request): Response
     {
         return Inertia::render('customer-management/addresses/index');
     }
 
-    // Get addresses for a customer (API)
     public function getCustomerAddresses(Request $request): JsonResponse
     {
         $customer_id = $request->input('customer_id');
@@ -36,7 +34,6 @@ class CustomerAddressController extends Controller
         return response()->json($addresses);
     }
 
-    // Store address (API-friendly)
     public function store(StoreAddressRequest $request): JsonResponse
     {
         $data = $request->validated();
@@ -59,7 +56,6 @@ class CustomerAddressController extends Controller
         ]);
     }
 
-    // Update address (API-friendly)
     public function update(UpdateAddressRequest $request, CustomerAddress $address): JsonResponse
     {
         $data = $request->validated();
@@ -83,7 +79,6 @@ class CustomerAddressController extends Controller
         ]);
     }
 
-    // Delete address (API-friendly)
     public function destroy(CustomerAddress $address): JsonResponse
     {
         $address->delete();

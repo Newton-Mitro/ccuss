@@ -1,32 +1,36 @@
-export type VerificationStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
-export type RecordStatus = 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'CLOSED';
-
-/* ===========================
- * Customers
- * =========================== */
-
 import { AuditFields, ID, Timestamp } from './base_types';
 
+export type AddressVerificationStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
+export type CustomerStatus = 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'CLOSED';
 export type CustomerType = 'Individual' | 'Organization';
-
 export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
-
 export type Religion =
     | 'CHRISTIANITY'
     | 'ISLAM'
     | 'HINDUISM'
     | 'BUDDHISM'
     | 'OTHER';
-
 export type IdentificationType =
     | 'NID'
     | 'BRN'
     | 'REGISTRATION_NO'
     | 'PASSPORT'
     | 'DRIVING_LICENSE';
-
 export type KycLevel = 'MIN' | 'STD' | 'ENH';
 export type KycStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
+
+/* ===========================
+ * Customer
+ * =========================== */
+
+export interface CustomerPhoto extends AuditFields {
+    id: number;
+    file_name: string;
+    file_path: string;
+    file_type: string;
+    alt_text?: string | null;
+    url: string;
+}
 
 export interface Customer extends AuditFields {
     id: ID;
@@ -50,7 +54,9 @@ export interface Customer extends AuditFields {
     kyc_verified_by?: ID | null;
     kyc_verified_at?: Timestamp | null;
 
-    status: RecordStatus;
+    photo?: CustomerPhoto | null;
+
+    status: CustomerStatus;
 }
 
 /* ===========================
@@ -81,7 +87,7 @@ export interface CustomerAddress extends AuditFields {
 
     type: AddressType;
 
-    verification_status: VerificationStatus;
+    verification_status: AddressVerificationStatus;
     verified_by?: ID | null;
     verified_at?: Timestamp | null;
     remarks?: string | null;
@@ -112,6 +118,15 @@ export type RelationType =
     | 'DAUGHTER_IN_LAW'
     | 'BROTHER_IN_LAW'
     | 'SISTER_IN_LAW';
+
+export interface FamilyRelationPhoto extends AuditFields {
+    id: number;
+    file_name: string;
+    file_path: string;
+    file_type: string;
+    alt_text?: string | null;
+    url: string;
+}
 
 export interface CustomerFamilyRelation extends AuditFields {
     id: ID;
@@ -185,7 +200,7 @@ export interface CustomerIntroducer extends AuditFields {
 
     relationship_type: IntroducerRelationshipType;
 
-    verification_status: VerificationStatus;
+    verification_status: AddressVerificationStatus;
     verified_by?: ID | null;
     verified_at?: Timestamp | null;
     remarks?: string | null;
@@ -206,5 +221,5 @@ export interface OnlineServiceUser extends AuditFields {
     password: string; // hashed
     last_login_at?: Timestamp | null;
 
-    status: Exclude<RecordStatus, 'PENDING'>;
+    status: Exclude<CustomerStatus, 'PENDING'>;
 }

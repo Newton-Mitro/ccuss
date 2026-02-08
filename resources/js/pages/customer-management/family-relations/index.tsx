@@ -12,13 +12,13 @@ import Swal from 'sweetalert2';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
-import { FamilyRelation } from '../../../types/family_relation';
+import { CustomerFamilyRelation } from '../../../types/customer';
 
 export default function Index() {
     const { props } = usePage<
         SharedData & {
             familyRelations: {
-                data: FamilyRelation[];
+                data: CustomerFamilyRelation[];
                 links: { url: string | null; label: string; active: boolean }[];
             };
             filters: Record<string, string | number>;
@@ -116,11 +116,8 @@ export default function Index() {
                             <tr>
                                 {[
                                     '#',
-                                    'Customer No',
-                                    'Customer Name',
-                                    'Relative',
+                                    'Relative Name',
                                     'Relation',
-                                    'Reverse',
                                     'Actions',
                                 ].map((header) => (
                                     <th
@@ -134,37 +131,29 @@ export default function Index() {
                         </thead>
                         <tbody>
                             {familyRelations.data.length > 0 ? (
-                                familyRelations.data.map((r, i) => (
+                                familyRelations.data.map((family, i) => (
                                     <tr
-                                        key={r.id}
+                                        key={family.id}
                                         className="border-b border-border even:bg-muted/30"
                                     >
                                         <td className="px-2 py-1">{i + 1}</td>
-                                        <td className="px-2 py-1 font-medium">
-                                            {r.customer?.customer_no}
-                                        </td>
-                                        <td className="px-2 py-1 font-medium">
-                                            {r.customer?.name}
-                                        </td>
                                         <td className="px-2 py-1">
-                                            {r.relative?.name}
+                                            {family.name}
                                         </td>
                                         <td className="px-2 py-1 text-blue-600 dark:text-blue-400">
-                                            {r.relation_type.replace(/_/g, ' ')}
-                                        </td>
-                                        <td className="px-2 py-1 text-indigo-600 dark:text-indigo-400">
-                                            {r.reverse_relation_type.replace(
+                                            {family.relation_type.replace(
                                                 /_/g,
                                                 ' ',
                                             )}
                                         </td>
+
                                         <td className="px-2 py-1">
                                             <TooltipProvider>
                                                 <div className="flex space-x-2">
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link
-                                                                href={`/auth/family-relations/${r.id}`}
+                                                                href={`/auth/family-relations/${family.id}`}
                                                                 className="text-primary hover:text-primary/80"
                                                             >
                                                                 <Eye className="h-5 w-5" />
@@ -178,7 +167,7 @@ export default function Index() {
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link
-                                                                href={`/auth/family-relations/${r.id}/edit`}
+                                                                href={`/auth/family-relations/${family.id}/edit`}
                                                                 className="text-green-600 hover:text-green-500"
                                                             >
                                                                 <Pencil className="h-5 w-5" />
@@ -195,8 +184,8 @@ export default function Index() {
                                                                 type="button"
                                                                 onClick={() =>
                                                                     handleDelete(
-                                                                        r.id,
-                                                                        r
+                                                                        family.id,
+                                                                        family
                                                                             .customer
                                                                             ?.name ||
                                                                             '',

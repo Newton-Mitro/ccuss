@@ -1,3 +1,4 @@
+import { useForm } from '@inertiajs/react';
 import axios from 'axios';
 import { Search } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
@@ -8,6 +9,7 @@ interface CustomerSearchProps {
     query: string;
     onQueryChange: (value: string) => void;
     onSelect: (customer: Customer) => void;
+    onSelectCallback: (customer: Customer) => void;
     error?: string;
     placeholder?: string;
 }
@@ -15,6 +17,7 @@ interface CustomerSearchProps {
 export const CustomerSearch: React.FC<CustomerSearchProps> = ({
     query,
     onQueryChange,
+    onSelectCallback,
     onSelect,
     error,
     placeholder = 'Search customer...',
@@ -24,6 +27,37 @@ export const CustomerSearch: React.FC<CustomerSearchProps> = ({
     const [loading, setLoading] = useState(false);
 
     const dropdownRef = useRef<HTMLDivElement | null>(null);
+
+    const { data, setData } = useForm({
+        id: null as number | null,
+        customer_no: '',
+        type: '',
+        name: '',
+        phone: '',
+        email: '',
+        identification_type: '',
+        identification_number: '',
+        photo: null as { url?: string } | null,
+        status: '',
+    });
+
+    const handleCustomerSelect = (customer: any) => {
+        setData({
+            id: customer.id,
+            customer_no: customer.customer_no,
+            type: customer.type,
+            name: customer.name,
+            phone: customer.phone,
+            email: customer.email,
+            identification_type: customer.identification_type,
+            identification_number: customer.identification_number,
+            photo: customer.photo ?? null,
+            status: customer.status,
+        });
+
+        onQueryChange(customer.name);
+        onSelectCallback(customer);
+    };
 
     /**
      * -----------------------

@@ -46,7 +46,33 @@ Route::prefix('auth')
         Route::get('/api/customer-addresses', [CustomerAddressController::class, 'getCustomerAddresses'])->name('customer-addresses');
         Route::resource('addresses', CustomerAddressController::class);
         Route::resource('family-relations', CustomerFamilyRelationController::class);
-        Route::resource('signatures', CustomerSignatureController::class);
+        Route::get(
+            '/customer/signatures',
+            [CustomerSignatureController::class, 'index']
+        )->name('signatures.index');
+        Route::get(
+            '/api/customer/signature',
+            [CustomerSignatureController::class, 'getCustomerSignature']
+        )->name('customer.signature.show');
+
+        // Store new signature
+        Route::post(
+            '/api/customer/signature',
+            [CustomerSignatureController::class, 'store']
+        )->name('customer.signature.store');
+
+        // Update signature
+        Route::put(
+            '/api/customer/signature/{signature}',
+            [CustomerSignatureController::class, 'update']
+        )->name('customer.signature.update');
+
+        // Delete signature
+        Route::delete(
+            '/api/customer/signature/{signature}',
+            [CustomerSignatureController::class, 'destroy']
+        )->name('customer.signature.destroy');
+
         Route::resource('online-clients', OnlineServiceUserController::class);
 
     });

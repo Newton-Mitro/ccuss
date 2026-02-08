@@ -19,12 +19,12 @@ export const sidebarMenu: SidebarItem[] = [
             },
         ],
     },
-    {
-        name: 'Media and Files',
-        icon: <i className="fa-solid fa-photo-film"></i>,
-        path: '/auth/media',
-        match_path: 'media',
-    },
+    // {
+    //     name: 'Media and Files',
+    //     icon: <i className="fa-solid fa-photo-film"></i>,
+    //     path: '/auth/media',
+    //     match_path: 'media',
+    // },
     {
         name: 'Organizational Structure',
         icon: <i className="fa-solid fa-building-flag"></i>,
@@ -74,7 +74,7 @@ export const sidebarMenu: SidebarItem[] = [
             {
                 name: 'Customer Signatures',
                 icon: <i className="fa-solid fa-signature" />,
-                path: '/auth/signatures',
+                path: '/auth/customer/signatures',
                 match_path: 'signatures',
             },
             {

@@ -2,7 +2,7 @@
 
 namespace App\Branch\Models;
 
-use App\CostomerManagement\Customer\Models\Customer;
+use App\CostomerMgmt\Models\Customer;
 use Database\Factories\BranchFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

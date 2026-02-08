@@ -26,7 +26,7 @@ class UpdateAddressRequest extends FormRequest
             'village_locality' => ['nullable', 'string', 'max:150'],
             'postal_code' => ['nullable', 'string', 'max:20'],
 
-            'country_code' => ['sometimes', 'required', 'string', 'size:2'],
+            'country_code' => ['sometimes', 'required', 'string', 'max:150'],
 
             'type' => ['sometimes', 'required', 'in:CURRENT,PERMANENT,MAILING,WORK,REGISTERED,OTHER'],
         ];

@@ -11,3 +11,5 @@ export interface AuditFields {
     created_at: Timestamp;
     updated_at: Timestamp;
 }
+
+export type ModalMode = 'create' | 'edit' | 'view';
