@@ -1,10 +1,10 @@
-import { Customer } from '@/types/customer';
+import { CustomerAddress } from '@/types/customer';
 import axios from 'axios';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
 export function useCustomerAddresses() {
-    const [addresses, setAddresses] = useState<Customer[]>([]);
+    const [addresses, setAddresses] = useState<CustomerAddress[]>([]);
     const [loading, setLoading] = useState(false);
 
     const fetchAddresses = async (customerId: number) => {

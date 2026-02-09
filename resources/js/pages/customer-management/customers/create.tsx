@@ -1,7 +1,7 @@
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, ListFilter, Loader2 } from 'lucide-react';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
@@ -13,6 +13,13 @@ import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 
 const Create = ({ backUrl }: { backUrl: string }) => {
+    const { flash } = usePage().props;
+
+    useEffect(() => {
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) toast.success(flash.success);
+    }, [flash]);
+
     const handleBack = () => {
         router.visit(backUrl, {
             preserveState: true,
@@ -21,7 +28,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
     };
     const { data, setData, post, processing, errors } = useForm({
         customer_no: '',
-        type: 'Individual',
+        type: '',
         name: '',
         phone: '',
         email: '',
@@ -33,7 +40,6 @@ const Create = ({ backUrl }: { backUrl: string }) => {
         photo: null as File | null,
         kyc_status: 'PENDING',
         status: 'PENDING',
-        registration_no: '',
     });
 
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -55,8 +61,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
         post('/auth/customers', {
             data: formData,
             preserveScroll: true,
-            onSuccess: () => toast.success('Customer created successfully!'),
-            onError: () => toast.error('Please fix errors in the form.'),
+            onError: (e) => toast.error(JSON.stringify(e)),
         });
     };
 
@@ -111,7 +116,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
                         <InputError message={errors.customer_no} />
                     </div>
                     <div>
-                        <Label className="text-xs">Type</Label>
+                        <Label className="text-xs">Customer Type</Label>
                         <select
                             value={data.type}
                             onChange={(e) => {
@@ -130,9 +135,11 @@ const Create = ({ backUrl }: { backUrl: string }) => {
                             }}
                             className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                         >
-                            <option>Individual</option>
-                            <option>Organization</option>
+                            <option value={''}>Select Customer Type</option>
+                            <option value="Individual">Individual</option>
+                            <option value="Organization">Organization</option>
                         </select>
+                        <InputError message={errors.type} />
                     </div>
                     <div>
                         <Label className="text-xs">Name</Label>
@@ -173,6 +180,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
                                 value={data.dob}
                                 onChange={(val) => setData('dob', val)}
                             />
+                            <InputError message={errors.dob} />
                         </div>
                         <div>
                             <Label className="text-xs">Gender</Label>
@@ -188,6 +196,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
                                 <option>FEMALE</option>
                                 <option>OTHER</option>
                             </select>
+                            <InputError message={errors.gender} />
                         </div>
                         <div>
                             <Label className="text-xs">Religion</Label>
@@ -205,6 +214,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
                                 <option>BUDDHISM</option>
                                 <option>OTHER</option>
                             </select>
+                            <InputError message={errors.religion} />
                         </div>
                     </div>
                 )}
@@ -288,6 +298,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
                             <option>VERIFIED</option>
                             <option>REJECTED</option>
                         </select>
+                        <InputError message={errors.kyc_status} />
                     </div>
                     <div>
                         <Label className="text-xs">Account Status</Label>
@@ -302,6 +313,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
                             <option>SUSPENDED</option>
                             <option>CLOSED</option>
                         </select>
+                        <InputError message={errors.status} />
                     </div>
                 </div>
 

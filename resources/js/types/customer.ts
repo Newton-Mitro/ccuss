@@ -23,15 +23,6 @@ export type KycStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
  * Customer
  * =========================== */
 
-export interface CustomerPhoto extends AuditFields {
-    id: number;
-    file_name: string;
-    file_path: string;
-    file_type: string;
-    alt_text?: string | null;
-    url: string;
-}
-
 export interface Customer extends AuditFields {
     id: ID;
     customer_no: string;
@@ -57,6 +48,15 @@ export interface Customer extends AuditFields {
     photo?: CustomerPhoto | null;
 
     status: CustomerStatus;
+}
+
+export interface CustomerPhoto extends AuditFields {
+    id: number;
+    file_name: string;
+    file_path: string;
+    file_type: string;
+    alt_text?: string | null;
+    url: string;
 }
 
 /* ===========================
@@ -119,15 +119,6 @@ export type RelationType =
     | 'BROTHER_IN_LAW'
     | 'SISTER_IN_LAW';
 
-export interface FamilyRelationPhoto extends AuditFields {
-    id: number;
-    file_name: string;
-    file_path: string;
-    file_type: string;
-    alt_text?: string | null;
-    url: string;
-}
-
 export interface CustomerFamilyRelation extends AuditFields {
     id: ID;
     customer_id: ID;
@@ -147,23 +138,18 @@ export interface CustomerFamilyRelation extends AuditFields {
     identification_type: Exclude<IdentificationType, 'REGISTRATION_NO'>;
     identification_number: string;
 
-    photo?: string | null;
+    photo?: FamilyRelationPhoto | null;
 
     relation_type: RelationType;
 }
 
-/* ===========================
- * Customer Photos
- * =========================== */
-
-export interface CustomerPhoto extends AuditFields {
-    id: ID;
-    customer_id: ID;
-
+export interface FamilyRelationPhoto extends AuditFields {
+    id: number;
     file_name: string;
     file_path: string;
-    mime: string;
+    file_type: string;
     alt_text?: string | null;
+    url: string;
 }
 
 /* ===========================
@@ -173,11 +159,11 @@ export interface CustomerPhoto extends AuditFields {
 export interface CustomerSignature extends AuditFields {
     id: ID;
     customer_id: ID;
-
     file_name: string;
     file_path: string;
     mime: string;
     alt_text?: string | null;
+    url?: string | null;
 }
 
 /* ===========================

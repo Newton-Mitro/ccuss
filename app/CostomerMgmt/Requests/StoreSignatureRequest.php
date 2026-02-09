@@ -16,7 +16,7 @@ class StoreSignatureRequest extends FormRequest
     {
         return [
             'customer_id' => ['required', 'exists:customers,id'],
-            'signature_id' => ['required', 'exists:media,id'],
+            'signature' => ['required', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
         ];
     }
 }

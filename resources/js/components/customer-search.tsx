@@ -177,13 +177,14 @@ export const CustomerSearch: React.FC<CustomerSearchProps> = ({
 
                             {/* Name */}
                             <span className="truncate font-medium">
-                                {customer.name}
+                                {customer.name.trim()}
                             </span>
 
                             {/* Customer No */}
                             {customer.customer_no && (
-                                <span className="ml-auto shrink-0 text-[11px] text-muted-foreground">
-                                    #{customer.customer_no}
+                                <span className="text-muted-foreground">
+                                    | {customer.customer_no} | {customer.type} |{' '}
+                                    {customer.status}
                                 </span>
                             )}
                         </li>

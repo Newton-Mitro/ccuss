@@ -4,10 +4,10 @@ namespace App\CostomerMgmt\Controllers;
 
 use App\CostomerMgmt\Models\CustomerSignature;
 use App\CostomerMgmt\Requests\StoreSignatureRequest;
-use App\CostomerMgmt\Requests\UpdateSignatureRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -45,57 +45,42 @@ class CustomerSignatureController extends Controller
     {
         $data = $request->validated();
 
-        // One signature per customer
-        $exists = CustomerSignature::where('customer_id', $data['customer_id'])
-            ->exists();
+        // Enforce one signature per customer
+        $exists = CustomerSignature::where('customer_id', $data['customer_id'])->exists();
 
         if ($exists) {
             return response()->json([
-                'error' => 'This customer already has a signature.'
+                'error' => 'This customer already has a signature.',
             ], 422);
         }
 
+        $file = $request->file('signature');
+
+        // Store file
+        $path = $file->store('customer/signatures', 'public');
+
         $signature = CustomerSignature::create([
             'customer_id' => $data['customer_id'],
-            'signature_id' => $data['signature_id'],
+            'file_name' => $file->getClientOriginalName(),
+            'file_path' => $path,
+            'mime' => $file->getMimeType(),
+            'alt_text' => 'Customer Signature',
         ]);
 
         return response()->json([
             'message' => 'Signature created successfully.',
-            'signature' => $signature->load('customer:id,name,customer_no'),
-        ]);
-    }
-
-    public function update(
-        UpdateSignatureRequest $request,
-        CustomerSignature $signature
-    ): JsonResponse {
-        $data = $request->validated();
-
-        // Prevent assigning another customer's signature
-        $exists = CustomerSignature::where('customer_id', $data['customer_id'])
-            ->where('id', '!=', $signature->id)
-            ->exists();
-
-        if ($exists) {
-            return response()->json([
-                'error' => 'This customer already has a signature.'
-            ], 422);
-        }
-
-        $signature->update([
-            'customer_id' => $data['customer_id'],
-            'signature_id' => $data['signature_id'] ?? $signature->signature_id,
-        ]);
-
-        return response()->json([
-            'message' => 'Signature updated successfully.',
-            'signature' => $signature->load('customer:id,name,customer_no'),
-        ]);
+            'signature' => $signature,
+        ], 201);
     }
 
     public function destroy(CustomerSignature $signature): JsonResponse
     {
+        // Delete file from storage if it exists
+        if ($signature->file_path && Storage::disk('public')->exists($signature->file_path)) {
+            Storage::disk('public')->delete($signature->file_path);
+        }
+
+        // Delete DB record
         $signature->delete();
 
         return response()->json([

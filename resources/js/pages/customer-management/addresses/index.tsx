@@ -116,7 +116,7 @@ export default function CustomerAddressIndex() {
 
             <div className="space-y-6 text-foreground">
                 {/* ================= Customer Search ================= */}
-                <div className="space-y-4 rounded-md border bg-card/80 p-4">
+                <div className="min-h-56 space-y-4 rounded-md border bg-card/80 p-4">
                     <Label className="text-xs">Search Customer</Label>
 
                     <CustomerSearch

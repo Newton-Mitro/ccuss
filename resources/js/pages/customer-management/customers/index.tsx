@@ -132,6 +132,7 @@ export default function Index() {
                         <thead className="sticky top-0 bg-muted">
                             <tr>
                                 {[
+                                    'Customer Id',
                                     'Customer No',
                                     'Name',
                                     'Type',
@@ -155,6 +156,7 @@ export default function Index() {
                                     key={c.id}
                                     className="border-b border-border even:bg-muted/30"
                                 >
+                                    <td className="px-2 py-1">{c.id}</td>
                                     <td className="px-2 py-1">
                                         {c.customer_no}
                                     </td>

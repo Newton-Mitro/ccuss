@@ -4,7 +4,6 @@ import {
     Edit2,
     HomeIcon,
     ListFilter,
-    SearchSlash,
     Trash2,
     UserCheckIcon,
     UserIcon,
@@ -13,6 +12,7 @@ import {
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { formatDate } from '../../../lib/date_util';
 import { BreadcrumbItem } from '../../../types';
 import {
     Customer,
@@ -151,26 +151,37 @@ function Show({ customer, backUrl }: ShowProps) {
                     title="Basic Information"
                     icon={<UserIcon size={16} />}
                 >
-                    <InfoGrid>
-                        {isIndividual && (
-                            <Info label="Date of Birth" value={customer.dob} />
-                        )}
-                        {isIndividual && (
-                            <Info label="Gender" value={customer.gender} />
-                        )}
-                        {isIndividual && (
-                            <Info label="Religion" value={customer.religion} />
-                        )}
-                        {isOrganization && (
+                    <div className="rounded-md border bg-card p-3">
+                        <InfoGrid>
+                            {isIndividual && (
+                                <Info
+                                    label="Date of Birth"
+                                    value={formatDate(customer.dob)}
+                                />
+                            )}
+                            {isIndividual && (
+                                <Info label="Gender" value={customer.gender} />
+                            )}
+                            {isIndividual && (
+                                <Info
+                                    label="Religion"
+                                    value={customer.religion}
+                                />
+                            )}
+                            {isOrganization && (
+                                <Info
+                                    label="Organization Name"
+                                    value={customer.name}
+                                />
+                            )}
+                            <Info label="Phone" value={customer.phone} />
+                            <Info label="Email" value={customer.email} />
                             <Info
-                                label="Organization Name"
-                                value={customer.name}
+                                label="KYC Status"
+                                value={customer.kyc_status}
                             />
-                        )}
-                        <Info label="Phone" value={customer.phone} />
-                        <Info label="Email" value={customer.email} />
-                        <Info label="KYC Status" value={customer.kyc_status} />
-                    </InfoGrid>
+                        </InfoGrid>
+                    </div>
                 </SectionCard>
 
                 {/* ================= Identification ================= */}
@@ -178,41 +189,21 @@ function Show({ customer, backUrl }: ShowProps) {
                     title="Identification"
                     icon={<UserCheckIcon size={16} />}
                 >
-                    <InfoGrid>
-                        <Info
-                            label="Type"
-                            value={customer.identification_type}
-                        />
-                        {isOrganization && (
+                    <div className="rounded-md border bg-card p-3">
+                        <InfoGrid>
+                            <Info
+                                label="Type"
+                                value={customer.identification_type}
+                            />
                             <Info
                                 label="Identification Number"
                                 value={customer.identification_number}
                             />
-                        )}
-                    </InfoGrid>
-                </SectionCard>
-
-                {/* ================= Basic Info ================= */}
-                <SectionCard
-                    title="Audit Trail"
-                    icon={<SearchSlash size={16} />}
-                >
-                    <InfoGrid>
-                        <Info
-                            label="Created At"
-                            value={formatDateTime(customer.created_at)}
-                        />
-                        <Info label="Created By" value={customer.created_at} />
-                        <Info
-                            label="Updated At"
-                            value={formatDateTime(customer.updated_at)}
-                        />
-                        <Info label="Updated By" value={customer.updated_at} />
-                    </InfoGrid>
+                        </InfoGrid>
+                    </div>
                 </SectionCard>
 
                 {/* ================= Addresses ================= */}
-
                 {customer.addresses?.length > 0 && (
                     <SectionCard
                         title="Addresses"
@@ -319,10 +310,11 @@ function Show({ customer, backUrl }: ShowProps) {
                                                     <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-3">
                                                         <Info
                                                             label="Date of Birth"
-                                                            value={
-                                                                family_relation.dob
-                                                            }
+                                                            value={formatDate(
+                                                                family_relation.dob,
+                                                            )}
                                                         />
+
                                                         <Info
                                                             label="Identification Type"
                                                             value={
@@ -364,34 +356,31 @@ function Show({ customer, backUrl }: ShowProps) {
                         title="Introducers"
                         icon={<UserCheckIcon size={16} />}
                     >
-                        <div className="grid gap-2">
+                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                             {customer.introducers.map((intro) => (
-                                <Card key={intro.id}>
-                                    <Info
-                                        label="Name"
-                                        value={intro.introducer_name}
-                                    />
-                                    <Info
-                                        label="Relationship"
-                                        value={intro.relationship_type}
-                                    />
-                                    <Info
-                                        label="Status"
-                                        value={intro.verification_status}
-                                    />
-                                    {intro.verified_by_name && (
+                                <div
+                                    key={intro.id}
+                                    className="rounded-md border bg-card p-3"
+                                >
+                                    <div className="flex flex-col gap-4 rounded-md border bg-background/60 p-3 md:flex-row">
                                         <Info
-                                            label="Verified By"
-                                            value={intro.verified_by_name}
+                                            label="Introducer Customer Id"
+                                            value={intro.introduced_customer_id.toString()}
                                         />
-                                    )}
-                                    {intro.verified_at && (
                                         <Info
-                                            label="Verified At"
-                                            value={intro.verified_at}
+                                            label="Introducer Account Id"
+                                            value={intro.introducer_account_id.toString()}
                                         />
-                                    )}
-                                </Card>
+                                        <Info
+                                            label="Relationship"
+                                            value={intro.relationship_type}
+                                        />
+                                        <Info
+                                            label="Status"
+                                            value={intro.verification_status}
+                                        />
+                                    </div>
+                                </div>
                             ))}
                         </div>
                     </SectionCard>
@@ -444,26 +433,10 @@ function SectionCard({
     );
 }
 
-function Card({ children }: { children: React.ReactNode }) {
-    return (
-        <div className="my-1 grid grid-cols-1 gap-2 md:grid-cols-2">
-            {children}
-        </div>
-    );
-}
-
 function InfoGrid({ children }: { children: React.ReactNode }) {
     return (
         <div className="grid grid-cols-1 gap-2 md:grid-cols-2">{children}</div>
     );
-}
-
-function formatDateTime(value?: string | null) {
-    if (!value) return '—';
-    return new Intl.DateTimeFormat('en-US', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-    }).format(new Date(value));
 }
 
 function getStatusColor(status?: string) {

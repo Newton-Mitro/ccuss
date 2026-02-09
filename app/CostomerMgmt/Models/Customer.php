@@ -35,7 +35,7 @@ class Customer extends Model
     ];
 
     protected $casts = [
-        'dob' => 'date',
+        'dob' => 'date:Y-m-d',
         'kyc_verified_at' => 'datetime',
     ];
 

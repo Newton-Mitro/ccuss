@@ -54,27 +54,16 @@ Route::prefix('auth')
             '/api/customer/signature',
             [CustomerSignatureController::class, 'getCustomerSignature']
         )->name('customer.signature.show');
-
-        // Store new signature
         Route::post(
             '/api/customer/signature',
             [CustomerSignatureController::class, 'store']
         )->name('customer.signature.store');
-
-        // Update signature
-        Route::put(
-            '/api/customer/signature/{signature}',
-            [CustomerSignatureController::class, 'update']
-        )->name('customer.signature.update');
-
-        // Delete signature
         Route::delete(
             '/api/customer/signature/{signature}',
             [CustomerSignatureController::class, 'destroy']
         )->name('customer.signature.destroy');
 
         Route::resource('online-clients', OnlineServiceUserController::class);
-
     });
 
 Route::prefix('auth')->middleware(['auth',])->group(function () {

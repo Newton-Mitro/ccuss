@@ -22,17 +22,34 @@ class StoreCustomerRequest extends FormRequest
             'kyc_level' => ['nullable', Rule::in(['MIN', 'STD', 'ENH'])],
             'status' => ['nullable', Rule::in(['PENDING', 'ACTIVE', 'SUSPENDED', 'CLOSED'])],
 
-            // Personal info
-            'dob' => ['nullable', 'date'],
-            'gender' => ['nullable', Rule::in(['MALE', 'FEMALE', 'OTHER'])],
-            'religion' => ['nullable', Rule::in(['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER'])],
+            // Personal info (required only for Individual)
+            'dob' => [
+                'nullable',
+                'date',
+                'required_if:type,Individual',
+            ],
+            'gender' => [
+                'nullable',
+                Rule::in(['MALE', 'FEMALE', 'OTHER']),
+                'required_if:type,Individual',
+            ],
+            'religion' => [
+                'nullable',
+                Rule::in([
+                    'CHRISTIANITY',
+                    'ISLAM',
+                    'HINDUISM',
+                    'BUDDHISM',
+                    'OTHER',
+                ])
+            ],
 
-            'identification_type' => ['required', Rule::in(['NID', 'BRN', 'PASSPORT', 'DRIVING_LICENSE'])],
+            'identification_type' => [
+                'required',
+                Rule::in(['NID', 'BRN', 'PASSPORT', 'DRIVING_LICENSE', 'REGISTRATION_NO']),
+            ],
             'identification_number' => ['required', 'string', 'max:50'],
-            'photo_id' => ['nullable', 'exists:media,id'],
-
-            // Organization info
-            'registration_no' => ['nullable', 'string', 'max:150'],
         ];
     }
+
 }

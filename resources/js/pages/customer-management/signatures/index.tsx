@@ -1,16 +1,20 @@
-import { Head, Link, useForm } from '@inertiajs/react';
-import { Plus } from 'lucide-react';
+import { Head, useForm } from '@inertiajs/react';
+import axios from 'axios';
+import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 
 import { CustomerSearch } from '../../../components/customer-search';
 import HeadingSmall from '../../../components/heading-small';
+import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 import { useCustomerSignature } from './hooks/useCustomerSignature';
+import UploadSignatureModal from './signature_modal';
 
 export default function CustomerSignatureIndex() {
-    /* ----------------------------- Form ----------------------------- */
     const { data, setData } = useForm({
         id: null as number | null,
         customer_no: '',
@@ -24,21 +28,16 @@ export default function CustomerSignatureIndex() {
         status: '',
     });
 
-    /* ----------------------------- State ----------------------------- */
     const [query, setQuery] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
-    /* -------------------------- Signature Hook ---------------------- */
     const { signature, loading, fetchSignature } = useCustomerSignature();
 
-    console.log('Signature:', signature);
-    /* --------------------------- Breadcrumb -------------------------- */
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Signatures', href: '/customer-management/signatures' },
     ];
 
-    /* =========================================================
-     * Handlers
-     * =======================================================*/
+    /* ================= Customer Select ================= */
     const handleCustomerSelect = (customer: any) => {
         setData({
             id: customer.id,
@@ -54,14 +53,47 @@ export default function CustomerSignatureIndex() {
         });
 
         setQuery(customer.name);
-
-        // 🔑 Fetch signature immediately
         fetchSignature(customer.id);
     };
 
-    /* =========================================================
-     * Render
-     * =======================================================*/
+    /* ================= Modal ================= */
+    const openModal = () => setIsModalOpen(true);
+    const closeModal = () => setIsModalOpen(false);
+
+    const handleSignatureUploaded = () => {
+        if (!data.id) return;
+        fetchSignature(data.id);
+        closeModal();
+    };
+
+    /* ================= Delete ================= */
+    const handleDelete = async (id: number) => {
+        const isDark = document.documentElement.classList.contains('dark');
+
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: 'This signature will be permanently deleted!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: isDark ? '#ef4444' : '#d33',
+            cancelButtonColor: isDark ? '#3b82f6' : '#3085d6',
+            background: isDark ? '#1f2937' : '#ffffff',
+            color: isDark ? '#f9fafb' : '#111827',
+            confirmButtonText: 'Yes, delete it!',
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            await axios.delete(`/auth/api/customer/signature/${id}`);
+            toast.success('Signature deleted successfully!');
+            if (data.id) fetchSignature(data.id);
+        } catch {
+            toast.error('Failed to delete the signature.');
+        }
+    };
+
+    /* ================= Render ================= */
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Customer Signatures" />
@@ -77,7 +109,6 @@ export default function CustomerSignatureIndex() {
                         onSelect={handleCustomerSelect}
                     />
 
-                    {/* ================= Profile Card ================= */}
                     {data.id && (
                         <div className="flex flex-col gap-4 rounded-md border bg-background/60 p-3 md:flex-row">
                             <div className="h-20 w-20 overflow-hidden rounded-full border bg-muted">
@@ -125,21 +156,22 @@ export default function CustomerSignatureIndex() {
                     />
 
                     {data.id && (
-                        <Link
-                            href="/customer-management/signatures/create"
-                            className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+                        <Button
+                            onClick={openModal}
+                            disabled={signature ? true : false}
+                            className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium"
                         >
                             <Plus className="h-4 w-4" />
                             <span className="hidden md:inline-block">
                                 Upload Signature
                             </span>
-                        </Link>
+                        </Button>
                     )}
                 </div>
 
-                {/* ================= Signature Image ================= */}
+                {/* ================= Signature Preview ================= */}
                 {signature && (
-                    <div>
+                    <div className="relative inline-block">
                         <h3 className="text-sm font-medium text-muted-foreground">
                             Signature Preview
                         </h3>
@@ -148,27 +180,43 @@ export default function CustomerSignatureIndex() {
                             <p className="mt-2 text-sm text-muted-foreground">
                                 Loading signature…
                             </p>
-                        ) : !signature?.url ? (
+                        ) : !signature.url ? (
                             <p className="mt-1 text-lg font-semibold">
                                 No signature uploaded
                             </p>
                         ) : (
-                            <img
-                                src={signature.url}
-                                alt={`Signature of ${signature.id}`}
-                                className="mt-1"
-                            />
+                            <div className="relative mt-1 inline-block">
+                                <img
+                                    src={signature.url}
+                                    alt="Customer signature"
+                                    className="rounded border border-gray-300"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => handleDelete(signature.id)}
+                                    className="absolute -top-2 -right-2 rounded-full bg-red-600 p-3 text-white shadow hover:bg-red-700"
+                                >
+                                    <Trash2 size={14} />
+                                </button>
+                            </div>
                         )}
                     </div>
+                )}
+
+                {/* ================= Modal ================= */}
+                {data.id && isModalOpen && (
+                    <UploadSignatureModal
+                        open={isModalOpen}
+                        customerId={data.id}
+                        onClose={closeModal}
+                        onUploaded={handleSignatureUploaded}
+                    />
                 )}
             </div>
         </CustomAuthLayout>
     );
 }
 
-/* =========================================================
- * Small UI helpers
- * =======================================================*/
 function Info({ label, value }: { label: string; value: string }) {
     return (
         <div>

@@ -1,6 +1,6 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, ListFilter, SpaceIcon } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
@@ -15,27 +15,35 @@ import { Customer } from '../../../types/customer';
 interface EditProps {
     customer: Customer;
     backUrl: string;
+    flash?: {
+        error?: string;
+        success?: string;
+    };
 }
 
-const Edit = ({ customer, backUrl }: EditProps) => {
+const Edit = ({ customer, backUrl, flash }: EditProps) => {
+    useEffect(() => {
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) toast.success(flash.success);
+    }, [flash]);
+
     const handleBack = () =>
         router.visit(backUrl, { preserveState: true, preserveScroll: true });
 
     const { data, setData, put, processing, errors } = useForm({
         customer_no: customer.customer_no || '',
-        type: customer.type || 'Individual',
+        type: (customer.type as string) || '',
         name: customer.name || '',
         phone: customer.phone || '',
         email: customer.email || '',
         dob: customer.dob || '',
-        gender: customer.gender || '',
+        gender: (customer.gender as string) || '',
         religion: customer.religion || '',
         identification_type: customer.identification_type || '',
         identification_number: customer.identification_number || '',
         photo: null as File | null,
-        kyc_status: customer.kyc_status || 'PENDING',
-        status: customer.status || 'ACTIVE',
-        registration_no: customer.registration_no || '',
+        kyc_status: (customer.kyc_status as string) || 'PENDING',
+        status: (customer.status as string) || 'ACTIVE',
     });
 
     const [photoPreview, setPhotoPreview] = useState<string | null>(
@@ -52,14 +60,9 @@ const Edit = ({ customer, backUrl }: EditProps) => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const formData = new FormData();
-        Object.entries(data).forEach(([key, value]) => {
-            if (value !== null) formData.append(key, value as any);
-        });
+
         put(`/auth/customers/${customer.id}`, {
-            data: formData,
             preserveScroll: true,
-            onSuccess: () => toast.success('Customer updated successfully!'),
             onError: () => toast.error('Please fix errors in the form.'),
         });
     };

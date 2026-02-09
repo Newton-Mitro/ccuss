@@ -8,9 +8,11 @@ use App\CostomerMgmt\Requests\UpdateCustomerRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class CustomerController extends Controller
 {
@@ -92,65 +94,46 @@ class CustomerController extends Controller
 
         // ✅ Require at least phone or email
         if (empty($data['phone']) && empty($data['email'])) {
-            return redirect()->back()
+
+            return back()
                 ->withInput()
                 ->with('error', 'Please provide at least a phone number or an email address.');
         }
 
         // ✅ Check if customer already exists
-        $exists = Customer::where(function ($q) use ($data) {
-            $q->where('identification_number', $data['identification_number']);
-
-            if (!empty($data['email'])) {
-                $q->orWhere('email', $data['email']);
-            }
-
-            if (!empty($data['phone'])) {
-                $q->orWhere('phone', $data['phone']);
-            }
-        })->exists();
+        $exists = Customer::where('identification_number', $data['identification_number'])
+            ->when(!empty($data['email']), fn($q) => $q->orWhere('email', $data['email']))
+            ->when(!empty($data['phone']), fn($q) => $q->orWhere('phone', $data['phone']))
+            ->exists();
 
         if ($exists) {
-            return redirect()->back()
+            return back()
                 ->withInput()
                 ->with('error', 'A customer with the same identification number, email, or phone already exists.');
         }
 
-        // ✅ Determine type prefix
-        $typePrefix = $data['type'] === 'Individual' ? 'I' : 'ORG';
+        DB::transaction(function () use (&$data) {
 
-        // ✅ Determine gender prefix (only for Individual)
-        $genderPrefix = $data['type'] === 'Individual'
-            ? strtoupper(substr($data['gender'] ?? 'X', 0, 1)) // M / F / O / X
-            : '';
+            // ✅ Type prefix
+            $typePrefix = $data['type'] === 'Individual' ? 'IND' : 'ORG';
 
-        // ✅ Determine ID type prefix (3-char abbreviation)
-        $idPrefix = $data['type'] === 'Individual'
-            ? match ($data['identification_type']) {
-                'NID' => 'N',
-                'PASSPORT' => 'P',
-                'DRIVING_LICENSE' => 'D',
-                'BRN' => 'B',
-                default => 'U',
-            } : '';
+            // ✅ Safe sequential number (locked)
+            $lastId = Customer::lockForUpdate()->max('id') ?? 0;
+            $nextNumber = str_pad($lastId + 1, 5, '0', STR_PAD_LEFT);
 
-        // ✅ Generate next sequential number
-        $latestCustomer = Customer::latest('id')->first();
-        $nextNumber = $latestCustomer ? $latestCustomer->id + 1 : 1;
-        $formattedNumber = str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+            // ✅ Build customer_no
+            $parts = array_filter([
+                $typePrefix,
+                $nextNumber,
+            ]);
 
-        // ✅ Build final customer_no
-        // Example: IND-M-NID-00001 or ORG-BRN-00002
-        $parts = $data['type'] === 'Individual'
-            ? [$typePrefix, $genderPrefix, $idPrefix, $formattedNumber]
-            : [$typePrefix, $idPrefix, $formattedNumber];
+            $data['customer_no'] = implode('-', $parts);
 
-        $data['customer_no'] = strtoupper(implode('', $parts));
+            Customer::create($data);
+        });
 
-        // ✅ Create new customer
-        $customer = Customer::create($data);
-
-        return redirect()->route('customers.index')
+        return redirect()
+            ->route('customers.index')
             ->with('success', 'Customer created successfully.');
     }
 
@@ -217,36 +200,17 @@ class CustomerController extends Controller
         // ✅ Check if we need to regenerate customer_no
         $shouldRegenerateNo =
             $data['type'] !== $customer->type ||
-            $data['identification_type'] !== $customer->identification_type ||
-            ($data['type'] === 'Individual' && $data['gender'] !== $customer->gender);
+            $data['identification_type'] !== $customer->identification_type;
 
         if ($shouldRegenerateNo) {
             // ✅ Determine type prefix
-            $typePrefix = $data['type'] === 'Individual' ? 'I' : 'ORG';
-
-            // ✅ Determine gender prefix (for Individuals only)
-            $genderPrefix = $data['type'] === 'Individual'
-                ? strtoupper(substr($data['gender'] ?? 'X', 0, 1))
-                : '';
-
-            // ✅ Determine ID type prefix
-            $idPrefix = $data['type'] === 'Individual'
-                ? match ($data['identification_type']) {
-                    'NID' => 'N',
-                    'PASSPORT' => 'P',
-                    'DRIVING_LICENSE' => 'D',
-                    'BRN' => 'B',
-                    default => 'U',
-                }
-                : '';
+            $typePrefix = $data['type'] === 'Individual' ? 'IND' : 'ORG';
 
             // ✅ Keep existing numeric ID sequence
             $formattedNumber = str_pad($customer->id, 5, '0', STR_PAD_LEFT);
 
             // ✅ Build new customer_no
-            $parts = $data['type'] === 'Individual'
-                ? [$typePrefix, $genderPrefix, $idPrefix, $formattedNumber]
-                : [$typePrefix, $idPrefix, $formattedNumber];
+            $parts = [$typePrefix, $formattedNumber];
 
             $data['customer_no'] = strtoupper(implode('', $parts));
         }

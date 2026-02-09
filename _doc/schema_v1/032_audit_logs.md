@@ -26,7 +26,6 @@ return new class extends Migration {
                 'CREATED',
                 'UPDATED',
                 'DELETED',
-                'RESTORED'
             ]);
 
             // Change snapshots

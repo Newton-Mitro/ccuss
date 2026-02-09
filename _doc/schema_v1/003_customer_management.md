@@ -453,6 +453,32 @@ return new class extends Migration {
 
         /*
         |--------------------------------------------------------------------------
+        | Customer Family Photos
+        |--------------------------------------------------------------------------
+        */
+        Schema::create('customer_family_photos', function (Blueprint $table) {
+            $table->id();
+
+            $table->foreignId('customer_id')
+                ->unique()
+                ->constrained('customers')
+                ->cascadeOnDelete();
+
+            $table->string('file_name');
+            $table->string('file_path');
+            $table->string('mime');
+            $table->string('alt_text')->nullable();
+
+            // Audit
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
+
+            $table->timestamps();
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
         | Customer Photos
         |--------------------------------------------------------------------------
         */

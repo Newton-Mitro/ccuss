@@ -13,9 +13,14 @@ class CustomerFactory extends Factory
     public function definition(): array
     {
         $type = $this->faker->randomElement(['Individual', 'Organization']);
+        $prefix = $type === 'Individual' ? 'IND' : 'ORG';
 
         return [
-            'customer_no' => 'CUST-' . $this->faker->unique()->numerify('#####'),
+            'customer_no' => sprintf(
+                '%s-%05d',
+                $prefix,
+                $this->faker->unique()->numberBetween(1, 99999)
+            ),
 
             'type' => $type,
 
