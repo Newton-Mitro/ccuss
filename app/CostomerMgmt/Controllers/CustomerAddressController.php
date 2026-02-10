@@ -15,7 +15,44 @@ class CustomerAddressController extends Controller
 {
     public function index(Request $request): Response
     {
-        return Inertia::render('customer-management/addresses/index');
+        $query = CustomerAddress::query()->with('customer');
+
+        // 🔍 Search filter
+        if ($search = $request->string('search')->toString()) {
+            $query->where(function ($q) use ($search) {
+                $q->where('line1', 'like', "%{$search}%")
+                    ->orWhere('line2', 'like', "%{$search}%")
+                    ->orWhere('district', 'like', "%{$search}%")
+                    ->orWhere('country', 'like', "%{$search}%");
+            });
+        }
+
+        // ✅ Verification status filter
+        if ($status = $request->input('verification_status')) {
+            if ($status !== 'all') {
+                $query->where('verification_status', $status);
+            }
+        }
+
+        $addresses = $query
+            ->latest()
+            ->paginate($request->integer('per_page', 10))
+            ->withQueryString();
+
+        return Inertia::render('customer-management/addresses/addresses_index', [
+            'addresses' => $addresses,
+            'filters' => $request->only([
+                'search',
+                'verification_status',
+                'per_page',
+                'page',
+            ]),
+        ]);
+    }
+
+    public function customerAddresses(Request $request): Response
+    {
+        return Inertia::render('customer-management/addresses/customer_addresses');
     }
 
     public function getCustomerAddresses(Request $request): JsonResponse
@@ -33,6 +70,17 @@ class CustomerAddressController extends Controller
 
         return response()->json($addresses);
     }
+
+    public function show(CustomerAddress $address): Response
+    {
+        // Load the related customer info
+        $address->load('customer');
+
+        return Inertia::render('customer-management/addresses/view_address_page', [
+            'address' => $address,
+        ]);
+    }
+
 
     public function store(StoreAddressRequest $request): JsonResponse
     {

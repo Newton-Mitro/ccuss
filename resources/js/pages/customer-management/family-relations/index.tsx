@@ -26,7 +26,7 @@ export default function Index() {
     >();
 
     const { familyRelations, filters } = props;
-    console.log('familyRelations', familyRelations);
+
     const { data, setData, get } = useForm({
         search: filters.search || '',
         per_page: Number(filters.per_page) || 10,
@@ -41,11 +41,9 @@ export default function Index() {
                 replace: true,
             });
         }, 400);
-
         return () => clearTimeout(delay);
     }, [data.search, data.per_page, data.page]);
 
-    // Delete confirmation
     const handleDelete = (id: number, customerName: string) => {
         const isDark = document.documentElement.classList.contains('dark');
         Swal.fire({
@@ -84,7 +82,7 @@ export default function Index() {
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
                         title="Family Relations"
-                        description="Manage family and relative familyRelationships."
+                        description="Manage family and relative relationships."
                     />
                     <Link
                         href="/auth/family-relations/create"
@@ -109,14 +107,19 @@ export default function Index() {
                     />
                 </div>
 
-                {/* Table */}
-                <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border border-border md:h-[calc(100vh-300px)]">
+                {/* ===================== */}
+                {/* Desktop Table */}
+                {/* ===================== */}
+                <div className="hidden h-[calc(100vh-360px)] overflow-auto rounded-md border border-border md:block">
                     <table className="w-full border-collapse">
                         <thead className="sticky top-0 bg-muted">
                             <tr>
                                 {[
                                     '#',
+                                    'Customer',
                                     'Relative Name',
+                                    'Phone',
+                                    'Email',
                                     'Relation',
                                     'Actions',
                                 ].map((header) => (
@@ -131,29 +134,33 @@ export default function Index() {
                         </thead>
                         <tbody>
                             {familyRelations.data.length > 0 ? (
-                                familyRelations.data.map((family, i) => (
+                                familyRelations.data.map((f, i) => (
                                     <tr
-                                        key={family.id}
+                                        key={f.id}
                                         className="border-b border-border even:bg-muted/30"
                                     >
                                         <td className="px-2 py-1">{i + 1}</td>
                                         <td className="px-2 py-1">
-                                            {family.name}
+                                            {f.customer?.name || '—'}
                                         </td>
-                                        <td className="px-2 py-1 text-blue-600 dark:text-blue-400">
-                                            {family.relation_type.replace(
-                                                /_/g,
-                                                ' ',
-                                            )}
+                                        <td className="px-2 py-1">{f.name}</td>
+                                        <td className="px-2 py-1">
+                                            {f.phone || '—'}
+                                        </td>
+                                        <td className="px-2 py-1">
+                                            {f.email || '—'}
                                         </td>
 
+                                        <td className="px-2 py-1 text-blue-600 dark:text-blue-400">
+                                            {f.relation_type.replace(/_/g, ' ')}
+                                        </td>
                                         <td className="px-2 py-1">
                                             <TooltipProvider>
                                                 <div className="flex space-x-2">
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link
-                                                                href={`/auth/family-relations/${family.id}`}
+                                                                href={`/auth/family-relations/${f.id}`}
                                                                 className="text-primary hover:text-primary/80"
                                                             >
                                                                 <Eye className="h-5 w-5" />
@@ -167,7 +174,7 @@ export default function Index() {
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link
-                                                                href={`/auth/family-relations/${family.id}/edit`}
+                                                                href={`/auth/family-relations/${f.id}/edit`}
                                                                 className="text-green-600 hover:text-green-500"
                                                             >
                                                                 <Pencil className="h-5 w-5" />
@@ -181,11 +188,10 @@ export default function Index() {
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <button
-                                                                type="button"
                                                                 onClick={() =>
                                                                     handleDelete(
-                                                                        family.id,
-                                                                        family
+                                                                        f.id,
+                                                                        f
                                                                             .customer
                                                                             ?.name ||
                                                                             '',
@@ -208,10 +214,10 @@ export default function Index() {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={7}
+                                        colSpan={12}
                                         className="px-4 py-6 text-center text-muted-foreground"
                                     >
-                                        No family familyRelations found.
+                                        No family relations found.
                                     </td>
                                 </tr>
                             )}
@@ -219,9 +225,68 @@ export default function Index() {
                     </table>
                 </div>
 
-                {/* Pagination & Records Info */}
+                {/* ===================== */}
+                {/* Mobile Cards */}
+                {/* ===================== */}
+                <div className="space-y-3 md:hidden">
+                    {familyRelations.data.map((f) => (
+                        <div
+                            key={f.id}
+                            className="rounded-md border border-border bg-card p-3 shadow-sm"
+                        >
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="font-medium">{f.name}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        {f.customer?.name || '—'}
+                                    </p>
+                                </div>
+                                <span className="rounded-full bg-muted px-2 py-0.5 text-xs">
+                                    {f.relation_type.replace(/_/g, ' ')}
+                                </span>
+                            </div>
+
+                            <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+                                <p>📞 {f.phone || '—'}</p>
+                                <p>✉️ {f.email || '—'}</p>
+                                <p>🎂 {f.dob || '—'}</p>
+                                <p>⚧ {f.gender || '—'}</p>
+                                <p>⛪ {f.religion || '—'}</p>
+                                <p>ID Type: {f.identification_type}</p>
+                                <p>ID #: {f.identification_number}</p>
+                            </div>
+
+                            <div className="mt-2 flex justify-end gap-3">
+                                <Link
+                                    href={`/auth/family-relations/${f.id}`}
+                                    className="text-primary"
+                                >
+                                    <Eye className="h-5 w-5" />
+                                </Link>
+                                <Link
+                                    href={`/auth/family-relations/${f.id}/edit`}
+                                    className="text-green-600 hover:text-green-500"
+                                >
+                                    <Pencil className="h-5 w-5" />
+                                </Link>
+                                <button
+                                    onClick={() =>
+                                        handleDelete(
+                                            f.id,
+                                            f.customer?.name || '',
+                                        )
+                                    }
+                                    className="text-destructive hover:text-destructive/80"
+                                >
+                                    <Trash2 className="h-5 w-5" />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Pagination */}
                 <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
-                    {/* Records info */}
                     <div className="flex items-center gap-2">
                         <span className="text-sm text-muted-foreground">
                             Show
@@ -245,7 +310,6 @@ export default function Index() {
                         </span>
                     </div>
 
-                    {/* Pagination links */}
                     <div className="flex gap-1">
                         {familyRelations.links.map((link, i) => (
                             <a

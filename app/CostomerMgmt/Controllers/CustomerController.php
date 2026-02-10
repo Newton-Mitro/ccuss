@@ -48,6 +48,18 @@ class CustomerController extends Controller
 
     }
 
+    public function findCustomer(int $id): JsonResponse
+    {
+        $customer = Customer::with([
+            'photo',
+            'addresses',
+            'familyRelations',
+            'introducers',
+        ])->findOrFail($id);
+
+        return response()->json($customer);
+    }
+
     public function index(Request $request): Response
     {
         $query = Customer::query()

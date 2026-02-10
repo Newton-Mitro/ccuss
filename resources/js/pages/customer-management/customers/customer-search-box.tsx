@@ -2,61 +2,45 @@ import { useForm } from '@inertiajs/react';
 import axios from 'axios';
 import { Search } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
-import { Customer } from '../types/customer';
-import InputError from './input-error';
+import { Label } from '../../../components/ui/label';
+import { Customer } from '../../../types/customer';
+import CustomerViewModal from './customer_view_modal';
 
-interface CustomerSearchProps {
-    query: string;
-    onQueryChange: (value: string) => void;
+interface CustomerSearchBoxProps {
     onSelect: (customer: Customer) => void;
-    onSelectCallback: (customer: Customer) => void;
-    error?: string;
-    placeholder?: string;
+    label?: string;
 }
 
-export const CustomerSearch: React.FC<CustomerSearchProps> = ({
-    query,
-    onQueryChange,
-    onSelectCallback,
+export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
     onSelect,
-    error,
-    placeholder = 'Search customer...',
+    label = 'Search Customer',
 }) => {
-    const [results, setResults] = useState<Customer[]>([]);
+    const [customers, setCustomers] = useState<Customer[]>([]);
+    const [customer, setCustomer] = useState<Customer | null>(null);
     const [showDropdown, setShowDropdown] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [query, setQuery] = useState('');
+    const [open, setOpen] = useState(false);
 
     const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-    const { data, setData } = useForm({
-        id: null as number | null,
-        customer_no: '',
-        type: '',
-        name: '',
-        phone: '',
-        email: '',
-        identification_type: '',
-        identification_number: '',
-        photo: null as { url?: string } | null,
-        status: '',
-    });
+    const { data, setData } = useForm<Customer | null>(null);
 
-    const handleCustomerSelect = (customer: any) => {
-        setData({
-            id: customer.id,
-            customer_no: customer.customer_no,
-            type: customer.type,
-            name: customer.name,
-            phone: customer.phone,
-            email: customer.email,
-            identification_type: customer.identification_type,
-            identification_number: customer.identification_number,
-            photo: customer.photo ?? null,
-            status: customer.status,
-        });
-
-        onQueryChange(customer.name);
-        onSelectCallback(customer);
+    const onSelectCustomer = async (customer: Customer) => {
+        setData(customer);
+        try {
+            setLoading(true);
+            const res = await axios.get(
+                `/auth/api/find-customers/${customer.id}`,
+            );
+            console.log(res.data);
+            onSelect(res.data || null);
+            setCustomer(res.data || null);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
     };
 
     /**
@@ -66,7 +50,7 @@ export const CustomerSearch: React.FC<CustomerSearchProps> = ({
      */
     const searchCustomers = async () => {
         if (!query?.trim()) {
-            setResults([]);
+            setCustomers([]);
             setShowDropdown(false);
             return;
         }
@@ -77,7 +61,7 @@ export const CustomerSearch: React.FC<CustomerSearchProps> = ({
                 params: { search: query },
             });
 
-            setResults(res.data || []);
+            setCustomers(res.data || []);
             setShowDropdown(true);
         } catch (err) {
             console.error(err);
@@ -119,22 +103,26 @@ export const CustomerSearch: React.FC<CustomerSearchProps> = ({
     }, []);
 
     return (
-        <div className="relative w-full" ref={dropdownRef}>
+        <div
+            className="relative w-full rounded-md border bg-card p-4"
+            ref={dropdownRef}
+        >
             {/* INPUT + SEARCH BUTTON */}
             <div className="relative">
+                <Label className="text-xs">{label}</Label>
                 <input
                     type="text"
                     value={query}
-                    onChange={(e) => onQueryChange(e.target.value)}
+                    onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder={placeholder}
+                    placeholder={label}
                     className="h-8 w-full rounded-md border border-border bg-background px-3 pr-10 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
                 />
 
                 <button
                     type="button"
                     onClick={searchCustomers}
-                    className="absolute top-1/2 right-1 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-primary"
+                    className="absolute top-8/11 right-1 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-primary"
                     title="Search"
                 >
                     {loading ? (
@@ -144,19 +132,16 @@ export const CustomerSearch: React.FC<CustomerSearchProps> = ({
                     )}
                 </button>
             </div>
-
-            <InputError message={error} />
-
             {/* RESULTS */}
-            {showDropdown && results.length > 0 && (
+            {showDropdown && customers.length > 0 && (
                 <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-border bg-background shadow-lg">
-                    {results.map((customer) => (
+                    {customers.map((customer) => (
                         <li
                             key={customer.id}
                             className="flex cursor-pointer items-center gap-2 px-3 py-2 text-xs hover:bg-muted"
                             onClick={() => {
-                                onSelect(customer);
-                                onQueryChange(customer.name);
+                                onSelectCustomer(customer);
+                                setQuery(customer.name);
                                 setShowDropdown(false);
                             }}
                         >
@@ -191,13 +176,74 @@ export const CustomerSearch: React.FC<CustomerSearchProps> = ({
                     ))}
                 </ul>
             )}
-
             {/* EMPTY STATE */}
-            {showDropdown && !loading && query && results.length === 0 && (
+            {showDropdown && !loading && query && customers.length === 0 && (
                 <div className="absolute z-10 mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-gray-500">
                     No customers found.
                 </div>
             )}
+            {data.id && (
+                <div className="mt-3 flex flex-col gap-4 rounded-md border bg-background/60 p-3 md:flex-row">
+                    <div className="h-20 w-20 overflow-hidden rounded-full border bg-muted">
+                        {data.photo?.url ? (
+                            <img
+                                src={data.photo.url}
+                                alt={data.name}
+                                className="h-full w-full object-cover"
+                            />
+                        ) : (
+                            <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
+                                {data.name.charAt(0)}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="flex-1 space-y-2">
+                        <div>
+                            <button
+                                onClick={() => setOpen(true)}
+                                className="text-sm font-semibold underline hover:cursor-pointer"
+                            >
+                                {data.name}
+                            </button>
+                            <p className="text-xs text-muted-foreground">
+                                {data.type} • {data.status}
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-3">
+                            <Info
+                                label="Customer No"
+                                value={data.customer_no}
+                            />
+                            <Info label="Phone" value={data.phone} />
+                            <Info label="Email" value={data.email} />
+                            <Info
+                                label="Identification Type"
+                                value={data.identification_type}
+                            />
+                            <Info
+                                label="Identification Number"
+                                value={data.identification_number}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
+            <CustomerViewModal
+                open={open}
+                onOpenChange={setOpen}
+                customer={customer}
+            />
         </div>
     );
 };
+
+function Info({ label, value }: { label: string; value: string }) {
+    return (
+        <div>
+            <span className="text-muted-foreground">{label}</span>
+            <p className="font-medium">{value}</p>
+        </div>
+    );
+}

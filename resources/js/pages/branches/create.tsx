@@ -1,7 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
-import { CustomerSearch } from '../../components/customer-search';
 import HeadingSmall from '../../components/heading-small';
 import InputError from '../../components/input-error';
 import { Button } from '../../components/ui/button';
@@ -10,6 +9,7 @@ import { Label } from '../../components/ui/label';
 import CustomAuthLayout from '../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../types';
 import { Customer } from '../../types/customer';
+import { CustomerSearchInput } from '../customer-management/customers/customer-search-input';
 
 function Create() {
     const { data, setData, post, processing, errors } = useForm({
@@ -144,7 +144,7 @@ function Create() {
                             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                                 <div className="">
                                     <Label>Search Branch Manager</Label>
-                                    <CustomerSearch
+                                    <CustomerSearchInput
                                         query={query}
                                         onQueryChange={setQuery}
                                         onSelect={(customer: Customer) => {

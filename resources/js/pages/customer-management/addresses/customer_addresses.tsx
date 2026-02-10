@@ -9,14 +9,13 @@ import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
-import { CustomerSearch } from '../../../components/customer-search';
 import HeadingSmall from '../../../components/heading-small';
-import { Label } from '../../../components/ui/label';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-import { CustomerAddress } from '../../../types/customer';
+import { Customer, CustomerAddress } from '../../../types/customer';
 
 import { ModalMode } from '../../../types/base_types';
+import { CustomerSearchBox } from '../customers/customer-search-box';
 import CustomerAddressModal from './address_modal';
 import { useCustomerAddresses } from './hooks/useCustomerAddresses';
 import { confirmDelete } from './utils/confirmDelete';
@@ -26,21 +25,9 @@ import { confirmDelete } from './utils/confirmDelete';
  * =======================================================*/
 export default function CustomerAddressIndex() {
     /* ----------------------------- Form ----------------------------- */
-    const { data, setData } = useForm({
-        id: null as number | null,
-        customer_no: '',
-        type: '',
-        name: '',
-        phone: '',
-        email: '',
-        identification_type: '',
-        identification_number: '',
-        photo: null as { url?: string } | null,
-        status: '',
-    });
+    const { data, setData } = useForm<Customer | null>(null);
 
     /* ----------------------------- State ----------------------------- */
-    const [query, setQuery] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState<ModalMode>('create');
     const [selectedAddress, setSelectedAddress] =
@@ -59,20 +46,8 @@ export default function CustomerAddressIndex() {
      * Handlers
      * =======================================================*/
     const handleCustomerSelect = (customer: any) => {
-        setData({
-            id: customer.id,
-            customer_no: customer.customer_no,
-            type: customer.type,
-            name: customer.name,
-            phone: customer.phone,
-            email: customer.email,
-            identification_type: customer.identification_type,
-            identification_number: customer.identification_number,
-            photo: customer.photo ?? null,
-            status: customer.status,
-        });
-
-        setQuery(customer.name);
+        console.log(customer);
+        setData(customer);
         fetchAddresses(customer.id);
     };
 
@@ -116,54 +91,7 @@ export default function CustomerAddressIndex() {
 
             <div className="space-y-6 text-foreground">
                 {/* ================= Customer Search ================= */}
-                <div className="min-h-56 space-y-4 rounded-md border bg-card/80 p-4">
-                    <Label className="text-xs">Search Customer</Label>
-
-                    <CustomerSearch
-                        query={query}
-                        onQueryChange={setQuery}
-                        onSelect={handleCustomerSelect}
-                    />
-
-                    {/* ================= Profile Card ================= */}
-                    {data.id && (
-                        <div className="flex flex-col gap-4 rounded-md border bg-background/60 p-3 md:flex-row">
-                            <div className="h-20 w-20 overflow-hidden rounded-full border bg-muted">
-                                {data.photo?.url ? (
-                                    <img
-                                        src={data.photo.url}
-                                        alt={data.name}
-                                        className="h-full w-full object-cover"
-                                    />
-                                ) : (
-                                    <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
-                                        {data.name.charAt(0)}
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="flex-1 space-y-2">
-                                <div>
-                                    <p className="text-sm font-semibold">
-                                        {data.name}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">
-                                        {data.type} • {data.status}
-                                    </p>
-                                </div>
-
-                                <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-3">
-                                    <Info
-                                        label="Customer No"
-                                        value={data.customer_no}
-                                    />
-                                    <Info label="Phone" value={data.phone} />
-                                    <Info label="Email" value={data.email} />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
+                <CustomerSearchBox onSelect={handleCustomerSelect} />
 
                 {/* ================= Header ================= */}
                 <div className="flex items-center justify-between">
@@ -265,18 +193,6 @@ export default function CustomerAddressIndex() {
                 )}
             </div>
         </CustomAuthLayout>
-    );
-}
-
-/* =========================================================
- * Small UI helpers
- * =======================================================*/
-function Info({ label, value }: { label: string; value: string }) {
-    return (
-        <div>
-            <span className="text-muted-foreground">{label}</span>
-            <p className="font-medium">{value}</p>
-        </div>
     );
 }
 

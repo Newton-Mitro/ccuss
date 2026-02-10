@@ -1,7 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
-import { CustomerSearch } from '../../../components/customer-search';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
@@ -9,10 +8,11 @@ import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-import { FamilyRelation } from '../../../types/family_relation';
+import { CustomerFamilyRelation } from '../../../types/customer';
+import { CustomerSearchInput } from '../customers/customer-search-input';
 
 interface EditFamilyRelationProps {
-    familyRelation: FamilyRelation;
+    familyRelation: CustomerFamilyRelation;
 }
 
 export default function EditFamilyRelation({
@@ -95,7 +95,7 @@ export default function EditFamilyRelation({
                             Customer
                         </h3>
                         <div className="mt-2">
-                            <CustomerSearch
+                            <CustomerSearchInput
                                 query={customerQuery}
                                 onQueryChange={setCustomerQuery}
                                 onSelect={(customer) => {
@@ -133,7 +133,7 @@ export default function EditFamilyRelation({
                             Relative
                         </h3>
                         <div className="mt-2">
-                            <CustomerSearch
+                            <CustomerSearchInput
                                 query={relativeQuery}
                                 onQueryChange={setRelativeQuery}
                                 onSelect={(relative) => {
@@ -184,31 +184,6 @@ export default function EditFamilyRelation({
                                 ))}
                             </select>
                             <InputError message={errors.relation_type} />
-                        </div>
-                        <div>
-                            <Label>Reverse Relation Type</Label>
-                            <select
-                                value={data.reverse_relation_type}
-                                onChange={(e) =>
-                                    setData(
-                                        'reverse_relation_type',
-                                        e.target.value,
-                                    )
-                                }
-                                className="mt-1 w-full rounded border border-border bg-background p-2"
-                            >
-                                <option value="">
-                                    Select Reverse Relation Type
-                                </option>
-                                {relations.map((r) => (
-                                    <option key={r} value={r}>
-                                        {r}
-                                    </option>
-                                ))}
-                            </select>
-                            <InputError
-                                message={errors.reverse_relation_type}
-                            />
                         </div>
                     </div>
 

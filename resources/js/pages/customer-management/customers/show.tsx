@@ -365,11 +365,11 @@ function Show({ customer, backUrl }: ShowProps) {
                                     <div className="flex flex-col gap-4 rounded-md border bg-background/60 p-3 md:flex-row">
                                         <Info
                                             label="Introducer Customer Id"
-                                            value={intro.introduced_customer_id.toString()}
+                                            value={intro.introduced_customer_id?.toString()}
                                         />
                                         <Info
                                             label="Introducer Account Id"
-                                            value={intro.introducer_account_id.toString()}
+                                            value={intro.introducer_account_id?.toString()}
                                         />
                                         <Info
                                             label="Relationship"

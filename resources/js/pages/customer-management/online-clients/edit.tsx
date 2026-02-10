@@ -1,7 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 import React from 'react';
 import toast from 'react-hot-toast';
-import { CustomerSearch } from '../../../components/customer-search';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
@@ -10,6 +9,7 @@ import { Label } from '../../../components/ui/label';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 import { OnlineClient } from '../../../types/online_client';
+import { CustomerSearchInput } from '../customers/customer-search-input';
 
 interface EditOnlineUserProps {
     onlineClient: OnlineClient;
@@ -63,7 +63,7 @@ export default function EditOnlineUser({ onlineClient }: EditOnlineUserProps) {
                             Linked Customer
                         </h3>
                         <div className="mt-2">
-                            <CustomerSearch
+                            <CustomerSearchInput
                                 query={customerQuery}
                                 onQueryChange={setCustomerQuery}
                                 onSelect={(customer) => {

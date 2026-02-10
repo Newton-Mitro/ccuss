@@ -1,6 +1,8 @@
 import { AuditFields, ID, Timestamp } from './base_types';
+import { User } from './user';
 
 export type AddressVerificationStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
+export type FamilyVerificationStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
 export type CustomerStatus = 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'CLOSED';
 export type CustomerType = 'Individual' | 'Organization';
 export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
@@ -52,6 +54,8 @@ export interface Customer extends AuditFields {
 
 export interface CustomerPhoto extends AuditFields {
     id: number;
+    customer_id: ID;
+    customer?: Customer | null;
     file_name: string;
     file_path: string;
     file_type: string;
@@ -74,6 +78,7 @@ export type AddressType =
 export interface CustomerAddress extends AuditFields {
     id: ID;
     customer_id: ID;
+    customer?: Customer | null;
 
     line1: string;
     line2?: string | null;
@@ -89,6 +94,7 @@ export interface CustomerAddress extends AuditFields {
 
     verification_status: AddressVerificationStatus;
     verified_by?: ID | null;
+    verified_by_user?: User | null;
     verified_at?: Timestamp | null;
     remarks?: string | null;
 }
@@ -122,6 +128,7 @@ export type RelationType =
 export interface CustomerFamilyRelation extends AuditFields {
     id: ID;
     customer_id: ID;
+    customer?: Customer | null;
 
     // Linked customer (optional)
     relative_id?: ID | null;
@@ -141,10 +148,17 @@ export interface CustomerFamilyRelation extends AuditFields {
     photo?: FamilyRelationPhoto | null;
 
     relation_type: RelationType;
+
+    verification_status: FamilyVerificationStatus;
+    verified_by?: ID | null;
+    verified_by_user?: User | null;
+    verified_at?: Timestamp | null;
 }
 
 export interface FamilyRelationPhoto extends AuditFields {
     id: number;
+    customer_id: ID;
+    customer?: Customer | null;
     file_name: string;
     file_path: string;
     file_type: string;
@@ -159,6 +173,7 @@ export interface FamilyRelationPhoto extends AuditFields {
 export interface CustomerSignature extends AuditFields {
     id: ID;
     customer_id: ID;
+    customer?: Customer | null;
     file_name: string;
     file_path: string;
     mime: string;
@@ -181,13 +196,16 @@ export interface CustomerIntroducer extends AuditFields {
     id: ID;
 
     introduced_customer_id: ID;
+    introduced_customer?: Customer | null;
     introducer_customer_id: ID;
+    introducer_customer?: Customer | null;
     introducer_account_id: ID;
 
     relationship_type: IntroducerRelationshipType;
 
     verification_status: AddressVerificationStatus;
     verified_by?: ID | null;
+    verified_by_user?: User | null;
     verified_at?: Timestamp | null;
     remarks?: string | null;
 }
@@ -199,6 +217,7 @@ export interface CustomerIntroducer extends AuditFields {
 export interface OnlineServiceUser extends AuditFields {
     id: ID;
     customer_id: ID;
+    customer?: Customer | null;
 
     username: string;
     email?: string | null;

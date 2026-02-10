@@ -1,7 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
-import { CustomerSearch } from '../../components/customer-search';
 import HeadingSmall from '../../components/heading-small';
 import InputError from '../../components/input-error';
 import { Button } from '../../components/ui/button';
@@ -11,6 +10,7 @@ import CustomAuthLayout from '../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../types';
 import { Branch } from '../../types/branch';
 import { Customer } from '../../types/customer';
+import { CustomerSearchInput } from '../customer-management/customers/customer-search-input';
 
 interface EditBranchProps {
     branch: Branch;
@@ -144,7 +144,7 @@ function Edit({ branch }: EditBranchProps) {
                         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                             <div>
                                 <Label>Search Manager</Label>
-                                <CustomerSearch
+                                <CustomerSearchInput
                                     query={query}
                                     onQueryChange={setQuery}
                                     onSelect={(customer: Customer) => {

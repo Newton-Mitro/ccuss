@@ -1,14 +1,13 @@
 import { Head, useForm } from '@inertiajs/react';
-import React, { useState } from 'react';
+import React from 'react';
 import toast from 'react-hot-toast';
-import { CustomerSearch } from '../../../components/customer-search';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
-import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
+import { CustomerSearchBox } from '../customers/customer-search-box';
 
 export default function CreateFamilyRelation() {
     const relations = [
@@ -44,11 +43,7 @@ export default function CreateFamilyRelation() {
         relative_id: null as number | null,
         relative_name: '',
         relation_type: '',
-        reverse_relation_type: '',
     });
-
-    const [customerQuery, setCustomerQuery] = useState('');
-    const [relativeQuery, setRelativeQuery] = useState('');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -84,35 +79,12 @@ export default function CreateFamilyRelation() {
                             Customer
                         </h3>
                         <div className="mt-2">
-                            <CustomerSearch
-                                query={customerQuery}
-                                onQueryChange={setCustomerQuery}
+                            <CustomerSearchBox
                                 onSelect={(customer) => {
                                     setData('customer_id', customer.id);
                                     setData('customer_name', customer.name);
-                                    setCustomerQuery(customer.name);
                                 }}
                             />
-                        </div>
-
-                        <div className="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2">
-                            <div>
-                                <Label>Customer ID</Label>
-                                <Input
-                                    value={data.customer_id}
-                                    disabled
-                                    className="bg-disabled mt-1 cursor-not-allowed"
-                                />
-                                <InputError message={errors.customer_id} />
-                            </div>
-                            <div>
-                                <Label>Customer Name</Label>
-                                <Input
-                                    value={data.customer_name}
-                                    disabled
-                                    className="bg-disabled mt-1 cursor-not-allowed"
-                                />
-                            </div>
                         </div>
                     </div>
 
@@ -122,35 +94,12 @@ export default function CreateFamilyRelation() {
                             Relative
                         </h3>
                         <div className="mt-2">
-                            <CustomerSearch
-                                query={relativeQuery}
-                                onQueryChange={setRelativeQuery}
+                            <CustomerSearchBox
                                 onSelect={(relative) => {
                                     setData('relative_id', relative.id);
                                     setData('relative_name', relative.name);
-                                    setRelativeQuery(relative.name);
                                 }}
                             />
-                        </div>
-
-                        <div className="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2">
-                            <div>
-                                <Label>Relative ID</Label>
-                                <Input
-                                    value={data.relative_id}
-                                    disabled
-                                    className="bg-disabled mt-1 cursor-not-allowed"
-                                />
-                                <InputError message={errors.relative_id} />
-                            </div>
-                            <div>
-                                <Label>Relative Name</Label>
-                                <Input
-                                    value={data.relative_name}
-                                    disabled
-                                    className="bg-disabled mt-1 cursor-not-allowed"
-                                />
-                            </div>
                         </div>
                     </div>
 
@@ -173,31 +122,6 @@ export default function CreateFamilyRelation() {
                                 ))}
                             </select>
                             <InputError message={errors.relation_type} />
-                        </div>
-                        <div>
-                            <Label>Reverse Relation Type</Label>
-                            <select
-                                value={data.reverse_relation_type}
-                                onChange={(e) =>
-                                    setData(
-                                        'reverse_relation_type',
-                                        e.target.value,
-                                    )
-                                }
-                                className="mt-1 w-full rounded border border-border bg-background p-2"
-                            >
-                                <option value="">
-                                    Select Reverse Relation Type
-                                </option>
-                                {relations.map((r) => (
-                                    <option key={r} value={r}>
-                                        {r}
-                                    </option>
-                                ))}
-                            </select>
-                            <InputError
-                                message={errors.reverse_relation_type}
-                            />
                         </div>
                     </div>
 
