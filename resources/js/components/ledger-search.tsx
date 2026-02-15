@@ -23,7 +23,7 @@ export const LedgerSearch: React.FC<LedgerSearchProps> = ({
     query,
     onQueryChange,
     onSelect,
-    api = '/auth/api/search-ledger',
+    api = '/api/search-ledger',
     error,
     placeholder = 'Search ledger...',
 }) => {

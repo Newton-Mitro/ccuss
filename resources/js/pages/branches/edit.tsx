@@ -10,7 +10,7 @@ import CustomAuthLayout from '../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../types';
 import { Branch } from '../../types/branch';
 import { Customer } from '../../types/customer';
-import { CustomerSearchInput } from '../customer-management/customers/customer-search-input';
+import { CustomerSearchInput } from '../customer-mgmt/customers/customer-search-input';
 
 interface EditBranchProps {
     branch: Branch;
@@ -32,7 +32,7 @@ function Edit({ branch }: EditBranchProps) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        put(`/auth/branches/${branch.id}`, {
+        put(`/branches/${branch.id}`, {
             preserveScroll: true,
             preserveState: true,
             onSuccess: () => {
@@ -42,7 +42,7 @@ function Edit({ branch }: EditBranchProps) {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Branches', href: '/auth/branches' },
+        { title: 'Branches', href: '/branches' },
         { title: 'Edit Branch', href: '' },
     ];
 
@@ -73,6 +73,7 @@ function Edit({ branch }: EditBranchProps) {
                                     onChange={(e) =>
                                         setData('code', e.target.value)
                                     }
+                                    className="h-8 text-sm"
                                 />
                                 <InputError message={errors.code} />
                             </div>
@@ -84,6 +85,7 @@ function Edit({ branch }: EditBranchProps) {
                                     onChange={(e) =>
                                         setData('name', e.target.value)
                                     }
+                                    className="h-8 text-sm"
                                 />
                                 <InputError message={errors.name} />
                             </div>
@@ -103,6 +105,7 @@ function Edit({ branch }: EditBranchProps) {
                                     onChange={(e) =>
                                         setData('address', e.target.value)
                                     }
+                                    className="h-8 text-sm"
                                 />
                                 <InputError message={errors.address} />
                             </div>
@@ -116,6 +119,7 @@ function Edit({ branch }: EditBranchProps) {
                                     onChange={(e) =>
                                         setData('latitude', e.target.value)
                                     }
+                                    className="h-8 text-sm"
                                 />
                                 <InputError message={errors.latitude} />
                             </div>
@@ -129,6 +133,7 @@ function Edit({ branch }: EditBranchProps) {
                                     onChange={(e) =>
                                         setData('longitude', e.target.value)
                                     }
+                                    className="h-8 text-sm"
                                 />
                                 <InputError message={errors.longitude} />
                             </div>
@@ -163,6 +168,7 @@ function Edit({ branch }: EditBranchProps) {
                                     type="number"
                                     value={data.manager_id || ''}
                                     disabled
+                                    className="h-8 text-sm"
                                 />
                             </div>
                             <div>
@@ -171,6 +177,7 @@ function Edit({ branch }: EditBranchProps) {
                                     type="text"
                                     value={data.manager_name || ''}
                                     disabled
+                                    className="h-8 text-sm"
                                 />
                             </div>
                         </div>

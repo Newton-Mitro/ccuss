@@ -34,7 +34,7 @@ class MediaController extends Controller
         }
 
         $mediaItems = $query->latest()->paginate($perPage);
-        $mediaItems->withPath('/auth/api/media');
+        $mediaItems->withPath('/api/media');
 
         return response()->json([
             'data' => $mediaItems->items(),

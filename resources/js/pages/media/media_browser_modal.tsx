@@ -44,7 +44,7 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
     ) => {
         try {
             // ✅ Base URL always includes filter & per_page
-            const baseUrl = `/auth/api/media?type=${type}&per_page=${perPageValue}`;
+            const baseUrl = `/api/media?type=${type}&per_page=${perPageValue}`;
             // ✅ Use provided page URL or default
             const url = pageUrl || baseUrl;
 
@@ -118,7 +118,7 @@ const MediaBrowserModal: React.FC<MediaBrowserModalProps> = ({
                 .querySelector('meta[name="csrf-token"]')
                 ?.getAttribute('content');
 
-            const res = await axios.post('/auth/media', formData, {
+            const res = await axios.post('/media', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'X-CSRF-TOKEN': token || '',

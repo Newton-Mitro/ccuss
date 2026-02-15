@@ -82,7 +82,7 @@ export default function Index() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Vouchers', href: '/auth/vouchers' },
+        { title: 'Vouchers', href: '/vouchers' },
     ];
 
     // Helper to calculate total debit/credit

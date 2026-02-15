@@ -86,7 +86,7 @@ class CustomerController extends Controller
             ->paginate($request->input('per_page', 10))
             ->withQueryString();
 
-        return Inertia::render('customer-management/customers/index', [
+        return Inertia::render('customer-mgmt/customers/index', [
             'customers' => $customers,
             'filters' => $request->only(['search', 'status', 'per_page', 'page']),
         ]);
@@ -95,7 +95,7 @@ class CustomerController extends Controller
     public function create(Request $request): Response
     {
 
-        return Inertia::render('customer-management/customers/create', [
+        return Inertia::render('customer-mgmt/customers/create', [
             'backUrl' => url()->previous(),
         ]);
     }
@@ -159,7 +159,7 @@ class CustomerController extends Controller
             'introducers',           // Introducer info
         ]);
 
-        return Inertia::render('customer-management/customers/show', [
+        return Inertia::render('customer-mgmt/customers/show', [
             'customer' => $customer,
             'backUrl' => url()->previous(),
         ]);
@@ -171,7 +171,7 @@ class CustomerController extends Controller
 
         $customer->load('photo');
 
-        return Inertia::render('customer-management/customers/edit', [
+        return Inertia::render('customer-mgmt/customers/edit', [
             'customer' => $customer,
             'backUrl' => url()->previous(),
         ]);

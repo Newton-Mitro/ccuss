@@ -21,7 +21,7 @@ class CustomerFamilyRelationController extends Controller
         // If search is empty, return empty paginator
         // if (empty($filters['search'])) {
         //     $relations = FamilyRelation::query()->whereRaw('0 = 1')->paginate($perPage);
-        //     return Inertia::render('customer-management/family-relations/index', [
+        //     return Inertia::render('customer-mgmt/family-relations/index', [
         //         'familyRelations' => $relations,
         //         'filters' => $filters,
         //     ]);
@@ -44,7 +44,7 @@ class CustomerFamilyRelationController extends Controller
         $relations = $query->paginate($perPage)->withQueryString();
 
 
-        return Inertia::render('customer-management/family-relations/index', [
+        return Inertia::render('customer-mgmt/family-relations/index', [
             'familyRelations' => $relations,
             'filters' => $filters,
         ]);
@@ -52,7 +52,7 @@ class CustomerFamilyRelationController extends Controller
 
     public function create(): Response
     {
-        return Inertia::render('customer-management/family-relations/create');
+        return Inertia::render('customer-mgmt/family-relations/create');
     }
 
     public function store(StoreFamilyRelationRequest $request): RedirectResponse
@@ -87,14 +87,14 @@ class CustomerFamilyRelationController extends Controller
 
     public function show(CustomerFamilyRelation $familyRelation): Response
     {
-        return Inertia::render('customer-management/family-relations/show', [
+        return Inertia::render('customer-mgmt/family-relations/show', [
             'familyRelation' => $familyRelation->load(['customer', 'relative']),
         ]);
     }
 
     public function edit(CustomerFamilyRelation $familyRelation): Response
     {
-        return Inertia::render('customer-management/family-relations/edit', [
+        return Inertia::render('customer-mgmt/family-relations/edit', [
             'familyRelation' => $familyRelation->load(['customer', 'relative']),
         ]);
     }

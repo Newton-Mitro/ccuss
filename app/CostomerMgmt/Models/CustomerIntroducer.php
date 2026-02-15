@@ -38,7 +38,7 @@ class CustomerIntroducer extends Model
         return $this->belongsTo(Customer::class, 'introducer_customer_id');
     }
 
-    public function verifier(): BelongsTo
+    public function verifiedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'verified_by');
     }

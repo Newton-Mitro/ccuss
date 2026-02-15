@@ -39,7 +39,7 @@ class CustomerAddressController extends Controller
             ->paginate($request->integer('per_page', 10))
             ->withQueryString();
 
-        return Inertia::render('customer-management/addresses/addresses_index', [
+        return Inertia::render('customer-mgmt/addresses/addresses_index', [
             'addresses' => $addresses,
             'filters' => $request->only([
                 'search',
@@ -52,7 +52,7 @@ class CustomerAddressController extends Controller
 
     public function customerAddresses(Request $request): Response
     {
-        return Inertia::render('customer-management/addresses/customer_addresses');
+        return Inertia::render('customer-mgmt/addresses/customer_addresses');
     }
 
     public function getCustomerAddresses(Request $request): JsonResponse
@@ -76,7 +76,7 @@ class CustomerAddressController extends Controller
         // Load the related customer info
         $address->load('customer');
 
-        return Inertia::render('customer-management/addresses/view_address_page', [
+        return Inertia::render('customer-mgmt/addresses/view_address_page', [
             'address' => $address,
         ]);
     }

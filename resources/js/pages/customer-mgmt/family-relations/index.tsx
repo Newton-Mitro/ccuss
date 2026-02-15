@@ -4,57 +4,51 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
-import { route } from 'ziggy-js';
-import HeadingSmall from '../../components/heading-small';
-import CustomAuthLayout from '../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../types';
-import { Branch } from '../../types/branch';
-
-interface BranchPageProps {
-    branches: {
-        data: Branch[];
-        links: { url: string | null; label: string; active: boolean }[];
-    };
-    filters: Record<string, string>;
-}
+import HeadingSmall from '../../../components/heading-small';
+import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { BreadcrumbItem, SharedData } from '../../../types';
+import { CustomerFamilyRelation } from '../../../types/customer';
 
 export default function Index() {
-    const { branches, filters } = usePage().props as unknown as BranchPageProps;
+    const { props } = usePage<
+        SharedData & {
+            familyRelations: {
+                data: CustomerFamilyRelation[];
+                links: { url: string | null; label: string; active: boolean }[];
+            };
+            filters: Record<string, string | number>;
+        }
+    >();
 
-    // Search + pagination
-    const {
-        data,
-        setData,
-        get,
-        delete: destroy,
-        processing,
-    } = useForm({
+    const { familyRelations, filters } = props;
+
+    const { data, setData, get } = useForm({
         search: filters.search || '',
         per_page: Number(filters.per_page) || 10,
         page: Number(filters.page) || 1,
     });
 
-    const handleSearch = () => {
-        get('/branches', { preserveState: true });
-    };
-
+    // Debounced search
     useEffect(() => {
-        const delay = setTimeout(handleSearch, 400);
+        const delay = setTimeout(() => {
+            get('/family-relations', {
+                preserveState: true,
+                replace: true,
+            });
+        }, 400);
         return () => clearTimeout(delay);
     }, [data.search, data.per_page, data.page]);
 
-    // Delete logic
-    const handleDelete = (id: number, name: string) => {
+    const handleDelete = (id: number, customerName: string) => {
         const isDark = document.documentElement.classList.contains('dark');
-
         Swal.fire({
             title: 'Are you sure?',
-            text: `Branch "${name}" will be permanently deleted!`,
+            text: `Relation of "${customerName}" will be permanently deleted!`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: isDark ? '#ef4444' : '#d33',
@@ -64,50 +58,46 @@ export default function Index() {
             confirmButtonText: 'Yes, delete it!',
         }).then((result) => {
             if (result.isConfirmed) {
-                destroy(route('branches.destroy', id), {
+                router.delete(`/family-relations/${id}`, {
                     preserveScroll: true,
                     preserveState: true,
-                    onSuccess: () => {
-                        toast.success(`Branch "${name}" deleted successfully!`);
-                    },
-                    onError: (errors) => {
-                        toast.error(
-                            'Failed to delete the branch. Please try again.',
-                        );
-                        console.error(errors);
-                    },
+                    onSuccess: () =>
+                        toast.success('Relation deleted successfully!'),
+                    onError: () => toast.error('Failed to delete relation.'),
                 });
             }
         });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Branches', href: '/branches' },
+        { title: 'Family Relations', href: '/family-relations' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Branches" />
-            <div className="space-y-4 p-2 text-foreground">
+            <Head title="Family Relations" />
+
+            <div className="space-y-4 text-foreground">
                 {/* Header */}
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
-                        title="Branches"
-                        description="Manage all organization branches and their details"
+                        title="Family Relations"
+                        description="Manage family and relative relationships."
                     />
                     <Link
-                        href="/branches/create"
+                        href="/family-relations/create"
                         className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                     >
-                        <Plus className="h-4 w-4" /> Add Branch
+                        <Plus className="h-4 w-4" />
+                        Customer Family Relations
                     </Link>
                 </div>
 
-                {/* Search */}
+                {/* Search & Per Page */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <input
                         type="text"
-                        placeholder="Search branches..."
+                        placeholder="Search by customer or relative name..."
                         value={data.search}
                         onChange={(e) => {
                             setData('search', e.target.value);
@@ -117,17 +107,20 @@ export default function Index() {
                     />
                 </div>
 
-                {/* Table */}
-                <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border border-border md:h-[calc(100vh-300px)]">
+                {/* ===================== */}
+                {/* Desktop Table */}
+                {/* ===================== */}
+                <div className="hidden h-[calc(100vh-360px)] overflow-auto rounded-md border border-border md:block">
                     <table className="w-full border-collapse">
                         <thead className="sticky top-0 bg-muted">
                             <tr>
                                 {[
-                                    'Code',
-                                    'Name',
-                                    'Address',
-                                    'Latitude',
-                                    'Longitude',
+                                    '#',
+                                    'Customer',
+                                    'Relative Name',
+                                    'Phone',
+                                    'Email',
+                                    'Relation',
                                     'Actions',
                                 ].map((header) => (
                                     <th
@@ -140,34 +133,34 @@ export default function Index() {
                             </tr>
                         </thead>
                         <tbody>
-                            {branches.data.length > 0 ? (
-                                branches.data.map((b) => (
+                            {familyRelations.data.length > 0 ? (
+                                familyRelations.data.map((f, i) => (
                                     <tr
-                                        key={b.id}
+                                        key={f.id}
                                         className="border-b border-border even:bg-muted/30"
                                     >
-                                        <td className="px-2 py-1">{b.code}</td>
-                                        <td className="px-2 py-1">{b.name}</td>
+                                        <td className="px-2 py-1">{i + 1}</td>
                                         <td className="px-2 py-1">
-                                            {b.address}
+                                            {f.customer?.name || '—'}
+                                        </td>
+                                        <td className="px-2 py-1">{f.name}</td>
+                                        <td className="px-2 py-1">
+                                            {f.phone || '—'}
                                         </td>
                                         <td className="px-2 py-1">
-                                            {b.latitude}
+                                            {f.email || '—'}
                                         </td>
-                                        <td className="px-2 py-1">
-                                            {b.longitude}
+
+                                        <td className="px-2 py-1 text-blue-600 dark:text-blue-400">
+                                            {f.relation_type.replace(/_/g, ' ')}
                                         </td>
                                         <td className="px-2 py-1">
                                             <TooltipProvider>
                                                 <div className="flex space-x-2">
-                                                    {/* View */}
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link
-                                                                href={route(
-                                                                    'branches.show',
-                                                                    b.id,
-                                                                )}
+                                                                href={`/family-relations/${f.id}`}
                                                                 className="text-primary hover:text-primary/80"
                                                             >
                                                                 <Eye className="h-5 w-5" />
@@ -178,15 +171,11 @@ export default function Index() {
                                                         </TooltipContent>
                                                     </Tooltip>
 
-                                                    {/* Edit */}
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link
-                                                                href={route(
-                                                                    'branches.edit',
-                                                                    b.id,
-                                                                )}
-                                                                className="text-green-600 hover:text-green-500 dark:text-green-400"
+                                                                href={`/family-relations/${f.id}/edit`}
+                                                                className="text-green-600 hover:text-green-500"
                                                             >
                                                                 <Pencil className="h-5 w-5" />
                                                             </Link>
@@ -196,21 +185,19 @@ export default function Index() {
                                                         </TooltipContent>
                                                     </Tooltip>
 
-                                                    {/* Delete */}
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <button
-                                                                type="button"
-                                                                disabled={
-                                                                    processing
-                                                                }
                                                                 onClick={() =>
                                                                     handleDelete(
-                                                                        b.id,
-                                                                        b.name,
+                                                                        f.id,
+                                                                        f
+                                                                            .customer
+                                                                            ?.name ||
+                                                                            '',
                                                                     )
                                                                 }
-                                                                className="text-destructive hover:text-destructive/80 disabled:opacity-50"
+                                                                className="text-destructive hover:text-destructive/80"
                                                             >
                                                                 <Trash2 className="h-5 w-5" />
                                                             </button>
@@ -227,15 +214,75 @@ export default function Index() {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={6}
+                                        colSpan={12}
                                         className="px-4 py-6 text-center text-muted-foreground"
                                     >
-                                        No branches found.
+                                        No family relations found.
                                     </td>
                                 </tr>
                             )}
                         </tbody>
                     </table>
+                </div>
+
+                {/* ===================== */}
+                {/* Mobile Cards */}
+                {/* ===================== */}
+                <div className="space-y-3 md:hidden">
+                    {familyRelations.data.map((f) => (
+                        <div
+                            key={f.id}
+                            className="rounded-md border border-border bg-card p-3 shadow-sm"
+                        >
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="font-medium">{f.name}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        {f.customer?.name || '—'}
+                                    </p>
+                                </div>
+                                <span className="rounded-full bg-muted px-2 py-0.5 text-xs">
+                                    {f.relation_type.replace(/_/g, ' ')}
+                                </span>
+                            </div>
+
+                            <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+                                <p>📞 {f.phone || '—'}</p>
+                                <p>✉️ {f.email || '—'}</p>
+                                <p>🎂 {f.dob || '—'}</p>
+                                <p>⚧ {f.gender || '—'}</p>
+                                <p>⛪ {f.religion || '—'}</p>
+                                <p>ID Type: {f.identification_type}</p>
+                                <p>ID #: {f.identification_number}</p>
+                            </div>
+
+                            <div className="mt-2 flex justify-end gap-3">
+                                <Link
+                                    href={`/family-relations/${f.id}`}
+                                    className="text-primary"
+                                >
+                                    <Eye className="h-5 w-5" />
+                                </Link>
+                                <Link
+                                    href={`/family-relations/${f.id}/edit`}
+                                    className="text-green-600 hover:text-green-500"
+                                >
+                                    <Pencil className="h-5 w-5" />
+                                </Link>
+                                <button
+                                    onClick={() =>
+                                        handleDelete(
+                                            f.id,
+                                            f.customer?.name || '',
+                                        )
+                                    }
+                                    className="text-destructive hover:text-destructive/80"
+                                >
+                                    <Trash2 className="h-5 w-5" />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
                 </div>
 
                 {/* Pagination */}
@@ -252,7 +299,7 @@ export default function Index() {
                             }}
                             className="h-9 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                         >
-                            {[5, 10, 20, 50, 100, 500].map((n) => (
+                            {[5, 10, 20, 50].map((n) => (
                                 <option key={n} value={n}>
                                     {n}
                                 </option>
@@ -264,8 +311,8 @@ export default function Index() {
                     </div>
 
                     <div className="flex gap-1">
-                        {branches.links.map((link, i) => (
-                            <Link
+                        {familyRelations.links.map((link, i) => (
+                            <a
                                 key={i}
                                 href={link.url || '#'}
                                 className={`rounded-full px-3 py-1 text-sm transition-colors ${

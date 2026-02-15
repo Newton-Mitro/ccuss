@@ -15,7 +15,7 @@ class CustomerSignatureController extends Controller
 {
     public function index(Request $request): Response
     {
-        return Inertia::render('customer-management/signatures/index');
+        return Inertia::render('customer-mgmt/signatures/index');
     }
 
     public function getCustomerSignature(Request $request): JsonResponse

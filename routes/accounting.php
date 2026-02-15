@@ -2,8 +2,9 @@
 
 use App\Accounting\GlAccount\Controllers\GlAccountController;
 use App\Accounting\Voucher\Controllers\JournalEntryController;
+use Illuminate\Support\Facades\Route;
 
-Route::prefix('auth')->middleware(['auth',])->group(function () {
+Route::middleware(['auth',])->group(function () {
     Route::get('/gl_accounts', [GlAccountController::class, 'index'])->name('gl-accounts.index');
     Route::get('/api/search-ledger', [GlAccountController::class, 'ledgerSearch'])->name('gl-accounts.search');
 
@@ -13,7 +14,7 @@ Route::prefix('auth')->middleware(['auth',])->group(function () {
     Route::post('/gl_accounts/move', [GlAccountController::class, 'move'])->name('gl-accounts.move');
 });
 
-Route::prefix('auth')->middleware(['auth',])->group(function () {
+Route::middleware(['auth',])->group(function () {
     // Voucher listing
     Route::get('vouchers/list', [JournalEntryController::class, 'index'])->name('vouchers.index');
 

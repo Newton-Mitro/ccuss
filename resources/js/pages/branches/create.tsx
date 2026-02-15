@@ -9,7 +9,7 @@ import { Label } from '../../components/ui/label';
 import CustomAuthLayout from '../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../types';
 import { Customer } from '../../types/customer';
-import { CustomerSearchInput } from '../customer-management/customers/customer-search-input';
+import { CustomerSearchInput } from '../customer-mgmt/customers/customer-search-input';
 
 function Create() {
     const { data, setData, post, processing, errors } = useForm({
@@ -26,7 +26,7 @@ function Create() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/auth/branches', {
+        post('/branches', {
             preserveScroll: true,
             preserveState: true,
             onSuccess: () => {
@@ -36,7 +36,7 @@ function Create() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Branches', href: '/auth/branches' },
+        { title: 'Branches', href: '/branches' },
         { title: 'Add Branch', href: '' },
     ];
 
@@ -67,6 +67,7 @@ function Create() {
                                     onChange={(e) =>
                                         setData('code', e.target.value)
                                     }
+                                    className="h-8 text-sm"
                                     placeholder="BR-001"
                                 />
                                 <InputError message={errors.code} />
@@ -79,6 +80,7 @@ function Create() {
                                     onChange={(e) =>
                                         setData('name', e.target.value)
                                     }
+                                    className="h-8 text-sm"
                                     placeholder="Downtown Branch"
                                 />
                                 <InputError message={errors.name} />
@@ -99,6 +101,7 @@ function Create() {
                                     onChange={(e) =>
                                         setData('address', e.target.value)
                                     }
+                                    className="h-8 text-sm"
                                     placeholder="123 Main Street, City"
                                 />
                                 <InputError message={errors.address} />
@@ -113,6 +116,7 @@ function Create() {
                                     onChange={(e) =>
                                         setData('latitude', e.target.value)
                                     }
+                                    className="h-8 text-sm"
                                     placeholder="e.g. 23.7808875"
                                 />
                                 <InputError message={errors.latitude} />
@@ -127,6 +131,7 @@ function Create() {
                                     onChange={(e) =>
                                         setData('longitude', e.target.value)
                                     }
+                                    className="h-8 text-sm"
                                     placeholder="e.g. 90.2792371"
                                 />
                                 <InputError message={errors.longitude} />
@@ -165,6 +170,7 @@ function Create() {
                                         type="number"
                                         disabled
                                         value={data.manager_id}
+                                        className="h-8 text-sm"
                                         placeholder="Enter manager user ID"
                                     />
                                     <InputError message={errors.manager_id} />
@@ -176,6 +182,7 @@ function Create() {
                                         type="text"
                                         disabled
                                         value={data.manager_name}
+                                        className="h-8 text-sm"
                                         placeholder="Enter manager user ID"
                                     />
                                     <InputError message={errors.manager_id} />

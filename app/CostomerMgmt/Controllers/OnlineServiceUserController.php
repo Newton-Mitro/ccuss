@@ -19,15 +19,6 @@ class OnlineServiceUserController extends Controller
         $filters = request()->only('search', 'per_page', 'page');
         $perPage = $filters['per_page'] ?? 10;
 
-        // If search is empty, return empty paginator
-        // if (empty($filters['search'])) {
-        //     $onlineClients = OnlineUser::query()->whereRaw('0 = 1')->paginate($perPage);
-        //     return Inertia::render('customer-management/online-clients/index', [
-        //         'onlineClients' => $onlineClients,
-        //         'filters' => $filters,
-        //     ]);
-        // }
-
         $search = $filters['search'] ?? '';
         $query = OnlineServiceUser::with('customer')
             ->latest()
@@ -43,7 +34,7 @@ class OnlineServiceUserController extends Controller
 
         $onlineClients = $query->paginate($perPage)->withQueryString();
 
-        return Inertia::render('customer-management/online-clients/index', [
+        return Inertia::render('customer-mgmt/online-service-users/index', [
             'onlineClients' => $onlineClients,
             'filters' => $filters,
         ]);
@@ -53,7 +44,7 @@ class OnlineServiceUserController extends Controller
     {
         $customers = Customer::select('id', 'name', 'customer_no')->get();
 
-        return Inertia::render('customer-management/online-clients/create', [
+        return Inertia::render('customer-mgmt/online-service-users/create', [
             'customers' => $customers,
         ]);
     }
@@ -77,20 +68,20 @@ class OnlineServiceUserController extends Controller
         OnlineServiceUser::create($data);
 
         return redirect()
-            ->route('online-clients.index')
+            ->route('online-service-users.index')
             ->with('success', 'Online client created successfully.');
     }
 
     public function show(OnlineServiceUser $onlineClient): Response
     {
-        return Inertia::render('customer-management/online-clients/show', [
+        return Inertia::render('customer-mgmt/online-service-users/show', [
             'onlineClient' => $onlineClient->load('customer'),
         ]);
     }
 
     public function edit(OnlineServiceUser $onlineClient): Response
     {
-        return Inertia::render('customer-management/online-clients/edit', [
+        return Inertia::render('customer-mgmt/online-service-users/edit', [
             'onlineClient' => $onlineClient->load('customer'),
         ]);
     }
@@ -121,7 +112,7 @@ class OnlineServiceUserController extends Controller
         $onlineClient->update($data);
 
         return redirect()
-            ->route('online-clients.index')
+            ->route('online-service-users.index')
             ->with('success', 'Online client updated successfully.');
     }
 
@@ -130,7 +121,7 @@ class OnlineServiceUserController extends Controller
         $onlineClient->delete();
 
         return redirect()
-            ->route('online-clients.index')
+            ->route('online-service-users.index')
             ->with('success', 'Online client deleted successfully.');
     }
 }

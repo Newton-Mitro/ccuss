@@ -11,7 +11,7 @@ interface ShowProps {
 
 export default function Show({ branch }: ShowProps) {
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Branches', href: '/auth/branches' },
+        { title: 'Branches', href: '/branches' },
         { title: branch.name, href: '' },
     ];
 
@@ -29,7 +29,7 @@ export default function Show({ branch }: ShowProps) {
                         description="Detailed branch information overview"
                     />
                     <Link
-                        href="/auth/branches"
+                        href="/branches"
                         className="flex items-center gap-1 rounded-md border border-border bg-background px-3 py-1.5 text-sm text-muted-foreground transition-all hover:bg-muted/20"
                     >
                         <ArrowLeft className="h-4 w-4" />
