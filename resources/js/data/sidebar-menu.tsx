@@ -268,6 +268,72 @@ export const sidebarMenu: SidebarItem[] = [
         ],
     },
     {
+        name: 'Share Capital Mgmt.',
+        icon: <i className="fa-solid fa-coins" />,
+        children: [
+            {
+                name: 'Member Contributions',
+                icon: <i className="fa-solid fa-hand-holding-dollar" />,
+                path: '/share-contributions',
+                match_path: 'share-contributions',
+            },
+            {
+                name: 'Dividends',
+                icon: <i className="fa-solid fa-percent" />,
+                path: '/share-dividends',
+                match_path: 'share-dividends',
+            },
+        ],
+    },
+    {
+        name: 'Insurance Mgmt.',
+        icon: <i className="fa-solid fa-shield-halved" />,
+        children: [
+            {
+                name: 'Policies',
+                icon: <i className="fa-solid fa-file-invoice" />,
+                path: '/insurance-policies',
+                match_path: 'insurance-policies',
+            },
+            {
+                name: 'Claims',
+                icon: <i className="fa-solid fa-file-medical" />,
+                path: '/insurance-claims',
+                match_path: 'insurance-claims',
+            },
+        ],
+    },
+    {
+        name: 'Investments Mgmt.',
+        icon: <i className="fa-solid fa-chart-line" />,
+        children: [
+            {
+                name: 'Treasury Securities',
+                icon: <i className="fa-solid fa-landmark" />,
+                path: '/treasury-securities',
+                match_path: 'treasury-securities',
+            },
+        ],
+    },
+    {
+        name: 'Remittance / Digital Transfers',
+        icon: <i className="fa-solid fa-paper-plane" />,
+        children: [
+            {
+                name: 'Incoming Transfers',
+                icon: <i className="fa-solid fa-arrow-down" />,
+                path: '/incoming-transfers',
+                match_path: 'incoming-transfers',
+            },
+            {
+                name: 'Outgoing Transfers',
+                icon: <i className="fa-solid fa-arrow-up" />,
+                path: '/outgoing-transfers',
+                match_path: 'outgoing-transfers',
+            },
+        ],
+    },
+    {
         name: 'Loan Mgmt.',
         icon: <i className="fa-solid fa-hand-holding-dollar" />,
         children: [
@@ -617,72 +683,7 @@ export const sidebarMenu: SidebarItem[] = [
             },
         ],
     },
-    {
-        name: 'Share Capital Mgmt.',
-        icon: <i className="fa-solid fa-coins" />,
-        children: [
-            {
-                name: 'Member Contributions',
-                icon: <i className="fa-solid fa-hand-holding-dollar" />,
-                path: '/share-contributions',
-                match_path: 'share-contributions',
-            },
-            {
-                name: 'Dividends',
-                icon: <i className="fa-solid fa-percent" />,
-                path: '/share-dividends',
-                match_path: 'share-dividends',
-            },
-        ],
-    },
-    {
-        name: 'Insurance Mgmt.',
-        icon: <i className="fa-solid fa-shield-halved" />,
-        children: [
-            {
-                name: 'Policies',
-                icon: <i className="fa-solid fa-file-invoice" />,
-                path: '/insurance-policies',
-                match_path: 'insurance-policies',
-            },
-            {
-                name: 'Claims',
-                icon: <i className="fa-solid fa-file-medical" />,
-                path: '/insurance-claims',
-                match_path: 'insurance-claims',
-            },
-        ],
-    },
-    {
-        name: 'Investments Mgmt.',
-        icon: <i className="fa-solid fa-chart-line" />,
-        children: [
-            {
-                name: 'Treasury Securities',
-                icon: <i className="fa-solid fa-landmark" />,
-                path: '/treasury-securities',
-                match_path: 'treasury-securities',
-            },
-        ],
-    },
-    {
-        name: 'Remittance / Digital Transfers',
-        icon: <i className="fa-solid fa-paper-plane" />,
-        children: [
-            {
-                name: 'Incoming Transfers',
-                icon: <i className="fa-solid fa-arrow-down" />,
-                path: '/incoming-transfers',
-                match_path: 'incoming-transfers',
-            },
-            {
-                name: 'Outgoing Transfers',
-                icon: <i className="fa-solid fa-arrow-up" />,
-                path: '/outgoing-transfers',
-                match_path: 'outgoing-transfers',
-            },
-        ],
-    },
+
     {
         name: 'User Auth Mgmt.',
         icon: <i className="fa-solid fa-user-gear" />,
