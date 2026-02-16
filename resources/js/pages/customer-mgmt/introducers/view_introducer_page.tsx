@@ -3,7 +3,7 @@ import { HomeIcon, UserIcon } from 'lucide-react';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-import { CustomerIntroducer } from '../../../types/customer';
+import { CustomerIntroducer } from '../../../types/introduced_customer';
 
 interface Props {
     introducer: CustomerIntroducer;
@@ -24,12 +24,77 @@ export default function ViewIntroducer({ introducer }: Props) {
 
             <div className="space-y-4 p-2">
                 <HeadingSmall
-                    title="Customer Introducer Details"
+                    title="Introducer Details"
                     description="View detailed information about this introducer."
                 />
 
                 {/* Introducer Information */}
-                <section className="rounded-md border bg-card p-4">
+                <section className="space-y-10 rounded-md border bg-card p-6">
+                    <div className="">
+                        <div className="mb-4 flex items-center gap-2 text-sm font-semibold">
+                            <UserIcon size={16} />
+                            <span>Customer Information</span>
+                        </div>
+                        <div className="mt-3 flex items-center gap-4">
+                            <div className="h-20 w-20 overflow-hidden rounded-full border bg-muted">
+                                {introducer.introduced_customer?.photo?.url ? (
+                                    <img
+                                        src={
+                                            introducer.introduced_customer
+                                                ?.photo.url
+                                        }
+                                        alt={
+                                            introducer.introduced_customer?.name
+                                        }
+                                        className="h-full w-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
+                                        {introducer.introduced_customer?.name.charAt(
+                                            0,
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex-1 space-y-2">
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        {introducer.introduced_customer ? (
+                                            <Link
+                                                href={`/customers/${introducer.introduced_customer.id}`}
+                                                className="text-primary underline"
+                                            >
+                                                {
+                                                    introducer
+                                                        .introduced_customer
+                                                        .name
+                                                }
+                                            </Link>
+                                        ) : (
+                                            '—'
+                                        )}
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        {introducer.introduced_customer?.type} •{' '}
+                                        {introducer.introduced_customer?.status}
+                                    </p>
+                                    <div className="text-xs text-muted-foreground">
+                                        {introducer.introduced_customer?.id} •{' '}
+                                        {
+                                            introducer.introduced_customer
+                                                ?.customer_no
+                                        }{' '}
+                                        •{' '}
+                                        {introducer.introduced_customer?.email}{' '}
+                                        •{' '}
+                                        {introducer.introduced_customer?.phone}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="mb-4 flex items-center gap-2 text-sm font-semibold">
                         <HomeIcon size={16} />
                         <span>Introducer Information</span>
@@ -66,81 +131,7 @@ export default function ViewIntroducer({ introducer }: Props) {
                             label="Verification Status"
                             value={introducer.verification_status}
                         />
-                        <Info
-                            label="Verified By"
-                            value={introducer.verified_by_user?.name || '—'}
-                        />
-                        <Info
-                            label="Verified At"
-                            value={introducer.verified_at || '—'}
-                        />
                         <Info label="Remarks" value={introducer.remarks} />
-                    </div>
-                </section>
-
-                {/* Customer Information */}
-                <section className="rounded-md border bg-card p-4">
-                    <div className="mb-4 flex items-center gap-2 text-sm font-semibold">
-                        <UserIcon size={16} />
-                        <span>Customer Info</span>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                        <Info
-                            label="Customer Name"
-                            value={
-                                introducer.introduced_customer ? (
-                                    <Link
-                                        href={`/customers/${introducer.introduced_customer.id}`}
-                                        className="text-primary underline"
-                                    >
-                                        {introducer.introduced_customer.name}
-                                    </Link>
-                                ) : (
-                                    '—'
-                                )
-                            }
-                        />
-                        <Info
-                            label="Customer ID"
-                            value={
-                                introducer.introduced_customer?.id?.toString() ||
-                                '—'
-                            }
-                        />
-                        <Info
-                            label="Customer No"
-                            value={
-                                introducer.introduced_customer?.customer_no ||
-                                '—'
-                            }
-                        />
-                        <Info
-                            label="Customer Type"
-                            value={introducer.introduced_customer?.type || '—'}
-                        />
-                        <Info
-                            label="Email"
-                            value={introducer.introduced_customer?.email || '—'}
-                        />
-                        <Info
-                            label="Phone"
-                            value={introducer.introduced_customer?.phone || '—'}
-                        />
-                        <Info
-                            label="Identification Type"
-                            value={
-                                introducer.introduced_customer
-                                    ?.identification_type || '—'
-                            }
-                        />
-                        <Info
-                            label="Identification Number"
-                            value={
-                                introducer.introduced_customer
-                                    ?.identification_number || '—'
-                            }
-                        />
                     </div>
                 </section>
             </div>

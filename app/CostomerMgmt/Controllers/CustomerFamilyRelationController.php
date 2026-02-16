@@ -6,129 +6,145 @@ use App\CostomerMgmt\Models\CustomerFamilyRelation;
 use App\CostomerMgmt\Requests\StoreFamilyRelationRequest;
 use App\CostomerMgmt\Requests\UpdateFamilyRelationRequest;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\RedirectResponse;
 
 class CustomerFamilyRelationController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        $query = CustomerFamilyRelation::query()
+            ->with(['customer', 'relative']);
 
-        $filters = request()->only('search', 'per_page', 'page');
-        $perPage = $filters['per_page'] ?? 10;
-
-        // If search is empty, return empty paginator
-        // if (empty($filters['search'])) {
-        //     $relations = FamilyRelation::query()->whereRaw('0 = 1')->paginate($perPage);
-        //     return Inertia::render('customer-mgmt/family-relations/index', [
-        //         'familyRelations' => $relations,
-        //         'filters' => $filters,
-        //     ]);
-        // }
-
-        $search = $filters['search'] ?? '';
-        $query = CustomerFamilyRelation::with(['customer', 'relative'])
-            ->latest()
-            ->where(function ($q) use ($search) {
-                $q->whereHas('customer', function ($q2) use ($search) {
-                    $q2->where('name', 'like', "%{$search}%")
+        // 🔍 Search filter
+        if ($search = $request->string('search')->toString()) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('customer', function ($qc) use ($search) {
+                    $qc->where('name', 'like', "%{$search}%")
                         ->orWhere('customer_no', 'like', "%{$search}%");
-                })
-                    ->orWhereHas('relative', function ($q2) use ($search) {
-                        $q2->where('name', 'like', "%{$search}%")
-                            ->orWhere('customer_no', 'like', "%{$search}%");
-                    });
+                })->orWhereHas('relative', function ($qr) use ($search) {
+                    $qr->where('name', 'like', "%{$search}%")
+                        ->orWhere('customer_no', 'like', "%{$search}%");
+                });
             });
+        }
 
-        $relations = $query->paginate($perPage)->withQueryString();
+        $relations = $query
+            ->latest()
+            ->paginate($request->integer('per_page', 10))
+            ->withQueryString();
 
-
-        return Inertia::render('customer-mgmt/family-relations/index', [
+        return Inertia::render('customer-mgmt/family-relations/family_relation_index', [
             'familyRelations' => $relations,
-            'filters' => $filters,
+            'filters' => $request->only([
+                'search',
+                'per_page',
+                'page',
+            ]),
         ]);
     }
 
-    public function create(): Response
+    public function customerRelations(Request $request): Response
     {
-        return Inertia::render('customer-mgmt/family-relations/create');
+        return Inertia::render('customer-mgmt/family-relations/customer_family_relations');
     }
 
-    public function store(StoreFamilyRelationRequest $request): RedirectResponse
+    public function getCustomerRelations(Request $request): JsonResponse
     {
-        $data = $request->validated();
+        $customerId = $request->input('customer_id');
 
-        // ✅ Check if relation already exists between same customer & relative
-        $exists = CustomerFamilyRelation::where(function ($q) use ($data) {
-            $q->where('customer_id', $data['customer_id'])
-                ->where('relative_id', $data['relative_id']);
-        })
-            ->orWhere(function ($q) use ($data) {
-                $q->where('customer_id', $data['relative_id'])
-                    ->where('relative_id', $data['customer_id']);
-            })
-            ->exists();
-
-        if ($exists) {
-            return redirect()
-                ->back()
-                ->withErrors(['relation' => 'This family relation already exists.'])
-                ->withInput();
+        if (!$customerId) {
+            return response()->json(
+                ['error' => 'customer_id is required'],
+                400
+            );
         }
 
-        // ✅ Otherwise, create new record
-        CustomerFamilyRelation::create($data);
+        $relations = CustomerFamilyRelation::where(function ($q) use ($customerId) {
+            $q->where('customer_id', $customerId)
+                ->orWhere('relative_id', $customerId);
+        })
+            ->with([
+                'customer:id,name,customer_no',
+                'relative:id,name,customer_no',
+            ])
+            ->latest()
+            ->get();
 
-        return redirect()
-            ->route('family-relations.index')
-            ->with('success', 'Family relation added successfully.');
+        return response()->json($relations);
     }
 
     public function show(CustomerFamilyRelation $familyRelation): Response
     {
-        return Inertia::render('customer-mgmt/family-relations/show', [
-            'familyRelation' => $familyRelation->load(['customer', 'relative']),
+        $familyRelation->load(['customer', 'relative']);
+
+        return Inertia::render('customer-mgmt/family-relations/view_family_relation', [
+            'familyRelation' => $familyRelation,
         ]);
     }
 
-    public function edit(CustomerFamilyRelation $familyRelation): Response
-    {
-        return Inertia::render('customer-mgmt/family-relations/edit', [
-            'familyRelation' => $familyRelation->load(['customer', 'relative']),
-        ]);
-    }
-
-    public function update(UpdateFamilyRelationRequest $request, CustomerFamilyRelation $familyRelation): RedirectResponse
+    public function store(StoreFamilyRelationRequest $request): JsonResponse
     {
         $data = $request->validated();
 
-        // ✅ Check if this relation already exists (excluding the current one)
-        $exists = CustomerFamilyRelation::where('customer_id', $data['customer_id'])
-            ->where('relative_id', $data['relative_id'])
+        // ✅ Prevent duplicate relations (both directions)
+        $exists = CustomerFamilyRelation::where(function ($q) use ($data) {
+            $q->where('customer_id', $data['customer_id'])
+                ->where('relative_id', $data['relative_id']);
+        })->orWhere(function ($q) use ($data) {
+            $q->where('customer_id', $data['relative_id'])
+                ->where('relative_id', $data['customer_id']);
+        })->exists();
+
+        if ($exists) {
+            return response()->json([
+                'error' => 'This family relation already exists.',
+            ], 422);
+        }
+
+        $relation = CustomerFamilyRelation::create($data);
+
+        return response()->json([
+            'message' => 'Family relation created successfully.',
+            'familyRelation' => $relation,
+        ]);
+    }
+
+    public function update(
+        UpdateFamilyRelationRequest $request,
+        CustomerFamilyRelation $familyRelation
+    ): JsonResponse {
+        $data = $request->validated();
+
+        $exists = CustomerFamilyRelation::where(function ($q) use ($data) {
+            $q->where('customer_id', $data['customer_id'])
+                ->where('relative_id', $data['relative_id']);
+        })
             ->where('id', '!=', $familyRelation->id)
             ->exists();
 
         if ($exists) {
-            return redirect()
-                ->back()
-                ->withErrors(['relative_id' => 'This relationship is already defined between these two people.'])
-                ->withInput();
+            return response()->json([
+                'error' => 'This family relation already exists.',
+            ], 422);
         }
 
         $familyRelation->update($data);
 
-        return redirect()
-            ->route('family-relations.index')
-            ->with('success', 'Family relation updated successfully.');
+        return response()->json([
+            'message' => 'Family relation updated successfully.',
+            'familyRelation' => $familyRelation,
+        ]);
     }
 
-    public function destroy(CustomerFamilyRelation $familyRelation): RedirectResponse
+    public function destroy(CustomerFamilyRelation $familyRelation): JsonResponse
     {
         $familyRelation->delete();
 
-        return redirect()
-            ->route('family-relations.index')
-            ->with('success', 'Family relation deleted successfully.');
+        return response()->json([
+            'message' => 'Family relation deleted successfully.',
+        ]);
     }
 }

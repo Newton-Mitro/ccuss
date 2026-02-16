@@ -53,17 +53,15 @@ class OnlineServiceUserController extends Controller
     {
         $data = $request->validated();
 
-        // ✅ Hash the password before saving
-        $data['password'] = Hash::make($data['password']);
-
-        // ✅ Check uniqueness for customer
-        $exists = OnlineServiceUser::where('customer_id', $data['customer_id'])->exists();
-        if ($exists) {
+        // ✅ Extra controller-level check: email or phone must exist
+        if (empty($data['email']) && empty($data['phone'])) {
             return redirect()
                 ->back()
-                ->withErrors(['customer_id' => 'This customer already has an online account.'])
+                ->withErrors(['contact' => 'Either email or phone must be provided.'])
                 ->withInput();
         }
+
+        $data['password'] = Hash::make($data['password']);
 
         OnlineServiceUser::create($data);
 
@@ -72,53 +70,51 @@ class OnlineServiceUserController extends Controller
             ->with('success', 'Online client created successfully.');
     }
 
-    public function show(OnlineServiceUser $onlineClient): Response
+
+    public function show(OnlineServiceUser $onlineServiceUser): Response
     {
         return Inertia::render('customer-mgmt/online-service-users/show', [
-            'onlineClient' => $onlineClient->load('customer'),
+            'onlineServiceUser' => $onlineServiceUser->load('customer'),
         ]);
     }
 
-    public function edit(OnlineServiceUser $onlineClient): Response
+    public function edit(OnlineServiceUser $onlineServiceUser): Response
     {
         return Inertia::render('customer-mgmt/online-service-users/edit', [
-            'onlineClient' => $onlineClient->load('customer'),
+            'onlineServiceUser' => $onlineServiceUser->load('customer'),
         ]);
     }
 
-    public function update(UpdateOnlineClientRequest $request, OnlineServiceUser $onlineClient): RedirectResponse
+    public function update(UpdateOnlineClientRequest $request, OnlineServiceUser $onlineServiceUser): RedirectResponse
     {
         $data = $request->validated();
 
-        // ✅ Re-hash password if provided
+        // ✅ Controller-level check: email or phone must exist
+        if (empty($data['email']) && empty($data['phone'])) {
+            return redirect()
+                ->back()
+                ->withErrors(['contact' => 'Either email or phone must be provided.'])
+                ->withInput();
+        }
+
+        // Re-hash password if provided
         if (!empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         } else {
             unset($data['password']);
         }
 
-        // ✅ Prevent assigning same customer to multiple online users
-        $exists = OnlineServiceUser::where('customer_id', $data['customer_id'])
-            ->where('id', '!=', $onlineClient->id)
-            ->exists();
-
-        if ($exists) {
-            return redirect()
-                ->back()
-                ->withErrors(['customer_id' => 'This customer already has another online user account.'])
-                ->withInput();
-        }
-
-        $onlineClient->update($data);
+        $onlineServiceUser->update($data);
 
         return redirect()
             ->route('online-service-users.index')
             ->with('success', 'Online client updated successfully.');
     }
 
-    public function destroy(OnlineServiceUser $onlineClient): RedirectResponse
+
+    public function destroy(OnlineServiceUser $onlineServiceUser): RedirectResponse
     {
-        $onlineClient->delete();
+        $onlineServiceUser->delete();
 
         return redirect()
             ->route('online-service-users.index')

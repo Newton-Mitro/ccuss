@@ -11,7 +11,8 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { ModalMode } from '../../../types/base_types';
-import { CustomerIntroducer } from '../../../types/customer';
+import { Customer, CustomerIntroducer } from '../../../types/customer';
+import { CustomerSearchInput } from '../customers/customer-search-input';
 
 interface Props {
     open: boolean;
@@ -22,8 +23,17 @@ interface Props {
     onSaved?: () => void;
 }
 
+const relationshipTypes = [
+    'FAMILY',
+    'FRIEND',
+    'BUSINESS',
+    'COLLEAGUE',
+    'OTHER',
+];
+
 const emptyForm = {
     introducer_customer_id: 0,
+    introducer_customer_name: '',
     introducer_account_id: 0,
     relationship_type: 'OTHER' as
         | 'FAMILY'
@@ -54,16 +64,23 @@ export default function IntroducerModal({
     useEffect(() => {
         setForm({
             introducer_customer_id: introducer?.introducer_customer_id ?? 0,
+            introducer_customer_name:
+                introducer?.introducer_customer?.name ?? '',
             introducer_account_id: introducer?.introducer_account_id ?? 0,
             relationship_type: introducer?.relationship_type ?? 'OTHER',
             remarks: introducer?.remarks ?? '',
         });
         setErrors({});
-    }, [introducer, customerId, open]);
+    }, [introducer, open]);
 
     const handleChange = <K extends keyof Form>(key: K, value: Form[K]) => {
         setForm((prev) => ({ ...prev, [key]: value }));
         setErrors((prev) => ({ ...prev, [key]: undefined }));
+    };
+
+    const handleSelectIntroducer = (customer: Customer) => {
+        handleChange('introducer_customer_id', customer.id);
+        handleChange('introducer_customer_name', customer.name);
     };
 
     const submit = async () => {
@@ -73,7 +90,10 @@ export default function IntroducerModal({
         try {
             const payload = {
                 introduced_customer_id: customerId,
-                ...form,
+                introducer_customer_id: form.introducer_customer_id,
+                introducer_account_id: form.introducer_account_id,
+                relationship_type: form.relationship_type,
+                remarks: form.remarks,
             };
 
             if (mode === 'create') {
@@ -125,22 +145,11 @@ export default function IntroducerModal({
 
                 <div className="grid grid-cols-1 gap-3">
                     <div>
-                        <Label className="text-xs">
-                            Introducer Customer ID
-                        </Label>
-                        <Input
-                            type="number"
+                        <Label className="text-xs">Introducer</Label>
+                        <CustomerSearchInput
                             disabled={isView}
-                            value={form.introducer_customer_id}
-                            onChange={(e) =>
-                                handleChange(
-                                    'introducer_customer_id',
-                                    Number(e.target.value),
-                                )
-                            }
-                            className={`h-8 text-sm ${errorClass(
-                                'introducer_customer_id',
-                            )}`}
+                            selectedCustomerId={form.introducer_customer_id}
+                            onSelect={handleSelectIntroducer}
                         />
                         {renderError('introducer_customer_id')}
                     </div>
@@ -179,11 +188,12 @@ export default function IntroducerModal({
                                 'relationship_type',
                             )}`}
                         >
-                            <option value="FAMILY">Family</option>
-                            <option value="FRIEND">Friend</option>
-                            <option value="BUSINESS">Business</option>
-                            <option value="COLLEAGUE">Colleague</option>
-                            <option value="OTHER">Other</option>
+                            {relationshipTypes.map((type) => (
+                                <option key={type} value={type}>
+                                    {type.charAt(0) +
+                                        type.slice(1).toLowerCase()}
+                                </option>
+                            ))}
                         </select>
                         {renderError('relationship_type')}
                     </div>

@@ -42,12 +42,6 @@ export const sidebarMenu: SidebarItem[] = [
                 match_path: 'customers',
             },
             {
-                name: 'Membership Mgmt.',
-                icon: <i className="fa-solid fa-id-card" />,
-                path: '/memberships',
-                match_path: 'memberships',
-            },
-            {
                 name: 'Addresses',
                 icon: <i className="fa-solid fa-map-location-dot" />,
                 path: '/addresses',
@@ -268,68 +262,36 @@ export const sidebarMenu: SidebarItem[] = [
         ],
     },
     {
+        name: 'Membership Mgmt.',
+        icon: <i className="fa-solid fa-id-card" />,
+        children: [
+            {
+                name: 'Member List',
+                icon: <i className="fa-solid fa-id-card" />,
+                path: '/member-list',
+                match_path: 'member-list',
+            },
+        ],
+    },
+    {
         name: 'Share Capital Mgmt.',
         icon: <i className="fa-solid fa-coins" />,
         children: [
             {
-                name: 'Member Contributions',
-                icon: <i className="fa-solid fa-hand-holding-dollar" />,
-                path: '/share-contributions',
-                match_path: 'share-contributions',
+                name: 'Share Accounts',
+                icon: <i className="fa-solid fa-layer-group" />,
+                match_path: '/share-capital/accounts',
+            },
+            {
+                name: 'Share Ledger',
+                icon: <i className="fa-solid fa-book" />,
+                match_path: '/share-capital/ledger',
             },
             {
                 name: 'Dividends',
                 icon: <i className="fa-solid fa-percent" />,
                 path: '/share-dividends',
                 match_path: 'share-dividends',
-            },
-        ],
-    },
-    {
-        name: 'Insurance Mgmt.',
-        icon: <i className="fa-solid fa-shield-halved" />,
-        children: [
-            {
-                name: 'Policies',
-                icon: <i className="fa-solid fa-file-invoice" />,
-                path: '/insurance-policies',
-                match_path: 'insurance-policies',
-            },
-            {
-                name: 'Claims',
-                icon: <i className="fa-solid fa-file-medical" />,
-                path: '/insurance-claims',
-                match_path: 'insurance-claims',
-            },
-        ],
-    },
-    {
-        name: 'Investments Mgmt.',
-        icon: <i className="fa-solid fa-chart-line" />,
-        children: [
-            {
-                name: 'Treasury Securities',
-                icon: <i className="fa-solid fa-landmark" />,
-                path: '/treasury-securities',
-                match_path: 'treasury-securities',
-            },
-        ],
-    },
-    {
-        name: 'Remittance / Digital Transfers',
-        icon: <i className="fa-solid fa-paper-plane" />,
-        children: [
-            {
-                name: 'Incoming Transfers',
-                icon: <i className="fa-solid fa-arrow-down" />,
-                path: '/incoming-transfers',
-                match_path: 'incoming-transfers',
-            },
-            {
-                name: 'Outgoing Transfers',
-                icon: <i className="fa-solid fa-arrow-up" />,
-                path: '/outgoing-transfers',
-                match_path: 'outgoing-transfers',
             },
         ],
     },
@@ -510,6 +472,36 @@ export const sidebarMenu: SidebarItem[] = [
         ],
     },
     {
+        name: 'Daily Transactions',
+        icon: <i className="fa-solid fa-cash-register" />,
+        children: [
+            {
+                name: 'Daily Collections',
+                icon: <i className="fa-solid fa-hand-holding-dollar" />,
+                path: '/daily-collections',
+                match_path: 'daily-collections',
+            },
+            {
+                name: 'Daily Payments',
+                icon: <i className="fa-solid fa-money-bill-transfer" />,
+                path: '/daily-payments',
+                match_path: 'daily-payments',
+            },
+            {
+                name: 'Incoming Transfers',
+                icon: <i className="fa-solid fa-right-to-bracket" />,
+                path: '/incoming-transfers',
+                match_path: 'incoming-transfers',
+            },
+            {
+                name: 'Outgoing Transfers',
+                icon: <i className="fa-solid fa-right-from-bracket" />,
+                path: '/outgoing-transfers',
+                match_path: 'outgoing-transfers',
+            },
+        ],
+    },
+    {
         name: 'Procurement Mgmt.',
         icon: <i className="fa-solid fa-sack-dollar" />,
         children: [
@@ -570,7 +562,7 @@ export const sidebarMenu: SidebarItem[] = [
         ],
     },
     {
-        name: 'HR Mgmt.',
+        name: 'Human Resource Mgmt.',
         icon: <i className="fa-solid fa-users-between-lines" />,
         children: [
             {
@@ -685,7 +677,7 @@ export const sidebarMenu: SidebarItem[] = [
     },
 
     {
-        name: 'User Auth Mgmt.',
+        name: 'User, Role & Permissions',
         icon: <i className="fa-solid fa-user-gear" />,
         children: [
             {
@@ -717,6 +709,72 @@ export const sidebarMenu: SidebarItem[] = [
                 icon: <i className="fa-solid fa-key" />,
                 path: '/users/user-permissions',
                 match_path: 'user-permissions',
+            },
+        ],
+    },
+    {
+        name: 'Alerts & Notifications',
+        icon: <i className="fa-solid fa-bell" />, // Main icon for the menu
+        children: [
+            {
+                name: 'System Alerts',
+                icon: <i className="fa-solid fa-exclamation-triangle" />,
+                path: '/system-alerts',
+                match_path: 'system-alerts',
+            },
+            {
+                name: 'User Notifications',
+                icon: <i className="fa-solid fa-envelope" />,
+                path: '/user-notifications',
+                match_path: 'user-notifications',
+            },
+            {
+                name: 'Message Center',
+                icon: <i className="fa-solid fa-comments" />,
+                path: '/message-center',
+                match_path: 'message-center',
+            },
+        ],
+    },
+    {
+        name: 'SMS & Email Queues',
+        icon: <i className="fa-solid fa-envelope-circle-check" />,
+        children: [
+            {
+                name: 'SMS Queue',
+                icon: <i className="fa-solid fa-sms" />,
+                children: [
+                    {
+                        name: 'Transaction SMS',
+                        icon: <i className="fa-solid fa-money-bill-wave" />,
+                        path: '/sms-queue/transactions',
+                        match_path: 'sms-queue/transactions',
+                    },
+                    {
+                        name: 'Account Statement SMS',
+                        icon: <i className="fa-solid fa-file-invoice-dollar" />,
+                        path: '/sms-queue/account-statements',
+                        match_path: 'sms-queue/account-statements',
+                    },
+                ],
+            },
+            {
+                name: 'Email Queue',
+                icon: <i className="fa-solid fa-envelope" />,
+                children: [
+                    {
+                        name: 'Transaction Emails',
+                        icon: <i className="fa-solid fa-money-bill" />,
+                        path: '/email-queue/transactions',
+                        match_path: 'email-queue/transactions',
+                    },
+                    {
+                        name: 'Account Statement Emails',
+                        icon: <i className="fa-solid fa-file-invoice" />,
+                        path: '/email-queue/account-statements',
+                        match_path: 'email-queue/account-statements',
+                    },
+                ],
             },
         ],
     },

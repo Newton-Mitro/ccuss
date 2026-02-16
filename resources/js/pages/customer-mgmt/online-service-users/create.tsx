@@ -12,145 +12,131 @@ import { OnlineServiceUser } from '../../../types/customer';
 import { CustomerSearchInput } from '../customers/customer-search-input';
 
 export default function CreateOnlineUser() {
-    // Form only contains real OnlineUser fields
-    const { data, setData, post, processing, errors } =
+    const { data, setData, post, processing, errors, clearErrors } =
         useForm<Partial<OnlineServiceUser | null>>(null);
-
-    // UI-only fields
     const [customerName, setCustomerName] = useState('');
+
+    // Generic handler for input/select changes with error reset
+    const handleChange =
+        (field: keyof OnlineServiceUser) =>
+        (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+            setData(field, e.target.value);
+            if (errors[field]) clearErrors(field);
+        };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         post('/online-service-users', {
             preserveScroll: true,
+            onError: () => toast.error('Please fix errors in the form.'),
             onSuccess: () => toast.success('Online user created successfully!'),
         });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Online Clients', href: '/online-service-users' },
-        { title: 'Add Online Client', href: '' },
+        { title: 'Online Service Users', href: '/online-service-users' },
+        { title: 'Add Online Service User', href: '' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Add Online Client" />
+            <Head title="Add Online Service User" />
 
-            <div className="animate-in space-y-8 text-foreground fade-in">
+            <div className="animate-in space-y-6 text-foreground fade-in">
                 <HeadingSmall
-                    title="Add Online Client"
+                    title="Add Online Service User"
                     description="Select a customer and fill in credentials, login info, and status."
                 />
 
                 <form
                     onSubmit={handleSubmit}
-                    className="space-y-6 rounded-xl border border-border bg-card/80 p-8 shadow backdrop-blur-sm transition-all duration-300"
+                    className="rounded-xl border border-border bg-card/80 p-6 shadow backdrop-blur-sm transition-all duration-300"
                 >
-                    {/* Customer Selection */}
-                    <div>
-                        <h3 className="text-lg font-semibold text-primary">
-                            Customer
-                        </h3>
-                        <div className="mt-2">
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        {/* Customer */}
+                        <div className="col-span-full">
+                            <Label>Customer</Label>
                             <CustomerSearchInput
                                 onSelect={(customer) => {
                                     setData('customer_id', customer.id);
-                                    setCustomerName(customer.name); // UI-only
+                                    setCustomerName(customer.name);
+                                    clearErrors('customer_id');
                                 }}
                             />
                         </div>
 
-                        <div className="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2">
-                            <div>
-                                <Label>Customer ID</Label>
-                                <Input
-                                    value={data.customer_id || ''}
-                                    disabled
-                                    className="h-8 text-sm"
-                                />
-                                <InputError message={errors.customer_id} />
-                            </div>
-                            <div>
-                                <Label>Customer Name</Label>
-                                <Input
-                                    value={customerName}
-                                    disabled
-                                    className="h-8 text-sm"
-                                />
-                            </div>
+                        <div>
+                            <Label>Customer ID</Label>
+                            <Input
+                                value={data.customer_id || ''}
+                                disabled
+                                className="h-8 text-sm"
+                            />
+                            <InputError message={errors.customer_id} />
                         </div>
-                    </div>
 
-                    {/* User Credentials */}
-                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                        <div>
+                            <Label>Customer Name</Label>
+                            <Input
+                                value={customerName}
+                                disabled
+                                className="h-8 text-sm"
+                            />
+                        </div>
+
+                        {/* Credentials */}
                         <div>
                             <Label>Username</Label>
                             <Input
-                                placeholder="Enter username"
+                                placeholder="Username"
                                 value={data.username || ''}
-                                onChange={(e) =>
-                                    setData('username', e.target.value)
-                                }
+                                onChange={handleChange('username')}
                                 className="h-8 text-sm"
                             />
                             <InputError message={errors.username} />
                         </div>
+
                         <div>
                             <Label>Email</Label>
                             <Input
                                 type="email"
-                                placeholder="Enter email"
+                                placeholder="Email"
                                 value={data.email || ''}
-                                onChange={(e) =>
-                                    setData('email', e.target.value)
-                                }
+                                onChange={handleChange('email')}
                                 className="h-8 text-sm"
                             />
                             <InputError message={errors.email} />
                         </div>
-                    </div>
 
-                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                         <div>
                             <Label>Phone</Label>
                             <Input
-                                placeholder="Enter phone number"
+                                placeholder="Phone"
                                 value={data.phone || ''}
-                                onChange={(e) =>
-                                    setData('phone', e.target.value)
-                                }
+                                onChange={handleChange('phone')}
                                 className="h-8 text-sm"
                             />
                             <InputError message={errors.phone} />
                         </div>
+
                         <div>
                             <Label>Password</Label>
                             <Input
                                 type="password"
-                                placeholder="Enter password"
+                                placeholder="Password"
                                 value={data.password || ''}
-                                onChange={(e) =>
-                                    setData('password', e.target.value)
-                                }
+                                onChange={handleChange('password')}
                                 className="h-8 text-sm"
                             />
                             <InputError message={errors.password} />
                         </div>
-                    </div>
 
-                    {/* Status & Last Login */}
-                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                        {/* Status */}
                         <div>
                             <Label>Status</Label>
                             <select
                                 value={data.status}
-                                onChange={(e) =>
-                                    setData(
-                                        'status',
-                                        e.target
-                                            .value as OnlineServiceUser['status'],
-                                    )
-                                }
+                                onChange={handleChange('status')}
                                 className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                             >
                                 <option value="ACTIVE">Active</option>
@@ -161,12 +147,12 @@ export default function CreateOnlineUser() {
                         </div>
                     </div>
 
-                    {/* Submit Button */}
-                    <div className="flex justify-end pt-4">
+                    {/* Submit */}
+                    <div className="flex justify-end pt-3">
                         <Button
                             type="submit"
                             disabled={processing}
-                            className="w-40 bg-primary text-primary-foreground transition-all duration-300 hover:bg-primary/90 hover:shadow-md"
+                            className="w-36 bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-md"
                         >
                             {processing ? 'Saving...' : 'Save User'}
                         </Button>

@@ -1,5 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
-import React from 'react';
+import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
@@ -12,24 +12,44 @@ import { OnlineServiceUser } from '../../../types/customer';
 import { CustomerSearchInput } from '../customers/customer-search-input';
 
 interface EditOnlineUserProps {
-    onlineClient: OnlineServiceUser;
+    onlineServiceUser: OnlineServiceUser;
 }
 
-export default function EditOnlineUser({ onlineClient }: EditOnlineUserProps) {
-    console.log(onlineClient);
-    const { data, setData, put, processing, errors } = useForm({
-        customer_id: onlineClient.customer_id || '',
-        customer_name: onlineClient?.customer?.name || '',
-        username: onlineClient.username || '',
-        email: onlineClient.email || '',
-        phone: onlineClient.phone || '',
+export default function EditOnlineUser({
+    onlineServiceUser,
+}: EditOnlineUserProps) {
+    const { data, setData, put, processing, errors, clearErrors } = useForm({
+        customer_id: onlineServiceUser.customer_id || '',
+        customer_name: onlineServiceUser.customer?.name || '',
+        username: onlineServiceUser.username || '',
+        email: onlineServiceUser.email || '',
+        phone: onlineServiceUser.phone || '',
         password: '',
+        status: onlineServiceUser.status || 'ACTIVE',
     });
+
+    const [customerName, setCustomerName] = useState(data.customer_name || '');
+
+    // Generic handler for input/select changes with immediate error reset
+    const handleChange =
+        (field: keyof OnlineServiceUser) =>
+        (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+            setData(field, e.target.value);
+            if (errors[field]) clearErrors(field);
+        };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        put(`/online-service-users/${onlineClient.id}`, {
+
+        // Frontend validation: either email or phone required
+        if (!data.email && !data.phone) {
+            toast.error('Either email or phone must be provided.');
+            return;
+        }
+
+        put(`/online-service-users/${onlineServiceUser.id}`, {
             preserveScroll: true,
+            onError: () => toast.error('Please fix errors in the form.'),
             onSuccess: () => toast.success('Online user updated successfully!'),
         });
     };
@@ -43,7 +63,7 @@ export default function EditOnlineUser({ onlineClient }: EditOnlineUserProps) {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Edit Online Client" />
 
-            <div className="animate-in space-y-8 text-foreground fade-in">
+            <div className="animate-in space-y-6 text-foreground fade-in">
                 <HeadingSmall
                     title="Edit Online Client"
                     description="Update customer account information, login credentials, and contact details."
@@ -51,108 +71,109 @@ export default function EditOnlineUser({ onlineClient }: EditOnlineUserProps) {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="space-y-5 rounded-xl border border-border bg-card/80 p-8 shadow backdrop-blur-sm transition-all duration-300"
+                    className="rounded-xl border border-border bg-card/90 p-6 shadow backdrop-blur-sm transition-all duration-300"
                 >
-                    {/* Customer Selection */}
-                    <div>
-                        <h3 className="text-lg font-semibold text-primary">
-                            Linked Customer
-                        </h3>
-                        <div className="mt-2">
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        {/* Customer Selection */}
+                        <div className="col-span-full">
+                            <Label>Linked Customer</Label>
                             <CustomerSearchInput
                                 onSelect={(customer) => {
                                     setData('customer_id', customer.id);
-                                    setData('customer_name', customer.name);
+                                    setCustomerName(customer.name);
+                                    clearErrors('customer_id');
                                 }}
                             />
                         </div>
 
-                        <div className="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2">
-                            <div>
-                                <Label>Customer ID</Label>
-                                <Input
-                                    value={data.customer_id}
-                                    disabled
-                                    className="h-8 text-sm"
-                                />
-                                <InputError message={errors.customer_id} />
-                            </div>
-                            <div>
-                                <Label>Customer Name</Label>
-                                <Input
-                                    value={data.customer_name}
-                                    disabled
-                                    className="h-8 text-sm"
-                                />
-                            </div>
+                        <div>
+                            <Label>Customer ID</Label>
+                            <Input
+                                value={data.customer_id}
+                                disabled
+                                className="h-8 text-sm"
+                            />
+                            <InputError message={errors.customer_id} />
                         </div>
-                    </div>
 
-                    {/* Account Info */}
-                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                        <div>
+                            <Label>Customer Name</Label>
+                            <Input
+                                value={customerName}
+                                disabled
+                                className="h-8 text-sm"
+                            />
+                        </div>
+
+                        {/* Credentials */}
                         <div>
                             <Label>Username</Label>
                             <Input
-                                type="text"
+                                placeholder="Username"
                                 value={data.username}
-                                onChange={(e) =>
-                                    setData('username', e.target.value)
-                                }
+                                onChange={handleChange('username')}
                                 className="h-8 text-sm"
-                                placeholder="Enter username"
                             />
                             <InputError message={errors.username} />
                         </div>
+
                         <div>
                             <Label>Email</Label>
                             <Input
                                 type="email"
+                                placeholder="Email"
                                 value={data.email}
-                                onChange={(e) =>
-                                    setData('email', e.target.value)
-                                }
+                                onChange={handleChange('email')}
                                 className="h-8 text-sm"
-                                placeholder="Enter email address"
                             />
                             <InputError message={errors.email} />
                         </div>
-                    </div>
 
-                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                         <div>
                             <Label>Phone</Label>
                             <Input
-                                type="text"
+                                placeholder="Phone"
                                 value={data.phone}
-                                onChange={(e) =>
-                                    setData('phone', e.target.value)
-                                }
+                                onChange={handleChange('phone')}
                                 className="h-8 text-sm"
-                                placeholder="Enter phone number"
                             />
                             <InputError message={errors.phone} />
                         </div>
+
                         <div>
                             <Label>New Password</Label>
                             <Input
                                 type="password"
-                                value={data.password}
-                                onChange={(e) =>
-                                    setData('password', e.target.value)
-                                }
-                                className="h-8 text-sm"
                                 placeholder="Leave blank to keep current password"
+                                value={data.password}
+                                onChange={handleChange('password')}
+                                className="h-8 text-sm"
                             />
                             <InputError message={errors.password} />
                         </div>
+
+                        {/* Status */}
+                        <div>
+                            <Label>Status</Label>
+                            <select
+                                value={data.status}
+                                onChange={handleChange('status')}
+                                className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                            >
+                                <option value="ACTIVE">Active</option>
+                                <option value="SUSPENDED">Suspended</option>
+                                <option value="CLOSED">Closed</option>
+                            </select>
+                            <InputError message={errors.status} />
+                        </div>
                     </div>
 
-                    {/* Submit Button */}
-                    <div className="flex justify-end pt-4">
+                    {/* Submit */}
+                    <div className="flex justify-end pt-3">
                         <Button
                             type="submit"
                             disabled={processing}
-                            className="w-48 bg-primary text-primary-foreground transition-all duration-300 hover:bg-primary/90 hover:shadow-md"
+                            className="w-36 bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-md"
                         >
                             {processing
                                 ? 'Updating...'

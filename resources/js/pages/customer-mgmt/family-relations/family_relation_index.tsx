@@ -5,7 +5,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Trash2, UserCheck2 } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
@@ -14,7 +14,7 @@ import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { CustomerFamilyRelation } from '../../../types/customer';
 
-export default function Index() {
+export default function FamilyRelationIndex() {
     const { props } = usePage<
         SharedData & {
             familyRelations: {
@@ -85,11 +85,13 @@ export default function Index() {
                         description="Manage family and relative relationships."
                     />
                     <Link
-                        href="/family-relations/create"
-                        className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                        href="/family-relations/customer"
+                        className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition hover:bg-primary/90"
                     >
-                        <Plus className="h-4 w-4" />
-                        Customer Family Relations
+                        <UserCheck2 className="h-4 w-4" />
+                        <span className="hidden sm:inline">
+                            Customer Family Relations
+                        </span>
                     </Link>
                 </div>
 
@@ -168,20 +170,6 @@ export default function Index() {
                                                         </TooltipTrigger>
                                                         <TooltipContent>
                                                             View
-                                                        </TooltipContent>
-                                                    </Tooltip>
-
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <Link
-                                                                href={`/family-relations/${f.id}/edit`}
-                                                                className="text-green-600 hover:text-green-500"
-                                                            >
-                                                                <Pencil className="h-5 w-5" />
-                                                            </Link>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                            Edit
                                                         </TooltipContent>
                                                     </Tooltip>
 

@@ -168,7 +168,7 @@ export default function Index() {
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
                                                         <Link
-                                                            href={`/addresses/get/${a.id}`}
+                                                            href={`/addresses/${a.id}`}
                                                             className="text-primary"
                                                         >
                                                             <Eye className="h-5 w-5" />

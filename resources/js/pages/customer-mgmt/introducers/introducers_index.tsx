@@ -5,7 +5,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Eye, Trash2, UserPlus } from 'lucide-react';
+import { Eye, Trash2, Users } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
@@ -84,11 +84,13 @@ export default function IntroducersIndex() {
                         description="Manage customer introducers."
                     />
                     <Link
-                        href="/introducers/create"
-                        className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground hover:bg-primary/90"
+                        href="/introducers/customer"
+                        className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition hover:bg-primary/90"
                     >
-                        <UserPlus className="h-4 w-4" />
-                        Add Introducer
+                        <Users className="h-4 w-4" />
+                        <span className="hidden sm:inline">
+                            Customer Introducers
+                        </span>
                     </Link>
                 </div>
 

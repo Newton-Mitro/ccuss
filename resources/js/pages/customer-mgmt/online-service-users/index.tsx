@@ -76,24 +76,24 @@ export default function Index() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Online Clients', href: '/online-service-users' },
+        { title: 'Online Service Users', href: '/online-service-users' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Online Clients" />
+            <Head title="Online Service Users" />
             <div className="space-y-4 text-foreground">
                 {/* Header */}
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
-                        title="Online Clients"
+                        title="Online Service Users"
                         description="Manage customer online access accounts."
                     />
                     <Link
                         href="/online-service-users/create"
                         className="inline-block rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                     >
-                        Add Online Client
+                        Add Online Service User
                     </Link>
                 </div>
 

@@ -12,7 +12,7 @@ import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-import { Customer, CustomerIntroducer } from '../../../types/customer';
+import { CustomerIntroducer } from '../../../types/customer';
 
 import { ModalMode } from '../../../types/base_types';
 import { CustomerSearchBox } from '../customers/customer-search-box';
@@ -25,7 +25,7 @@ import { confirmDelete } from './utils/confirmDelete';
  * =======================================================*/
 export default function CustomerIntroducers() {
     /* ----------------------------- Form ----------------------------- */
-    const { data, setData } = useForm<Customer | null>(null);
+    const { data, setData } = useForm<CustomerIntroducer | null>(null);
 
     /* ----------------------------- State ----------------------------- */
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -112,60 +112,93 @@ export default function CustomerIntroducers() {
                 {/* ================= Introducer List ================= */}
                 {introducers.length ? (
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                        {introducers.map((intro, index) => (
+                        {introducers.map((intro) => (
                             <div
                                 key={intro.id}
-                                className="rounded-md border bg-card p-3"
+                                className="flex items-center justify-center gap-3 rounded-md border bg-card p-3"
                             >
-                                <div className="flex items-start justify-between">
-                                    <div className="space-y-1 text-sm">
-                                        <p className="font-semibold">
-                                            {index + 1}.{' '}
-                                            {intro.introducer_customer?.name ??
-                                                '—'}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">
-                                            {intro.relationship_type} |{' '}
+                                {/* Photo */}
+                                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border bg-muted">
+                                    {intro.introducer_customer?.photo?.url ? (
+                                        <img
+                                            src={
+                                                intro.introducer_customer.photo
+                                                    .url
+                                            }
+                                            alt={intro.introducer_customer.name}
+                                            className="h-full w-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
+                                            {intro.introducer_customer?.name?.charAt(
+                                                0,
+                                            ) ?? '-'}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Info */}
+                                <div className="flex-1 space-y-1 text-sm">
+                                    <p className="font-semibold">
+                                        {intro.introducer_customer?.name ?? '—'}
+                                    </p>
+
+                                    <div className="flex flex-wrap gap-1">
+                                        <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+                                            {intro.relationship_type?.replace(
+                                                '_',
+                                                ' ',
+                                            )}
+                                        </span>
+                                        <span
+                                            className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                                                intro.verification_status ===
+                                                'VERIFIED'
+                                                    ? 'bg-green-100 text-green-800'
+                                                    : intro.verification_status ===
+                                                        'REJECTED'
+                                                      ? 'bg-red-100 text-red-800'
+                                                      : 'bg-yellow-100 text-yellow-800'
+                                            }`}
+                                        >
                                             {intro.verification_status}
-                                        </p>
-                                        {intro.remarks && (
-                                            <p className="text-xs text-muted-foreground">
-                                                {intro.remarks}
-                                            </p>
-                                        )}
+                                        </span>
                                     </div>
 
-                                    <TooltipProvider>
-                                        <div className="flex gap-2">
-                                            <Action
-                                                label="View"
-                                                onClick={() =>
-                                                    openViewModal(intro)
-                                                }
-                                            >
-                                                <Eye className="h-5 w-5 text-primary" />
-                                            </Action>
-
-                                            <Action
-                                                label="Edit"
-                                                onClick={() =>
-                                                    openEditModal(intro)
-                                                }
-                                            >
-                                                <Pencil className="h-5 w-5 text-green-600" />
-                                            </Action>
-
-                                            <Action
-                                                label="Delete"
-                                                onClick={() =>
-                                                    handleDelete(intro.id)
-                                                }
-                                            >
-                                                <Trash2 className="h-5 w-5 text-destructive" />
-                                            </Action>
-                                        </div>
-                                    </TooltipProvider>
+                                    {intro.remarks && (
+                                        <p className="text-xs text-muted-foreground">
+                                            {intro.remarks}
+                                        </p>
+                                    )}
                                 </div>
+
+                                {/* Actions */}
+                                <TooltipProvider>
+                                    <div className="flex gap-2">
+                                        <Action
+                                            label="View"
+                                            onClick={() => openViewModal(intro)}
+                                        >
+                                            <Eye className="h-5 w-5 text-primary" />
+                                        </Action>
+
+                                        <Action
+                                            label="Edit"
+                                            onClick={() => openEditModal(intro)}
+                                        >
+                                            <Pencil className="h-5 w-5 text-green-600" />
+                                        </Action>
+
+                                        <Action
+                                            label="Delete"
+                                            onClick={() =>
+                                                handleDelete(intro.id)
+                                            }
+                                        >
+                                            <Trash2 className="h-5 w-5 text-destructive" />
+                                        </Action>
+                                    </div>
+                                </TooltipProvider>
                             </div>
                         ))}
                     </div>

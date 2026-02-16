@@ -44,8 +44,33 @@ Route::middleware(['auth', 'verified'])
 
 Route::middleware(['auth', 'verified'])
     ->group(function () {
-        Route::resource('family-relations', CustomerFamilyRelationController::class);
+
+        // 📄 Inertia pages
+        Route::get('/family-relations', [CustomerFamilyRelationController::class, 'index'])
+            ->name('family-relations.index');
+
+        Route::get('/family-relations/customer', [CustomerFamilyRelationController::class, 'customerRelations'])
+            ->name('family-relations.customer');
+
+        Route::get('/family-relations/{familyRelation}', [CustomerFamilyRelationController::class, 'show'])
+            ->name('family-relations.show');
+
+        // 🔄 AJAX / API endpoints
+        Route::get(
+            '/api/family-relations/by-customer',
+            [CustomerFamilyRelationController::class, 'getCustomerRelations']
+        )->name('family-relations.by-customer');
+
+        Route::post('/family-relations', [CustomerFamilyRelationController::class, 'store'])
+            ->name('family-relations.store');
+
+        Route::put('/family-relations/{familyRelation}', [CustomerFamilyRelationController::class, 'update'])
+            ->name('family-relations.update');
+
+        Route::delete('/family-relations/{familyRelation}', [CustomerFamilyRelationController::class, 'destroy'])
+            ->name('family-relations.destroy');
     });
+
 
 Route::middleware(['auth', 'verified'])
     ->group(function () {
@@ -67,31 +92,35 @@ Route::middleware(['auth', 'verified'])
         )->name('customer.signature.destroy');
     });
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
+
+    // 📄 Inertia pages
+    Route::get('/introducers', [CustomerIntroducerController::class, 'index'])
+        ->name('introducers.index');
+
+    Route::get('/introducers/customer', [CustomerIntroducerController::class, 'customerIntroducers'])
+        ->name('introducers.customer');
+
+    Route::get('/introducers/{customerIntroducer}', [CustomerIntroducerController::class, 'show'])
+        ->name('introducers.show');
+
+    // 🔄 AJAX / API endpoints
     Route::get(
-        '/introducers',
-        [CustomerIntroducerController::class, 'index']
-    )->name('customers.introducers.index');
+        '/api/introducers/by-customer',
+        [CustomerIntroducerController::class, 'getCustomerIntroducers']
+    )->name('introducers.by-customer');
 
-    Route::post(
-        '/introducers',
-        [CustomerIntroducerController::class, 'store']
-    )->name('customers.introducers.store');
+    Route::post('/introducers', [CustomerIntroducerController::class, 'store'])
+        ->name('introducers.store');
 
-    Route::put(
-        '/introducers/{customerIntroducer}',
-        [CustomerIntroducerController::class, 'update']
-    )->name('customers.introducers.update');
+    Route::put('/introducers/{customerIntroducer}', [CustomerIntroducerController::class, 'update'])
+        ->name('introducers.update');
 
-    Route::post(
-        '/introducers/{customerIntroducer}/verify',
-        [CustomerIntroducerController::class, 'verify']
-    )->name('customers.introducers.verify');
+    Route::put('/introducers/{customerIntroducer}/verify', [CustomerIntroducerController::class, 'verify'])
+        ->name('introducers.verify');
 
-    Route::delete(
-        '/introducers/{customerIntroducer}',
-        [CustomerIntroducerController::class, 'destroy']
-    )->name('customers.introducers.destroy');
+    Route::delete('/introducers/{customerIntroducer}', [CustomerIntroducerController::class, 'destroy'])
+        ->name('introducers.destroy');
 });
 
 

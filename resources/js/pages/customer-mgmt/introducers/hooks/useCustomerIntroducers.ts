@@ -10,13 +10,10 @@ export function useCustomerIntroducers() {
     const fetchIntroducers = async (customerId: number) => {
         try {
             setLoading(true);
-            const { data } = await axios.get(
-                '/introducers/get-customer-introducers',
-                {
-                    params: { customer_id: customerId },
-                    withCredentials: true,
-                },
-            );
+            const { data } = await axios.get('/api/introducers/by-customer', {
+                params: { customer_id: customerId },
+                withCredentials: true,
+            });
             setIntroducers(data ?? []);
         } catch {
             toast.error('Failed to fetch introducers');

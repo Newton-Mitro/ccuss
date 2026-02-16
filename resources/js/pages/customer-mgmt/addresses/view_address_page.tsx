@@ -28,82 +28,93 @@ export default function ViewAddress({ address }: Props) {
                     description="View detailed information about this address."
                 />
 
-                <section className="rounded-md border bg-card p-4">
-                    <div className="mb-4 flex items-center gap-2 text-sm font-semibold">
-                        <HomeIcon size={16} />
-                        <span>Address Information</span>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                        <Info label="Address Line 1" value={address.line1} />
-                        <Info label="Address Line 2" value={address.line2} />
-                        <Info label="Division" value={address.division} />
-                        <Info label="District" value={address.district} />
-                        <Info label="Upazila" value={address.upazila} />
-                        <Info label="Union/Ward" value={address.union_ward} />
-                        <Info label="Postal Code" value={address.postal_code} />
-                        <Info label="Country" value={address.country} />
-                        <Info label="Type" value={address.type} />
-                        <Info
-                            label="Verification Status"
-                            value={address.verification_status}
-                        />
-                        <Info label="Remarks" value={address.remarks} />
-                    </div>
-                </section>
-
-                <section className="rounded-md border bg-card p-4">
-                    <div className="mb-4 flex items-center gap-2 text-sm font-semibold">
-                        <UserIcon size={16} />
-                        <span>Customer Info</span>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                        <Info
-                            label="Customer Name"
-                            value={
-                                address.customer ? (
-                                    <Link
-                                        href={`/customers/${address.customer.id}`}
-                                        className="text-primary underline"
-                                    >
-                                        {address.customer.name}
-                                    </Link>
+                <section className="space-y-6 rounded-md border bg-card p-4">
+                    <div className="">
+                        <div className="mb-4 flex items-center gap-2 text-sm font-semibold">
+                            <UserIcon size={16} />
+                            <span>Customer Info</span>
+                        </div>
+                        <div className="mt-3 flex items-center gap-4">
+                            <div className="h-20 w-20 overflow-hidden rounded-full border bg-muted">
+                                {address.customer?.photo?.url ? (
+                                    <img
+                                        src={address.customer?.photo.url}
+                                        alt={address.customer?.name}
+                                        className="h-full w-full object-cover"
+                                    />
                                 ) : (
-                                    '—'
-                                )
-                            }
-                        />
-                        <Info
-                            label="Customer ID"
-                            value={address.customer?.id?.toString() || '—'}
-                        />
-                        <Info
-                            label="Customer No"
-                            value={address.customer?.customer_no || '—'}
-                        />
-                        <Info
-                            label="Customer Type"
-                            value={address.customer?.type || '—'}
-                        />
-                        <Info
-                            label="Email"
-                            value={address.customer?.email || '—'}
-                        />
-                        <Info
-                            label="Phone"
-                            value={address.customer?.phone || '—'}
-                        />
-                        <Info
-                            label="Identification Type"
-                            value={address.customer?.identification_type || '—'}
-                        />
-                        <Info
-                            label="Identification Number"
-                            value={
-                                address.customer?.identification_number || '—'
-                            }
-                        />
+                                    <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
+                                        {address.customer?.name.charAt(0)}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex-1 space-y-2">
+                                <div>
+                                    <Info
+                                        label=""
+                                        value={
+                                            address.customer ? (
+                                                <Link
+                                                    href={`/customers/${address.customer.id}`}
+                                                    className="text-primary underline"
+                                                >
+                                                    {address.customer.name}
+                                                </Link>
+                                            ) : (
+                                                '—'
+                                            )
+                                        }
+                                    />
+                                    <p className="text-xs text-muted-foreground">
+                                        {address.customer?.type} •{' '}
+                                        {address.customer?.status}
+                                    </p>
+                                    <div className="text-xs text-muted-foreground">
+                                        {address.customer?.id} •{' '}
+                                        {address.customer?.customer_no} •{' '}
+                                        {address.customer?.email} •{' '}
+                                        {address.customer?.phone}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="">
+                        <div className="mb-4 flex items-center gap-2 text-sm font-semibold">
+                            <HomeIcon size={16} />
+                            <span>Address Information</span>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                            <Info
+                                label="Address Line 1"
+                                value={address.line1}
+                            />
+                            <Info
+                                label="Address Line 2"
+                                value={address.line2}
+                            />
+                            <Info label="Division" value={address.division} />
+                            <Info label="District" value={address.district} />
+                            <Info label="Upazila" value={address.upazila} />
+                            <Info
+                                label="Union/Ward"
+                                value={address.union_ward}
+                            />
+                            <Info
+                                label="Postal Code"
+                                value={address.postal_code}
+                            />
+                            <Info label="Country" value={address.country} />
+                            <Info label="Type" value={address.type} />
+                            <Info
+                                label="Verification Status"
+                                value={address.verification_status}
+                            />
+                            <Info label="Remarks" value={address.remarks} />
+                        </div>
                     </div>
                 </section>
             </div>
