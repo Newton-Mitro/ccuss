@@ -156,7 +156,8 @@ class CustomerController extends Controller
             'photo',                 // Customer photo
             'addresses',             // Customer addresses
             'familyRelations',       // Family relations
-            'introducers',           // Introducer info
+            'introducers.introducerCustomer',   // The introducer customer
+            'introducers.introducedCustomer',   // The customer who was introduced
         ]);
 
         return Inertia::render('customer-mgmt/customers/show', [
