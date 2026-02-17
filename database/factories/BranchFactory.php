@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Branch\Models\Branch;
-use App\Models\User;
+use App\UserRolePermissions\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class BranchFactory extends Factory

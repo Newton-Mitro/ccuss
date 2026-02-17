@@ -2,15 +2,14 @@ import { Head, Link, router } from '@inertiajs/react';
 import {
     ArrowLeft,
     Edit2,
+    EyeClosed,
     HomeIcon,
     ListFilter,
-    Trash2,
     UserCheckIcon,
     UserIcon,
     UsersIcon,
+    X,
 } from 'lucide-react';
-import toast from 'react-hot-toast';
-import Swal from 'sweetalert2';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatDate } from '../../../lib/date_util';
 import { BreadcrumbItem } from '../../../types';
@@ -41,38 +40,6 @@ function Show({ customer, backUrl }: ShowProps) {
 
     const isIndividual = customer.type === 'Individual';
     const isOrganization = customer.type === 'Organization';
-
-    const handleDelete = (id: number, name: string) => {
-        const isDark = document.documentElement.classList.contains('dark');
-
-        Swal.fire({
-            title: 'Are you sure?',
-            text: `Customer "${name}" will be permanently deleted!`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: isDark ? '#ef4444' : '#d33',
-            cancelButtonColor: isDark ? '#3b82f6' : '#3085d6',
-            background: isDark ? '#1f2937' : '#fff',
-            color: isDark ? '#f9fafb' : '#111827',
-            confirmButtonText: 'Yes, delete it!',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                router.delete(`/customers/${id}`, {
-                    preserveScroll: true,
-                    preserveState: true,
-                    onSuccess: () => {
-                        toast.success(
-                            `Customer "${name}" deleted successfully!`,
-                        );
-                    },
-                    onError: (errors) => {
-                        toast.error('Failed to delete the customer.');
-                        console.error(errors);
-                    },
-                });
-            }
-        });
-    };
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
@@ -127,13 +94,20 @@ function Show({ customer, backUrl }: ShowProps) {
 
                         <button
                             type="button"
-                            onClick={() =>
-                                handleDelete(customer.id, customer.name)
-                            }
                             className="flex items-center gap-1 rounded bg-destructive px-3 py-1 text-destructive-foreground transition hover:bg-destructive/90"
                         >
-                            <Trash2 size={16} />
-                            <span className="hidden sm:inline">Delete</span>
+                            <EyeClosed size={16} />
+                            <span className="hidden sm:inline">Suspend</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            className="flex items-center gap-1 rounded bg-destructive px-3 py-1 text-destructive-foreground transition hover:bg-destructive/90"
+                        >
+                            <X size={16} />
+                            <span className="hidden sm:inline">
+                                Close Account
+                            </span>
                         </button>
 
                         <Link

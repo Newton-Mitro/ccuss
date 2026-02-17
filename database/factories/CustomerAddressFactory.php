@@ -21,7 +21,7 @@ class CustomerAddressFactory extends Factory
             'upazila' => $this->faker->citySuffix(),
             'union_ward' => $this->faker->word(),
             'postal_code' => $this->faker->postcode(),
-            'country' => 'BD',
+            'country' => 'Bangladesh',
             'type' => $this->faker->randomElement([
                 'CURRENT',
                 'PERMANENT',

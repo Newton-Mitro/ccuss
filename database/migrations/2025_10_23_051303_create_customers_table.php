@@ -40,9 +40,6 @@ return new class extends Migration {
             $table->enum('kyc_level', ['MIN', 'STD', 'ENH'])->default('MIN');
             $table->enum('kyc_status', ['PENDING', 'VERIFIED', 'REJECTED'])->default('PENDING');
 
-            $table->foreignId('kyc_verified_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamp('kyc_verified_at')->nullable();
-
             $table->enum('status', ['PENDING', 'ACTIVE', 'SUSPENDED', 'CLOSED'])->default('PENDING');
 
             // Audit
@@ -159,6 +156,12 @@ return new class extends Migration {
 
             // Prevent duplicate linkage
             $table->unique(['customer_id', 'relative_id'], 'uq_customer_relative');
+
+            // Verification
+            $table->enum('verification_status', ['PENDING', 'VERIFIED', 'REJECTED'])->default('PENDING');
+            $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('verified_at')->nullable();
+            $table->text('remarks')->nullable();
 
             // Audit
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
@@ -305,7 +308,7 @@ return new class extends Migration {
             $table->string('password', 255);
 
             $table->timestamp('last_login_at')->nullable();
-            $table->enum('status', ['ACTIVE', 'SUSPENDED', 'CLOSED'])->default('ACTIVE');
+            $table->enum('status', ['PENDING', 'ACTIVE', 'SUSPENDED', 'CLOSED'])->default('ACTIVE');
 
             // Audit
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();

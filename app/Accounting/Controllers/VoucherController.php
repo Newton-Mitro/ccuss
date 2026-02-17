@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Accounting\Voucher\Controllers;
+namespace App\Accounting\Controllers;
 
-use App\Accounting\Voucher\Models\JournalEntry;
+use App\Accounting\Models\Voucher;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
-class JournalEntryController extends Controller
+class VoucherController extends Controller
 {
 
     public function index(Request $request)
@@ -18,7 +18,7 @@ class JournalEntryController extends Controller
         $search = $request->input('search');
         $txCode = $request->input('tx_code'); // optional filter for transaction type/code
 
-        $query = JournalEntry::with('lines');
+        $query = Voucher::with('lines');
 
         // 🔍 Search filter
         if (!empty($search)) {
@@ -96,7 +96,7 @@ class JournalEntryController extends Controller
             case 'journal':
                 $rules = array_merge($rules, [
                     'rows' => 'required|array|min:2',
-                    'rows.*.gl_account_id' => 'required|integer|exists:gl_accounts,id',
+                    'rows.*.account_id' => 'required|integer|exists:gl_accounts,id',
                     'rows.*.debit' => 'nullable|numeric|min:0',
                     'rows.*.credit' => 'nullable|numeric|min:0',
                     'rows.*.subledger_type' => 'nullable|string',
@@ -109,7 +109,7 @@ class JournalEntryController extends Controller
 
         $data = $request->validate($rules);
 
-        $journalEntry = JournalEntry::create([
+        $journalEntry = Voucher::create([
             'tx_code' => strtoupper($type),
             'tx_ref' => $request->voucher_no,
             'posted_at' => $request->date,
@@ -121,7 +121,7 @@ class JournalEntryController extends Controller
         if ($type === 'journal' && isset($data['rows'])) {
             foreach ($data['rows'] as $row) {
                 $journalEntry->lines()->create([
-                    'gl_account_id' => $row['gl_account_id'],
+                    'account_id' => $row['account_id'],
                     'debit' => $row['debit'] ?? 0,
                     'credit' => $row['credit'] ?? 0,
                     'subledger_type' => $row['subledger_type'] ?? null,
@@ -136,14 +136,14 @@ class JournalEntryController extends Controller
             ->with('success', ucfirst($type) . ' voucher created successfully.');
     }
 
-    public function show(JournalEntry $voucher)
+    public function show(Voucher $voucher)
     {
         return Inertia::render('accounting/vouchers/show', [
             'voucher' => $voucher->load('lines'),
         ]);
     }
 
-    public function edit(JournalEntry $voucher)
+    public function edit(Voucher $voucher)
     {
         return Inertia::render('accounting/vouchers/edit', [
             'voucher' => $voucher->load('lines'),
@@ -151,7 +151,7 @@ class JournalEntryController extends Controller
         ]);
     }
 
-    public function update(Request $request, JournalEntry $voucher)
+    public function update(Request $request, Voucher $voucher)
     {
         $data = $request->validate([
             'narration' => 'nullable|string',
@@ -167,7 +167,7 @@ class JournalEntryController extends Controller
             ->with('success', 'Voucher updated successfully.');
     }
 
-    public function destroy(JournalEntry $voucher)
+    public function destroy(Voucher $voucher)
     {
         $voucher->delete();
 

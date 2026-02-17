@@ -44,6 +44,7 @@ class CustomerFamilyRelationFactory extends Factory
                 'BROTHER_IN_LAW',
                 'SISTER_IN_LAW'
             ]),
+            'verification_status' => 'PENDING',
         ];
     }
 }

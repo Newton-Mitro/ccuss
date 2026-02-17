@@ -1,5 +1,12 @@
 import { Head, Link } from '@inertiajs/react';
-import { HomeIcon, UserIcon } from 'lucide-react';
+import {
+    Edit2,
+    EyeClosed,
+    HomeIcon,
+    ListFilter,
+    UserIcon,
+    X,
+} from 'lucide-react';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
@@ -23,10 +30,50 @@ export default function ViewIntroducer({ introducer }: Props) {
             <Head title={`Introducer #${introducer.id}`} />
 
             <div className="space-y-4 p-2">
-                <HeadingSmall
-                    title="Introducer Details"
-                    description="View detailed information about this introducer."
-                />
+                <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <HeadingSmall
+                        title="Introducer Details"
+                        description="View detailed information about this introducer."
+                    />
+
+                    <div className="flex gap-2">
+                        <Link
+                            href={`/introducers/${introducer.id}/edit`}
+                            className="flex items-center gap-1 rounded bg-accent px-3 py-1 text-accent-foreground transition hover:bg-accent/90"
+                        >
+                            <Edit2 size={16} />
+                            <span className="hidden sm:inline">Edit</span>
+                        </Link>
+
+                        <button
+                            type="button"
+                            className="flex items-center gap-1 rounded bg-destructive px-3 py-1 text-destructive-foreground transition hover:bg-destructive/90"
+                        >
+                            <EyeClosed size={16} />
+                            <span className="hidden sm:inline">Suspend</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            className="flex items-center gap-1 rounded bg-destructive px-3 py-1 text-destructive-foreground transition hover:bg-destructive/90"
+                        >
+                            <X size={16} />
+                            <span className="hidden sm:inline">
+                                Close Account
+                            </span>
+                        </button>
+
+                        <Link
+                            href={`/introducers`}
+                            className="flex items-center gap-1 rounded bg-secondary px-3 py-1 text-secondary-foreground transition hover:bg-secondary/90"
+                        >
+                            <ListFilter size={16} />
+                            <span className="hidden sm:inline">
+                                Introducers
+                            </span>
+                        </Link>
+                    </div>
+                </div>
 
                 {/* Introducer Information */}
                 <section className="space-y-10 rounded-md border bg-card p-6">

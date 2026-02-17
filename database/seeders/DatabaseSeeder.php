@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\UserRolePermissions\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -32,11 +32,10 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             PermissionSeeder::class,
-            ImageMediaSeeder::class,
             BranchSeeder::class,
             CustomerSeeder::class,
-            GlAccountSeeder::class,
-            JournalEntrySeeder::class,
+            AccountSeeder::class,
+            VoucherEntrySeeder::class,
         ]);
 
     }

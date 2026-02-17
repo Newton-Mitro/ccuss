@@ -20,7 +20,7 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 
-// 🧩 DnD imports
+// DnD imports
 import {
     DndContext,
     closestCenter,
@@ -38,39 +38,34 @@ const TYPE_COLORS = {
     EXPENSE: 'bg-yellow-100 text-yellow-800',
 };
 
-/* ----------------- DND COMPONENTS ----------------- */
+// Draggable leaf account
 function DraggableItem({ id, children }) {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
         id,
     });
-
-    const style = {
-        transform: CSS.Translate.toString(transform),
-    };
-
     return (
-        <div ref={setNodeRef} style={style}>
-            {children({ listeners, attributes })}
+        <div
+            ref={setNodeRef}
+            style={{ transform: CSS.Translate.toString(transform) }}
+        >
+            {children({ attributes, listeners })}
         </div>
     );
 }
 
+// Droppable group (control account)
 function DroppableGroup({ id, children }) {
     const { setNodeRef, isOver } = useDroppable({ id });
-
     return (
         <div
             ref={setNodeRef}
-            className={`rounded-lg transition ${
-                isOver ? 'border border-primary bg-primary/10' : ''
-            }`}
+            className={`rounded-lg transition ${isOver ? 'border border-primary bg-primary/10' : ''}`}
         >
             {children}
         </div>
     );
 }
 
-/* ----------------- MAIN PAGE ----------------- */
 export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
     const [expandedIds, setExpandedIds] = useState([]);
     const [modalOpen, setModalOpen] = useState(false);
@@ -81,9 +76,10 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
         name: '',
         type: '',
         parent_id: '',
-        category: 'GL',
+        is_control_account: false,
     });
 
+    // Flash messages
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
         if (flash?.error) toast.error(flash.error);
@@ -98,11 +94,9 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
                 name: account.name,
                 type: account.type,
                 parent_id: account.parent_id || '',
-                category: account.category || 'GL',
+                is_control_account: account.is_control_account || false,
             });
-        } else {
-            reset();
-        }
+        } else reset();
         setModalOpen(true);
     };
 
@@ -115,21 +109,16 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (editingAccount) {
-            put(route('gl-accounts.update', editingAccount.id), {
-                data, // your form data
+            put(route('accounts.update', editingAccount.id), {
                 preserveScroll: true,
                 onSuccess: closeModal,
-                onError: (err) => {
-                    console.log('Update error:', err);
-                    toast.error('Failed to update GL account.');
-                },
+                onError: () => toast.error('Failed to update account.'),
             });
         } else {
-            post(route('gl-accounts.store'), {
-                data,
+            post(route('accounts.store'), {
                 preserveScroll: true,
                 onSuccess: closeModal,
-                onError: (err) => toast.error('Failed to create GL account.'),
+                onError: () => toast.error('Failed to create account.'),
             });
         }
     };
@@ -145,7 +134,7 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
         const allIds = [];
         const collect = (accounts) => {
             for (const acc of accounts) {
-                if (acc.category === 'GROUP') {
+                if (acc.is_control_account) {
                     allIds.push(acc.id);
                     if (acc.children?.length) collect(acc.children);
                 }
@@ -162,7 +151,7 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
         const isDark = document.documentElement.classList.contains('dark');
         Swal.fire({
             title: 'Are you sure?',
-            text: `GL Account "${name}" will be permanently deleted!`,
+            text: `Account "${name}" will be permanently deleted!`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: isDark ? '#ef4444' : '#d33',
@@ -172,56 +161,52 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
             confirmButtonText: `Yes, delete it!`,
         }).then((result) => {
             if (result.isConfirmed) {
-                router.delete(route('gl-accounts.destroy', id), {
+                router.delete(route('accounts.destroy', id), {
                     preserveScroll: true,
                     onSuccess: () =>
-                        toast.success('GL Account deleted successfully!'),
+                        toast.success('Account deleted successfully!'),
                     onError: () => toast.error('Failed to delete account.'),
                 });
             }
         });
     };
 
-    /* ----------------- DRAG & DROP HANDLER ----------------- */
-    const handleDragEnd = (event) => {
-        const { active, over } = event;
+    /* ----------------- DRAG & DROP ----------------- */
+    const handleDragEnd = ({ active, over }) => {
         if (!over) return;
-
-        const draggedId = active.id.replace('gl-', '');
-        const targetGroupId = over.id.replace('group-', '');
-
-        if (active.id.startsWith('gl-') && over.id.startsWith('group-')) {
-            router.post(
-                route('gl-accounts.move'),
-                { gl_id: draggedId, parent_id: targetGroupId },
-                {
-                    preserveScroll: true,
-                    onSuccess: () =>
-                        toast.success('GL account moved successfully!'),
-                    onError: () => toast.error('Failed to move GL account.'),
-                },
-            );
-        }
+        const draggedId = active.id;
+        const targetId = over.id.replace('group-', '');
+        router.post(
+            route('accounts.move'),
+            { account_id: draggedId, parent_id: targetId },
+            {
+                preserveScroll: true,
+                onSuccess: () => toast.success('Account moved successfully!'),
+                onError: () => toast.error('Failed to move account.'),
+            },
+        );
     };
 
     /* ----------------- RENDER TREE ----------------- */
     const renderTree = (accounts, level = 0) => (
         <ul className="list-none">
             {accounts.map((acc) => {
+                const children = acc.childrenRecursive || []; // <-- recursive children
+
                 const content = (
                     <div
                         className={`flex items-center justify-between rounded-lg px-3 py-1 transition hover:bg-accent/10 ${
-                            acc.category === 'GROUP'
+                            acc.is_control_account
                                 ? 'cursor-pointer font-medium'
                                 : ''
                         }`}
                         style={{ marginLeft: `${level * 1.5}rem` }}
                         onClick={() =>
-                            acc.category === 'GROUP' && toggleExpand(acc.id)
+                            acc.is_control_account && toggleExpand(acc.id)
                         }
                     >
                         <div className="flex items-center gap-2">
-                            {acc.category === 'GROUP' ? (
+                            {acc.is_control_account ? (
                                 expandedIds.includes(acc.id) ? (
                                     <ChevronDownIcon className="h-4 w-4 text-muted-foreground" />
                                 ) : (
@@ -258,7 +243,7 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
                                 <Edit2Icon className="h-3 w-3" />
                             </Button>
 
-                            {acc.category === 'GL' && (
+                            {!acc.is_control_account && (
                                 <button
                                     type="button"
                                     onClick={() =>
@@ -275,25 +260,23 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
 
                 return (
                     <li key={acc.id}>
-                        {acc.category === 'GROUP' ? (
+                        {acc.is_control_account ? (
                             <DroppableGroup id={`group-${acc.id}`}>
                                 {content}
-                                {acc.children?.length > 0 &&
+                                {children.length > 0 &&
                                     expandedIds.includes(acc.id) &&
-                                    renderTree(acc.children, level + 1)}
+                                    renderTree(children, level + 1)}
                             </DroppableGroup>
                         ) : (
-                            <DraggableItem id={`gl-${acc.id}`}>
+                            <DraggableItem id={`${acc.id}`}>
                                 {({ listeners, attributes }) => (
                                     <div
-                                        className={`flex items-center justify-between rounded-lg px-3 py-1 hover:bg-accent/10`}
+                                        className="flex items-center justify-between rounded-lg px-3 py-1 hover:bg-accent/10"
                                         style={{
                                             marginLeft: `${level * 1.5}rem`,
                                         }}
                                     >
-                                        {/* Left: drag handle + account info */}
                                         <div className="flex items-center gap-2">
-                                            {/* Drag handle */}
                                             <div
                                                 {...listeners}
                                                 {...attributes}
@@ -304,13 +287,9 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
                                             >
                                                 <FileIcon className="h-4 w-4 text-muted-foreground" />
                                             </div>
-
-                                            {/* Account code & name */}
                                             <span className="text-sm text-foreground">
                                                 {acc.code} — {acc.name}
                                             </span>
-
-                                            {/* Type badge */}
                                             <span
                                                 className={`ml-2 rounded px-2 py-0.5 text-xs font-medium ${
                                                     TYPE_COLORS[acc.type] ||
@@ -320,8 +299,6 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
                                                 {acc.type}
                                             </span>
                                         </div>
-
-                                        {/* Right: Edit / Delete buttons */}
                                         <div className="flex gap-2">
                                             <Button
                                                 size="sm"
@@ -334,21 +311,18 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
                                             >
                                                 <Edit2Icon className="h-3 w-3" />
                                             </Button>
-
-                                            {acc.category === 'GL' && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        handleDelete(
-                                                            acc.id,
-                                                            acc.name,
-                                                        )
-                                                    }
-                                                    className="text-destructive hover:text-destructive/80"
-                                                >
-                                                    <Trash2 className="h-5 w-5" />
-                                                </button>
-                                            )}
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    handleDelete(
+                                                        acc.id,
+                                                        acc.name,
+                                                    )
+                                                }
+                                                className="text-destructive hover:text-destructive/80"
+                                            >
+                                                <Trash2 className="h-5 w-5" />
+                                            </button>
                                         </div>
                                     </div>
                                 )}
@@ -360,11 +334,10 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
         </ul>
     );
 
-    /* ----------------- PAGE LAYOUT ----------------- */
     return (
         <CustomAuthLayout
             breadcrumbs={[
-                { title: 'General Ledger', href: '/gl-accounts' },
+                { title: 'General Ledger', href: '/accounts' },
                 { title: 'Chart of Accounts', href: '' },
             ]}
         >
@@ -382,35 +355,35 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
                         className="flex w-44 items-center gap-2"
                     >
                         <PlusIcon className="h-4 w-4" />
-                        Add Ledger Account
+                        Add Account
                     </Button>
 
                     <div className="flex items-center gap-2">
                         <Button size="sm" variant="outline" onClick={expandAll}>
-                            <ChevronDownIcon className="h-4 w-4" />
-                            Expand All
+                            <ChevronDownIcon className="h-4 w-4" /> Expand All
                         </Button>
                         <Button
                             size="sm"
                             variant="outline"
                             onClick={collapseAll}
                         >
-                            <ChevronUpIcon className="h-4 w-4" />
-                            Collapse All
+                            <ChevronUpIcon className="h-4 w-4" /> Collapse All
                         </Button>
                     </div>
                 </div>
 
                 <Card className="h-[calc(100vh-240px)] overflow-y-auto rounded-xl border border-border p-6 shadow-lg">
                     <DndContext
-                        onDragEnd={handleDragEnd}
                         collisionDetection={closestCenter}
+                        onDragEnd={handleDragEnd}
                     >
                         {glAccounts.length > 0 ? (
-                            renderTree(glAccounts)
+                            <ul className="list-none">
+                                {renderTree(glAccounts)}
+                            </ul>
                         ) : (
                             <p className="text-sm text-muted-foreground">
-                                No ledger accounts yet.
+                                No accounts yet.
                             </p>
                         )}
                     </DndContext>
@@ -431,8 +404,8 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
 
                             <h2 className="mb-4 text-lg font-semibold text-primary">
                                 {editingAccount
-                                    ? 'Edit Ledger Account'
-                                    : 'Add Ledger Account'}
+                                    ? 'Edit Account'
+                                    : 'Add Account'}
                             </h2>
 
                             <form onSubmit={handleSubmit} className="space-y-4">
@@ -443,7 +416,6 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
                                         onChange={(e) =>
                                             setData('code', e.target.value)
                                         }
-                                        placeholder="e.g. 1010"
                                         className="mt-1"
                                     />
                                     <InputError message={errors.code} />
@@ -456,7 +428,6 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
                                         onChange={(e) =>
                                             setData('name', e.target.value)
                                         }
-                                        placeholder="Cash Account"
                                         className="mt-1"
                                     />
                                     <InputError message={errors.name} />
@@ -465,11 +436,11 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
                                 <div>
                                     <Label>Type</Label>
                                     <select
-                                        className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3 text-sm"
                                         value={data.type}
                                         onChange={(e) =>
                                             setData('type', e.target.value)
                                         }
+                                        className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3 text-sm"
                                     >
                                         <option value="">Select Type</option>
                                         {Object.keys(TYPE_COLORS).map(
@@ -484,35 +455,38 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
                                 </div>
 
                                 <div>
-                                    <Label>Category</Label>
+                                    <Label>Control Account</Label>
                                     <select
-                                        className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3 text-sm"
-                                        value={data.category}
-                                        onChange={(e) =>
-                                            setData('category', e.target.value)
+                                        value={
+                                            data.is_control_account ? '1' : '0'
                                         }
+                                        onChange={(e) =>
+                                            setData(
+                                                'is_control_account',
+                                                e.target.value === '1',
+                                            )
+                                        }
+                                        className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3 text-sm"
                                     >
-                                        <option value="GL">GL</option>
-                                        <option value="GROUP">GROUP</option>
+                                        <option value="0">No</option>
+                                        <option value="1">Yes</option>
                                     </select>
-                                    <InputError message={errors.category} />
                                 </div>
 
                                 <div>
                                     <Label>Parent Account</Label>
                                     <select
-                                        className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3 text-sm"
                                         value={data.parent_id}
                                         onChange={(e) =>
                                             setData('parent_id', e.target.value)
                                         }
+                                        className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3 text-sm"
                                     >
                                         <option value="">No Parent</option>
                                         {groupAccounts
                                             .filter(
-                                                (acc) =>
-                                                    acc.id !==
-                                                    editingAccount?.id,
+                                                (a) =>
+                                                    a.id !== editingAccount?.id,
                                             )
                                             .map((acc) => (
                                                 <option
@@ -530,7 +504,7 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
                                     <Button
                                         type="submit"
                                         disabled={processing}
-                                        className="w-40 bg-primary text-primary-foreground transition-all duration-300 hover:bg-primary/90 hover:shadow-md"
+                                        className="w-40 bg-primary text-primary-foreground hover:bg-primary/90"
                                     >
                                         {processing
                                             ? 'Saving...'

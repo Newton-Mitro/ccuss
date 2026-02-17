@@ -92,8 +92,8 @@ export const sidebarMenu: SidebarItem[] = [
             {
                 name: 'Ledger Accounts',
                 icon: <i className="fa-solid fa-book-open" />,
-                path: '/gl-accounts',
-                match_path: 'gl-accounts',
+                path: '/accounts',
+                match_path: 'accounts',
             },
             {
                 name: 'Vouchers',

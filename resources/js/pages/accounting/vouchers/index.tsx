@@ -13,11 +13,28 @@ import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-import { JournalEntry, JournalLine } from '../../../types/accounting';
+
+interface VoucherLine {
+    id: number;
+    account_id: number;
+    debit: number;
+    credit: number;
+    narration?: string;
+}
+
+interface VoucherEntry {
+    id: number;
+    voucher_no: string;
+    reference?: string;
+    voucher_type: 'CASH_RECEIPT' | 'CASH_PAYMENT' | 'JOURNAL';
+    voucher_date: string;
+    status: 'DRAFT' | 'APPROVED' | 'POSTED' | 'CANCELLED';
+    lines: VoucherLine[];
+}
 
 interface VoucherPageProps {
     vouchers: {
-        data: JournalEntry[];
+        data: VoucherEntry[];
         links: { url: string | null; label: string; active: boolean }[];
     };
     filters: Record<string, string>;
@@ -26,8 +43,6 @@ interface VoucherPageProps {
 export default function Index() {
     const { vouchers, filters } = usePage()
         .props as unknown as VoucherPageProps;
-
-    console.log(vouchers);
 
     const {
         data,
@@ -41,21 +56,22 @@ export default function Index() {
         page: Number(filters.page) || 1,
     });
 
-    const handleSearch = () => {
-        get(route('vouchers.index'), { preserveState: true });
-    };
-
+    // Fetch with debounce
     useEffect(() => {
-        const delay = setTimeout(handleSearch, 400);
+        const delay = setTimeout(() => {
+            get(route('vouchers.index'), {
+                preserveScroll: true,
+                preserveState: true,
+            });
+        }, 400);
         return () => clearTimeout(delay);
     }, [data.search, data.per_page, data.page]);
 
-    const handleDelete = (id: number, txCode: string) => {
+    const handleDelete = (id: number, voucherNo: string) => {
         const isDark = document.documentElement.classList.contains('dark');
-
         Swal.fire({
             title: 'Are you sure?',
-            text: `Voucher "${txCode}" will be permanently deleted!`,
+            text: `Voucher "${voucherNo}" will be permanently deleted!`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: isDark ? '#ef4444' : '#d33',
@@ -70,12 +86,9 @@ export default function Index() {
                     preserveState: true,
                     onSuccess: () =>
                         toast.success(
-                            `Voucher "${txCode}" deleted successfully!`,
+                            `Voucher "${voucherNo}" deleted successfully!`,
                         ),
-                    onError: () =>
-                        toast.error(
-                            'Failed to delete the voucher. Please try again.',
-                        ),
+                    onError: () => toast.error('Failed to delete voucher.'),
                 });
             }
         });
@@ -85,10 +98,12 @@ export default function Index() {
         { title: 'Vouchers', href: '/vouchers' },
     ];
 
-    // Helper to calculate total debit/credit
-    const getTotals = (lines?: JournalLine[]) => {
-        const totalDebit = lines?.reduce((sum, l) => sum + l.debit, 0) || 0;
-        const totalCredit = lines?.reduce((sum, l) => sum + l.credit, 0) || 0;
+    // Helper to calculate totals
+    const getTotals = (lines?: VoucherLine[]) => {
+        const totalDebit =
+            lines?.reduce((sum, l) => sum + Number(l.debit), 0) || 0;
+        const totalCredit =
+            lines?.reduce((sum, l) => sum + Number(l.credit), 0) || 0;
         return { totalDebit, totalCredit };
     };
 
@@ -101,7 +116,7 @@ export default function Index() {
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
                         title="Vouchers"
-                        description="Manage all journal and cash vouchers with ease"
+                        description="Manage all vouchers with ease"
                     />
                 </div>
 
@@ -117,6 +132,28 @@ export default function Index() {
                         }}
                         className="h-9 w-full max-w-sm rounded-md border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                     />
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">
+                            Show
+                        </span>
+                        <select
+                            value={data.per_page}
+                            onChange={(e) => {
+                                setData('per_page', Number(e.target.value));
+                                setData('page', 1);
+                            }}
+                            className="h-9 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+                        >
+                            {[5, 10, 20, 50, 100, 500].map((n) => (
+                                <option key={n} value={n}>
+                                    {n}
+                                </option>
+                            ))}
+                        </select>
+                        <span className="text-sm text-muted-foreground">
+                            records
+                        </span>
+                    </div>
                 </div>
 
                 {/* Table */}
@@ -125,44 +162,50 @@ export default function Index() {
                         <thead className="sticky top-0 bg-muted">
                             <tr>
                                 {[
-                                    'Voucher Code',
+                                    'Voucher No',
                                     'Reference',
-                                    'Posted At',
+                                    'Date',
+                                    'Type',
                                     'Debit',
                                     'Credit',
+                                    'Status',
                                     'Actions',
-                                ].map((header) => (
+                                ].map((h) => (
                                     <th
-                                        key={header}
+                                        key={h}
                                         className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground"
                                     >
-                                        {header}
+                                        {h}
                                     </th>
                                 ))}
                             </tr>
                         </thead>
-
                         <tbody>
                             {vouchers.data.length > 0 ? (
                                 vouchers.data.map((v) => {
                                     const { totalDebit, totalCredit } =
                                         getTotals(v.lines);
-
                                     return (
                                         <tr
                                             key={v.id}
                                             className="border-b border-border even:bg-muted/30"
                                         >
                                             <td className="px-2 py-1">
-                                                {v.tx_code || '-'}
+                                                {v.voucher_no}
                                             </td>
                                             <td className="px-2 py-1">
-                                                {v.tx_ref || '-'}
+                                                {v.reference || '-'}
                                             </td>
                                             <td className="px-2 py-1">
                                                 {new Date(
-                                                    v.posted_at,
+                                                    v.voucher_date,
                                                 ).toLocaleDateString()}
+                                            </td>
+                                            <td className="px-2 py-1">
+                                                {v.voucher_type.replace(
+                                                    '_',
+                                                    ' ',
+                                                )}
                                             </td>
                                             <td className="px-2 py-1">
                                                 {totalDebit.toFixed(2)}
@@ -170,7 +213,9 @@ export default function Index() {
                                             <td className="px-2 py-1">
                                                 {totalCredit.toFixed(2)}
                                             </td>
-
+                                            <td className="px-2 py-1">
+                                                {v.status}
+                                            </td>
                                             <td className="px-2 py-1">
                                                 <TooltipProvider>
                                                     <div className="flex space-x-2">
@@ -224,8 +269,7 @@ export default function Index() {
                                                                     onClick={() =>
                                                                         handleDelete(
                                                                             v.id,
-                                                                            v.tx_code ||
-                                                                                '',
+                                                                            v.voucher_no,
                                                                         )
                                                                     }
                                                                     className="text-destructive hover:text-destructive/80 disabled:opacity-50"
@@ -246,7 +290,7 @@ export default function Index() {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={6}
+                                        colSpan={8}
                                         className="px-4 py-6 text-center text-muted-foreground"
                                     >
                                         No vouchers found.
@@ -259,29 +303,6 @@ export default function Index() {
 
                 {/* Pagination */}
                 <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">
-                            Show
-                        </span>
-                        <select
-                            value={data.per_page}
-                            onChange={(e) => {
-                                setData('per_page', Number(e.target.value));
-                                setData('page', 1);
-                            }}
-                            className="h-9 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-                        >
-                            {[5, 10, 20, 50, 100, 500].map((n) => (
-                                <option key={n} value={n}>
-                                    {n}
-                                </option>
-                            ))}
-                        </select>
-                        <span className="text-sm text-muted-foreground">
-                            records
-                        </span>
-                    </div>
-
                     <div className="flex gap-1">
                         {vouchers.links.map((link, i) => (
                             <Link

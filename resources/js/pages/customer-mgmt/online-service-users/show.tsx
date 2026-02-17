@@ -1,4 +1,5 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
+import { Edit2, EyeClosed, ListFilter, X } from 'lucide-react';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
@@ -21,10 +22,49 @@ export default function ShowOnlineUser({
             <Head title="View Online Client" />
 
             <div className="animate-in space-y-8 fade-in">
-                <HeadingSmall
-                    title="Online Client Profile"
-                    description={`User snapshot for "${onlineServiceUser.username}"`}
-                />
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <HeadingSmall
+                        title="Online Client Profile"
+                        description={`User snapshot for "${onlineServiceUser.username}"`}
+                    />
+                    <div className="flex gap-2">
+                        <Link
+                            href={`/online-service-users/${onlineServiceUser.id}/edit`}
+                            className="flex items-center gap-1 rounded bg-accent px-3 py-1 text-accent-foreground transition hover:bg-accent/90"
+                        >
+                            <Edit2 size={16} />
+                            <span className="hidden sm:inline">Edit</span>
+                        </Link>
+
+                        <button
+                            type="button"
+                            className="flex items-center gap-1 rounded bg-destructive px-3 py-1 text-destructive-foreground transition hover:bg-destructive/90"
+                        >
+                            <EyeClosed size={16} />
+                            <span className="hidden sm:inline">Suspend</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            className="flex items-center gap-1 rounded bg-destructive px-3 py-1 text-destructive-foreground transition hover:bg-destructive/90"
+                        >
+                            <X size={16} />
+                            <span className="hidden sm:inline">
+                                Close Account
+                            </span>
+                        </button>
+
+                        <Link
+                            href={`/online-service-users`}
+                            className="flex items-center gap-1 rounded bg-secondary px-3 py-1 text-secondary-foreground transition hover:bg-secondary/90"
+                        >
+                            <ListFilter size={16} />
+                            <span className="hidden sm:inline">
+                                Online Service Users
+                            </span>
+                        </Link>
+                    </div>
+                </div>
 
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
                     {/* Left: Profile */}

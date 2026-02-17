@@ -121,8 +121,8 @@ export default function FamilyRelationIndex() {
                                     'Customer',
                                     'Relative Name',
                                     'Phone',
-                                    'Email',
                                     'Relation',
+                                    'Status',
                                     'Actions',
                                 ].map((header) => (
                                     <th
@@ -136,12 +136,12 @@ export default function FamilyRelationIndex() {
                         </thead>
                         <tbody>
                             {familyRelations.data.length > 0 ? (
-                                familyRelations.data.map((f, i) => (
+                                familyRelations.data.map((f) => (
                                     <tr
                                         key={f.id}
                                         className="border-b border-border even:bg-muted/30"
                                     >
-                                        <td className="px-2 py-1">{i + 1}</td>
+                                        <td className="px-2 py-1">{f.id}</td>
                                         <td className="px-2 py-1">
                                             {f.customer?.name || '—'}
                                         </td>
@@ -149,12 +149,11 @@ export default function FamilyRelationIndex() {
                                         <td className="px-2 py-1">
                                             {f.phone || '—'}
                                         </td>
-                                        <td className="px-2 py-1">
-                                            {f.email || '—'}
-                                        </td>
-
                                         <td className="px-2 py-1 text-blue-600 dark:text-blue-400">
                                             {f.relation_type.replace(/_/g, ' ')}
+                                        </td>
+                                        <td className="px-2 py-1">
+                                            {f.verification_status || '—'}
                                         </td>
                                         <td className="px-2 py-1">
                                             <TooltipProvider>
@@ -235,13 +234,8 @@ export default function FamilyRelationIndex() {
                             </div>
 
                             <div className="mt-2 space-y-1 text-xs text-muted-foreground">
-                                <p>📞 {f.phone || '—'}</p>
-                                <p>✉️ {f.email || '—'}</p>
-                                <p>🎂 {f.dob || '—'}</p>
-                                <p>⚧ {f.gender || '—'}</p>
-                                <p>⛪ {f.religion || '—'}</p>
-                                <p>ID Type: {f.identification_type}</p>
-                                <p>ID #: {f.identification_number}</p>
+                                <p> {f.phone || '—'}</p>
+                                <p> {f.verification_status || '—'}</p>
                             </div>
 
                             <div className="mt-2 flex justify-end gap-3">

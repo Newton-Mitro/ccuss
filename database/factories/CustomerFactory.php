@@ -50,14 +50,15 @@ class CustomerFactory extends Factory
                 ])
                 : null,
 
-            // Identification (required for both)
-            'identification_type' => $this->faker->randomElement([
-                'NID',
-                'BRN',
-                'REGISTRATION_NO',
-                'PASSPORT',
-                'DRIVING_LICENSE'
-            ]),
+            // 🔑 Identification logic (business-rule driven)
+            'identification_type' => $type === 'Organization'
+                ? 'REGISTRATION_NO'
+                : $this->faker->randomElement([
+                    'NID',
+                    'BRN',
+                    'PASSPORT',
+                    'DRIVING_LICENSE'
+                ]),
 
             'identification_number' => strtoupper(Str::random(12)),
 

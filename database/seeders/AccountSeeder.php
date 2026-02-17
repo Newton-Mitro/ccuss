@@ -2,264 +2,264 @@
 
 namespace Database\Seeders;
 
-use App\Accounting\GlAccount\Models\GlAccount;
+use App\Accounting\Models\Account;
 use Illuminate\Database\Seeder;
 
-class GlAccountSeeder extends Seeder
+class AccountSeeder extends Seeder
 {
     public function run()
     {
         // -----------------------
         // ASSETS
         // -----------------------
-        $assets = GlAccount::create([
+        $assets = Account::create([
             'code' => '1000',
             'name' => 'Assets',
             'type' => 'ASSET',
-            'category' => 'GROUP',
+            // 'category' => 'GROUP',
         ]);
 
         // Sub-groups
-        $currentAssets = GlAccount::create([
+        $currentAssets = Account::create([
             'code' => '1100',
             'name' => 'Current Assets',
             'type' => 'ASSET',
-            'category' => 'GROUP',
+            // 'category' => 'GROUP',
             'parent_id' => $assets->id,
         ]);
 
-        $fixedAssets = GlAccount::create([
+        $fixedAssets = Account::create([
             'code' => '1200',
             'name' => 'Fixed Assets',
             'type' => 'ASSET',
-            'category' => 'GROUP',
+            // 'category' => 'GROUP',
             'parent_id' => $assets->id,
         ]);
 
         // GL accounts under Current Assets
-        GlAccount::create([
+        Account::create([
             'code' => '1010',
             'name' => 'Cash',
             'type' => 'ASSET',
-            'category' => 'GL',
+            // 'category' => 'GL',
             'parent_id' => $currentAssets->id,
         ]);
 
-        GlAccount::create([
+        Account::create([
             'code' => '1020',
             'name' => 'Accounts Receivable',
             'type' => 'ASSET',
-            'category' => 'GL',
+            // 'category' => 'GL',
             'parent_id' => $currentAssets->id,
         ]);
 
-        GlAccount::create([
+        Account::create([
             'code' => '1030',
             'name' => 'Investments',
             'type' => 'ASSET',
-            'category' => 'GL',
+            // 'category' => 'GL',
             'parent_id' => $currentAssets->id,
         ]);
 
         // GL accounts under Fixed Assets
-        GlAccount::create([
+        Account::create([
             'code' => '1040',
             'name' => 'Land',
             'type' => 'ASSET',
-            'category' => 'GL',
+            // 'category' => 'GL',
             'parent_id' => $fixedAssets->id,
         ]);
 
-        GlAccount::create([
+        Account::create([
             'code' => '1050',
             'name' => 'Buildings',
             'type' => 'ASSET',
-            'category' => 'GL',
+            // 'category' => 'GL',
             'parent_id' => $fixedAssets->id,
         ]);
 
-        GlAccount::create([
+        Account::create([
             'code' => '1060',
             'name' => 'Machinery',
             'type' => 'ASSET',
-            'category' => 'GL',
+            // 'category' => 'GL',
             'parent_id' => $fixedAssets->id,
         ]);
 
         // -----------------------
         // LIABILITIES
         // -----------------------
-        $liabilities = GlAccount::create([
+        $liabilities = Account::create([
             'code' => '2000',
             'name' => 'Liabilities',
             'type' => 'LIABILITY',
-            'category' => 'GROUP',
+            // 'category' => 'GROUP',
         ]);
 
-        $currentLiabilities = GlAccount::create([
+        $currentLiabilities = Account::create([
             'code' => '2100',
             'name' => 'Current Liabilities',
             'type' => 'LIABILITY',
-            'category' => 'GROUP',
+            // 'category' => 'GROUP',
             'parent_id' => $liabilities->id,
         ]);
 
-        $longTermLiabilities = GlAccount::create([
+        $longTermLiabilities = Account::create([
             'code' => '2200',
             'name' => 'Long-Term Liabilities',
             'type' => 'LIABILITY',
-            'category' => 'GROUP',
+            // 'category' => 'GROUP',
             'parent_id' => $liabilities->id,
         ]);
 
         // GL accounts
-        GlAccount::create([
+        Account::create([
             'code' => '2010',
             'name' => 'Member Deposits',
             'type' => 'LIABILITY',
-            'category' => 'GL',
+            // 'category' => 'GL',
             'parent_id' => $currentLiabilities->id,
         ]);
 
-        GlAccount::create([
+        Account::create([
             'code' => '2020',
             'name' => 'Accounts Payable',
             'type' => 'LIABILITY',
-            'category' => 'GL',
+            // 'category' => 'GL',
             'parent_id' => $currentLiabilities->id,
         ]);
 
-        GlAccount::create([
+        Account::create([
             'code' => '2040',
             'name' => 'Loans Payable',
             'type' => 'LIABILITY',
-            'category' => 'GL',
+            // 'category' => 'GL',
             'parent_id' => $longTermLiabilities->id,
         ]);
 
         // -----------------------
         // EQUITY
         // -----------------------
-        $equity = GlAccount::create([
+        $equity = Account::create([
             'code' => '3000',
             'name' => 'Equity',
             'type' => 'EQUITY',
-            'category' => 'GROUP',
+            // 'category' => 'GROUP',
         ]);
 
-        $capital = GlAccount::create([
+        $capital = Account::create([
             'code' => '3100',
             'name' => 'Capital',
             'type' => 'EQUITY',
-            'category' => 'GROUP',
+            // 'category' => 'GROUP',
             'parent_id' => $equity->id,
         ]);
 
-        GlAccount::create([
+        Account::create([
             'code' => '3010',
             'name' => 'Member Shares',
             'type' => 'EQUITY',
-            'category' => 'GL',
+            // 'category' => 'GL',
             'parent_id' => $capital->id,
         ]);
 
-        GlAccount::create([
+        Account::create([
             'code' => '3020',
             'name' => 'Retained Earnings',
             'type' => 'EQUITY',
-            'category' => 'GL',
+            // 'category' => 'GL',
             'parent_id' => $capital->id,
         ]);
 
-        GlAccount::create([
+        Account::create([
             'code' => '3030',
             'name' => 'Reserves',
             'type' => 'EQUITY',
-            'category' => 'GL',
+            // 'category' => 'GL',
             'parent_id' => $equity->id,
         ]);
 
         // -----------------------
         // INCOME
         // -----------------------
-        $income = GlAccount::create([
+        $income = Account::create([
             'code' => '4000',
             'name' => 'Income',
             'type' => 'INCOME',
-            'category' => 'GROUP',
+            // 'category' => 'GROUP',
         ]);
 
-        $interestIncomeGroup = GlAccount::create([
+        $interestIncomeGroup = Account::create([
             'code' => '4100',
             'name' => 'Interest Income',
             'type' => 'INCOME',
-            'category' => 'GROUP',
+            // 'category' => 'GROUP',
             'parent_id' => $income->id,
         ]);
 
-        GlAccount::create([
+        Account::create([
             'code' => '4010',
             'name' => 'Savings Interest',
             'type' => 'INCOME',
-            'category' => 'GL',
+            // 'category' => 'GL',
             'parent_id' => $interestIncomeGroup->id,
         ]);
 
-        GlAccount::create([
+        Account::create([
             'code' => '4020',
             'name' => 'Loan Interest',
             'type' => 'INCOME',
-            'category' => 'GL',
+            // 'category' => 'GL',
             'parent_id' => $interestIncomeGroup->id,
         ]);
 
         // -----------------------
         // EXPENSES
         // -----------------------
-        $expenses = GlAccount::create([
+        $expenses = Account::create([
             'code' => '5000',
             'name' => 'Expenses',
             'type' => 'EXPENSE',
-            'category' => 'GROUP',
+            // 'category' => 'GROUP',
         ]);
 
-        $operatingExpenses = GlAccount::create([
+        $operatingExpenses = Account::create([
             'code' => '5100',
             'name' => 'Operating Expenses',
             'type' => 'EXPENSE',
-            'category' => 'GROUP',
+            // 'category' => 'GROUP',
             'parent_id' => $expenses->id,
         ]);
 
-        GlAccount::create([
+        Account::create([
             'code' => '5020',
             'name' => 'Salaries & Wages',
             'type' => 'EXPENSE',
-            'category' => 'GL',
+            // 'category' => 'GL',
             'parent_id' => $operatingExpenses->id,
         ]);
 
-        GlAccount::create([
+        Account::create([
             'code' => '5030',
             'name' => 'Office Expenses',
             'type' => 'EXPENSE',
-            'category' => 'GL',
+            // 'category' => 'GL',
             'parent_id' => $operatingExpenses->id,
         ]);
 
-        GlAccount::create([
+        Account::create([
             'code' => '5040',
             'name' => 'Depreciation',
             'type' => 'EXPENSE',
-            'category' => 'GL',
+            // 'category' => 'GL',
             'parent_id' => $expenses->id,
         ]);
 
-        GlAccount::create([
+        Account::create([
             'code' => '5050',
             'name' => 'Provision for Loan Losses',
             'type' => 'EXPENSE',
-            'category' => 'GL',
+            // 'category' => 'GL',
             'parent_id' => $expenses->id,
         ]);
     }

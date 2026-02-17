@@ -441,6 +441,12 @@ return new class extends Migration {
                 'SISTER_IN_LAW'
             ]);
 
+             // Verification
+            $table->enum('verification_status', ['PENDING', 'VERIFIED', 'REJECTED'])->default('PENDING');
+            $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('verified_at')->nullable();
+            $table->text('remarks')->nullable();
+
             // Prevent duplicate linkage
             $table->unique(['customer_id', 'relative_id'], 'uq_customer_relative');
 

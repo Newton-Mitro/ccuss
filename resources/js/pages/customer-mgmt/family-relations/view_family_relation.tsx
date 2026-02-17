@@ -1,18 +1,18 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import {
     CheckCircle,
     Clock,
+    Edit2,
+    EyeClosed,
+    ListFilter,
     ShieldCheck,
-    Trash2,
     User2,
     UserIcon,
+    X,
     XCircle,
 } from 'lucide-react';
-import toast from 'react-hot-toast';
-import Swal from 'sweetalert2';
 import HeadingSmall from '../../../components/heading-small';
 import { Badge } from '../../../components/ui/badge';
-import { Button } from '../../../components/ui/button';
 import { Card, CardContent } from '../../../components/ui/card';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatDate } from '../../../lib/date_util';
@@ -53,61 +53,51 @@ export default function View({ familyRelation }: ViewFamilyRelationProps) {
 
     const StatusIcon = statusConfig.icon;
 
-    const handleDelete = () => {
-        const relativeName = familyRelation.name || '';
-        const relationship = familyRelation.relation_type || '';
-        const isDark = document.documentElement.classList.contains('dark');
-        Swal.fire({
-            title: 'Are you sure?',
-            text: `Relation of "${relativeName} (${relationship})" will be permanently deleted!`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: isDark ? '#ef4444' : '#d33',
-            cancelButtonColor: isDark ? '#3b82f6' : '#3085d6',
-            background: isDark ? '#1f2937' : '#fff',
-            color: isDark ? '#f9fafb' : '#111827',
-            confirmButtonText: 'Yes, delete it!',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                router.delete(`/family-relations/${familyRelation.id}`, {
-                    preserveScroll: true,
-                    preserveState: true,
-                    onSuccess: () =>
-                        toast.success('Relation deleted successfully!'),
-                    onError: () => toast.error('Failed to delete relation.'),
-                });
-            }
-        });
-    };
-
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="View Family Relation" />
 
             {/* Customer Header */}
-            <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <HeadingSmall
                     title="Relation Information"
                     description="Customer family relation information."
                 />
 
-                {/* Status & Actions */}
-                <div className="mt-2 flex flex-wrap items-center gap-2 sm:mt-0">
-                    <Badge
-                        className={`flex items-center gap-1 text-xs ${statusConfig.class}`}
+                <div className="flex gap-2">
+                    <Link
+                        href={`/family-relations/${familyRelation.id}/edit`}
+                        className="flex items-center gap-1 rounded bg-accent px-3 py-1 text-accent-foreground transition hover:bg-accent/90"
                     >
-                        <StatusIcon className="h-3 w-3" /> {statusConfig.label}
-                    </Badge>
+                        <Edit2 size={16} />
+                        <span className="hidden sm:inline">Edit</span>
+                    </Link>
 
-                    {/* Delete Button */}
-                    <Button
-                        size="sm"
-                        variant="destructive"
-                        className="flex items-center gap-1 rounded-lg bg-red-50 px-3 text-sm font-medium text-red-700 transition hover:bg-red-100"
-                        onClick={handleDelete}
+                    <button
+                        type="button"
+                        className="flex items-center gap-1 rounded bg-destructive px-3 py-1 text-destructive-foreground transition hover:bg-destructive/90"
                     >
-                        <Trash2 className="h-4 w-4" /> Delete
-                    </Button>
+                        <EyeClosed size={16} />
+                        <span className="hidden sm:inline">Suspend</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        className="flex items-center gap-1 rounded bg-destructive px-3 py-1 text-destructive-foreground transition hover:bg-destructive/90"
+                    >
+                        <X size={16} />
+                        <span className="hidden sm:inline">Close Account</span>
+                    </button>
+
+                    <Link
+                        href={`/family-relations`}
+                        className="flex items-center gap-1 rounded bg-secondary px-3 py-1 text-secondary-foreground transition hover:bg-secondary/90"
+                    >
+                        <ListFilter size={16} />
+                        <span className="hidden sm:inline">
+                            Family Relations
+                        </span>
+                    </Link>
                 </div>
             </div>
 
@@ -166,18 +156,27 @@ export default function View({ familyRelation }: ViewFamilyRelationProps) {
                     </div>
 
                     {/* Relation Info */}
-                    <div className="space-y-1 border-t pt-4">
+                    <div className="space-y-4 border-t pt-4">
                         <h3 className="flex items-center gap-1 text-sm font-semibold text-muted-foreground">
                             <ShieldCheck className="h-4 w-4" /> Relation
                         </h3>
 
-                        <Info
-                            label="Relation Type"
-                            value={familyRelation.relation_type.replaceAll(
-                                '_',
-                                ' ',
-                            )}
-                        />
+                        <div className="flex flex-col gap-1">
+                            <Info
+                                label="Relation Type"
+                                value={familyRelation.relation_type.replaceAll(
+                                    '_',
+                                    ' ',
+                                )}
+                            />
+
+                            <Badge
+                                className={`flex items-center gap-1 text-xs ${statusConfig.class}`}
+                            >
+                                <StatusIcon className="h-3 w-3" />{' '}
+                                {statusConfig.label}
+                            </Badge>
+                        </div>
                     </div>
 
                     {/* Relative Info */}

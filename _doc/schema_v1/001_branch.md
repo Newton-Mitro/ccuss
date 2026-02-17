@@ -20,31 +20,12 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('fiscal_years', function (Blueprint $table) {
-            $table->id();
-            $table->string('code')->unique()->comment('(FY-2025-26)');
-            $table->date('start_date');
-            $table->date('end_date');
-            $table->boolean('is_active')->default(false);
-            $table->boolean('is_closed')->default(false);
-            $table->timestamps();
-        });
 
-        Schema::create('fiscal_periods', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('fiscal_year_id')->constrained()->cascadeOnDelete();
-            $table->string('period_name')->comment('(JAN-2026)');
-            $table->date('start_date');
-            $table->date('end_date');
-            $table->boolean('is_open')->default(true);
-            $table->timestamps();
-        });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('fiscal_periods');
-        Schema::dropIfExists('fiscal_years');
+
         Schema::dropIfExists('branches');
     }
 };
