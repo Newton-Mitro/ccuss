@@ -294,7 +294,7 @@ return new class extends Migration {
         | Online Service Users
         |--------------------------------------------------------------------------
         */
-        Schema::create('online_service_users', function (Blueprint $table) {
+        Schema::create('online_service_clients', function (Blueprint $table) {
             $table->id();
 
             $table->foreignId('customer_id')
@@ -320,7 +320,7 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('online_service_users');
+        Schema::dropIfExists('online_service_clients');
         Schema::dropIfExists('customer_introducers');
         Schema::dropIfExists('customer_signatures');
         Schema::dropIfExists('customer_photos');

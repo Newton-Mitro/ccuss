@@ -8,31 +8,17 @@ import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-import { OnlineServiceUser } from '../../../types/customer';
+import { OnlineServiceClient } from '../../../types/customer';
 import { CustomerSearchInput } from '../customers/customer-search-input';
 
-interface EditOnlineUserProps {
-    onlineServiceUser: OnlineServiceUser;
-}
+export default function CreateOnlineUser() {
+    const { data, setData, post, processing, errors, clearErrors } =
+        useForm<Partial<OnlineServiceClient | null>>(null);
+    const [customerName, setCustomerName] = useState('');
 
-export default function EditOnlineUser({
-    onlineServiceUser,
-}: EditOnlineUserProps) {
-    const { data, setData, put, processing, errors, clearErrors } = useForm({
-        customer_id: onlineServiceUser.customer_id || '',
-        customer_name: onlineServiceUser.customer?.name || '',
-        username: onlineServiceUser.username || '',
-        email: onlineServiceUser.email || '',
-        phone: onlineServiceUser.phone || '',
-        password: '',
-        status: onlineServiceUser.status || 'ACTIVE',
-    });
-
-    const [customerName, setCustomerName] = useState(data.customer_name || '');
-
-    // Generic handler for input/select changes with immediate error reset
+    // Generic handler for input/select changes with error reset
     const handleChange =
-        (field: keyof OnlineServiceUser) =>
+        (field: keyof OnlineServiceClient) =>
         (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
             setData(field, e.target.value);
             if (errors[field]) clearErrors(field);
@@ -40,43 +26,36 @@ export default function EditOnlineUser({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
-        // Frontend validation: either email or phone required
-        if (!data.email && !data.phone) {
-            toast.error('Either email or phone must be provided.');
-            return;
-        }
-
-        put(`/online-service-users/${onlineServiceUser.id}`, {
+        post('/online-service-clients', {
             preserveScroll: true,
             onError: () => toast.error('Please fix errors in the form.'),
-            onSuccess: () => toast.success('Online user updated successfully!'),
+            onSuccess: () => toast.success('Online user created successfully!'),
         });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Online Clients', href: '/online-service-users' },
-        { title: 'Edit Online Client', href: '' },
+        { title: 'Online Service Clients', href: '/online-service-clients' },
+        { title: 'Add Online Service Client', href: '' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Edit Online Client" />
+            <Head title="Add Online Service Client" />
 
             <div className="animate-in space-y-6 text-foreground fade-in">
                 <HeadingSmall
-                    title="Edit Online Client"
-                    description="Update customer account information, login credentials, and contact details."
+                    title="Add Online Service Client"
+                    description="Select a customer and fill in credentials, login info, and status."
                 />
 
                 <form
                     onSubmit={handleSubmit}
-                    className="rounded-xl border border-border bg-card/90 p-6 shadow backdrop-blur-sm transition-all duration-300"
+                    className="rounded-xl border border-border bg-card/80 p-6 shadow backdrop-blur-sm transition-all duration-300"
                 >
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                        {/* Customer Selection */}
+                        {/* Customer */}
                         <div className="col-span-full">
-                            <Label>Linked Customer</Label>
+                            <Label>Customer</Label>
                             <CustomerSearchInput
                                 onSelect={(customer) => {
                                     setData('customer_id', customer.id);
@@ -89,7 +68,7 @@ export default function EditOnlineUser({
                         <div>
                             <Label>Customer ID</Label>
                             <Input
-                                value={data.customer_id}
+                                value={data.customer_id || ''}
                                 disabled
                                 className="h-8 text-sm"
                             />
@@ -110,7 +89,7 @@ export default function EditOnlineUser({
                             <Label>Username</Label>
                             <Input
                                 placeholder="Username"
-                                value={data.username}
+                                value={data.username || ''}
                                 onChange={handleChange('username')}
                                 className="h-8 text-sm"
                             />
@@ -122,7 +101,7 @@ export default function EditOnlineUser({
                             <Input
                                 type="email"
                                 placeholder="Email"
-                                value={data.email}
+                                value={data.email || ''}
                                 onChange={handleChange('email')}
                                 className="h-8 text-sm"
                             />
@@ -133,7 +112,7 @@ export default function EditOnlineUser({
                             <Label>Phone</Label>
                             <Input
                                 placeholder="Phone"
-                                value={data.phone}
+                                value={data.phone || ''}
                                 onChange={handleChange('phone')}
                                 className="h-8 text-sm"
                             />
@@ -141,11 +120,11 @@ export default function EditOnlineUser({
                         </div>
 
                         <div>
-                            <Label>New Password</Label>
+                            <Label>Password</Label>
                             <Input
                                 type="password"
-                                placeholder="Leave blank to keep current password"
-                                value={data.password}
+                                placeholder="Password"
+                                value={data.password || ''}
                                 onChange={handleChange('password')}
                                 className="h-8 text-sm"
                             />
@@ -175,9 +154,7 @@ export default function EditOnlineUser({
                             disabled={processing}
                             className="w-36 bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-md"
                         >
-                            {processing
-                                ? 'Updating...'
-                                : 'Update Online Client'}
+                            {processing ? 'Saving...' : 'Save User'}
                         </Button>
                     </div>
                 </form>

@@ -215,7 +215,7 @@ export interface CustomerIntroducer extends AuditFields {
  * Online Service Users
  * =========================== */
 
-export interface OnlineServiceUser extends AuditFields {
+export interface OnlineServiceClient extends AuditFields {
     id: ID;
     customer_id: ID;
     customer?: Customer | null;

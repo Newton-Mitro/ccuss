@@ -2,12 +2,12 @@
 
 namespace App\CostomerMgmt\Models;
 
-use Database\Factories\OnlineServiceUserFactory;
+use Database\Factories\OnlineServiceClientFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class OnlineServiceUser extends Model
+class OnlineServiceClient extends Model
 {
     use HasFactory;
 
@@ -38,6 +38,6 @@ class OnlineServiceUser extends Model
 
     protected static function newFactory()
     {
-        return OnlineServiceUserFactory::new();
+        return OnlineServiceClientFactory::new();
     }
 }

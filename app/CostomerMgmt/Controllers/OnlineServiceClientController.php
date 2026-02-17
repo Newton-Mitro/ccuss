@@ -3,7 +3,7 @@
 namespace App\CostomerMgmt\Controllers;
 
 use App\CostomerMgmt\Models\Customer;
-use App\CostomerMgmt\Models\OnlineServiceUser;
+use App\CostomerMgmt\Models\OnlineServiceClient;
 use App\CostomerMgmt\Requests\StoreOnlineClientRequest;
 use App\CostomerMgmt\Requests\UpdateOnlineClientRequest;
 use App\Http\Controllers\Controller;
@@ -12,7 +12,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Support\Facades\Hash;
 
-class OnlineServiceUserController extends Controller
+class OnlineServiceClientController extends Controller
 {
     public function index(): Response
     {
@@ -20,7 +20,7 @@ class OnlineServiceUserController extends Controller
         $perPage = $filters['per_page'] ?? 10;
 
         $search = $filters['search'] ?? '';
-        $query = OnlineServiceUser::with('customer')
+        $query = OnlineServiceClient::with('customer')
             ->latest()
             ->where(function ($q) use ($search) {
                 $q->where('username', 'like', "%{$search}%")
@@ -32,10 +32,10 @@ class OnlineServiceUserController extends Controller
                     });
             });
 
-        $onlineClients = $query->paginate($perPage)->withQueryString();
+        $onlineServiceClients = $query->paginate($perPage)->withQueryString();
 
-        return Inertia::render('customer-mgmt/online-service-users/index', [
-            'onlineClients' => $onlineClients,
+        return Inertia::render('customer-mgmt/online-service-clients/index', [
+            'onlineServiceClients' => $onlineServiceClients,
             'filters' => $filters,
         ]);
     }
@@ -44,7 +44,7 @@ class OnlineServiceUserController extends Controller
     {
         $customers = Customer::select('id', 'name', 'customer_no')->get();
 
-        return Inertia::render('customer-mgmt/online-service-users/create', [
+        return Inertia::render('customer-mgmt/online-service-clients/create', [
             'customers' => $customers,
         ]);
     }
@@ -63,29 +63,29 @@ class OnlineServiceUserController extends Controller
 
         $data['password'] = Hash::make($data['password']);
 
-        OnlineServiceUser::create($data);
+        OnlineServiceClient::create($data);
 
         return redirect()
-            ->route('online-service-users.index')
-            ->with('success', 'Online client created successfully.');
+            ->route('online-service-clients.index')
+            ->with('success', 'Online service client created successfully.');
     }
 
 
-    public function show(OnlineServiceUser $onlineServiceUser): Response
+    public function show(OnlineServiceClient $onlineServiceClient): Response
     {
-        return Inertia::render('customer-mgmt/online-service-users/show', [
-            'onlineServiceUser' => $onlineServiceUser->load('customer'),
+        return Inertia::render('customer-mgmt/online-service-clients/show', [
+            'onlineServiceClient' => $onlineServiceClient->load('customer'),
         ]);
     }
 
-    public function edit(OnlineServiceUser $onlineServiceUser): Response
+    public function edit(OnlineServiceClient $onlineServiceClient): Response
     {
-        return Inertia::render('customer-mgmt/online-service-users/edit', [
-            'onlineServiceUser' => $onlineServiceUser->load('customer'),
+        return Inertia::render('customer-mgmt/online-service-clients/edit', [
+            'onlineServiceClient' => $onlineServiceClient->load('customer'),
         ]);
     }
 
-    public function update(UpdateOnlineClientRequest $request, OnlineServiceUser $onlineServiceUser): RedirectResponse
+    public function update(UpdateOnlineClientRequest $request, OnlineServiceClient $onlineServiceClient): RedirectResponse
     {
         $data = $request->validated();
 
@@ -104,20 +104,20 @@ class OnlineServiceUserController extends Controller
             unset($data['password']);
         }
 
-        $onlineServiceUser->update($data);
+        $onlineServiceClient->update($data);
 
         return redirect()
-            ->route('online-service-users.index')
-            ->with('success', 'Online client updated successfully.');
+            ->route('online-service-clients.index')
+            ->with('success', 'Online service client updated successfully.');
     }
 
 
-    public function destroy(OnlineServiceUser $onlineServiceUser): RedirectResponse
+    public function destroy(OnlineServiceClient $onlineServiceClient): RedirectResponse
     {
-        $onlineServiceUser->delete();
+        $onlineServiceClient->delete();
 
         return redirect()
-            ->route('online-service-users.index')
-            ->with('success', 'Online client deleted successfully.');
+            ->route('online-service-clients.index')
+            ->with('success', 'Online service client deleted successfully.');
     }
 }

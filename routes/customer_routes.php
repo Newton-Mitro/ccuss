@@ -5,7 +5,7 @@ use App\CostomerMgmt\Controllers\CustomerController;
 use App\CostomerMgmt\Controllers\CustomerFamilyRelationController;
 use App\CostomerMgmt\Controllers\CustomerIntroducerController;
 use App\CostomerMgmt\Controllers\CustomerSignatureController;
-use App\CostomerMgmt\Controllers\OnlineServiceUserController;
+use App\CostomerMgmt\Controllers\OnlineServiceClientController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified'])
@@ -126,5 +126,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::middleware(['auth', 'verified'])
     ->group(function () {
-        Route::resource('/online-service-users', OnlineServiceUserController::class);
+        Route::resource('/online-service-clients', OnlineServiceClientController::class);
     });

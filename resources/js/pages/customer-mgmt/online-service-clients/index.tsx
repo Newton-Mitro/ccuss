@@ -12,13 +12,13 @@ import Swal from 'sweetalert2';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
-import { OnlineServiceUser } from '../../../types/customer';
+import { OnlineServiceClient } from '../../../types/customer';
 
 export default function Index() {
     const { props } = usePage<
         SharedData & {
-            onlineClients: {
-                data: OnlineServiceUser[];
+            onlineServiceClients: {
+                data: OnlineServiceClient[];
                 links: { url: string | null; label: string; active: boolean }[];
                 current_page: number;
                 per_page: number;
@@ -27,7 +27,7 @@ export default function Index() {
         }
     >();
 
-    const { onlineClients, filters } = props;
+    const { onlineServiceClients, filters } = props;
 
     const { data, setData, get } = useForm({
         search: filters.search || '',
@@ -37,7 +37,7 @@ export default function Index() {
 
     // Debounced search
     const handleSearch = () => {
-        get('/online-service-users', {
+        get('/online-service-clients', {
             preserveState: true,
             replace: true,
         });
@@ -64,7 +64,7 @@ export default function Index() {
             confirmButtonText: 'Yes, delete it!',
         }).then((result) => {
             if (result.isConfirmed) {
-                router.delete(`/online-service-users/${id}`, {
+                router.delete(`/online-service-clients/${id}`, {
                     preserveScroll: true,
                     preserveState: true,
                     onSuccess: () =>
@@ -76,24 +76,24 @@ export default function Index() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Online Service Users', href: '/online-service-users' },
+        { title: 'Online Service Clients', href: '/online-service-clients' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Online Service Users" />
+            <Head title="Online Service Clients" />
             <div className="space-y-4 text-foreground">
                 {/* Header */}
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
-                        title="Online Service Users"
+                        title="Online Service Clients"
                         description="Manage customer online access accounts."
                     />
                     <Link
-                        href="/online-service-users/create"
+                        href="/online-service-clients/create"
                         className="inline-block rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                     >
-                        Add Online Service User
+                        Add Online Service Client
                     </Link>
                 </div>
 
@@ -136,15 +136,16 @@ export default function Index() {
                             </tr>
                         </thead>
                         <tbody>
-                            {onlineClients.data.length > 0 ? (
-                                onlineClients.data.map((user, i) => (
+                            {onlineServiceClients.data.length > 0 ? (
+                                onlineServiceClients.data.map((user, i) => (
                                     <tr
                                         key={user.id}
                                         className="border-b border-border even:bg-muted/30"
                                     >
                                         <td className="px-2 py-1">
-                                            {(onlineClients.current_page - 1) *
-                                                onlineClients.per_page +
+                                            {(onlineServiceClients.current_page -
+                                                1) *
+                                                onlineServiceClients.per_page +
                                                 i +
                                                 1}
                                         </td>
@@ -187,7 +188,7 @@ export default function Index() {
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link
-                                                                href={`/online-service-users/${user.id}`}
+                                                                href={`/online-service-clients/${user.id}`}
                                                                 className="text-primary hover:text-primary/80"
                                                             >
                                                                 <Eye className="h-5 w-5" />
@@ -201,7 +202,7 @@ export default function Index() {
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link
-                                                                href={`/online-service-users/${user.id}/edit`}
+                                                                href={`/online-service-clients/${user.id}/edit`}
                                                                 className="text-green-600 hover:text-green-500"
                                                             >
                                                                 <Pencil className="h-5 w-5" />
@@ -276,7 +277,7 @@ export default function Index() {
                     </div>
 
                     <div className="flex gap-1">
-                        {onlineClients.links.map((link, i) => (
+                        {onlineServiceClients.links.map((link, i) => (
                             <Link
                                 key={i}
                                 href={link.url || '#'}

@@ -73,7 +73,7 @@ export default function ViewAddress({ address }: Props) {
                     </div>
                 </div>
 
-                <section className="space-y-6 rounded-md border bg-card p-4">
+                <section className="space-y-10 rounded-md border bg-card p-8">
                     <div className="">
                         <div className="mb-4 flex items-center gap-2 text-sm font-semibold">
                             <UserIcon size={16} />

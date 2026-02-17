@@ -8,17 +8,31 @@ import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-import { OnlineServiceUser } from '../../../types/customer';
+import { OnlineServiceClient } from '../../../types/customer';
 import { CustomerSearchInput } from '../customers/customer-search-input';
 
-export default function CreateOnlineUser() {
-    const { data, setData, post, processing, errors, clearErrors } =
-        useForm<Partial<OnlineServiceUser | null>>(null);
-    const [customerName, setCustomerName] = useState('');
+interface EditOnlineClientProps {
+    onlineServiceClient: OnlineServiceClient;
+}
 
-    // Generic handler for input/select changes with error reset
+export default function EditOnlineClient({
+    onlineServiceClient,
+}: EditOnlineClientProps) {
+    const { data, setData, put, processing, errors, clearErrors } = useForm({
+        customer_id: onlineServiceClient.customer_id || '',
+        customer_name: onlineServiceClient.customer?.name || '',
+        username: onlineServiceClient.username || '',
+        email: onlineServiceClient.email || '',
+        phone: onlineServiceClient.phone || '',
+        password: '',
+        status: onlineServiceClient.status || 'ACTIVE',
+    });
+
+    const [customerName, setCustomerName] = useState(data.customer_name || '');
+
+    // Generic handler for input/select changes with immediate error reset
     const handleChange =
-        (field: keyof OnlineServiceUser) =>
+        (field: keyof OnlineServiceClient) =>
         (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
             setData(field, e.target.value);
             if (errors[field]) clearErrors(field);
@@ -26,36 +40,43 @@ export default function CreateOnlineUser() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/online-service-users', {
+
+        // Frontend validation: either email or phone required
+        if (!data.email && !data.phone) {
+            toast.error('Either email or phone must be provided.');
+            return;
+        }
+
+        put(`/online-service-clients/${onlineServiceClient.id}`, {
             preserveScroll: true,
             onError: () => toast.error('Please fix errors in the form.'),
-            onSuccess: () => toast.success('Online user created successfully!'),
+            onSuccess: () => toast.success('Online user updated successfully!'),
         });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Online Service Users', href: '/online-service-users' },
-        { title: 'Add Online Service User', href: '' },
+        { title: 'Online Clients', href: '/online-service-clients' },
+        { title: 'Edit Online Service Client', href: '' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Add Online Service User" />
+            <Head title="Edit Online Service Client" />
 
             <div className="animate-in space-y-6 text-foreground fade-in">
                 <HeadingSmall
-                    title="Add Online Service User"
-                    description="Select a customer and fill in credentials, login info, and status."
+                    title="Edit Online Service Client"
+                    description="Update customer account information, login credentials, and contact details."
                 />
 
                 <form
                     onSubmit={handleSubmit}
-                    className="rounded-xl border border-border bg-card/80 p-6 shadow backdrop-blur-sm transition-all duration-300"
+                    className="rounded-xl border border-border bg-card/90 p-6 shadow backdrop-blur-sm transition-all duration-300"
                 >
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                        {/* Customer */}
+                        {/* Customer Selection */}
                         <div className="col-span-full">
-                            <Label>Customer</Label>
+                            <Label>Linked Customer</Label>
                             <CustomerSearchInput
                                 onSelect={(customer) => {
                                     setData('customer_id', customer.id);
@@ -68,7 +89,7 @@ export default function CreateOnlineUser() {
                         <div>
                             <Label>Customer ID</Label>
                             <Input
-                                value={data.customer_id || ''}
+                                value={data.customer_id}
                                 disabled
                                 className="h-8 text-sm"
                             />
@@ -89,7 +110,7 @@ export default function CreateOnlineUser() {
                             <Label>Username</Label>
                             <Input
                                 placeholder="Username"
-                                value={data.username || ''}
+                                value={data.username}
                                 onChange={handleChange('username')}
                                 className="h-8 text-sm"
                             />
@@ -101,7 +122,7 @@ export default function CreateOnlineUser() {
                             <Input
                                 type="email"
                                 placeholder="Email"
-                                value={data.email || ''}
+                                value={data.email}
                                 onChange={handleChange('email')}
                                 className="h-8 text-sm"
                             />
@@ -112,7 +133,7 @@ export default function CreateOnlineUser() {
                             <Label>Phone</Label>
                             <Input
                                 placeholder="Phone"
-                                value={data.phone || ''}
+                                value={data.phone}
                                 onChange={handleChange('phone')}
                                 className="h-8 text-sm"
                             />
@@ -120,11 +141,11 @@ export default function CreateOnlineUser() {
                         </div>
 
                         <div>
-                            <Label>Password</Label>
+                            <Label>New Password</Label>
                             <Input
                                 type="password"
-                                placeholder="Password"
-                                value={data.password || ''}
+                                placeholder="Leave blank to keep current password"
+                                value={data.password}
                                 onChange={handleChange('password')}
                                 className="h-8 text-sm"
                             />
@@ -154,7 +175,9 @@ export default function CreateOnlineUser() {
                             disabled={processing}
                             className="w-36 bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-md"
                         >
-                            {processing ? 'Saving...' : 'Save User'}
+                            {processing
+                                ? 'Updating...'
+                                : 'Update Online Service Client'}
                         </Button>
                     </div>
                 </form>

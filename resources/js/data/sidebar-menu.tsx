@@ -66,10 +66,10 @@ export const sidebarMenu: SidebarItem[] = [
                 match_path: 'introducers',
             },
             {
-                name: 'Online Service Users',
+                name: 'Online Service Clients',
                 icon: <i className="fa-solid fa-street-view" />,
-                path: '/online-service-users',
-                match_path: 'online-service-users',
+                path: '/online-service-clients',
+                match_path: 'online-service-clients',
             },
         ],
     },

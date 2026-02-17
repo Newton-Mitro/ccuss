@@ -8,7 +8,7 @@ use App\CostomerMgmt\Models\CustomerFamilyRelation;
 use App\CostomerMgmt\Models\CustomerIntroducer;
 use App\CostomerMgmt\Models\CustomerPhoto;
 use App\CostomerMgmt\Models\CustomerSignature;
-use App\CostomerMgmt\Models\OnlineServiceUser;
+use App\CostomerMgmt\Models\OnlineServiceClient;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -86,7 +86,7 @@ class CustomerSeeder extends Seeder
             // ---------------------------
             // Online Service User (1)
             // ---------------------------
-            OnlineServiceUser::create([
+            OnlineServiceClient::create([
                 'customer_id' => $customer->id,
                 'username' => 'user_' . $customer->customer_no,
                 'email' => $customer->email,

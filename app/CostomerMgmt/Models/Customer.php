@@ -70,7 +70,7 @@ class Customer extends Model
 
     public function onlineUser(): HasOne
     {
-        return $this->hasOne(OnlineServiceUser::class);
+        return $this->hasOne(OnlineServiceClient::class);
     }
 
     public function kycVerifier(): BelongsTo
