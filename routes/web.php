@@ -18,6 +18,9 @@ Route::get('/', function (Request $request) {
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+Route::get('/home', [DashboardController::class, 'home'])
+    ->middleware(['auth', 'verified'])
+    ->name('auth-home');
 
 Route::middleware(['auth', 'verified'])
     ->group(function () {
