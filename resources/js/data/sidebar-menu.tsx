@@ -98,8 +98,8 @@ export const sidebarMenu: SidebarItem[] = [
             {
                 name: 'Vouchers',
                 icon: <i className="fa-solid fa-file-invoice-dollar" />,
-                path: '/vouchers/list',
-                match_path: 'vouchers-list',
+                path: '/vouchers',
+                match_path: 'vouchers',
             },
             {
                 name: 'Voucher Entries',
@@ -108,14 +108,14 @@ export const sidebarMenu: SidebarItem[] = [
                     {
                         name: 'Debit Vouchers',
                         icon: <i className="fa-solid fa-arrow-down"></i>,
-                        path: '/vouchers/debit/create',
-                        match_path: 'vouchers/debit',
+                        path: '/debit-voucher/create',
+                        match_path: 'debit-voucher',
                     },
                     {
                         name: 'Credit Vouchers',
                         icon: <i className="fa-solid fa-arrow-up"></i>,
-                        path: '/vouchers/credit/create',
-                        match_path: 'vouchers/credit',
+                        path: '/credit-voucher/create',
+                        match_path: 'credit-voucher',
                     },
                     {
                         name: 'Journal Vouchers',

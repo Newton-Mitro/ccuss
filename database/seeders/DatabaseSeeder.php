@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\UserRolePermissions\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -31,10 +30,11 @@ class DatabaseSeeder extends Seeder
         User::factory(10)->create();
 
         $this->call([
+            FiscalYearSeeder::class,
             PermissionSeeder::class,
             BranchSeeder::class,
             CustomerSeeder::class,
-            AccountSeeder::class,
+            ChartOfAccountsSeeder::class,
             VoucherEntrySeeder::class,
         ]);
 

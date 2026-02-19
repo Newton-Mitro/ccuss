@@ -12,7 +12,17 @@ class VoucherFactory extends Factory
 
     public function definition()
     {
-        $types = ['CASH_RECEIPT', 'CASH_PAYMENT', 'JOURNAL'];
+        $types = [
+            'RECEIPT',
+            'PAYMENT',
+            'JOURNAL',
+            'PURCHASE',
+            'SALE',
+            'DEBIT NOTE',
+            'CREDIT NOTE',
+            'PETTY CASH',
+            'CONTRA',
+        ];
         $status = ['DRAFT', 'APPROVED', 'POSTED', 'CANCELLED'];
         $creatorId = User::factory();
 

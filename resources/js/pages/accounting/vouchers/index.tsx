@@ -13,28 +13,11 @@ import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-
-interface VoucherLine {
-    id: number;
-    account_id: number;
-    debit: number;
-    credit: number;
-    narration?: string;
-}
-
-interface VoucherEntry {
-    id: number;
-    voucher_no: string;
-    reference?: string;
-    voucher_type: 'CASH_RECEIPT' | 'CASH_PAYMENT' | 'JOURNAL';
-    voucher_date: string;
-    status: 'DRAFT' | 'APPROVED' | 'POSTED' | 'CANCELLED';
-    lines: VoucherLine[];
-}
+import { Voucher } from '../../../types/accounting';
 
 interface VoucherPageProps {
     vouchers: {
-        data: VoucherEntry[];
+        data: Voucher[];
         links: { url: string | null; label: string; active: boolean }[];
     };
     filters: Record<string, string>;
@@ -52,11 +35,12 @@ export default function Index() {
         processing,
     } = useForm({
         search: filters.search || '',
+        status: filters.status || 'all',
         per_page: Number(filters.per_page) || 10,
         page: Number(filters.page) || 1,
     });
 
-    // Fetch with debounce
+    // Fetch vouchers on filter/search change
     useEffect(() => {
         const delay = setTimeout(() => {
             get(route('vouchers.index'), {
@@ -65,7 +49,7 @@ export default function Index() {
             });
         }, 400);
         return () => clearTimeout(delay);
-    }, [data.search, data.per_page, data.page]);
+    }, [data.search, data.status, data.per_page, data.page]);
 
     const handleDelete = (id: number, voucherNo: string) => {
         const isDark = document.documentElement.classList.contains('dark');
@@ -98,8 +82,7 @@ export default function Index() {
         { title: 'Vouchers', href: '/vouchers' },
     ];
 
-    // Helper to calculate totals
-    const getTotals = (lines?: VoucherLine[]) => {
+    const getTotals = (lines?: { debit: number; credit: number }[]) => {
         const totalDebit =
             lines?.reduce((sum, l) => sum + Number(l.debit), 0) || 0;
         const totalCredit =
@@ -120,7 +103,7 @@ export default function Index() {
                     />
                 </div>
 
-                {/* Search */}
+                {/* Filters */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <input
                         type="text"
@@ -132,28 +115,21 @@ export default function Index() {
                         }}
                         className="h-9 w-full max-w-sm rounded-md border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                     />
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">
-                            Show
-                        </span>
-                        <select
-                            value={data.per_page}
-                            onChange={(e) => {
-                                setData('per_page', Number(e.target.value));
-                                setData('page', 1);
-                            }}
-                            className="h-9 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-                        >
-                            {[5, 10, 20, 50, 100, 500].map((n) => (
-                                <option key={n} value={n}>
-                                    {n}
-                                </option>
-                            ))}
-                        </select>
-                        <span className="text-sm text-muted-foreground">
-                            records
-                        </span>
-                    </div>
+
+                    <select
+                        value={data.status}
+                        onChange={(e) => {
+                            setData('status', e.target.value);
+                            setData('page', 1);
+                        }}
+                        className="h-9 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none sm:max-w-xs"
+                    >
+                        <option value="all">All Statuses</option>
+                        <option value="DRAFT">Draft</option>
+                        <option value="APPROVED">Approved</option>
+                        <option value="POSTED">Posted</option>
+                        <option value="CANCELLED">Cancelled</option>
+                    </select>
                 </div>
 
                 {/* Table */}
@@ -162,12 +138,14 @@ export default function Index() {
                         <thead className="sticky top-0 bg-muted">
                             <tr>
                                 {[
+                                    'Voucher Date',
+                                    'Voucher Type',
                                     'Voucher No',
-                                    'Reference',
-                                    'Date',
-                                    'Type',
-                                    'Debit',
-                                    'Credit',
+                                    'Fiscal Year',
+                                    'Period',
+                                    'Branch',
+                                    'Total Debit',
+                                    'Total Credit',
                                     'Status',
                                     'Actions',
                                 ].map((h) => (
@@ -191,21 +169,25 @@ export default function Index() {
                                             className="border-b border-border even:bg-muted/30"
                                         >
                                             <td className="px-2 py-1">
-                                                {v.voucher_no}
-                                            </td>
-                                            <td className="px-2 py-1">
-                                                {v.reference || '-'}
-                                            </td>
-                                            <td className="px-2 py-1">
                                                 {new Date(
                                                     v.voucher_date,
                                                 ).toLocaleDateString()}
                                             </td>
                                             <td className="px-2 py-1">
-                                                {v.voucher_type.replace(
-                                                    '_',
-                                                    ' ',
-                                                )}
+                                                {v.voucher_type || '-'}
+                                            </td>
+                                            <td className="px-2 py-1">
+                                                {v.voucher_no}
+                                            </td>
+                                            <td className="px-2 py-1">
+                                                {v.fiscal_year?.code || '-'}
+                                            </td>
+                                            <td className="px-2 py-1">
+                                                {v.fiscal_period?.period_name ||
+                                                    '-'}
+                                            </td>
+                                            <td className="px-2 py-1">
+                                                {v.branch?.name || '-'}
                                             </td>
                                             <td className="px-2 py-1">
                                                 {totalDebit.toFixed(2)}
@@ -290,7 +272,7 @@ export default function Index() {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={8}
+                                        colSpan={10}
                                         className="px-4 py-6 text-center text-muted-foreground"
                                     >
                                         No vouchers found.
@@ -301,9 +283,32 @@ export default function Index() {
                     </table>
                 </div>
 
-                {/* Pagination */}
+                {/* Pagination + Records Dropdown */}
                 <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
-                    <div className="flex gap-1">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">
+                            Show
+                        </span>
+                        <select
+                            value={data.per_page}
+                            onChange={(e) => {
+                                setData('per_page', Number(e.target.value));
+                                setData('page', 1);
+                            }}
+                            className="h-9 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+                        >
+                            {[5, 10, 20, 50, 100, 500].map((n) => (
+                                <option key={n} value={n}>
+                                    {n}
+                                </option>
+                            ))}
+                        </select>
+                        <span className="text-sm text-muted-foreground">
+                            records
+                        </span>
+                    </div>
+
+                    <div className="flex gap-1 overflow-x-auto">
                         {vouchers.links.map((link, i) => (
                             <Link
                                 key={i}

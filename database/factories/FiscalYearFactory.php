@@ -18,8 +18,13 @@ class FiscalYearFactory extends Factory
             'code' => 'FY-' . $start->format('Y') . '-' . $end->format('y'),
             'start_date' => $start->format('Y-m-d'),
             'end_date' => $end->format('Y-m-d'),
-            'is_active' => $this->faker->boolean(50),
-            'is_closed' => $this->faker->boolean(20),
+            'is_active' => false,
+            'is_closed' => false,
         ];
+    }
+
+    public function active(): static
+    {
+        return $this->state(['is_active' => true]);
     }
 }

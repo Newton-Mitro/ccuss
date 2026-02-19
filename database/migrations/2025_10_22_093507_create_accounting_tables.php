@@ -48,7 +48,17 @@ return new class extends Migration {
             $table->foreignId('branch_id')->nullable()->constrained('branches')->nullOnDelete();
 
             $table->timestamp('voucher_date')->useCurrent()->comment('Posting timestamp');
-            $table->enum('voucher_type', ['CASH_RECEIPT', 'CASH_PAYMENT', 'JOURNAL']);
+            $table->enum('voucher_type', [
+                'RECEIPT',
+                'PAYMENT',
+                'JOURNAL',
+                'PURCHASE',
+                'SALE',
+                'DEBIT NOTE',
+                'CREDIT NOTE',
+                'PETTY CASH',
+                'CONTRA',
+            ]);
             $table->string('voucher_no', 50);
             $table->string('reference', 50)->nullable();
 

@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Accounting\Models\Account;
+use App\Accounting\Models\Voucher;
 use App\Accounting\Models\VoucherLine;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -9,20 +11,24 @@ class VoucherLineFactory extends Factory
 {
     protected $model = VoucherLine::class;
 
-    public function definition()
+    public function definition(): array
     {
-        $debit = $this->faker->randomFloat(2, 0, 1000);
-        $credit = $debit > 0 ? 0 : $this->faker->randomFloat(2, 0, 1000);
+        $amount = $this->faker->randomFloat(2, 100, 1000);
+        $isDebit = $this->faker->boolean();
 
         return [
-            'voucher_id' => null, // assign manually
-            'account_id' => null, // assign manually
+            'voucher_id' => Voucher::factory(),
+            'account_id' => Account::factory(),
+
             'subledger_id' => null,
             'subledger_type' => null,
             'associate_ledger_id' => null,
+
             'narration' => $this->faker->optional()->sentence(),
-            'debit' => $debit,
-            'credit' => $credit,
+
+            // ✅ XOR enforced
+            'debit' => $isDebit ? $amount : 0,
+            'credit' => $isDebit ? 0 : $amount,
         ];
     }
 }

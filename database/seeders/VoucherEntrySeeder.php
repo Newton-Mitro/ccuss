@@ -5,72 +5,67 @@ namespace Database\Seeders;
 use App\Accounting\Models\Account;
 use App\Accounting\Models\Voucher;
 use App\Accounting\Models\VoucherLine;
+use App\Accounting\Models\FiscalYear;
+use App\Accounting\Models\FiscalPeriod;
 use App\Branch\Models\Branch;
 use App\UserRolePermissions\Models\User;
 use Illuminate\Database\Seeder;
-use Faker\Factory as Faker;
-use Illuminate\Support\Str;
+use Illuminate\Support\Arr;
 
 class VoucherEntrySeeder extends Seeder
 {
     public function run(): void
     {
-        $faker = Faker::create();
+        $branches = Branch::pluck('id')->all();
+        $users = User::pluck('id')->all();
+        $accounts = Account::pluck('id')->all();
+        $fiscalYears = FiscalYear::pluck('id')->all();
+        $fiscalPeriods = FiscalPeriod::pluck('id')->all();
 
-        $branches = Branch::pluck('id')->toArray();
-        $users = User::pluck('id')->toArray();
-        $accounts = Account::pluck('id')->toArray();
-
-        // Create 20 vouchers
-        for ($i = 0; $i < 20; $i++) {
-
-            $voucher = Voucher::create([
-                'voucher_date' => $faker->dateTimeThisYear(),
-                'voucher_type' => $faker->randomElement([
-                    'CASH_RECEIPT',
-                    'CASH_PAYMENT',
-                    'JOURNAL',
-                ]),
-                'voucher_no' => 'V-' . strtoupper(Str::random(8)),
-                'reference' => $faker->optional()->regexify('[A-Z0-9]{6,10}'),
-
-                'branch_id' => $faker->optional()->randomElement($branches),
-                'created_by' => $faker->randomElement($users),
-                'approved_by' => null,
-                'approved_at' => null,
-
-                'narration' => $faker->sentence(),
+        Voucher::factory()
+            ->count(20)
+            ->state(fn() => [
+                'branch_id' => Arr::random($branches),
+                'created_by' => Arr::random($users),
+                'fiscal_year_id' => Arr::random($fiscalYears),
+                'fiscal_period_id' => Arr::random($fiscalPeriods),
                 'status' => 'DRAFT',
-            ]);
+            ])
+            ->create()
+            ->each(function (Voucher $voucher) use ($accounts) {
 
-            // Each voucher must have at least 2 lines
-            $lineCount = rand(2, 5);
+                // 🔒 Always even → always balanced
+                $pairCount = rand(1, 3); // 2–6 lines
+    
+                for ($i = 0; $i < $pairCount; $i++) {
 
-            for ($j = 0; $j < $lineCount; $j++) {
+                    $amount = fake()->randomFloat(2, 100, 5000);
 
-                $amount = $faker->randomFloat(2, 100, 5000);
+                    $debitAccount = Arr::random($accounts);
+                    $creditAccount = Arr::random($accounts);
 
-                // Enforce debit XOR credit
-                $isDebit = $j % 2 === 0;
+                    // 🔹 Debit line
+                    VoucherLine::factory()->create([
+                        'voucher_id' => $voucher->id,
+                        'account_id' => $debitAccount,
+                        'debit' => $amount,
+                        'credit' => 0,
+                    ]);
 
-                VoucherLine::create([
-                    'voucher_id' => $voucher->id,
-                    'account_id' => $faker->randomElement($accounts),
-
-                    'subledger_type' => $faker->optional()->randomElement([
-                        'App\\Accounting\\Models\\DepositAccount',
-                        'App\\Accounting\\Models\\LoanAccount',
-                        'App\\Accounting\\Models\\Vendor',
-                    ]),
-                    'subledger_id' => $faker->optional()->numberBetween(1, 50),
-
-                    'associate_ledger_id' => $faker->optional()->numberBetween(1, 50),
-                    'narration' => $faker->optional()->sentence(),
-
-                    'debit' => $isDebit ? $amount : 0,
-                    'credit' => $isDebit ? 0 : $amount,
-                ]);
-            }
-        }
+                    // 🔹 Credit line (optionally subledgered)
+                    VoucherLine::factory()->create([
+                        'voucher_id' => $voucher->id,
+                        'account_id' => $creditAccount,
+                        'debit' => 0,
+                        'credit' => $amount,
+                        'subledger_type' => fake()->optional()->randomElement([
+                            'App\\Accounting\\Models\\DepositAccount',
+                            'App\\Accounting\\Models\\LoanAccount',
+                            'App\\Accounting\\Models\\Vendor',
+                        ]),
+                        'subledger_id' => fake()->optional()->numberBetween(1, 50),
+                    ]);
+                }
+            });
     }
 }

@@ -2,12 +2,15 @@
 
 namespace App\Accounting\Models;
 
+use Database\Factories\VoucherLineFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class VoucherLine extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'voucher_id',
         'account_id',
@@ -37,5 +40,10 @@ class VoucherLine extends Model
     public function subledger(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    protected static function newFactory()
+    {
+        return VoucherLineFactory::new();
     }
 }

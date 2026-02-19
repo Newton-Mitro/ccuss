@@ -2,11 +2,14 @@
 
 namespace App\Accounting\Models;
 
+use Database\Factories\AccountBalanceFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AccountBalance extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'account_id',
         'fiscal_period_id',
@@ -31,5 +34,10 @@ class AccountBalance extends Model
     public function fiscalPeriod(): BelongsTo
     {
         return $this->belongsTo(FiscalPeriod::class);
+    }
+
+    protected static function newFactory()
+    {
+        return AccountBalanceFactory::new();
     }
 }

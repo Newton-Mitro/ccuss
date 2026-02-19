@@ -2,6 +2,7 @@
 
 namespace App\Accounting\Models;
 
+use Database\Factories\AccountFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -53,5 +54,10 @@ class Account extends Model
     public function balances(): HasMany
     {
         return $this->hasMany(AccountBalance::class);
+    }
+
+    protected static function newFactory()
+    {
+        return AccountFactory::new();
     }
 }

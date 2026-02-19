@@ -4,12 +4,15 @@ namespace App\Accounting\Models;
 
 use App\Branch\Models\Branch;
 use App\UserRolePermissions\Models\User;
+use Database\Factories\VoucherFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Voucher extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'fiscal_year_id',
         'fiscal_period_id',
@@ -63,5 +66,10 @@ class Voucher extends Model
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    protected static function newFactory()
+    {
+        return VoucherFactory::new();
     }
 }

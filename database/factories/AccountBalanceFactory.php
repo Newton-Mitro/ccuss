@@ -2,7 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Accounting\Models\Account;
 use App\Accounting\Models\AccountBalance;
+use App\Accounting\Models\FiscalPeriod;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AccountBalanceFactory extends Factory
@@ -17,8 +19,8 @@ class AccountBalanceFactory extends Factory
         $closing = $opening + $debit - $credit;
 
         return [
-            'account_id' => null, // assign manually
-            'fiscal_period_id' => null, // assign manually
+            'account_id' => Account::factory(),
+            'fiscal_period_id' => FiscalPeriod::factory(),
             'opening_balance' => $opening,
             'debit_total' => $debit,
             'credit_total' => $credit,

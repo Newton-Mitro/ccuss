@@ -8,27 +8,41 @@ import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-import { VoucherLine } from '../../../types/accounting';
+import { Voucher, VoucherLine } from '../../../types/accounting';
 
-export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
-    const { accounts, fiscalYears, fiscalPeriods, branches, flash } = usePage()
-        .props as any;
+interface VoucherEditProps {
+    voucher?: Voucher;
+    accounts: { id: number; name: string }[];
+    fiscalYears: { id: number; code: string }[];
+    fiscalPeriods: {
+        id: number;
+        period_name: string;
+        fiscal_year_id: number;
+    }[];
+    branches: { id: number; name: string }[];
+    flash: { success?: string; error?: string };
+    backUrl: string;
+}
+
+export default function VoucherEdit({ backUrl }: { backUrl: string }) {
+    const { voucher, accounts, fiscalYears, fiscalPeriods, branches, flash } =
+        usePage().props as unknown as VoucherEditProps;
 
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
         if (flash?.error) toast.error(flash.error);
     }, [flash]);
 
-    const { data, setData, post, processing } = useForm({
-        voucher_no: '',
-        voucher_date: '',
-        voucher_type: 'DEBIT NOTE',
-        fiscal_year_id: undefined,
-        fiscal_period_id: undefined,
-        branch_id: undefined,
-        status: 'DRAFT',
-        narration: '',
-        lines: [] as VoucherLine[],
+    const { data, setData, post, put, processing } = useForm({
+        voucher_no: voucher?.voucher_no || '',
+        voucher_date: voucher?.voucher_date || '',
+        voucher_type: voucher?.voucher_type || '',
+        fiscal_year_id: voucher?.fiscal_year_id || undefined,
+        fiscal_period_id: voucher?.fiscal_period_id || undefined,
+        branch_id: voucher?.branch_id || undefined,
+        status: voucher?.status || 'draft',
+        narration: voucher?.narration || '',
+        lines: voucher?.lines || ([] as VoucherLine[]),
     });
 
     const handleBack = () => {
@@ -50,7 +64,7 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
             ...data.lines,
             {
                 id: Date.now(),
-                voucher_id: 0, // <-- replaced voucher?.id
+                voucher_id: voucher?.id || 0,
                 account_id: 0,
                 account_code: '',
                 subledger_name: '',
@@ -71,23 +85,42 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/vouchers', { preserveScroll: true });
+        if (voucher?.id) {
+            put(`/vouchers/${voucher.id}`, { preserveScroll: true });
+        } else {
+            post(`/vouchers`, { preserveScroll: true });
+        }
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Vouchers', href: '/vouchers' },
-        { title: 'Create Debit Voucher', href: '' },
+        {
+            title: voucher
+                ? `Edit Voucher ${voucher.voucher_no}`
+                : 'Create Voucher',
+            href: '',
+        },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Create Debit Voucher" />
+            <Head
+                title={
+                    voucher
+                        ? `Edit Voucher ${voucher.voucher_no}`
+                        : 'Create Voucher'
+                }
+            />
 
             {/* Header */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <HeadingSmall
-                    title="Create Debit Voucher"
-                    description="Enter debit voucher details"
+                    title={
+                        voucher
+                            ? `Edit Voucher ${voucher.voucher_no}`
+                            : 'Create Voucher'
+                    }
+                    description="Edit voucher details"
                 />
                 <button
                     type="button"
@@ -105,7 +138,7 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                 className="mt-4 space-y-4 rounded-md border border-border bg-card p-4 sm:p-6"
             >
                 {/* Voucher Info */}
-                <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-2 md:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
                     <div>
                         <Label className="text-xs">Voucher No</Label>
                         <Input
@@ -131,11 +164,24 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
 
                     <div>
                         <Label className="text-xs">Type</Label>
-                        <Input
-                            value="DEBIT NOTE"
-                            disabled
-                            className="h-8 text-sm"
-                        />
+                        <select
+                            value={data.voucher_type}
+                            onChange={(e) =>
+                                setData('voucher_type', e.target.value)
+                            }
+                            className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                        >
+                            <option value="">Select Voucher Type</option>
+                            <option value="RECEIPT">RECEIPT</option>
+                            <option value="PAYMENT">PAYMENT</option>
+                            <option value="JOURNAL">JOURNAL</option>
+                            <option value="PURCHASE">PURCHASE</option>
+                            <option value="SALE">SALE</option>
+                            <option value="DEBIT NOTE">DEBIT NOTE</option>
+                            <option value="CREDIT NOTE">CREDIT NOTE</option>
+                            <option value="PETTY CASH">PETTY CASH</option>
+                            <option value="CONTRA">CONTRA</option>
+                        </select>
                     </div>
 
                     <div>
@@ -151,7 +197,7 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                             className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                         >
                             <option value="">Select Fiscal Year</option>
-                            {fiscalYears.map((fy: any) => (
+                            {fiscalYears.map((fy) => (
                                 <option key={fy.id} value={fy.id}>
                                     {fy.code}
                                 </option>
@@ -174,11 +220,11 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                             <option value="">Select Fiscal Period</option>
                             {fiscalPeriods
                                 .filter(
-                                    (fp: any) =>
+                                    (fp) =>
                                         fp.fiscal_year_id ===
                                         data.fiscal_year_id,
                                 )
-                                .map((fp: any) => (
+                                .map((fp) => (
                                     <option key={fp.id} value={fp.id}>
                                         {fp.period_name}
                                     </option>
@@ -196,7 +242,7 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                             className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                         >
                             <option value="">Select Branch</option>
-                            {branches.map((b: any) => (
+                            {branches.map((b) => (
                                 <option key={b.id} value={b.id}>
                                     {b.name}
                                 </option>
@@ -206,63 +252,28 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
 
                     <div>
                         <Label className="text-xs">Status</Label>
-                        <Input value="DRAFT" disabled className="h-8 text-sm" />
+                        <select
+                            disabled
+                            value={data.status}
+                            onChange={(e) => setData('status', e.target.value)}
+                            className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                        >
+                            <option value="DRAFT">DRAFT</option>
+                            <option value="APPROVED">APPROVED</option>
+                            <option value="POSTED">POSTED</option>
+                            <option value="CANCELLED">CANCELLED</option>
+                        </select>
                     </div>
 
                     <div className="sm:col-span-2 md:col-span-3">
                         <Label className="text-xs">Description</Label>
                         <Input
-                            value={data.narration}
+                            value={data.narration || ''}
                             onChange={(e) =>
                                 setData('narration', e.target.value)
                             }
                             className="h-8 text-sm"
                         />
-                    </div>
-                </div>
-
-                {/* Ledger Selection */}
-                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
-                    <div>
-                        <Label className="text-xs">Cash Ledger</Label>
-                        <select
-                            value={data.cash_ledger_id || ''}
-                            onChange={(e) =>
-                                setData(
-                                    'cash_ledger_id',
-                                    Number(e.target.value),
-                                )
-                            }
-                            className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                        >
-                            <option value="">Select Cash Ledger</option>
-                            {accounts.map((acc: any) => (
-                                <option key={acc.id} value={acc.id}>
-                                    {acc.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div>
-                        <Label className="text-xs">Personal Ledger</Label>
-                        <select
-                            value={data.personal_ledger_id || ''}
-                            onChange={(e) =>
-                                setData(
-                                    'personal_ledger_id',
-                                    Number(e.target.value),
-                                )
-                            }
-                            className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                        >
-                            <option value="">Select Personal Ledger</option>
-                            {accounts.map((acc: any) => (
-                                <option key={acc.id} value={acc.id}>
-                                    {acc.name}
-                                </option>
-                            ))}
-                        </select>
                     </div>
                 </div>
 
@@ -286,7 +297,8 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                                     {[
                                         'GL & Subledger Account',
                                         'Account Number',
-                                        'Amount',
+                                        'Debit',
+                                        'Credit',
                                         'Narration',
                                         'Actions',
                                     ].map((h) => (
@@ -367,11 +379,26 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                                         <td className="px-2 py-1">
                                             <Input
                                                 type="number"
-                                                value={line.amount || 0}
+                                                value={line.debit}
                                                 onChange={(e) =>
                                                     handleLineChange(
                                                         index,
-                                                        'amount',
+                                                        'debit',
+                                                        Number(e.target.value),
+                                                    )
+                                                }
+                                                className="h-8 text-sm"
+                                            />
+                                        </td>
+
+                                        <td className="px-2 py-1">
+                                            <Input
+                                                type="number"
+                                                value={line.credit}
+                                                onChange={(e) =>
+                                                    handleLineChange(
+                                                        index,
+                                                        'credit',
                                                         Number(e.target.value),
                                                     )
                                                 }
@@ -587,7 +614,7 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                         ) : (
                             <CheckCheck />
                         )}
-                        Create Debit Voucher
+                        {voucher ? 'Update Voucher' : 'Create Voucher'}
                     </Button>
                 </div>
             </form>

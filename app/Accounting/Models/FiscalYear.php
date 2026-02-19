@@ -2,11 +2,14 @@
 
 namespace App\Accounting\Models;
 
+use Database\Factories\FiscalYearFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FiscalYear extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'code',
         'start_date',
@@ -30,5 +33,10 @@ class FiscalYear extends Model
     public function vouchers(): HasMany
     {
         return $this->hasMany(Voucher::class);
+    }
+
+    protected static function newFactory()
+    {
+        return FiscalYearFactory::new();
     }
 }

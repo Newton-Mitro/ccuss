@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Accounting\Models\Account;
 use Illuminate\Database\Seeder;
 
-class AccountSeeder extends Seeder
+class ChartOfAccountsSeeder extends Seeder
 {
     public function run()
     {

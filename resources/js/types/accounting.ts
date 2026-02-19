@@ -1,71 +1,105 @@
-export type GlAccountType =
-    | 'ASSET'
-    | 'LIABILITY'
-    | 'EQUITY'
-    | 'INCOME'
-    | 'EXPENSE';
-export type GlAccountCategory = 'GROUP' | 'GL';
+import { Branch } from './branch';
+import { User } from './user';
 
-export interface GlAccount {
+// Fiscal Year
+export interface FiscalYear {
     id: number;
-    code: string; // Unique GL code
-    name: string; // Account name
-    type: GlAccountType; // GL account category
-    category: GlAccountCategory; // GROUP or GL
-    parent_id?: number | null; // Optional parent account reference
+    code: string; // e.g. "FY-2025-26"
+    start_date: string; // ISO date
+    end_date: string; // ISO date
+    is_active: boolean;
+    is_closed: boolean;
     created_at: string;
     updated_at: string;
-    children?: GlAccount[]; // Optional for nested/grouped accounts
 }
 
-export type SubledgerType =
-    | 'DEPOSIT'
-    | 'LOAN'
-    | 'SHARE'
-    | 'INSURANCE'
-    | 'CASH'
-    | 'FIXED_ASSET'
-    | 'PAYROLL'
-    | 'VENDOR'
-    | 'FEE'
-    | 'INTEREST'
-    | 'PROTECTION_PREMIUM'
-    | 'PROTECTION_RENEWAL'
-    | 'ADVANCE_DEPOSIT';
-
-export type AssociateLedgerType =
-    | 'FEE'
-    | 'FINE'
-    | 'PROVISION'
-    | 'INTEREST'
-    | 'DIVIDEND'
-    | 'REBATE'
-    | 'PROTECTION_PREMIUM'
-    | 'PROTECTION_RENEWAL';
-
-export interface JournalEntry {
+// Fiscal Period
+export interface FiscalPeriod {
     id: number;
-    tx_code?: string; // Transaction code (e.g., PAY_VOUCHER)
-    tx_ref?: string; // Transaction reference (e.g., cheque_no)
-    posted_at: string; // Timestamp
-    branch_id?: number; // Nullable branch reference
-    user_id?: number; // Nullable user reference
-    memo?: string; // Remarks or description
+    fiscal_year_id: number;
+    period_name: string; // e.g. "JAN-2026"
+    start_date: string;
+    end_date: string;
+    is_open: boolean;
     created_at: string;
     updated_at: string;
-    lines?: JournalLine[]; // Optional relation
 }
 
-export interface JournalLine {
+// Account
+export interface Account {
     id: number;
-    journal_entry_id: number;
-    gl_account_id: number;
-    subledger_type?: SubledgerType | null;
+    code: string;
+    name: string;
+    type: 'ASSET' | 'LIABILITY' | 'EQUITY' | 'INCOME' | 'EXPENSE';
+    is_control_account: boolean;
+    is_active: boolean;
+    is_leaf: boolean;
+    parent_id?: number | null;
+    created_at: string;
+    updated_at: string;
+}
+
+// Voucher Line
+export interface VoucherLine {
+    id: number;
+    voucher_id: number;
+    account_id: number;
+    account?: Account;
     subledger_id?: number | null;
-    associate_ledger_type?: AssociateLedgerType | null;
+    subledger_type?: string | null;
     associate_ledger_id?: number | null;
+    narration?: string | null;
     debit: number;
     credit: number;
+    created_at: string;
+    updated_at: string;
+}
+
+// Voucher
+export interface Voucher {
+    id: number;
+    fiscal_year_id?: number | null;
+    fiscal_period_id?: number | null;
+    branch_id?: number | null;
+    voucher_date: string; // timestamp
+    voucher_type:
+        | 'RECEIPT'
+        | 'PAYMENT'
+        | 'JOURNAL'
+        | 'PURCHASE'
+        | 'SALE'
+        | 'DEBIT NOTE'
+        | 'CREDIT NOTE'
+        | 'PETTY CASH'
+        | 'CONTRA';
+    voucher_no: string;
+    reference?: string | null;
+    approved_by?: number | null;
+    approved_at?: string | null;
+    created_by: number;
+    narration: string;
+    status: 'DRAFT' | 'APPROVED' | 'POSTED' | 'CANCELLED';
+    created_at: string;
+    updated_at: string;
+
+    // Optional relations
+    fiscal_year?: FiscalYear;
+    fiscal_period?: FiscalPeriod;
+    branch?: Branch;
+    creator?: User;
+    approver?: User;
+    lines?: VoucherLine[];
+}
+
+// Account Balance
+export interface AccountBalance {
+    id: number;
+    account_id: number;
+    fiscal_period_id: number;
+    opening_balance: number;
+    debit_total: number;
+    credit_total: number;
+    closing_balance: number;
     created_at: string;
     updated_at: string;
 }

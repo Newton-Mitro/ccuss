@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Accounting\Models\FiscalPeriod;
+use App\Accounting\Models\FiscalYear;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class FiscalPeriodFactory extends Factory
@@ -15,11 +16,11 @@ class FiscalPeriodFactory extends Factory
         $end = (clone $start)->modify('+1 month');
 
         return [
-            'fiscal_year_id' => null, // assign later or via relationship
-            'period_name' => strtoupper($start->format('M-Y')),
-            'start_date' => $start->format('Y-m-d'),
-            'end_date' => $end->format('Y-m-d'),
-            'is_open' => $this->faker->boolean(80),
+            'fiscal_year_id' => FiscalYear::factory(),
+            'period_name' => strtoupper($this->faker->monthName) . '-' . now()->year,
+            'start_date' => now()->startOfMonth(),
+            'end_date' => now()->endOfMonth(),
+            'is_open' => true,
         ];
     }
 }
