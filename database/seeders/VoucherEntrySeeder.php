@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Accounting\Models\Account;
+use App\Accounting\Models\LedgerAccount;
 use App\Accounting\Models\Voucher;
 use App\Accounting\Models\VoucherLine;
 use App\Accounting\Models\FiscalYear;
@@ -18,7 +18,7 @@ class VoucherEntrySeeder extends Seeder
     {
         $branches = Branch::pluck('id')->all();
         $users = User::pluck('id')->all();
-        $accounts = Account::pluck('id')->all();
+        $ledger_accounts = LedgerAccount::pluck('id')->all();
         $fiscalYears = FiscalYear::pluck('id')->all();
         $fiscalPeriods = FiscalPeriod::pluck('id')->all();
 
@@ -32,7 +32,7 @@ class VoucherEntrySeeder extends Seeder
                 'status' => 'DRAFT',
             ])
             ->create()
-            ->each(function (Voucher $voucher) use ($accounts) {
+            ->each(function (Voucher $voucher) use ($ledger_accounts) {
 
                 // 🔒 Always even → always balanced
                 $pairCount = rand(1, 3); // 2–6 lines
@@ -41,13 +41,13 @@ class VoucherEntrySeeder extends Seeder
 
                     $amount = fake()->randomFloat(2, 100, 5000);
 
-                    $debitAccount = Arr::random($accounts);
-                    $creditAccount = Arr::random($accounts);
+                    $debitAccount = Arr::random($ledger_accounts);
+                    $creditAccount = Arr::random($ledger_accounts);
 
                     // 🔹 Debit line
                     VoucherLine::factory()->create([
                         'voucher_id' => $voucher->id,
-                        'account_id' => $debitAccount,
+                        'ledger_account_id' => $debitAccount,
                         'debit' => $amount,
                         'credit' => 0,
                     ]);
@@ -55,7 +55,7 @@ class VoucherEntrySeeder extends Seeder
                     // 🔹 Credit line (optionally subledgered)
                     VoucherLine::factory()->create([
                         'voucher_id' => $voucher->id,
-                        'account_id' => $creditAccount,
+                        'ledger_account_id' => $creditAccount,
                         'debit' => 0,
                         'credit' => $amount,
                         'subledger_type' => fake()->optional()->randomElement([

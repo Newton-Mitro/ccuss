@@ -5,7 +5,7 @@ CREATE TABLE cash_accounts (
     account_number VARCHAR(50) UNIQUE NOT NULL,  -- if type BANK
     branch_name VARCHAR(150),   -- if type BANK
     type ENUM('VAULT','DRAWER','BANK','PETTY_CASH','CASH_EQUIVALENT') NOT NULL,
-    branch_id BIGINT UNSIGNED,                  -- nullable for global/head office accounts
+    branch_id BIGINT UNSIGNED,                  -- nullable for global/head office ledger_accounts
     gl_account_id BIGINT UNSIGNED NOT NULL,  -- Asset GL for vault cash
     location VARCHAR(255),
     currency CHAR(3) NOT NULL DEFAULT 'BDT',

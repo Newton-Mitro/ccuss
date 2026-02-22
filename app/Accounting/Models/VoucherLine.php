@@ -13,7 +13,7 @@ class VoucherLine extends Model
     use HasFactory;
     protected $fillable = [
         'voucher_id',
-        'account_id',
+        'ledger_account_id',
         'subledger_id',
         'subledger_type',
         'associate_ledger_id',
@@ -34,7 +34,7 @@ class VoucherLine extends Model
 
     public function account(): BelongsTo
     {
-        return $this->belongsTo(Account::class);
+        return $this->belongsTo(LedgerAccount::class, 'ledger_account_id');
     }
 
     public function subledger(): MorphTo

@@ -2,8 +2,11 @@
 
 namespace App\Accounting\Controllers;
 
+use App\Accounting\Models\FiscalPeriod;
 use App\Accounting\Models\FiscalYear;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -27,7 +30,7 @@ class FiscalYearController
             }
         }
 
-        $perPage = $request->input('per_page', 10);
+        $perPage = $request->input('per_page', 20);
 
         $fiscalYears = $query->latest()
             ->paginate($perPage)
@@ -51,12 +54,23 @@ class FiscalYearController
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'is_active' => 'boolean',
-            'is_closed' => 'boolean',
         ]);
 
-        FiscalYear::create($validated);
+        DB::transaction(function () use ($validated) {
 
-        return redirect()->route('fiscal-years.index')->with('success', 'Fiscal Year created.');
+            // Deactivate all other fiscal years if this one is active
+            if (!empty($validated['is_active'])) {
+                FiscalYear::where('is_active', true)->update(['is_active' => false]);
+            }
+
+            $fiscalYear = FiscalYear::create($validated);
+
+            // Auto-generate fiscal periods
+            $this->generateFiscalPeriods($fiscalYear);
+        });
+
+        return redirect()->route('fiscal-years.index')
+            ->with('success', 'Fiscal Year created with periods.');
     }
 
     public function edit(FiscalYear $fiscalYear): Response
@@ -76,14 +90,42 @@ class FiscalYearController
             'is_closed' => 'boolean',
         ]);
 
-        $fiscalYear->update($validated);
+        DB::transaction(function () use ($validated, $fiscalYear) {
 
-        return redirect()->route('fiscal-years.index')->with('success', 'Fiscal Year updated.');
+            if (!empty($validated['is_active'])) {
+                FiscalYear::where('id', '!=', $fiscalYear->id)
+                    ->where('is_active', true)
+                    ->update(['is_active' => false]);
+            }
+
+            $fiscalYear->update($validated);
+        });
+
+        return redirect()->route('fiscal-years.index')
+            ->with('success', 'Fiscal Year updated.');
     }
 
     public function destroy(FiscalYear $fiscalYear)
     {
         $fiscalYear->delete();
         return redirect()->route('fiscal-years.index')->with('success', 'Fiscal Year deleted.');
+    }
+
+    protected function generateFiscalPeriods(FiscalYear $fiscalYear): void
+    {
+        $start = Carbon::parse($fiscalYear->start_date)->startOfMonth();
+        $end = Carbon::parse($fiscalYear->end_date)->endOfMonth();
+
+        while ($start->lte($end)) {
+            FiscalPeriod::create([
+                'fiscal_year_id' => $fiscalYear->id,
+                'period_name' => strtoupper($start->format('M-Y')),
+                'start_date' => $start->copy()->startOfMonth(),
+                'end_date' => $start->copy()->endOfMonth(),
+                'is_open' => true,
+            ]);
+
+            $start->addMonth();
+        }
     }
 }

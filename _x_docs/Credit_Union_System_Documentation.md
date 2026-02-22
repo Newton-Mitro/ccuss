@@ -18,7 +18,7 @@
 
 ## 1️⃣ Overview
 
-A modular credit union system designed to manage **member accounts, deposits, loans, and cash operations**. It ensures regulatory compliance, robust permissions, and detailed financial tracking.
+A modular credit union system designed to manage **member ledger_accounts, deposits, loans, and cash operations**. It ensures regulatory compliance, robust permissions, and detailed financial tracking.
 
 ---
 
@@ -98,7 +98,7 @@ erDiagram
 
 - If inactive: Status changed to `DORMANT`.
 - For account closure:
-    - All balances settled and accounts closed.
+    - All balances settled and ledger_accounts closed.
     - Membership revoked, and audit logs updated.
 
 ### 🔁 High-Level Customer Flow Diagram
@@ -118,7 +118,7 @@ flowchart TD
 
 ## 4️⃣ Products (Deposit, Loan, Insurance)
 
-**Purpose:** Define financial products and link them to GL accounts.
+**Purpose:** Define financial products and link them to GL ledger_accounts.
 
 - **Deposit Products**: Savings, RD, FD with interest methods.
 - **Loan Products**: Principal, interest, fees, collateral rules.
@@ -257,7 +257,7 @@ flowchart TD
 
 **Purpose:** Record all financial transactions.
 
-- **GL Accounts**: Chart of accounts hierarchy.
+- **GL Accounts**: Chart of ledger_accounts hierarchy.
 - **Journal Entries & Lines**: Capture debits and credits with references.
 
 ✅ **ER Diagram**
@@ -371,12 +371,12 @@ erDiagram
 
 - **Accrual:**
     - Calculated daily, monthly, or quarterly based on product rules.
-    - Accrued interest posted periodically to customer accounts or income ledgers.
+    - Accrued interest posted periodically to customer ledger_accounts or income ledgers.
 - **For Loans:**
     - Interest due is part of the repayment schedule.
     - Accrual continues on overdue amounts (compounded if applicable).
 - **For Deposits:**
-    - Interest credited to savings or fixed deposit accounts as per rules.
+    - Interest credited to savings or fixed deposit ledger_accounts as per rules.
 
 ---
 
@@ -433,7 +433,7 @@ flowchart TD
 
 ### 5️⃣ Clearing & Settlement
 
-- **In-house:** Funds transferred instantly between accounts.
+- **In-house:** Funds transferred instantly between ledger_accounts.
 - **External Bank:**
     - Sent to clearing house.
     - Await confirmation before crediting recipient account.
@@ -569,13 +569,13 @@ Track all user actions, including staff and members.
 
 Log creation, closure, and modifications.
 
-| Event                         | Description               | Important Fields                                    |
-| ----------------------------- | ------------------------- | --------------------------------------------------- |
-| Account Creation              | New account opened        | account_id, customer_id, type, branch_id, timestamp |
-| Account Closure               | Account closed            | account_id, customer_id, timestamp, reason          |
-| Account Suspension/Activation | Account status change     | account_id, status, timestamp                       |
-| Account Type Change           | Change in account type    | account_id, old_type, new_type, timestamp           |
-| Signature Update              | Account signature updated | account_id, timestamp                               |
+| Event                         | Description               | Important Fields                                           |
+| ----------------------------- | ------------------------- | ---------------------------------------------------------- |
+| Account Creation              | New account opened        | ledger_account_id, customer_id, type, branch_id, timestamp |
+| Account Closure               | Account closed            | ledger_account_id, customer_id, timestamp, reason          |
+| Account Suspension/Activation | Account status change     | ledger_account_id, status, timestamp                       |
+| Account Type Change           | Change in account type    | ledger_account_id, old_type, new_type, timestamp           |
+| Signature Update              | Account signature updated | ledger_account_id, timestamp                               |
 
 ---
 
@@ -583,15 +583,15 @@ Log creation, closure, and modifications.
 
 Track all financial movements.
 
-| Event                     | Description                        | Important Fields                                            |
-| ------------------------- | ---------------------------------- | ----------------------------------------------------------- |
-| Deposit                   | Deposit into account               | transaction_id, account_id, amount, timestamp, teller_id    |
-| Withdrawal                | Withdrawal from account            | transaction_id, account_id, amount, timestamp, teller_id    |
-| Transfer                  | Funds transferred between accounts | transaction_id, from_account, to_account, amount, timestamp |
-| Cheque Issuance           | Cheque issued                      | cheque_no, account_id, amount, timestamp                    |
-| Cheque Clearance/Dishonor | Cheque cleared or bounced          | cheque_no, account_id, status, timestamp                    |
-| Fee Deduction             | Fees deducted                      | account_id, fee_type, amount, timestamp                     |
-| Interest Posting          | Interest credited/debited          | account_id, amount, interest_type, timestamp                |
+| Event                     | Description                               | Important Fields                                                |
+| ------------------------- | ----------------------------------------- | --------------------------------------------------------------- |
+| Deposit                   | Deposit into account                      | transaction_id, ledger_account_id, amount, timestamp, teller_id |
+| Withdrawal                | Withdrawal from account                   | transaction_id, ledger_account_id, amount, timestamp, teller_id |
+| Transfer                  | Funds transferred between ledger_accounts | transaction_id, from_account, to_account, amount, timestamp     |
+| Cheque Issuance           | Cheque issued                             | cheque_no, ledger_account_id, amount, timestamp                 |
+| Cheque Clearance/Dishonor | Cheque cleared or bounced                 | cheque_no, ledger_account_id, status, timestamp                 |
+| Fee Deduction             | Fees deducted                             | ledger_account_id, fee_type, amount, timestamp                  |
+| Interest Posting          | Interest credited/debited                 | ledger_account_id, amount, interest_type, timestamp             |
 
 ---
 

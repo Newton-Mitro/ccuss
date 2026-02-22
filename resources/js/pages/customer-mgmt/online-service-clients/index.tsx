@@ -87,7 +87,7 @@ export default function Index() {
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
                         title="Online Service Clients"
-                        description="Manage customer online access accounts."
+                        description="Manage customer online access ledger_accounts."
                     />
                     <Link
                         href="/online-service-clients/create"

@@ -2,13 +2,13 @@
 
 namespace App\Accounting\Models;
 
-use Database\Factories\AccountFactory;
+use Database\Factories\LedgerAccountFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Account extends Model
+class LedgerAccount extends Model
 {
     use HasFactory;
 
@@ -31,13 +31,13 @@ class Account extends Model
     // 🔗 Parent relation
     public function children(): HasMany
     {
-        return $this->hasMany(Account::class, 'parent_id')->orderBy('code');
+        return $this->hasMany(LedgerAccount::class, 'parent_id')->orderBy('code');
     }
 
     // Parent relationship
     public function parent(): BelongsTo
     {
-        return $this->belongsTo(Account::class, 'parent_id');
+        return $this->belongsTo(LedgerAccount::class, 'parent_id');
     }
 
     // 🧠 Recursive relationship (optional for full hierarchy)
@@ -58,6 +58,6 @@ class Account extends Model
 
     protected static function newFactory()
     {
-        return AccountFactory::new();
+        return LedgerAccountFactory::new();
     }
 }

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->enum('type', ['ASSET', 'LIABILITY', 'EQUITY', 'INCOME', 'EXPENSE'])
                 ->comment('GL account category');
 
-            $table->boolean('is_leaf')->default(true)->comment('Indicates if this is a leaf node in the chart of accounts');
+            $table->boolean('is_leaf')->default(true)->comment('Indicates if this is a leaf node in the chart of ledger_accounts');
 
             $table->foreignId('parent_id')
                 ->nullable()

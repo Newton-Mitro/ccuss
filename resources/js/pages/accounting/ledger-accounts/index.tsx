@@ -109,13 +109,13 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (editingAccount) {
-            put(route('accounts.update', editingAccount.id), {
+            put(route('ledger_accounts.update', editingAccount.id), {
                 preserveScroll: true,
                 onSuccess: closeModal,
                 onError: () => toast.error('Failed to update account.'),
             });
         } else {
-            post(route('accounts.store'), {
+            post(route('ledger_accounts.store'), {
                 preserveScroll: true,
                 onSuccess: closeModal,
                 onError: () => toast.error('Failed to create account.'),
@@ -132,8 +132,8 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
 
     const expandAll = () => {
         const allIds = [];
-        const collect = (accounts) => {
-            for (const acc of accounts) {
+        const collect = (ledger_accounts) => {
+            for (const acc of ledger_accounts) {
                 if (acc.is_control_account) {
                     allIds.push(acc.id);
                     if (acc.children?.length) collect(acc.children);
@@ -161,7 +161,7 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
             confirmButtonText: `Yes, delete it!`,
         }).then((result) => {
             if (result.isConfirmed) {
-                router.delete(route('accounts.destroy', id), {
+                router.delete(route('ledger_accounts.destroy', id), {
                     preserveScroll: true,
                     onSuccess: () =>
                         toast.success('Account deleted successfully!'),
@@ -177,8 +177,8 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
         const draggedId = active.id;
         const targetId = over.id.replace('group-', '');
         router.post(
-            route('accounts.move'),
-            { account_id: draggedId, parent_id: targetId },
+            route('ledger_accounts.move'),
+            { ledger_account_id: draggedId, parent_id: targetId },
             {
                 preserveScroll: true,
                 onSuccess: () => toast.success('Account moved successfully!'),
@@ -188,9 +188,9 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
     };
 
     /* ----------------- RENDER TREE ----------------- */
-    const renderTree = (accounts, level = 0) => (
+    const renderTree = (ledger_accounts, level = 0) => (
         <ul className="list-none">
-            {accounts.map((acc) => {
+            {ledger_accounts.map((acc) => {
                 const children = acc.childrenRecursive || []; // <-- recursive children
 
                 const content = (
@@ -337,7 +337,7 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
     return (
         <CustomAuthLayout
             breadcrumbs={[
-                { title: 'General Ledger', href: '/accounts' },
+                { title: 'General Ledger', href: '/ledger_accounts' },
                 { title: 'Chart of Accounts', href: '' },
             ]}
         >
@@ -346,7 +346,7 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
             <div className="animate-in space-y-6 text-foreground fade-in">
                 <HeadingSmall
                     title="Chart of Accounts"
-                    description="Manage your ledger accounts hierarchy"
+                    description="Manage your ledger ledger_accounts hierarchy"
                 />
 
                 <div className="flex items-center justify-between">
@@ -383,7 +383,7 @@ export default function GlAccountsIndex({ glAccounts, groupAccounts, flash }) {
                             </ul>
                         ) : (
                             <p className="text-sm text-muted-foreground">
-                                No accounts yet.
+                                No ledger_accounts yet.
                             </p>
                         )}
                     </DndContext>

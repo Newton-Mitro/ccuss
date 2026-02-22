@@ -1,394 +1,536 @@
-import HeadingSmall from '@/components/heading-small';
-import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { ArrowLeft, CheckCheck, Loader2, Plus, Trash2 } from 'lucide-react';
+import { useEffect } from 'react';
+import toast from 'react-hot-toast';
+import HeadingSmall from '../../../components/heading-small';
+import { SubLedgerSearchInput } from '../../../components/sub-ledger-search-input';
+import AppDatePicker from '../../../components/ui/app_date_picker';
+import { Button } from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label';
+import { Select } from '../../../components/ui/select';
+import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { BreadcrumbItem } from '../../../types';
+import { VoucherLine } from '../../../types/accounting';
+import { LedgerSearchInput } from '../components/ledger-search-input';
 
-import { Head } from '@inertiajs/react';
-import { motion } from 'framer-motion';
-import { useMemo, useState } from 'react';
+export default function JournalVoucherEntry({ backUrl }: { backUrl: string }) {
+    const { ledger_accounts, fiscalYears, fiscalPeriods, branches, flash } =
+        usePage().props as any;
 
-import { LedgerSearch } from '../../../components/ledger-search';
-import { Textarea } from '../../../components/ui/text-area';
+    useEffect(() => {
+        if (flash?.success) toast.success(flash.success);
+        if (flash?.error) toast.error(flash.error);
+    }, [flash]);
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+    const { data, setData, post, processing } = useForm({
+        voucher_no: '',
+        voucher_date: new Date().toISOString().split('T')[0],
+        voucher_type: 'JOURNAL_OR_NON_CASH',
+        fiscal_year_id: undefined,
+        fiscal_period_id: undefined,
+        branch_id: undefined,
+        status: 'DRAFT',
+        narration: '',
+        cash_type: '',
+        lines: [] as VoucherLine[],
+    });
 
-import { ChevronRight, Plus, Search, Trash2 } from 'lucide-react';
-
-export default function JournalVoucherEntry() {
-    // Single row shape
-    const emptyRow = {
-        account_id: '',
-        gl_account_id: '',
-        gl_account_name: '',
-        sl_account_id: '',
-        sl_account_name: '',
-        instrument_name: '',
-        debit: '',
-        credit: '',
+    const handleBack = () => {
+        router.visit(backUrl, { preserveState: true, preserveScroll: true });
     };
 
-    const [rows, setRows] = useState([emptyRow]);
-
-    const [voucherNo, setVoucherNo] = useState('');
-    const [date, setDate] = useState('');
-    const [reference, setReference] = useState('');
-    const [narration, setNarration] = useState('');
-
-    const addRow = () => setRows([...rows, { ...emptyRow }]);
-    const removeRow = (index) => setRows(rows.filter((_, i) => i !== index));
-
-    // Placeholder handlers — replace with your modal or API search
-    const onSearchSL = (index) => {
-        console.log('Search SL for row:', index);
-        // open modal or fetch list
+    const handleLineChange = (
+        index: number,
+        field: keyof VoucherLine,
+        value: any,
+    ) => {
+        const updatedLines = [...data.lines];
+        updatedLines[index] = { ...updatedLines[index], [field]: value };
+        setData('lines', updatedLines);
     };
 
-    const onSearchInstrument = (index) => {
-        console.log('Search Instrument for row:', index);
-        // open modal or fetch list
+    const addLine = () => {
+        setData('lines', [
+            ...data.lines,
+            {
+                id: Date.now(),
+                voucher_id: 0,
+                ledger_account_id: 0,
+                account_code: '',
+                subledger_name: '',
+                subledger_type: '',
+                associate_ledger_Code: '',
+                debit: 0,
+                credit: 0,
+                narration: '',
+            } as VoucherLine,
+        ]);
     };
 
-    // Totals calculation
-    const totals = useMemo(() => {
-        let debitTotal = 0;
-        let creditTotal = 0;
+    const removeLine = (index: number) => {
+        const updatedLines = [...data.lines];
+        updatedLines.splice(index, 1);
+        setData('lines', updatedLines);
+    };
 
-        rows.forEach((r) => {
-            debitTotal += parseFloat(r.debit || 0);
-            creditTotal += parseFloat(r.credit || 0);
-        });
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        post('/vouchers', { preserveScroll: true });
+    };
 
-        return { debitTotal, creditTotal };
-    }, [rows]);
-
-    const canSubmit =
-        totals.debitTotal === totals.creditTotal && totals.debitTotal > 0;
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Vouchers', href: '/vouchers/list' },
+        { title: 'Create Journal / Non-Cash Voucher', href: '' },
+    ];
 
     return (
-        <CustomAuthLayout
-            breadcrumbs={[
-                { title: 'Accounting', href: '/accounting' },
-                { title: 'Journal Voucher', href: '' },
-            ]}
-        >
-            <Head title="Journal Voucher Entry" />
+        <CustomAuthLayout breadcrumbs={breadcrumbs}>
+            <Head title="Create Journal / Non-Cash Voucher" />
 
-            <div className="animate-in space-y-6 text-foreground fade-in">
+            {/* Header */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <HeadingSmall
-                    title="Journal Voucher Entry"
-                    description="Create and manage journal vouchers efficiently"
+                    title="Create Journal / Non-Cash Voucher"
+                    description="Enter journal / non-cash voucher details"
                 />
-
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mx-auto w-full space-y-4"
+                <button
+                    type="button"
+                    onClick={handleBack}
+                    className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
                 >
-                    <Card className="rounded-xl border border-gray-200 shadow-sm dark:border-gray-800">
-                        <CardContent className="space-y-4 p-4">
-                            {/* Voucher Info */}
-                            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                                <div>
-                                    <Label>Voucher No</Label>
-                                    <Input
-                                        className="h-9 text-sm"
-                                        value={voucherNo}
-                                        onChange={(e) =>
-                                            setVoucherNo(e.target.value)
-                                        }
-                                    />
-                                </div>
+                    <ArrowLeft className="h-4 w-4" />
+                    Back
+                </button>
+            </div>
 
-                                <div>
-                                    <Label>Date</Label>
-                                    <Input
-                                        type="date"
-                                        className="h-9 text-sm"
-                                        value={date}
-                                        onChange={(e) =>
-                                            setDate(e.target.value)
-                                        }
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label>Reference</Label>
-                                    <Input
-                                        className="h-9 text-sm"
-                                        value={reference}
-                                        onChange={(e) =>
-                                            setReference(e.target.value)
-                                        }
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Journal Rows */}
-                            <div className="space-y-2">
-                                {/* Header Row (desktop only) */}
-                                <div className="hidden items-end rounded-lg border-b border-gray-300 bg-gray-100 p-3 text-sm font-medium md:flex dark:border-gray-700 dark:bg-gray-800">
-                                    <div className="w-full md:w-24">Acc ID</div>
-                                    <div className="w-full md:flex-2">
-                                        GL Account
-                                    </div>
-                                    <div className="w-full md:w-24">SL ID</div>
-                                    <div className="w-full md:flex-2">
-                                        SL Account
-                                    </div>
-                                    <div className="w-full md:flex-2">
-                                        Instrument
-                                    </div>
-                                    <div className="w-full text-right md:w-28">
-                                        Debit
-                                    </div>
-                                    <div className="w-full text-right md:w-28">
-                                        Credit
-                                    </div>
-                                    <div className="w-full md:w-9"></div>
-                                </div>
-
-                                {rows.map((row, i) => (
-                                    <div
-                                        key={i}
-                                        className="flex flex-col gap-3 rounded-lg bg-gray-50 p-3 md:flex-row md:items-end md:gap-2 md:p-0 dark:bg-gray-900/40"
-                                    >
-                                        {/* Account ID */}
-                                        <div className="w-full md:flex-1">
-                                            <Label className="text-xs md:hidden">
-                                                Account ID
-                                            </Label>
-                                            <Input
-                                                className="h-9 text-sm"
-                                                value={row.account_id}
-                                                onChange={(e) => {
-                                                    row.account_id =
-                                                        e.target.value;
-                                                    setRows([...rows]);
-                                                }}
-                                            />
-                                        </div>
-
-                                        {/* GL Account Search */}
-                                        <div className="w-full md:flex-2">
-                                            <Label className="text-xs md:hidden">
-                                                GL Account
-                                            </Label>
-                                            <LedgerSearch
-                                                query={row.gl_account_name}
-                                                onQueryChange={(v) => {
-                                                    row.gl_account_name = v;
-                                                    setRows([...rows]);
-                                                }}
-                                                onSelect={(ledger) => {
-                                                    row.gl_account_id =
-                                                        ledger.id;
-                                                    row.gl_account_name =
-                                                        ledger.full_display ??
-                                                        ledger.name;
-                                                    setRows([...rows]);
-                                                }}
-                                                placeholder="Search GL account..."
-                                            />
-                                        </div>
-
-                                        {/* SL ID */}
-                                        <div className="w-full md:flex-1">
-                                            <Label className="text-xs md:hidden">
-                                                SL ID
-                                            </Label>
-                                            <Input
-                                                className="h-9 text-sm"
-                                                value={row.sl_account_id}
-                                                onChange={(e) => {
-                                                    row.sl_account_id =
-                                                        e.target.value;
-                                                    setRows([...rows]);
-                                                }}
-                                            />
-                                        </div>
-
-                                        {/* SL Account Search */}
-                                        <div className="w-full md:flex-2">
-                                            <Label className="text-xs md:hidden">
-                                                SL Account
-                                            </Label>
-                                            <div className="flex gap-1">
-                                                <Input
-                                                    placeholder="Search SL..."
-                                                    className="h-9 text-sm"
-                                                    value={row.sl_account_name}
-                                                    onChange={(e) => {
-                                                        row.sl_account_name =
-                                                            e.target.value;
-                                                        setRows([...rows]);
-                                                    }}
-                                                />
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    size="icon"
-                                                    className="h-9 w-9"
-                                                    onClick={() =>
-                                                        onSearchSL(i)
-                                                    }
-                                                >
-                                                    <Search className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </div>
-
-                                        {/* Instrument Search */}
-                                        <div className="w-full md:flex-2">
-                                            <Label className="text-xs md:hidden">
-                                                Instrument
-                                            </Label>
-                                            <div className="flex gap-1">
-                                                <Input
-                                                    placeholder="Search Instrument..."
-                                                    className="h-9 text-sm"
-                                                    value={row.instrument_name}
-                                                    onChange={(e) => {
-                                                        row.instrument_name =
-                                                            e.target.value;
-                                                        setRows([...rows]);
-                                                    }}
-                                                />
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    size="icon"
-                                                    className="h-9 w-9"
-                                                    onClick={() =>
-                                                        onSearchInstrument(i)
-                                                    }
-                                                >
-                                                    <Search className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </div>
-
-                                        {/* Debit */}
-                                        <div className="w-full md:w-28">
-                                            <Label className="text-xs md:hidden">
-                                                Debit
-                                            </Label>
-                                            <Input
-                                                type="number"
-                                                className="h-9 text-sm"
-                                                value={row.debit}
-                                                onChange={(e) => {
-                                                    const value = parseFloat(
-                                                        e.target.value || 0,
-                                                    );
-                                                    row.debit = value;
-                                                    if (value > 0)
-                                                        row.credit = 0;
-                                                    setRows([...rows]);
-                                                }}
-                                            />
-                                        </div>
-
-                                        {/* Credit */}
-                                        <div className="w-full md:w-28">
-                                            <Label className="text-xs md:hidden">
-                                                Credit
-                                            </Label>
-                                            <Input
-                                                type="number"
-                                                className="h-9 text-sm"
-                                                value={row.credit}
-                                                onChange={(e) => {
-                                                    const value = parseFloat(
-                                                        e.target.value || 0,
-                                                    );
-                                                    row.credit = value;
-                                                    if (value > 0)
-                                                        row.debit = 0;
-                                                    setRows([...rows]);
-                                                }}
-                                            />
-                                        </div>
-
-                                        {/* Delete Row */}
-                                        <div className="flex justify-end md:block">
-                                            <Button
-                                                variant="destructive"
-                                                size="icon"
-                                                onClick={() => removeRow(i)}
-                                                className="h-9 w-9 rounded-full"
-                                                disabled={rows.length === 1}
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ))}
-
-                                {/* Add Row */}
-                                <Button
-                                    variant="outline"
-                                    className="flex h-9 items-center gap-2 rounded-lg border text-sm"
-                                    onClick={addRow}
-                                >
-                                    <Plus className="h-4 w-4" /> Add Entry
-                                </Button>
-
-                                {/* Totals */}
-                                <div className="flex flex-col gap-2 rounded-lg bg-gray-100 p-3 font-medium md:flex-row md:items-end md:gap-2 dark:bg-gray-900/40">
-                                    <div className="flex-1">Total</div>
-
-                                    <div className="flex w-full justify-between md:block md:w-24">
-                                        <span className="text-xs md:hidden">
-                                            Debit:
-                                        </span>
-                                        {totals.debitTotal.toFixed(2)}
-                                    </div>
-
-                                    <div className="flex w-full justify-between md:block md:w-24">
-                                        <span className="text-xs md:hidden">
-                                            Credit:
-                                        </span>
-                                        {totals.creditTotal.toFixed(2)}
-                                    </div>
-
-                                    <div className="hidden w-9 md:block"></div>
-                                </div>
-
-                                {totals.debitTotal !== totals.creditTotal && (
-                                    <p className="mt-1 text-sm text-red-500">
-                                        Debit and Credit totals must be equal to
-                                        submit!
-                                    </p>
-                                )}
-                            </div>
-
-                            {/* Narration */}
+            {/* ---------------- Form Card ---------------- */}
+            <form
+                onSubmit={handleSubmit}
+                className="mt-4 space-y-6 rounded-md border border-border bg-card p-4 sm:p-6"
+            >
+                {/* ---------------- Voucher + Cash Details ---------------- */}
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
+                    {/* Voucher Details - 10/12 */}
+                    <div className="space-y-4 rounded-md border border-border bg-muted/30 p-3 md:col-span-8">
+                        <h2 className="border-b border-border pb-1 text-sm font-medium text-primary">
+                            Voucher Details
+                        </h2>
+                        <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-2 md:grid-cols-3">
                             <div>
-                                <Label>Narration</Label>
-                                <Textarea
-                                    className="h-20 rounded-lg text-sm"
-                                    value={narration}
-                                    onChange={(e) =>
-                                        setNarration(e.target.value)
-                                    }
+                                <Label className="text-xs">Voucher No</Label>
+                                <Input
+                                    disabled
+                                    value={data.voucher_no}
+                                    className="h-8 text-sm"
                                 />
                             </div>
 
-                            {/* Submit */}
-                            <div className="flex justify-end gap-2">
-                                <Button
-                                    className="flex h-9 items-center gap-1 rounded-lg px-4"
-                                    disabled={!canSubmit}
-                                >
-                                    Submit
-                                    <ChevronRight className="ml-1 h-4 w-4" />
-                                </Button>
+                            <div>
+                                <Label className="text-xs">Voucher Date</Label>
+                                <AppDatePicker
+                                    disabled
+                                    value={data.voucher_date}
+                                />
                             </div>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-            </div>
+
+                            <div>
+                                <Label className="text-xs">Voucher Type</Label>
+                                <Select
+                                    disabled
+                                    value={data.voucher_type}
+                                    options={[
+                                        {
+                                            value: 'CREDIT_OR_RECEIPT',
+                                            label: 'Journal / Non-Cash',
+                                        },
+                                        {
+                                            value: 'DEBIT_OR_PAYMENT',
+                                            label: 'Journal / Non-Cash',
+                                        },
+                                        {
+                                            value: 'JOURNAL_OR_NON_CASH',
+                                            label: 'Journal / Non-Cash',
+                                        },
+                                        {
+                                            value: 'PURCHASE',
+                                            label: 'Purchase',
+                                        },
+                                        { value: 'SALE', label: 'Sale' },
+                                        {
+                                            value: 'DEBIT_NOTE',
+                                            label: 'Debit Note',
+                                        },
+                                        {
+                                            value: 'CREDIT_NOTE',
+                                            label: 'Credit Note',
+                                        },
+                                        {
+                                            value: 'PETTY_CASH',
+                                            label: 'Petty Cash',
+                                        },
+                                        { value: 'CONTRA', label: 'Contra' },
+                                    ]}
+                                />
+                            </div>
+
+                            <div>
+                                <Label className="text-xs">Fiscal Year</Label>
+                                <Select
+                                    disabled
+                                    value={data.fiscal_year_id || ''}
+                                    options={fiscalYears}
+                                />
+                            </div>
+
+                            <div>
+                                <Label className="text-xs">Fiscal Period</Label>
+                                <Select
+                                    disabled
+                                    value={data.fiscal_period_id || ''}
+                                    options={fiscalPeriods}
+                                />
+                            </div>
+
+                            <div>
+                                <Label className="text-xs">Branch</Label>
+                                <Select
+                                    disabled
+                                    value={data.branch_id || ''}
+                                    options={branches}
+                                />
+                            </div>
+
+                            <div>
+                                <Label className="text-xs">
+                                    Voucher Status
+                                </Label>
+                                <Select
+                                    value={data.status}
+                                    options={[
+                                        { value: 'DRAFT', label: 'Draft' },
+                                        {
+                                            value: 'APPROVED',
+                                            label: 'Approved',
+                                        },
+                                        { value: 'POSTED', label: 'Posted' },
+                                        {
+                                            value: 'CANCELLED',
+                                            label: 'Cancelled',
+                                        },
+                                    ]}
+                                    disabled
+                                    includeNone={false}
+                                />
+                            </div>
+
+                            <div className="sm:col-span-2">
+                                <Label className="text-xs">Narration</Label>
+                                <Input
+                                    value={data.narration}
+                                    className="h-8 text-sm"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Cash Details - 2/12 */}
+                    <div className="space-y-4 rounded-md border border-border bg-muted/30 p-3 md:col-span-4">
+                        <h2 className="border-b border-border pb-1 text-sm font-medium text-primary">
+                            Cash Ledger
+                        </h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-1">
+                            <div>
+                                <Label className="text-xs">Cash Type</Label>
+                                <Select
+                                    value={data.cash_type || ''}
+                                    onChange={(e) =>
+                                        setData('cash_type', e.target.value)
+                                    }
+                                    options={[
+                                        {
+                                            value: 'CASH_IN_HAND',
+                                            label: 'Cash in Hand',
+                                        },
+                                        {
+                                            value: 'CASH_IN_BANK',
+                                            label: 'Cash in Bank',
+                                        },
+                                        {
+                                            value: 'PETTY_CASH',
+                                            label: 'Petty Cash',
+                                        },
+                                    ]}
+                                />
+                            </div>
+
+                            <div>
+                                <Label className="text-xs">
+                                    Cash Ledger Account
+                                </Label>
+                                <LedgerSearchInput
+                                    placeholder="Cash Ledger Account"
+                                    onSelect={() => {}}
+                                />
+                            </div>
+
+                            <div>
+                                <Label className="text-xs">
+                                    Cash Sub-Ledger
+                                </Label>
+                                <SubLedgerSearchInput
+                                    placeholder="Cash Sub-Ledger Account"
+                                    onSelect={() => {}}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* ---------------- Voucher Lines ---------------- */}
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h3 className="font-medium text-primary">
+                            Voucher Lines
+                        </h3>
+                        <Button
+                            type="button"
+                            onClick={addLine}
+                            className="flex items-center gap-1"
+                        >
+                            <Plus className="h-4 w-4" /> Add Line
+                        </Button>
+                    </div>
+
+                    {/* Desktop Table */}
+                    <div className="hidden min-h-80 rounded-md border border-border md:block">
+                        <table className="w-full table-fixed border-collapse">
+                            <thead className="sticky top-0 bg-muted">
+                                <tr>
+                                    <th className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                        Ledger Account
+                                    </th>
+                                    <th className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                        Subledger Account
+                                    </th>
+                                    <th className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                        Ref Subledger Account
+                                    </th>
+                                    <th className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                        Instrument Type
+                                    </th>
+                                    <th className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                        Instrument Number
+                                    </th>
+                                    <th className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                        Amount
+                                    </th>
+                                    <th className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                        Narration
+                                    </th>
+                                    <th className="w-[60px] border-b border-border p-2 text-center text-sm font-medium text-muted-foreground">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="">
+                                {data.lines.map((line, index) => (
+                                    <tr
+                                        key={line.id}
+                                        className="border-b border-border even:bg-muted/30"
+                                    >
+                                        <td className="px-2 py-1">
+                                            <LedgerSearchInput
+                                                placeholder="Ledger Account"
+                                                onSelect={() => {}}
+                                            />
+                                        </td>
+
+                                        <td className="px-2 py-1">
+                                            <SubLedgerSearchInput
+                                                placeholder="Sub-Ledger Account"
+                                                onSelect={() => {}}
+                                            />
+                                        </td>
+
+                                        <td className="px-2 py-1">
+                                            <SubLedgerSearchInput
+                                                placeholder="Reference Sub-Ledger Account"
+                                                onSelect={() => {}}
+                                            />
+                                        </td>
+                                        <td className="px-2 py-1">
+                                            <Select
+                                                value={''}
+                                                options={[
+                                                    {
+                                                        value: 'CHEQUE',
+                                                        label: 'Cheque',
+                                                    },
+                                                    {
+                                                        value: 'DD',
+                                                        label: 'Demand Draft (DD)',
+                                                    },
+                                                    {
+                                                        value: 'NEFT',
+                                                        label: 'NEFT',
+                                                    },
+                                                    {
+                                                        value: 'RTGS',
+                                                        label: 'RTGS',
+                                                    },
+                                                    {
+                                                        value: 'IMPS',
+                                                        label: 'IMPS',
+                                                    },
+                                                    {
+                                                        value: 'CASH',
+                                                        label: 'Cash',
+                                                    },
+                                                    {
+                                                        value: 'OTHER',
+                                                        label: 'Other',
+                                                    },
+                                                ]}
+                                            />
+                                        </td>
+                                        <td className="px-2 py-1">
+                                            <Input
+                                                placeholder="Instrument Number"
+                                                className="h-8 text-sm"
+                                            />
+                                        </td>
+                                        <td className="px-2 py-1">
+                                            <Input
+                                                type="number"
+                                                value={0}
+                                                className="h-8 text-sm"
+                                            />
+                                        </td>
+                                        <td className="px-2 py-1">
+                                            <Input
+                                                value={line.narration || ''}
+                                                onChange={(e) =>
+                                                    handleLineChange(
+                                                        index,
+                                                        'narration',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                className="h-8 text-sm"
+                                            />
+                                        </td>
+                                        <td className="px-2 py-1 text-center">
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    removeLine(index)
+                                                }
+                                                className="text-destructive hover:text-destructive/80"
+                                            >
+                                                <Trash2 className="h-5 w-5" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Mobile Lines */}
+                    <div className="space-y-3 md:hidden">
+                        {data.lines.map((line, index) => (
+                            <div
+                                key={line.id}
+                                className="space-y-3 rounded-md border border-border bg-card p-3"
+                            >
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs font-medium text-muted-foreground">
+                                        Line #{index + 1}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={() => removeLine(index)}
+                                        className="text-destructive"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </button>
+                                </div>
+                                <LedgerSearchInput
+                                    placeholder="Ledger Account"
+                                    onSelect={() => {}}
+                                />
+                                <SubLedgerSearchInput
+                                    placeholder="Sub-Ledger Account"
+                                    onSelect={() => {}}
+                                />
+                                <SubLedgerSearchInput
+                                    placeholder="Reference Sub-Ledger Account"
+                                    onSelect={() => {}}
+                                />
+                                <Select
+                                    value={''}
+                                    options={[
+                                        { value: 'CHEQUE', label: 'Cheque' },
+                                        {
+                                            value: 'DD',
+                                            label: 'Demand Draft (DD)',
+                                        },
+                                        { value: 'NEFT', label: 'NEFT' },
+                                        { value: 'RTGS', label: 'RTGS' },
+                                        { value: 'IMPS', label: 'IMPS' },
+                                        { value: 'CASH', label: 'Cash' },
+                                        { value: 'OTHER', label: 'Other' },
+                                    ]}
+                                />
+                                <Input
+                                    placeholder="Instrument Number"
+                                    className="h-8 text-sm"
+                                />
+                                <Input
+                                    type="number"
+                                    value={line.debit}
+                                    onChange={(e) =>
+                                        handleLineChange(
+                                            index,
+                                            'debit',
+                                            Number(e.target.value),
+                                        )
+                                    }
+                                    className="h-8 text-sm"
+                                />
+                                <Input
+                                    value={line.narration || ''}
+                                    onChange={(e) =>
+                                        handleLineChange(
+                                            index,
+                                            'narration',
+                                            e.target.value,
+                                        )
+                                    }
+                                    className="h-8 text-sm"
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Submit */}
+                <div className="flex justify-end gap-2">
+                    <Button
+                        type="submit"
+                        disabled={processing}
+                        className="flex items-center gap-2"
+                    >
+                        {processing ? (
+                            <Loader2 className="animate-spin" />
+                        ) : (
+                            <CheckCheck />
+                        )}
+                        Create Voucher
+                    </Button>
+                </div>
+            </form>
         </CustomAuthLayout>
     );
 }

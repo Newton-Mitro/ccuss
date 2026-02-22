@@ -2,12 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Accounting\Models\Account;
+use App\Accounting\Models\LedgerAccount;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class AccountFactory extends Factory
+class LedgerAccountFactory extends Factory
 {
-    protected $model = Account::class;
+    protected $model = LedgerAccount::class;
 
     public function definition()
     {

@@ -92,47 +92,102 @@ export const sidebarMenu: SidebarItem[] = [
             {
                 name: 'Ledger Accounts',
                 icon: <i className="fa-solid fa-book-open" />,
-                path: '/accounts',
-                match_path: 'accounts',
+                path: '/ledger_accounts',
+                match_path: 'ledger_accounts',
             },
             {
                 name: 'Vouchers',
-                icon: <i className="fa-solid fa-file-invoice-dollar" />,
-                path: '/vouchers',
-                match_path: 'vouchers',
-            },
-            {
-                name: 'Voucher Entries',
-                icon: <i className="fa-solid fa-file-invoice-dollar" />,
+                icon: <i className="fa-solid fa-folder-open" />,
                 children: [
                     {
-                        name: 'Debit Vouchers',
-                        icon: <i className="fa-solid fa-arrow-down"></i>,
-                        path: '/debit-voucher/create',
-                        match_path: 'debit-voucher',
+                        name: 'List Vouchers',
+                        icon: <i className="fa-solid fa-list-check" />,
+                        path: '/vouchers',
+                        match_path: 'vouchers',
                     },
                     {
-                        name: 'Credit Vouchers',
-                        icon: <i className="fa-solid fa-arrow-up"></i>,
-                        path: '/credit-voucher/create',
-                        match_path: 'credit-voucher',
-                    },
-                    {
-                        name: 'Journal Vouchers',
-                        icon: (
-                            <i className="fa-solid fa-book-journal-whills"></i>
-                        ),
-                        path: '/vouchers/journal/create',
-                        match_path: 'vouchers/journal',
-                    },
-                    {
-                        name: 'Contra Vouchers',
-                        icon: <i className="fa-solid fa-exchange-alt"></i>,
-                        path: '/vouchers/contra/create',
-                        match_path: 'vouchers/contra',
+                        name: 'Voucher Entry',
+                        icon: <i className="fa-solid fa-file-circle-plus" />,
+                        children: [
+                            {
+                                name: 'Debit / Payment Voucher',
+                                icon: (
+                                    <i className="fa-solid fa-money-bill-transfer" />
+                                ),
+                                path: '/vouchers/debit/create',
+                                match_path: 'vouchers/debit',
+                            },
+                            {
+                                name: 'Credit / Receipt Voucher',
+                                icon: (
+                                    <i className="fa-solid fa-money-bill-trend-up" />
+                                ),
+                                path: '/vouchers/credit/create',
+                                match_path: 'vouchers/credit',
+                            },
+                            {
+                                name: 'Journal / Non-Cash Voucher',
+                                icon: (
+                                    <i className="fa-solid fa-book-open-reader" />
+                                ),
+                                path: '/vouchers/journal/create',
+                                match_path: 'vouchers/journal',
+                            },
+
+                            // --- Trade Vouchers ---
+                            {
+                                name: 'Purchase Voucher',
+                                icon: (
+                                    <i className="fa-solid fa-cart-shopping" />
+                                ),
+                                path: '/vouchers/purchase/create',
+                                match_path: 'vouchers/purchase',
+                            },
+                            {
+                                name: 'Sale Voucher',
+                                icon: (
+                                    <i className="fa-solid fa-cash-register" />
+                                ),
+                                path: '/vouchers/sale/create',
+                                match_path: 'vouchers/sale',
+                            },
+
+                            // --- Adjustment Notes ---
+                            {
+                                name: 'Debit Note',
+                                icon: (
+                                    <i className="fa-solid fa-file-circle-minus" />
+                                ),
+                                path: '/vouchers/debit-note/create',
+                                match_path: 'vouchers/debit-note',
+                            },
+                            {
+                                name: 'Credit Note',
+                                icon: (
+                                    <i className="fa-solid fa-file-circle-plus" />
+                                ),
+                                path: '/vouchers/credit-note/create',
+                                match_path: 'vouchers/credit-note',
+                            },
+
+                            // --- Cash & Bank ---
+                            {
+                                name: 'Petty Cash Voucher',
+                                icon: <i className="fa-solid fa-wallet" />,
+                                path: '/vouchers/petty-cash/create',
+                                match_path: 'vouchers/petty-cash',
+                            },
+                            {
+                                name: 'Contra Voucher',
+                                icon: <i className="fa-solid fa-right-left" />,
+                                path: '/vouchers/contra/create',
+                                match_path: 'vouchers/contra',
+                            },
+                        ],
                     },
                 ],
             },
+
             {
                 name: 'Reports',
                 icon: <i className="fa-solid fa-chart-simple" />,
@@ -194,8 +249,8 @@ export const sidebarMenu: SidebarItem[] = [
                     {
                         name: 'Opening Policies',
                         icon: <i className="fa-solid fa-file-circle-plus" />,
-                        path: '/saving-accounts',
-                        match_path: 'saving-accounts',
+                        path: '/saving-ledger_accounts',
+                        match_path: 'saving-ledger_accounts',
                     },
                     {
                         name: 'Transaction Policies',
@@ -236,8 +291,8 @@ export const sidebarMenu: SidebarItem[] = [
                     {
                         name: 'Deposit Accounts',
                         icon: <i className="fa-solid fa-piggy-bank" />,
-                        path: '/deposit-accounts',
-                        match_path: 'deposit-accounts',
+                        path: '/deposit-ledger_accounts',
+                        match_path: 'deposit-ledger_accounts',
                     },
                     {
                         name: 'Deposit Schedules',
@@ -280,7 +335,7 @@ export const sidebarMenu: SidebarItem[] = [
             {
                 name: 'Share Accounts',
                 icon: <i className="fa-solid fa-layer-group" />,
-                match_path: '/share-capital/accounts',
+                match_path: '/share-capital/ledger_accounts',
             },
             {
                 name: 'Share Ledger',
@@ -348,8 +403,8 @@ export const sidebarMenu: SidebarItem[] = [
                     {
                         name: 'Loan Accounts',
                         icon: <i className="fa-solid fa-wallet" />,
-                        path: '/loan-accounts',
-                        match_path: 'loan-accounts',
+                        path: '/loan-ledger_accounts',
+                        match_path: 'loan-ledger_accounts',
                     },
                     {
                         name: 'Loan Schedules',
@@ -444,8 +499,8 @@ export const sidebarMenu: SidebarItem[] = [
                     {
                         name: 'Bank Accounts',
                         icon: <i className="fa-solid fa-university" />,
-                        path: '/bank-accounts',
-                        match_path: 'bank-accounts',
+                        path: '/bank-ledger_accounts',
+                        match_path: 'bank-ledger_accounts',
                     },
                     {
                         name: 'Bank Cheque Books',

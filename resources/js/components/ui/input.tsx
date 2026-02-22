@@ -18,12 +18,10 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
         // validation
         "aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
 
-        // disabled (customized)
-        "disabled:bg-muted disabled:border-muted-foreground/30",
-        "disabled:text-muted-foreground disabled:placeholder:text-muted-foreground/70",
+        // disabled (MATCH SELECT)
+        "disabled:pointer-events-none",
         "disabled:cursor-not-allowed",
-        "disabled:select-text", // <-- text selectable
-        // ⚠️ removed: disabled:pointer-events-none & disabled:opacity-40
+        "disabled:opacity-50",
 
         className
       )}

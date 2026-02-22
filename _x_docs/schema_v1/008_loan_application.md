@@ -97,7 +97,7 @@ CREATE TABLE loan_approvals (
     interest_rate DECIMAL(5,2) NOT NULL,
     repayment_schedule JSON NOT NULL, -- installments, dates, amounts
     approved_date DATE NOT NULL,
-    loan_account_id BIGINT UNSIGNED NOT NULL, -- created account_id
+    loan_account_id BIGINT UNSIGNED NOT NULL, -- created ledger_account_id
     FOREIGN KEY (loan_application_id) REFERENCES loan_applications(id) ON DELETE CASCADE,
     FOREIGN KEY (loan_account_id) REFERENCES loan_accounts(id)
     FOREIGN KEY (approved_by) REFERENCES users(id)
@@ -171,7 +171,7 @@ erDiagram
     LOAN_APPLICATIONS ||--o{ LOAN_DISBURSEMENTS : disbursed
     LOAN_APPLICATIONS ||--o{ LOAN_APPLICATION_STATUS_HISTORY : status_updates
 
-    %% Loan accounts & repayment
+    %% Loan ledger_accounts & repayment
     LOAN_POLICIES ||--o{ LOAN_ACCOUNTS : defines
     LOAN_ACCOUNTS ||--o{ LOAN_SCHEDULES : schedules
     LOAN_ACCOUNTS ||--o{ LOAN_PAYMENTS : receives

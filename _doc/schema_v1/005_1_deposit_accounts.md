@@ -97,7 +97,7 @@ return new class extends Migration
          */
         Schema::create('deposit_account_transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('gl_deposit_payable_id')->nullable()->constrained('accounts');
+            $table->foreignId('gl_deposit_payable_id')->nullable()->constrained('ledger_accounts');
             $table->foreignId('deposit_account_id')->constrained()->cascadeOnDelete();
             $table->foreignId('related_schedule_id')->nullable()->constrained('deposit_account_schedules');
 
@@ -123,7 +123,7 @@ return new class extends Migration
          */
         Schema::create('deposit_account_fees', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('gl_fee_income_id')->nullable()->constrained('accounts');
+            $table->foreignId('gl_fee_income_id')->nullable()->constrained('ledger_accounts');
             $table->foreignId('deposit_account_id')->constrained()->cascadeOnDelete();
 
             $table->date('txn_date');
@@ -190,8 +190,8 @@ return new class extends Migration
                   ->cascadeOnDelete();
 
             $table->foreignId('deposit_account_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('gl_interest_payable_id')->nullable()->constrained('accounts');
-            $table->foreignId('gl_interest_expense_id')->nullable()->constrained('accounts');
+            $table->foreignId('gl_interest_payable_id')->nullable()->constrained('ledger_accounts');
+            $table->foreignId('gl_interest_expense_id')->nullable()->constrained('ledger_accounts');
 
             $table->date('provision_date');
             $table->decimal('accrued_interest', 18, 2);

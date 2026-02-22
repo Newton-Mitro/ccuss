@@ -23,7 +23,7 @@ export default function ContraVoucherEntry() {
                 {/* Page header */}
                 <HeadingSmall
                     title="Contra Voucher Entry"
-                    description="Record transfers between cash, bank, or GL accounts"
+                    description="Record transfers between cash, bank, or GL ledger_accounts"
                 />
 
                 {/* Voucher card */}

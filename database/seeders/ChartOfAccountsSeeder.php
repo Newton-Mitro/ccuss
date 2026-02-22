@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Accounting\Models\Account;
+use App\Accounting\Models\LedgerAccount;
 use Illuminate\Database\Seeder;
 
 class ChartOfAccountsSeeder extends Seeder
@@ -12,7 +12,7 @@ class ChartOfAccountsSeeder extends Seeder
         // -----------------------
         // ASSETS
         // -----------------------
-        $assets = Account::create([
+        $assets = LedgerAccount::create([
             'code' => '1000',
             'name' => 'Assets',
             'type' => 'ASSET',
@@ -20,7 +20,7 @@ class ChartOfAccountsSeeder extends Seeder
         ]);
 
         // Sub-groups
-        $currentAssets = Account::create([
+        $currentAssets = LedgerAccount::create([
             'code' => '1100',
             'name' => 'Current Assets',
             'type' => 'ASSET',
@@ -28,7 +28,7 @@ class ChartOfAccountsSeeder extends Seeder
             'parent_id' => $assets->id,
         ]);
 
-        $fixedAssets = Account::create([
+        $fixedAssets = LedgerAccount::create([
             'code' => '1200',
             'name' => 'Fixed Assets',
             'type' => 'ASSET',
@@ -36,8 +36,8 @@ class ChartOfAccountsSeeder extends Seeder
             'parent_id' => $assets->id,
         ]);
 
-        // GL accounts under Current Assets
-        Account::create([
+        // GL ledger_accounts under Current Assets
+        LedgerAccount::create([
             'code' => '1010',
             'name' => 'Cash',
             'type' => 'ASSET',
@@ -45,7 +45,7 @@ class ChartOfAccountsSeeder extends Seeder
             'parent_id' => $currentAssets->id,
         ]);
 
-        Account::create([
+        LedgerAccount::create([
             'code' => '1020',
             'name' => 'Accounts Receivable',
             'type' => 'ASSET',
@@ -53,7 +53,7 @@ class ChartOfAccountsSeeder extends Seeder
             'parent_id' => $currentAssets->id,
         ]);
 
-        Account::create([
+        LedgerAccount::create([
             'code' => '1030',
             'name' => 'Investments',
             'type' => 'ASSET',
@@ -61,8 +61,8 @@ class ChartOfAccountsSeeder extends Seeder
             'parent_id' => $currentAssets->id,
         ]);
 
-        // GL accounts under Fixed Assets
-        Account::create([
+        // GL ledger_accounts under Fixed Assets
+        LedgerAccount::create([
             'code' => '1040',
             'name' => 'Land',
             'type' => 'ASSET',
@@ -70,7 +70,7 @@ class ChartOfAccountsSeeder extends Seeder
             'parent_id' => $fixedAssets->id,
         ]);
 
-        Account::create([
+        LedgerAccount::create([
             'code' => '1050',
             'name' => 'Buildings',
             'type' => 'ASSET',
@@ -78,7 +78,7 @@ class ChartOfAccountsSeeder extends Seeder
             'parent_id' => $fixedAssets->id,
         ]);
 
-        Account::create([
+        LedgerAccount::create([
             'code' => '1060',
             'name' => 'Machinery',
             'type' => 'ASSET',
@@ -89,14 +89,14 @@ class ChartOfAccountsSeeder extends Seeder
         // -----------------------
         // LIABILITIES
         // -----------------------
-        $liabilities = Account::create([
+        $liabilities = LedgerAccount::create([
             'code' => '2000',
             'name' => 'Liabilities',
             'type' => 'LIABILITY',
             // 'category' => 'GROUP',
         ]);
 
-        $currentLiabilities = Account::create([
+        $currentLiabilities = LedgerAccount::create([
             'code' => '2100',
             'name' => 'Current Liabilities',
             'type' => 'LIABILITY',
@@ -104,7 +104,7 @@ class ChartOfAccountsSeeder extends Seeder
             'parent_id' => $liabilities->id,
         ]);
 
-        $longTermLiabilities = Account::create([
+        $longTermLiabilities = LedgerAccount::create([
             'code' => '2200',
             'name' => 'Long-Term Liabilities',
             'type' => 'LIABILITY',
@@ -112,8 +112,8 @@ class ChartOfAccountsSeeder extends Seeder
             'parent_id' => $liabilities->id,
         ]);
 
-        // GL accounts
-        Account::create([
+        // GL ledger_accounts
+        LedgerAccount::create([
             'code' => '2010',
             'name' => 'Member Deposits',
             'type' => 'LIABILITY',
@@ -121,7 +121,7 @@ class ChartOfAccountsSeeder extends Seeder
             'parent_id' => $currentLiabilities->id,
         ]);
 
-        Account::create([
+        LedgerAccount::create([
             'code' => '2020',
             'name' => 'Accounts Payable',
             'type' => 'LIABILITY',
@@ -129,7 +129,7 @@ class ChartOfAccountsSeeder extends Seeder
             'parent_id' => $currentLiabilities->id,
         ]);
 
-        Account::create([
+        LedgerAccount::create([
             'code' => '2040',
             'name' => 'Loans Payable',
             'type' => 'LIABILITY',
@@ -140,14 +140,14 @@ class ChartOfAccountsSeeder extends Seeder
         // -----------------------
         // EQUITY
         // -----------------------
-        $equity = Account::create([
+        $equity = LedgerAccount::create([
             'code' => '3000',
             'name' => 'Equity',
             'type' => 'EQUITY',
             // 'category' => 'GROUP',
         ]);
 
-        $capital = Account::create([
+        $capital = LedgerAccount::create([
             'code' => '3100',
             'name' => 'Capital',
             'type' => 'EQUITY',
@@ -155,7 +155,7 @@ class ChartOfAccountsSeeder extends Seeder
             'parent_id' => $equity->id,
         ]);
 
-        Account::create([
+        LedgerAccount::create([
             'code' => '3010',
             'name' => 'Member Shares',
             'type' => 'EQUITY',
@@ -163,7 +163,7 @@ class ChartOfAccountsSeeder extends Seeder
             'parent_id' => $capital->id,
         ]);
 
-        Account::create([
+        LedgerAccount::create([
             'code' => '3020',
             'name' => 'Retained Earnings',
             'type' => 'EQUITY',
@@ -171,7 +171,7 @@ class ChartOfAccountsSeeder extends Seeder
             'parent_id' => $capital->id,
         ]);
 
-        Account::create([
+        LedgerAccount::create([
             'code' => '3030',
             'name' => 'Reserves',
             'type' => 'EQUITY',
@@ -182,14 +182,14 @@ class ChartOfAccountsSeeder extends Seeder
         // -----------------------
         // INCOME
         // -----------------------
-        $income = Account::create([
+        $income = LedgerAccount::create([
             'code' => '4000',
             'name' => 'Income',
             'type' => 'INCOME',
             // 'category' => 'GROUP',
         ]);
 
-        $interestIncomeGroup = Account::create([
+        $interestIncomeGroup = LedgerAccount::create([
             'code' => '4100',
             'name' => 'Interest Income',
             'type' => 'INCOME',
@@ -197,7 +197,7 @@ class ChartOfAccountsSeeder extends Seeder
             'parent_id' => $income->id,
         ]);
 
-        Account::create([
+        LedgerAccount::create([
             'code' => '4010',
             'name' => 'Savings Interest',
             'type' => 'INCOME',
@@ -205,7 +205,7 @@ class ChartOfAccountsSeeder extends Seeder
             'parent_id' => $interestIncomeGroup->id,
         ]);
 
-        Account::create([
+        LedgerAccount::create([
             'code' => '4020',
             'name' => 'Loan Interest',
             'type' => 'INCOME',
@@ -216,14 +216,14 @@ class ChartOfAccountsSeeder extends Seeder
         // -----------------------
         // EXPENSES
         // -----------------------
-        $expenses = Account::create([
+        $expenses = LedgerAccount::create([
             'code' => '5000',
             'name' => 'Expenses',
             'type' => 'EXPENSE',
             // 'category' => 'GROUP',
         ]);
 
-        $operatingExpenses = Account::create([
+        $operatingExpenses = LedgerAccount::create([
             'code' => '5100',
             'name' => 'Operating Expenses',
             'type' => 'EXPENSE',
@@ -231,7 +231,7 @@ class ChartOfAccountsSeeder extends Seeder
             'parent_id' => $expenses->id,
         ]);
 
-        Account::create([
+        LedgerAccount::create([
             'code' => '5020',
             'name' => 'Salaries & Wages',
             'type' => 'EXPENSE',
@@ -239,7 +239,7 @@ class ChartOfAccountsSeeder extends Seeder
             'parent_id' => $operatingExpenses->id,
         ]);
 
-        Account::create([
+        LedgerAccount::create([
             'code' => '5030',
             'name' => 'Office Expenses',
             'type' => 'EXPENSE',
@@ -247,7 +247,7 @@ class ChartOfAccountsSeeder extends Seeder
             'parent_id' => $operatingExpenses->id,
         ]);
 
-        Account::create([
+        LedgerAccount::create([
             'code' => '5040',
             'name' => 'Depreciation',
             'type' => 'EXPENSE',
@@ -255,7 +255,7 @@ class ChartOfAccountsSeeder extends Seeder
             'parent_id' => $expenses->id,
         ]);
 
-        Account::create([
+        LedgerAccount::create([
             'code' => '5050',
             'name' => 'Provision for Loan Losses',
             'type' => 'EXPENSE',

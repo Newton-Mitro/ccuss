@@ -92,15 +92,15 @@ CREATE TABLE journal_lines (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     entry_id BIGINT UNSIGNED NOT NULL,
     gl_account_id BIGINT UNSIGNED NOT NULL,
-    account_id BIGINT UNSIGNED,       -- optional, link to customer/account
+    ledger_account_id BIGINT UNSIGNED,       -- optional, link to customer/account
     cash_account_id BIGINT UNSIGNED,       -- optional, link to cash/account
-    -- account_id BIGINT UNSIGNED,       -- optional, link to vendor/account
+    -- ledger_account_id BIGINT UNSIGNED,       -- optional, link to vendor/account
     debit DECIMAL(18,2) DEFAULT 0,
     credit DECIMAL(18,2) DEFAULT 0,
     CHECK ((debit = 0 AND credit > 0) OR (credit = 0 AND debit > 0)),
     FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE,
     FOREIGN KEY (gl_account_id) REFERENCES gl_accounts(id),
-    FOREIGN KEY (account_id) REFERENCES accounts(id)
+    FOREIGN KEY (ledger_account_id) REFERENCES ledger_accounts(id)
     FOREIGN KEY (cash_account_id) REFERENCES cash_accounts(id),
 );
 -- End of General Ledger Management
@@ -254,7 +254,7 @@ CREATE TABLE insurance_policies (
 -- End of Product Management
 
 -- Start of Account Management
-CREATE TABLE accounts (
+CREATE TABLE ledger_accounts (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     account_no VARCHAR(50) UNIQUE NOT NULL,         -- core account number
     customer_id BIGINT UNSIGNED NOT NULL,             -- who owns the account
@@ -273,58 +273,58 @@ CREATE TABLE accounts (
 
 CREATE TABLE account_customers (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    account_id BIGINT UNSIGNED NOT NULL,
+    ledger_account_id BIGINT UNSIGNED NOT NULL,
     customer_id BIGINT UNSIGNED NOT NULL,
     role ENUM('PRIMARY_HOLDER','JOINT_HOLDER','AUTHORIZED_SIGNATORY') NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
+    FOREIGN KEY (ledger_account_id) REFERENCES ledger_accounts(id) ON DELETE CASCADE,
     FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
 );
 
 CREATE TABLE account_introducers (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    account_id BIGINT UNSIGNED NOT NULL,
+    ledger_account_id BIGINT UNSIGNED NOT NULL,
     introducer_customer_id BIGINT UNSIGNED NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
+    FOREIGN KEY (ledger_account_id) REFERENCES ledger_accounts(id) ON DELETE CASCADE,
     FOREIGN KEY (introducer_customer_id) REFERENCES customers(id) ON DELETE CASCADE
 );
 
 CREATE TABLE account_nominees (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    account_id BIGINT UNSIGNED NOT NULL,
+    ledger_account_id BIGINT UNSIGNED NOT NULL,
     nominee_id BIGINT UNSIGNED,
     name VARCHAR(100) NOT NULL,
     relation VARCHAR(100) NOT NULL,
     share_percentage DECIMAL(5,2) DEFAULT 0,
-    FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
+    FOREIGN KEY (ledger_account_id) REFERENCES ledger_accounts(id) ON DELETE CASCADE,
     FOREIGN KEY (nominee_id) REFERENCES customers(id)
 );
 
 CREATE TABLE account_signatories (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    account_id BIGINT UNSIGNED NOT NULL,
+    ledger_account_id BIGINT UNSIGNED NOT NULL,
     customer_id BIGINT UNSIGNED NOT NULL,
     signing_rule ENUM('PRIMARY','JOINT','DIRECTOR','PARTNER','AUTHORIZED') NOT NULL DEFAULT 'PRIMARY',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
+    FOREIGN KEY (ledger_account_id) REFERENCES ledger_accounts(id) ON DELETE CASCADE,
     FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
-    UNIQUE KEY uq_account_signatory (account_id, customer_id)
+    UNIQUE KEY uq_account_signatory (ledger_account_id, customer_id)
 );
 
 CREATE TABLE savings_accounts (
-    account_id BIGINT UNSIGNED PRIMARY KEY,
+    ledger_account_id BIGINT UNSIGNED PRIMARY KEY,
     balance DECIMAL(18,2) DEFAULT 0,
     min_balance DECIMAL(18,2) DEFAULT 0,
     interest_rate_bp INT DEFAULT 0,
     interest_method ENUM('DAILY','MONTHLY','QUARTERLY') DEFAULT 'MONTHLY',
-    FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+    FOREIGN KEY (ledger_account_id) REFERENCES ledger_accounts(id) ON DELETE CASCADE
 );
 
 CREATE TABLE term_deposit_accounts (
-    account_id BIGINT UNSIGNED PRIMARY KEY,
+    ledger_account_id BIGINT UNSIGNED PRIMARY KEY,
     principal DECIMAL(18,2) NOT NULL,
     rate_bp INT NOT NULL, -- interest rate base point
     start_date DATE NOT NULL,
@@ -332,28 +332,28 @@ CREATE TABLE term_deposit_accounts (
     --how interest is calculated and added to the account.
     compounding ENUM('MONTHLY','QUARTERLY','SEMI_ANNUAL','ANNUAL','MATURITY') DEFAULT 'MATURITY',
     auto_renew BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+    FOREIGN KEY (ledger_account_id) REFERENCES ledger_accounts(id) ON DELETE CASCADE
 );
 
 CREATE TABLE recurring_deposit_accounts (
-    account_id BIGINT UNSIGNED PRIMARY KEY,
+    ledger_account_id BIGINT UNSIGNED PRIMARY KEY,
     installment_amount DECIMAL(18,2) NOT NULL,
     rate_bp INT NOT NULL, -- interest rate base point
     cycle ENUM('MONTHLY') DEFAULT 'MONTHLY',
     start_date DATE NOT NULL,
     tenor_months INT NOT NULL,
-    FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+    FOREIGN KEY (ledger_account_id) REFERENCES ledger_accounts(id) ON DELETE CASCADE
 );
 
 CREATE TABLE share_accounts (
-    account_id BIGINT UNSIGNED PRIMARY KEY,
+    ledger_account_id BIGINT UNSIGNED PRIMARY KEY,
     total_shares INT NOT NULL,
     share_price DECIMAL(18,2) NOT NULL,
-    FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+    FOREIGN KEY (ledger_account_id) REFERENCES ledger_accounts(id) ON DELETE CASCADE
 );
 
 CREATE TABLE loan_accounts (
-    account_id BIGINT UNSIGNED PRIMARY KEY,
+    ledger_account_id BIGINT UNSIGNED PRIMARY KEY,
     principal_amount DECIMAL(18,2) NOT NULL,
     outstanding_amount DECIMAL(18,2) NOT NULL,
     rate_bp INT NOT NULL, -- interest rate in basis points
@@ -364,23 +364,23 @@ CREATE TABLE loan_accounts (
     ltv_percent INT, -- Loan-to-Value ratio
     penalty_bp INT DEFAULT 0, -- penalty interest
     status ENUM('APPROVED','DISBURSED','REPAID','DEFAULTED') DEFAULT 'APPROVED',
-    FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+    FOREIGN KEY (ledger_account_id) REFERENCES ledger_accounts(id) ON DELETE CASCADE
 );
 
 CREATE TABLE insurance_accounts (
-    account_id BIGINT UNSIGNED PRIMARY KEY,
+    ledger_account_id BIGINT UNSIGNED PRIMARY KEY,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     premium_amount DECIMAL(18,2) NOT NULL,
     premium_cycle ENUM('MONTHLY','QUARTERLY','ANNUAL') DEFAULT 'MONTHLY',
     status ENUM('ACTIVE','LAPSED','CANCELLED','CLAIMED') DEFAULT 'ACTIVE',
     beneficiary VARCHAR(150),
-    FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+    FOREIGN KEY (ledger_account_id) REFERENCES ledger_accounts(id) ON DELETE CASCADE
 );
 
 CREATE TABLE schedules (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    account_id BIGINT UNSIGNED NOT NULL,
+    ledger_account_id BIGINT UNSIGNED NOT NULL,
     due_date DATE NOT NULL,
     principal_due DECIMAL(18,2) DEFAULT 0,
     interest_due DECIMAL(18,2) DEFAULT 0,
@@ -388,43 +388,43 @@ CREATE TABLE schedules (
     component ENUM('LOAN','RD','FD','INSURANCE','DIVIDEND') NOT NULL,
     sequence_no INT NOT NULL,
     status ENUM('PENDING','PARTIAL','PAID','WAIVED','CLOSED') DEFAULT 'PENDING',
-    UNIQUE(account_id, sequence_no, component),
-    FOREIGN KEY (account_id) REFERENCES accounts(id)
+    UNIQUE(ledger_account_id, sequence_no, component),
+    FOREIGN KEY (ledger_account_id) REFERENCES ledger_accounts(id)
 );
 
 CREATE TABLE payments (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    account_id BIGINT UNSIGNED NOT NULL,
+    ledger_account_id BIGINT UNSIGNED NOT NULL,
     schedule_id BIGINT UNSIGNED, -- optional
     amount DECIMAL(18,2) NOT NULL,
     method ENUM('CASH','TRANSFER','ADJUSTMENT') NOT NULL,
     received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     journal_entry_id BIGINT UNSIGNED,
-    FOREIGN KEY (account_id) REFERENCES accounts(id),
+    FOREIGN KEY (ledger_account_id) REFERENCES ledger_accounts(id),
     FOREIGN KEY (schedule_id) REFERENCES schedules(id),
     FOREIGN KEY (journal_entry_id) REFERENCES journal_entries(id)
 );
 
 CREATE TABLE interest_accruals (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    account_id BIGINT UNSIGNED NOT NULL,
+    ledger_account_id BIGINT UNSIGNED NOT NULL,
     period_start DATE NOT NULL,
     period_end DATE NOT NULL,
     interest_amount DECIMAL(18,2) NOT NULL,
     journal_entry_id BIGINT UNSIGNED,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (account_id) REFERENCES accounts(id),
+    FOREIGN KEY (ledger_account_id) REFERENCES ledger_accounts(id),
     FOREIGN KEY (journal_entry_id) REFERENCES journal_entries(id)
 );
 
 CREATE TABLE charges (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    account_id BIGINT UNSIGNED NOT NULL,
+    ledger_account_id BIGINT UNSIGNED NOT NULL,
     code VARCHAR(50) NOT NULL,
     amount DECIMAL(18,2) NOT NULL,
     applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     journal_entry_id BIGINT UNSIGNED,
-    FOREIGN KEY (account_id) REFERENCES accounts(id),
+    FOREIGN KEY (ledger_account_id) REFERENCES ledger_accounts(id),
     FOREIGN KEY (journal_entry_id) REFERENCES journal_entries(id)
 );
 
@@ -500,7 +500,7 @@ CREATE TABLE loan_applications (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     customer_id BIGINT UNSIGNED NOT NULL,
     product_policy_id BIGINT UNSIGNED NOT NULL,
-    account_id BIGINT UNSIGNED NULL, -- created later after approval
+    ledger_account_id BIGINT UNSIGNED NULL, -- created later after approval
     loan_type ENUM('GENERAL','DEPOSIT','SECURED') DEFAULT 'GENERAL',
     amount_requested DECIMAL(18,2) NOT NULL,
     purpose TEXT,
@@ -510,17 +510,17 @@ CREATE TABLE loan_applications (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customers(id),
     FOREIGN KEY (product_policy_id) REFERENCES product_policies(id),
-    FOREIGN KEY (account_id) REFERENCES accounts(id)
+    FOREIGN KEY (ledger_account_id) REFERENCES ledger_accounts(id)
 );
 
 CREATE TABLE loan_sureties (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     loan_application_id BIGINT UNSIGNED NOT NULL,
-    account_id BIGINT UNSIGNED NOT NULL,
+    ledger_account_id BIGINT UNSIGNED NOT NULL,
     surety_type ENUM('SURETY','LEAN') NOT NULL,
     amount DECIMAL(18,2) NOT NULL,
     FOREIGN KEY (loan_application_id) REFERENCES loan_applications(id) ON DELETE CASCADE,
-    FOREIGN KEY (account_id) REFERENCES accounts(id)
+    FOREIGN KEY (ledger_account_id) REFERENCES ledger_accounts(id)
 );
 
 CREATE TABLE loan_collaterals (
@@ -597,9 +597,9 @@ CREATE TABLE loan_approvals (
     interest_rate DECIMAL(5,2) NOT NULL,
     repayment_schedule JSON NOT NULL, -- installments, dates, amounts
     approved_date DATE NOT NULL,
-    account_id BIGINT UNSIGNED NOT NULL, -- created account_id
+    ledger_account_id BIGINT UNSIGNED NOT NULL, -- created ledger_account_id
     FOREIGN KEY (loan_application_id) REFERENCES loan_applications(id) ON DELETE CASCADE,
-    FOREIGN KEY (account_id) REFERENCES accounts(id)
+    FOREIGN KEY (ledger_account_id) REFERENCES ledger_accounts(id)
     FOREIGN KEY (approved_by) REFERENCES users(id)
 );
 
@@ -608,9 +608,9 @@ CREATE TABLE loan_disbursements (
     loan_application_id BIGINT UNSIGNED NOT NULL,
     disbursement_date DATE NOT NULL,
     amount DECIMAL(18,2) NOT NULL,
-    account_id BIGINT UNSIGNED NOT NULL, -- account credited
+    ledger_account_id BIGINT UNSIGNED NOT NULL, -- account credited
     FOREIGN KEY (loan_application_id) REFERENCES loan_applications(id) ON DELETE CASCADE,
-    FOREIGN KEY (account_id) REFERENCES accounts(id)
+    FOREIGN KEY (ledger_account_id) REFERENCES ledger_accounts(id)
 );
 
 CREATE TABLE loan_application_status_history (
@@ -634,7 +634,7 @@ CREATE TABLE cash_accounts (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,                 -- "Cash on Hand", "Petty Cash", "Bank - ABC"
     type ENUM('CASH_ON_HAND','BANK','PETTY_CASH','CASH_EQUIVALENT') NOT NULL,
-    branch_id BIGINT UNSIGNED,                  -- nullable for global/head office accounts
+    branch_id BIGINT UNSIGNED,                  -- nullable for global/head office ledger_accounts
     location VARCHAR(255),
     currency CHAR(3) DEFAULT 'BDT',
     is_active BOOLEAN DEFAULT TRUE,
@@ -753,13 +753,13 @@ CREATE TABLE cash_reconciliations (
 -- Start of Cheque Management
 CREATE TABLE cheque_books (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    account_id BIGINT UNSIGNED NOT NULL,
+    ledger_account_id BIGINT UNSIGNED NOT NULL,
     book_no VARCHAR(50) NOT NULL,
     start_no INT NOT NULL,
     end_no INT NOT NULL,
     issued_date DATE NOT NULL,
     active BOOLEAN DEFAULT TRUE,
-    FOREIGN KEY (account_id) REFERENCES accounts(id)
+    FOREIGN KEY (ledger_account_id) REFERENCES ledger_accounts(id)
 );
 
 CREATE TABLE cheques (
@@ -777,11 +777,11 @@ CREATE TABLE cheques (
 CREATE TABLE pending_cheque_debits (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     cheque_id BIGINT UNSIGNED NOT NULL,
-    account_id BIGINT UNSIGNED NOT NULL,
+    ledger_account_id BIGINT UNSIGNED NOT NULL,
     amount DECIMAL(18,2) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (cheque_id) REFERENCES cheques(id),
-    FOREIGN KEY (account_id) REFERENCES accounts(id)
+    FOREIGN KEY (ledger_account_id) REFERENCES ledger_accounts(id)
 );
 -- End of Cheque Management
 

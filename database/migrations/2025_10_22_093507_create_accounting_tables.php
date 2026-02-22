@@ -28,7 +28,7 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        Schema::create('accounts', function (Blueprint $table) {
+        Schema::create('ledger_accounts', function (Blueprint $table) {
             $table->id();
             $table->string('code', 50)->unique()->comment('Unique GL code');
             $table->string('name', 100)->comment('Account name');
@@ -36,7 +36,7 @@ return new class extends Migration {
             $table->boolean('is_control_account')->default(false);
             $table->boolean('is_active')->default(true);
             $table->boolean('is_leaf')->default(true);
-            $table->foreignId('parent_id')->nullable()->constrained('accounts')->nullOnDelete();
+            $table->foreignId('parent_id')->nullable()->constrained('ledger_accounts')->nullOnDelete();
             $table->timestamps();
         });
 
@@ -49,9 +49,9 @@ return new class extends Migration {
 
             $table->timestamp('voucher_date')->useCurrent()->comment('Posting timestamp');
             $table->enum('voucher_type', [
-                'RECEIPT',
-                'PAYMENT',
-                'JOURNAL',
+                'CREDIT_OR_RECEIPT',
+                'DEBIT_OR_PAYMENT',
+                'JOURNAL_OR_NON_CASH',
                 'PURCHASE',
                 'SALE',
                 'DEBIT NOTE',
@@ -80,8 +80,8 @@ return new class extends Migration {
                 ->cascadeOnDelete()
                 ->comment('Reference to voucher entry');
 
-            $table->foreignId('account_id')
-                ->constrained('accounts')
+            $table->foreignId('ledger_account_id')
+                ->constrained('ledger_accounts')
                 ->restrictOnDelete()
                 ->comment('Linked GL account');
 
@@ -102,7 +102,7 @@ return new class extends Migration {
 
         Schema::create('account_balances', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('account_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('ledger_account_id')->constrained()->cascadeOnDelete();
             $table->foreignId('fiscal_period_id')->constrained()->cascadeOnDelete();
             $table->decimal('opening_balance', 18, 2)->default(0);
             $table->decimal('debit_total', 18, 2)->default(0);
@@ -120,15 +120,15 @@ return new class extends Migration {
         DB::statement("
             CREATE OR REPLACE VIEW view_trial_balance AS
             SELECT
-                a.id   AS account_id,
+                a.id   AS ledger_account_id,
                 a.code AS account_code,
                 a.name AS account_name,
                 a.type AS account_type,
                 COALESCE(SUM(ve.debit), 0)  AS total_debit,
                 COALESCE(SUM(ve.credit), 0) AS total_credit,
                 (COALESCE(SUM(ve.debit), 0) - COALESCE(SUM(ve.credit), 0)) AS balance
-            FROM accounts a
-            LEFT JOIN voucher_lines ve ON ve.account_id = a.id
+            FROM ledger_accounts a
+            LEFT JOIN voucher_lines ve ON ve.ledger_account_id = a.id
             LEFT JOIN vouchers v
                 ON v.id = ve.voucher_id
                AND v.status = 'POSTED'
@@ -148,11 +148,11 @@ return new class extends Migration {
                     WHEN a.type = 'INCOME'  THEN 'INCOME'
                     WHEN a.type = 'EXPENSE' THEN 'EXPENSE'
                 END AS category,
-                a.id   AS account_id,
+                a.id   AS ledger_account_id,
                 a.name AS account_name,
                 SUM(ve.credit - ve.debit) AS amount
-            FROM accounts a
-            JOIN voucher_lines ve ON ve.account_id = a.id
+            FROM ledger_accounts a
+            JOIN voucher_lines ve ON ve.ledger_account_id = a.id
             JOIN vouchers v
                 ON v.id = ve.voucher_id
                AND v.status = 'POSTED'
@@ -170,7 +170,7 @@ return new class extends Migration {
             CREATE OR REPLACE VIEW view_balance_sheet AS
             SELECT
                 a.type AS category,
-                a.id   AS account_id,
+                a.id   AS ledger_account_id,
                 a.name AS account_name,
                 CASE
                     WHEN a.type = 'ASSET'
@@ -178,8 +178,8 @@ return new class extends Migration {
                     ELSE
                         SUM(ve.credit - ve.debit)
                 END AS balance
-            FROM accounts a
-            JOIN voucher_lines ve ON ve.account_id = a.id
+            FROM ledger_accounts a
+            JOIN voucher_lines ve ON ve.ledger_account_id = a.id
             JOIN vouchers v
                 ON v.id = ve.voucher_id
                AND v.status = 'POSTED'
@@ -192,7 +192,7 @@ return new class extends Migration {
     {
         Schema::dropIfExists('vouchers');
         Schema::dropIfExists('voucher_lines');
-        Schema::dropIfExists('accounts');
+        Schema::dropIfExists('ledger_accounts');
         Schema::dropIfExists('account_balances');
         Schema::dropIfExists('fiscal_periods');
         Schema::dropIfExists('fiscal_years');

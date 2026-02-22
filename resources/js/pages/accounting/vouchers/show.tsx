@@ -16,6 +16,8 @@ interface VoucherViewProps {
 export default function VoucherView({ backUrl }: { backUrl: string }) {
     const { voucher, flash } = usePage().props as unknown as VoucherViewProps;
 
+    console.log(voucher);
+
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
         if (flash?.error) toast.error(flash.error);
@@ -80,7 +82,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
             {/* Voucher Details & Lines */}
             <div className="print-area mt-4 space-y-4 rounded-md border border-border bg-card p-4 sm:p-6">
                 {/* Voucher Info */}
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
                     <div>
                         <span className="text-xs text-muted-foreground">
                             Voucher No
@@ -89,7 +91,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                     </div>
                     <div>
                         <span className="text-xs text-muted-foreground">
-                            Date
+                            Voucher Date
                         </span>
                         <p className="text-sm">
                             {new Date(
@@ -99,7 +101,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                     </div>
                     <div>
                         <span className="text-xs text-muted-foreground">
-                            Type
+                            Voucher Type
                         </span>
                         <p className="text-sm">{voucher.voucher_type}</p>
                     </div>
@@ -127,26 +129,15 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                     </div>
                     <div>
                         <span className="text-xs text-muted-foreground">
-                            Status
+                            Voucher Status
                         </span>
                         <p className="text-sm">{voucher.status}</p>
                     </div>
-                    <div>
-                        <span className="text-xs text-muted-foreground">
-                            Total Debit
-                        </span>
-                        <p className="text-sm">{totals.totalDebit}</p>
-                    </div>
-                    <div>
-                        <span className="text-xs text-muted-foreground">
-                            Total Credit
-                        </span>
-                        <p className="text-sm">{totals.totalCredit}</p>
-                    </div>
+
                     {voucher.narration && (
                         <div className="sm:col-span-2 md:col-span-3">
                             <span className="text-xs text-muted-foreground">
-                                Description
+                                Narration
                             </span>
                             <p className="text-sm">{voucher.narration}</p>
                         </div>
@@ -159,7 +150,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                         <thead className="sticky top-0 bg-muted">
                             <tr>
                                 {[
-                                    'Account',
+                                    'Ledger Account',
                                     'Debit',
                                     'Credit',
                                     'Narration',
@@ -181,7 +172,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                                         className="border-b border-border even:bg-muted/30"
                                     >
                                         <td className="px-2 py-1">
-                                            {line.account?.name || '-'}
+                                            {`${line.account.code} - ${line.account.name}`}
                                         </td>
                                         <td className="px-2 py-1">
                                             {line.debit}
@@ -211,10 +202,10 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                                     Totals:
                                 </td>
                                 <td className="px-2 py-1">
-                                    {totals.totalDebit}
+                                    {totals.totalDebit?.toFixed(2)}
                                 </td>
                                 <td className="px-2 py-1">
-                                    {totals.totalCredit}
+                                    {totals.totalCredit?.toFixed(2)}
                                 </td>
                                 <td></td>
                             </tr>

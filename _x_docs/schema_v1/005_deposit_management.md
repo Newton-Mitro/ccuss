@@ -53,7 +53,7 @@ CREATE TABLE deposit_policies (
     interest_rate DECIMAL(5,2) DEFAULT 0.00,
     interest_eligibility_check BOOLEAN DEFAULT TRUE,
 
-    -- GL accounts
+    -- GL ledger_accounts
     gl_deposit_payable_id BIGINT UNSIGNED DEFAULT NULL,
     gl_interest_payable_id BIGINT UNSIGNED DEFAULT NULL,
     gl_interest_expense_id BIGINT UNSIGNED DEFAULT NULL,

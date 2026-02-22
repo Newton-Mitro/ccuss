@@ -1,13 +1,13 @@
 ```sql
 CREATE TABLE cheque_books (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    account_id BIGINT UNSIGNED NOT NULL,
+    ledger_account_id BIGINT UNSIGNED NOT NULL,
     book_no VARCHAR(50) NOT NULL,
     start_no INT NOT NULL,
     end_no INT NOT NULL,
     issued_date DATE NOT NULL,
     active BOOLEAN DEFAULT TRUE,
-    FOREIGN KEY (account_id) REFERENCES accounts(id)
+    FOREIGN KEY (ledger_account_id) REFERENCES ledger_accounts(id)
 );
 
 CREATE TABLE cheques (
@@ -25,10 +25,10 @@ CREATE TABLE cheques (
 CREATE TABLE pending_cheque_debits (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     cheque_id BIGINT UNSIGNED NOT NULL,
-    account_id BIGINT UNSIGNED NOT NULL,
+    ledger_account_id BIGINT UNSIGNED NOT NULL,
     amount DECIMAL(18,2) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (cheque_id) REFERENCES cheques(id),
-    FOREIGN KEY (account_id) REFERENCES accounts(id)
+    FOREIGN KEY (ledger_account_id) REFERENCES ledger_accounts(id)
 );
 ```

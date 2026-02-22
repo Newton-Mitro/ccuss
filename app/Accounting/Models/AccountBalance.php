@@ -11,7 +11,7 @@ class AccountBalance extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'account_id',
+        'ledger_account_id',
         'fiscal_period_id',
         'opening_balance',
         'debit_total',
@@ -28,7 +28,7 @@ class AccountBalance extends Model
 
     public function account(): BelongsTo
     {
-        return $this->belongsTo(Account::class);
+        return $this->belongsTo(LedgerAccount::class);
     }
 
     public function fiscalPeriod(): BelongsTo

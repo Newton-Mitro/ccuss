@@ -1,6 +1,6 @@
 <?php
 
-use App\Accounting\Controllers\AccountController;
+use App\Accounting\Controllers\LedgerAccountController;
 use App\Accounting\Controllers\VoucherController;
 use Illuminate\Support\Facades\Route;
 
@@ -33,13 +33,13 @@ Route::middleware(['auth',])->group(function () {
 
 
 Route::middleware(['auth',])->group(function () {
-    Route::get('/accounts', [AccountController::class, 'index'])->name('accounts.index');
-    Route::get('/api/search-ledger', [AccountController::class, 'ledgerSearch'])->name('accounts.search');
+    Route::get('/ledger_accounts', [LedgerAccountController::class, 'index'])->name('ledger_accounts.index');
+    Route::get('/api/search-ledger', [LedgerAccountController::class, 'ledgerSearch'])->name('ledger_accounts.search');
 
-    Route::post('/accounts', [AccountController::class, 'store'])->name('accounts.store');
-    Route::put('/accounts/{gl_account}', [AccountController::class, 'update'])->name('accounts.update');
-    Route::delete('/accounts/{gl_account}', [AccountController::class, 'destroy'])->name('accounts.destroy');
-    Route::post('/accounts/move', [AccountController::class, 'move'])->name('accounts.move');
+    Route::post('/ledger_accounts', [LedgerAccountController::class, 'store'])->name('ledger_accounts.store');
+    Route::put('/ledger_accounts/{gl_account}', [LedgerAccountController::class, 'update'])->name('ledger_accounts.update');
+    Route::delete('/ledger_accounts/{gl_account}', [LedgerAccountController::class, 'destroy'])->name('ledger_accounts.destroy');
+    Route::post('/ledger_accounts/move', [LedgerAccountController::class, 'move'])->name('ledger_accounts.move');
 });
 
 Route::middleware(['auth',])->group(function () {
@@ -47,8 +47,8 @@ Route::middleware(['auth',])->group(function () {
     Route::get('vouchers', [VoucherController::class, 'index'])->name('vouchers.index');
 
     // Voucher create routes per type
-    Route::get('debit-voucher/create', [VoucherController::class, 'createDebitVoucher'])->name('vouchers.create.debit');
-    Route::get('credit-voucher/create', [VoucherController::class, 'createCreditVoucher'])->name('vouchers.create.credit');
+    Route::get('vouchers/debit/create', [VoucherController::class, 'createDebitVoucher'])->name('vouchers.create.debit');
+    Route::get('vouchers/credit/create', [VoucherController::class, 'createCreditVoucher'])->name('vouchers.create.credit');
     Route::get('vouchers/journal/create', [VoucherController::class, 'createJournalVoucher'])->name('vouchers.create.journal');
     Route::get('vouchers/contra/create', [VoucherController::class, 'createContraVoucher'])->name('vouchers.create.contra');
     // Transfer can reuse store with type 'transfer' in request

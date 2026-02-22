@@ -6,13 +6,14 @@ import HeadingSmall from '../../../components/heading-small';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
+import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 import { Voucher, VoucherLine } from '../../../types/accounting';
 
 interface VoucherEditProps {
     voucher?: Voucher;
-    accounts: { id: number; name: string }[];
+    ledger_accounts: { id: number; name: string }[];
     fiscalYears: { id: number; code: string }[];
     fiscalPeriods: {
         id: number;
@@ -25,8 +26,14 @@ interface VoucherEditProps {
 }
 
 export default function VoucherEdit({ backUrl }: { backUrl: string }) {
-    const { voucher, accounts, fiscalYears, fiscalPeriods, branches, flash } =
-        usePage().props as unknown as VoucherEditProps;
+    const {
+        voucher,
+        ledger_accounts,
+        fiscalYears,
+        fiscalPeriods,
+        branches,
+        flash,
+    } = usePage().props as unknown as VoucherEditProps;
 
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
@@ -65,7 +72,7 @@ export default function VoucherEdit({ backUrl }: { backUrl: string }) {
             {
                 id: Date.now(),
                 voucher_id: voucher?.id || 0,
-                account_id: 0,
+                ledger_account_id: 0,
                 account_code: '',
                 subledger_name: '',
                 subledger_type: '',
@@ -252,17 +259,18 @@ export default function VoucherEdit({ backUrl }: { backUrl: string }) {
 
                     <div>
                         <Label className="text-xs">Status</Label>
-                        <select
-                            disabled
+                        <Select
                             value={data.status}
                             onChange={(e) => setData('status', e.target.value)}
-                            className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                        >
-                            <option value="DRAFT">DRAFT</option>
-                            <option value="APPROVED">APPROVED</option>
-                            <option value="POSTED">POSTED</option>
-                            <option value="CANCELLED">CANCELLED</option>
-                        </select>
+                            options={[
+                                { value: 'DRAFT', label: 'Draft' },
+                                { value: 'APPROVED', label: 'Approved' },
+                                { value: 'POSTED', label: 'Posted' },
+                                { value: 'CANCELLED', label: 'Cancelled' },
+                            ]}
+                            disabled
+                            includeNone={false}
+                        />
                     </div>
 
                     <div className="sm:col-span-2 md:col-span-3">

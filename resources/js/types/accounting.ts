@@ -43,7 +43,7 @@ export interface Account {
 export interface VoucherLine {
     id: number;
     voucher_id: number;
-    account_id: number;
+    ledger_account_id: number;
     account?: Account;
     subledger_id?: number | null;
     subledger_type?: string | null;
@@ -94,7 +94,7 @@ export interface Voucher {
 // Account Balance
 export interface AccountBalance {
     id: number;
-    account_id: number;
+    ledger_account_id: number;
     fiscal_period_id: number;
     opening_balance: number;
     debit_total: number;

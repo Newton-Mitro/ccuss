@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Accounting\Models\Account;
+use App\Accounting\Models\LedgerAccount;
 use App\Accounting\Models\Voucher;
 use App\Accounting\Models\VoucherLine;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -18,7 +18,7 @@ class VoucherLineFactory extends Factory
 
         return [
             'voucher_id' => Voucher::factory(),
-            'account_id' => Account::factory(),
+            'ledger_account_id' => LedgerAccount::factory(),
 
             'subledger_id' => null,
             'subledger_type' => null,

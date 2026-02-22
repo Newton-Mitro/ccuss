@@ -3,16 +3,20 @@ import { ArrowLeft, CheckCheck, Loader2, Plus, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
+import { SubLedgerSearchInput } from '../../../components/sub-ledger-search-input';
+import AppDatePicker from '../../../components/ui/app_date_picker';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
+import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 import { VoucherLine } from '../../../types/accounting';
+import { LedgerSearchInput } from '../components/ledger-search-input';
 
 export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
-    const { accounts, fiscalYears, fiscalPeriods, branches, flash } = usePage()
-        .props as any;
+    const { ledger_accounts, fiscalYears, fiscalPeriods, branches, flash } =
+        usePage().props as any;
 
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
@@ -21,13 +25,14 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
 
     const { data, setData, post, processing } = useForm({
         voucher_no: '',
-        voucher_date: '',
-        voucher_type: 'DEBIT NOTE',
+        voucher_date: new Date().toISOString().split('T')[0],
+        voucher_type: 'DEBIT_OR_PAYMENT',
         fiscal_year_id: undefined,
         fiscal_period_id: undefined,
         branch_id: undefined,
         status: 'DRAFT',
         narration: '',
+        cash_type: '',
         lines: [] as VoucherLine[],
     });
 
@@ -50,8 +55,8 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
             ...data.lines,
             {
                 id: Date.now(),
-                voucher_id: 0, // <-- replaced voucher?.id
-                account_id: 0,
+                voucher_id: 0,
+                ledger_account_id: 0,
                 account_code: '',
                 subledger_name: '',
                 subledger_type: '',
@@ -75,19 +80,19 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Vouchers', href: '/vouchers' },
+        { title: 'Vouchers', href: '/vouchers/list' },
         { title: 'Create Debit Voucher', href: '' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Create Debit Voucher" />
+            <Head title="Create Debit / Payment Voucher" />
 
             {/* Header */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <HeadingSmall
-                    title="Create Debit Voucher"
-                    description="Enter debit voucher details"
+                    title="Create Debit / Payment Voucher"
+                    description="Enter debit / payment voucher details"
                 />
                 <button
                     type="button"
@@ -99,177 +104,195 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                 </button>
             </div>
 
-            {/* Form */}
+            {/* ---------------- Form Card ---------------- */}
             <form
                 onSubmit={handleSubmit}
-                className="mt-4 space-y-4 rounded-md border border-border bg-card p-4 sm:p-6"
+                className="mt-4 space-y-6 rounded-md border border-border bg-card p-4 sm:p-6"
             >
-                {/* Voucher Info */}
-                <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-2 md:grid-cols-3">
-                    <div>
-                        <Label className="text-xs">Voucher No</Label>
-                        <Input
-                            value={data.voucher_no}
-                            onChange={(e) =>
-                                setData('voucher_no', e.target.value)
-                            }
-                            className="h-8 text-sm"
-                        />
+                {/* ---------------- Voucher + Cash Details ---------------- */}
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
+                    {/* Voucher Details - 10/12 */}
+                    <div className="space-y-4 rounded-md border border-border bg-muted/30 p-3 md:col-span-8">
+                        <h2 className="border-b border-border pb-1 text-sm font-medium text-primary">
+                            Voucher Details
+                        </h2>
+                        <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-2 md:grid-cols-3">
+                            <div>
+                                <Label className="text-xs">Voucher No</Label>
+                                <Input
+                                    disabled
+                                    value={data.voucher_no}
+                                    className="h-8 text-sm"
+                                />
+                            </div>
+
+                            <div>
+                                <Label className="text-xs">Voucher Date</Label>
+                                <AppDatePicker
+                                    disabled
+                                    value={data.voucher_date}
+                                />
+                            </div>
+
+                            <div>
+                                <Label className="text-xs">Voucher Type</Label>
+                                <Select
+                                    disabled
+                                    value={data.voucher_type}
+                                    options={[
+                                        {
+                                            value: 'CREDIT_OR_RECEIPT',
+                                            label: 'Credit / Receipt',
+                                        },
+                                        {
+                                            value: 'DEBIT_OR_PAYMENT',
+                                            label: 'Debit / Payment',
+                                        },
+                                        {
+                                            value: 'JOURNAL_OR_NON_CASH',
+                                            label: 'Journal / Non-Cash',
+                                        },
+                                        {
+                                            value: 'PURCHASE',
+                                            label: 'Purchase',
+                                        },
+                                        { value: 'SALE', label: 'Sale' },
+                                        {
+                                            value: 'DEBIT_NOTE',
+                                            label: 'Debit Note',
+                                        },
+                                        {
+                                            value: 'CREDIT_NOTE',
+                                            label: 'Credit Note',
+                                        },
+                                        {
+                                            value: 'PETTY_CASH',
+                                            label: 'Petty Cash',
+                                        },
+                                        { value: 'CONTRA', label: 'Contra' },
+                                    ]}
+                                />
+                            </div>
+
+                            <div>
+                                <Label className="text-xs">Fiscal Year</Label>
+                                <Select
+                                    disabled
+                                    value={data.fiscal_year_id || ''}
+                                    options={fiscalYears}
+                                />
+                            </div>
+
+                            <div>
+                                <Label className="text-xs">Fiscal Period</Label>
+                                <Select
+                                    disabled
+                                    value={data.fiscal_period_id || ''}
+                                    options={fiscalPeriods}
+                                />
+                            </div>
+
+                            <div>
+                                <Label className="text-xs">Branch</Label>
+                                <Select
+                                    disabled
+                                    value={data.branch_id || ''}
+                                    options={branches}
+                                />
+                            </div>
+
+                            <div>
+                                <Label className="text-xs">
+                                    Voucher Status
+                                </Label>
+                                <Select
+                                    value={data.status}
+                                    options={[
+                                        { value: 'DRAFT', label: 'Draft' },
+                                        {
+                                            value: 'APPROVED',
+                                            label: 'Approved',
+                                        },
+                                        { value: 'POSTED', label: 'Posted' },
+                                        {
+                                            value: 'CANCELLED',
+                                            label: 'Cancelled',
+                                        },
+                                    ]}
+                                    disabled
+                                    includeNone={false}
+                                />
+                            </div>
+
+                            <div className="sm:col-span-2">
+                                <Label className="text-xs">Narration</Label>
+                                <Input
+                                    value={data.narration}
+                                    className="h-8 text-sm"
+                                />
+                            </div>
+                        </div>
                     </div>
 
-                    <div>
-                        <Label className="text-xs">Date</Label>
-                        <Input
-                            type="date"
-                            value={data.voucher_date}
-                            onChange={(e) =>
-                                setData('voucher_date', e.target.value)
-                            }
-                            className="h-8 text-sm"
-                        />
-                    </div>
+                    {/* Cash Details - 2/12 */}
+                    <div className="space-y-4 rounded-md border border-border bg-muted/30 p-3 md:col-span-4">
+                        <h2 className="border-b border-border pb-1 text-sm font-medium text-primary">
+                            Cash Ledger
+                        </h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-1">
+                            <div>
+                                <Label className="text-xs">Cash Type</Label>
+                                <Select
+                                    value={data.cash_type || ''}
+                                    onChange={(e) =>
+                                        setData('cash_type', e.target.value)
+                                    }
+                                    options={[
+                                        {
+                                            value: 'CASH_IN_HAND',
+                                            label: 'Cash in Hand',
+                                        },
+                                        {
+                                            value: 'CASH_IN_BANK',
+                                            label: 'Cash in Bank',
+                                        },
+                                        {
+                                            value: 'PETTY_CASH',
+                                            label: 'Petty Cash',
+                                        },
+                                    ]}
+                                />
+                            </div>
 
-                    <div>
-                        <Label className="text-xs">Type</Label>
-                        <Input
-                            value="DEBIT NOTE"
-                            disabled
-                            className="h-8 text-sm"
-                        />
-                    </div>
+                            <div>
+                                <Label className="text-xs">
+                                    Cash Ledger Account
+                                </Label>
+                                <LedgerSearchInput
+                                    placeholder="Cash Ledger Account"
+                                    onSelect={() => {}}
+                                />
+                            </div>
 
-                    <div>
-                        <Label className="text-xs">Fiscal Year</Label>
-                        <select
-                            value={data.fiscal_year_id || ''}
-                            onChange={(e) =>
-                                setData(
-                                    'fiscal_year_id',
-                                    Number(e.target.value),
-                                )
-                            }
-                            className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                        >
-                            <option value="">Select Fiscal Year</option>
-                            {fiscalYears.map((fy: any) => (
-                                <option key={fy.id} value={fy.id}>
-                                    {fy.code}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div>
-                        <Label className="text-xs">Fiscal Period</Label>
-                        <select
-                            value={data.fiscal_period_id || ''}
-                            onChange={(e) =>
-                                setData(
-                                    'fiscal_period_id',
-                                    Number(e.target.value),
-                                )
-                            }
-                            className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                        >
-                            <option value="">Select Fiscal Period</option>
-                            {fiscalPeriods
-                                .filter(
-                                    (fp: any) =>
-                                        fp.fiscal_year_id ===
-                                        data.fiscal_year_id,
-                                )
-                                .map((fp: any) => (
-                                    <option key={fp.id} value={fp.id}>
-                                        {fp.period_name}
-                                    </option>
-                                ))}
-                        </select>
-                    </div>
-
-                    <div>
-                        <Label className="text-xs">Branch</Label>
-                        <select
-                            value={data.branch_id || ''}
-                            onChange={(e) =>
-                                setData('branch_id', Number(e.target.value))
-                            }
-                            className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                        >
-                            <option value="">Select Branch</option>
-                            {branches.map((b: any) => (
-                                <option key={b.id} value={b.id}>
-                                    {b.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div>
-                        <Label className="text-xs">Status</Label>
-                        <Input value="DRAFT" disabled className="h-8 text-sm" />
-                    </div>
-
-                    <div className="sm:col-span-2 md:col-span-3">
-                        <Label className="text-xs">Description</Label>
-                        <Input
-                            value={data.narration}
-                            onChange={(e) =>
-                                setData('narration', e.target.value)
-                            }
-                            className="h-8 text-sm"
-                        />
+                            <div>
+                                <Label className="text-xs">
+                                    Cash Sub-Ledger
+                                </Label>
+                                <SubLedgerSearchInput
+                                    placeholder="Cash Sub-Ledger Account"
+                                    onSelect={() => {}}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                {/* Ledger Selection */}
-                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
-                    <div>
-                        <Label className="text-xs">Cash Ledger</Label>
-                        <select
-                            value={data.cash_ledger_id || ''}
-                            onChange={(e) =>
-                                setData(
-                                    'cash_ledger_id',
-                                    Number(e.target.value),
-                                )
-                            }
-                            className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                        >
-                            <option value="">Select Cash Ledger</option>
-                            {accounts.map((acc: any) => (
-                                <option key={acc.id} value={acc.id}>
-                                    {acc.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div>
-                        <Label className="text-xs">Personal Ledger</Label>
-                        <select
-                            value={data.personal_ledger_id || ''}
-                            onChange={(e) =>
-                                setData(
-                                    'personal_ledger_id',
-                                    Number(e.target.value),
-                                )
-                            }
-                            className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                        >
-                            <option value="">Select Personal Ledger</option>
-                            {accounts.map((acc: any) => (
-                                <option key={acc.id} value={acc.id}>
-                                    {acc.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-
-                {/* Voucher Lines */}
-                <div className="mt-4 space-y-2">
+                {/* ---------------- Voucher Lines ---------------- */}
+                <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-medium">Voucher Lines</h3>
+                        <h3 className="font-medium text-primary">
+                            Voucher Lines
+                        </h3>
                         <Button
                             type="button"
                             onClick={addLine}
@@ -279,106 +302,111 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                         </Button>
                     </div>
 
-                    <div className="hidden overflow-auto rounded-md border border-border md:block">
-                        <table className="w-full border-collapse">
+                    {/* Desktop Table */}
+                    <div className="hidden min-h-80 rounded-md border border-border md:block">
+                        <table className="w-full table-fixed border-collapse">
                             <thead className="sticky top-0 bg-muted">
                                 <tr>
-                                    {[
-                                        'GL & Subledger Account',
-                                        'Account Number',
-                                        'Amount',
-                                        'Narration',
-                                        'Actions',
-                                    ].map((h) => (
-                                        <th
-                                            key={h}
-                                            className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground"
-                                        >
-                                            {h}
-                                        </th>
-                                    ))}
+                                    <th className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                        Ledger Account
+                                    </th>
+                                    <th className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                        Subledger Account
+                                    </th>
+                                    <th className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                        Ref Subledger Account
+                                    </th>
+                                    <th className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                        Instrument Type
+                                    </th>
+                                    <th className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                        Instrument Number
+                                    </th>
+                                    <th className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                        Amount
+                                    </th>
+                                    <th className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                        Narration
+                                    </th>
+                                    <th className="w-[60px] border-b border-border p-2 text-center text-sm font-medium text-muted-foreground">
+                                        Actions
+                                    </th>
                                 </tr>
                             </thead>
-
-                            <tbody>
+                            <tbody className="">
                                 {data.lines.map((line, index) => (
                                     <tr
                                         key={line.id}
                                         className="border-b border-border even:bg-muted/30"
                                     >
-                                        {/* Account */}
                                         <td className="px-2 py-1">
-                                            <Input
+                                            <LedgerSearchInput
                                                 placeholder="Ledger Account"
-                                                value={
-                                                    line.subledger_name || ''
-                                                }
-                                                onChange={(e) =>
-                                                    handleLineChange(
-                                                        index,
-                                                        'subledger_name',
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className="h-8 text-sm"
-                                            />
-                                            <Input
-                                                placeholder="Personal Ledger Account"
-                                                className="h-8 text-sm"
-                                            />
-                                            <Input
-                                                placeholder="Reference Personal Ledger Account"
-                                                className="h-8 text-sm"
-                                            />
-                                            <Input
-                                                placeholder="Instrument Type"
-                                                className="h-8 text-sm"
+                                                onSelect={() => {}}
                                             />
                                         </td>
 
-                                        {/* Account Code */}
                                         <td className="px-2 py-1">
-                                            <Input
-                                                placeholder="Ledger Code"
-                                                value={line.account_code || ''}
-                                                onChange={(e) =>
-                                                    handleLineChange(
-                                                        index,
-                                                        'account_code',
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className="h-8 text-sm"
+                                            <SubLedgerSearchInput
+                                                placeholder="Sub-Ledger Account"
+                                                onSelect={() => {}}
                                             />
-                                            <Input
-                                                placeholder="Personal Ledger Account No"
-                                                className="h-8 text-sm"
+                                        </td>
+
+                                        <td className="px-2 py-1">
+                                            <SubLedgerSearchInput
+                                                placeholder="Reference Sub-Ledger Account"
+                                                onSelect={() => {}}
                                             />
-                                            <Input
-                                                placeholder="Reference Personal Ledger Account No"
-                                                className="h-8 text-sm"
+                                        </td>
+                                        <td className="px-2 py-1">
+                                            <Select
+                                                value={''}
+                                                options={[
+                                                    {
+                                                        value: 'CHEQUE',
+                                                        label: 'Cheque',
+                                                    },
+                                                    {
+                                                        value: 'DD',
+                                                        label: 'Demand Draft (DD)',
+                                                    },
+                                                    {
+                                                        value: 'NEFT',
+                                                        label: 'NEFT',
+                                                    },
+                                                    {
+                                                        value: 'RTGS',
+                                                        label: 'RTGS',
+                                                    },
+                                                    {
+                                                        value: 'IMPS',
+                                                        label: 'IMPS',
+                                                    },
+                                                    {
+                                                        value: 'CASH',
+                                                        label: 'Cash',
+                                                    },
+                                                    {
+                                                        value: 'OTHER',
+                                                        label: 'Other',
+                                                    },
+                                                ]}
                                             />
+                                        </td>
+                                        <td className="px-2 py-1">
                                             <Input
                                                 placeholder="Instrument Number"
                                                 className="h-8 text-sm"
                                             />
                                         </td>
-
                                         <td className="px-2 py-1">
                                             <Input
                                                 type="number"
-                                                value={line.amount || 0}
-                                                onChange={(e) =>
-                                                    handleLineChange(
-                                                        index,
-                                                        'amount',
-                                                        Number(e.target.value),
-                                                    )
-                                                }
+                                                value={0}
                                                 className="h-8 text-sm"
                                             />
                                         </td>
-
                                         <td className="px-2 py-1">
                                             <Input
                                                 value={line.narration || ''}
@@ -392,8 +420,7 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                                                 className="h-8 text-sm"
                                             />
                                         </td>
-
-                                        <td className="px-2 py-1">
+                                        <td className="px-2 py-1 text-center">
                                             <button
                                                 type="button"
                                                 onClick={() =>
@@ -409,13 +436,14 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                             </tbody>
                         </table>
                     </div>
+
+                    {/* Mobile Lines */}
                     <div className="space-y-3 md:hidden">
                         {data.lines.map((line, index) => (
                             <div
                                 key={line.id}
                                 className="space-y-3 rounded-md border border-border bg-card p-3"
                             >
-                                {/* Header */}
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs font-medium text-muted-foreground">
                                         Line #{index + 1}
@@ -428,148 +456,60 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                                         <Trash2 className="h-4 w-4" />
                                     </button>
                                 </div>
-
-                                {/* Ledger / Subledger */}
-                                <div className="space-y-1">
-                                    <Label className="text-xs">
-                                        Ledger Account
-                                    </Label>
-                                    <Input
-                                        value={line.subledger_name || ''}
-                                        onChange={(e) =>
-                                            handleLineChange(
-                                                index,
-                                                'subledger_name',
-                                                e.target.value,
-                                            )
-                                        }
-                                        className="h-8 text-sm"
-                                    />
-                                    <Label className="text-xs">
-                                        Ledger Code
-                                    </Label>
-                                    <Input
-                                        value={line.account_code || ''}
-                                        onChange={(e) =>
-                                            handleLineChange(
-                                                index,
-                                                'account_code',
-                                                e.target.value,
-                                            )
-                                        }
-                                        className="h-8 text-sm"
-                                    />
-
-                                    <Label className="text-xs">
-                                        Personal Ledger Account
-                                    </Label>
-                                    <Input className="h-8 text-sm" />
-                                    <Label className="text-xs">
-                                        Personal Ledger Account No
-                                    </Label>
-                                    <Input
-                                        value={line.subledger_type || ''}
-                                        onChange={(e) =>
-                                            handleLineChange(
-                                                index,
-                                                'subledger_type',
-                                                e.target.value,
-                                            )
-                                        }
-                                        className="h-8 text-sm"
-                                    />
-
-                                    <Label className="text-xs">
-                                        Reference Personal Ledger Account
-                                    </Label>
-                                    <Input className="h-8 text-sm" />
-                                    <Label className="text-xs">
-                                        Reference Personal Ledger Account No
-                                    </Label>
-                                    <Input
-                                        value={line.associate_ledger_Code || ''}
-                                        onChange={(e) =>
-                                            handleLineChange(
-                                                index,
-                                                'associate_ledger_Code',
-                                                e.target.value,
-                                            )
-                                        }
-                                        className="h-8 text-sm"
-                                    />
-
-                                    <Label className="text-xs">
-                                        Instrument Type
-                                    </Label>
-                                    <Input className="h-8 text-sm" />
-                                    <Label className="text-xs">
-                                        Instrument Number
-                                    </Label>
-                                    <Input
-                                        value={line.associate_ledger_Code || ''}
-                                        onChange={(e) =>
-                                            handleLineChange(
-                                                index,
-                                                'associate_ledger_Code',
-                                                e.target.value,
-                                            )
-                                        }
-                                        className="h-8 text-sm"
-                                    />
-                                </div>
-
-                                {/* Debit / Credit */}
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <Label className="text-xs">Debit</Label>
-                                        <Input
-                                            type="number"
-                                            value={line.debit}
-                                            onChange={(e) =>
-                                                handleLineChange(
-                                                    index,
-                                                    'debit',
-                                                    Number(e.target.value),
-                                                )
-                                            }
-                                            className="h-8 text-sm"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <Label className="text-xs">
-                                            Credit
-                                        </Label>
-                                        <Input
-                                            type="number"
-                                            value={line.credit}
-                                            onChange={(e) =>
-                                                handleLineChange(
-                                                    index,
-                                                    'credit',
-                                                    Number(e.target.value),
-                                                )
-                                            }
-                                            className="h-8 text-sm"
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Narration */}
-                                <div>
-                                    <Label className="text-xs">Narration</Label>
-                                    <Input
-                                        value={line.narration || ''}
-                                        onChange={(e) =>
-                                            handleLineChange(
-                                                index,
-                                                'narration',
-                                                e.target.value,
-                                            )
-                                        }
-                                        className="h-8 text-sm"
-                                    />
-                                </div>
+                                <LedgerSearchInput
+                                    placeholder="Ledger Account"
+                                    onSelect={() => {}}
+                                />
+                                <SubLedgerSearchInput
+                                    placeholder="Sub-Ledger Account"
+                                    onSelect={() => {}}
+                                />
+                                <SubLedgerSearchInput
+                                    placeholder="Reference Sub-Ledger Account"
+                                    onSelect={() => {}}
+                                />
+                                <Select
+                                    value={''}
+                                    options={[
+                                        { value: 'CHEQUE', label: 'Cheque' },
+                                        {
+                                            value: 'DD',
+                                            label: 'Demand Draft (DD)',
+                                        },
+                                        { value: 'NEFT', label: 'NEFT' },
+                                        { value: 'RTGS', label: 'RTGS' },
+                                        { value: 'IMPS', label: 'IMPS' },
+                                        { value: 'CASH', label: 'Cash' },
+                                        { value: 'OTHER', label: 'Other' },
+                                    ]}
+                                />
+                                <Input
+                                    placeholder="Instrument Number"
+                                    className="h-8 text-sm"
+                                />
+                                <Input
+                                    type="number"
+                                    value={line.debit}
+                                    onChange={(e) =>
+                                        handleLineChange(
+                                            index,
+                                            'debit',
+                                            Number(e.target.value),
+                                        )
+                                    }
+                                    className="h-8 text-sm"
+                                />
+                                <Input
+                                    value={line.narration || ''}
+                                    onChange={(e) =>
+                                        handleLineChange(
+                                            index,
+                                            'narration',
+                                            e.target.value,
+                                        )
+                                    }
+                                    className="h-8 text-sm"
+                                />
                             </div>
                         ))}
                     </div>
@@ -587,7 +527,7 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                         ) : (
                             <CheckCheck />
                         )}
-                        Create Debit Voucher
+                        Create Voucher
                     </Button>
                 </div>
             </form>

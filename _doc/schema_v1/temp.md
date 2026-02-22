@@ -185,7 +185,7 @@ return new class extends Migration {
         // ------------------------
         // 14. Ledger Accounts
         // ------------------------
-        Schema::create('accounts', function (Blueprint $table) {
+        Schema::create('ledger_accounts', function (Blueprint $table) {
             $table->id();
             $table->string('code')->unique();
             $table->string('name');
@@ -210,7 +210,7 @@ return new class extends Migration {
         Schema::create('journal_entries', function (Blueprint $table) {
             $table->id();
             $table->foreignId('journal_id')->constrained('journals');
-            $table->foreignId('account_id')->constrained('accounts');
+            $table->foreignId('ledger_account_id')->constrained('ledger_accounts');
             $table->decimal('debit',15,2)->default(0);
             $table->decimal('credit',15,2)->default(0);
         });
@@ -220,7 +220,7 @@ return new class extends Migration {
     {
         Schema::dropIfExists('journal_entries');
         Schema::dropIfExists('journals');
-        Schema::dropIfExists('accounts');
+        Schema::dropIfExists('ledger_accounts');
         Schema::dropIfExists('interest_accruals');
         Schema::dropIfExists('deposit_transactions');
         Schema::dropIfExists('rd_installments');
@@ -369,7 +369,7 @@ erDiagram
     JOURNAL_ENTRIES {
         id
         journal_id
-        account_id
+        ledger_account_id
         debit
     }
 
