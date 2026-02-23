@@ -17,7 +17,7 @@ class VoucherLine extends Model
         'subledger_id',
         'subledger_type',
         'associate_ledger_id',
-        'narration',
+        'particulars',
         'debit',
         'credit',
     ];
@@ -32,7 +32,7 @@ class VoucherLine extends Model
         return $this->belongsTo(Voucher::class);
     }
 
-    public function account(): BelongsTo
+    public function ledger_account(): BelongsTo
     {
         return $this->belongsTo(LedgerAccount::class, 'ledger_account_id');
     }

@@ -56,6 +56,25 @@ class LedgerAccount extends Model
         return $this->hasMany(AccountBalance::class);
     }
 
+    protected static function booted()
+    {
+        static::saving(function ($account) {
+            // Control accounts are never leaf nodes
+            $account->is_leaf = !$account->is_control_account;
+        });
+
+        static::created(function ($account) {
+            // If this account has a parent, parent can’t be a leaf
+            if ($account->parent_id) {
+                self::where('id', $account->parent_id)
+                    ->update([
+                        'is_leaf' => false,
+                        'is_control_account' => true,
+                    ]);
+            }
+        });
+    }
+
     protected static function newFactory()
     {
         return LedgerAccountFactory::new();

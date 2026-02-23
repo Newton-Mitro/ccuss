@@ -11,30 +11,90 @@ import { Label } from '../../../components/ui/label';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-import { VoucherLine } from '../../../types/accounting';
+import { LedgerAccount } from '../../../types/accounting';
 import { LedgerSearchInput } from '../components/ledger-search-input';
 
+export interface VoucherLine {
+    id: number;
+    voucher_id: number;
+    ledger_account_id: number;
+    ldger_account?: LedgerAccount;
+    subledger_id?: number | null;
+    subledger_type?: string | null;
+    associate_ledger_id?: number | null;
+    instrument_type?: string | null;
+    instrument_number?: string | null;
+    particulars?: string | null;
+    debit: number;
+    credit: number;
+}
+
+interface VoucherFormData {
+    voucher_no: string;
+    voucher_date: string;
+    voucher_type: string;
+    fiscal_year_id?: number;
+    fiscal_period_id?: number;
+    branch_id?: number;
+    status: string;
+    narration: string;
+    cash_type: string;
+    lines: VoucherLine[];
+    cash_ledger_id: number;
+}
+
 export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
-    const { ledger_accounts, fiscalYears, fiscalPeriods, branches, flash } =
-        usePage().props as any;
+    const {
+        fiscalYears,
+        fiscalPeriods,
+        branches,
+        cashLedgers,
+        activeFiscalYearId,
+        activeFiscalPeriodId,
+        userBranchId,
+        flash,
+    } = usePage().props as any;
+
+    const { data, setData, post, processing } = useForm<VoucherFormData>({
+        voucher_no: '',
+        voucher_date: new Date().toISOString().split('T')[0],
+        voucher_type: 'DEBIT_OR_PAYMENT',
+        fiscal_year_id: activeFiscalYearId || 0,
+        fiscal_period_id: activeFiscalPeriodId || 0,
+        branch_id: userBranchId || 0,
+        status: 'DRAFT',
+        narration: '',
+        cash_type: '',
+        lines: [],
+        cash_ledger_id: cashLedgers?.length ? cashLedgers[0].id : 0,
+    });
+
+    console.log(cashLedgers);
+
+    const addLine = () => {
+        setData('lines', [
+            ...data.lines,
+            {
+                id: Date.now(),
+                voucher_id: 0,
+                ledger_account_id: 0,
+                ldger_account: null,
+                subledger_id: 0,
+                subledger_type: '',
+                associate_ledger_id: 0,
+                instrument_type: '',
+                instrument_number: '',
+                debit: 0,
+                credit: 0,
+                particulars: '',
+            } as VoucherLine,
+        ]);
+    };
 
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
         if (flash?.error) toast.error(flash.error);
     }, [flash]);
-
-    const { data, setData, post, processing } = useForm({
-        voucher_no: '',
-        voucher_date: new Date().toISOString().split('T')[0],
-        voucher_type: 'DEBIT_OR_PAYMENT',
-        fiscal_year_id: undefined,
-        fiscal_period_id: undefined,
-        branch_id: undefined,
-        status: 'DRAFT',
-        narration: '',
-        cash_type: '',
-        lines: [] as VoucherLine[],
-    });
 
     const handleBack = () => {
         router.visit(backUrl, { preserveState: true, preserveScroll: true });
@@ -45,27 +105,9 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
         field: keyof VoucherLine,
         value: any,
     ) => {
-        const updatedLines = [...data.lines];
+        const updatedLines: VoucherLine[] = [...data.lines];
         updatedLines[index] = { ...updatedLines[index], [field]: value };
         setData('lines', updatedLines);
-    };
-
-    const addLine = () => {
-        setData('lines', [
-            ...data.lines,
-            {
-                id: Date.now(),
-                voucher_id: 0,
-                ledger_account_id: 0,
-                account_code: '',
-                subledger_name: '',
-                subledger_type: '',
-                associate_ledger_Code: '',
-                debit: 0,
-                credit: 0,
-                narration: '',
-            } as VoucherLine,
-        ]);
     };
 
     const removeLine = (index: number) => {
@@ -80,9 +122,24 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Vouchers', href: '/vouchers/list' },
+        { title: 'Vouchers', href: '/vouchers' },
         { title: 'Create Debit Voucher', href: '' },
     ];
+
+    // Calculate totals
+    const debitTotal = data.lines.reduce(
+        (sum, line) => sum + (line.debit || 0),
+        0,
+    );
+    const creditTotal = data.lines.reduce(
+        (sum, line) => sum + (line.credit || 0),
+        0,
+    );
+
+    const isBalanced = data.lines.length > 0 && debitTotal === creditTotal;
+
+    const showBalanceError =
+        data.lines.length > 0 && debitTotal !== creditTotal;
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
@@ -111,29 +168,31 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
             >
                 {/* ---------------- Voucher + Cash Details ---------------- */}
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
-                    {/* Voucher Details - 10/12 */}
+                    {/* Voucher Details - 8/12 */}
                     <div className="space-y-4 rounded-md border border-border bg-muted/30 p-3 md:col-span-8">
                         <h2 className="border-b border-border pb-1 text-sm font-medium text-primary">
                             Voucher Details
                         </h2>
-                        <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-2 md:grid-cols-3">
+                        <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-2 md:grid-cols-5">
                             <div>
                                 <Label className="text-xs">Voucher No</Label>
                                 <Input
                                     disabled
                                     value={data.voucher_no}
                                     className="h-8 text-sm"
+                                    onChange={(e) =>
+                                        setData('voucher_no', e.target.value)
+                                    }
                                 />
                             </div>
-
                             <div>
                                 <Label className="text-xs">Voucher Date</Label>
                                 <AppDatePicker
                                     disabled
                                     value={data.voucher_date}
+                                    onChange={(e) => setData('voucher_date', e)}
                                 />
                             </div>
-
                             <div>
                                 <Label className="text-xs">Voucher Type</Label>
                                 <Select
@@ -171,36 +230,73 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                                         },
                                         { value: 'CONTRA', label: 'Contra' },
                                     ]}
+                                    onChange={(e) =>
+                                        setData('voucher_type', e.target.value)
+                                    }
                                 />
                             </div>
-
+                            {/* Fiscal Year */}
                             <div>
                                 <Label className="text-xs">Fiscal Year</Label>
                                 <Select
-                                    disabled
-                                    value={data.fiscal_year_id || ''}
-                                    options={fiscalYears}
+                                    value={
+                                        data.fiscal_year_id?.toString() || ''
+                                    }
+                                    options={fiscalYears.map((fy: any) => ({
+                                        value: fy.id.toString(),
+                                        label: fy.code,
+                                    }))}
+                                    onChange={(e) => {
+                                        const selectedYearId = Number(
+                                            e.target.value,
+                                        );
+                                        setData(
+                                            'fiscal_year_id',
+                                            selectedYearId,
+                                        );
+                                    }}
                                 />
                             </div>
 
+                            {/* Fiscal Period */}
                             <div>
                                 <Label className="text-xs">Fiscal Period</Label>
                                 <Select
-                                    disabled
-                                    value={data.fiscal_period_id || ''}
-                                    options={fiscalPeriods}
+                                    value={
+                                        data.fiscal_period_id?.toString() || ''
+                                    }
+                                    options={fiscalPeriods
+                                        .filter(
+                                            (fp) =>
+                                                fp.fiscal_year_id ===
+                                                data.fiscal_year_id,
+                                        )
+                                        .map((fp) => ({
+                                            value: fp.id.toString(),
+                                            label: fp.period_name,
+                                        }))}
+                                    onChange={(e) =>
+                                        setData(
+                                            'fiscal_period_id',
+                                            Number(e.target.value),
+                                        )
+                                    }
                                 />
                             </div>
-
                             <div>
                                 <Label className="text-xs">Branch</Label>
                                 <Select
                                     disabled
                                     value={data.branch_id || ''}
                                     options={branches}
+                                    onChange={(e) =>
+                                        setData(
+                                            'branch_id',
+                                            Number(e.target.value),
+                                        )
+                                    }
                                 />
                             </div>
-
                             <div>
                                 <Label className="text-xs">
                                     Voucher Status
@@ -221,59 +317,51 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                                     ]}
                                     disabled
                                     includeNone={false}
+                                    onChange={(e) =>
+                                        setData('status', e.target.value)
+                                    }
                                 />
                             </div>
-
                             <div className="sm:col-span-2">
                                 <Label className="text-xs">Narration</Label>
                                 <Input
                                     value={data.narration}
                                     className="h-8 text-sm"
+                                    onChange={(e) =>
+                                        setData('narration', e.target.value)
+                                    }
                                 />
                             </div>
                         </div>
                     </div>
 
-                    {/* Cash Details - 2/12 */}
+                    {/* Cash Details - 4/12 */}
                     <div className="space-y-4 rounded-md border border-border bg-muted/30 p-3 md:col-span-4">
                         <h2 className="border-b border-border pb-1 text-sm font-medium text-primary">
                             Cash Ledger
                         </h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-1">
-                            <div>
-                                <Label className="text-xs">Cash Type</Label>
-                                <Select
-                                    value={data.cash_type || ''}
-                                    onChange={(e) =>
-                                        setData('cash_type', e.target.value)
-                                    }
-                                    options={[
-                                        {
-                                            value: 'CASH_IN_HAND',
-                                            label: 'Cash in Hand',
-                                        },
-                                        {
-                                            value: 'CASH_IN_BANK',
-                                            label: 'Cash in Bank',
-                                        },
-                                        {
-                                            value: 'PETTY_CASH',
-                                            label: 'Petty Cash',
-                                        },
-                                    ]}
-                                />
-                            </div>
-
+                        <div className="grid grid-cols-1 gap-x-3 md:grid-cols-2">
                             <div>
                                 <Label className="text-xs">
                                     Cash Ledger Account
                                 </Label>
-                                <LedgerSearchInput
-                                    placeholder="Cash Ledger Account"
-                                    onSelect={() => {}}
+
+                                <Select
+                                    value={data.cash_ledger_id || ''}
+                                    options={cashLedgers.map((ledger) => ({
+                                        value: ledger.id?.toString(),
+                                        label: `${ledger.code} - ${ledger.name}`,
+                                    }))}
+                                    onChange={(e) =>
+                                        setData(
+                                            'cash_ledger_id',
+                                            e.target.value
+                                                ? Number(e.target.value)
+                                                : null, // convert back to number
+                                        )
+                                    }
                                 />
                             </div>
-
                             <div>
                                 <Label className="text-xs">
                                     Cash Sub-Ledger
@@ -303,85 +391,78 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                     </div>
 
                     {/* Desktop Table */}
-                    <div className="hidden min-h-80 rounded-md border border-border md:block">
+                    <div className="hidden min-h-96 rounded-md border border-border md:block">
                         <table className="w-full table-fixed border-collapse">
                             <thead className="sticky top-0 bg-muted">
                                 <tr>
-                                    <th className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
-                                        Ledger Account
+                                    <th className="w-7/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                        Ledger & Sub-Ledger, Ref Sub-Ledger &
+                                        Particulars
                                     </th>
-                                    <th className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
-                                        Subledger Account
-                                    </th>
-                                    <th className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
-                                        Ref Subledger Account
-                                    </th>
-                                    <th className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                    <th className="w-2/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
                                         Instrument Type
                                     </th>
-                                    <th className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                    <th className="w-2/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
                                         Instrument Number
                                     </th>
-                                    <th className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
-                                        Amount
+                                    <th className="w-2/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                        Debit
                                     </th>
-                                    <th className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
-                                        Narration
+                                    <th className="w-2/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                        Credit
                                     </th>
-                                    <th className="w-[60px] border-b border-border p-2 text-center text-sm font-medium text-muted-foreground">
+                                    <th className="w-1/12 border-b border-border p-2 text-center text-sm font-medium text-muted-foreground">
                                         Actions
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody className="">
+                            <tbody>
                                 {data.lines.map((line, index) => (
                                     <tr
                                         key={line.id}
                                         className="border-b border-border even:bg-muted/30"
                                     >
                                         <td className="px-2 py-1">
-                                            <LedgerSearchInput
-                                                placeholder="Ledger Account"
-                                                onSelect={() => {}}
-                                            />
+                                            <div className="flex flex-col gap-1">
+                                                <div className="flex gap-1">
+                                                    <LedgerSearchInput
+                                                        placeholder="Ledger Account"
+                                                        onSelect={() => {}}
+                                                    />
+                                                    <SubLedgerSearchInput
+                                                        placeholder="Sub-Ledger"
+                                                        onSelect={() => {}}
+                                                    />
+                                                    <SubLedgerSearchInput
+                                                        placeholder="Ref Sub-Ledger"
+                                                        onSelect={() => {}}
+                                                    />
+                                                </div>
+                                                <Input
+                                                    type="text"
+                                                    placeholder="Particulars"
+                                                    value={
+                                                        line.particulars || ''
+                                                    }
+                                                    onChange={(e) =>
+                                                        handleLineChange(
+                                                            index,
+                                                            'particulars',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    className="mt-1 h-8 text-sm"
+                                                />
+                                            </div>
                                         </td>
 
-                                        <td className="px-2 py-1">
-                                            <SubLedgerSearchInput
-                                                placeholder="Sub-Ledger Account"
-                                                onSelect={() => {}}
-                                            />
-                                        </td>
-
-                                        <td className="px-2 py-1">
-                                            <SubLedgerSearchInput
-                                                placeholder="Reference Sub-Ledger Account"
-                                                onSelect={() => {}}
-                                            />
-                                        </td>
                                         <td className="px-2 py-1">
                                             <Select
-                                                value={''}
+                                                value={line.instrument_type}
                                                 options={[
                                                     {
                                                         value: 'CHEQUE',
                                                         label: 'Cheque',
-                                                    },
-                                                    {
-                                                        value: 'DD',
-                                                        label: 'Demand Draft (DD)',
-                                                    },
-                                                    {
-                                                        value: 'NEFT',
-                                                        label: 'NEFT',
-                                                    },
-                                                    {
-                                                        value: 'RTGS',
-                                                        label: 'RTGS',
-                                                    },
-                                                    {
-                                                        value: 'IMPS',
-                                                        label: 'IMPS',
                                                     },
                                                     {
                                                         value: 'CASH',
@@ -392,29 +473,74 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                                                         label: 'Other',
                                                     },
                                                 ]}
+                                                onChange={(e) =>
+                                                    handleLineChange(
+                                                        index,
+                                                        'instrument_type',
+                                                        e.target.value,
+                                                    )
+                                                }
                                             />
                                         </td>
+
                                         <td className="px-2 py-1">
                                             <Input
                                                 placeholder="Instrument Number"
                                                 className="h-8 text-sm"
-                                            />
-                                        </td>
-                                        <td className="px-2 py-1">
-                                            <Input
-                                                type="number"
-                                                value={0}
-                                                className="h-8 text-sm"
-                                            />
-                                        </td>
-                                        <td className="px-2 py-1">
-                                            <Input
-                                                value={line.narration || ''}
+                                                value={line.instrument_number}
                                                 onChange={(e) =>
                                                     handleLineChange(
                                                         index,
-                                                        'narration',
+                                                        'instrument_number',
                                                         e.target.value,
+                                                    )
+                                                }
+                                            />
+                                        </td>
+
+                                        <td className="px-2 py-1">
+                                            <Input
+                                                type="number"
+                                                value={
+                                                    line.debit === 0
+                                                        ? ''
+                                                        : line.debit
+                                                }
+                                                onChange={(e) =>
+                                                    handleLineChange(
+                                                        index,
+                                                        'debit',
+                                                        e.target.value === ''
+                                                            ? 0
+                                                            : Number(
+                                                                  e.target
+                                                                      .value,
+                                                              ),
+                                                    )
+                                                }
+                                                className="h-8 text-sm"
+                                            />
+                                        </td>
+
+                                        <td className="px-2 py-1">
+                                            <Input
+                                                type="number"
+                                                disabled
+                                                value={
+                                                    line.credit === 0
+                                                        ? ''
+                                                        : line.credit
+                                                }
+                                                onChange={(e) =>
+                                                    handleLineChange(
+                                                        index,
+                                                        'credit',
+                                                        e.target.value === ''
+                                                            ? 0
+                                                            : Number(
+                                                                  e.target
+                                                                      .value,
+                                                              ),
                                                     )
                                                 }
                                                 className="h-8 text-sm"
@@ -434,6 +560,28 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                                     </tr>
                                 ))}
                             </tbody>
+
+                            <tfoot>
+                                <tr className="bg-muted font-medium">
+                                    <td colSpan={2} className="p-2">
+                                        {showBalanceError && (
+                                            <div className="rounded-md border border-destructive bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                                                Debit and Credit totals must be
+                                                equal before creating the
+                                                voucher.
+                                            </div>
+                                        )}
+                                    </td>
+                                    <td className="p-2 text-right">Totals</td>
+                                    <td className="p-2">
+                                        {debitTotal.toFixed(2)}
+                                    </td>
+                                    <td className="p-2">
+                                        {creditTotal.toFixed(2)}
+                                    </td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
 
@@ -456,62 +604,173 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                                         <Trash2 className="h-4 w-4" />
                                     </button>
                                 </div>
-                                <LedgerSearchInput
-                                    placeholder="Ledger Account"
-                                    onSelect={() => {}}
-                                />
-                                <SubLedgerSearchInput
-                                    placeholder="Sub-Ledger Account"
-                                    onSelect={() => {}}
-                                />
-                                <SubLedgerSearchInput
-                                    placeholder="Reference Sub-Ledger Account"
-                                    onSelect={() => {}}
-                                />
-                                <Select
-                                    value={''}
-                                    options={[
-                                        { value: 'CHEQUE', label: 'Cheque' },
-                                        {
-                                            value: 'DD',
-                                            label: 'Demand Draft (DD)',
-                                        },
-                                        { value: 'NEFT', label: 'NEFT' },
-                                        { value: 'RTGS', label: 'RTGS' },
-                                        { value: 'IMPS', label: 'IMPS' },
-                                        { value: 'CASH', label: 'Cash' },
-                                        { value: 'OTHER', label: 'Other' },
-                                    ]}
-                                />
-                                <Input
-                                    placeholder="Instrument Number"
-                                    className="h-8 text-sm"
-                                />
-                                <Input
-                                    type="number"
-                                    value={line.debit}
-                                    onChange={(e) =>
-                                        handleLineChange(
-                                            index,
-                                            'debit',
-                                            Number(e.target.value),
-                                        )
-                                    }
-                                    className="h-8 text-sm"
-                                />
-                                <Input
-                                    value={line.narration || ''}
-                                    onChange={(e) =>
-                                        handleLineChange(
-                                            index,
-                                            'narration',
-                                            e.target.value,
-                                        )
-                                    }
-                                    className="h-8 text-sm"
-                                />
+
+                                {/* Ledger */}
+                                <div className="space-y-1">
+                                    <Label className="text-xs">
+                                        Ledger Account
+                                    </Label>
+                                    <LedgerSearchInput
+                                        placeholder="Ledger Account"
+                                        onSelect={(value) =>
+                                            handleLineChange(
+                                                index,
+                                                'ledger_account_id',
+                                                value,
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                {/* Sub-Ledger */}
+                                <div className="space-y-1">
+                                    <Label className="text-xs">
+                                        Sub-Ledger Account
+                                    </Label>
+                                    <SubLedgerSearchInput
+                                        placeholder="Sub-Ledger Account"
+                                        onSelect={(value) =>
+                                            handleLineChange(
+                                                index,
+                                                'subledger_id',
+                                                value,
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                {/* Reference Sub-Ledger */}
+                                <div className="space-y-1">
+                                    <Label className="text-xs">
+                                        Reference Sub-Ledger Account
+                                    </Label>
+                                    <SubLedgerSearchInput
+                                        placeholder="Reference Sub-Ledger Account"
+                                        onSelect={(value) =>
+                                            handleLineChange(
+                                                index,
+                                                'associate_ledger_id',
+                                                value,
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                {/* Instrument Type */}
+                                <div className="space-y-1">
+                                    <Label className="text-xs">
+                                        Instrument Type
+                                    </Label>
+                                    <Select
+                                        value={line.instrument_type || ''}
+                                        options={[
+                                            {
+                                                value: 'CHEQUE',
+                                                label: 'Cheque',
+                                            },
+                                            { value: 'CASH', label: 'Cash' },
+                                            { value: 'OTHER', label: 'Other' },
+                                        ]}
+                                        onChange={(e) =>
+                                            handleLineChange(
+                                                index,
+                                                'instrument_type',
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                {/* Instrument Number */}
+                                <div className="space-y-1">
+                                    <Label className="text-xs">
+                                        Instrument Number
+                                    </Label>
+                                    <Input
+                                        placeholder="Instrument Number"
+                                        className="h-8 text-sm"
+                                        value={line.instrument_number || ''}
+                                        onChange={(e) =>
+                                            handleLineChange(
+                                                index,
+                                                'instrument_number',
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                {/* Debit */}
+                                <div className="space-y-1">
+                                    <Label className="text-xs">Debit</Label>
+                                    <Input
+                                        type="number"
+                                        value={line.debit}
+                                        onChange={(e) =>
+                                            handleLineChange(
+                                                index,
+                                                'debit',
+                                                Number(e.target.value),
+                                            )
+                                        }
+                                        className="h-8 text-sm"
+                                    />
+                                </div>
+
+                                {/* Credit */}
+                                <div className="space-y-1">
+                                    <Label className="text-xs">Credit</Label>
+                                    <Input
+                                        type="number"
+                                        disabled
+                                        value={line.credit}
+                                        onChange={(e) =>
+                                            handleLineChange(
+                                                index,
+                                                'credit',
+                                                Number(e.target.value),
+                                            )
+                                        }
+                                        className="h-8 text-sm"
+                                    />
+                                </div>
+
+                                {/* Particulars */}
+                                <div className="space-y-1">
+                                    <Label className="text-xs">
+                                        Particulars
+                                    </Label>
+                                    <Input
+                                        value={line.particulars || ''}
+                                        onChange={(e) =>
+                                            handleLineChange(
+                                                index,
+                                                'particulars',
+                                                e.target.value,
+                                            )
+                                        }
+                                        className="h-8 text-sm"
+                                    />
+                                </div>
                             </div>
                         ))}
+
+                        {/* Mobile Totals */}
+                        {data.lines.length > 0 && (
+                            <div className="mt-3 flex justify-between rounded-md border border-border bg-muted p-3 text-sm font-medium">
+                                <span>Debit Total:</span>
+                                <span>{debitTotal.toFixed(2)}</span>
+                                <span>Credit Total:</span>
+                                <span>{creditTotal.toFixed(2)}</span>
+                            </div>
+                        )}
+                        {/* 🔴 Balance Error */}
+                        {data.lines.length > 0 &&
+                            debitTotal !== creditTotal && (
+                                <div className="rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
+                                    Debit and Credit totals must be equal.
+                                </div>
+                            )}
                     </div>
                 </div>
 
@@ -519,7 +778,7 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                 <div className="flex justify-end gap-2">
                     <Button
                         type="submit"
-                        disabled={processing}
+                        disabled={processing || !isBalanced}
                         className="flex items-center gap-2"
                     >
                         {processing ? (

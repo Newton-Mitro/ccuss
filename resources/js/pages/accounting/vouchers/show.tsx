@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { takaToText } from '../../../lib/taka_to_text';
 import { BreadcrumbItem } from '../../../types';
 import { Voucher } from '../../../types/accounting';
 
@@ -82,7 +83,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
             {/* Voucher Details & Lines */}
             <div className="print-area mt-4 space-y-4 rounded-md border border-border bg-card p-4 sm:p-6">
                 {/* Voucher Info */}
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-5">
                     <div>
                         <span className="text-xs text-muted-foreground">
                             Voucher No
@@ -150,14 +151,19 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                         <thead className="sticky top-0 bg-muted">
                             <tr>
                                 {[
-                                    'Ledger Account',
+                                    'Ledger, Subledger, Ref Subledger Account',
+                                    'Instrument Type',
+                                    'Instrument No.',
                                     'Debit',
                                     'Credit',
-                                    'Narration',
                                 ].map((h) => (
                                     <th
                                         key={h}
-                                        className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground"
+                                        className={`border-b border-border p-2 text-sm font-medium text-muted-foreground ${
+                                            h === 'Debit' || h === 'Credit'
+                                                ? 'text-right'
+                                                : 'text-left'
+                                        }`}
                                     >
                                         {h}
                                     </th>
@@ -172,16 +178,22 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                                         className="border-b border-border even:bg-muted/30"
                                     >
                                         <td className="px-2 py-1">
-                                            {`${line.account.code} - ${line.account.name}`}
+                                            <div className="">
+                                                <div className="flex">
+                                                    {`${line.ledger_account?.code} - ${line.ledger_account?.name}`}
+                                                </div>
+                                                <div className="">
+                                                    {line.particulars || '-'}
+                                                </div>
+                                            </div>
                                         </td>
-                                        <td className="px-2 py-1">
+                                        <td className="px-2 py-1"></td>
+                                        <td className="px-2 py-1"></td>
+                                        <td className="px-2 py-1 text-right">
                                             {line.debit}
                                         </td>
-                                        <td className="px-2 py-1">
+                                        <td className="px-2 py-1 text-right">
                                             {line.credit}
-                                        </td>
-                                        <td className="px-2 py-1">
-                                            {line.narration || '-'}
                                         </td>
                                     </tr>
                                 ))
@@ -198,16 +210,23 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                         </tbody>
                         <tfoot>
                             <tr className="border-t border-border font-medium">
+                                <td colSpan={2}></td>
+
                                 <td className="px-2 py-1 text-right">
                                     Totals:
                                 </td>
-                                <td className="px-2 py-1">
+                                <td className="px-2 py-1 text-right">
                                     {totals.totalDebit?.toFixed(2)}
                                 </td>
-                                <td className="px-2 py-1">
+                                <td className="px-2 py-1 text-right">
                                     {totals.totalCredit?.toFixed(2)}
                                 </td>
                                 <td></td>
+                            </tr>
+                            <tr className="border-t border-border text-right font-medium">
+                                <td colSpan={5} className="p-3">
+                                    {`In Word: ${takaToText(totals.totalCredit)} only.`}
+                                </td>
                             </tr>
                         </tfoot>
                     </table>

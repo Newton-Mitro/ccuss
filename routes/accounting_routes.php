@@ -35,11 +35,11 @@ Route::middleware(['auth',])->group(function () {
 Route::middleware(['auth',])->group(function () {
     Route::get('/ledger_accounts', [LedgerAccountController::class, 'index'])->name('ledger_accounts.index');
     Route::get('/api/search-ledger', [LedgerAccountController::class, 'ledgerSearch'])->name('ledger_accounts.search');
+    Route::get('/api/get-cash-ledgers', [LedgerAccountController::class, 'cashLedgerList'])->name('ledger_accounts.cash-ledger-list');
 
     Route::post('/ledger_accounts', [LedgerAccountController::class, 'store'])->name('ledger_accounts.store');
     Route::put('/ledger_accounts/{gl_account}', [LedgerAccountController::class, 'update'])->name('ledger_accounts.update');
     Route::delete('/ledger_accounts/{gl_account}', [LedgerAccountController::class, 'destroy'])->name('ledger_accounts.destroy');
-    Route::post('/ledger_accounts/move', [LedgerAccountController::class, 'move'])->name('ledger_accounts.move');
 });
 
 Route::middleware(['auth',])->group(function () {

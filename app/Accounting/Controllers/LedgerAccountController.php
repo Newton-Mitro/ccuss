@@ -11,6 +11,9 @@ use Inertia\Response;
 
 class LedgerAccountController extends Controller
 {
+    /**
+     * AJAX search for ledger accounts
+     */
     public function ledgerSearch(Request $request)
     {
         $search = trim($request->input('search', ''));
@@ -20,8 +23,9 @@ class LedgerAccountController extends Controller
         }
 
         $ledgers = LedgerAccount::query()
-            ->whereNotNull('parent_id')        // parent not null
-            ->where('is_active', true)          // active only
+            ->whereNotNull('parent_id')           // only leaf or sub-accounts
+            ->where('is_active', true)            // only active accounts
+            ->where('is_control_account', false)  // exclude control accounts
             ->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('code', 'like', "%{$search}%");
@@ -33,26 +37,57 @@ class LedgerAccountController extends Controller
         return response()->json($ledgers);
     }
 
-    public function index(): Response
+    public function cashLedgerList()
     {
-        $glAccounts = LedgerAccount::with('childrenRecursive')
-            ->whereNull('parent_id')
+        // Find Cash control account
+        $cashControl = LedgerAccount::where('name', 'Cash')
+            ->where('is_control_account', true)
+            ->where('is_active', true)
+            ->first();
+
+        if (!$cashControl) {
+            return response()->json([]);
+        }
+
+        $ledgers = LedgerAccount::query()
+            ->where('parent_id', $cashControl->id)   // only Cash children
+            ->where('is_active', true)
+            ->where('is_control_account', false)
             ->orderBy('code')
             ->get();
 
-        $groupAccounts = LedgerAccount::where('is_control_account', true)
+        return response()->json($ledgers);
+    }
+
+    /**
+     * Index page
+     */
+    public function index(): Response
+    {
+        $glAccounts = LedgerAccount::query()
+            ->whereNull('parent_id')
+            ->with('childrenRecursive')
             ->orderBy('code')
             ->get();
+
+        $groupAccounts = LedgerAccount::query()
+            ->where('is_control_account', true)
+            ->orderBy('code')
+            ->get(['id', 'code', 'name']);
 
         return Inertia::render('accounting/ledger-accounts/index', [
             'glAccounts' => $glAccounts,
             'groupAccounts' => $groupAccounts,
-            'flash' => session()->all(),
+            'flash' => [
+                'success' => session('success'),
+                'error' => session('error'),
+            ],
         ]);
     }
 
-
-
+    /**
+     * Create new ledger account
+     */
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -63,44 +98,42 @@ class LedgerAccountController extends Controller
             'parent_id' => 'nullable|exists:ledger_accounts,id',
         ]);
 
+        // Prevent setting a parent on a control account
+        if (!empty($data['is_control_account']) && !empty($data['parent_id'])) {
+            return back()->with('error', 'Control accounts cannot have a parent.');
+        }
+
         $account = LedgerAccount::create([
             ...$data,
             'is_leaf' => empty($data['is_control_account']),
         ]);
 
-        // If parent exists → mark parent as non-leaf
+        // Update parent's leaf status
         if ($account->parent_id) {
-            LedgerAccount::where('id', $account->parent_id)
-                ->update(['is_leaf' => false]);
+            LedgerAccount::where('id', $account->parent_id)->update(['is_leaf' => false]);
         }
 
         return back()->with('success', 'Account created successfully.');
     }
 
-    public function move(Request $request)
-    {
-        $data = $request->validate([
-            'ledger_account_id' => 'required|exists:ledger_accounts,id',
-            'parent_id' => 'required|exists:ledger_accounts,id',
-        ]);
-
-        LedgerAccount::where('id', $data['ledger_account_id'])
-            ->update(['parent_id' => $data['parent_id']]);
-
-        // Parent is no longer leaf
-        LedgerAccount::where('id', $data['parent_id'])
-            ->update(['is_leaf' => false]);
-
-        return back()->with('success', 'Account moved successfully.');
-    }
-
+    /**
+     * Update existing ledger account
+     */
     public function update(Request $request, LedgerAccount $ledgerAccount)
     {
         $rules = [
             'name' => 'required|string|max:100',
             'type' => 'required|in:ASSET,LIABILITY,EQUITY,INCOME,EXPENSE',
             'is_control_account' => 'boolean',
-            'parent_id' => 'nullable|exists:ledger_accounts,id',
+            'parent_id' => [
+                'nullable',
+                'exists:ledger_accounts,id',
+                function ($attribute, $value, $fail) use ($ledgerAccount) {
+                    if ($value == $ledgerAccount->id) {
+                        $fail('Parent account cannot be self.');
+                    }
+                }
+            ],
         ];
 
         if ($request->code !== $ledgerAccount->code) {
@@ -116,11 +149,27 @@ class LedgerAccountController extends Controller
 
         $data = $request->validate($rules);
 
+        // Prevent parent on control account
+        if (!empty($data['is_control_account']) && !empty($data['parent_id'])) {
+            return back()->with('error', 'Control accounts cannot have a parent.');
+        }
+
         $ledgerAccount->update($data);
+
+        // Update leaf status for parent accounts
+        if ($ledgerAccount->parent_id) {
+            LedgerAccount::where('id', $ledgerAccount->parent_id)->update(['is_leaf' => false]);
+        }
+        if ($ledgerAccount->children()->count() === 0 && !$ledgerAccount->is_control_account) {
+            $ledgerAccount->update(['is_leaf' => true]);
+        }
 
         return back()->with('success', 'Account updated successfully.');
     }
 
+    /**
+     * Delete ledger account
+     */
     public function destroy(LedgerAccount $ledgerAccount)
     {
         if ($ledgerAccount->children()->exists()) {
@@ -130,6 +179,7 @@ class LedgerAccountController extends Controller
         $parent = $ledgerAccount->parent;
         $ledgerAccount->delete();
 
+        // If parent has no more children, mark it as leaf
         if ($parent && $parent->children()->count() === 0) {
             $parent->update(['is_leaf' => true]);
         }

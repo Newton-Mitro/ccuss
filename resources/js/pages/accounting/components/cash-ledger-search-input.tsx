@@ -5,13 +5,13 @@ import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import { LedgerAccount } from '../../../types/accounting';
 
-interface LedgerSearchInputProps {
+interface CashLedgerSearchInputProps {
     onSelect: (ledger: LedgerAccount) => void;
     label?: string;
     placeholder?: string;
 }
 
-export const LedgerSearchInput: React.FC<LedgerSearchInputProps> = ({
+export const CashLedgerSearchInput: React.FC<CashLedgerSearchInputProps> = ({
     onSelect,
     label,
     placeholder,
@@ -32,7 +32,7 @@ export const LedgerSearchInput: React.FC<LedgerSearchInputProps> = ({
 
         try {
             setLoading(true);
-            const res = await axios.get('/api/search-ledger', {
+            const res = await axios.get('/api/get-cash-ledgers', {
                 params: { search: query },
             });
 

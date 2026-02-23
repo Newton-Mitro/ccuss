@@ -58,14 +58,14 @@ class VoucherController extends Controller
             'voucher_type' => [
                 'required',
                 Rule::in([
-                    'RECEIPT',
-                    'PAYMENT',
-                    'JOURNAL',
+                    'CREDIT_OR_RECEIPT',
+                    'DEBIT_OR_PAYMENT',
+                    'JOURNAL_OR_NON_CASH',
                     'PURCHASE',
                     'SALE',
-                    'DEBIT NOTE',
-                    'CREDIT NOTE',
-                    'PETTY CASH',
+                    'DEBIT_NOTE',
+                    'CREDIT_NOTE',
+                    'PETTY_CASH',
                     'CONTRA',
                 ])
             ],
@@ -78,7 +78,7 @@ class VoucherController extends Controller
             'lines.*.ledger_account_id' => 'required|integer|exists:ledger_accounts,id',
             'lines.*.debit' => 'nullable|numeric|min:0',
             'lines.*.credit' => 'nullable|numeric|min:0',
-            'lines.*.narration' => 'nullable|string',
+            'lines.*.particulars' => 'nullable|string',
         ]);
 
         $voucher = Voucher::create([
@@ -97,7 +97,7 @@ class VoucherController extends Controller
                 'ledger_account_id' => $line['ledger_account_id'],
                 'debit' => $line['debit'] ?? 0,
                 'credit' => $line['credit'] ?? 0,
-                'narration' => $line['narration'] ?? null,
+                'particulars' => $line['particulars'] ?? null,
             ]);
         }
 
@@ -109,7 +109,7 @@ class VoucherController extends Controller
     {
         return Inertia::render('accounting/vouchers/show', [
             'voucher' => $voucher->load([
-                'lines.account',
+                'lines.ledger_account',
                 'fiscalYear',
                 'fiscalPeriod',
                 'branch',
@@ -135,14 +135,14 @@ class VoucherController extends Controller
             'voucher_type' => [
                 'required',
                 Rule::in([
-                    'RECEIPT',
-                    'PAYMENT',
-                    'JOURNAL',
+                    'CREDIT_OR_RECEIPT',
+                    'DEBIT_OR_PAYMENT',
+                    'JOURNAL_OR_NON_CASH',
                     'PURCHASE',
                     'SALE',
-                    'DEBIT NOTE',
-                    'CREDIT NOTE',
-                    'PETTY CASH',
+                    'DEBIT_NOTE',
+                    'CREDIT_NOTE',
+                    'PETTY_CASH',
                     'CONTRA',
                 ])
             ],
@@ -156,7 +156,7 @@ class VoucherController extends Controller
             'lines.*.ledger_account_id' => 'required|integer|exists:ledger_accounts,id',
             'lines.*.debit' => 'nullable|numeric|min:0',
             'lines.*.credit' => 'nullable|numeric|min:0',
-            'lines.*.narration' => 'nullable|string',
+            'lines.*.particulars' => 'nullable|string',
         ]);
 
         $voucher->update([
@@ -186,14 +186,14 @@ class VoucherController extends Controller
                     'ledger_account_id' => $line['ledger_account_id'],
                     'debit' => $line['debit'] ?? 0,
                     'credit' => $line['credit'] ?? 0,
-                    'narration' => $line['narration'] ?? null,
+                    'particulars' => $line['particulars'] ?? null,
                 ]);
             } else {
                 $voucher->lines()->create([
                     'ledger_account_id' => $line['ledger_account_id'],
                     'debit' => $line['debit'] ?? 0,
                     'credit' => $line['credit'] ?? 0,
-                    'narration' => $line['narration'] ?? null,
+                    'particulars' => $line['particulars'] ?? null,
                 ]);
             }
         }
@@ -210,11 +210,31 @@ class VoucherController extends Controller
 
     public function createDebitVoucher()
     {
+        $cashControl = LedgerAccount::where('name', 'Cash')
+            ->where('is_control_account', true)
+            ->where('is_active', true)
+            ->first();
+
+        if (!$cashControl) {
+            return response()->json([]);
+        }
+
+        $cashLedgers = LedgerAccount::query()
+            ->where('parent_id', $cashControl->id)   // only Cash children
+            ->where('is_active', true)
+            ->where('is_control_account', false)
+            ->orderBy('code')
+            ->get();
+
         return Inertia::render('accounting/vouchers/debit_voucher', [
             'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
             'fiscalYears' => FiscalYear::select('id', 'code')->get(),
             'fiscalPeriods' => FiscalPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
             'branches' => Branch::select('id', 'name')->get(),
+            'cashLedgers' => $cashLedgers,
+            'activeFiscalYearId' => FiscalYear::where('is_active', true)->first()->id,
+            'activeFiscalPeriodId' => FiscalPeriod::where('is_open', true)->first()->id,
+            'userBranchId' => auth()->user()->branch_id,
             'flash' => [
                 'success' => session('success'),
                 'error' => session('error'),

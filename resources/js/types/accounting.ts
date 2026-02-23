@@ -26,7 +26,7 @@ export interface FiscalPeriod {
 }
 
 // Account
-export interface Account {
+export interface LedgerAccount {
     id: number;
     code: string;
     name: string;
@@ -44,11 +44,11 @@ export interface VoucherLine {
     id: number;
     voucher_id: number;
     ledger_account_id: number;
-    account?: Account;
+    ledger_account?: LedgerAccount;
     subledger_id?: number | null;
     subledger_type?: string | null;
     associate_ledger_id?: number | null;
-    narration?: string | null;
+    particulars?: string | null;
     debit: number;
     credit: number;
     created_at: string;

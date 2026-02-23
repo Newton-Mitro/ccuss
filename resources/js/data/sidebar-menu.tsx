@@ -73,159 +73,7 @@ export const sidebarMenu: SidebarItem[] = [
             },
         ],
     },
-    {
-        name: 'General Accounting',
-        icon: <i className="fa-solid fa-calculator" />,
-        children: [
-            {
-                name: 'Fiscal Years',
-                icon: <i className="fa-solid fa-calendar-check" />,
-                path: '/fiscal-years',
-                match_path: 'fiscal-years',
-            },
-            {
-                name: 'Fiscal Periods',
-                icon: <i className="fa-solid fa-calendar-day" />,
-                path: '/fiscal-periods',
-                match_path: 'fiscal-periods',
-            },
-            {
-                name: 'Ledger Accounts',
-                icon: <i className="fa-solid fa-book-open" />,
-                path: '/ledger_accounts',
-                match_path: 'ledger_accounts',
-            },
-            {
-                name: 'Vouchers',
-                icon: <i className="fa-solid fa-folder-open" />,
-                children: [
-                    {
-                        name: 'List Vouchers',
-                        icon: <i className="fa-solid fa-list-check" />,
-                        path: '/vouchers',
-                        match_path: 'vouchers',
-                    },
-                    {
-                        name: 'Voucher Entry',
-                        icon: <i className="fa-solid fa-file-circle-plus" />,
-                        children: [
-                            {
-                                name: 'Debit / Payment Voucher',
-                                icon: (
-                                    <i className="fa-solid fa-money-bill-transfer" />
-                                ),
-                                path: '/vouchers/debit/create',
-                                match_path: 'vouchers/debit',
-                            },
-                            {
-                                name: 'Credit / Receipt Voucher',
-                                icon: (
-                                    <i className="fa-solid fa-money-bill-trend-up" />
-                                ),
-                                path: '/vouchers/credit/create',
-                                match_path: 'vouchers/credit',
-                            },
-                            {
-                                name: 'Journal / Non-Cash Voucher',
-                                icon: (
-                                    <i className="fa-solid fa-book-open-reader" />
-                                ),
-                                path: '/vouchers/journal/create',
-                                match_path: 'vouchers/journal',
-                            },
 
-                            // --- Trade Vouchers ---
-                            {
-                                name: 'Purchase Voucher',
-                                icon: (
-                                    <i className="fa-solid fa-cart-shopping" />
-                                ),
-                                path: '/vouchers/purchase/create',
-                                match_path: 'vouchers/purchase',
-                            },
-                            {
-                                name: 'Sale Voucher',
-                                icon: (
-                                    <i className="fa-solid fa-cash-register" />
-                                ),
-                                path: '/vouchers/sale/create',
-                                match_path: 'vouchers/sale',
-                            },
-
-                            // --- Adjustment Notes ---
-                            {
-                                name: 'Debit Note',
-                                icon: (
-                                    <i className="fa-solid fa-file-circle-minus" />
-                                ),
-                                path: '/vouchers/debit-note/create',
-                                match_path: 'vouchers/debit-note',
-                            },
-                            {
-                                name: 'Credit Note',
-                                icon: (
-                                    <i className="fa-solid fa-file-circle-plus" />
-                                ),
-                                path: '/vouchers/credit-note/create',
-                                match_path: 'vouchers/credit-note',
-                            },
-
-                            // --- Cash & Bank ---
-                            {
-                                name: 'Petty Cash Voucher',
-                                icon: <i className="fa-solid fa-wallet" />,
-                                path: '/vouchers/petty-cash/create',
-                                match_path: 'vouchers/petty-cash',
-                            },
-                            {
-                                name: 'Contra Voucher',
-                                icon: <i className="fa-solid fa-right-left" />,
-                                path: '/vouchers/contra/create',
-                                match_path: 'vouchers/contra',
-                            },
-                        ],
-                    },
-                ],
-            },
-
-            {
-                name: 'Reports',
-                icon: <i className="fa-solid fa-chart-simple" />,
-                children: [
-                    {
-                        name: 'Trial Balance',
-                        icon: <i className="fa-solid fa-balance-scale" />,
-                        path: '/reports/trial-balance',
-                        match_path: 'trial-balance',
-                    },
-                    {
-                        name: 'Income Statement',
-                        icon: <i className="fa-solid fa-file-invoice" />,
-                        path: '/reports/income-statement',
-                        match_path: 'income-statement',
-                    },
-                    {
-                        name: 'Balance Sheet',
-                        icon: <i className="fa-solid fa-landmark" />,
-                        path: '/reports/balance-sheet',
-                        match_path: 'balance-sheet',
-                    },
-                    {
-                        name: 'Cash Flow Statement',
-                        icon: <i className="fa-solid fa-water" />,
-                        path: '/reports/cash-flow-statement',
-                        match_path: 'cash-flow-statement',
-                    },
-                    {
-                        name: 'Statement of Shareholders Equity',
-                        icon: <i className="fa-solid fa-users" />,
-                        path: '/reports/statement-of-shareholders-equity',
-                        match_path: 'statement-of-shareholders-equity',
-                    },
-                ],
-            },
-        ],
-    },
     {
         name: 'Saving Deposit Mgmt.',
         icon: <i className="fa-solid fa-sack-dollar" />,
@@ -521,6 +369,159 @@ export const sidebarMenu: SidebarItem[] = [
                         ),
                         path: '/fund-transfers',
                         match_path: 'fund-transfers',
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        name: 'General Accounting',
+        icon: <i className="fa-solid fa-calculator" />,
+        children: [
+            {
+                name: 'Fiscal Years',
+                icon: <i className="fa-solid fa-calendar-check" />,
+                path: '/fiscal-years',
+                match_path: 'fiscal-years',
+            },
+            {
+                name: 'Fiscal Periods',
+                icon: <i className="fa-solid fa-calendar-day" />,
+                path: '/fiscal-periods',
+                match_path: 'fiscal-periods',
+            },
+            {
+                name: 'Ledger Accounts',
+                icon: <i className="fa-solid fa-book-open" />,
+                path: '/ledger_accounts',
+                match_path: 'ledger_accounts',
+            },
+            {
+                name: 'Vouchers',
+                icon: <i className="fa-solid fa-folder-open" />,
+                children: [
+                    {
+                        name: 'List Vouchers',
+                        icon: <i className="fa-solid fa-list-check" />,
+                        path: '/vouchers',
+                        match_path: 'vouchers',
+                    },
+                    {
+                        name: 'Voucher Entry',
+                        icon: <i className="fa-solid fa-file-circle-plus" />,
+                        children: [
+                            {
+                                name: 'Debit / Payment Voucher',
+                                icon: (
+                                    <i className="fa-solid fa-money-bill-transfer" />
+                                ),
+                                path: '/vouchers/debit/create',
+                                match_path: 'vouchers/debit',
+                            },
+                            {
+                                name: 'Credit / Receipt Voucher',
+                                icon: (
+                                    <i className="fa-solid fa-money-bill-trend-up" />
+                                ),
+                                path: '/vouchers/credit/create',
+                                match_path: 'vouchers/credit',
+                            },
+                            {
+                                name: 'Journal / Non-Cash Voucher',
+                                icon: (
+                                    <i className="fa-solid fa-book-open-reader" />
+                                ),
+                                path: '/vouchers/journal/create',
+                                match_path: 'vouchers/journal',
+                            },
+
+                            // --- Trade Vouchers ---
+                            {
+                                name: 'Purchase Voucher',
+                                icon: (
+                                    <i className="fa-solid fa-cart-shopping" />
+                                ),
+                                path: '/vouchers/purchase/create',
+                                match_path: 'vouchers/purchase',
+                            },
+                            {
+                                name: 'Sale Voucher',
+                                icon: (
+                                    <i className="fa-solid fa-cash-register" />
+                                ),
+                                path: '/vouchers/sale/create',
+                                match_path: 'vouchers/sale',
+                            },
+
+                            // --- Adjustment Notes ---
+                            {
+                                name: 'Debit Note',
+                                icon: (
+                                    <i className="fa-solid fa-file-circle-minus" />
+                                ),
+                                path: '/vouchers/debit-note/create',
+                                match_path: 'vouchers/debit-note',
+                            },
+                            {
+                                name: 'Credit Note',
+                                icon: (
+                                    <i className="fa-solid fa-file-circle-plus" />
+                                ),
+                                path: '/vouchers/credit-note/create',
+                                match_path: 'vouchers/credit-note',
+                            },
+
+                            // --- Cash & Bank ---
+                            {
+                                name: 'Petty Cash Voucher',
+                                icon: <i className="fa-solid fa-wallet" />,
+                                path: '/vouchers/petty-cash/create',
+                                match_path: 'vouchers/petty-cash',
+                            },
+                            {
+                                name: 'Contra Voucher',
+                                icon: <i className="fa-solid fa-right-left" />,
+                                path: '/vouchers/contra/create',
+                                match_path: 'vouchers/contra',
+                            },
+                        ],
+                    },
+                ],
+            },
+
+            {
+                name: 'Reports',
+                icon: <i className="fa-solid fa-chart-simple" />,
+                children: [
+                    {
+                        name: 'Trial Balance',
+                        icon: <i className="fa-solid fa-balance-scale" />,
+                        path: '/reports/trial-balance',
+                        match_path: 'trial-balance',
+                    },
+                    {
+                        name: 'Income Statement',
+                        icon: <i className="fa-solid fa-file-invoice" />,
+                        path: '/reports/income-statement',
+                        match_path: 'income-statement',
+                    },
+                    {
+                        name: 'Balance Sheet',
+                        icon: <i className="fa-solid fa-landmark" />,
+                        path: '/reports/balance-sheet',
+                        match_path: 'balance-sheet',
+                    },
+                    {
+                        name: 'Cash Flow Statement',
+                        icon: <i className="fa-solid fa-water" />,
+                        path: '/reports/cash-flow-statement',
+                        match_path: 'cash-flow-statement',
+                    },
+                    {
+                        name: 'Statement of Shareholders Equity',
+                        icon: <i className="fa-solid fa-users" />,
+                        path: '/reports/statement-of-shareholders-equity',
+                        match_path: 'statement-of-shareholders-equity',
                     },
                 ],
             },

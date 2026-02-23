@@ -54,9 +54,9 @@ return new class extends Migration {
                 'JOURNAL_OR_NON_CASH',
                 'PURCHASE',
                 'SALE',
-                'DEBIT NOTE',
-                'CREDIT NOTE',
-                'PETTY CASH',
+                'DEBIT_NOTE',
+                'CREDIT_NOTE',
+                'PETTY_CASH',
                 'CONTRA',
             ]);
             $table->string('voucher_no', 50);
@@ -90,7 +90,7 @@ return new class extends Migration {
             // creates: subledger_id (BIGINT), subledger_type (VARCHAR)
 
             $table->unsignedBigInteger('associate_ledger_id')->nullable();
-            $table->string('narration')->nullable();
+            $table->string('particulars')->nullable();
             $table->decimal('debit', 18, 2)->default(0);
             $table->decimal('credit', 18, 2)->default(0);
 

@@ -24,7 +24,7 @@ class VoucherLineFactory extends Factory
             'subledger_type' => null,
             'associate_ledger_id' => null,
 
-            'narration' => $this->faker->optional()->sentence(),
+            'particulars' => $this->faker->optional()->sentence(),
 
             // ✅ XOR enforced
             'debit' => $isDebit ? $amount : 0,

@@ -13,14 +13,14 @@ class VoucherFactory extends Factory
     public function definition()
     {
         $types = [
-            'RECEIPT',
-            'PAYMENT',
-            'JOURNAL',
+            'CREDIT_OR_RECEIPT',
+            'DEBIT_OR_PAYMENT',
+            'JOURNAL_OR_NON_CASH',
             'PURCHASE',
             'SALE',
-            'DEBIT NOTE',
-            'CREDIT NOTE',
-            'PETTY CASH',
+            'DEBIT_NOTE',
+            'CREDIT_NOTE',
+            'PETTY_CASH',
             'CONTRA',
         ];
         $status = ['DRAFT', 'APPROVED', 'POSTED', 'CANCELLED'];

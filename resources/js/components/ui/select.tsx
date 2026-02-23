@@ -21,12 +21,12 @@ const Select: React.FC<SelectProps> = ({ className, options, includeNone = true,
       {...props}
     >
       {includeNone && (
-        <option value="">
+        <option key={9999} value="">
           --None--
         </option>
       )}
-      {options.map((opt) => (
-        <option key={opt.value} value={opt.value}>
+      {options.map((opt, i) => (
+        <option key={`opt-${i}-${opt.value}-${opt.label}` } value={opt.value}>
           {opt.label}
         </option>
       ))}
