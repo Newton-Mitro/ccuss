@@ -53,7 +53,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                     title={`Voucher ${voucher.voucher_no}`}
                     description="View voucher details"
                 />
-                <div className="flex gap-2">
+                <div className="flex gap-2 print:hidden">
                     <button
                         type="button"
                         onClick={handleBack}
@@ -151,7 +151,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                         <thead className="sticky top-0 bg-muted">
                             <tr>
                                 {[
-                                    'Ledger, Subledger, Ref Subledger Account',
+                                    'Ledger, Subledger, Reference Account',
                                     'Instrument Type',
                                     'Instrument No.',
                                     'Debit',

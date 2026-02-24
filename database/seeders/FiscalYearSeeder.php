@@ -11,7 +11,16 @@ class FiscalYearSeeder extends Seeder
 {
     public function run(): void
     {
-        $fy = FiscalYear::factory()->active()->create();
+        $start = Carbon::now()->startOfYear();
+        $end = (clone $start)->addYear()->subDay();
+
+        $fy = FiscalYear::factory()
+            ->active()
+            ->create([
+                'code' => 'FY-' . $start->format('Y') . '-' . $end->format('y'),
+                'start_date' => $start->toDateString(),
+                'end_date' => $end->toDateString(),
+            ]);
 
         for ($i = 0; $i < 12; $i++) {
             $start = Carbon::parse($fy->start_date)->addMonths($i);

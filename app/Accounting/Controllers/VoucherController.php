@@ -16,9 +16,17 @@ use Inertia\Response;
 
 class VoucherController extends Controller
 {
+    /* =====================================================
+     |  INDEX
+     ===================================================== */
     public function index(Request $request): Response
     {
-        $query = Voucher::with(['lines.account', 'fiscalYear', 'fiscalPeriod', 'branch']);
+        $query = Voucher::with([
+            'lines.ledgerAccount',
+            'fiscalYear',
+            'fiscalPeriod',
+            'branch',
+        ]);
 
         if ($request->filled('status') && strtolower($request->status) !== 'all') {
             $query->where('status', $request->status);
@@ -32,15 +40,17 @@ class VoucherController extends Controller
         }
 
         $perPage = $request->input('per_page', 10);
-        $vouchers = $query->latest()->paginate($perPage)->withQueryString();
 
         return Inertia::render('accounting/vouchers/index', [
-            'vouchers' => $vouchers,
+            'vouchers' => $query->latest()->paginate($perPage)->withQueryString(),
             'filters' => $request->only(['search', 'status', 'per_page', 'page']),
         ]);
     }
 
-    public function create()
+    /* =====================================================
+     |  CREATE
+     ===================================================== */
+    public function create(): Response
     {
         return Inertia::render('accounting/vouchers/edit', [
             'ledger_accounts' => LedgerAccount::all(),
@@ -50,36 +60,15 @@ class VoucherController extends Controller
         ]);
     }
 
+    /* =====================================================
+     |  STORE
+     ===================================================== */
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'voucher_no' => 'required|string|unique:vouchers,voucher_no|max:50',
-            'voucher_date' => 'required|date',
-            'voucher_type' => [
-                'required',
-                Rule::in([
-                    'CREDIT_OR_RECEIPT',
-                    'DEBIT_OR_PAYMENT',
-                    'JOURNAL_OR_NON_CASH',
-                    'PURCHASE',
-                    'SALE',
-                    'DEBIT_NOTE',
-                    'CREDIT_NOTE',
-                    'PETTY_CASH',
-                    'CONTRA',
-                ])
-            ],
-            'fiscal_year_id' => 'required|integer|exists:fiscal_years,id',
-            'fiscal_period_id' => 'required|integer|exists:fiscal_periods,id',
-            'branch_id' => 'nullable|integer|exists:branches,id',
-            'status' => 'required|string',
-            'narration' => 'nullable|string',
-            'lines' => 'required|array|min:1',
-            'lines.*.ledger_account_id' => 'required|integer|exists:ledger_accounts,id',
-            'lines.*.debit' => 'nullable|numeric|min:0',
-            'lines.*.credit' => 'nullable|numeric|min:0',
-            'lines.*.particulars' => 'nullable|string',
-        ]);
+        $data = $this->validateVoucher($request);
+
+        // Enforce debit / credit XOR
+        $this->validateDebitCredit($data['lines']);
 
         $voucher = Voucher::create([
             'voucher_no' => $data['voucher_no'],
@@ -93,23 +82,22 @@ class VoucherController extends Controller
         ]);
 
         foreach ($data['lines'] as $line) {
-            $voucher->lines()->create([
-                'ledger_account_id' => $line['ledger_account_id'],
-                'debit' => $line['debit'] ?? 0,
-                'credit' => $line['credit'] ?? 0,
-                'particulars' => $line['particulars'] ?? null,
-            ]);
+            $voucher->lines()->create($this->linePayload($line));
         }
 
-        return redirect()->route('vouchers.index')
+        return redirect()
+            ->route('vouchers.index')
             ->with('success', 'Voucher created successfully.');
     }
 
-    public function show(Voucher $voucher)
+    /* =====================================================
+     |  SHOW
+     ===================================================== */
+    public function show(Voucher $voucher): Response
     {
         return Inertia::render('accounting/vouchers/show', [
             'voucher' => $voucher->load([
-                'lines.ledger_account',
+                'lines.ledgerAccount',
                 'fiscalYear',
                 'fiscalPeriod',
                 'branch',
@@ -117,10 +105,13 @@ class VoucherController extends Controller
         ]);
     }
 
-    public function edit(Voucher $voucher)
+    /* =====================================================
+     |  EDIT
+     ===================================================== */
+    public function edit(Voucher $voucher): Response
     {
         return Inertia::render('accounting/vouchers/edit', [
-            'voucher' => $voucher->load('lines.account'),
+            'voucher' => $voucher->load('lines.ledgerAccount'),
             'ledger_accounts' => LedgerAccount::all(),
             'fiscalYears' => FiscalYear::all(),
             'fiscalPeriods' => FiscalPeriod::all(),
@@ -128,9 +119,133 @@ class VoucherController extends Controller
         ]);
     }
 
+    /* =====================================================
+     |  UPDATE
+     ===================================================== */
     public function update(Request $request, Voucher $voucher)
     {
-        $data = $request->validate([
+        $data = $this->validateVoucher($request, true);
+
+        $this->validateDebitCredit($data['lines']);
+
+        $voucher->update([
+            'voucher_date' => $data['voucher_date'],
+            'voucher_type' => $data['voucher_type'],
+            'fiscal_year_id' => $data['fiscal_year_id'],
+            'fiscal_period_id' => $data['fiscal_period_id'],
+            'branch_id' => $data['branch_id'] ?? null,
+            'status' => $data['status'],
+            'narration' => $data['narration'] ?? null,
+        ]);
+
+        // Sync voucher lines
+        $existingIds = $voucher->lines()->pluck('id')->toArray();
+        $submittedIds = array_filter(array_column($data['lines'], 'id'));
+
+        $toDelete = array_diff($existingIds, $submittedIds);
+        if ($toDelete) {
+            VoucherLine::whereIn('id', $toDelete)->delete();
+        }
+
+        foreach ($data['lines'] as $line) {
+            if (!empty($line['id'])) {
+                $voucher->lines()
+                    ->where('id', $line['id'])
+                    ->update($this->linePayload($line));
+            } else {
+                $voucher->lines()->create($this->linePayload($line));
+            }
+        }
+
+        return redirect()
+            ->route('vouchers.index')
+            ->with('success', 'Voucher updated successfully.');
+    }
+
+    /* =====================================================
+     |  DELETE
+     ===================================================== */
+    public function destroy(Voucher $voucher)
+    {
+        $voucher->delete();
+
+        return back()->with('success', 'Voucher deleted successfully.');
+    }
+
+    /* =====================================================
+     |  SPECIALIZED VOUCHERS
+     ===================================================== */
+    public function createDebitVoucher(Request $request): Response
+    {
+        $cashLedgerId = $request->input('cash_ledger_id');
+        $cashSubledgerId = $request->input('cash_subledger_id');
+
+        $cashLedger = LedgerAccount::find($cashLedgerId);
+
+        $cashControl = LedgerAccount::where('name', 'Cash')
+            ->where('is_control_account', true)
+            ->where('is_active', true)
+            ->first();
+
+        $cashLedgers = $cashControl
+            ? LedgerAccount::where('parent_id', $cashControl->id)
+                ->where('is_active', true)
+                ->where('is_control_account', false)
+                ->orderBy('code')
+                ->get()
+            : collect();
+
+        if ($cashLedger) {
+            if ($cashLedger->name === 'Cash in Hand') {
+                $cashSubledgers = $cashLedgers;
+            } else {
+                $cashSubledgers = $cashLedgers;
+            }
+        } else {
+            $cashSubledgers = [];
+        }
+
+        return Inertia::render('accounting/vouchers/debit_voucher', [
+            'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
+            'fiscalYears' => FiscalYear::select('id', 'code')->get(),
+            'fiscalPeriods' => FiscalPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
+            'branches' => Branch::select('id', 'name')->get(),
+            'cashLedgerId' => $cashLedgerId,
+            'cashLedgers' => $cashLedgers,
+            'cashSubledgerId' => $cashSubledgerId,
+            'cashSubledgers' => $cashSubledgers ?? [],
+            'activeFiscalYearId' => optional(FiscalYear::where('is_active', true)->first())->id,
+            'activeFiscalPeriodId' => optional(FiscalPeriod::where('is_open', true)->first())->id,
+            'userBranchId' => auth()->user()->branch_id,
+            'backUrl' => route('vouchers.index'),
+        ]);
+    }
+
+    public function createCreditVoucher(): Response
+    {
+        return $this->simpleVoucherView('credit_voucher');
+    }
+
+    public function createJournalVoucher(): Response
+    {
+        return $this->simpleVoucherView('journal_voucher');
+    }
+
+    public function createContraVoucher(): Response
+    {
+        return $this->simpleVoucherView('contra_voucher');
+    }
+
+    /* =====================================================
+     |  HELPERS
+     ===================================================== */
+    private function validateVoucher(Request $request, bool $updating = false): array
+    {
+        return $request->validate([
+            'voucher_no' => $updating
+                ? 'sometimes|string|max:50'
+                : 'required|string|unique:vouchers,voucher_no|max:50',
+
             'voucher_date' => 'required|date',
             'voucher_type' => [
                 'required',
@@ -144,147 +259,72 @@ class VoucherController extends Controller
                     'CREDIT_NOTE',
                     'PETTY_CASH',
                     'CONTRA',
-                ])
+                ]),
             ],
-            'fiscal_year_id' => 'required|integer|exists:fiscal_years,id',
-            'fiscal_period_id' => 'required|integer|exists:fiscal_periods,id',
-            'branch_id' => 'nullable|integer|exists:branches,id',
+            'fiscal_year_id' => 'required|exists:fiscal_years,id',
+            'fiscal_period_id' => 'required|exists:fiscal_periods,id',
+            'branch_id' => 'nullable|exists:branches,id',
             'status' => 'required|string',
             'narration' => 'nullable|string',
+
             'lines' => 'required|array|min:1',
-            'lines.*.id' => 'nullable|integer|exists:voucher_lines,id',
-            'lines.*.ledger_account_id' => 'required|integer|exists:ledger_accounts,id',
+            'lines.*.id' => 'nullable|exists:voucher_lines,id',
+            'lines.*.ledger_account_id' => 'required|exists:ledger_accounts,id',
+
+            'lines.*.subledger_id' => 'nullable|integer',
+            'lines.*.subledger_type' => 'nullable|string',
+
+            'lines.*.reference_id' => 'nullable|integer',
+            'lines.*.reference_type' => 'nullable|string',
+
+            'lines.*.instrument_type' => 'nullable|string|max:50',
+            'lines.*.instrument_no' => 'nullable|string|max:100',
+
+            'lines.*.particulars' => 'nullable|string',
             'lines.*.debit' => 'nullable|numeric|min:0',
             'lines.*.credit' => 'nullable|numeric|min:0',
-            'lines.*.particulars' => 'nullable|string',
         ]);
+    }
 
-        $voucher->update([
-            'voucher_date' => $data['voucher_date'],
-            'voucher_type' => $data['voucher_type'],
-            'fiscal_year_id' => $data['fiscal_year_id'],
-            'fiscal_period_id' => $data['fiscal_period_id'],
-            'branch_id' => $data['branch_id'] ?? null,
-            'status' => $data['status'],
-            'narration' => $data['narration'] ?? null,
-        ]);
+    private function validateDebitCredit(array $lines): void
+    {
+        foreach ($lines as $line) {
+            $debit = $line['debit'] ?? 0;
+            $credit = $line['credit'] ?? 0;
 
-        // Update lines
-        $existingLineIds = $voucher->lines()->pluck('id')->toArray();
-        $submittedLineIds = array_filter(array_column($data['lines'], 'id'));
-
-        // Delete removed lines
-        $linesToDelete = array_diff($existingLineIds, $submittedLineIds);
-        if ($linesToDelete) {
-            VoucherLine::whereIn('id', $linesToDelete)->delete();
-        }
-
-        // Upsert lines
-        foreach ($data['lines'] as $line) {
-            if (!empty($line['id'])) {
-                $voucher->lines()->where('id', $line['id'])->update([
-                    'ledger_account_id' => $line['ledger_account_id'],
-                    'debit' => $line['debit'] ?? 0,
-                    'credit' => $line['credit'] ?? 0,
-                    'particulars' => $line['particulars'] ?? null,
-                ]);
-            } else {
-                $voucher->lines()->create([
-                    'ledger_account_id' => $line['ledger_account_id'],
-                    'debit' => $line['debit'] ?? 0,
-                    'credit' => $line['credit'] ?? 0,
-                    'particulars' => $line['particulars'] ?? null,
-                ]);
+            if (
+                ($debit > 0 && $credit > 0) ||
+                ($debit == 0 && $credit == 0)
+            ) {
+                abort(422, 'Each voucher line must have either debit or credit.');
             }
         }
-
-        return redirect()->route('vouchers.index')
-            ->with('success', 'Voucher updated successfully.');
     }
 
-    public function destroy(Voucher $voucher)
+    private function linePayload(array $line): array
     {
-        $voucher->delete();
-        return back()->with('success', 'Voucher deleted successfully.');
+        return [
+            'ledger_account_id' => $line['ledger_account_id'],
+            'subledger_id' => $line['subledger_id'] ?? null,
+            'subledger_type' => $line['subledger_type'] ?? null,
+            'reference_id' => $line['reference_id'] ?? null,
+            'reference_type' => $line['reference_type'] ?? null,
+            'instrument_type' => $line['instrument_type'] ?? null,
+            'instrument_no' => $line['instrument_no'] ?? null,
+            'particulars' => $line['particulars'] ?? null,
+            'debit' => $line['debit'] ?? 0,
+            'credit' => $line['credit'] ?? 0,
+        ];
     }
 
-    public function createDebitVoucher()
+    private function simpleVoucherView(string $view): Response
     {
-        $cashControl = LedgerAccount::where('name', 'Cash')
-            ->where('is_control_account', true)
-            ->where('is_active', true)
-            ->first();
-
-        if (!$cashControl) {
-            return response()->json([]);
-        }
-
-        $cashLedgers = LedgerAccount::query()
-            ->where('parent_id', $cashControl->id)   // only Cash children
-            ->where('is_active', true)
-            ->where('is_control_account', false)
-            ->orderBy('code')
-            ->get();
-
-        return Inertia::render('accounting/vouchers/debit_voucher', [
+        return Inertia::render("accounting/vouchers/{$view}", [
             'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
             'fiscalYears' => FiscalYear::select('id', 'code')->get(),
             'fiscalPeriods' => FiscalPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
             'branches' => Branch::select('id', 'name')->get(),
-            'cashLedgers' => $cashLedgers,
-            'activeFiscalYearId' => FiscalYear::where('is_active', true)->first()->id,
-            'activeFiscalPeriodId' => FiscalPeriod::where('is_open', true)->first()->id,
-            'userBranchId' => auth()->user()->branch_id,
-            'flash' => [
-                'success' => session('success'),
-                'error' => session('error'),
-            ],
-            'backUrl' => route('vouchers.index'), // Adjust route as needed
-        ]);
-    }
-
-    public function createCreditVoucher()
-    {
-        return Inertia::render('accounting/vouchers/credit_voucher', [
-            'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
-            'fiscalYears' => FiscalYear::select('id', 'code')->get(),
-            'fiscalPeriods' => FiscalPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
-            'branches' => Branch::select('id', 'name')->get(),
-            'flash' => [
-                'success' => session('success'),
-                'error' => session('error'),
-            ],
-            'backUrl' => route('vouchers.index'), // Adjust route as needed
-        ]);
-    }
-
-    public function createJournalVoucher()
-    {
-        return Inertia::render('accounting/vouchers/journal_voucher', [
-            'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
-            'fiscalYears' => FiscalYear::select('id', 'code')->get(),
-            'fiscalPeriods' => FiscalPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
-            'branches' => Branch::select('id', 'name')->get(),
-            'flash' => [
-                'success' => session('success'),
-                'error' => session('error'),
-            ],
-            'backUrl' => route('vouchers.index'), // Adjust route as needed
-        ]);
-    }
-
-    public function createContraVoucher()
-    {
-        return Inertia::render('accounting/vouchers/contra_voucher', [
-            'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
-            'fiscalYears' => FiscalYear::select('id', 'code')->get(),
-            'fiscalPeriods' => FiscalPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
-            'branches' => Branch::select('id', 'name')->get(),
-            'flash' => [
-                'success' => session('success'),
-                'error' => session('error'),
-            ],
-            'backUrl' => route('vouchers.index'), // Adjust route as needed
+            'backUrl' => route('vouchers.index'),
         ]);
     }
 }

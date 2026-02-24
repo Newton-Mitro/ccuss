@@ -502,8 +502,8 @@ export const sidebarMenu: SidebarItem[] = [
                     {
                         name: 'Income Statement',
                         icon: <i className="fa-solid fa-file-invoice" />,
-                        path: '/reports/income-statement',
-                        match_path: 'income-statement',
+                        path: '/reports/profit-loss',
+                        match_path: 'profit-loss',
                     },
                     {
                         name: 'Balance Sheet',

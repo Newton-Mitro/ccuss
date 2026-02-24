@@ -16,56 +16,72 @@ class VoucherEntrySeeder extends Seeder
 {
     public function run(): void
     {
+        // Grab available branches, users, fiscal year, and open periods
         $branches = Branch::pluck('id')->all();
         $users = User::pluck('id')->all();
-        $ledger_accounts = LedgerAccount::pluck('id')->all();
-        $fiscalYears = FiscalYear::pluck('id')->all();
-        $fiscalPeriods = FiscalPeriod::pluck('id')->all();
+        $fiscalYear = FiscalYear::where('is_active', true)->first();
+        $fiscalPeriods = FiscalPeriod::where('is_open', true)->pluck('id')->all();
 
+        // Grab leaf accounts (non-control, active, with parent)
+        $ledgerAccounts = LedgerAccount::query()
+            ->whereNotNull('parent_id')
+            ->where('is_control_account', false)
+            ->where('is_active', true)
+            ->pluck('id')
+            ->all();
+
+        if (
+            empty($branches) ||
+            empty($users) ||
+            !$fiscalYear ||
+            empty($fiscalPeriods) ||
+            empty($ledgerAccounts)
+        ) {
+            $this->command?->warn('RealVoucherSeeder skipped: missing prerequisite data.');
+            return;
+        }
+
+        // Create 50 realistic vouchers
         Voucher::factory()
-            ->count(20)
+            ->count(50)
             ->state(fn() => [
                 'branch_id' => Arr::random($branches),
                 'created_by' => Arr::random($users),
-                'fiscal_year_id' => Arr::random($fiscalYears),
+                'fiscal_year_id' => $fiscalYear->id,
                 'fiscal_period_id' => Arr::random($fiscalPeriods),
-                'status' => 'DRAFT',
+                'status' => 'POSTED', // ensure included in reports
             ])
             ->create()
-            ->each(function (Voucher $voucher) use ($ledger_accounts) {
+            ->each(function (Voucher $voucher) use ($ledgerAccounts) {
 
-                // 🔒 Always even → always balanced
-                $pairCount = rand(1, 3); // 2–6 lines
-    
-                for ($i = 0; $i < $pairCount; $i++) {
+                // Each voucher has 1–3 debit/credit pairs
+                $pairs = rand(1, 3);
 
+                for ($i = 0; $i < $pairs; $i++) {
                     $amount = fake()->randomFloat(2, 100, 5000);
 
-                    $debitAccount = Arr::random($ledger_accounts);
-                    $creditAccount = Arr::random($ledger_accounts);
+                    // Random leaf accounts
+                    $debitAccount = Arr::random($ledgerAccounts);
+                    $creditAccount = Arr::random($ledgerAccounts);
 
-                    // 🔹 Debit line
-                    VoucherLine::factory()->create([
-                        'voucher_id' => $voucher->id,
-                        'ledger_account_id' => $debitAccount,
-                        'debit' => $amount,
-                        'credit' => 0,
-                    ]);
+                    // Debit line
+                    VoucherLine::factory()
+                        ->debit($amount)
+                        ->create([
+                            'voucher_id' => $voucher->id,
+                            'ledger_account_id' => $debitAccount,
+                        ]);
 
-                    // 🔹 Credit line (optionally subledgered)
-                    VoucherLine::factory()->create([
-                        'voucher_id' => $voucher->id,
-                        'ledger_account_id' => $creditAccount,
-                        'debit' => 0,
-                        'credit' => $amount,
-                        'subledger_type' => fake()->optional()->randomElement([
-                            'App\\Accounting\\Models\\DepositAccount',
-                            'App\\Accounting\\Models\\LoanAccount',
-                            'App\\Accounting\\Models\\Vendor',
-                        ]),
-                        'subledger_id' => fake()->optional()->numberBetween(1, 50),
-                    ]);
+                    // Credit line
+                    VoucherLine::factory()
+                        ->credit($amount)
+                        ->create([
+                            'voucher_id' => $voucher->id,
+                            'ledger_account_id' => $creditAccount,
+                        ]);
                 }
             });
+
+        $this->command?->info('✅ Realistic vouchers seeded.');
     }
 }

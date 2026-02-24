@@ -171,7 +171,7 @@ export default function CustomAuthLayout({
             {/* Sidebar */}
             <aside
                 className={cn(
-                    'flex-shrink-0 border-r transition-all duration-300',
+                    'flex-shrink-0 border-r transition-all duration-300 print:hidden',
                     sidebarOpen ? 'w-72' : 'w-16',
                     'border-border bg-sidebar text-sidebar-foreground',
                 )}
@@ -207,7 +207,7 @@ export default function CustomAuthLayout({
 
             {/* Main Content */}
             <div className="flex flex-1 flex-col transition-colors duration-300">
-                <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6 text-card-foreground">
+                <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6 text-card-foreground print:hidden">
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => setSidebarOpen((prev) => !prev)}

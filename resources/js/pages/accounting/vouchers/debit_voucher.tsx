@@ -2,6 +2,7 @@ import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2, Plus, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import HeadingSmall from '../../../components/heading-small';
 import { SubLedgerSearchInput } from '../../../components/sub-ledger-search-input';
 import AppDatePicker from '../../../components/ui/app_date_picker';
@@ -11,23 +12,8 @@ import { Label } from '../../../components/ui/label';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-import { LedgerAccount } from '../../../types/accounting';
+import { VoucherLine } from '../../../types/accounting';
 import { LedgerSearchInput } from '../components/ledger-search-input';
-
-export interface VoucherLine {
-    id: number;
-    voucher_id: number;
-    ledger_account_id: number;
-    ldger_account?: LedgerAccount;
-    subledger_id?: number | null;
-    subledger_type?: string | null;
-    associate_ledger_id?: number | null;
-    instrument_type?: string | null;
-    instrument_number?: string | null;
-    particulars?: string | null;
-    debit: number;
-    credit: number;
-}
 
 interface VoucherFormData {
     voucher_no: string;
@@ -38,16 +24,21 @@ interface VoucherFormData {
     branch_id?: number;
     status: string;
     narration: string;
-    cash_type: string;
+
+    cash_ledger_id?: number;
+    cash_subledger_id?: number;
+
     lines: VoucherLine[];
-    cash_ledger_id: number;
 }
 
 export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
     const {
         fiscalYears,
         fiscalPeriods,
+        cashSubledgerId,
+        cashSubledgers,
         branches,
+        cashLedgerId,
         cashLedgers,
         activeFiscalYearId,
         activeFiscalPeriodId,
@@ -61,12 +52,14 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
         voucher_type: 'DEBIT_OR_PAYMENT',
         fiscal_year_id: activeFiscalYearId || 0,
         fiscal_period_id: activeFiscalPeriodId || 0,
-        branch_id: userBranchId || 0,
+        branch_id: userBranchId || branches[0]?.id,
         status: 'DRAFT',
         narration: '',
-        cash_type: '',
+
+        cash_ledger_id: cashLedgerId,
+        cash_subledger_id: cashSubledgerId,
+
         lines: [],
-        cash_ledger_id: cashLedgers?.length ? cashLedgers[0].id : 0,
     });
 
     console.log(cashLedgers);
@@ -75,19 +68,41 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
         setData('lines', [
             ...data.lines,
             {
-                id: Date.now(),
+                // Frontend-only temp ID (safe for React keys)
+                id: -Date.now(),
+
                 voucher_id: 0,
+
                 ledger_account_id: 0,
-                ldger_account: null,
-                subledger_id: 0,
-                subledger_type: '',
-                associate_ledger_id: 0,
-                instrument_type: '',
-                instrument_number: '',
+                ledger_account: undefined,
+
+                // Polymorphic subledger
+                subledger_id: null,
+                subledger_type: null,
+                subledger: null,
+
+                // Polymorphic reference
+                reference_id: null,
+                reference_type: null,
+                reference: null,
+
+                // Instrument details
+                instrument_type: null,
+                instrument_no: null,
+
+                particulars: null,
+
                 debit: 0,
                 credit: 0,
-                particulars: '',
-            } as VoucherLine,
+
+                // Audit fields
+                created_by: null,
+                created_by_user: null,
+                updated_by: null,
+                updated_by_user: null,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            } satisfies VoucherLine,
         ]);
     };
 
@@ -140,6 +155,46 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
 
     const showBalanceError =
         data.lines.length > 0 && debitTotal !== creditTotal;
+
+    const handleDeleteLine = (index: number) => {
+        const isDark = document.documentElement.classList.contains('dark');
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `This voucher line will be permanently deleted!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: isDark ? '#ef4444' : '#d33',
+            cancelButtonColor: isDark ? '#3b82f6' : '#3085d6',
+            background: isDark ? '#1f2937' : '#fff',
+            color: isDark ? '#f9fafb' : '#111827',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                removeLine(index);
+
+                toast.success('Voucher line deleted successfully!');
+            }
+        });
+    };
+
+    const handleCashLedgerChange = (
+        e: React.ChangeEvent<HTMLSelectElement>,
+    ) => {
+        setData(
+            'cash_ledger_id',
+            e.target.value ? Number(e.target.value) : null, // convert back to number
+        );
+        router.get(
+            '/vouchers/debit/create',
+            {
+                cash_ledger_id: e.target.value ? Number(e.target.value) : null,
+                cash_subledger_id: data.cash_subledger_id,
+            },
+            { preserveState: true },
+        );
+    };
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
@@ -288,7 +343,10 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                                 <Select
                                     disabled
                                     value={data.branch_id || ''}
-                                    options={branches}
+                                    options={branches.map((b) => ({
+                                        value: b.id.toString(),
+                                        label: b.name,
+                                    }))}
                                     onChange={(e) =>
                                         setData(
                                             'branch_id',
@@ -322,7 +380,7 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                                     }
                                 />
                             </div>
-                            <div className="sm:col-span-2">
+                            <div className="sm:col-span-3">
                                 <Label className="text-xs">Narration</Label>
                                 <Input
                                     value={data.narration}
@@ -334,8 +392,6 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                             </div>
                         </div>
                     </div>
-
-                    {/* Cash Details - 4/12 */}
                     <div className="space-y-4 rounded-md border border-border bg-muted/30 p-3 md:col-span-4">
                         <h2 className="border-b border-border pb-1 text-sm font-medium text-primary">
                             Cash Ledger
@@ -352,9 +408,22 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                                         value: ledger.id?.toString(),
                                         label: `${ledger.code} - ${ledger.name}`,
                                     }))}
+                                    onChange={handleCashLedgerChange}
+                                />
+                            </div>
+                            <div>
+                                <Label className="text-xs">
+                                    Cash Sub-Ledger
+                                </Label>
+                                <Select
+                                    value={data.cash_subledger_id || ''}
+                                    options={cashSubledgers.map((ledger) => ({
+                                        value: ledger.id?.toString(),
+                                        label: `${ledger.code} - ${ledger.name}`,
+                                    }))}
                                     onChange={(e) =>
                                         setData(
-                                            'cash_ledger_id',
+                                            'cash_subledger_id',
                                             e.target.value
                                                 ? Number(e.target.value)
                                                 : null, // convert back to number
@@ -362,17 +431,10 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                                     }
                                 />
                             </div>
-                            <div>
-                                <Label className="text-xs">
-                                    Cash Sub-Ledger
-                                </Label>
-                                <SubLedgerSearchInput
-                                    placeholder="Cash Sub-Ledger Account"
-                                    onSelect={() => {}}
-                                />
-                            </div>
                         </div>
                     </div>
+
+                    {/* Cash Details - 4/12 */}
                 </div>
 
                 {/* ---------------- Voucher Lines ---------------- */}
@@ -487,11 +549,11 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                                             <Input
                                                 placeholder="Instrument Number"
                                                 className="h-8 text-sm"
-                                                value={line.instrument_number}
+                                                value={line.instrument_no || ''}
                                                 onChange={(e) =>
                                                     handleLineChange(
                                                         index,
-                                                        'instrument_number',
+                                                        'instrument_no',
                                                         e.target.value,
                                                     )
                                                 }
@@ -550,7 +612,7 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                                             <button
                                                 type="button"
                                                 onClick={() =>
-                                                    removeLine(index)
+                                                    handleDeleteLine(index)
                                                 }
                                                 className="text-destructive hover:text-destructive/80"
                                             >
@@ -642,14 +704,14 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                                 {/* Reference Sub-Ledger */}
                                 <div className="space-y-1">
                                     <Label className="text-xs">
-                                        Reference Sub-Ledger Account
+                                        Reference Account
                                     </Label>
                                     <SubLedgerSearchInput
-                                        placeholder="Reference Sub-Ledger Account"
+                                        placeholder="Reference Account"
                                         onSelect={(value) =>
                                             handleLineChange(
                                                 index,
-                                                'associate_ledger_id',
+                                                'reference_id',
                                                 value,
                                             )
                                         }
@@ -689,11 +751,11 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                                     <Input
                                         placeholder="Instrument Number"
                                         className="h-8 text-sm"
-                                        value={line.instrument_number || ''}
+                                        value={line.instrument_no || ''}
                                         onChange={(e) =>
                                             handleLineChange(
                                                 index,
-                                                'instrument_number',
+                                                'instrument_no',
                                                 e.target.value,
                                             )
                                         }

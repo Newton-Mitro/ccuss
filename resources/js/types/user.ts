@@ -1,6 +1,4 @@
-import { AuditFields } from './base_types';
-
-export interface User extends AuditFields {
+export interface User {
     id: number;
 
     name: string;

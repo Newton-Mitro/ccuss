@@ -1,5 +1,6 @@
 <?php
 
+use App\Accounting\Controllers\AccountingReportController;
 use App\Accounting\Controllers\LedgerAccountController;
 use App\Accounting\Controllers\VoucherController;
 use Illuminate\Support\Facades\Route;
@@ -61,4 +62,11 @@ Route::middleware(['auth',])->group(function () {
     Route::get('vouchers/{voucher}/edit', [VoucherController::class, 'edit'])->name('vouchers.edit');
     Route::put('vouchers/{voucher}', [VoucherController::class, 'update'])->name('vouchers.update');
     Route::delete('vouchers/{voucher}', [VoucherController::class, 'destroy'])->name('vouchers.destroy');
+});
+
+
+Route::middleware(['auth',])->group(function () {
+    Route::get('/reports/trial-balance', [AccountingReportController::class, 'trialBalance'])->name('reports.trial-balance');
+    Route::get('/reports/profit-loss', [AccountingReportController::class, 'profitAndLoss'])->name('reports.profit-loss');
+    Route::get('/reports/balance-sheet', [AccountingReportController::class, 'balanceSheet'])->name('reports.balance-sheet');
 });

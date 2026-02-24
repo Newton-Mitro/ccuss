@@ -21,7 +21,7 @@ const Select: React.FC<SelectProps> = ({ className, options, includeNone = true,
       {...props}
     >
       {includeNone && (
-        <option key={9999} value="">
+        <option key={9999} >
           --None--
         </option>
       )}

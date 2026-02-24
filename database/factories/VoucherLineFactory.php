@@ -20,15 +20,47 @@ class VoucherLineFactory extends Factory
             'voucher_id' => Voucher::factory(),
             'ledger_account_id' => LedgerAccount::factory(),
 
+            // Polymorphic subledger (optional)
             'subledger_id' => null,
             'subledger_type' => null,
-            'associate_ledger_id' => null,
+
+            // Polymorphic reference (optional)
+            'reference_id' => null,
+            'reference_type' => null,
+
+            // Instrument details (optional)
+            'instrument_type' => null,
+            'instrument_no' => null,
 
             'particulars' => $this->faker->optional()->sentence(),
 
-            // ✅ XOR enforced
+            // ✅ Strict XOR (never both, never zero)
             'debit' => $isDebit ? $amount : 0,
             'credit' => $isDebit ? 0 : $amount,
         ];
+    }
+
+    /* =========================================
+     |  Helpful States (Optional but Powerful)
+     ========================================= */
+
+    public function debit(float $amount = null): static
+    {
+        $amount ??= $this->faker->randomFloat(2, 100, 1000);
+
+        return $this->state(fn() => [
+            'debit' => $amount,
+            'credit' => 0,
+        ]);
+    }
+
+    public function credit(float $amount = null): static
+    {
+        $amount ??= $this->faker->randomFloat(2, 100, 1000);
+
+        return $this->state(fn() => [
+            'debit' => 0,
+            'credit' => $amount,
+        ]);
     }
 }

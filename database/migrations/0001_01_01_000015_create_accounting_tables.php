@@ -89,15 +89,15 @@ return new class extends Migration {
             $table->nullableMorphs('subledger');
             // creates: subledger_id (BIGINT), subledger_type (VARCHAR)
 
-            $table->unsignedBigInteger('associate_ledger_id')->nullable();
+            $table->nullableMorphs('reference');
+
+            $table->string('instrument_type')->nullable();
+            $table->string('instrument_no')->nullable();
             $table->string('particulars')->nullable();
             $table->decimal('debit', 18, 2)->default(0);
             $table->decimal('credit', 18, 2)->default(0);
 
             $table->timestamps();
-
-            // ✅ Add constraint for valid debit/credit logic
-            // $table->check("(debit = 0 AND credit > 0) OR (credit = 0 AND debit > 0)");
         });
 
         Schema::create('account_balances', function (Blueprint $table) {
@@ -120,71 +120,90 @@ return new class extends Migration {
         DB::statement("
             CREATE OR REPLACE VIEW view_trial_balance AS
             SELECT
-                a.id   AS ledger_account_id,
+                a.id AS ledger_account_id,
                 a.code AS account_code,
                 a.name AS account_name,
                 a.type AS account_type,
-                COALESCE(SUM(ve.debit), 0)  AS total_debit,
+                COALESCE(SUM(ve.debit), 0) AS total_debit,
                 COALESCE(SUM(ve.credit), 0) AS total_credit,
                 (COALESCE(SUM(ve.debit), 0) - COALESCE(SUM(ve.credit), 0)) AS balance
             FROM ledger_accounts a
-            LEFT JOIN voucher_lines ve ON ve.ledger_account_id = a.id
+            LEFT JOIN voucher_lines ve 
+                ON ve.ledger_account_id = a.id
             LEFT JOIN vouchers v
                 ON v.id = ve.voucher_id
-               AND v.status = 'POSTED'
+            AND v.status = 'POSTED'
+            WHERE a.is_active = TRUE
+            AND a.is_control_account = FALSE
             GROUP BY a.id, a.code, a.name, a.type
+            ORDER BY a.code
         ");
 
+
         /*
-        |--------------------------------------------------------------------------
-        | Profit & Loss View
-        |--------------------------------------------------------------------------
-        | Income vs Expense
-        */
+|--------------------------------------------------------------------------
+| Profit & Loss View
+|--------------------------------------------------------------------------
+| Income vs Expense filtered by fiscal year and period
+*/
         DB::statement("
-            CREATE OR REPLACE VIEW view_profit_and_loss AS
-            SELECT
-                CASE
-                    WHEN a.type = 'INCOME'  THEN 'INCOME'
-                    WHEN a.type = 'EXPENSE' THEN 'EXPENSE'
-                END AS category,
-                a.id   AS ledger_account_id,
-                a.name AS account_name,
-                SUM(ve.credit - ve.debit) AS amount
-            FROM ledger_accounts a
-            JOIN voucher_lines ve ON ve.ledger_account_id = a.id
-            JOIN vouchers v
-                ON v.id = ve.voucher_id
-               AND v.status = 'POSTED'
-            WHERE a.type IN ('INCOME', 'EXPENSE')
-            GROUP BY category, a.id, a.name
-        ");
+CREATE OR REPLACE VIEW view_profit_and_loss AS
+SELECT
+    CASE
+        WHEN a.type = 'INCOME'  THEN 'INCOME'
+        WHEN a.type = 'EXPENSE' THEN 'EXPENSE'
+    END AS category,
+    a.id AS ledger_account_id,
+    a.code AS account_code,
+    a.name AS account_name,
+    v.fiscal_year_id,
+    v.fiscal_period_id,
+    COALESCE(SUM(
+        CASE 
+            WHEN a.type = 'INCOME' THEN ve.credit - ve.debit
+            WHEN a.type = 'EXPENSE' THEN ve.debit - ve.credit
+        END
+    ), 0) AS amount
+FROM ledger_accounts a
+LEFT JOIN voucher_lines ve ON ve.ledger_account_id = a.id
+LEFT JOIN vouchers v ON v.id = ve.voucher_id AND v.status = 'POSTED'
+WHERE a.type IN ('INCOME', 'EXPENSE')
+  AND a.is_active = TRUE
+  AND a.is_control_account = FALSE
+GROUP BY a.id, a.code, a.name, category, v.fiscal_year_id, v.fiscal_period_id
+ORDER BY a.code;
+");
 
         /*
         |--------------------------------------------------------------------------
         | Balance Sheet View
         |--------------------------------------------------------------------------
-        | Assets = Liabilities + Equity
+        | Assets = Liabilities + Equity filtered by fiscal year and period
         */
         DB::statement("
-            CREATE OR REPLACE VIEW view_balance_sheet AS
-            SELECT
-                a.type AS category,
-                a.id   AS ledger_account_id,
-                a.name AS account_name,
-                CASE
-                    WHEN a.type = 'ASSET'
-                        THEN SUM(ve.debit - ve.credit)
-                    ELSE
-                        SUM(ve.credit - ve.debit)
-                END AS balance
-            FROM ledger_accounts a
-            JOIN voucher_lines ve ON ve.ledger_account_id = a.id
-            JOIN vouchers v
-                ON v.id = ve.voucher_id
-               AND v.status = 'POSTED'
-            WHERE a.type IN ('ASSET', 'LIABILITY', 'EQUITY')
-            GROUP BY a.type, a.id, a.name
+        CREATE OR REPLACE VIEW view_balance_sheet AS
+SELECT
+    a.type AS category,
+    a.id AS ledger_account_id,
+    a.code AS account_code,
+    a.name AS account_name,
+    v.fiscal_year_id,
+    COALESCE(SUM(
+        CASE 
+            WHEN a.type = 'ASSET' THEN vl.debit - vl.credit
+            ELSE vl.credit - vl.debit
+        END
+    ), 0) AS balance
+FROM ledger_accounts a
+LEFT JOIN voucher_lines vl
+    ON vl.ledger_account_id = a.id
+LEFT JOIN vouchers v
+    ON v.id = vl.voucher_id
+    AND v.status = 'POSTED'
+WHERE a.type IN ('ASSET','LIABILITY','EQUITY')
+  AND a.is_active = TRUE
+GROUP BY a.id, a.code, a.name, a.type, v.fiscal_year_id
+ORDER BY a.code;
         ");
     }
 

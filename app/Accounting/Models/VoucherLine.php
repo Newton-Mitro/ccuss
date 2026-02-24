@@ -11,12 +11,21 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class VoucherLine extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'voucher_id',
         'ledger_account_id',
+
+        // Polymorphic relations
         'subledger_id',
         'subledger_type',
-        'associate_ledger_id',
+        'reference_id',
+        'reference_type',
+
+        // Instrument details
+        'instrument_type',
+        'instrument_no',
+
         'particulars',
         'debit',
         'credit',
@@ -27,17 +36,34 @@ class VoucherLine extends Model
         'credit' => 'decimal:2',
     ];
 
+    /* =======================
+     |  Relationships
+     ======================= */
+
     public function voucher(): BelongsTo
     {
         return $this->belongsTo(Voucher::class);
     }
 
-    public function ledger_account(): BelongsTo
+    public function ledgerAccount(): BelongsTo
     {
-        return $this->belongsTo(LedgerAccount::class, 'ledger_account_id');
+        return $this->belongsTo(LedgerAccount::class);
     }
 
+    /**
+     * Polymorphic subledger
+     * Example: DepositAccount, LoanAccount, MemberAccount
+     */
     public function subledger(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    /**
+     * Optional reference
+     * Example: Transaction, Cheque, Invoice, Transfer
+     */
+    public function reference(): MorphTo
     {
         return $this->morphTo();
     }
