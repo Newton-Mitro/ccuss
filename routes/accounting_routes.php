@@ -48,7 +48,7 @@ Route::middleware(['auth',])->group(function () {
     Route::get('vouchers', [VoucherController::class, 'index'])->name('vouchers.index');
 
     // Voucher create routes per type
-    Route::get('vouchers/debit/create', [VoucherController::class, 'createDebitVoucher'])->name('vouchers.create.debit');
+    Route::get('vouchers/debit/create', [VoucherController::class, 'createDebitVoucher'])->name('vouchers.create');
     Route::get('vouchers/credit/create', [VoucherController::class, 'createCreditVoucher'])->name('vouchers.create.credit');
     Route::get('vouchers/journal/create', [VoucherController::class, 'createJournalVoucher'])->name('vouchers.create.journal');
     Route::get('vouchers/contra/create', [VoucherController::class, 'createContraVoucher'])->name('vouchers.create.contra');

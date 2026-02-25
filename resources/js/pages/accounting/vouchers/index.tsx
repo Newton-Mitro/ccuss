@@ -101,6 +101,68 @@ export default function Index() {
                         title="Vouchers"
                         description="Manage all vouchers with ease"
                     />
+
+                    {/* Voucher Type Buttons */}
+                    {/* Voucher Type Buttons */}
+                    <div className="mt-2 flex flex-wrap gap-2 sm:mt-0">
+                        {[
+                            {
+                                type: 'DEBIT_OR_PAYMENT',
+                                label: 'Debit / Payment',
+                                color: 'bg-blue-600',
+                            },
+                            {
+                                type: 'CREDIT_OR_RECEIPT',
+                                label: 'Credit / Receipt',
+                                color: 'bg-green-600',
+                            },
+                            {
+                                type: 'JOURNAL_OR_NON_CASH',
+                                label: 'Journal / Non-Cash',
+                                color: 'bg-purple-600',
+                            },
+                            {
+                                type: 'PURCHASE',
+                                label: 'Purchase',
+                                color: 'bg-yellow-600',
+                            },
+                            {
+                                type: 'SALE',
+                                label: 'Sale',
+                                color: 'bg-pink-600',
+                            },
+                            {
+                                type: 'DEBIT_NOTE',
+                                label: 'Debit Note',
+                                color: 'bg-red-600',
+                            },
+                            {
+                                type: 'CREDIT_NOTE',
+                                label: 'Credit Note',
+                                color: 'bg-teal-600',
+                            },
+                            {
+                                type: 'PETTY_CASH',
+                                label: 'Petty Cash',
+                                color: 'bg-orange-600',
+                            },
+                            {
+                                type: 'CONTRA',
+                                label: 'Contra',
+                                color: 'bg-gray-600',
+                            },
+                        ].map((v) => (
+                            <Link
+                                key={v.type}
+                                href={route('vouchers.create', {
+                                    type: v.type,
+                                })}
+                                className={`min-w-[120px] flex-1 rounded-md px-3 py-2 text-center text-sm font-medium text-white hover:opacity-90 sm:flex-none ${v.color}`}
+                            >
+                                {v.label}
+                            </Link>
+                        ))}
+                    </div>
                 </div>
 
                 {/* Filters */}

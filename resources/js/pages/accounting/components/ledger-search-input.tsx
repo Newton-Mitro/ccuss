@@ -1,25 +1,34 @@
 import axios from 'axios';
 import { Search } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
+import InputError from '../../../components/input-error';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import { LedgerAccount } from '../../../types/accounting';
 
 interface LedgerSearchInputProps {
+    value: string;
     onSelect: (ledger: LedgerAccount) => void;
     label?: string;
     placeholder?: string;
+    error?: string;
+    showErrorText?: boolean;
+    disabled?: boolean;
 }
 
 export const LedgerSearchInput: React.FC<LedgerSearchInputProps> = ({
+    value,
     onSelect,
     label,
     placeholder,
+    error,
+    showErrorText = false,
+    disabled = false,
 }) => {
     const [ledgers, setLedgers] = useState<LedgerAccount[]>([]);
     const [showDropdown, setShowDropdown] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [query, setQuery] = useState('');
+    const [query, setQuery] = useState(value);
 
     const dropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -45,11 +54,6 @@ export const LedgerSearchInput: React.FC<LedgerSearchInputProps> = ({
         }
     };
 
-    /**
-     * -----------------------
-     * ENTER KEY HANDLER
-     * -----------------------
-     */
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -57,11 +61,6 @@ export const LedgerSearchInput: React.FC<LedgerSearchInputProps> = ({
         }
     };
 
-    /**
-     * -----------------------
-     * OUTSIDE CLICK HANDLER
-     * -----------------------
-     */
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (
@@ -79,16 +78,19 @@ export const LedgerSearchInput: React.FC<LedgerSearchInputProps> = ({
 
     return (
         <div className="relative w-full" ref={dropdownRef}>
-            {/* INPUT */}
-            <div className="relative">
-                <Label className="text-xs">{label}</Label>
+            {/* LABEL */}
+            {label && <Label className="mb-1 block text-xs">{label}</Label>}
+
+            {/* INPUT + BUTTON */}
+            <div className="relative w-full">
                 <Input
                     type="text"
+                    disabled={disabled}
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={placeholder || 'Search ledgers...'}
-                    className="h-8 w-full rounded-md border border-border bg-background px-3 pr-10 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                    className={`h-8 w-full rounded-md border px-3 pr-10 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none ${error ? 'border-destructive' : 'border-border'} `}
                 />
 
                 <button
@@ -105,23 +107,27 @@ export const LedgerSearchInput: React.FC<LedgerSearchInputProps> = ({
                 </button>
             </div>
 
+            {/* ERROR MESSAGE */}
+            {error && showErrorText && (
+                <InputError message={error} className="mt-1" />
+            )}
+
             {/* DROPDOWN RESULTS */}
             {showDropdown && ledgers.length > 0 && (
-                <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-border bg-background shadow-lg">
+                <ul className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-border bg-background shadow-lg">
                     {ledgers.map((ledger) => (
                         <li
                             key={ledger.id}
                             className="cursor-pointer px-3 py-2 text-xs hover:bg-muted"
                             onClick={() => {
                                 onSelect(ledger);
-                                setQuery(`${ledger.name} | ${ledger.code}`);
+                                setQuery(`${ledger.code} - ${ledger.name}`);
                                 setShowDropdown(false);
                             }}
                         >
                             <div className="truncate font-medium">
                                 {ledger.name}
                             </div>
-
                             <div className="text-[10px] text-muted-foreground">
                                 {ledger.code && <span>{ledger.code}</span>}
                                 {ledger.type && <span> | {ledger.type}</span>}
@@ -134,7 +140,7 @@ export const LedgerSearchInput: React.FC<LedgerSearchInputProps> = ({
 
             {/* EMPTY STATE */}
             {showDropdown && !loading && query && ledgers.length === 0 && (
-                <div className="absolute z-10 mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-muted-foreground">
+                <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-muted-foreground">
                     No personal ledgers found.
                 </div>
             )}

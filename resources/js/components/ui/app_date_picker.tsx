@@ -9,11 +9,12 @@ interface AppDatePickerProps {
   value: string;
   onChange?: (value: string) => void;
   error?: string;
+  showErrorText?: boolean
   disabled?: boolean;
 }
 
 const AppDatePicker = forwardRef<HTMLInputElement, AppDatePickerProps>(
-  ({ label, value, onChange, error, disabled = false }, ref) => {
+  ({ label, value, onChange, error, disabled = false, showErrorText=false }, ref) => {
     const inputRef = useRef<HTMLInputElement>(null);
 
     const combinedRef = (node: HTMLInputElement) => {
@@ -34,6 +35,7 @@ const AppDatePicker = forwardRef<HTMLInputElement, AppDatePickerProps>(
         {label && <Label className="text-xs">{label}</Label>}
         <div className="relative">
           <Input
+            aria-invalid={error ? true : false}
             type="date"
             value={value}
             ref={combinedRef}
@@ -46,7 +48,7 @@ const AppDatePicker = forwardRef<HTMLInputElement, AppDatePickerProps>(
             onClick={openDatePicker}
           />
         </div>
-        {error && <InputError message={error} />}
+        {error && showErrorText && <InputError message={error} />}
       </div>
     );
   }

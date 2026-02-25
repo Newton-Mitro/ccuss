@@ -119,24 +119,34 @@ return new class extends Migration {
         */
         DB::statement("
             CREATE OR REPLACE VIEW view_trial_balance AS
-            SELECT
-                a.id AS ledger_account_id,
-                a.code AS account_code,
-                a.name AS account_name,
-                a.type AS account_type,
-                COALESCE(SUM(ve.debit), 0) AS total_debit,
-                COALESCE(SUM(ve.credit), 0) AS total_credit,
-                (COALESCE(SUM(ve.debit), 0) - COALESCE(SUM(ve.credit), 0)) AS balance
-            FROM ledger_accounts a
-            LEFT JOIN voucher_lines ve 
-                ON ve.ledger_account_id = a.id
-            LEFT JOIN vouchers v
-                ON v.id = ve.voucher_id
-            AND v.status = 'POSTED'
-            WHERE a.is_active = TRUE
-            AND a.is_control_account = FALSE
-            GROUP BY a.id, a.code, a.name, a.type
-            ORDER BY a.code
+SELECT
+    a.id AS ledger_account_id,
+    a.code AS account_code,
+    a.name AS account_name,
+    a.type AS account_type,
+
+    SUM(ve.debit)  AS total_debit,
+    SUM(ve.credit) AS total_credit,
+
+    CASE
+        WHEN a.type IN ('ASSET','EXPENSE')
+            THEN SUM(ve.debit) - SUM(ve.credit)
+        ELSE
+            SUM(ve.credit) - SUM(ve.debit)
+    END AS balance
+FROM ledger_accounts a
+JOIN voucher_lines ve
+    ON ve.ledger_account_id = a.id
+JOIN vouchers v
+    ON v.id = ve.voucher_id
+WHERE v.status = 'POSTED'
+  AND a.is_active = TRUE
+GROUP BY
+    a.id,
+    a.code,
+    a.name,
+    a.type
+ORDER BY a.code;
         ");
 
 
@@ -181,28 +191,35 @@ ORDER BY a.code;
         | Assets = Liabilities + Equity filtered by fiscal year and period
         */
         DB::statement("
-        CREATE OR REPLACE VIEW view_balance_sheet AS
+       CREATE OR REPLACE VIEW view_balance_sheet AS
 SELECT
     a.type AS category,
     a.id AS ledger_account_id,
     a.code AS account_code,
     a.name AS account_name,
     v.fiscal_year_id,
-    COALESCE(SUM(
-        CASE 
-            WHEN a.type = 'ASSET' THEN vl.debit - vl.credit
-            ELSE vl.credit - vl.debit
+    SUM(
+        CASE
+            WHEN a.type = 'ASSET'
+                THEN vl.debit - vl.credit
+            ELSE
+                vl.credit - vl.debit
         END
-    ), 0) AS balance
+    ) AS balance
 FROM ledger_accounts a
-LEFT JOIN voucher_lines vl
+JOIN voucher_lines vl
     ON vl.ledger_account_id = a.id
-LEFT JOIN vouchers v
+JOIN vouchers v
     ON v.id = vl.voucher_id
-    AND v.status = 'POSTED'
-WHERE a.type IN ('ASSET','LIABILITY','EQUITY')
+WHERE v.status = 'POSTED'
+  AND a.type IN ('ASSET','LIABILITY','EQUITY')
   AND a.is_active = TRUE
-GROUP BY a.id, a.code, a.name, a.type, v.fiscal_year_id
+GROUP BY
+    a.id,
+    a.code,
+    a.name,
+    a.type,
+    v.fiscal_year_id
 ORDER BY a.code;
         ");
     }

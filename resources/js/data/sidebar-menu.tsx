@@ -398,97 +398,10 @@ export const sidebarMenu: SidebarItem[] = [
             },
             {
                 name: 'Vouchers',
-                icon: <i className="fa-solid fa-folder-open" />,
-                children: [
-                    {
-                        name: 'List Vouchers',
-                        icon: <i className="fa-solid fa-list-check" />,
-                        path: '/vouchers',
-                        match_path: 'vouchers',
-                    },
-                    {
-                        name: 'Voucher Entry',
-                        icon: <i className="fa-solid fa-file-circle-plus" />,
-                        children: [
-                            {
-                                name: 'Debit / Payment Voucher',
-                                icon: (
-                                    <i className="fa-solid fa-money-bill-transfer" />
-                                ),
-                                path: '/vouchers/debit/create',
-                                match_path: 'vouchers/debit',
-                            },
-                            {
-                                name: 'Credit / Receipt Voucher',
-                                icon: (
-                                    <i className="fa-solid fa-money-bill-trend-up" />
-                                ),
-                                path: '/vouchers/credit/create',
-                                match_path: 'vouchers/credit',
-                            },
-                            {
-                                name: 'Journal / Non-Cash Voucher',
-                                icon: (
-                                    <i className="fa-solid fa-book-open-reader" />
-                                ),
-                                path: '/vouchers/journal/create',
-                                match_path: 'vouchers/journal',
-                            },
-
-                            // --- Trade Vouchers ---
-                            {
-                                name: 'Purchase Voucher',
-                                icon: (
-                                    <i className="fa-solid fa-cart-shopping" />
-                                ),
-                                path: '/vouchers/purchase/create',
-                                match_path: 'vouchers/purchase',
-                            },
-                            {
-                                name: 'Sale Voucher',
-                                icon: (
-                                    <i className="fa-solid fa-cash-register" />
-                                ),
-                                path: '/vouchers/sale/create',
-                                match_path: 'vouchers/sale',
-                            },
-
-                            // --- Adjustment Notes ---
-                            {
-                                name: 'Debit Note',
-                                icon: (
-                                    <i className="fa-solid fa-file-circle-minus" />
-                                ),
-                                path: '/vouchers/debit-note/create',
-                                match_path: 'vouchers/debit-note',
-                            },
-                            {
-                                name: 'Credit Note',
-                                icon: (
-                                    <i className="fa-solid fa-file-circle-plus" />
-                                ),
-                                path: '/vouchers/credit-note/create',
-                                match_path: 'vouchers/credit-note',
-                            },
-
-                            // --- Cash & Bank ---
-                            {
-                                name: 'Petty Cash Voucher',
-                                icon: <i className="fa-solid fa-wallet" />,
-                                path: '/vouchers/petty-cash/create',
-                                match_path: 'vouchers/petty-cash',
-                            },
-                            {
-                                name: 'Contra Voucher',
-                                icon: <i className="fa-solid fa-right-left" />,
-                                path: '/vouchers/contra/create',
-                                match_path: 'vouchers/contra',
-                            },
-                        ],
-                    },
-                ],
+                icon: <i className="fa-solid fa-list-check" />,
+                path: '/vouchers',
+                match_path: 'vouchers',
             },
-
             {
                 name: 'Reports',
                 icon: <i className="fa-solid fa-chart-simple" />,

@@ -35,7 +35,7 @@ class DatabaseSeeder extends Seeder
             BranchSeeder::class,
             CustomerSeeder::class,
             ChartOfAccountsSeeder::class,
-            VoucherEntrySeeder::class,
+            RealVoucherEntrySeeder::class
         ]);
 
     }
