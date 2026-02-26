@@ -125,6 +125,8 @@ class CustomerSeeder extends Seeder
                 'verification_status' => 'VERIFIED',
                 'verified_at' => now(),
             ]);
+
         }
+        $this->command->info('✅ Customers created.');
     }
 }

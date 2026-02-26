@@ -12,6 +12,7 @@ use App\Accounting\Requests\UpdateVoucherRequest;
 use App\Branch\Models\Branch;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -121,11 +122,11 @@ class VoucherController extends Controller
      ===================================================== */
     public function store(StoreVoucherRequest $request)
     {
-
         $data = $request->validated();
         $this->validateDebitCredit($data['lines']);
 
         DB::transaction(function () use ($data) {
+
             $voucherNo = $this->generateVoucherNo(
                 $data['voucher_type'],
                 $data['fiscal_year_id']
@@ -138,9 +139,25 @@ class VoucherController extends Controller
                 'fiscal_year_id' => $data['fiscal_year_id'],
                 'fiscal_period_id' => $data['fiscal_period_id'],
                 'branch_id' => $data['branch_id'] ?? null,
-                'status' => $data['status'],
                 'narration' => $data['narration'] ?? null,
+                'status' => $data['status'],
+
+                // audit
+                'created_by' => Auth::id(),
+                'posted_by' => Auth::id(),
             ]);
+
+            // lifecycle timestamps
+            if ($voucher->status === Voucher::STATUS_POSTED) {
+                $voucher->update(['posted_at' => now()]);
+            }
+
+            if ($voucher->status === Voucher::STATUS_APPROVED) {
+                $voucher->update([
+                    'approved_by' => Auth::id(),
+                    'approved_at' => now(),
+                ]);
+            }
 
             foreach ($data['lines'] as $line) {
                 $voucher->lines()->create($this->linePayload($line));
@@ -163,6 +180,11 @@ class VoucherController extends Controller
                 'fiscalYear',
                 'fiscalPeriod',
                 'branch',
+                'creator',
+                'poster',
+                'approver',
+                'rejector',
+                'updater',
             ]),
         ]);
     }
@@ -214,13 +236,11 @@ class VoucherController extends Controller
      ===================================================== */
     public function update(UpdateVoucherRequest $request, Voucher $voucher)
     {
-        dd($request->all());
         $data = $request->validated();
-        dd($data);
         $this->validateDebitCredit($data['lines']);
 
-
         DB::transaction(function () use ($voucher, $data) {
+
             $voucher->update([
                 'voucher_date' => $data['voucher_date'],
                 'voucher_type' => $data['voucher_type'],
@@ -231,10 +251,36 @@ class VoucherController extends Controller
                 'narration' => $data['narration'] ?? null,
             ]);
 
+            // lifecycle handling
+            if ($voucher->status === Voucher::STATUS_POSTED && !$voucher->posted_at) {
+                $voucher->update([
+                    'posted_by' => Auth::id(),
+                    'posted_at' => now(),
+                ]);
+            }
+
+            if ($voucher->status === Voucher::STATUS_APPROVED && !$voucher->approved_at) {
+                $voucher->update([
+                    'approved_by' => Auth::id(),
+                    'approved_at' => now(),
+                ]);
+            }
+
+            if ($voucher->status === Voucher::STATUS_CANCELLED && !$voucher->rejected_at) {
+                $voucher->update([
+                    'rejected_by' => Auth::id(),
+                    'rejected_at' => now(),
+                ]);
+            }
+
+            // sync lines
             $existingIds = $voucher->lines()->pluck('id')->toArray();
             $submittedIds = array_filter(array_column($data['lines'], 'id'));
 
-            VoucherLine::whereIn('id', array_diff($existingIds, $submittedIds))->delete();
+            VoucherLine::whereIn(
+                'id',
+                array_diff($existingIds, $submittedIds)
+            )->delete();
 
             foreach ($data['lines'] as $line) {
                 $voucher->lines()->updateOrCreate(

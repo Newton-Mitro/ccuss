@@ -53,7 +53,7 @@ class LedgerAccount extends Model
 
     public function balances(): HasMany
     {
-        return $this->hasMany(AccountBalance::class);
+        return $this->hasMany(LedgerAccountBalance::class);
     }
 
     protected static function booted()

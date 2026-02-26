@@ -3,13 +3,13 @@
 namespace Database\Factories;
 
 use App\Accounting\Models\LedgerAccount;
-use App\Accounting\Models\AccountBalance;
+use App\Accounting\Models\LedgerAccountBalance;
 use App\Accounting\Models\FiscalPeriod;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class AccountBalanceFactory extends Factory
+class LedgerAccountBalanceFactory extends Factory
 {
-    protected $model = AccountBalance::class;
+    protected $model = LedgerAccountBalance::class;
 
     public function definition()
     {

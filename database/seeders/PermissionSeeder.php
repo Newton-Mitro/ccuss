@@ -32,5 +32,7 @@ class PermissionSeeder extends Seeder
         $manager->permissions()->sync(
             Permission::whereIn('slug', ['customer.view', 'customer.create'])->pluck('id')
         );
+
+        $this->command->info('✅ Permissions created');
     }
 }

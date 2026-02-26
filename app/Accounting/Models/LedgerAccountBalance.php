@@ -2,12 +2,12 @@
 
 namespace App\Accounting\Models;
 
-use Database\Factories\AccountBalanceFactory;
+use Database\Factories\LedgerAccountBalanceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class AccountBalance extends Model
+class LedgerAccountBalance extends Model
 {
     use HasFactory;
     protected $fillable = [
@@ -26,7 +26,7 @@ class AccountBalance extends Model
         'closing_balance' => 'decimal:2',
     ];
 
-    public function account(): BelongsTo
+    public function ledgerAccount(): BelongsTo
     {
         return $this->belongsTo(LedgerAccount::class);
     }
@@ -38,6 +38,6 @@ class AccountBalance extends Model
 
     protected static function newFactory()
     {
-        return AccountBalanceFactory::new();
+        return LedgerAccountBalanceFactory::new();
     }
 }

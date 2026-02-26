@@ -32,5 +32,6 @@ class FiscalYearSeeder extends Seeder
                 'is_open' => true,
             ]);
         }
+        $this->command->info('✅ Fiscal Year created');
     }
 }

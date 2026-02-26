@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { formatDateTime } from '../../../lib/date_util';
 import { takaToText } from '../../../lib/taka_to_text';
 import { BreadcrumbItem } from '../../../types';
 import { Voucher } from '../../../types/accounting';
@@ -88,7 +89,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                         <span className="text-xs text-muted-foreground">
                             Voucher No
                         </span>
-                        <p className="text-sm">{voucher.voucher_no}</p>
+                        <p className="text-sm">{voucher.voucher_no || '-'}</p>
                     </div>
                     <div>
                         <span className="text-xs text-muted-foreground">
@@ -104,7 +105,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                         <span className="text-xs text-muted-foreground">
                             Voucher Type
                         </span>
-                        <p className="text-sm">{voucher.voucher_type}</p>
+                        <p className="text-sm">{voucher.voucher_type || '-'}</p>
                     </div>
                     <div>
                         <span className="text-xs text-muted-foreground">
@@ -132,7 +133,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                         <span className="text-xs text-muted-foreground">
                             Voucher Status
                         </span>
-                        <p className="text-sm">{voucher.status}</p>
+                        <p className="text-sm">{voucher.status || '-'}</p>
                     </div>
 
                     {voucher.narration && (
@@ -140,7 +141,9 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                             <span className="text-xs text-muted-foreground">
                                 Narration
                             </span>
-                            <p className="text-sm">{voucher.narration}</p>
+                            <p className="text-sm">
+                                {voucher.narration || '-'}
+                            </p>
                         </div>
                     )}
                 </div>
@@ -180,15 +183,25 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                                         <td className="px-2 py-1">
                                             <div className="">
                                                 <div className="flex">
-                                                    {`${line.ledger_account?.code} - ${line.ledger_account?.name}`}
+                                                    {`
+                                                    ${line.ledger_account?.code} - ${line.ledger_account?.name} 
+                                                    ${line.subledger ? `'|' ${line.subledger?.account_no || ''} - - ${line.subledger?.name || ''}` : ''}  
+                                                    ${line.reference ? `'|' ${line.reference?.account_no || ''} - - ${line.reference?.name || ''}` : ''}  
+                                                    `}
                                                 </div>
-                                                <div className="">
-                                                    {line.particulars || '-'}
-                                                </div>
+                                                {line.particulars ? (
+                                                    <div className="">
+                                                        {line.particulars}
+                                                    </div>
+                                                ) : null}
                                             </div>
                                         </td>
-                                        <td className="px-2 py-1"></td>
-                                        <td className="px-2 py-1"></td>
+                                        <td className="px-2 py-1">
+                                            {line.instrument_type || '-'}
+                                        </td>
+                                        <td className="px-2 py-1">
+                                            {line.instrument_no || '-'}
+                                        </td>
                                         <td className="px-2 py-1 text-right">
                                             {line.debit}
                                         </td>
@@ -230,6 +243,80 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                             </tr>
                         </tfoot>
                     </table>
+                </div>
+
+                <div className="flex flex-col justify-between gap-6 md:flex-row">
+                    <div className="">
+                        <span className="text-xs text-primary">
+                            Prepared By
+                        </span>
+                        <div className="text-sm">
+                            <div className="">
+                                {voucher.creator?.name || '-'}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                                {(voucher.created_at &&
+                                    formatDateTime(voucher.created_at)) ||
+                                    '-'}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="">
+                        <span className="text-xs text-primary">Poster By</span>
+                        <div className="text-sm">
+                            <div className="">
+                                {voucher.poster?.name || '-'}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                                {(voucher.posted_at &&
+                                    formatDateTime(voucher.posted_at)) ||
+                                    '-'}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="">
+                        <span className="text-xs text-primary">
+                            Approved By
+                        </span>
+                        <div className="text-sm">
+                            <div className="">
+                                {voucher.approver?.name || '-'}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                                {(voucher.approved_at &&
+                                    formatDateTime(voucher.approved_at)) ||
+                                    '-'}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="">
+                        <span className="text-xs text-primary">
+                            Rejected/Canceled By
+                        </span>
+                        <div className="text-sm">
+                            <div className="">
+                                {voucher.rejector?.name || '-'}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                                {(voucher.rejected_at &&
+                                    formatDateTime(voucher.rejected_at)) ||
+                                    '-'}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="">
+                        <span className="text-xs text-primary">Updated By</span>
+                        <div className="text-sm">
+                            <div className="">
+                                {voucher.updater?.name || '-'}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                                {(voucher.updated_at &&
+                                    formatDateTime(voucher.updated_at)) ||
+                                    '-'}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </CustomAuthLayout>

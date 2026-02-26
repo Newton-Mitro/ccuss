@@ -69,4 +69,6 @@ Route::middleware(['auth',])->group(function () {
     Route::get('/reports/trial-balance', [AccountingReportController::class, 'trialBalance'])->name('reports.trial-balance');
     Route::get('/reports/profit-loss', [AccountingReportController::class, 'profitAndLoss'])->name('reports.profit-loss');
     Route::get('/reports/balance-sheet', [AccountingReportController::class, 'balanceSheet'])->name('reports.balance-sheet');
+    Route::get('/reports/cash-flow', [AccountingReportController::class, 'cashFlow'])->name('reports.cash-flow');
+    Route::get('/reports/shareholders-equity', [AccountingReportController::class, 'shareholdersEquity'])->name('reports.shareholders-equity');
 });

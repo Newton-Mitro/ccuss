@@ -5,125 +5,104 @@ import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '../../../types';
-import { FiscalPeriod, FiscalYear } from '../../../types/accounting';
+import { FiscalYear } from '../../../types/accounting';
 
 /* ---------------- Types ---------------- */
 
-interface TrialBalanceRow {
-    ledger_account_id: number;
+type EquityLine = {
     account_code: string;
     account_name: string;
-    account_type: string;
-    fiscal_year_id: number;
-    fiscal_year_code: string;
-    fiscal_period_id: number;
-    period_name: string;
-    total_debit: number;
-    total_credit: number;
-    balance: number;
-}
+    period_name: string | null;
+    opening_balance: number | null;
+    net_profit: number | null;
+    ending_balance: number | null;
+};
 
 interface Props {
-    trialBalance: TrialBalanceRow[];
+    equityStatement: EquityLine[];
     fiscalYears: FiscalYear[];
-    fiscalPeriods: FiscalPeriod[];
     selectedFiscalYear?: number;
-    selectedFiscalPeriod?: number;
 }
 
 /* ---------------- Page ---------------- */
 
-export default function TrialBalancePage() {
-    const {
-        trialBalance,
-        fiscalYears,
-        fiscalPeriods,
-        selectedFiscalYear,
-        selectedFiscalPeriod,
-    } = usePage().props as Props;
+export default function ShareholdersEquityPage() {
+    const { equityStatement, fiscalYears, selectedFiscalYear } = usePage()
+        .props as Props;
 
     const [fiscalYear, setFiscalYear] = useState<number>(
         selectedFiscalYear || 0,
     );
-    const [fiscalPeriod, setFiscalPeriod] = useState<number>(
-        selectedFiscalPeriod || 0,
-    );
 
-    const fiscalYearCode = fiscalYears.find((fy) => fy.id === fiscalYear)?.code;
-    const fiscalPeriodName = fiscalPeriods.find(
-        (fp) => fp.id === fiscalPeriod,
-    )?.period_name;
+    const fiscalYearCode = fiscalYears.find(
+        (fy) => fy.id === Number(fiscalYear),
+    )?.code;
 
-    /* ---------------- Filter Handlers ---------------- */
     const handleFiscalYearChange = (
         e: React.ChangeEvent<HTMLSelectElement>,
     ) => {
         const year = Number(e.target.value);
         setFiscalYear(year);
         router.get(
-            '/reports/trial-balance',
-            { fiscal_year_id: year, fiscal_period_id: fiscalPeriod },
+            '/reports/shareholders-equity',
+            { fiscal_year_id: year },
             { preserveState: true },
         );
     };
 
-    const handleFiscalPeriodChange = (
-        e: React.ChangeEvent<HTMLSelectElement>,
-    ) => {
-        const period = Number(e.target.value);
-        setFiscalPeriod(period);
-        router.get(
-            '/reports/trial-balance',
-            { fiscal_year_id: fiscalYear, fiscal_period_id: period },
-            { preserveState: true },
-        );
-    };
-
-    /* ---------------- Grouping & Totals ---------------- */
-    // Optional: group by account_type
+    /* ---------------- Grouping ---------------- */
+    // Group by account name (or period_name if you prefer)
     const grouped = useMemo(() => {
-        const map: Record<string, TrialBalanceRow[]> = {};
-        trialBalance.forEach((row) => {
-            const key = row.account_type || 'Other';
+        const map: Record<string, EquityLine[]> = {};
+        equityStatement.forEach((row) => {
+            const key = row.account_name || 'Other';
             if (!map[key]) map[key] = [];
             map[key].push(row);
         });
         return map;
-    }, [trialBalance]);
+    }, [equityStatement]);
 
-    const groupTotal = (rows: TrialBalanceRow[]) => ({
-        totalDebit: rows.reduce((sum, r) => sum + Number(r.total_debit), 0),
-        totalCredit: rows.reduce((sum, r) => sum + Number(r.total_credit), 0),
-        balance: rows.reduce((sum, r) => sum + Number(r.balance), 0),
-    });
+    /* ---------------- Totals ---------------- */
+    const groupTotal = (rows: EquityLine[]) => {
+        return {
+            opening: rows.reduce((sum, r) => sum + (r.opening_balance ?? 0), 0),
+            netProfit: rows.reduce((sum, r) => sum + (r.net_profit ?? 0), 0),
+            ending: rows.reduce((sum, r) => sum + (r.ending_balance ?? 0), 0),
+        };
+    };
 
     const grandTotals = useMemo(() => {
-        return trialBalance.reduce(
-            (acc, row) => ({
-                totalDebit: acc.totalDebit + Number(row.total_debit),
-                totalCredit: acc.totalCredit + Number(row.total_credit),
-                balance: acc.balance + Number(row.balance),
-            }),
-            { totalDebit: 0, totalCredit: 0, balance: 0 },
-        );
-    }, [trialBalance]);
+        return equityStatement.reduce(
+            (acc, row) => {
+                const opening = Number(row.opening_balance ?? 0);
+                const netProfit = Number(row.net_profit ?? 0);
+                const ending = Number(row.ending_balance ?? 0);
 
-    /* ---------------- Breadcrumbs ---------------- */
+                return {
+                    opening: acc.opening + opening,
+                    netProfit: acc.netProfit + netProfit,
+                    ending: acc.ending + ending,
+                };
+            },
+            { opening: 0, netProfit: 0, ending: 0 },
+        );
+    }, [equityStatement]);
+
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Reports', href: '/reports' },
-        { title: 'Trial Balance', href: '/reports/trial-balance' },
+        { title: 'Reports', href: '#' },
+        { title: 'Shareholders’ Equity', href: '/reports/shareholders-equity' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Trial Balance" />
+            <Head title="Statement of Shareholders’ Equity" />
 
             <div className="space-y-3 p-2 print:p-4 print:text-black">
                 {/* Header */}
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
                     <HeadingSmall
-                        title="Trial Balance"
-                        description="Debit, Credit & Balance Summary"
+                        title="Statement of Shareholders’ Equity"
+                        description="Opening Balance + Net Profit = Closing Balance"
                     />
 
                     <div className="flex items-center gap-2">
@@ -134,16 +113,6 @@ export default function TrialBalancePage() {
                             options={fiscalYears.map((fy) => ({
                                 value: fy.id.toString(),
                                 label: fy.code,
-                            }))}
-                        />
-
-                        <Select
-                            value={fiscalPeriod}
-                            onChange={handleFiscalPeriodChange}
-                            className="rounded border px-2 py-1 text-sm"
-                            options={fiscalPeriods.map((fp) => ({
-                                value: fp.id.toString(),
-                                label: fp.period_name,
                             }))}
                         />
 
@@ -158,13 +127,15 @@ export default function TrialBalancePage() {
 
                 {/* Print Header */}
                 <div className="hidden text-center print:block">
-                    <h1 className="text-xl font-bold">Trial Balance</h1>
+                    <h1 className="text-xl font-bold">
+                        Statement of Shareholders’ Equity
+                    </h1>
                     {fiscalYearCode && (
                         <p className="text-sm">Fiscal Year: {fiscalYearCode}</p>
                     )}
-                    {fiscalPeriodName && (
-                        <p className="text-sm">Period: {fiscalPeriodName}</p>
-                    )}
+                    <p className="text-sm">
+                        Opening Balance + Net Profit = Closing Balance
+                    </p>
                     <hr className="my-2 border-t border-border" />
                 </div>
 
@@ -174,16 +145,19 @@ export default function TrialBalancePage() {
                         <thead>
                             <tr>
                                 <th className="border-b px-2 py-1 text-left">
-                                    Account
+                                    Period
+                                </th>
+                                <th className="border-b px-2 py-1 text-left">
+                                    Equity Account
                                 </th>
                                 <th className="border-b px-2 py-1 text-right">
-                                    Debit
+                                    Opening Balance
                                 </th>
                                 <th className="border-b px-2 py-1 text-right">
-                                    Credit
+                                    Net Profit / (Loss)
                                 </th>
                                 <th className="border-b px-2 py-1 text-right">
-                                    Balance
+                                    Closing Balance
                                 </th>
                             </tr>
                         </thead>
@@ -195,7 +169,7 @@ export default function TrialBalancePage() {
                                 <tbody key={group}>
                                     {/* Group Header */}
                                     <tr className="bg-muted font-semibold print:bg-transparent">
-                                        <td colSpan={4} className="px-2 py-1">
+                                        <td colSpan={5} className="px-2 py-1">
                                             {group}
                                         </td>
                                     </tr>
@@ -204,21 +178,28 @@ export default function TrialBalancePage() {
                                     {rows.map((row, idx) => (
                                         <tr key={`${group}-${idx}`}>
                                             <td className="border px-2 py-1">
+                                                {row.period_name ?? '—'}
+                                            </td>
+                                            <td className="border px-2 py-1">
                                                 {row.account_code} —{' '}
                                                 {row.account_name}
                                             </td>
                                             <td className="border px-2 py-1 text-right">
                                                 {formatBDTCurrency(
-                                                    row.total_debit,
+                                                    row.opening_balance ?? 0,
                                                 )}
                                             </td>
-                                            <td className="border px-2 py-1 text-right">
+                                            <td
+                                                className={`border px-2 py-1 text-right ${(row.net_profit ?? 0) < 0 ? 'text-red-600' : 'text-green-600'}`}
+                                            >
                                                 {formatBDTCurrency(
-                                                    row.total_credit,
+                                                    row.net_profit ?? 0,
                                                 )}
                                             </td>
-                                            <td className="border px-2 py-1 text-right">
-                                                {formatBDTCurrency(row.balance)}
+                                            <td className="border px-2 py-1 text-right font-semibold">
+                                                {formatBDTCurrency(
+                                                    row.ending_balance ?? 0,
+                                                )}
                                             </td>
                                         </tr>
                                     ))}
@@ -228,18 +209,17 @@ export default function TrialBalancePage() {
                                         <td className="border px-2 py-1">
                                             Total {group}
                                         </td>
+                                        <td className="border px-2 py-1"></td>
                                         <td className="border px-2 py-1 text-right">
-                                            {formatBDTCurrency(
-                                                totals.totalDebit,
-                                            )}
+                                            {formatBDTCurrency(totals.opening)}
                                         </td>
                                         <td className="border px-2 py-1 text-right">
                                             {formatBDTCurrency(
-                                                totals.totalCredit,
+                                                totals.netProfit,
                                             )}
                                         </td>
                                         <td className="border px-2 py-1 text-right">
-                                            {formatBDTCurrency(totals.balance)}
+                                            {formatBDTCurrency(totals.ending)}
                                         </td>
                                     </tr>
                                 </tbody>
@@ -249,17 +229,20 @@ export default function TrialBalancePage() {
                         {/* Grand Total */}
                         <tfoot className="font-bold">
                             <tr>
-                                <td className="border px-2 py-1 text-right">
+                                <td
+                                    colSpan={2}
+                                    className="border px-2 py-1 text-right"
+                                >
                                     Grand Total
                                 </td>
                                 <td className="border px-2 py-1 text-right">
-                                    {formatBDTCurrency(grandTotals.totalDebit)}
+                                    {formatBDTCurrency(grandTotals.opening)}
                                 </td>
                                 <td className="border px-2 py-1 text-right">
-                                    {formatBDTCurrency(grandTotals.totalCredit)}
+                                    {formatBDTCurrency(grandTotals.netProfit)}
                                 </td>
                                 <td className="border px-2 py-1 text-right">
-                                    {formatBDTCurrency(grandTotals.balance)}
+                                    {formatBDTCurrency(grandTotals.ending)}
                                 </td>
                             </tr>
                         </tfoot>

@@ -2,9 +2,14 @@
 
 namespace App\Accounting\Controllers;
 
+use App\Accounting\Models\FiscalPeriod;
+use App\Accounting\Models\FiscalYear;
 use App\Accounting\Models\LedgerAccount;
+use App\Accounting\Models\Voucher;
+use App\Accounting\Models\VoucherLine;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -75,9 +80,19 @@ class LedgerAccountController extends Controller
             ->orderBy('code')
             ->get(['id', 'code', 'name']);
 
+        $fiscalYears = FiscalYear::query()
+            ->orderBy('code', 'desc')
+            ->get(['id', 'code']);
+
+        $fiscalPeriods = FiscalPeriod::query()
+            ->orderBy('period_name')
+            ->get(['id', 'period_name']);
+
         return Inertia::render('accounting/ledger-accounts/index', [
             'glAccounts' => $glAccounts,
             'groupAccounts' => $groupAccounts,
+            'fiscalYears' => $fiscalYears,
+            'fiscalPeriods' => $fiscalPeriods,
             'flash' => [
                 'success' => session('success'),
                 'error' => session('error'),
@@ -96,22 +111,61 @@ class LedgerAccountController extends Controller
             'type' => 'required|in:ASSET,LIABILITY,EQUITY,INCOME,EXPENSE',
             'is_control_account' => 'boolean',
             'parent_id' => 'nullable|exists:ledger_accounts,id',
+            'opening_balance' => 'nullable|numeric|min:0',
+            'fiscal_year_id' => 'required|exists:fiscal_years,id',
+            'fiscal_period_id' => 'required|exists:fiscal_periods,id',
         ]);
 
-        // Prevent setting a parent on a control account
-        if (!empty($data['is_control_account']) && !empty($data['parent_id'])) {
-            return back()->with('error', 'Control accounts cannot have a parent.');
-        }
+        // Wrap everything in a transaction
+        DB::transaction(function () use ($data, $request) {
+            // Prevent setting a parent on a control account
+            if (!empty($data['is_control_account']) && !empty($data['parent_id'])) {
+                throw new \Exception('Control accounts cannot have a parent.');
+            }
 
-        $account = LedgerAccount::create([
-            ...$data,
-            'is_leaf' => empty($data['is_control_account']),
-        ]);
+            // Create the ledger account
+            $account = LedgerAccount::create([
+                ...$data,
+                'is_leaf' => empty($data['is_control_account']),
+            ]);
 
-        // Update parent's leaf status
-        if ($account->parent_id) {
-            LedgerAccount::where('id', $account->parent_id)->update(['is_leaf' => false]);
-        }
+            // Update parent's leaf status
+            if ($account->parent_id) {
+                LedgerAccount::where('id', $account->parent_id)->update(['is_leaf' => false]);
+            }
+
+            // Optional: create opening balance voucher
+            if (!empty($data['opening_balance']) && $account->is_leaf) {
+                $openingVoucher = Voucher::create([
+                    'voucher_type' => 'JOURNAL_OR_NON_CASH',
+                    'voucher_no' => 'OPEN-' . strtoupper($account->code),
+                    'narration' => 'Opening balance for ' . $account->name,
+                    'status' => Voucher::STATUS_POSTED,
+                    'fiscal_year_id' => $data['fiscal_year_id'],
+                    'fiscal_period_id' => $data['fiscal_period_id'],
+                    'created_by' => auth()->id(),
+                    'posted_by' => auth()->id(),
+                    'posted_at' => now(),
+                ]);
+
+                // Ledger line for the new account
+                VoucherLine::create([
+                    'voucher_id' => $openingVoucher->id,
+                    'ledger_account_id' => $account->id,
+                    'debit' => in_array($account->type, ['ASSET', 'EXPENSE']) ? $data['opening_balance'] : 0,
+                    'credit' => in_array($account->type, ['LIABILITY', 'EQUITY', 'INCOME']) ? $data['opening_balance'] : 0,
+                ]);
+
+                // Counterbalance entry
+                $openingEquity = LedgerAccount::where('code', '9999')->firstOrFail(); // Opening Balances Equity
+                VoucherLine::create([
+                    'voucher_id' => $openingVoucher->id,
+                    'ledger_account_id' => $openingEquity->id,
+                    'debit' => in_array($account->type, ['LIABILITY', 'EQUITY', 'INCOME']) ? $data['opening_balance'] : 0,
+                    'credit' => in_array($account->type, ['ASSET', 'EXPENSE']) ? $data['opening_balance'] : 0,
+                ]);
+            }
+        });
 
         return back()->with('success', 'Account created successfully.');
     }
@@ -134,6 +188,9 @@ class LedgerAccountController extends Controller
                     }
                 }
             ],
+            'opening_balance' => 'nullable|numeric|min:0',
+            'fiscal_year_id' => 'required|exists:fiscal_years,id',
+            'fiscal_period_id' => 'required|exists:fiscal_periods,id',
         ];
 
         if ($request->code !== $ledgerAccount->code) {
@@ -143,26 +200,63 @@ class LedgerAccountController extends Controller
                 'max:50',
                 Rule::unique('ledger_accounts', 'code')->ignore($ledgerAccount->id),
             ];
-        } else {
-            $rules['code'] = 'required|string|max:50';
         }
 
         $data = $request->validate($rules);
 
-        // Prevent parent on control account
-        if (!empty($data['is_control_account']) && !empty($data['parent_id'])) {
-            return back()->with('error', 'Control accounts cannot have a parent.');
-        }
+        DB::transaction(function () use ($ledgerAccount, $data) {
+            // Prevent parent on control account
+            if (!empty($data['is_control_account']) && !empty($data['parent_id'])) {
+                throw new \Exception('Control accounts cannot have a parent.');
+            }
 
-        $ledgerAccount->update($data);
+            // Update ledger account
+            $ledgerAccount->update($data);
 
-        // Update leaf status for parent accounts
-        if ($ledgerAccount->parent_id) {
-            LedgerAccount::where('id', $ledgerAccount->parent_id)->update(['is_leaf' => false]);
-        }
-        if ($ledgerAccount->children()->count() === 0 && !$ledgerAccount->is_control_account) {
-            $ledgerAccount->update(['is_leaf' => true]);
-        }
+            // Update leaf status for parent accounts
+            if ($ledgerAccount->parent_id) {
+                LedgerAccount::where('id', $ledgerAccount->parent_id)->update(['is_leaf' => false]);
+            }
+            if ($ledgerAccount->children()->count() === 0 && !$ledgerAccount->is_control_account) {
+                $ledgerAccount->update(['is_leaf' => true]);
+            }
+
+            // Handle opening balance
+            if ($ledgerAccount->is_leaf) {
+                $openingVoucher = Voucher::firstOrCreate(
+                    [
+                        'voucher_no' => 'OPEN-' . strtoupper($ledgerAccount->code),
+                        'voucher_type' => 'JOURNAL_OR_NON_CASH',
+                    ],
+                    [
+                        'narration' => 'Opening balance for ' . $ledgerAccount->name,
+                        'status' => Voucher::STATUS_POSTED,
+                        'fiscal_year_id' => $data['fiscal_year_id'],
+                        'fiscal_period_id' => $data['fiscal_period_id'],
+                        'created_by' => auth()->id(),
+                        'posted_by' => auth()->id(),
+                        'posted_at' => now(),
+                    ]
+                );
+
+                // Update or create voucher line for this account
+                $line = $openingVoucher->lines()->firstOrNew([
+                    'ledger_account_id' => $ledgerAccount->id,
+                ]);
+                $line->debit = in_array($ledgerAccount->type, ['ASSET', 'EXPENSE']) ? $data['opening_balance'] ?? 0 : 0;
+                $line->credit = in_array($ledgerAccount->type, ['LIABILITY', 'EQUITY', 'INCOME']) ? $data['opening_balance'] ?? 0 : 0;
+                $line->save();
+
+                // Counterbalance entry
+                $openingEquity = LedgerAccount::where('code', '9999')->firstOrFail(); // Opening Balances Equity
+                $counter = $openingVoucher->lines()->firstOrNew([
+                    'ledger_account_id' => $openingEquity->id,
+                ]);
+                $counter->debit = in_array($ledgerAccount->type, ['LIABILITY', 'EQUITY', 'INCOME']) ? $data['opening_balance'] ?? 0 : 0;
+                $counter->credit = in_array($ledgerAccount->type, ['ASSET', 'EXPENSE']) ? $data['opening_balance'] ?? 0 : 0;
+                $counter->save();
+            }
+        });
 
         return back()->with('success', 'Account updated successfully.');
     }

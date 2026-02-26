@@ -81,19 +81,24 @@ export interface Voucher extends AuditFields {
         | 'CONTRA';
     voucher_no: string;
     reference?: string | null;
+    narration: string;
+    lines?: VoucherLine[];
+
+    posted_by?: number | null;
+    posted_at?: string | null;
     approved_by?: number | null;
     approved_at?: string | null;
-    created_by: number;
-    narration: string;
+    rejected_by?: number | null;
+    rejected_at?: string | null;
+
     status: 'DRAFT' | 'APPROVED' | 'POSTED' | 'CANCELLED';
 
-    // Optional relations
+    poster?: User;
+    approver?: User;
+    rejector?: User;
+    branch?: Branch;
     fiscal_year?: FiscalYear;
     fiscal_period?: FiscalPeriod;
-    branch?: Branch;
-    creator?: User;
-    approver?: User;
-    lines?: VoucherLine[];
 }
 
 // Account Balance

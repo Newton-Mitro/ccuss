@@ -80,6 +80,8 @@ function DroppableGroup({ id, children }: any) {
 export default function GlAccountsIndex({
     glAccounts,
     groupAccounts,
+    fiscalYears,
+    fiscalPeriods,
     flash,
 }: any) {
     const [expandedIds, setExpandedIds] = useState<number[]>([]);
@@ -92,6 +94,9 @@ export default function GlAccountsIndex({
         type: '',
         parent_id: '',
         is_control_account: false,
+        opening_balance_amount: '',
+        opening_balance_fiscal_year_id: '',
+        opening_balance_fiscal_period_id: '',
     });
 
     /* ---------------------------------------------
@@ -127,6 +132,11 @@ export default function GlAccountsIndex({
                 type: account.type,
                 parent_id: account.parent_id || '',
                 is_control_account: account.is_control_account,
+                opening_balance_amount: account.opening_balance?.amount || '',
+                opening_balance_fiscal_year_id:
+                    account.opening_balance?.fiscal_year_id || '',
+                opening_balance_fiscal_period_id:
+                    account.opening_balance?.fiscal_period_id || '',
             });
         } else {
             reset();
@@ -382,6 +392,7 @@ export default function GlAccountsIndex({
                         </h2>
 
                         <form onSubmit={handleSubmit} className="space-y-4">
+                            {/* Code, Name, Type, Control, Parent */}
                             <div>
                                 <Label>Code</Label>
                                 <Input
@@ -455,11 +466,92 @@ export default function GlAccountsIndex({
                                                 a.id !== editingAccount?.id,
                                         )
                                         .map((a: any) => ({
-                                            value: a.id.toString(), // value must be string
-                                            label: `${a.code} — ${a.name}`, // label for display
+                                            value: a.id.toString(),
+                                            label: `${a.code} — ${a.name}`,
                                         }))}
-                                    includeNone={true} // allows "--None--" option
+                                    includeNone={true}
                                 />
+                            </div>
+
+                            {/* Opening Balance */}
+                            <div className="mt-4 space-y-2 border-t border-border pt-4">
+                                <h3 className="text-sm font-medium text-muted-foreground">
+                                    Opening Balance
+                                </h3>
+
+                                <div>
+                                    <Label>Amount</Label>
+                                    <Input
+                                        type="number"
+                                        value={
+                                            data.opening_balance_amount || ''
+                                        }
+                                        onChange={(e) =>
+                                            setData(
+                                                'opening_balance_amount',
+                                                e.target.value,
+                                            )
+                                        }
+                                        className="h-8 text-sm"
+                                    />
+                                    <InputError
+                                        message={errors.opening_balance_amount}
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label>Fiscal Year</Label>
+                                    <Select
+                                        value={
+                                            data.opening_balance_fiscal_year_id ||
+                                            ''
+                                        }
+                                        onChange={(e) =>
+                                            setData(
+                                                'opening_balance_fiscal_year_id',
+                                                e.target.value,
+                                            )
+                                        }
+                                        options={fiscalYears.map((fy: any) => ({
+                                            value: fy.id.toString(),
+                                            label: fy.code,
+                                        }))}
+                                        includeNone={true}
+                                    />
+                                    <InputError
+                                        message={
+                                            errors.opening_balance_fiscal_year_id
+                                        }
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label>Fiscal Period</Label>
+                                    <Select
+                                        value={
+                                            data.opening_balance_fiscal_period_id ||
+                                            ''
+                                        }
+                                        onChange={(e) =>
+                                            setData(
+                                                'opening_balance_fiscal_period_id',
+                                                e.target.value,
+                                            )
+                                        }
+                                        options={fiscalPeriods.map(
+                                            (fp: any) => ({
+                                                value: fp.id.toString(),
+                                                label: fp.period_name,
+                                            }),
+                                        )}
+                                        includeNone={true}
+                                    />
+                                    <InputError
+                                        message={
+                                            errors.opening_balance_fiscal_period_id
+                                        }
+                                    />
+                                </div>
                             </div>
 
                             <div className="flex justify-end">

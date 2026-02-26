@@ -61,7 +61,7 @@ export default function BalanceSheetPage() {
     );
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Reports', href: '/reports' },
+        { title: 'Reports', href: '#' },
         { title: 'Balance Sheet', href: '/reports/balance-sheet' },
     ];
 

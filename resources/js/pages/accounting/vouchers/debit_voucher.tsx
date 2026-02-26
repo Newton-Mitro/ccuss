@@ -13,6 +13,7 @@ import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '../../../types';
 import { VoucherLine } from '../../../types/accounting';
 import { LedgerSearchInput } from '../components/ledger-search-input';
@@ -203,7 +204,9 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
 
     const debitTotal = data.lines.reduce((sum, l) => sum + (l.debit || 0), 0);
     const creditTotal = data.lines.reduce((sum, l) => sum + (l.credit || 0), 0);
-    const isBalanced = data.lines.length > 0 && debitTotal === creditTotal;
+    const hasValidLines = data.lines.every((l) => (l.debit || l.credit) > 0);
+    const isBalanced =
+        data.lines.length > 0 && debitTotal === creditTotal && hasValidLines;
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Vouchers', href: '/vouchers' },
@@ -638,7 +641,10 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
 
                         {!isBalanced && data.lines.length > 0 && (
                             <div className="rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
-                                Debit and Credit totals must be equal.
+                                Voucher is not balanced. Debit total:{' '}
+                                {formatBDTCurrency(debitTotal)}, Credit total:{' '}
+                                {formatBDTCurrency(creditTotal)}. Both must be
+                                equal and greater than zero.
                             </div>
                         )}
                     </div>

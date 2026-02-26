@@ -23,22 +23,40 @@ class VoucherFactory extends Factory
             'PETTY_CASH',
             'CONTRA',
         ];
-        $status = ['DRAFT', 'APPROVED', 'POSTED', 'CANCELLED'];
-        $creatorId = User::factory();
+
+        $statuses = ['DRAFT', 'APPROVED', 'POSTED', 'CANCELLED'];
+        $status = $this->faker->randomElement($statuses);
+
+        $creator = User::factory();
+        $actor = User::factory(); // used for posted/approved/rejected
 
         return [
-            'fiscal_year_id' => null, // assign manually
-            'fiscal_period_id' => null, // assign manually
-            'branch_id' => null, // optional
+            // Relations (assign explicitly when needed)
+            'fiscal_year_id' => null,
+            'fiscal_period_id' => null,
+            'branch_id' => null,
+
+            // Core fields
             'voucher_date' => $this->faker->dateTimeThisYear(),
             'voucher_type' => $this->faker->randomElement($types),
             'voucher_no' => strtoupper($this->faker->bothify('VCHR-####')),
             'reference' => $this->faker->optional()->bothify('REF-####'),
-            'created_by' => $creatorId,
-            'approved_by' => null,
-            'approved_at' => null,
             'narration' => $this->faker->sentence(),
-            'status' => $this->faker->randomElement($status),
+            'status' => $status,
+
+            // Audit fields
+            'created_by' => $creator,
+            'posted_by' => $actor,
+            'approved_by' => $status === 'APPROVED' ? $actor : null,
+            'rejected_by' => $status === 'CANCELLED' ? $actor : $actor,
+
+            // Timestamps based on lifecycle
+            'posted_at' => $status === 'POSTED' ? now() : null,
+            'approved_at' => $status === 'APPROVED' ? now() : null,
+            'rejected_at' => $status === 'CANCELLED' ? now() : null,
+
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 }
