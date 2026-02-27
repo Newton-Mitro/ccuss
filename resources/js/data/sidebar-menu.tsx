@@ -375,6 +375,36 @@ export const sidebarMenu: SidebarItem[] = [
         ],
     },
     {
+        name: 'Daily Transactions',
+        icon: <i className="fa-solid fa-cash-register" />,
+        children: [
+            {
+                name: 'Daily Collections',
+                icon: <i className="fa-solid fa-hand-holding-dollar" />,
+                path: '/daily-collections',
+                match_path: 'daily-collections',
+            },
+            {
+                name: 'Daily Payments',
+                icon: <i className="fa-solid fa-money-bill-transfer" />,
+                path: '/daily-payments',
+                match_path: 'daily-payments',
+            },
+            {
+                name: 'Incoming Transfers',
+                icon: <i className="fa-solid fa-right-to-bracket" />,
+                path: '/incoming-transfers',
+                match_path: 'incoming-transfers',
+            },
+            {
+                name: 'Outgoing Transfers',
+                icon: <i className="fa-solid fa-right-from-bracket" />,
+                path: '/outgoing-transfers',
+                match_path: 'outgoing-transfers',
+            },
+        ],
+    },
+    {
         name: 'General Accounting',
         icon: <i className="fa-solid fa-calculator" />,
         children: [
@@ -401,6 +431,36 @@ export const sidebarMenu: SidebarItem[] = [
                 icon: <i className="fa-solid fa-list-check" />,
                 path: '/vouchers',
                 match_path: 'vouchers',
+            },
+            {
+                name: 'Voucher Entry',
+                icon: <i className="fa-solid fa-chart-simple" />,
+                children: [
+                    {
+                        name: 'Debit / Payment Voucher',
+                        icon: <i className="fa-solid fa-chart-simple" />,
+                        path: '/voucher-entry/debit-voucher',
+                        match_path: 'debit-voucher',
+                    },
+                    {
+                        name: 'Credit / Receipt Voucher',
+                        icon: <i className="fa-solid fa-chart-simple" />,
+                        path: '/voucher-entry/credit-voucher',
+                        match_path: 'credit-voucher',
+                    },
+                    {
+                        name: 'Journal Voucher',
+                        icon: <i className="fa-solid fa-chart-simple" />,
+                        path: '/voucher-entry/journal-voucher',
+                        match_path: 'journal-voucher',
+                    },
+                    {
+                        name: 'Contra Voucher',
+                        icon: <i className="fa-solid fa-chart-simple" />,
+                        path: '/voucher-entry/contra-voucher',
+                        match_path: 'contra-voucher',
+                    },
+                ],
             },
             {
                 name: 'Reports',
@@ -440,36 +500,7 @@ export const sidebarMenu: SidebarItem[] = [
             },
         ],
     },
-    {
-        name: 'Daily Transactions',
-        icon: <i className="fa-solid fa-cash-register" />,
-        children: [
-            {
-                name: 'Daily Collections',
-                icon: <i className="fa-solid fa-hand-holding-dollar" />,
-                path: '/daily-collections',
-                match_path: 'daily-collections',
-            },
-            {
-                name: 'Daily Payments',
-                icon: <i className="fa-solid fa-money-bill-transfer" />,
-                path: '/daily-payments',
-                match_path: 'daily-payments',
-            },
-            {
-                name: 'Incoming Transfers',
-                icon: <i className="fa-solid fa-right-to-bracket" />,
-                path: '/incoming-transfers',
-                match_path: 'incoming-transfers',
-            },
-            {
-                name: 'Outgoing Transfers',
-                icon: <i className="fa-solid fa-right-from-bracket" />,
-                path: '/outgoing-transfers',
-                match_path: 'outgoing-transfers',
-            },
-        ],
-    },
+
     {
         name: 'Procurement Mgmt.',
         icon: <i className="fa-solid fa-sack-dollar" />,

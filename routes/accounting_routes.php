@@ -48,10 +48,10 @@ Route::middleware(['auth',])->group(function () {
     Route::get('vouchers', [VoucherController::class, 'index'])->name('vouchers.index');
 
     // Voucher create routes per type
-    Route::get('vouchers/debit/create', [VoucherController::class, 'createDebitVoucher'])->name('vouchers.create');
-    Route::get('vouchers/credit/create', [VoucherController::class, 'createCreditVoucher'])->name('vouchers.create.credit');
-    Route::get('vouchers/journal/create', [VoucherController::class, 'createJournalVoucher'])->name('vouchers.create.journal');
-    Route::get('vouchers/contra/create', [VoucherController::class, 'createContraVoucher'])->name('vouchers.create.contra');
+    Route::get('voucher-entry/debit-voucher', [VoucherController::class, 'createDebitVoucher'])->name('vouchers.create');
+    Route::get('voucher-entry/credit-voucher', [VoucherController::class, 'createCreditVoucher'])->name('vouchers.create.credit');
+    Route::get('voucher-entry/journal-voucher', [VoucherController::class, 'createJournalVoucher'])->name('vouchers.create.journal');
+    Route::get('voucher-entry/contra-voucher', [VoucherController::class, 'createContraVoucher'])->name('vouchers.create.contra');
     // Transfer can reuse store with type 'transfer' in request
 
     // Store voucher (handles all types dynamically)
