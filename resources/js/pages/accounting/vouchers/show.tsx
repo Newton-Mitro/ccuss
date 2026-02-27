@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { formatDateTime } from '../../../lib/date_util';
+import { formatDate, formatDateTime } from '../../../lib/date_util';
 import { takaToText } from '../../../lib/taka_to_text';
 import { BreadcrumbItem } from '../../../types';
 import { Voucher } from '../../../types/accounting';
@@ -49,12 +49,12 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
             <Head title={`Voucher ${voucher.voucher_no}`} />
 
             {/* Header */}
-            <div className="print-hidden flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
                 <HeadingSmall
                     title={`Voucher ${voucher.voucher_no}`}
                     description="View voucher details"
                 />
-                <div className="flex gap-2 print:hidden">
+                <div className="flex gap-2">
                     <button
                         type="button"
                         onClick={handleBack}
@@ -81,8 +81,48 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                 </div>
             </div>
 
+            {/* Print-only Header */}
+            <div className="mb-6 hidden print:block">
+                <div className="mb-2 text-center">
+                    <h1 className="text-2xl font-bold tracking-wide uppercase">
+                        PAYMENT VOUCHER
+                    </h1>
+                    <p className="text-sm text-muted-foreground">
+                        Official Transaction Record
+                    </p>
+                </div>
+
+                <div className="mt-4 flex justify-between text-sm">
+                    {/* Left Side - Company Info */}
+                    <div>
+                        <p className="font-semibold">Your Company Name</p>
+                        <p>123 Business Street</p>
+                        <p>City, State, ZIP</p>
+                        <p>Phone: (123) 456-7890</p>
+                    </div>
+
+                    {/* Right Side - Voucher Info */}
+                    <div className="text-right">
+                        <p>
+                            <span className="font-semibold">Voucher No:</span>{' '}
+                            {voucher.voucher_no}
+                        </p>
+                        <p>
+                            <span className="font-semibold">Date:</span>{' '}
+                            {formatDate(voucher.voucher_date)}
+                        </p>
+                        <p>
+                            <span className="font-semibold">Reference:</span>{' '}
+                            {voucher.reference || '-'}
+                        </p>
+                    </div>
+                </div>
+
+                <hr className="my-4 border-t border-border" />
+            </div>
+
             {/* Voucher Details & Lines */}
-            <div className="print-area mt-4 space-y-4 rounded-md border border-border bg-card p-4 sm:p-6">
+            <div className="print-area mt-4 space-y-4 rounded-md bg-card p-4 sm:p-6">
                 {/* Voucher Info */}
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-5">
                     <div>
