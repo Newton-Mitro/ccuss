@@ -2,6 +2,7 @@
 
 namespace App\Accounting\Models;
 
+use App\Audit\Traits\Auditable;
 use Database\Factories\FiscalPeriodFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FiscalPeriod extends Model
 {
-    use HasFactory;
+    use HasFactory, Auditable;
     protected $fillable = [
         'fiscal_year_id',
         'period_name',

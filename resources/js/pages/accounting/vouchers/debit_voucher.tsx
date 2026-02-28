@@ -298,10 +298,6 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                                             value: 'CREDIT_NOTE',
                                             label: 'Credit Note',
                                         },
-                                        {
-                                            value: 'PETTY_CASH',
-                                            label: 'Petty Cash',
-                                        },
                                         { value: 'CONTRA', label: 'Contra' },
                                     ]}
                                     onChange={(e) =>

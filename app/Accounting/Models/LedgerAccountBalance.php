@@ -2,6 +2,7 @@
 
 namespace App\Accounting\Models;
 
+use App\Audit\Traits\Auditable;
 use Database\Factories\LedgerAccountBalanceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LedgerAccountBalance extends Model
 {
-    use HasFactory;
+    use HasFactory, Auditable;
     protected $fillable = [
         'ledger_account_id',
         'fiscal_period_id',

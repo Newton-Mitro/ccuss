@@ -2,6 +2,7 @@
 
 namespace App\Accounting\Models;
 
+use App\Audit\Traits\Auditable;
 use Database\Factories\VoucherLineFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class VoucherLine extends Model
 {
-    use HasFactory;
+    use HasFactory, Auditable;
 
     protected $fillable = [
         'voucher_id',

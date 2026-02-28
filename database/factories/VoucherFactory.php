@@ -13,15 +13,16 @@ class VoucherFactory extends Factory
     public function definition()
     {
         $types = [
-            'CREDIT_OR_RECEIPT',
-            'DEBIT_OR_PAYMENT',
-            'JOURNAL_OR_NON_CASH',
-            'PURCHASE',
-            'SALE',
-            'DEBIT_NOTE',
-            'CREDIT_NOTE',
-            'PETTY_CASH',
-            'CONTRA',
+            'OPENING_BALANCE',       // Initial balance of accounts
+            'CLOSING_BALANCE',       // Closing balance (optional)
+            'CREDIT_OR_RECEIPT',     // Cash/bank inflow
+            'DEBIT_OR_PAYMENT',      // Cash/bank outflow
+            'JOURNAL_OR_NON_CASH',   // Non-cash adjustments / transfers
+            'PURCHASE',              // Purchase invoice
+            'SALE',                  // Sales invoice
+            'DEBIT_NOTE',            // Adjustment reducing payable
+            'CREDIT_NOTE',           // Adjustment reducing receivable
+            'CONTRA',                // Bank/Cash transfer within accounts
         ];
 
         $statuses = ['DRAFT', 'APPROVED', 'POSTED', 'CANCELLED'];

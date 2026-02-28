@@ -7,11 +7,13 @@ import { Customer } from '../../../types/customer';
 interface CustomerSearchInputProps {
     onSelect: (customer: Customer) => void;
     label?: string;
+    placeholder?: string; // <-- new prop
 }
 
 export const CustomerSearchInput: React.FC<CustomerSearchInputProps> = ({
     onSelect,
-    label = 'Search Customer',
+    label,
+    placeholder = 'Search customer...', // default placeholder
 }) => {
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [showDropdown, setShowDropdown] = useState(false);
@@ -42,11 +44,6 @@ export const CustomerSearchInput: React.FC<CustomerSearchInputProps> = ({
         }
     };
 
-    /**
-     * -----------------------
-     * ENTER KEY HANDLER
-     * -----------------------
-     */
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -54,11 +51,6 @@ export const CustomerSearchInput: React.FC<CustomerSearchInputProps> = ({
         }
     };
 
-    /**
-     * -----------------------
-     * OUTSIDE CLICK
-     * -----------------------
-     */
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (
@@ -76,33 +68,33 @@ export const CustomerSearchInput: React.FC<CustomerSearchInputProps> = ({
 
     return (
         <div className="relative w-full" ref={dropdownRef}>
-            {/* INPUT + SEARCH BUTTON */}
+            {label && <Label className="text-xs">{label}</Label>}
+
             <div className="relative">
-                <Label className="text-xs">{label}</Label>
                 <input
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder={label}
+                    placeholder={placeholder} // <-- set placeholder
                     className="h-8 w-full rounded-md border border-border bg-background px-3 pr-10 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
                 />
 
                 <button
                     type="button"
                     onClick={searchCustomers}
-                    className="absolute top-8/11 right-1 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-primary"
+                    className="absolute top-1/2 right-2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-primary"
                     title="Search"
                 >
                     {loading ? (
                         <span className="animate-spin text-xs">⏳</span>
                     ) : (
-                        <Search size={14} />
+                        <Search size={16} />
                     )}
                 </button>
             </div>
 
-            {/* RESULTS */}
+            {/* Dropdown Results */}
             {showDropdown && customers.length > 0 && (
                 <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-border bg-background shadow-lg">
                     {customers.map((customer) => (
@@ -115,7 +107,6 @@ export const CustomerSearchInput: React.FC<CustomerSearchInputProps> = ({
                                 setShowDropdown(false);
                             }}
                         >
-                            {/* Avatar */}
                             <div className="h-6 w-6 shrink-0 overflow-hidden rounded-full border bg-muted">
                                 {customer.photo?.url ? (
                                     <img
@@ -129,15 +120,11 @@ export const CustomerSearchInput: React.FC<CustomerSearchInputProps> = ({
                                     </div>
                                 )}
                             </div>
-
-                            {/* Name */}
                             <span className="truncate font-medium">
                                 {customer.name.trim()}
                             </span>
-
-                            {/* Customer No */}
                             {customer.customer_no && (
-                                <span className="text-muted-foreground">
+                                <span className="truncate text-muted-foreground">
                                     | {customer.customer_no} | {customer.type} |{' '}
                                     {customer.status}
                                 </span>
@@ -147,7 +134,7 @@ export const CustomerSearchInput: React.FC<CustomerSearchInputProps> = ({
                 </ul>
             )}
 
-            {/* EMPTY STATE */}
+            {/* Empty State */}
             {showDropdown && !loading && query && customers.length === 0 && (
                 <div className="absolute z-10 mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-gray-500">
                     No customers found.

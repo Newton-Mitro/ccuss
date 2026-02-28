@@ -1,5 +1,6 @@
 <?php
 
+use App\Audit\Middleware\AuditBatchMiddleware;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\PermissionMiddleware;
@@ -24,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
+            AuditBatchMiddleware::class,
         ]);
 
         // 🧩 Register custom route middleware aliases

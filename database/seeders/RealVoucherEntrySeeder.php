@@ -128,7 +128,7 @@ class RealVoucherEntrySeeder extends Seeder
 
             $voucher = Voucher::create([
                 'voucher_date' => now(),
-                'voucher_type' => 'PETTY_CASH',
+                'voucher_type' => 'DEBIT_OR_PAYMENT',
                 'voucher_no' => 'PC-4001',
                 'narration' => 'Tea, snacks and miscellaneous expenses',
                 'status' => Voucher::STATUS_POSTED,

@@ -140,6 +140,7 @@ class VoucherController extends Controller
                 'fiscal_period_id' => $data['fiscal_period_id'],
                 'branch_id' => $data['branch_id'] ?? null,
                 'narration' => $data['narration'] ?? null,
+                'reference' => $data['reference'] ?? null,
                 'status' => $data['status'],
 
                 // audit
@@ -249,6 +250,7 @@ class VoucherController extends Controller
                 'branch_id' => $data['branch_id'] ?? null,
                 'status' => $data['status'],
                 'narration' => $data['narration'] ?? null,
+                'reference' => $data['reference'] ?? null,
             ]);
 
             // lifecycle handling
@@ -320,6 +322,8 @@ class VoucherController extends Controller
     private function generateVoucherNo(string $type, int $fiscalYearId): string
     {
         $map = [
+            'OPENING_BALANCE' => 'OB',
+            'CLOSING_BALANCE' => 'CB',
             'CREDIT_OR_RECEIPT' => 'CR',
             'DEBIT_OR_PAYMENT' => 'DV',
             'JOURNAL_OR_NON_CASH' => 'JV',
@@ -327,7 +331,6 @@ class VoucherController extends Controller
             'SALE' => 'SV',
             'DEBIT_NOTE' => 'DN',
             'CREDIT_NOTE' => 'CN',
-            'PETTY_CASH' => 'PC',
             'CONTRA' => 'CV',
         ];
 

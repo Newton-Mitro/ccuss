@@ -2,6 +2,7 @@
 
 namespace App\CostomerMgmt\Models;
 
+use App\Audit\Traits\Auditable;
 use Database\Factories\CustomerSignatureFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 
 class CustomerSignature extends Model
 {
-    use HasFactory;
+    use HasFactory, Auditable;
 
     protected $fillable = [
         'customer_id',

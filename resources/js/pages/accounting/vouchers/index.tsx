@@ -142,11 +142,6 @@ export default function Index() {
                                 color: 'bg-teal-600',
                             },
                             {
-                                type: 'PETTY_CASH',
-                                label: 'Petty Cash',
-                                color: 'bg-orange-600',
-                            },
-                            {
                                 type: 'CONTRA',
                                 label: 'Contra',
                                 color: 'bg-gray-600',

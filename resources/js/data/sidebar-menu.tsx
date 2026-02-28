@@ -379,10 +379,10 @@ export const sidebarMenu: SidebarItem[] = [
         icon: <i className="fa-solid fa-cash-register" />,
         children: [
             {
-                name: 'Daily Collections',
+                name: 'Daily Collection',
                 icon: <i className="fa-solid fa-hand-holding-dollar" />,
-                path: '/daily-collections',
-                match_path: 'daily-collections',
+                path: '/daily-collection',
+                match_path: 'daily-collection',
             },
             {
                 name: 'Daily Payments',
@@ -779,26 +779,14 @@ export const sidebarMenu: SidebarItem[] = [
         ],
     },
     {
-        name: 'Audit Trails',
+        name: 'Audits',
         icon: <i className="fa-solid fa-clipboard-list" />,
         children: [
             {
                 name: 'Audit Logs',
                 icon: <i className="fa-solid fa-file-alt" />,
-                path: '/audit-logs',
-                match_path: 'audit-logs',
-            },
-            {
-                name: 'Activity Logs',
-                icon: <i className="fa-solid fa-list-check" />,
-                path: '/activity-logs',
-                match_path: 'activity-logs',
-            },
-            {
-                name: 'Visit Logs',
-                icon: <i className="fa-solid fa-map-marker-alt" />,
-                path: '/visit-logs',
-                match_path: 'visit-logs',
+                path: '/audits',
+                match_path: 'audits',
             },
         ],
     },

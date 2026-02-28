@@ -80,22 +80,22 @@ return new class extends Migration {
                 ->comment('Posting timestamp');
 
             $table->enum('voucher_type', [
-                'OPENING_BALANCE',
-                'CREDIT_OR_RECEIPT',
-                'DEBIT_OR_PAYMENT',
-                'JOURNAL_OR_NON_CASH',
-                'PURCHASE',
-                'SALE',
-                'DEBIT_NOTE',
-                'CREDIT_NOTE',
-                'PETTY_CASH',
-                'CONTRA',
+                'OPENING_BALANCE',       // Initial balance of accounts
+                'CLOSING_BALANCE',       // Closing balance (optional)
+                'CREDIT_OR_RECEIPT',     // Cash/bank inflow
+                'DEBIT_OR_PAYMENT',      // Cash/bank outflow
+                'JOURNAL_OR_NON_CASH',   // Non-cash adjustments / transfers
+                'PURCHASE',              // Purchase invoice
+                'SALE',                  // Sales invoice
+                'DEBIT_NOTE',            // Adjustment reducing payable
+                'CREDIT_NOTE',           // Adjustment reducing receivable
+                'CONTRA',                // Bank/Cash transfer within accounts
             ]);
 
             $table->string('voucher_no', 50);
 
             // ✅ Reference field
-            $table->string('reference', 100)
+            $table->string('reference', 150)
                 ->nullable()
                 ->comment('External reference number');
 

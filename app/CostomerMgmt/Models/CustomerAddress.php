@@ -2,6 +2,7 @@
 
 namespace App\CostomerMgmt\Models;
 
+use App\Audit\Traits\Auditable;
 use App\UserRolePermissions\Models\User;
 use Database\Factories\CustomerAddressFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CustomerAddress extends Model
 {
-    use HasFactory;
+    use HasFactory, Auditable;
 
     protected $fillable = [
         'customer_id',

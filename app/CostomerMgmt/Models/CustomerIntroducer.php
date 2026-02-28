@@ -2,6 +2,7 @@
 
 namespace App\CostomerMgmt\Models;
 
+use App\Audit\Traits\Auditable;
 use App\UserRolePermissions\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CustomerIntroducer extends Model
 {
-    use HasFactory;
+    use HasFactory, Auditable;
 
     protected $fillable = [
         'introduced_customer_id',
