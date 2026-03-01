@@ -74,7 +74,7 @@ class CustomerAddressController extends Controller
     public function show(CustomerAddress $address): Response
     {
         // Load the related customer info
-        $address->load('customer');
+        $address->load(['customer', 'customer.photo']);
 
         return Inertia::render('customer-mgmt/addresses/view_address_page', [
             'address' => $address,

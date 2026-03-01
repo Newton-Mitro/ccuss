@@ -112,7 +112,9 @@ class CustomerIntroducerController extends Controller
     {
         $customerIntroducer->load([
             'introducedCustomer',
+            'introducedCustomer.photo',
             'introducerCustomer',
+            'introducerCustomer.photo',
             'verifiedBy',
         ]);
 

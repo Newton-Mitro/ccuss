@@ -25,6 +25,8 @@ export default function ViewAddress({ address }: Props) {
         },
     ];
 
+    console.log(address);
+
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Address #${address.id}`} />

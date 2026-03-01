@@ -3,7 +3,6 @@
 namespace App\Audit\Traits;
 
 use App\Audit\Models\Audit;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 trait Auditable

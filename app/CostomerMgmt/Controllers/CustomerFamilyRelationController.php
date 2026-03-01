@@ -78,7 +78,7 @@ class CustomerFamilyRelationController extends Controller
 
     public function show(CustomerFamilyRelation $familyRelation): Response
     {
-        $familyRelation->load(['customer', 'relative']);
+        $familyRelation->load(['customer', 'relative', 'customer.photo', 'relative.photo']);
 
         return Inertia::render('customer-mgmt/family-relations/view_family_relation', [
             'familyRelation' => $familyRelation,

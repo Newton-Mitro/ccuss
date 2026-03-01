@@ -10,7 +10,7 @@ import {
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-import { CustomerIntroducer } from '../../../types/introduced_customer';
+import { CustomerIntroducer } from '../../../types/customer';
 
 interface Props {
     introducer: CustomerIntroducer;
@@ -24,6 +24,8 @@ export default function ViewIntroducer({ introducer }: Props) {
             href: `/introducers/${introducer.id}`,
         },
     ];
+
+    console.log(introducer);
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
