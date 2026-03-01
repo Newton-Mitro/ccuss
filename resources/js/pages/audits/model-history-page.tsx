@@ -4,25 +4,12 @@ import HeadingSmall from '../../components/heading-small';
 import CustomAuthLayout from '../../layouts/custom-auth-layout';
 import { formatDateTime } from '../../lib/date_util';
 import { BreadcrumbItem } from '../../types';
-
-type AuditChange = {
-    model: string;
-    event: 'CREATED' | 'UPDATED' | 'DELETED';
-    old: Record<string, any> | null;
-    new: Record<string, any> | null;
-};
-
-type Batch = {
-    batch_id: string;
-    event_at: string;
-    user?: { id: number; name: string };
-    changes: AuditChange[];
-};
+import { AuditBatch } from '../../types/audit_models';
 
 interface ModelHistoryProps {
     auditableType: string;
     auditableId: number;
-    batches: Batch[];
+    batches: AuditBatch[];
 }
 
 export default function ModelHistory({
@@ -59,7 +46,7 @@ export default function ModelHistory({
                                 <div className="mb-2 flex items-center justify-between">
                                     <div className="text-sm">
                                         <div className="font-medium">
-                                            {batch.user?.name ?? 'System'}
+                                            {batch.creator?.name ?? '-'}
                                         </div>
                                         <div className="text-xs text-muted-foreground">
                                             {formatDateTime(batch.event_at)}

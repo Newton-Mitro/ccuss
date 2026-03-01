@@ -3,21 +3,10 @@ import HeadingSmall from '../../components/heading-small';
 import CustomAuthLayout from '../../layouts/custom-auth-layout';
 import { formatDateTime } from '../../lib/date_util';
 import { BreadcrumbItem } from '../../types';
-
-type Change = {
-    model: string;
-    event: 'CREATED' | 'UPDATED' | 'DELETED';
-    old: Record<string, any> | null;
-    new: Record<string, any> | null;
-};
+import { AuditBatch } from '../../types/audit_models';
 
 interface BatchPageProps {
-    batch: {
-        batch_id: string;
-        event_at: string;
-        user?: { id: number; name: string };
-        changes: Change[];
-    };
+    batch: AuditBatch;
 }
 
 export default function Batch({ batch }: BatchPageProps) {
@@ -35,7 +24,7 @@ export default function Batch({ batch }: BatchPageProps) {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <HeadingSmall
                         title={`Audit Batch ${batch.batch_id}`}
-                        description={`Performed by ${batch.user?.name ?? 'System'} · ${formatDateTime(batch.event_at)}`}
+                        description={`Performed by ${batch.creator?.name ?? '-'} · ${formatDateTime(batch.event_at)}`}
                     />
                 </div>
 

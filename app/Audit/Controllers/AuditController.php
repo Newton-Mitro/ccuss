@@ -17,7 +17,7 @@ class AuditController extends Controller
         $perPage = $request->input('per_page', 10);
 
         $audits = Audit::query()
-            ->with('user')
+            ->with('creator')
             ->when($request->event, fn($q) => $q->where('event', $request->event))
             ->when($request->user_id, fn($q) => $q->where('user_id', $request->user_id))
             ->select('audits.*')
@@ -50,7 +50,7 @@ class AuditController extends Controller
             ->join('audits as b', 'b.batch_id', '=', 'a.batch_id')
             ->where('b.auditable_type', $validated['type'])
             ->where('b.auditable_id', $validated['id'])
-            ->with('user')
+            ->with('creator')
             ->orderBy('a.created_at')
             ->get()
             ->groupBy('batch_id')
@@ -70,7 +70,7 @@ class AuditController extends Controller
     public function batch(string $batchId)
     {
         $audits = Audit::where('batch_id', $batchId)
-            ->with('user')
+            ->with('creator')
             ->orderBy('created_at')
             ->get();
 

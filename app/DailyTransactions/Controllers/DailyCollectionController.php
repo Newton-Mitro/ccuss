@@ -7,6 +7,7 @@ use App\Accounting\Models\FiscalYear;
 use App\Accounting\Models\LedgerAccount;
 use App\Branch\Models\Branch;
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -45,7 +46,12 @@ class DailyCollectionController extends Controller
             'cashSubledgerId' => $cashSubledgerId,
             'cashSubledgers' => $cashSubledgers,
             'activeFiscalYearId' => optional(FiscalYear::where('is_active', true)->first())->id,
-            'activeFiscalPeriodId' => optional(FiscalPeriod::where('is_open', true)->first())->id,
+            'activeFiscalPeriodId' => optional(
+                FiscalPeriod::where('is_open', true)
+                    ->whereMonth('start_date', Carbon::now()->month)
+                    ->whereYear('start_date', Carbon::now()->year)
+                    ->first()
+            )->id,
             'userBranchId' => auth()->user()->branch_id,
             'backUrl' => route('vouchers.index'),
             'filters' => $request->only(['event', 'user_id', 'page', 'per_page']),

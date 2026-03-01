@@ -207,7 +207,7 @@ export default function CustomAuthLayout({
 
             {/* Main Content */}
             <div className="flex flex-1 flex-col transition-colors duration-300">
-                <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6 text-card-foreground print:hidden">
+                <header className="flex h-16 items-center justify-between border-b border-border bg-sidebar px-6 text-card-foreground print:hidden">
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => setSidebarOpen((prev) => !prev)}

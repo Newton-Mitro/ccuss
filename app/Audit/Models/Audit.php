@@ -31,7 +31,7 @@ class Audit extends Model
         return $this->morphTo();
     }
 
-    public function user()
+    public function creator()
     {
         return $this->belongsTo(User::class);
     }

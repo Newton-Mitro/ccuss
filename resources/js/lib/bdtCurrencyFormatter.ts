@@ -24,5 +24,5 @@ export function formatBDTCurrency(
             ? otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ','
             : '') + lastThree;
 
-    return `${showSymbol ? '৳' : ''}${formattedInteger}${decimals > 0 ? '.' + decimalPart : ''}`;
+    return `${showSymbol ? '৳ ' : ''}${formattedInteger}${decimals > 0 ? '.' + decimalPart : ''}`;
 }

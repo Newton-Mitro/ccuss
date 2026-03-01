@@ -9,11 +9,13 @@ import CustomerViewModal from './customer_view_modal';
 interface CustomerSearchBoxProps {
     onSelect: (customer: Customer) => void;
     label?: string;
+    placeholder?: string;
 }
 
 export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
     onSelect,
-    label = 'Search Customer',
+    label,
+    placeholder = 'Search Customer',
 }) => {
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [customer, setCustomer] = useState<Customer | null>(null);
@@ -23,7 +25,6 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
     const [open, setOpen] = useState(false);
 
     const dropdownRef = useRef<HTMLDivElement | null>(null);
-
     const { data, setData } = useForm<Customer | null>(null);
 
     const onSelectCustomer = async (customer: Customer) => {
@@ -31,7 +32,6 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
         try {
             setLoading(true);
             const res = await axios.get(`/api/find-customers/${customer.id}`);
-            console.log(res.data);
             onSelect(res.data || null);
             setCustomer(res.data || null);
         } catch (err) {
@@ -41,24 +41,18 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
         }
     };
 
-    /**
-     * -----------------------
-     * API SEARCH
-     * -----------------------
-     */
+    // ----------------------- API SEARCH
     const searchCustomers = async () => {
         if (!query?.trim()) {
             setCustomers([]);
             setShowDropdown(false);
             return;
         }
-
         try {
             setLoading(true);
             const res = await axios.get('/api/search-customers', {
                 params: { search: query },
             });
-
             setCustomers(res.data || []);
             setShowDropdown(true);
         } catch (err) {
@@ -68,11 +62,7 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
         }
     };
 
-    /**
-     * -----------------------
-     * ENTER KEY HANDLER
-     * -----------------------
-     */
+    // ----------------------- ENTER KEY HANDLER
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -80,11 +70,7 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
         }
     };
 
-    /**
-     * -----------------------
-     * OUTSIDE CLICK
-     * -----------------------
-     */
+    // ----------------------- OUTSIDE CLICK
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (
@@ -94,7 +80,6 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
                 setShowDropdown(false);
             }
         };
-
         document.addEventListener('mousedown', handleClickOutside);
         return () =>
             document.removeEventListener('mousedown', handleClickOutside);
@@ -106,21 +91,20 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
             ref={dropdownRef}
         >
             {/* INPUT + SEARCH BUTTON */}
-            <div className="relative">
-                <Label className="text-xs">{label}</Label>
+            <div className="relative w-full">
+                {label && <Label>{label}</Label>}
                 <input
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder={label}
+                    placeholder={placeholder}
                     className="h-8 w-full rounded-md border border-border bg-background px-3 pr-10 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
                 />
-
                 <button
                     type="button"
                     onClick={searchCustomers}
-                    className="absolute top-8/11 right-1 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-primary"
+                    className="absolute inset-y-0 right-1 flex items-center rounded p-1 text-muted-foreground hover:bg-muted hover:text-primary"
                     title="Search"
                 >
                     {loading ? (
@@ -130,6 +114,7 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
                     )}
                 </button>
             </div>
+
             {/* RESULTS */}
             {showDropdown && customers.length > 0 && (
                 <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-border bg-background shadow-lg">
@@ -174,14 +159,19 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
                     ))}
                 </ul>
             )}
+
             {/* EMPTY STATE */}
             {showDropdown && !loading && query && customers.length === 0 && (
                 <div className="absolute z-10 mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-gray-500">
                     No customers found.
                 </div>
             )}
-            {data.id && (
+
+            {/* CUSTOMER DETAILS / SKELETON */}
+            {data?.id ? (
+                // Loaded customer
                 <div className="mt-3 flex flex-col gap-4 rounded-md border bg-background/60 p-3 md:flex-row">
+                    {/* Avatar */}
                     <div className="h-20 w-20 overflow-hidden rounded-full border bg-muted">
                         {data.photo?.url ? (
                             <img
@@ -196,6 +186,7 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
                         )}
                     </div>
 
+                    {/* Info */}
                     <div className="flex-1 space-y-2">
                         <div>
                             <button
@@ -227,7 +218,34 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
                         </div>
                     </div>
                 </div>
+            ) : (
+                // Skeleton with exact same height
+                <div className="mt-3 flex flex-col gap-4 rounded-md border bg-background/60 p-3 md:flex-row">
+                    {/* Avatar */}
+                    <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-full bg-muted" />
+
+                    {/* Right side */}
+                    <div className="flex flex-1 flex-col justify-between space-y-3">
+                        {/* Name & type row */}
+                        <div className="space-y-1">
+                            <div className="h-4 w-3/5 rounded bg-muted" />{' '}
+                            {/* name */}
+                            <div className="h-3 w-2/5 rounded bg-muted" />{' '}
+                            {/* type/status */}
+                        </div>
+
+                        {/* Grid info row */}
+                        <div className="grid grid-cols-1 gap-3 text-xs sm:grid-cols-3">
+                            <div className="h-8 w-full rounded bg-muted" />
+                            <div className="h-8 w-full rounded bg-muted" />
+                            <div className="h-8 w-full rounded bg-muted" />
+                            <div className="h-8 w-full rounded bg-muted" />
+                            <div className="h-8 w-full rounded bg-muted" />
+                        </div>
+                    </div>
+                </div>
             )}
+
             <CustomerViewModal
                 open={open}
                 onOpenChange={setOpen}

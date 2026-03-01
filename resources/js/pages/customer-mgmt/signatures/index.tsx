@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import ReactPanZoom from 'react-image-pan-zoom-rotate';
 import Swal from 'sweetalert2';
 
 import HeadingSmall from '../../../components/heading-small';
@@ -71,7 +72,7 @@ export default function CustomerSignatureIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Customer Signatures" />
 
-            <div className="space-y-6 text-foreground">
+            <div className="w-full space-y-6 text-foreground">
                 {/* ================= Customer Search ================= */}
                 <CustomerSearchBox onSelect={handleCustomerSelect} />
 
@@ -112,19 +113,31 @@ export default function CustomerSignatureIndex() {
                                 No signature uploaded
                             </p>
                         ) : (
-                            <div className="relative mt-1 inline-block">
-                                <img
-                                    src={signature.url}
-                                    alt="Customer signature"
-                                    className="rounded border border-gray-300"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => handleDelete(signature.id)}
-                                    className="absolute -top-2 -right-2 rounded-full bg-red-600 p-3 text-white shadow hover:bg-red-700"
+                            <div className="">
+                                <div
+                                    style={{
+                                        height: 400,
+                                        position: 'relative',
+                                        overflow: 'hidden',
+                                    }}
+                                    className="w-full border border-border bg-muted/50 md:w-[100vh]"
                                 >
-                                    <Trash2 size={14} />
-                                </button>
+                                    <ReactPanZoom
+                                        image={signature.url}
+                                        alt="Image alt text"
+                                    />
+                                </div>
+                                <div className="flex justify-end">
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            handleDelete(signature.id)
+                                        }
+                                        className="flex items-center justify-center gap-2 bg-destructive px-4 py-2 text-white hover:cursor-pointer hover:bg-red-700"
+                                    >
+                                        <Trash2 size={14} /> Remove Signature
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>

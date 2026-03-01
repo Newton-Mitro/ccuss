@@ -11,6 +11,7 @@ use App\Accounting\Requests\StoreVoucherRequest;
 use App\Accounting\Requests\UpdateVoucherRequest;
 use App\Branch\Models\Branch;
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -96,7 +97,12 @@ class VoucherController extends Controller
             'cashSubledgerId' => $cashSubledgerId,
             'cashSubledgers' => $cashSubledgers,
             'activeFiscalYearId' => optional(FiscalYear::where('is_active', true)->first())->id,
-            'activeFiscalPeriodId' => optional(FiscalPeriod::where('is_open', true)->first())->id,
+            'activeFiscalPeriodId' => optional(
+                FiscalPeriod::where('is_open', true)
+                    ->whereMonth('start_date', Carbon::now()->month)
+                    ->whereYear('start_date', Carbon::now()->year)
+                    ->first()
+            )->id,
             'userBranchId' => auth()->user()->branch_id,
             'backUrl' => route('vouchers.index'),
         ]);

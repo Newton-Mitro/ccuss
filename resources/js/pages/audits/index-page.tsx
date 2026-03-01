@@ -12,16 +12,7 @@ import HeadingSmall from '../../components/heading-small';
 import CustomAuthLayout from '../../layouts/custom-auth-layout';
 import { formatDateTime } from '../../lib/date_util';
 import { BreadcrumbItem } from '../../types';
-
-type Audit = {
-    id: number;
-    event: 'CREATED' | 'UPDATED' | 'DELETED';
-    auditable_type: string;
-    auditable_id: number;
-    batch_id: string;
-    created_at: string;
-    user?: { id: number; name: string };
-};
+import { Audit } from '../../types/audit_models';
 
 interface AuditsPageProps {
     audits: {
@@ -102,12 +93,14 @@ export default function Index() {
                 </div>
 
                 {/* Desktop Table */}
-                <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border border-border md:h-[calc(100vh-300px)]">
+                <div className="hidden h-[calc(100vh-360px)] overflow-auto rounded-md border border-border md:block md:h-[calc(100vh-300px)]">
                     <table className="w-full min-w-[600px] border-collapse text-sm">
                         <thead className="sticky top-0 bg-muted">
                             <tr>
                                 {[
                                     'Time',
+                                    'IP Address',
+                                    'User Agent',
                                     'Event',
                                     'Model',
                                     'User',
@@ -133,6 +126,12 @@ export default function Index() {
                                             {formatDateTime(a.created_at)}
                                         </td>
                                         <td className="px-2 py-2 font-medium">
+                                            {a.ip_address}
+                                        </td>
+                                        <td className="px-2 py-2 font-medium">
+                                            {a.user_agent}
+                                        </td>
+                                        <td className="px-2 py-2 font-medium">
                                             {a.event}
                                         </td>
                                         <td className="px-2 py-2">
@@ -140,7 +139,7 @@ export default function Index() {
                                             #{a.auditable_id}
                                         </td>
                                         <td className="px-2 py-2">
-                                            {a.user?.name ?? 'System'}
+                                            {a.creator?.name ?? '-'}
                                         </td>
                                         <td className="px-2 py-2">
                                             <TooltipProvider>
@@ -216,7 +215,20 @@ export default function Index() {
                                         {formatDateTime(a.created_at)}
                                     </div>
                                 </div>
+
                                 <div className="text-sm">
+                                    <div>
+                                        <span className="font-semibold">
+                                            IP Address:
+                                        </span>{' '}
+                                        {a.ip_address ?? '-'}
+                                    </div>
+                                    <div>
+                                        <span className="font-semibold">
+                                            User Agent:
+                                        </span>{' '}
+                                        {a.user_agent ?? '-'}
+                                    </div>
                                     <div>
                                         <span className="font-semibold">
                                             Model:
@@ -228,7 +240,7 @@ export default function Index() {
                                         <span className="font-semibold">
                                             User:
                                         </span>{' '}
-                                        {a.user?.name ?? 'System'}
+                                        {a.creator?.name ?? '-'}
                                     </div>
                                 </div>
                                 <div className="mt-2 flex space-x-2">
