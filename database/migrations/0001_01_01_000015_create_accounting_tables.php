@@ -210,9 +210,9 @@ return new class extends Migration {
 
             $table->timestamps();
 
-            $table->check(
-                '(debit > 0 AND credit = 0) OR (credit > 0 AND debit = 0)'
-            );
+            // $table->check(
+            //     '(debit > 0 AND credit = 0) OR (credit > 0 AND debit = 0)'
+            // );
         });
 
 

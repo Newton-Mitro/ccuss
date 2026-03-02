@@ -19,7 +19,7 @@ import {
     Search,
     UserCircle,
 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { Breadcrumbs } from '../components/breadcrumbs';
 import { SidebarMenuItem } from '../components/sidebar-menu-item';
@@ -28,6 +28,8 @@ import { edit } from '../routes/profile';
 import { BreadcrumbItem, SharedData, SidebarItem } from '../types';
 
 const STORAGE_KEY = 'app_sidebar_open_menus_v1';
+const SIDEBAR_SCROLL_KEY = 'app_sidebar_scroll_v1';
+const SIDEBAR_OPEN_KEY = 'app_sidebar_open_state_v1';
 
 interface CustomAuthLayoutProps {
     children: React.ReactNode;
@@ -43,9 +45,12 @@ export default function CustomAuthLayout({
 
     const cleanup = useMobileNavigation();
 
+    /* ------------------------------------------------------------------
+     * Sidebar state
+     * ------------------------------------------------------------------ */
     const [sidebarOpen, setSidebarOpen] = useState<boolean>(() => {
         try {
-            const v = localStorage.getItem('app_sidebar_open_state_v1');
+            const v = localStorage.getItem(SIDEBAR_OPEN_KEY);
             return v ? JSON.parse(v) : true;
         } catch {
             return true;
@@ -55,54 +60,85 @@ export default function CustomAuthLayout({
     const [menuAction, setMenuAction] = useState<
         'expand-all' | 'collapse-all' | null
     >(null);
+
     const [searchTerm, setSearchTerm] = useState('');
 
+    /* ------------------------------------------------------------------
+     * Persist sidebar open/close
+     * ------------------------------------------------------------------ */
     useEffect(() => {
-        try {
-            localStorage.setItem(
-                'app_sidebar_open_state_v1',
-                JSON.stringify(sidebarOpen),
-            );
-        } catch {
-            console.warn('Failed to save sidebar open state');
-        }
+        localStorage.setItem(SIDEBAR_OPEN_KEY, JSON.stringify(sidebarOpen));
     }, [sidebarOpen]);
 
-    const applyMenuAction = (action: 'expand-all' | 'collapse-all') => {
-        try {
-            Object.keys(localStorage)
-                .filter((k) => k.startsWith(STORAGE_KEY))
-                .forEach((k) =>
-                    localStorage.setItem(
-                        k,
-                        JSON.stringify(action === 'expand-all'),
-                    ),
-                );
+    /* ------------------------------------------------------------------
+     * Sidebar scroll preservation
+     * ------------------------------------------------------------------ */
+    const sidebarScrollRef = useRef<HTMLDivElement | null>(null);
 
-            setMenuAction(action);
-            setTimeout(() => setMenuAction(null), 0);
-        } catch {
-            console.warn('Failed to save sidebar openMenus');
-        }
+    // Save scroll position
+    useEffect(() => {
+        const el = sidebarScrollRef.current;
+        if (!el) return;
+
+        const onScroll = () => {
+            localStorage.setItem(SIDEBAR_SCROLL_KEY, String(el.scrollTop));
+        };
+
+        el.addEventListener('scroll', onScroll);
+        return () => el.removeEventListener('scroll', onScroll);
+    }, []);
+
+    // Restore scroll position
+    useEffect(() => {
+        const el = sidebarScrollRef.current;
+        if (!el) return;
+
+        const saved = localStorage.getItem(SIDEBAR_SCROLL_KEY);
+        if (!saved) return;
+
+        requestAnimationFrame(() => {
+            el.scrollTop = Number(saved);
+        });
+    }, []);
+
+    /* ------------------------------------------------------------------
+     * Expand / Collapse all menus
+     * ------------------------------------------------------------------ */
+    const applyMenuAction = (action: 'expand-all' | 'collapse-all') => {
+        Object.keys(localStorage)
+            .filter((k) => k.startsWith(STORAGE_KEY))
+            .forEach((k) =>
+                localStorage.setItem(
+                    k,
+                    JSON.stringify(action === 'expand-all'),
+                ),
+            );
+
+        setMenuAction(action);
+        setTimeout(() => setMenuAction(null), 0);
     };
 
+    /* ------------------------------------------------------------------
+     * Logout
+     * ------------------------------------------------------------------ */
     const handleLogout = () => {
         cleanup();
         localStorage.removeItem(STORAGE_KEY);
         router.post(logout(), {}, { preserveScroll: false });
     };
 
-    /** Recursive filter for sidebar menu by search term */
+    /* ------------------------------------------------------------------
+     * Sidebar search filter
+     * ------------------------------------------------------------------ */
     const filteredMenu = useMemo(() => {
         if (!searchTerm.trim()) return sidebarMenu;
 
-        const filterRecursive = (items: SidebarItem[]): SidebarItem[] => {
-            return items
+        const filterRecursive = (items: SidebarItem[]): SidebarItem[] =>
+            items
                 .map((item) => {
-                    let children: SidebarItem[] | undefined;
-                    if (item.children) {
-                        children = filterRecursive(item.children);
-                    }
+                    const children = item.children
+                        ? filterRecursive(item.children)
+                        : undefined;
 
                     if (
                         item.name
@@ -116,11 +152,13 @@ export default function CustomAuthLayout({
                     return null;
                 })
                 .filter(Boolean) as SidebarItem[];
-        };
 
         return filterRecursive(sidebarMenu);
     }, [searchTerm]);
 
+    /* ------------------------------------------------------------------
+     * Render
+     * ------------------------------------------------------------------ */
     return (
         <div className="flex h-screen bg-background">
             {/* Sidebar */}
@@ -143,9 +181,12 @@ export default function CustomAuthLayout({
                     </span>
                 </div>
 
-                {/* Search + Expand/Collapse */}
+                {/* Search + controls */}
                 <div
-                    className={`my-3 flex items-center gap-2 px-2 ${sidebarOpen ? '' : 'hidden'}`}
+                    className={cn(
+                        'my-3 flex items-center gap-2 px-2',
+                        !sidebarOpen && 'hidden',
+                    )}
                 >
                     <div className="flex flex-1 items-center gap-1 rounded border px-2 py-1">
                         <Search size={16} />
@@ -160,20 +201,24 @@ export default function CustomAuthLayout({
                     <button
                         onClick={() => applyMenuAction('expand-all')}
                         className="rounded p-1 hover:bg-muted"
-                        title="Expand All"
+                        title="Expand all"
                     >
                         <ListPlus size={18} />
                     </button>
                     <button
                         onClick={() => applyMenuAction('collapse-all')}
                         className="rounded p-1 hover:bg-muted"
-                        title="Collapse All"
+                        title="Collapse all"
                     >
                         <ListCollapse size={18} />
                     </button>
                 </div>
 
-                <nav className="h-[calc(100%-8rem)] overflow-y-auto px-2 pb-4">
+                {/* Menu */}
+                <nav
+                    ref={sidebarScrollRef}
+                    className="h-[calc(100%-8rem)] overflow-y-auto px-2 pb-4"
+                >
                     <ul className="space-y-1">
                         {filteredMenu.map((item, index) => (
                             <SidebarMenuItem
@@ -202,40 +247,38 @@ export default function CustomAuthLayout({
                         )}
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <button className="flex items-center gap-2 rounded px-2 py-1">
-                                    <UserInfo user={auth?.user} showEmail />
-                                </button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-52">
-                                <DropdownMenuGroup>
-                                    <DropdownMenuItem asChild>
-                                        <Link
-                                            href={edit()}
-                                            as="button"
-                                            onClick={cleanup}
-                                            className="flex gap-2"
-                                        >
-                                            <UserCircle size={16} />
-                                            Profile
-                                        </Link>
-                                    </DropdownMenuItem>
-                                </DropdownMenuGroup>
-                                <DropdownMenuSeparator />
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <button className="flex items-center gap-2 rounded px-2 py-1">
+                                <UserInfo user={auth?.user} showEmail />
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-52">
+                            <DropdownMenuGroup>
                                 <DropdownMenuItem asChild>
-                                    <button
-                                        onClick={handleLogout}
-                                        className="flex w-full gap-2 text-destructive"
+                                    <Link
+                                        href={edit()}
+                                        preserveScroll
+                                        onClick={cleanup}
+                                        className="flex gap-2"
                                     >
-                                        <LogOut size={16} />
-                                        Log out
-                                    </button>
+                                        <UserCircle size={16} />
+                                        Profile
+                                    </Link>
                                 </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
+                            </DropdownMenuGroup>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem asChild>
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex w-full gap-2 text-destructive"
+                                >
+                                    <LogOut size={16} />
+                                    Log out
+                                </button>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </header>
 
                 <main className="flex-1 overflow-y-auto p-6">

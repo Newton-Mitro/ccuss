@@ -11,7 +11,14 @@ class FiscalYearSeeder extends Seeder
 {
     public function run(): void
     {
-        $start = Carbon::now()->startOfYear();
+        // Fiscal year starts in July
+        $start = Carbon::create(now()->year, 7, 1);
+
+        // If today is before July, roll back one year
+        if (now()->month < 7) {
+            $start->subYear();
+        }
+
         $end = (clone $start)->addYear()->subDay();
 
         $fy = FiscalYear::factory()
@@ -23,15 +30,17 @@ class FiscalYearSeeder extends Seeder
             ]);
 
         for ($i = 0; $i < 12; $i++) {
-            $start = Carbon::parse($fy->start_date)->addMonths($i);
+            $periodStart = (clone $start)->addMonths($i);
+
             FiscalPeriod::create([
                 'fiscal_year_id' => $fy->id,
-                'period_name' => strtoupper($start->format('M-Y')),
-                'start_date' => $start->startOfMonth(),
-                'end_date' => $start->endOfMonth(),
+                'period_name' => strtoupper($periodStart->format('M-Y')),
+                'start_date' => $periodStart->copy()->startOfMonth(),
+                'end_date' => $periodStart->copy()->endOfMonth(),
                 'is_open' => true,
             ]);
         }
-        $this->command->info('✅ Fiscal Year created');
+
+        $this->command->info('✅ Fiscal Year & Periods (JUL–JUN) created');
     }
 }
