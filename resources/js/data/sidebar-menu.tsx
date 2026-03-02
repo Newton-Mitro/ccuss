@@ -454,13 +454,13 @@ export const sidebarMenu: SidebarItem[] = [
                 children_expanded: false,
                 children: [
                     {
-                        name: 'Debit / Payment Voucher',
+                        name: 'Debit/Payment Voucher',
                         icon: <i className="fa-solid fa-chart-simple" />,
                         path: '/voucher-entry/debit-voucher',
                         match_path: 'debit-voucher',
                     },
                     {
-                        name: 'Credit / Receipt Voucher',
+                        name: 'Credit/Receipt Voucher',
                         icon: <i className="fa-solid fa-chart-simple" />,
                         path: '/voucher-entry/credit-voucher',
                         match_path: 'credit-voucher',

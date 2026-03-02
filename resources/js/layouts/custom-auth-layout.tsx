@@ -11,21 +11,28 @@ import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { cn } from '@/lib/utils';
 import { logout } from '@/routes';
 import { Link, router, usePage } from '@inertiajs/react';
-import { LogOut, Menu, UserCircle } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import {
+    ListCollapse,
+    ListPlus,
+    LogOut,
+    Menu,
+    Search,
+    UserCircle,
+} from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { Breadcrumbs } from '../components/breadcrumbs';
 import { SidebarMenuItem } from '../components/sidebar-menu-item';
 import { sidebarMenu } from '../data/sidebar-menu';
 import { edit } from '../routes/profile';
-import { BreadcrumbItem, SharedData } from '../types';
+import { BreadcrumbItem, SharedData, SidebarItem } from '../types';
+
+const STORAGE_KEY = 'app_sidebar_open_menus_v1';
 
 interface CustomAuthLayoutProps {
     children: React.ReactNode;
     breadcrumbs?: BreadcrumbItem[];
 }
-
-const STORAGE_KEY = 'app_sidebar_open_menus_v1';
 
 export default function CustomAuthLayout({
     children,
@@ -38,7 +45,6 @@ export default function CustomAuthLayout({
 
     const [sidebarOpen, setSidebarOpen] = useState<boolean>(() => {
         try {
-            if (typeof window === 'undefined') return true;
             const v = localStorage.getItem('app_sidebar_open_state_v1');
             return v ? JSON.parse(v) : true;
         } catch {
@@ -46,8 +52,12 @@ export default function CustomAuthLayout({
         }
     });
 
+    const [menuAction, setMenuAction] = useState<
+        'expand-all' | 'collapse-all' | null
+    >(null);
+    const [searchTerm, setSearchTerm] = useState('');
+
     useEffect(() => {
-        if (typeof window === 'undefined') return;
         try {
             localStorage.setItem(
                 'app_sidebar_open_state_v1',
@@ -58,62 +68,132 @@ export default function CustomAuthLayout({
         }
     }, [sidebarOpen]);
 
+    const applyMenuAction = (action: 'expand-all' | 'collapse-all') => {
+        try {
+            Object.keys(localStorage)
+                .filter((k) => k.startsWith(STORAGE_KEY))
+                .forEach((k) =>
+                    localStorage.setItem(
+                        k,
+                        JSON.stringify(action === 'expand-all'),
+                    ),
+                );
+
+            setMenuAction(action);
+            setTimeout(() => setMenuAction(null), 0);
+        } catch {
+            console.warn('Failed to save sidebar openMenus');
+        }
+    };
+
     const handleLogout = () => {
         cleanup();
-        try {
-            if (typeof window !== 'undefined') {
-                localStorage.removeItem(STORAGE_KEY);
-            }
-        } catch {
-            console.warn('Failed to remove sidebar openMenus');
-        }
+        localStorage.removeItem(STORAGE_KEY);
         router.post(logout(), {}, { preserveScroll: false });
     };
 
+    /** Recursive filter for sidebar menu by search term */
+    const filteredMenu = useMemo(() => {
+        if (!searchTerm.trim()) return sidebarMenu;
+
+        const filterRecursive = (items: SidebarItem[]): SidebarItem[] => {
+            return items
+                .map((item) => {
+                    let children: SidebarItem[] | undefined;
+                    if (item.children) {
+                        children = filterRecursive(item.children);
+                    }
+
+                    if (
+                        item.name
+                            .toLowerCase()
+                            .includes(searchTerm.toLowerCase()) ||
+                        (children && children.length)
+                    ) {
+                        return { ...item, children };
+                    }
+
+                    return null;
+                })
+                .filter(Boolean) as SidebarItem[];
+        };
+
+        return filterRecursive(sidebarMenu);
+    }, [searchTerm]);
+
     return (
-        <div className="flex h-screen bg-background text-foreground transition-colors duration-300">
+        <div className="flex h-screen bg-background">
             {/* Sidebar */}
             <aside
                 className={cn(
                     'flex-shrink-0 border-r transition-all duration-300 print:hidden',
                     sidebarOpen ? 'w-72' : 'w-16',
-                    'border-border bg-sidebar text-sidebar-foreground',
                 )}
             >
-                <div className="flex h-16 items-center gap-2 border-b border-border px-4">
-                    <img src="/logo.png" alt="Logo" className="h-8 w-8" />
-                    <div
+                {/* Logo */}
+                <div className="flex h-16 items-center gap-2 border-b px-4">
+                    <img src="/logo.png" className="h-8 w-8" />
+                    <span
                         className={cn(
-                            'font-semibold text-primary transition-opacity duration-300',
-                            sidebarOpen
-                                ? 'opacity-100'
-                                : 'w-0 overflow-hidden opacity-0',
+                            'font-semibold transition-opacity',
+                            sidebarOpen ? 'opacity-100' : 'w-0 opacity-0',
                         )}
                     >
                         CCUSS
-                    </div>
+                    </span>
                 </div>
 
-                <nav className="h-[calc(100%-4rem)] overflow-y-auto px-2 py-4 text-sm">
+                {/* Search + Expand/Collapse */}
+                <div
+                    className={`my-3 flex items-center gap-2 px-2 ${sidebarOpen ? '' : 'hidden'}`}
+                >
+                    <div className="flex flex-1 items-center gap-1 rounded border px-2 py-1">
+                        <Search size={16} />
+                        <input
+                            type="text"
+                            placeholder="Search menu..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full bg-transparent text-sm outline-none"
+                        />
+                    </div>
+                    <button
+                        onClick={() => applyMenuAction('expand-all')}
+                        className="rounded p-1 hover:bg-muted"
+                        title="Expand All"
+                    >
+                        <ListPlus size={18} />
+                    </button>
+                    <button
+                        onClick={() => applyMenuAction('collapse-all')}
+                        className="rounded p-1 hover:bg-muted"
+                        title="Collapse All"
+                    >
+                        <ListCollapse size={18} />
+                    </button>
+                </div>
+
+                <nav className="h-[calc(100%-8rem)] overflow-y-auto px-2 pb-4">
                     <ul className="space-y-1">
-                        {sidebarMenu.map((item, index) => (
+                        {filteredMenu.map((item, index) => (
                             <SidebarMenuItem
                                 key={`${item.name}-${index}`}
                                 item={item}
                                 sidebarOpen={sidebarOpen}
+                                menuAction={menuAction}
                             />
                         ))}
                     </ul>
                 </nav>
             </aside>
 
-            {/* Main Content */}
-            <div className="flex flex-1 flex-col transition-colors duration-300">
-                <header className="flex h-16 items-center justify-between border-b border-border bg-sidebar px-6 text-card-foreground print:hidden">
+            {/* Main */}
+            <div className="flex flex-1 flex-col">
+                <header className="flex h-16 items-center justify-between border-b px-6 print:hidden">
                     <div className="flex items-center gap-3">
                         <button
-                            onClick={() => setSidebarOpen((prev) => !prev)}
-                            className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                            onClick={() => setSidebarOpen((v) => !v)}
+                            className="rounded p-1 hover:bg-muted"
                         >
                             <Menu size={18} />
                         </button>
@@ -123,29 +203,20 @@ export default function CustomAuthLayout({
                     </div>
 
                     <div className="flex items-center gap-3">
-                        {/* User Dropdown */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <button className="flex items-center gap-2 rounded px-2 py-1 focus:outline-none">
-                                    <UserInfo
-                                        user={auth?.user}
-                                        showEmail={true}
-                                    />
+                                <button className="flex items-center gap-2 rounded px-2 py-1">
+                                    <UserInfo user={auth?.user} showEmail />
                                 </button>
                             </DropdownMenuTrigger>
-
-                            <DropdownMenuContent
-                                align="end"
-                                className="w-52 bg-card text-card-foreground"
-                            >
+                            <DropdownMenuContent align="end" className="w-52">
                                 <DropdownMenuGroup>
                                     <DropdownMenuItem asChild>
                                         <Link
                                             href={edit()}
                                             as="button"
-                                            prefetch
                                             onClick={cleanup}
-                                            className="flex w-full items-center gap-2"
+                                            className="flex gap-2"
                                         >
                                             <UserCircle size={16} />
                                             Profile
@@ -156,8 +227,7 @@ export default function CustomAuthLayout({
                                 <DropdownMenuItem asChild>
                                     <button
                                         onClick={handleLogout}
-                                        data-test="logout-button"
-                                        className="flex w-full items-center gap-2 text-destructive hover:text-destructive-foreground"
+                                        className="flex w-full gap-2 text-destructive"
                                     >
                                         <LogOut size={16} />
                                         Log out
@@ -168,35 +238,9 @@ export default function CustomAuthLayout({
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-y-auto bg-background p-2 transition-colors md:p-6">
+                <main className="flex-1 overflow-y-auto p-6">
                     {children}
-                    <Toaster
-                        position="top-center"
-                        reverseOrder={false}
-                        gutter={8}
-                        containerClassName=""
-                        containerStyle={{}}
-                        toasterId="default"
-                        toastOptions={{
-                            // Define default options
-                            className: '',
-                            duration: 5000,
-                            removeDelay: 1000,
-                            style: {
-                                background: '#363636',
-                                color: '#fff',
-                            },
-
-                            // Default options for specific types
-                            success: {
-                                duration: 3000,
-                                iconTheme: {
-                                    primary: 'green',
-                                    secondary: 'black',
-                                },
-                            },
-                        }}
-                    />
+                    <Toaster position="top-center" />
                 </main>
             </div>
         </div>

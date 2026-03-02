@@ -19,7 +19,7 @@ export default function Batch({ batch }: BatchPageProps) {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Audit Batch ${batch.batch_id}`} />
 
-            <div className="space-y-6 p-4 text-foreground">
+            <div className="space-y-6 text-foreground">
                 {/* Header */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <HeadingSmall

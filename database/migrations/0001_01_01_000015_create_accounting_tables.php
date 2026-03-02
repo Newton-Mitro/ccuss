@@ -60,6 +60,70 @@ return new class extends Migration {
 
         /*
         |--------------------------------------------------------------------------
+        | Instrument Types
+        |--------------------------------------------------------------------------
+        */
+        Schema::create('instrument_types', function (Blueprint $table) {
+            $table->id();
+            $table->string('code', 50)->unique();
+            $table->string('name', 100);
+            $table->timestamps();
+        });
+
+        Schema::create('cheque_instruments', function (Blueprint $table) {
+            $table->id();
+
+            $table->string('cheque_no', 50);
+            $table->date('cheque_date');
+
+            $table->foreignId('bank_id')->constrained();
+            $table->string('branch_name', 100)->nullable();
+
+            $table->string('payee_name', 150)->nullable();
+            $table->enum('status', ['ISSUED', 'CLEARED', 'BOUNCED'])
+                ->default('ISSUED');
+
+            $table->timestamps();
+        });
+
+        Schema::create('bank_transfer_instruments', function (Blueprint $table) {
+            $table->id();
+
+            $table->foreignId('bank_id')->constrained();
+            $table->string('account_no', 50);
+
+            $table->string('transaction_ref', 100)->unique();
+            $table->date('transfer_date');
+
+            $table->timestamps();
+        });
+
+        Schema::create('mobile_banking_instruments', function (Blueprint $table) {
+            $table->id();
+
+            $table->string('provider', 50); // bKash, Nagad, etc
+            $table->string('wallet_no', 30);
+
+            $table->string('transaction_id', 100)->unique();
+            $table->date('transaction_date');
+
+            $table->timestamps();
+        });
+
+        Schema::create('card_instruments', function (Blueprint $table) {
+            $table->id();
+
+            $table->enum('card_type', ['DEBIT', 'CREDIT']);
+            $table->string('card_last4', 4);
+
+            $table->string('transaction_ref', 100)->unique();
+            $table->date('transaction_date');
+
+            $table->timestamps();
+        });
+
+        /*
+        |--------------------------------------------------------------------------
         | Vouchers
         |--------------------------------------------------------------------------
         */
@@ -94,10 +158,18 @@ return new class extends Migration {
 
             $table->string('voucher_no', 50);
 
+            $table->foreignId('instrument_type_id')
+                ->nullable()
+                ->constrained('instrument_types');
+            $table->unsignedBigInteger('instrument_id')->nullable();
+
             // ✅ Reference field
             $table->string('reference', 150)
                 ->nullable()
                 ->comment('External reference number');
+
+            $table->decimal('total_debit', 18, 2)->default(0);
+            $table->decimal('total_credit', 18, 2)->default(0);
 
             $table->foreignId('created_by')->constrained('users');
             $table->foreignId('posted_by')->nullable()->constrained('users');
@@ -108,7 +180,7 @@ return new class extends Migration {
             $table->timestamp('rejected_at')->nullable();
 
             $table->text('narration')->comment('Description or remarks');
-            $table->enum('status', ['DRAFT', 'APPROVED', 'POSTED', 'CANCELLED']);
+            $table->enum('status', ['DRAFT', 'APPROVED', 'POSTED', 'CANCELLED'])->default('DRAFT');
 
             $table->timestamps();
         });
@@ -132,14 +204,18 @@ return new class extends Migration {
             $table->nullableMorphs('subledger');
             $table->nullableMorphs('reference');
 
-            $table->string('instrument_type')->nullable();
-            $table->string('instrument_no')->nullable();
             $table->string('particulars')->nullable();
             $table->decimal('debit', 18, 2)->default(0);
             $table->decimal('credit', 18, 2)->default(0);
 
             $table->timestamps();
+
+            $table->check(
+                '(debit > 0 AND credit = 0) OR (credit > 0 AND debit = 0)'
+            );
         });
+
+
 
         /*
         |--------------------------------------------------------------------------
@@ -384,6 +460,10 @@ return new class extends Migration {
         Schema::dropIfExists('ledger_account_balances');
         Schema::dropIfExists('voucher_lines');
         Schema::dropIfExists('vouchers');
+        Schema::dropIfExists('instrument_types');
+        Schema::dropIfExists('cheque_instruments');
+        Schema::dropIfExists('bank_transfer_instruments');
+        Schema::dropIfExists('mobile_banking_instruments');
         Schema::dropIfExists('ledger_accounts');
         Schema::dropIfExists('fiscal_periods');
         Schema::dropIfExists('fiscal_years');

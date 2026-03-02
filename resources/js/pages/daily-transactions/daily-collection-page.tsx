@@ -10,6 +10,7 @@ import { Label } from '../../components/ui/label';
 import { Select } from '../../components/ui/select';
 import CustomAuthLayout from '../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../lib/bdtCurrencyFormatter';
+import { formatDate } from '../../lib/date_util';
 import { BreadcrumbItem } from '../../types';
 import { LedgerAccount } from '../../types/accounting';
 import { CustomerSearchBox } from '../customer-mgmt/customers/customer-search-box';
@@ -379,6 +380,12 @@ export default function DebitVoucherEntry() {
                                 />
                             </div>
 
+                            <div>
+                                <h2 className="text-sm font-medium text-primary">
+                                    Collection Ledgers
+                                </h2>
+                            </div>
+
                             {/* Table */}
                             <div className="rounded-md border border-border md:block">
                                 {/* Table header */}
@@ -402,7 +409,7 @@ export default function DebitVoucherEntry() {
                                 </div>
 
                                 {/* Scrollable body */}
-                                <div className="h-[calc(100vh/2-50px)] overflow-y-auto bg-muted/40 p-2">
+                                <div className="h-[calc(100vh/2-86px)] overflow-y-auto bg-muted/40 p-2">
                                     <table className="w-full table-fixed border-separate border-spacing-y-2">
                                         <tbody>
                                             {data.lines.map((line, index) => (
@@ -419,19 +426,19 @@ export default function DebitVoucherEntry() {
 
                                                     {/* Ledger info */}
                                                     <td className="w-7/12 border border-destructive align-middle">
-                                                        <div className="flex h-9 items-center border-x border-border px-2">
-                                                            <div className="flex justify-end gap-2 text-right">
-                                                                <span className="text-xs text-muted-foreground">
+                                                        <div className="flex h-9 items-center justify-end border-x border-border px-2">
+                                                            <div className="flex gap-2">
+                                                                <span className="text-xs text-muted-foreground underline">
                                                                     10001 -
                                                                     Saving
                                                                     Deposit
                                                                 </span>
-                                                                <span className="text-xs text-muted-foreground">
+                                                                <span className="text-xs text-muted-foreground underline">
                                                                     John Doe -
                                                                     10000014 -
                                                                     Personal
                                                                 </span>
-                                                                <span className="text-xs text-muted-foreground">
+                                                                <span className="text-xs text-muted-foreground underline">
                                                                     Saving Ref
                                                                     Subledger
                                                                 </span>
@@ -523,228 +530,276 @@ export default function DebitVoucherEntry() {
                     </div>
 
                     <div className="flex flex-col gap-4 md:col-span-5">
-                        <div className="flex flex-col gap-4">
-                            <div className="space-y-4 rounded-md border border-border bg-muted/30 p-4">
-                                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
-                                    <div>
-                                        <Label className="text-xs">
-                                            Voucher Date
-                                        </Label>
-                                        <AppDatePicker
-                                            disabled
-                                            error={errors.voucher_date}
-                                            value={data.voucher_date}
-                                            onChange={(e) =>
-                                                setData('voucher_date', e)
-                                            }
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label className="text-xs">
-                                            Voucher Type
-                                        </Label>
-                                        <Select
-                                            disabled
-                                            error={errors.voucher_type}
-                                            value={data.voucher_type}
-                                            options={[
-                                                {
-                                                    value: 'CREDIT_OR_RECEIPT',
-                                                    label: 'Credit / Receipt',
-                                                },
-                                                {
-                                                    value: 'DEBIT_OR_PAYMENT',
-                                                    label: 'Debit / Payment',
-                                                },
-                                                {
-                                                    value: 'JOURNAL_OR_NON_CASH',
-                                                    label: 'Journal / Non-Cash',
-                                                },
-                                                {
-                                                    value: 'PURCHASE',
-                                                    label: 'Purchase',
-                                                },
-                                                {
-                                                    value: 'SALE',
-                                                    label: 'Sale',
-                                                },
-                                                {
-                                                    value: 'DEBIT_NOTE',
-                                                    label: 'Debit Note',
-                                                },
-                                                {
-                                                    value: 'CREDIT_NOTE',
-                                                    label: 'Credit Note',
-                                                },
-                                                {
-                                                    value: 'CONTRA',
-                                                    label: 'Contra',
-                                                },
-                                            ]}
-                                            onChange={(e) =>
-                                                setData(
-                                                    'voucher_type',
-                                                    e.target.value,
-                                                )
-                                            }
-                                        />
-                                    </div>
-                                    {/* Fiscal Year */}
-                                    <div>
-                                        <Label className="text-xs">
-                                            Fiscal Year
-                                        </Label>
-                                        <Select
-                                            disabled
-                                            error={errors.fiscal_year_id}
-                                            value={
-                                                data.fiscal_year_id?.toString() ||
-                                                ''
-                                            }
-                                            options={fiscalYears.map(
-                                                (fy: any) => ({
-                                                    value: fy.id.toString(),
-                                                    label: fy.code,
-                                                }),
-                                            )}
-                                            onChange={(e) => {
-                                                setData(
-                                                    'fiscal_year_id',
-                                                    Number(e.target.value),
-                                                );
-                                                setData(
-                                                    'fiscal_period_id',
-                                                    null,
-                                                );
-                                            }}
-                                        />
-                                    </div>
-                                    {/* Fiscal Period */}
-                                    <div>
-                                        <Label className="text-xs">
-                                            Fiscal Period
-                                        </Label>
-                                        <Select
-                                            disabled
-                                            error={errors.fiscal_period_id}
-                                            value={
-                                                data.fiscal_period_id?.toString() ||
-                                                ''
-                                            }
-                                            options={fiscalPeriods
-                                                .filter(
-                                                    (fp) =>
-                                                        fp.fiscal_year_id ===
-                                                        data.fiscal_year_id,
-                                                )
-                                                .map((fp) => ({
-                                                    value: fp.id.toString(),
-                                                    label: fp.period_name,
-                                                }))}
-                                            onChange={(e) =>
-                                                setData(
-                                                    'fiscal_period_id',
-                                                    Number(e.target.value),
-                                                )
-                                            }
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <Label className="text-xs">
-                                            Branch
-                                        </Label>
-                                        <Select
-                                            disabled
-                                            error={errors.branch_id}
-                                            value={
-                                                data.branch_id?.toString() || ''
-                                            }
-                                            options={branches.map((b: any) => ({
-                                                value: b.id.toString(),
-                                                label: b.name,
+                        {/* Voucher Header */}
+                        <div className="space-y-4 rounded-md border border-border bg-muted/30 p-3 md:col-span-6">
+                            <h2 className="border-b border-border pb-1 text-sm font-medium text-primary">
+                                Voucher Header
+                            </h2>
+                            <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-2 md:grid-cols-3">
+                                <div>
+                                    <Label className="text-xs">
+                                        Voucher Date
+                                    </Label>
+                                    <AppDatePicker
+                                        error={errors.voucher_date}
+                                        value={data.voucher_date}
+                                        onChange={(e) =>
+                                            setData('voucher_date', e)
+                                        }
+                                    />
+                                </div>
+                                <div>
+                                    <Label className="text-xs">
+                                        Voucher Type
+                                    </Label>
+                                    <Select
+                                        error={errors.voucher_type}
+                                        value={data.voucher_type}
+                                        options={[
+                                            {
+                                                value: 'CREDIT_OR_RECEIPT',
+                                                label: 'Credit/Receipt',
+                                            },
+                                            {
+                                                value: 'DEBIT_OR_PAYMENT',
+                                                label: 'Debit/Payment',
+                                            },
+                                            {
+                                                value: 'JOURNAL_OR_NON_CASH',
+                                                label: 'Journal/Non-Cash',
+                                            },
+                                            {
+                                                value: 'PURCHASE',
+                                                label: 'Purchase',
+                                            },
+                                            { value: 'SALE', label: 'Sale' },
+                                            {
+                                                value: 'DEBIT_NOTE',
+                                                label: 'Debit Note',
+                                            },
+                                            {
+                                                value: 'CREDIT_NOTE',
+                                                label: 'Credit Note',
+                                            },
+                                            {
+                                                value: 'CONTRA',
+                                                label: 'Contra',
+                                            },
+                                        ]}
+                                        onChange={(e) =>
+                                            setData(
+                                                'voucher_type',
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
+                                {/* Fiscal Year */}
+                                <div>
+                                    <Label className="text-xs">
+                                        Fiscal Year
+                                    </Label>
+                                    <Select
+                                        error={errors.fiscal_year_id}
+                                        value={
+                                            data.fiscal_year_id?.toString() ||
+                                            ''
+                                        }
+                                        options={fiscalYears.map((fy: any) => ({
+                                            value: fy.id.toString(),
+                                            label: fy.code,
+                                        }))}
+                                        onChange={(e) => {
+                                            setData(
+                                                'fiscal_year_id',
+                                                Number(e.target.value),
+                                            );
+                                            setData('fiscal_period_id', null);
+                                        }}
+                                    />
+                                </div>
+                                {/* Fiscal Period */}
+                                <div>
+                                    <Label className="text-xs">
+                                        Fiscal Period
+                                    </Label>
+                                    <Select
+                                        error={errors.fiscal_period_id}
+                                        value={
+                                            data.fiscal_period_id?.toString() ||
+                                            ''
+                                        }
+                                        options={fiscalPeriods
+                                            .filter(
+                                                (fp) =>
+                                                    fp.fiscal_year_id ===
+                                                    data.fiscal_year_id,
+                                            )
+                                            .map((fp) => ({
+                                                value: fp.id.toString(),
+                                                label: fp.period_name,
                                             }))}
-                                            onChange={(e) =>
-                                                setData(
-                                                    'branch_id',
-                                                    Number(e.target.value),
-                                                )
-                                            }
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label className="text-xs">
-                                            Deposit Slip Ref
-                                        </Label>
-                                        <Input
-                                            error={errors.reference}
-                                            value={data.reference}
-                                            className="h-8 text-sm"
-                                            placeholder="Reference.. ex. deposit slip"
-                                            onChange={(e) =>
-                                                setData(
-                                                    'reference',
-                                                    e.target.value,
-                                                )
-                                            }
-                                        />
-                                    </div>
+                                        onChange={(e) =>
+                                            setData(
+                                                'fiscal_period_id',
+                                                Number(e.target.value),
+                                            )
+                                        }
+                                    />
+                                </div>
+                                {/* Branch */}
+                                <div>
+                                    <Label className="text-xs">Branch</Label>
+                                    <Select
+                                        error={errors.branch_id}
+                                        value={data.branch_id?.toString() || ''}
+                                        options={branches.map((b: any) => ({
+                                            value: b.id.toString(),
+                                            label: b.name,
+                                        }))}
+                                        onChange={(e) =>
+                                            setData(
+                                                'branch_id',
+                                                Number(e.target.value),
+                                            )
+                                        }
+                                    />
+                                </div>
+                                <div className="">
+                                    <Label className="text-xs">Narration</Label>
+                                    <Input
+                                        error={errors.narration}
+                                        value={data.narration}
+                                        onChange={(e) =>
+                                            setData('narration', e.target.value)
+                                        }
+                                        className="h-8 text-sm"
+                                    />
+                                </div>
+                            </div>
+                        </div>
 
-                                    <div>
-                                        <Label className="text-xs">
-                                            Cash Ledger Account
-                                        </Label>
-                                        <Select
-                                            error={errors.cash_ledger_id}
-                                            value={data.cash_ledger_id || ''}
-                                            options={cashLedgers.map(
-                                                (ledger) => ({
-                                                    value: ledger.id?.toString(),
-                                                    label: `${ledger.code} - ${ledger.name}`,
-                                                }),
-                                            )}
-                                            onChange={handleCashLedgerChange}
-                                        />
-                                    </div>
+                        {/* Cash Ledger */}
+                        <div className="space-y-4 rounded-md border border-border bg-muted/30 p-3 md:col-span-6">
+                            <h2 className="border-b border-border pb-1 text-sm font-medium text-primary">
+                                Cash Ledger
+                            </h2>
+                            <div className="grid grid-cols-1 gap-x-3 md:grid-cols-3">
+                                <div>
+                                    <Label className="text-xs">
+                                        Cash Ledger Account
+                                    </Label>
+                                    <Select
+                                        error={errors.cash_ledger_id}
+                                        value={data.cash_ledger_id || ''}
+                                        options={cashLedgers.map((ledger) => ({
+                                            value: ledger.id?.toString(),
+                                            label: `${ledger.code} - ${ledger.name}`,
+                                        }))}
+                                        onChange={handleCashLedgerChange}
+                                    />
+                                </div>
+                                <div>
+                                    <Label className="text-xs">
+                                        Cash Sub-Ledger
+                                    </Label>
+                                    <Select
+                                        error={errors.cash_subledger_id}
+                                        value={data.cash_subledger_id || ''}
+                                        options={cashSubledgers.map(
+                                            (ledger) => ({
+                                                value: ledger.id?.toString(),
+                                                label: `${ledger.code} - ${ledger.name}`,
+                                            }),
+                                        )}
+                                        onChange={(e) =>
+                                            setData(
+                                                'cash_subledger_id',
+                                                e.target.value
+                                                    ? Number(e.target.value)
+                                                    : null,
+                                            )
+                                        }
+                                    />
+                                </div>
+                                <div className="">
+                                    <Label className="text-xs font-medium">
+                                        Instrument Type
+                                    </Label>
+                                    <Select
+                                        value={data.instrument_type || ''}
+                                        options={[
+                                            { value: 'CASH', label: 'Cash' },
+                                            {
+                                                value: 'CHEQUE',
+                                                label: 'Cheque',
+                                            },
+                                            {
+                                                value: 'BANK_TRANSFER',
+                                                label: 'Bank Transfer',
+                                            },
+                                            {
+                                                value: 'MOBILE_BANKING',
+                                                label: 'Mobile Banking',
+                                            },
+                                            { value: 'CARD', label: 'Card' },
+                                            { value: 'OTHER', label: 'Other' },
+                                        ]}
+                                        onChange={(e) =>
+                                            setData(
+                                                'instrument_type',
+                                                e.target.value,
+                                            )
+                                        }
+                                        className="mt-1 w-full"
+                                    />
+                                </div>
+                                <div className="">
+                                    <Label className="text-xs">
+                                        Instrument Ref
+                                    </Label>
 
-                                    <div>
-                                        <Label className="text-xs">
-                                            Cash Sub-Ledger
-                                        </Label>
-                                        <Select
-                                            error={errors.cash_subledger_id}
-                                            value={data.cash_subledger_id || ''}
-                                            options={cashSubledgers.map(
-                                                (ledger) => ({
-                                                    value: ledger.id?.toString(),
-                                                    label: `${ledger.code} - ${ledger.name}`,
-                                                }),
-                                            )}
-                                            onChange={(e) =>
-                                                setData(
-                                                    'cash_subledger_id',
-                                                    e.target.value
-                                                        ? Number(e.target.value)
-                                                        : null,
-                                                )
-                                            }
-                                        />
-                                    </div>
+                                    <Input
+                                        placeholder="Instrument No"
+                                        value={data.instrument_no || ''}
+                                        onChange={(e) =>
+                                            setData(
+                                                'instrument_no',
+                                                e.target.value,
+                                            )
+                                        }
+                                        className="h-8 text-sm"
+                                    />
+                                </div>
+
+                                <div className="">
+                                    <Label className="text-xs">
+                                        Bill/Invoice Ref
+                                    </Label>
+
+                                    <Input
+                                        placeholder="Customer / Vendor"
+                                        value={data.invoice_id || ''}
+                                        onChange={(e) =>
+                                            setData(
+                                                'invoice_id',
+                                                e.target.value,
+                                            )
+                                        }
+                                        className="h-8 text-sm"
+                                    />
                                 </div>
                             </div>
                         </div>
 
                         {/* Voucher Queue */}
                         <div className="flex flex-col gap-4">
-                            <div className="flex h-[calc(100vh/2)] flex-col overflow-hidden rounded-md border border-border">
+                            <div className="flex h-[calc(100vh/3+50px)] flex-col overflow-hidden rounded-md border border-border">
                                 <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-muted/30 px-4 py-3">
                                     <div>
                                         <h2 className="text-sm font-medium text-primary">
                                             Voucher Queue
                                         </h2>
-                                        <h3 className="text-xs font-semibold tracking-tight text-muted-foreground">
-                                            Pending collections & payments
-                                        </h3>
                                     </div>
                                     <span className="text-xs text-muted-foreground">
                                         {vouchers.length} vouchers
@@ -764,15 +819,16 @@ export default function DebitVoucherEntry() {
                                                     {voucher.customer_name}
                                                 </p>
                                                 <p className="text-[11px] text-muted-foreground">
-                                                    {voucher.date}
+                                                    {formatDate(voucher.date)}
                                                 </p>
                                             </div>
 
                                             {/* Amount */}
                                             <div className="text-right">
                                                 <p className="text-xs font-semibold">
-                                                    ৳{' '}
-                                                    {voucher.amount.toLocaleString()}
+                                                    {formatBDTCurrency(
+                                                        voucher.amount,
+                                                    )}
                                                 </p>
                                             </div>
 

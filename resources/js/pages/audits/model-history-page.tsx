@@ -26,7 +26,7 @@ export default function ModelHistory({
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`${auditableType} #${auditableId} – Audit History`} />
 
-            <div className="space-y-6 p-4 text-foreground">
+            <div className="space-y-6 text-foreground">
                 {/* Header */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <HeadingSmall

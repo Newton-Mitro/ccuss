@@ -10,35 +10,29 @@ interface Props {
     item: SidebarItem;
     level?: number;
     sidebarOpen: boolean;
+    menuAction?: 'expand-all' | 'collapse-all' | null;
 }
 
-/**
- * Recursively detect whether this item or any of its children
- * matches the current route
- */
+/** Recursively check if item or its children are active */
 function isItemActive(item: SidebarItem, url: string): boolean {
-    if (item.match_path && url.includes(item.match_path)) {
-        return true;
-    }
-
-    if (item.children?.length) {
-        return item.children.some((child) => isItemActive(child, url));
-    }
-
-    return false;
+    if (item.match_path && url.includes(item.match_path)) return true;
+    return !!item.children?.some((c) => isItemActive(c, url));
 }
 
-export function SidebarMenuItem({ item, level = 0, sidebarOpen }: Props) {
+export function SidebarMenuItem({
+    item,
+    level = 0,
+    sidebarOpen,
+    menuAction,
+}: Props) {
     const { url } = usePage();
     const hasChildren = !!item.children?.length;
 
-    /** Exact (leaf) active */
     const isSelfActive = useMemo(
         () => !!item.match_path && url.includes(item.match_path),
         [url, item.match_path],
     );
 
-    /** Parent active because a child is active */
     const hasActiveChild = useMemo(
         () =>
             !!item.children?.length &&
@@ -57,14 +51,20 @@ export function SidebarMenuItem({ item, level = 0, sidebarOpen }: Props) {
         }
     });
 
-    /** Auto-expand when a child route is active */
+    /** Auto-expand if child active */
     useEffect(() => {
         if (hasActiveChild && hasChildren) {
-            Promise.resolve().then(() => {
-                setOpen(true);
-            });
+            Promise.resolve().then(() => setOpen(true));
         }
     }, [hasActiveChild, hasChildren]);
+
+    /** Handle expand/collapse all */
+    useEffect(() => {
+        if (!menuAction || !hasChildren) return;
+        const next = menuAction === 'expand-all';
+        Promise.resolve().then(() => setOpen(next));
+        localStorage.setItem(storageKey, JSON.stringify(next));
+    }, [menuAction, hasChildren, storageKey]);
 
     /** Persist open state */
     useEffect(() => {
@@ -75,16 +75,11 @@ export function SidebarMenuItem({ item, level = 0, sidebarOpen }: Props) {
         }
     }, [open, storageKey]);
 
-    /**
-     * 👉 IMPORTANT:
-     * Indentation is applied to INNER content,
-     * not the clickable container
-     */
+    /** Indentation for child items */
     const indentStyle = sidebarOpen
         ? { paddingLeft: `${12 + level * 16}px` }
         : undefined;
 
-    /** Full-width clickable container */
     const containerClasses = cn(
         'block w-full rounded-md transition-colors',
         'hover:bg-muted',
@@ -94,12 +89,10 @@ export function SidebarMenuItem({ item, level = 0, sidebarOpen }: Props) {
             'border-l-2 border-primary/60 bg-muted/50 text-primary',
     );
 
-    /** Inner content (indented visually) */
     const contentClasses = 'flex w-full h-full items-center gap-3 px-3 py-2';
 
     return (
         <li className="w-full">
-            {/* LINK ITEM */}
             {item.path ? (
                 <Link href={item.path} className={containerClasses}>
                     <div className={contentClasses} style={indentStyle}>
@@ -108,7 +101,6 @@ export function SidebarMenuItem({ item, level = 0, sidebarOpen }: Props) {
                     </div>
                 </Link>
             ) : (
-                /* GROUP ITEM */
                 <button
                     type="button"
                     onClick={() => setOpen((v) => !v)}
@@ -116,13 +108,11 @@ export function SidebarMenuItem({ item, level = 0, sidebarOpen }: Props) {
                 >
                     <div className={contentClasses} style={indentStyle}>
                         <span className="shrink-0 text-base">{item.icon}</span>
-
                         {sidebarOpen && (
                             <>
                                 <span className="flex-1 text-left">
                                     {item.name}
                                 </span>
-
                                 {hasChildren && (
                                     <ChevronDown
                                         size={16}
@@ -138,7 +128,6 @@ export function SidebarMenuItem({ item, level = 0, sidebarOpen }: Props) {
                 </button>
             )}
 
-            {/* CHILDREN */}
             {hasChildren && open && sidebarOpen && (
                 <ul className="mt-1 space-y-1">
                     {item.children!.map((child, idx) => (
@@ -147,6 +136,7 @@ export function SidebarMenuItem({ item, level = 0, sidebarOpen }: Props) {
                             item={child}
                             level={level + 1}
                             sidebarOpen={sidebarOpen}
+                            menuAction={menuAction}
                         />
                     ))}
                 </ul>
