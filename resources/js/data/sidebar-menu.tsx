@@ -4,7 +4,7 @@ export const sidebarMenu: SidebarItem[] = [
     {
         name: 'Dashboard',
         icon: <i className="fa-solid fa-gauge-high" />,
-        children_expanded: true,
+        children_expanded: false,
         children: [
             {
                 name: 'User Dashboard',
@@ -23,7 +23,7 @@ export const sidebarMenu: SidebarItem[] = [
     {
         name: 'Organizational Structure',
         icon: <i className="fa-solid fa-building-flag" />,
-        children_expanded: true,
+        children_expanded: false,
         children: [
             {
                 name: 'Branches',
@@ -36,7 +36,7 @@ export const sidebarMenu: SidebarItem[] = [
     {
         name: 'Customer Mgmt.',
         icon: <i className="fa-solid fa-users" />,
-        children_expanded: true,
+        children_expanded: false,
         children: [
             {
                 name: 'Customers',
@@ -80,7 +80,7 @@ export const sidebarMenu: SidebarItem[] = [
     {
         name: 'Saving Deposit Mgmt.',
         icon: <i className="fa-solid fa-sack-dollar" />,
-        children_expanded: true,
+        children_expanded: false,
         children: [
             {
                 name: 'Deposit Product Mgmt.',
@@ -139,7 +139,7 @@ export const sidebarMenu: SidebarItem[] = [
             {
                 name: 'Deposit Account Mgmt.',
                 icon: <i className="fa-solid fa-landmark" />,
-                children_expanded: true,
+                children_expanded: false,
                 children: [
                     {
                         name: 'Deposit Accounts',
@@ -172,7 +172,7 @@ export const sidebarMenu: SidebarItem[] = [
     {
         name: 'Membership Mgmt.',
         icon: <i className="fa-solid fa-id-card" />,
-        children_expanded: true,
+        children_expanded: false,
         children: [
             {
                 name: 'Member List',
@@ -185,7 +185,7 @@ export const sidebarMenu: SidebarItem[] = [
     {
         name: 'Share Capital Mgmt.',
         icon: <i className="fa-solid fa-coins" />,
-        children_expanded: true,
+        children_expanded: false,
         children: [
             {
                 name: 'Share Accounts',
@@ -208,7 +208,7 @@ export const sidebarMenu: SidebarItem[] = [
     {
         name: 'Loan Mgmt.',
         icon: <i className="fa-solid fa-hand-holding-dollar" />,
-        children_expanded: true,
+        children_expanded: false,
         children: [
             {
                 name: 'Loan Product Mgmt.',
@@ -255,7 +255,7 @@ export const sidebarMenu: SidebarItem[] = [
             {
                 name: 'Loan Account Mgmt.',
                 icon: <i className="fa-solid fa-landmark" />,
-                children_expanded: true,
+                children_expanded: false,
                 children: [
                     {
                         name: 'Loan Accounts',
@@ -280,7 +280,7 @@ export const sidebarMenu: SidebarItem[] = [
             {
                 name: 'Loan Application Mgmt.',
                 icon: <i className="fa-solid fa-file-invoice" />,
-                children_expanded: true,
+                children_expanded: false,
                 children: [
                     {
                         name: 'Loan Applications',
@@ -307,12 +307,12 @@ export const sidebarMenu: SidebarItem[] = [
     {
         name: 'Cash & Treasury Mgmt.',
         icon: <i className="fa-solid fa-cash-register" />,
-        children_expanded: true,
+        children_expanded: false,
         children: [
             {
                 name: 'Cash at Hand',
                 icon: <i className="fa-solid fa-hand-holding-dollar" />,
-                children_expanded: true,
+                children_expanded: false,
                 children: [
                     {
                         name: 'Cash In Hand',
@@ -337,7 +337,7 @@ export const sidebarMenu: SidebarItem[] = [
             {
                 name: 'Petty Cash',
                 icon: <i className="fa-solid fa-coins" />,
-                children_expanded: true,
+                children_expanded: false,
                 children: [
                     {
                         name: 'Cash Book',
@@ -356,7 +356,7 @@ export const sidebarMenu: SidebarItem[] = [
             {
                 name: 'Cash at Bank',
                 icon: <i className="fa-solid fa-piggy-bank" />,
-                children_expanded: true,
+                children_expanded: false,
                 children: [
                     {
                         name: 'Bank Accounts',
@@ -391,7 +391,7 @@ export const sidebarMenu: SidebarItem[] = [
     {
         name: 'Teller Transactions',
         icon: <i className="fa-solid fa-building-columns" />,
-        children_expanded: true,
+        children_expanded: false,
         children: [
             {
                 name: 'Teller Collection',
@@ -422,7 +422,7 @@ export const sidebarMenu: SidebarItem[] = [
     {
         name: 'General Accounting',
         icon: <i className="fa-solid fa-calculator" />,
-        children_expanded: true,
+        children_expanded: false,
         children: [
             {
                 name: 'Fiscal Years',
@@ -451,7 +451,7 @@ export const sidebarMenu: SidebarItem[] = [
             {
                 name: 'Voucher Entry',
                 icon: <i className="fa-solid fa-chart-simple" />,
-                children_expanded: true,
+                children_expanded: false,
                 children: [
                     {
                         name: 'Debit / Payment Voucher',
@@ -482,7 +482,7 @@ export const sidebarMenu: SidebarItem[] = [
             {
                 name: 'Reports',
                 icon: <i className="fa-solid fa-chart-simple" />,
-                children_expanded: true,
+                children_expanded: false,
                 children: [
                     {
                         name: 'Trial Balance',
@@ -522,7 +522,7 @@ export const sidebarMenu: SidebarItem[] = [
     {
         name: 'Procurement Mgmt.',
         icon: <i className="fa-solid fa-sack-dollar" />,
-        children_expanded: true,
+        children_expanded: false,
         children: [
             {
                 name: 'Purchase Orders',
@@ -553,7 +553,7 @@ export const sidebarMenu: SidebarItem[] = [
     {
         name: 'Fixed Asset Mgmt.',
         icon: <i className="fa-solid fa-boxes-stacked" />,
-        children_expanded: true,
+        children_expanded: false,
         children: [
             {
                 name: 'Assets',
@@ -584,12 +584,12 @@ export const sidebarMenu: SidebarItem[] = [
     {
         name: 'Human Resource Mgmt.',
         icon: <i className="fa-solid fa-users-between-lines" />,
-        children_expanded: true,
+        children_expanded: false,
         children: [
             {
                 name: 'Employee Mgmt.',
                 icon: <i className="fa-solid fa-user-group" />,
-                children_expanded: true,
+                children_expanded: false,
                 children: [
                     {
                         name: 'Employees',
@@ -620,7 +620,7 @@ export const sidebarMenu: SidebarItem[] = [
             {
                 name: 'Time Mgmt.',
                 icon: <i className="fa-solid fa-clock" />,
-                children_expanded: true,
+                children_expanded: false,
                 children: [
                     {
                         name: 'Leaves',
@@ -663,7 +663,7 @@ export const sidebarMenu: SidebarItem[] = [
             {
                 name: 'Payroll',
                 icon: <i className="fa-solid fa-money-bill-wave" />,
-                children_expanded: true,
+                children_expanded: false,
                 children: [
                     {
                         name: 'Payslips',
@@ -703,7 +703,7 @@ export const sidebarMenu: SidebarItem[] = [
     {
         name: 'User, Role & Permissions',
         icon: <i className="fa-solid fa-user-gear" />,
-        children_expanded: true,
+        children_expanded: false,
         children: [
             {
                 name: 'Roles',
@@ -740,7 +740,7 @@ export const sidebarMenu: SidebarItem[] = [
     {
         name: 'Alerts & Notifications',
         icon: <i className="fa-solid fa-bell" />, // Main icon for the menu
-        children_expanded: true,
+        children_expanded: false,
         children: [
             {
                 name: 'System Alerts',
@@ -765,12 +765,12 @@ export const sidebarMenu: SidebarItem[] = [
     {
         name: 'SMS & Email Queues',
         icon: <i className="fa-solid fa-envelope-circle-check" />,
-        children_expanded: true,
+        children_expanded: false,
         children: [
             {
                 name: 'SMS Queue',
                 icon: <i className="fa-solid fa-sms" />,
-                children_expanded: true,
+                children_expanded: false,
                 children: [
                     {
                         name: 'Transaction SMS',
@@ -789,7 +789,7 @@ export const sidebarMenu: SidebarItem[] = [
             {
                 name: 'Email Queue',
                 icon: <i className="fa-solid fa-envelope" />,
-                children_expanded: true,
+                children_expanded: false,
                 children: [
                     {
                         name: 'Transaction Emails',
@@ -810,7 +810,7 @@ export const sidebarMenu: SidebarItem[] = [
     {
         name: 'Audits',
         icon: <i className="fa-solid fa-clipboard-list" />,
-        children_expanded: true,
+        children_expanded: false,
         children: [
             {
                 name: 'Audit Logs',

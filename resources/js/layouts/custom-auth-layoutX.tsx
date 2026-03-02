@@ -15,10 +15,10 @@ import { LogOut, Menu, UserCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { Breadcrumbs } from '../components/breadcrumbs';
-import { SidebarMenuItem } from '../components/sidebar-menu-item';
+import SidebarMenuItemX from '../components/sidebar-menu-itemX';
 import { sidebarMenu } from '../data/sidebar-menu';
 import { edit } from '../routes/profile';
-import { BreadcrumbItem, SharedData } from '../types';
+import { BreadcrumbItem, SharedData, SidebarItem } from '../types';
 
 interface CustomAuthLayoutProps {
     children: React.ReactNode;
@@ -27,11 +27,12 @@ interface CustomAuthLayoutProps {
 
 const STORAGE_KEY = 'app_sidebar_open_menus_v1';
 
-export default function CustomAuthLayout({
+export default function CustomAuthLayoutX({
     children,
     breadcrumbs,
 }: CustomAuthLayoutProps) {
     const page = usePage<SharedData>();
+    const url = page.url ?? '';
     const auth = page.props?.auth;
 
     const cleanup = useMobileNavigation();
@@ -46,6 +47,36 @@ export default function CustomAuthLayout({
         }
     });
 
+    const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
+
+    // --- Restore openMenus on mount ---
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                // ✅ defer to avoid synchronous state update warning
+                Promise.resolve().then(() => {
+                    setOpenMenus(JSON.parse(raw));
+                });
+            }
+        } catch (e) {
+            console.warn('Failed to load sidebar openMenus', e);
+        }
+    }, []);
+
+    // --- Persist openMenus whenever it changes ---
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(openMenus));
+        } catch (e) {
+            console.warn('Failed to save sidebar openMenus', e);
+        }
+    }, [openMenus]);
+
+    // --- Persist sidebar collapse state ---
     useEffect(() => {
         if (typeof window === 'undefined') return;
         try {
@@ -57,6 +88,71 @@ export default function CustomAuthLayout({
             console.warn('Failed to save sidebar open state');
         }
     }, [sidebarOpen]);
+
+    // --- Auto-open parent menus that contain the active route ---
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const currentPath = String(url).split('?')[0]; // remove query params
+
+        // recursively collect parents containing the active path
+        const collectParents = (items: SidebarItem[]): string[] => {
+            const activeParents: string[] = [];
+            for (const item of items) {
+                if (!item) continue;
+
+                // direct match or child match
+                const isActive = item.path && currentPath.startsWith(item.path);
+
+                if (item.children && item.children.length > 0) {
+                    const childParents = collectParents(item.children);
+                    if (childParents.length > 0) {
+                        activeParents.push(item.name, ...childParents);
+                    }
+                }
+
+                if (isActive) {
+                    activeParents.push(item.name);
+                }
+            }
+            return activeParents;
+        };
+
+        const parents = collectParents(sidebarMenu);
+
+        if (parents.length > 0) {
+            // ✅ Use microtask to avoid React "setState in effect" warning
+            Promise.resolve().then(() => {
+                setOpenMenus((prev) => {
+                    const updated = { ...prev };
+                    parents.forEach((p) => (updated[p] = true));
+                    try {
+                        localStorage.setItem(
+                            STORAGE_KEY,
+                            JSON.stringify(updated),
+                        );
+                    } catch {
+                        console.warn('Failed to save sidebar openMenus');
+                    }
+                    return updated;
+                });
+            });
+        }
+    }, [url]);
+
+    const toggleMenu = (name: string) => {
+        setOpenMenus((prev) => {
+            const updated = { ...prev, [name]: !prev[name] };
+            try {
+                if (typeof window !== 'undefined') {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+                }
+            } catch {
+                console.warn('Failed to save sidebar openMenus');
+            }
+            return updated;
+        });
+    };
 
     const handleLogout = () => {
         cleanup();
@@ -95,11 +191,13 @@ export default function CustomAuthLayout({
                 </div>
 
                 <nav className="h-[calc(100%-4rem)] overflow-y-auto px-2 py-4 text-sm">
-                    <ul className="space-y-1">
-                        {sidebarMenu.map((item, index) => (
-                            <SidebarMenuItem
-                                key={`${item.name}-${index}`}
+                    <ul>
+                        {sidebarMenu.map((item) => (
+                            <SidebarMenuItemX
+                                key={item.name}
                                 item={item}
+                                openMenus={openMenus}
+                                toggleMenu={toggleMenu}
                                 sidebarOpen={sidebarOpen}
                             />
                         ))}

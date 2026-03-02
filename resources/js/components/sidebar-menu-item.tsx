@@ -1,149 +1,156 @@
 import { cn } from '@/lib/utils';
 import { Link, usePage } from '@inertiajs/react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronRight } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { SidebarItem } from '../types';
 
-interface SidebarMenuItemProps {
-    item?: SidebarItem;
-    openMenus: Record<string, boolean>;
-    toggleMenu: (name: string) => void;
+const STORAGE_KEY = 'app_sidebar_open_menus_v1';
+
+interface Props {
+    item: SidebarItem;
+    level?: number;
     sidebarOpen: boolean;
 }
 
-// 🎨 Define consistent color palette
-const borderColors = [
-    'border-l-red-400',
-    'border-l-blue-400',
-    'border-l-green-400',
-    'border-l-yellow-400',
-    'border-l-purple-400',
-    'border-l-pink-400',
-    'border-l-cyan-400',
-    'border-l-amber-400',
-];
+/**
+ * Recursively detect whether this item or any of its children
+ * matches the current route
+ */
+function isItemActive(item: SidebarItem, url: string): boolean {
+    if (item.match_path && url.includes(item.match_path)) {
+        return true;
+    }
 
-export default function SidebarMenuItem({
-    item,
-    openMenus,
-    toggleMenu,
-    sidebarOpen,
-}: SidebarMenuItemProps) {
+    if (item.children?.length) {
+        return item.children.some((child) => isItemActive(child, url));
+    }
+
+    return false;
+}
+
+export function SidebarMenuItem({ item, level = 0, sidebarOpen }: Props) {
     const { url } = usePage();
+    const hasChildren = !!item.children?.length;
 
-    if (!item || !item.name) return null;
+    /** Exact (leaf) active */
+    const isSelfActive = useMemo(
+        () => !!item.match_path && url.includes(item.match_path),
+        [url, item.match_path],
+    );
 
-    const hasChildren =
-        Array.isArray(item.children) && item.children.length > 0;
-    const isOpen = openMenus[item.name] || false;
+    /** Parent active because a child is active */
+    const hasActiveChild = useMemo(
+        () =>
+            !!item.children?.length &&
+            item.children.some((c) => isItemActive(c, url)),
+        [item.children, url],
+    );
 
-    const currentPath = url.split('?')[0];
+    const storageKey = `${STORAGE_KEY}:${item.name}`;
 
-    const isActive = (i: SidebarItem): boolean => {
-        if (i.match_path && currentPath.includes(i.match_path)) return true;
-        if (i.children) return i.children.some((c) => c && isActive(c));
-        return false;
-    };
+    const [open, setOpen] = useState<boolean>(() => {
+        try {
+            const v = localStorage.getItem(storageKey);
+            return v ? JSON.parse(v) : (item.children_expanded ?? false);
+        } catch {
+            return false;
+        }
+    });
 
-    const active = isActive(item);
-    const isChildActive =
-        item.match_path && currentPath.includes(item.match_path);
+    /** Auto-expand when a child route is active */
+    useEffect(() => {
+        if (hasActiveChild && hasChildren) {
+            Promise.resolve().then(() => {
+                setOpen(true);
+            });
+        }
+    }, [hasActiveChild, hasChildren]);
 
-    const handleClick = () => {
-        if (hasChildren) toggleMenu(item.name);
-    };
+    /** Persist open state */
+    useEffect(() => {
+        try {
+            localStorage.setItem(storageKey, JSON.stringify(open));
+        } catch {
+            console.warn('Failed to save sidebar openMenus');
+        }
+    }, [open, storageKey]);
 
-    // Pick unique border color (based on name hash)
-    const colorIndex =
-        Math.abs(
-            item.name
-                .split('')
-                .reduce((acc, char) => acc + char.charCodeAt(0), 0),
-        ) % borderColors.length;
-    const borderColor = borderColors[colorIndex];
+    /**
+     * 👉 IMPORTANT:
+     * Indentation is applied to INNER content,
+     * not the clickable container
+     */
+    const indentStyle = sidebarOpen
+        ? { paddingLeft: `${12 + level * 16}px` }
+        : undefined;
 
-    const parentBg = 'bg-accent/30 text-accent-foreground';
-    const childBg = 'bg-primary text-primary-foreground';
-    const defaultBg =
-        'text-foreground/80 hover:bg-accent hover:text-accent-foreground';
-    const paddingLeft = 12;
+    /** Full-width clickable container */
+    const containerClasses = cn(
+        'block w-full rounded-md transition-colors',
+        'hover:bg-muted',
+        isSelfActive && 'bg-muted font-medium text-primary',
+        hasActiveChild &&
+            !isSelfActive &&
+            'border-l-2 border-primary/60 bg-muted/50 text-primary',
+    );
+
+    /** Inner content (indented visually) */
+    const contentClasses = 'flex w-full h-full items-center gap-3 px-3 py-2';
 
     return (
-        <li>
+        <li className="w-full">
+            {/* LINK ITEM */}
             {item.path ? (
-                <Link
-                    href={item.path}
-                    className={cn(
-                        'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none',
-                        isChildActive ? childBg : active ? parentBg : defaultBg,
-                    )}
-                    style={{ paddingLeft }}
-                >
-                    {item.icon && (
-                        <span
-                            className={cn(
-                                isChildActive
-                                    ? 'text-primary-foreground'
-                                    : 'text-primary',
-                            )}
-                        >
-                            {item.icon}
-                        </span>
-                    )}
-                    {sidebarOpen && <span>{item.name}</span>}
-                </Link>
-            ) : (
-                <button
-                    onClick={handleClick}
-                    className={cn(
-                        'flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                        active ? parentBg : defaultBg,
-                    )}
-                    style={{ paddingLeft }}
-                >
-                    <div className="flex items-center gap-2">
-                        {item.icon && (
-                            <span className="text-primary">{item.icon}</span>
-                        )}
+                <Link href={item.path} className={containerClasses}>
+                    <div className={contentClasses} style={indentStyle}>
+                        <span className="shrink-0 text-base">{item.icon}</span>
                         {sidebarOpen && <span>{item.name}</span>}
                     </div>
-                    {hasChildren && sidebarOpen && (
-                        <motion.div
-                            animate={{ rotate: isOpen ? 90 : 0 }}
-                            transition={{ duration: 0.25 }}
-                        >
-                            <ChevronRight size={14} />
-                        </motion.div>
-                    )}
+                </Link>
+            ) : (
+                /* GROUP ITEM */
+                <button
+                    type="button"
+                    onClick={() => setOpen((v) => !v)}
+                    className={containerClasses}
+                >
+                    <div className={contentClasses} style={indentStyle}>
+                        <span className="shrink-0 text-base">{item.icon}</span>
+
+                        {sidebarOpen && (
+                            <>
+                                <span className="flex-1 text-left">
+                                    {item.name}
+                                </span>
+
+                                {hasChildren && (
+                                    <ChevronDown
+                                        size={16}
+                                        className={cn(
+                                            'transition-transform duration-200',
+                                            open && 'rotate-180',
+                                        )}
+                                    />
+                                )}
+                            </>
+                        )}
+                    </div>
                 </button>
             )}
 
-            <AnimatePresence initial={false}>
-                {hasChildren && isOpen && (
-                    <motion.ul
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.25, ease: 'easeInOut' }}
-                        className={cn(
-                            'flex flex-col gap-1 border-l',
-                            borderColor, // 🎨 dynamic color class
-                        )}
-                    >
-                        {item.children?.map((child) =>
-                            child ? (
-                                <SidebarMenuItem
-                                    key={child.name}
-                                    item={child}
-                                    openMenus={openMenus}
-                                    toggleMenu={toggleMenu}
-                                    sidebarOpen={sidebarOpen}
-                                />
-                            ) : null,
-                        )}
-                    </motion.ul>
-                )}
-            </AnimatePresence>
+            {/* CHILDREN */}
+            {hasChildren && open && sidebarOpen && (
+                <ul className="mt-1 space-y-1">
+                    {item.children!.map((child, idx) => (
+                        <SidebarMenuItem
+                            key={`${child.name}-${idx}`}
+                            item={child}
+                            level={level + 1}
+                            sidebarOpen={sidebarOpen}
+                        />
+                    ))}
+                </ul>
+            )}
         </li>
     );
 }
