@@ -156,7 +156,7 @@ export function SidebarMenuItem({
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.35, ease: 'easeInOut' }}
                         className={cn(
-                            'mt-1 space-y-1 border-l bg-primary/10',
+                            'mt-1 space-y-1 border-l bg-secondary/10',
                             borderColor, // 🎨 dynamic color class
                         )}
                     >

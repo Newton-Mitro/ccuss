@@ -27,11 +27,11 @@ function VoucherQueueSection({ vouchers, onCollect, onCancel }: any) {
                             <div className="min-w-0">
                                 <p className="truncate text-xs font-medium">
                                     #{voucher.voucher_no} —{' '}
-                                    {voucher.reference
-                                        ? voucher.reference
-                                        : 'N/A'}
                                 </p>
                                 <p className="text-[11px] text-muted-foreground">
+                                    {voucher.narration
+                                        ? voucher.narration
+                                        : 'N/A'}
                                     {formatDate(voucher.voucher_date)}
                                 </p>
                             </div>

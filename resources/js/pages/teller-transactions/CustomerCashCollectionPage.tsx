@@ -153,7 +153,7 @@ export default function CustomerCashCollectionPage() {
     }, [data.lines]);
 
     const onCustomerSelected = (customer: Customer) => {
-        setCreditLines([
+        const newLines: VoucherLine[] = [
             {
                 id: -Date.now(),
                 voucher_id: 0,
@@ -175,9 +175,9 @@ export default function CustomerCashCollectionPage() {
                 is_selected: true,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
-            } satisfies VoucherLine,
+            },
             {
-                id: -Date.now(),
+                id: -Date.now() - 1,
                 voucher_id: 0,
                 ledger_account_id: null,
                 ledger_account: null,
@@ -197,9 +197,14 @@ export default function CustomerCashCollectionPage() {
                 is_selected: true,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
-            } satisfies VoucherLine,
-        ]);
-        setData('reference', customer.name);
+            },
+        ];
+
+        setData('lines', newLines);
+        setData(
+            'narration',
+            `Deposit to "${customer.name}" (${customer.customer_no}) via cash counter.`,
+        );
     };
 
     const handleLineChange = (

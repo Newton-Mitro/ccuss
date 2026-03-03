@@ -158,10 +158,7 @@ return new class extends Migration {
 
             $table->string('voucher_no', 50);
 
-            $table->foreignId('instrument_type_id')
-                ->nullable()
-                ->constrained('instrument_types');
-            $table->unsignedBigInteger('instrument_id')->nullable();
+
 
             // ✅ Reference field
             $table->string('reference', 150)
@@ -203,6 +200,11 @@ return new class extends Migration {
 
             $table->nullableMorphs('subledger');
             $table->nullableMorphs('reference');
+
+            $table->foreignId('instrument_type_id')
+                ->nullable()
+                ->constrained('instrument_types');
+            $table->unsignedBigInteger('instrument_id')->nullable();
 
             $table->string('particulars')->nullable();
             $table->decimal('debit', 18, 2)->default(0);
