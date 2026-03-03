@@ -131,14 +131,14 @@ function VoucherHeaderSection({
                     />
                 </div>
 
-                {/* Narration */}
+                {/* Reference */}
                 <div>
-                    <Label className="text-xs">Narration</Label>
+                    <Label className="text-xs">Reference</Label>
                     <Input
                         disabled
-                        error={errors?.narration}
-                        value={data.narration || ''}
-                        onChange={(e) => setData('narration', e.target.value)}
+                        error={errors?.reference}
+                        value={data.reference || ''}
+                        onChange={(e) => setData('reference', e.target.value)}
                         className="h-8 text-sm"
                     />
                 </div>

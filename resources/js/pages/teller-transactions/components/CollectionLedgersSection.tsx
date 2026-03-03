@@ -3,6 +3,7 @@ import { Button } from '../../../components/ui/button';
 import { Checkbox } from '../../../components/ui/checkbox';
 import { Input } from '../../../components/ui/input';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
+import { Customer } from '../../../types/customer';
 import { CustomerSearchBox } from '../../customer-mgmt/customers/customer-search-box';
 
 interface CollectionLine {
@@ -14,7 +15,7 @@ interface CollectionLine {
 interface CollectionLedgersSectionProps {
     lines: CollectionLine[];
     processing: boolean;
-    setCollectionLedgers: (lines: CollectionLine[]) => void;
+    onCustomerSelect: (customer: Customer) => void;
     handleLineChange: (
         index: number,
         field: keyof CollectionLine,
@@ -27,7 +28,7 @@ interface CollectionLedgersSectionProps {
 function CollectionLedgersSection({
     lines,
     processing,
-    setCollectionLedgers,
+    onCustomerSelect,
     handleLineChange,
     onSubmit,
     onCollectLater,
@@ -46,8 +47,8 @@ function CollectionLedgersSection({
                 </h2>
 
                 <CustomerSearchBox
-                    onSelect={() => {
-                        setCollectionLedgers([]);
+                    onSelect={(customer) => {
+                        onCustomerSelect(customer);
                     }}
                 />
 

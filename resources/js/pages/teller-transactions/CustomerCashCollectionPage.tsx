@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import CustomAuthLayout from '../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../types';
 import { LedgerAccount } from '../../types/accounting';
+import { Customer } from '../../types/customer';
 import CashLedgerSection from './components/CashLedgerSection';
 import CollectionLedgersSection from './components/CollectionLedgersSection';
 import VoucherHeaderSection from './components/VoucherHeaderSection';
@@ -151,7 +152,7 @@ export default function CustomerCashCollectionPage() {
         setCreditLines(credit);
     }, [data.lines]);
 
-    const setCollectionLedgers = (voucherLines: VoucherLine[]) => {
+    const onCustomerSelected = (customer: Customer) => {
         setCreditLines([
             {
                 id: -Date.now(),
@@ -198,6 +199,7 @@ export default function CustomerCashCollectionPage() {
                 updated_at: new Date().toISOString(),
             } satisfies VoucherLine,
         ]);
+        setData('reference', customer.name);
     };
 
     const handleLineChange = (
@@ -250,7 +252,6 @@ export default function CustomerCashCollectionPage() {
                         <CollectionLedgersSection
                             lines={creditLines}
                             processing={processing}
-                            setCollectionLedgers={setCollectionLedgers}
                             handleLineChange={handleLineChange}
                             onSubmit={function (): void {
                                 throw new Error('Function not implemented.');
@@ -258,6 +259,7 @@ export default function CustomerCashCollectionPage() {
                             onCollectLater={function (): void {
                                 throw new Error('Function not implemented.');
                             }}
+                            onCustomerSelect={onCustomerSelected}
                         />
                     </div>
 
