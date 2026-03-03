@@ -4,7 +4,7 @@ import { Voucher } from '../../../types/accounting';
 
 function VoucherQueueSection({ vouchers, onCollect, onCancel }: any) {
     return (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 bg-card">
             <div className="flex h-[calc(100vh/3+50px)] flex-col overflow-hidden rounded-md border border-border">
                 <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-muted/30 px-4 py-3">
                     <div>

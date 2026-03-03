@@ -394,10 +394,10 @@ export const sidebarMenu: SidebarItem[] = [
         children_expanded: false,
         children: [
             {
-                name: 'Customer Cash Collection',
+                name: 'Customer Cash Deposit',
                 icon: <i className="fa-solid fa-circle-dollar-to-slot" />,
-                path: '/customer-cash-collection',
-                match_path: 'customer-cash-collection',
+                path: '/customer-cash-deposit',
+                match_path: 'customer-cash-deposit',
             },
             {
                 name: 'Miscellaneous Collection',

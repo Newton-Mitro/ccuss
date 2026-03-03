@@ -1,7 +1,7 @@
-import AppDatePicker from '../../../components/ui/app_date_picker';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import { Select } from '../../../components/ui/select';
+import { formatDate } from '../../../lib/date_util';
 import { FiscalPeriod, FiscalYear } from '../../../types/accounting';
 import { Branch } from '../../../types/branch';
 
@@ -23,25 +23,17 @@ function VoucherHeaderSection({
     branches,
 }: VoucherHeaderSectionProps) {
     return (
-        <div className="rounded-md border border-border bg-muted/30 md:col-span-6">
+        <div className="rounded-md border border-border bg-card md:col-span-6">
             <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-muted/30 px-4 py-3">
                 <h2 className="text-sm font-medium text-primary">
                     Voucher Header
                 </h2>
+                <span className="text-xs text-muted-foreground">
+                    {data.voucher_date && formatDate(data.voucher_date)}
+                </span>
             </div>
 
             <div className="grid grid-cols-1 gap-x-3 p-3 sm:grid-cols-2 md:grid-cols-3">
-                {/* Voucher Date */}
-                <div>
-                    <Label className="text-xs">Voucher Date</Label>
-                    <AppDatePicker
-                        disabled
-                        error={errors?.voucher_date}
-                        value={data.voucher_date}
-                        onChange={(value) => setData('voucher_date', value)}
-                    />
-                </div>
-
                 {/* Voucher Type */}
                 <div>
                     <Label className="text-xs">Voucher Type</Label>
@@ -128,6 +120,17 @@ function VoucherHeaderSection({
                         onChange={(e) =>
                             setData('branch_id', Number(e.target.value))
                         }
+                    />
+                </div>
+
+                {/* Reference */}
+                <div>
+                    <Label className="text-xs">Deposit Slip Reference</Label>
+                    <Input
+                        error={errors?.reference}
+                        value={data.reference}
+                        className="h-8 text-sm"
+                        onChange={(e) => setData('reference', e.target.value)}
                     />
                 </div>
 

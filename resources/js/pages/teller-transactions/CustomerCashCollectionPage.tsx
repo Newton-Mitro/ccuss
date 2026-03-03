@@ -228,7 +228,7 @@ export default function CustomerCashCollectionPage() {
         setData('cash_ledger_id', value ? Number(value) : null);
 
         router.get(
-            '/customer-cash-collection',
+            '/customer-cash-deposit',
             {
                 cash_ledger_id: value ? Number(value) : null,
                 cash_subledger_id: data.cash_subledger_id,
@@ -244,12 +244,12 @@ export default function CustomerCashCollectionPage() {
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Teller Transactions', href: '#' },
-        { title: 'Customer Cash Collection', href: '' },
+        { title: 'Customer Cash Deposit', href: '' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Customer Cash Collection" />
+            <Head title="Customer Cash Deposit" />
             <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
                     <div className="md:col-span-7">

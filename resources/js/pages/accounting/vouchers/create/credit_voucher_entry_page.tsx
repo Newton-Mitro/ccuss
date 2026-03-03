@@ -276,14 +276,17 @@ export default function CreditVoucherEntryPage({
 
                                     <div className="">
                                         <Label className="text-xs">
-                                            Debit Amount
+                                            Credit Amount
                                         </Label>
                                         <Input
                                             type="number"
-                                            error={errors.debit}
-                                            value={data.debit}
+                                            error={errors.credit}
+                                            value={data.credit}
                                             onChange={(e) =>
-                                                setData('debit', e.target.value)
+                                                setData(
+                                                    'credit',
+                                                    e.target.value,
+                                                )
                                             }
                                             className="h-8 text-sm"
                                         />
@@ -332,23 +335,21 @@ export default function CreditVoucherEntryPage({
                                                                 <div className="-mt-1 flex items-center justify-end border-x border-border px-2 py-1">
                                                                     <div className="flex gap-2">
                                                                         <span className="text-xs text-muted-foreground underline">
-                                                                            10001
+                                                                            Ledger
+                                                                            Code
                                                                             -
-                                                                            Saving
-                                                                            Deposit
+                                                                            Name
                                                                         </span>
                                                                         <span className="text-xs text-muted-foreground underline">
-                                                                            John
-                                                                            Doe
+                                                                            Acc.Name
                                                                             -
-                                                                            10000014
-                                                                            -
-                                                                            Personal
+                                                                            Number
                                                                         </span>
                                                                         <span className="text-xs text-muted-foreground underline">
-                                                                            Saving
                                                                             Ref
-                                                                            Subledger
+                                                                            Acc.Name
+                                                                            -
+                                                                            Number
                                                                         </span>
                                                                     </div>
                                                                 </div>

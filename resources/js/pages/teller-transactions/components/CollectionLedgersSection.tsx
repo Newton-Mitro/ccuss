@@ -39,11 +39,11 @@ function CollectionLedgersSection({
     );
 
     return (
-        <div className="flex flex-col gap-4 rounded-md border border-border bg-secondary/10 p-4">
+        <div className="flex flex-col gap-4 rounded-md border border-border bg-muted/30 p-4">
             {/* Header */}
             <div className="space-y-4">
                 <h2 className="text-sm font-medium text-primary">
-                    Customer Cash Collection
+                    Customer Cash Deposit
                 </h2>
 
                 <CustomerSearchBox
@@ -55,7 +55,7 @@ function CollectionLedgersSection({
                 {/* Table Wrapper */}
                 <div className="rounded-md border border-border md:block">
                     {/* Table Header */}
-                    <div className="bg-secondary/30 px-2">
+                    <div className="bg-muted/30 px-2">
                         <table className="w-full table-fixed border-collapse">
                             <thead>
                                 <tr>
@@ -74,7 +74,7 @@ function CollectionLedgersSection({
                     </div>
 
                     {/* Scroll Body */}
-                    <div className="h-[calc(100vh/2-92px)] overflow-y-auto bg-muted/40 p-2">
+                    <div className="h-[calc(100vh/2-86px)] overflow-y-auto bg-card p-2">
                         <table className="w-full table-fixed border-separate border-spacing-y-2">
                             <tbody>
                                 {lines.map((line, index) => (
@@ -94,17 +94,13 @@ function CollectionLedgersSection({
                                             <div className="-mt-1 flex items-center justify-end border-x border-border px-2 py-1">
                                                 <div className="flex gap-2">
                                                     <span className="text-xs text-muted-foreground underline">
-                                                        10001 - Saving Deposit
+                                                        Ledger Code - Name
                                                     </span>
                                                     <span className="text-xs text-muted-foreground underline">
-                                                        John Doe - 10000014 -
-                                                        Personal
+                                                        Acc. Name - Number
                                                     </span>
                                                     <span className="text-xs text-muted-foreground underline">
-                                                        Saving Ref Subledger
-                                                    </span>
-                                                    <span className="text-xs text-muted-foreground underline">
-                                                        Cheque - 10001
+                                                        Ref. Acc. Name - Number
                                                     </span>
                                                 </div>
                                             </div>
@@ -141,7 +137,7 @@ function CollectionLedgersSection({
                     {/* Footer */}
                     <table className="w-full table-fixed border-collapse">
                         <tfoot>
-                            <tr className="bg-muted font-medium">
+                            <tr className="bg-muted/30 font-medium">
                                 <td className="w-9/12 p-2" colSpan={2}>
                                     <div className="text-sm text-destructive">
                                         Debit total: 0, Credit total:{' '}

@@ -290,7 +290,7 @@ export default function DebitVoucherEntryPage({
                                                     e.target.value,
                                                 )
                                             }
-                                            className="mt-1 w-full"
+                                            className="w-full"
                                             placeholder="Select instrument type"
                                         />
                                     </div>
@@ -330,17 +330,14 @@ export default function DebitVoucherEntryPage({
 
                                     <div className="">
                                         <Label className="text-xs">
-                                            Credit Amount
+                                            Debit Amount
                                         </Label>
                                         <Input
                                             type="number"
-                                            error={errors.credit}
-                                            value={data.credit}
+                                            error={errors.debit}
+                                            value={data.debit}
                                             onChange={(e) =>
-                                                setData(
-                                                    'credit',
-                                                    e.target.value,
-                                                )
+                                                setData('debit', e.target.value)
                                             }
                                             className="h-8 text-sm"
                                         />
@@ -390,28 +387,27 @@ export default function DebitVoucherEntryPage({
                                                                 <div className="-mt-1 flex items-center justify-end border-x border-border px-2 py-1">
                                                                     <div className="flex gap-2">
                                                                         <span className="text-xs text-muted-foreground underline">
-                                                                            10001
+                                                                            Ledger
+                                                                            Code
                                                                             -
-                                                                            Saving
-                                                                            Deposit
+                                                                            Name
                                                                         </span>
                                                                         <span className="text-xs text-muted-foreground underline">
-                                                                            John
-                                                                            Doe
+                                                                            Acc.Name
                                                                             -
-                                                                            10000014
-                                                                            -
-                                                                            Personal
+                                                                            Number
                                                                         </span>
                                                                         <span className="text-xs text-muted-foreground underline">
-                                                                            Saving
                                                                             Ref
-                                                                            Subledger
+                                                                            Acc.Name
+                                                                            -
+                                                                            Number
                                                                         </span>
                                                                         <span className="text-xs text-muted-foreground underline">
-                                                                            Cheque
+                                                                            Inst.
+                                                                            Type
                                                                             -
-                                                                            10001
+                                                                            Number
                                                                         </span>
                                                                     </div>
                                                                 </div>

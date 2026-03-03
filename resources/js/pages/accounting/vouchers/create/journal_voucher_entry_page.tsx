@@ -343,23 +343,21 @@ export default function JournalVoucherEntryPage({
                                                                 <div className="-mt-1 flex items-center justify-end border-x border-border px-2 py-1">
                                                                     <div className="flex gap-2">
                                                                         <span className="text-xs text-muted-foreground underline">
-                                                                            10001
+                                                                            Ledger
+                                                                            Code
                                                                             -
-                                                                            Saving
-                                                                            Deposit
+                                                                            Name
                                                                         </span>
                                                                         <span className="text-xs text-muted-foreground underline">
-                                                                            John
-                                                                            Doe
+                                                                            Acc.Name
                                                                             -
-                                                                            10000014
-                                                                            -
-                                                                            Personal
+                                                                            Number
                                                                         </span>
                                                                         <span className="text-xs text-muted-foreground underline">
-                                                                            Saving
                                                                             Ref
-                                                                            Subledger
+                                                                            Acc.Name
+                                                                            -
+                                                                            Number
                                                                         </span>
                                                                     </div>
                                                                 </div>
