@@ -29,32 +29,65 @@ class LedgerAccount extends Model
         'is_leaf' => 'boolean',
     ];
 
-    // 🔗 Parent relation
+    // 🔗 Direct children
     public function children(): HasMany
     {
         return $this->hasMany(LedgerAccount::class, 'parent_id')->orderBy('code');
     }
 
-    // Parent relationship
+    // 🔗 Parent
     public function parent(): BelongsTo
     {
         return $this->belongsTo(LedgerAccount::class, 'parent_id');
     }
 
-    // 🧠 Recursive relationship (optional for full hierarchy)
+    // 🧠 Recursive children for hierarchy
     public function childrenRecursive()
     {
-        return $this->children()->with('childrenRecursive');
+        return $this->children()->with(['childrenRecursive', 'balances']);
     }
 
+    // Voucher lines
     public function voucherLines(): HasMany
     {
         return $this->hasMany(VoucherLine::class);
     }
 
+    // All balances
     public function balances(): HasMany
     {
         return $this->hasMany(LedgerAccountBalance::class);
+    }
+
+    // 🔹 Get balance for a specific fiscal period
+    public function balanceForPeriod($periodId)
+    {
+        return $this->hasOne(LedgerAccountBalance::class)
+            ->where('fiscal_period_id', $periodId);
+    }
+
+    // 🔹 Get balances filtered by fiscal year or period dynamically
+    public function balancesForFilter($fiscalYearId = null, $fiscalPeriodId = null)
+    {
+        return $this->hasMany(LedgerAccountBalance::class)
+            ->when($fiscalYearId, function ($q) use ($fiscalYearId) {
+                $q->whereHas('fiscalPeriod', fn($p) => $p->where('fiscal_year_id', $fiscalYearId));
+            })
+            ->when($fiscalPeriodId, fn($q) => $q->where('fiscal_period_id', $fiscalPeriodId));
+    }
+
+    // 🔹 Recursive balances including children
+    public function recursiveBalances($fiscalYearId = null, $fiscalPeriodId = null)
+    {
+        $balanceSum = $this->balancesForFilter($fiscalYearId, $fiscalPeriodId)->sum('amount');
+
+        if ($this->children_recursive) {
+            foreach ($this->children_recursive as $child) {
+                $balanceSum += $child->recursiveBalances($fiscalYearId, $fiscalPeriodId);
+            }
+        }
+
+        return $balanceSum;
     }
 
     protected static function booted()

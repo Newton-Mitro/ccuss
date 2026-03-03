@@ -19,16 +19,9 @@ import {
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
-
-import {
-    DndContext,
-    closestCenter,
-    useDraggable,
-    useDroppable,
-} from '@dnd-kit/core';
-import { CSS } from '@dnd-kit/utilities';
 import { route } from 'ziggy-js';
 import { Select } from '../../../components/ui/select';
+import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 
 /* ---------------------------------------------
  | Constants
@@ -41,37 +34,33 @@ const TYPE_COLORS: Record<string, string> = {
     EXPENSE: 'bg-yellow-100 text-yellow-800',
 };
 
-/* ---------------------------------------------
- | Drag helpers
- --------------------------------------------- */
-function DraggableItem({ id, children }: any) {
-    const { attributes, listeners, setNodeRef, transform } = useDraggable({
-        id: String(id),
-    });
+function calculateClosingBalance(account: any): number {
+    let ownBalance = 0;
 
-    return (
-        <div
-            ref={setNodeRef}
-            style={{ transform: CSS.Translate.toString(transform) }}
-        >
-            {children({ attributes, listeners })}
-        </div>
+    if (account.balances?.length) {
+        const balance = account.balances[0];
+
+        const opening = Number(balance.opening_balance ?? 0);
+        const debit = Number(balance.debit_total ?? 0);
+        const credit = Number(balance.credit_total ?? 0);
+
+        if (account.type === 'ASSET' || account.type === 'EXPENSE') {
+            ownBalance = opening + debit - credit;
+        } else {
+            ownBalance = opening + credit - debit;
+        }
+    }
+
+    if (!account.children_recursive?.length) {
+        return ownBalance;
+    }
+
+    const childrenTotal = account.children_recursive.reduce(
+        (sum: number, child: any) => sum + calculateClosingBalance(child),
+        0,
     );
-}
 
-function DroppableGroup({ id, children }: any) {
-    const { setNodeRef, isOver } = useDroppable({ id: String(id) });
-
-    return (
-        <div
-            ref={setNodeRef}
-            className={`rounded-lg transition ${
-                isOver ? 'border border-primary bg-primary/10' : ''
-            }`}
-        >
-            {children}
-        </div>
-    );
+    return ownBalance + childrenTotal;
 }
 
 /* ---------------------------------------------
@@ -216,111 +205,89 @@ export default function GlAccountsIndex({
     };
 
     /* ---------------------------------------------
-     | Drag & Drop
-     --------------------------------------------- */
-    const handleDragEnd = ({ active, over }: any) => {
-        if (!over) return;
-
-        router.post(
-            route('ledger_accounts.move'),
-            {
-                ledger_account_id: Number(active.id),
-                parent_id: Number(over.id),
-            },
-            {
-                preserveScroll: true,
-                onSuccess: () => toast.success('Account moved'),
-            },
-        );
-    };
-
-    /* ---------------------------------------------
      | Recursive render
      --------------------------------------------- */
-    const renderTree = (nodes: any[], level = 0) => (
-        <ul className="space-y-1">
-            {nodes.map((acc) => {
-                const children = acc.children_recursive || [];
-                const expanded = expandedIds.includes(acc.id);
+    const renderTree = (nodes: any[], level = 0) => {
+        return (
+            <ul className="space-y-1">
+                {nodes.map((acc) => {
+                    const children = acc.children_recursive || [];
+                    const expanded = expandedIds.includes(acc.id);
+                    const balance = calculateClosingBalance(acc);
 
-                const row = (
-                    <div
-                        className="flex items-center justify-between rounded-lg px-3 py-1 hover:bg-accent/10"
-                        style={{ marginLeft: `${level * 1.5}rem` }}
-                        onClick={() =>
-                            acc.is_control_account && toggleExpand(acc.id)
-                        }
-                    >
-                        <div className="flex items-center gap-2">
-                            {acc.is_control_account ? (
-                                expanded ? (
-                                    <ChevronDownIcon className="h-4 w-4" />
-                                ) : (
-                                    <ChevronRightIcon className="h-4 w-4" />
-                                )
-                            ) : (
-                                <FileIcon className="h-4 w-4" />
-                            )}
-
-                            <span className="text-sm">
-                                {acc.code} — {acc.name}
-                            </span>
-
-                            <span
-                                className={`ml-2 rounded px-2 py-0.5 text-xs ${
-                                    TYPE_COLORS[acc.type]
-                                }`}
+                    return (
+                        <li key={acc.id}>
+                            <div
+                                className="flex items-center justify-between rounded-lg px-3 py-1 hover:bg-accent/10"
+                                style={{ marginLeft: `${level * 1.5}rem` }}
+                                onClick={() =>
+                                    acc.is_control_account &&
+                                    toggleExpand(acc.id)
+                                }
                             >
-                                {acc.type}
-                            </span>
-                        </div>
+                                <div className="flex items-center gap-2">
+                                    {acc.is_control_account ? (
+                                        expanded ? (
+                                            <ChevronDownIcon className="h-4 w-4" />
+                                        ) : (
+                                            <ChevronRightIcon className="h-4 w-4" />
+                                        )
+                                    ) : (
+                                        <FileIcon className="h-4 w-4" />
+                                    )}
 
-                        <div className="flex gap-2">
-                            <Button
-                                size="sm"
-                                variant="secondary"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    openModal(acc);
-                                }}
-                            >
-                                <Edit2Icon className="h-3 w-3" />
-                            </Button>
+                                    <span className="text-sm">
+                                        {acc.code} — {acc.name}
+                                    </span>
 
-                            {!acc.is_control_account && (
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleDelete(acc.id, acc.name);
-                                    }}
-                                    className="text-destructive"
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                );
+                                    <span
+                                        className={`ml-2 rounded px-2 py-0.5 text-xs ${
+                                            TYPE_COLORS[acc.type]
+                                        }`}
+                                    >
+                                        {acc.type}
+                                    </span>
+                                </div>
 
-                return (
-                    <li key={acc.id}>
-                        {acc.is_control_account ? (
-                            <DroppableGroup id={acc.id}>
-                                {row}
-                                {expanded &&
-                                    children.length > 0 &&
-                                    renderTree(children, level + 1)}
-                            </DroppableGroup>
-                        ) : (
-                            <DraggableItem id={acc.id}>
-                                {() => row}
-                            </DraggableItem>
-                        )}
-                    </li>
-                );
-            })}
-        </ul>
-    );
+                                <div className="flex items-center gap-2">
+                                    <div className="">
+                                        {formatBDTCurrency(balance)}
+                                    </div>
+                                    <Button
+                                        size="sm"
+                                        variant="secondary"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            openModal(acc);
+                                        }}
+                                    >
+                                        <Edit2Icon className="h-3 w-3" />
+                                    </Button>
+
+                                    {!acc.is_control_account && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDelete(acc.id, acc.name);
+                                            }}
+                                            className="text-destructive"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Render children recursively if expanded */}
+                            {expanded &&
+                                children.length > 0 &&
+                                renderTree(children, level + 1)}
+                        </li>
+                    );
+                })}
+            </ul>
+        );
+    };
 
     /* ---------------------------------------------
      | Render
@@ -329,7 +296,7 @@ export default function GlAccountsIndex({
         <CustomAuthLayout
             breadcrumbs={[
                 { title: 'General Ledger', href: '/ledger_accounts' },
-                { title: 'Chart of Accounts' },
+                { title: 'Chart of Accounts', href: '#' },
             ]}
         >
             <Head title="Chart of Accounts" />
@@ -347,6 +314,41 @@ export default function GlAccountsIndex({
                     </Button>
 
                     <div className="flex gap-2">
+                        <Select
+                            error={errors.fiscal_year_id}
+                            value={data.fiscal_year_id?.toString() || ''}
+                            options={fiscalYears.map((fy: any) => ({
+                                value: fy.id.toString(),
+                                label: fy.code,
+                            }))}
+                            onChange={(e) => {
+                                setData(
+                                    'fiscal_year_id',
+                                    Number(e.target.value),
+                                );
+                                setData('fiscal_period_id', null);
+                            }}
+                        />
+                        <Select
+                            error={errors.fiscal_period_id}
+                            value={data.fiscal_period_id?.toString() || ''}
+                            options={fiscalPeriods
+                                .filter(
+                                    (fp) =>
+                                        fp.fiscal_year_id ===
+                                        data.fiscal_year_id,
+                                )
+                                .map((fp) => ({
+                                    value: fp.id.toString(),
+                                    label: fp.period_name,
+                                }))}
+                            onChange={(e) =>
+                                setData(
+                                    'fiscal_period_id',
+                                    Number(e.target.value),
+                                )
+                            }
+                        />
                         <Button size="sm" variant="outline" onClick={expandAll}>
                             <ChevronDownIcon className="mr-1 h-4 w-4" />
                             Expand All
@@ -363,18 +365,11 @@ export default function GlAccountsIndex({
                 </div>
 
                 <Card className="h-[calc(100vh-240px)] overflow-y-auto p-6">
-                    <DndContext
-                        collisionDetection={closestCenter}
-                        onDragEnd={handleDragEnd}
-                    >
-                        {renderTree(glAccounts)}
-                    </DndContext>
+                    {renderTree(glAccounts)}
                 </Card>
             </div>
 
-            {/* -----------------------------------------
-             | Modal
-             ----------------------------------------- */}
+            {/* Modal */}
             {modalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
                     <Card className="relative w-full max-w-md p-6">

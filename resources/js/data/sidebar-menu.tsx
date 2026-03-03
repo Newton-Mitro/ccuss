@@ -394,10 +394,10 @@ export const sidebarMenu: SidebarItem[] = [
         children_expanded: false,
         children: [
             {
-                name: 'Teller Collection',
+                name: 'Customer Cash Collection',
                 icon: <i className="fa-solid fa-circle-dollar-to-slot" />,
-                path: '/daily-collection',
-                match_path: 'daily-collection',
+                path: '/customer-cash-collection',
+                match_path: 'customer-cash-collection',
             },
             {
                 name: 'Miscellaneous Collection',
@@ -406,10 +406,10 @@ export const sidebarMenu: SidebarItem[] = [
                 match_path: 'miscellaneous-collection',
             },
             {
-                name: 'Teller Payments',
+                name: 'Cash Payment',
                 icon: <i className="fa-solid fa-money-bill-transfer" />,
-                path: '/daily-payments',
-                match_path: 'daily-payments',
+                path: '/cash-payment',
+                match_path: 'cash-payment',
             },
             {
                 name: 'Cheque Verification',
@@ -466,7 +466,7 @@ export const sidebarMenu: SidebarItem[] = [
                         match_path: 'credit-voucher',
                     },
                     {
-                        name: 'Journal Voucher',
+                        name: 'Journal/Non-Cash Voucher',
                         icon: <i className="fa-solid fa-chart-simple" />,
                         path: '/voucher-entry/journal-voucher',
                         match_path: 'journal-voucher',

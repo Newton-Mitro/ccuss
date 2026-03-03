@@ -4,18 +4,18 @@ import { useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 
-import InputError from '../../../components/input-error';
-import { SubLedgerSearchInput } from '../../../components/sub-ledger-search-input';
-import AppDatePicker from '../../../components/ui/app_date_picker';
-import { Button } from '../../../components/ui/button';
-import { Input } from '../../../components/ui/input';
-import { Label } from '../../../components/ui/label';
-import { Select } from '../../../components/ui/select';
-import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
-import { BreadcrumbItem } from '../../../types';
-import { VoucherLine } from '../../../types/accounting';
-import { LedgerSearchInput } from '../components/ledger-search-input';
+import InputError from '../../../../components/input-error';
+import { SubLedgerSearchInput } from '../../../../components/sub-ledger-search-input';
+import AppDatePicker from '../../../../components/ui/app_date_picker';
+import { Button } from '../../../../components/ui/button';
+import { Input } from '../../../../components/ui/input';
+import { Label } from '../../../../components/ui/label';
+import { Select } from '../../../../components/ui/select';
+import CustomAuthLayout from '../../../../layouts/custom-auth-layout';
+import { formatBDTCurrency } from '../../../../lib/bdtCurrencyFormatter';
+import { BreadcrumbItem } from '../../../../types';
+import { VoucherLine } from '../../../../types/accounting';
+import { LedgerSearchInput } from '../../components/ledger-search-input';
 
 /* -------------------------------------------------------
  | Helpers
@@ -65,7 +65,11 @@ interface VoucherFormData {
 /* -------------------------------------------------------
  | Component
  ------------------------------------------------------- */
-export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
+export default function CreditVoucherEntryPage({
+    backUrl,
+}: {
+    backUrl: string;
+}) {
     const {
         fiscalYears,
         fiscalPeriods,
@@ -89,7 +93,7 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
     } = useForm<VoucherFormData>({
         voucher_no: '',
         voucher_date: new Date().toISOString().split('T')[0],
-        voucher_type: 'DEBIT_OR_PAYMENT',
+        voucher_type: 'CREDIT_OR_RECEIPT',
         fiscal_year_id: activeFiscalYearId || 0,
         fiscal_period_id: activeFiscalPeriodId || 0,
         branch_id: userBranchId || branches[0]?.id,
@@ -127,7 +131,7 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                 reference: null,
                 instrument_type: 'CASH',
                 instrument_no: null,
-                particulars: null,
+                particulars: 'Purchase furniture for office',
                 debit: 0,
                 credit: 0,
                 created_by: null,
@@ -207,21 +211,247 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Vouchers', href: '/vouchers' },
-        { title: 'Debit/Payment Voucher Entry', href: '' },
+        { title: 'Credit/Receipt Voucher Entry', href: '' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Debit/Payment Voucher Entry" />
+            <Head title="Credit/Receipt Voucher Entry" />
 
             {/* ---------------- Form Card ---------------- */}
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="">
                 {/* Voucher Header & Cash Ledger */}
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
+                    <div className="md:col-span-8">
+                        {/* Voucher Lines */}
+                        <div className="space-y-1">
+                            <div className="space-y-2 rounded-md border border-border bg-muted/30 p-3">
+                                <h2 className="border-b border-border pb-3 text-sm font-medium text-primary">
+                                    Voucher Details/Lines
+                                </h2>
+                                <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-2 md:grid-cols-4">
+                                    <div>
+                                        <Label className="text-xs">
+                                            Ledger Account
+                                        </Label>
+                                        <LedgerSearchInput />
+                                        <InputError
+                                            message={errors.voucher_no}
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label className="text-xs">
+                                            Subledger Account
+                                        </Label>
+                                        <SubLedgerSearchInput />
+                                    </div>
+                                    <div>
+                                        <Label className="text-xs">
+                                            Ref Subledger
+                                        </Label>
+                                        <SubLedgerSearchInput />
+                                    </div>
+                                    <div>
+                                        <Label className="text-xs">
+                                            Account Schedule
+                                        </Label>
+                                        <SubLedgerSearchInput />
+                                    </div>
+                                    <div className="">
+                                        <Label className="text-xs">
+                                            Particulars
+                                        </Label>
+                                        <Input
+                                            error={errors.particulars}
+                                            value={data.particulars}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'particulars',
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="h-8 text-sm"
+                                        />
+                                    </div>
+
+                                    <div className="">
+                                        <Label className="text-xs">
+                                            Debit Amount
+                                        </Label>
+                                        <Input
+                                            type="number"
+                                            error={errors.debit}
+                                            value={data.debit}
+                                            onChange={(e) =>
+                                                setData('debit', e.target.value)
+                                            }
+                                            className="h-8 text-sm"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-end">
+                                    <Button type="button" onClick={addLine}>
+                                        <Plus className="h-4 w-4" /> Add Line
+                                    </Button>
+                                </div>
+
+                                <div className="">
+                                    {/* Table header */}
+                                    <div className="bg-secondary/30 px-2">
+                                        <table className="w-full table-fixed border-collapse">
+                                            <thead className="sticky top-0">
+                                                <tr className="">
+                                                    <th className="w-8/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                                        Ledger & Sub-Ledger, Ref
+                                                        Sub-Ledger
+                                                    </th>
+                                                    <th className="w-3/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                                        Credit Amount
+                                                    </th>
+                                                    <th className="w-1/12 border-b border-border p-2 text-center text-sm font-medium text-muted-foreground">
+                                                        Action
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+
+                                    {/* Scrollable body */}
+                                    <div className="h-[calc(100vh/2-86px)] overflow-y-auto bg-muted/40 p-2">
+                                        <table className="w-full table-fixed border-separate border-spacing-y-2">
+                                            <tbody>
+                                                {data.lines.map(
+                                                    (line, index) => (
+                                                        <tr
+                                                            key={line.id}
+                                                            className="rounded-md odd:bg-secondary/50 even:bg-primary/20"
+                                                        >
+                                                            {/* Ledger info */}
+                                                            <td className="w-8/12 border border-destructive align-middle">
+                                                                <div className="-mt-1 flex items-center justify-end border-x border-border px-2 py-1">
+                                                                    <div className="flex gap-2">
+                                                                        <span className="text-xs text-muted-foreground underline">
+                                                                            10001
+                                                                            -
+                                                                            Saving
+                                                                            Deposit
+                                                                        </span>
+                                                                        <span className="text-xs text-muted-foreground underline">
+                                                                            John
+                                                                            Doe
+                                                                            -
+                                                                            10000014
+                                                                            -
+                                                                            Personal
+                                                                        </span>
+                                                                        <span className="text-xs text-muted-foreground underline">
+                                                                            Saving
+                                                                            Ref
+                                                                            Subledger
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                {line.particulars && (
+                                                                    <div className="-mt-1 flex items-center justify-end border-x border-border px-2">
+                                                                        <span className="text-xs text-muted-foreground underline">
+                                                                            {
+                                                                                line.particulars
+                                                                            }
+                                                                        </span>
+                                                                    </div>
+                                                                )}
+                                                            </td>
+
+                                                            {/* Amount */}
+                                                            <td className="w-3/12 align-middle">
+                                                                <Input
+                                                                    type="number"
+                                                                    value={
+                                                                        line.credit ||
+                                                                        ''
+                                                                    }
+                                                                    onChange={(
+                                                                        e,
+                                                                    ) =>
+                                                                        handleLineChange(
+                                                                            index,
+                                                                            'credit',
+                                                                            Number(
+                                                                                e
+                                                                                    .target
+                                                                                    .value,
+                                                                            ),
+                                                                        )
+                                                                    }
+                                                                    className="h-8 rounded-none text-sm"
+                                                                />
+                                                            </td>
+
+                                                            <td className="w-1/12 text-center align-middle">
+                                                                <button
+                                                                    className="flex h-full w-full items-center justify-center"
+                                                                    onClick={() =>
+                                                                        handleDeleteLine(
+                                                                            index,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <Trash2 className="h-6 w-6 text-destructive" />
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    ),
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {/* Table footer */}
+                                    <table className="w-full table-fixed border-collapse">
+                                        <tfoot>
+                                            <tr className="bg-muted font-medium">
+                                                <td className="w-8/12 p-2">
+                                                    <div className="text-sm text-destructive">
+                                                        Debit total: , Credit
+                                                        total: . Both must be
+                                                        equal and greater than
+                                                        zero.
+                                                    </div>
+                                                </td>
+
+                                                <td className="w-3/12 p-2">
+                                                    {`Total: ${formatBDTCurrency(
+                                                        creditTotal,
+                                                    )}`}
+                                                </td>
+                                                <td className="w-1/12 p-2"></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+
+                                <div className="mt-2 flex justify-end">
+                                    <Button
+                                        type="submit"
+                                        disabled={processing || !isBalanced}
+                                        className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2 font-medium text-primary-foreground shadow-md transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        {processing ? (
+                                            <Loader2 className="h-5 w-5 animate-spin" />
+                                        ) : (
+                                            <CheckCheck className="h-5 w-5" />
+                                        )}
+                                        <span>Submit</span>
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div className="flex flex-col gap-6 md:col-span-4">
                         {/* Voucher Header */}
-                        <div className="space-y-4 rounded-md border border-border bg-muted/30 p-3">
-                            <h2 className="border-b border-border pb-1 text-sm font-medium text-primary">
+                        <div className="space-y-2 rounded-md border border-border bg-muted/30 p-3">
+                            <h2 className="border-b border-border pb-3 text-sm font-medium text-primary">
                                 Voucher Header
                             </h2>
                             <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-2 md:grid-cols-2">
@@ -269,7 +499,7 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                                             },
                                             {
                                                 value: 'DEBIT_OR_PAYMENT',
-                                                label: 'Debit/Payment',
+                                                label: 'Credit/Receipt',
                                             },
                                             {
                                                 value: 'JOURNAL_OR_NON_CASH',
@@ -410,8 +640,8 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                         </div>
 
                         {/* Cash Ledger */}
-                        <div className="space-y-4 rounded-md border border-border bg-muted/30 p-3">
-                            <h2 className="border-b border-border pb-1 text-sm font-medium text-primary">
+                        <div className="space-y-2 rounded-md border border-border bg-muted/30 p-3">
+                            <h2 className="border-b border-border pb-3 text-sm font-medium text-primary">
                                 Cash Ledger
                             </h2>
                             <div className="grid grid-cols-1 gap-x-3 md:grid-cols-2">
@@ -561,269 +791,6 @@ export default function DebitVoucherEntry({ backUrl }: { backUrl: string }) {
                                     />
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <div className="md:col-span-8">
-                        {/* Voucher Lines */}
-                        <div className="space-y-2">
-                            <div className="space-y-4 rounded-md border border-border bg-muted/30 p-3">
-                                <h2 className="border-b border-border pb-1 text-sm font-medium text-primary">
-                                    Line Item
-                                </h2>
-                                <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-2 md:grid-cols-3">
-                                    <div>
-                                        <Label className="text-xs">
-                                            Ledger Account
-                                        </Label>
-                                        <LedgerSearchInput />
-                                        <InputError
-                                            message={errors.voucher_no}
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label className="text-xs">
-                                            Subledger Account
-                                        </Label>
-                                        <SubLedgerSearchInput />
-                                    </div>
-                                    <div>
-                                        <Label className="text-xs">
-                                            Ref Subledger
-                                        </Label>
-                                        <SubLedgerSearchInput />
-                                    </div>
-                                    <div className="">
-                                        <Label className="text-xs">
-                                            Particulars
-                                        </Label>
-                                        <Input
-                                            error={errors.particulars}
-                                            value={data.particulars}
-                                            onChange={(e) =>
-                                                setData(
-                                                    'particulars',
-                                                    e.target.value,
-                                                )
-                                            }
-                                            className="h-8 text-sm"
-                                        />
-                                    </div>
-                                    <div className="">
-                                        <Label className="text-xs">Debit</Label>
-                                        <Input
-                                            type="number"
-                                            error={errors.debit}
-                                            value={data.debit}
-                                            onChange={(e) =>
-                                                setData('debit', e.target.value)
-                                            }
-                                            className="h-8 text-sm"
-                                        />
-                                    </div>
-                                    <div className="">
-                                        <Label className="text-xs">
-                                            Credit
-                                        </Label>
-                                        <Input
-                                            type="number"
-                                            error={errors.credit}
-                                            value={data.credit}
-                                            onChange={(e) =>
-                                                setData(
-                                                    'credit',
-                                                    e.target.value,
-                                                )
-                                            }
-                                            className="h-8 text-sm"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <h3 className="font-medium text-primary">
-                                    Voucher Lines
-                                </h3>
-                                <Button type="button" onClick={addLine}>
-                                    <Plus className="h-4 w-4" /> Add Line
-                                </Button>
-                            </div>
-
-                            {/* Table */}
-                            <div className="rounded-md border border-border md:block">
-                                {/* Scroll container with fixed height */}
-                                <div className="rounded-md border border-border md:block">
-                                    {/* Table header */}
-                                    <div className="bg-secondary/30 px-2">
-                                        <table className="w-full table-fixed border-collapse">
-                                            <thead className="sticky top-0">
-                                                <tr className="">
-                                                    <th className="w-8/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
-                                                        Ledger & Sub-Ledger, Ref
-                                                        Sub-Ledger
-                                                    </th>
-                                                    <th className="w-3/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
-                                                        Debit
-                                                    </th>
-                                                    <th className="w-3/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
-                                                        Credit
-                                                    </th>
-                                                    <th className="w-1/12 border-b border-border p-2 text-center text-sm font-medium text-muted-foreground">
-                                                        Action
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                        </table>
-                                    </div>
-
-                                    {/* Scrollable body */}
-                                    <div className="h-[calc(100vh/2-86px)] overflow-y-auto bg-muted/40 p-2">
-                                        <table className="w-full table-fixed border-separate border-spacing-y-2">
-                                            <tbody>
-                                                {data.lines.map(
-                                                    (line, index) => (
-                                                        <tr
-                                                            key={line.id}
-                                                            className="rounded-md odd:bg-secondary/50 even:bg-primary/20"
-                                                        >
-                                                            {/* Ledger info */}
-                                                            <td className="w-8/12 border border-destructive align-middle">
-                                                                <div className="flex h-9 items-center justify-end border-x border-border px-2">
-                                                                    <div className="flex gap-2">
-                                                                        <span className="text-xs text-muted-foreground underline">
-                                                                            10001
-                                                                            -
-                                                                            Saving
-                                                                            Deposit
-                                                                        </span>
-                                                                        <span className="text-xs text-muted-foreground underline">
-                                                                            John
-                                                                            Doe
-                                                                            -
-                                                                            10000014
-                                                                            -
-                                                                            Personal
-                                                                        </span>
-                                                                        <span className="text-xs text-muted-foreground underline">
-                                                                            Saving
-                                                                            Ref
-                                                                            Subledger
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                            {/* Amount */}
-                                                            <td className="w-3/12 align-middle">
-                                                                <Input
-                                                                    type="number"
-                                                                    value={
-                                                                        line.debit ||
-                                                                        ''
-                                                                    }
-                                                                    onChange={(
-                                                                        e,
-                                                                    ) =>
-                                                                        handleLineChange(
-                                                                            index,
-                                                                            'debit',
-                                                                            Number(
-                                                                                e
-                                                                                    .target
-                                                                                    .value,
-                                                                            ),
-                                                                        )
-                                                                    }
-                                                                    className="h-9 rounded-none border border-l-0 text-sm"
-                                                                />
-                                                            </td>
-
-                                                            {/* Amount */}
-                                                            <td className="w-3/12 align-middle">
-                                                                <Input
-                                                                    type="number"
-                                                                    value={
-                                                                        line.credit ||
-                                                                        ''
-                                                                    }
-                                                                    onChange={(
-                                                                        e,
-                                                                    ) =>
-                                                                        handleLineChange(
-                                                                            index,
-                                                                            'credit',
-                                                                            Number(
-                                                                                e
-                                                                                    .target
-                                                                                    .value,
-                                                                            ),
-                                                                        )
-                                                                    }
-                                                                    className="h-9 rounded-none border border-l-0 text-sm"
-                                                                />
-                                                            </td>
-
-                                                            <td className="w-1/12 text-center align-middle">
-                                                                <button
-                                                                    className="flex h-full w-full items-center justify-center"
-                                                                    onClick={() =>
-                                                                        handleDeleteLine(
-                                                                            index,
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    <Trash2 className="h-6 w-6 text-destructive" />
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                    ),
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                    {/* Table footer */}
-                                    <table className="w-full table-fixed border-collapse">
-                                        <tfoot>
-                                            <tr className="bg-muted font-medium">
-                                                <td className="w-8/12 p-2 text-right">
-                                                    Total:
-                                                </td>
-
-                                                <td className="w-3/12 p-2">
-                                                    {formatBDTCurrency(
-                                                        debitTotal,
-                                                    )}
-                                                </td>
-                                                <td className="w-3/12 p-2">
-                                                    {formatBDTCurrency(
-                                                        creditTotal,
-                                                    )}
-                                                </td>
-                                                <td className="w-1/12 p-2"></td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                    <div className="bg-destructive/10 p-3 text-sm text-destructive">
-                                        Debit total: , Credit total: . Both must
-                                        be equal and greater than zero.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Submit */}
-                        <div className="mt-6 flex justify-end">
-                            <Button
-                                type="submit"
-                                disabled={processing || !isBalanced}
-                                className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2 font-medium text-primary-foreground shadow-md transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                {processing ? (
-                                    <Loader2 className="h-5 w-5 animate-spin" />
-                                ) : (
-                                    <CheckCheck className="h-5 w-5" />
-                                )}
-                                <span>Submit</span>
-                            </Button>
                         </div>
                     </div>
                 </div>

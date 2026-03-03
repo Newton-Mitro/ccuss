@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import { Link, usePage } from '@inertiajs/react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { SidebarItem } from '../types';
@@ -12,6 +13,17 @@ interface Props {
     sidebarOpen: boolean;
     menuAction?: 'expand-all' | 'collapse-all' | null;
 }
+
+const borderColors = [
+    'border-l-red-400',
+    'border-l-blue-400',
+    'border-l-green-400',
+    'border-l-yellow-400',
+    'border-l-purple-400',
+    'border-l-pink-400',
+    'border-l-cyan-400',
+    'border-l-amber-400',
+];
 
 /** Recursively check if item or its children are active */
 function isItemActive(item: SidebarItem, url: string): boolean {
@@ -39,6 +51,14 @@ export function SidebarMenuItem({
             item.children.some((c) => isItemActive(c, url)),
         [item.children, url],
     );
+
+    const colorIndex =
+        Math.abs(
+            item.name
+                .split('')
+                .reduce((acc, char) => acc + char.charCodeAt(0), 0),
+        ) % borderColors.length;
+    const borderColor = borderColors[colorIndex];
 
     const storageKey = `${STORAGE_KEY}:${item.name}`;
 
@@ -81,7 +101,7 @@ export function SidebarMenuItem({
         : undefined;
 
     const containerClasses = cn(
-        'block w-full rounded-md transition-colors',
+        'block w-full rounded-md text-sm transition-colors',
         'hover:bg-muted',
         isSelfActive && 'bg-muted font-medium text-primary',
         hasActiveChild &&
@@ -89,7 +109,7 @@ export function SidebarMenuItem({
             'border-l-2 border-primary/60 bg-muted/50 text-primary',
     );
 
-    const contentClasses = 'flex w-full h-full items-center gap-3 px-3 py-2';
+    const contentClasses = 'flex w-full h-full items-center gap-2 px-3 py-2';
 
     return (
         <li className="w-full">
@@ -128,19 +148,30 @@ export function SidebarMenuItem({
                 </button>
             )}
 
-            {hasChildren && open && sidebarOpen && (
-                <ul className="mt-1 space-y-1">
-                    {item.children!.map((child, idx) => (
-                        <SidebarMenuItem
-                            key={`${child.name}-${idx}`}
-                            item={child}
-                            level={level + 1}
-                            sidebarOpen={sidebarOpen}
-                            menuAction={menuAction}
-                        />
-                    ))}
-                </ul>
-            )}
+            <AnimatePresence initial={false}>
+                {hasChildren && open && sidebarOpen && (
+                    <motion.ul
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.35, ease: 'easeInOut' }}
+                        className={cn(
+                            'mt-1 space-y-1 border-l bg-primary/10',
+                            borderColor, // 🎨 dynamic color class
+                        )}
+                    >
+                        {item.children!.map((child, idx) => (
+                            <SidebarMenuItem
+                                key={`${child.name}-${idx}`}
+                                item={child}
+                                level={level + 1}
+                                sidebarOpen={sidebarOpen}
+                                menuAction={menuAction}
+                            />
+                        ))}
+                    </motion.ul>
+                )}
+            </AnimatePresence>
         </li>
     );
 }

@@ -171,40 +171,38 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
             {data?.id ? (
                 // Loaded customer
                 <div className="mt-3 flex flex-col gap-4 rounded-md border bg-background/60 p-3 md:flex-row">
-                    {/* Avatar */}
-                    <div className="h-20 w-20 overflow-hidden rounded-full border bg-muted">
-                        {data.photo?.url ? (
-                            <img
-                                src={data.photo.url}
-                                alt={data.name}
-                                className="h-full w-full object-cover"
-                            />
-                        ) : (
-                            <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
-                                {data.name.charAt(0)}
-                            </div>
-                        )}
+                    <div className="flex items-center justify-center">
+                        {/* Avatar */}
+                        <div className="h-20 w-20 overflow-hidden rounded-full border bg-muted">
+                            {data.photo?.url ? (
+                                <img
+                                    src={data.photo.url}
+                                    alt={data.name}
+                                    className="h-full w-full object-cover"
+                                />
+                            ) : (
+                                <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
+                                    {data.name.charAt(0)}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Info */}
-                    <div className="flex-1 space-y-2">
+                    <div className="flex-1 space-y-1">
                         <div>
                             <button
                                 onClick={() => setOpen(true)}
                                 className="text-sm font-semibold underline hover:cursor-pointer"
                             >
-                                {data.name}
+                                {`${data.name} • ${data.customer_no}`}
                             </button>
                             <p className="text-xs text-muted-foreground">
-                                {data.type} • {data.status}
+                                {data.status} • {data.type}
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-3">
-                            <Info
-                                label="Customer No"
-                                value={data.customer_no}
-                            />
+                        <div className="grid grid-cols-1 gap-1 text-xs md:grid-cols-4">
                             <Info label="Phone" value={data.phone} />
                             <Info label="Email" value={data.email} />
                             <Info
@@ -221,11 +219,13 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
             ) : (
                 // Skeleton with exact same height
                 <div className="mt-3 flex flex-col gap-4 rounded-md border bg-background/60 p-3 md:flex-row">
-                    {/* Avatar */}
-                    <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-full bg-muted" />
+                    <div className="flex items-center justify-center">
+                        {/* Avatar */}
+                        <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-full bg-muted" />
+                    </div>
 
                     {/* Right side */}
-                    <div className="flex flex-1 flex-col justify-between space-y-3">
+                    <div className="flex flex-1 flex-col justify-between space-y-2">
                         {/* Name & type row */}
                         <div className="space-y-1">
                             <div className="h-4 w-3/5 rounded bg-muted" />{' '}
@@ -235,8 +235,7 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
                         </div>
 
                         {/* Grid info row */}
-                        <div className="grid grid-cols-1 gap-3 text-xs sm:grid-cols-3">
-                            <div className="h-8 w-full rounded bg-muted" />
+                        <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-4">
                             <div className="h-8 w-full rounded bg-muted" />
                             <div className="h-8 w-full rounded bg-muted" />
                             <div className="h-8 w-full rounded bg-muted" />

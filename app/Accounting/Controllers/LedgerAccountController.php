@@ -67,11 +67,19 @@ class LedgerAccountController extends Controller
     /**
      * Index page
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        $periodId = 2;
         $glAccounts = LedgerAccount::query()
             ->whereNull('parent_id')
-            ->with('childrenRecursive')
+            ->with([
+                'childrenRecursive',
+                'balances' => function ($q) use ($periodId) {
+                    if ($periodId) {
+                        $q->where('fiscal_period_id', $periodId);
+                    }
+                }
+            ])
             ->orderBy('code')
             ->get();
 

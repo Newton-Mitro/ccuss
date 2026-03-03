@@ -5,6 +5,7 @@ namespace App\DailyTransactions\Controllers;
 use App\Accounting\Models\FiscalPeriod;
 use App\Accounting\Models\FiscalYear;
 use App\Accounting\Models\LedgerAccount;
+use App\Accounting\Models\Voucher;
 use App\Branch\Models\Branch;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
@@ -16,9 +17,10 @@ class DailyCollectionController extends Controller
     public function index(Request $request)
     {
 
-        $cashLedgerId = $request->input('cash_ledger_id');
-        $cashSubledgerId = $request->input('cash_subledger_id');
-        $cashLedger = LedgerAccount::find($cashLedgerId);
+        $cashLedger = LedgerAccount::where([
+            ['name', 'Cash in Hand'],
+            ['is_active', true],
+        ])->first();
 
         $cashControl = LedgerAccount::where([
             ['name', 'Cash'],
@@ -35,26 +37,44 @@ class DailyCollectionController extends Controller
             : collect();
 
         $cashSubledgers = $cashLedger ? $cashLedgers : [];
+        $vouchers = Voucher::where('voucher_type', 'CREDIT_OR_RECEIPT')->where('status', 'POSTED')->get();
 
-        return Inertia::render('daily-transactions/daily-collection-page', [
+        return Inertia::render('teller-transactions/CustomerCashCollectionPage', [
             'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
-            'fiscalYears' => FiscalYear::select('id', 'code')->get(),
-            'fiscalPeriods' => FiscalPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
+            'fiscal_years' => FiscalYear::select('id', 'code')->get(),
+            'fiscal_periods' => FiscalPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
             'branches' => Branch::select('id', 'name')->get(),
-            'cashLedgerId' => $cashLedgerId,
-            'cashLedgers' => $cashLedgers,
-            'cashSubledgerId' => $cashSubledgerId,
-            'cashSubledgers' => $cashSubledgers,
-            'activeFiscalYearId' => optional(FiscalYear::where('is_active', true)->first())->id,
-            'activeFiscalPeriodId' => optional(
+            'cash_ledgers' => $cashLedgers,
+            'cash_subledgers' => $cashSubledgers,
+            'lines' => [
+                [
+                    'id' => 0,
+                    'voucher_id' => 0,
+                    'ledger_account_id' => $cashLedger->id,
+                    'ledger_account' => $cashLedger,
+                    'subledger_id' => null,
+                    'subledger_type' => null,
+                    'subledger' => null,
+                    'reference_id' => null,
+                    'reference_type' => null,
+                    'reference' => null,
+                    'instrument_type' => 'CASH',
+                    'instrument_no' => null,
+                    'debit' => 0,
+                    'credit' => 0,
+                    'particulars' => 'Cash in Hand',
+
+                ],
+            ],
+            'vouchers' => $vouchers,
+            'user_branch_id' => auth()->user()->branch_id,
+            'fiscal_year_id' => optional(FiscalYear::where('is_active', true)->first())->id,
+            'fiscal_period_id' => optional(
                 FiscalPeriod::where('is_open', true)
                     ->whereMonth('start_date', Carbon::now()->month)
                     ->whereYear('start_date', Carbon::now()->year)
                     ->first()
             )->id,
-            'userBranchId' => auth()->user()->branch_id,
-            'backUrl' => route('vouchers.index'),
-            'filters' => $request->only(['event', 'user_id', 'page', 'per_page']),
         ]);
     }
 

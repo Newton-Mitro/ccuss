@@ -12,8 +12,8 @@ import { cn } from '@/lib/utils';
 import { logout } from '@/routes';
 import { Link, router, usePage } from '@inertiajs/react';
 import {
+    ExpandIcon,
     ListCollapse,
-    ListPlus,
     LogOut,
     Menu,
     Search,
@@ -174,7 +174,7 @@ export default function CustomAuthLayout({
                     <span
                         className={cn(
                             'font-semibold transition-opacity',
-                            sidebarOpen ? 'opacity-100' : 'w-0 opacity-0',
+                            sidebarOpen ? 'inline-block' : 'hidden w-0',
                         )}
                     >
                         CCUSS
@@ -203,7 +203,7 @@ export default function CustomAuthLayout({
                         className="rounded p-1 hover:bg-muted"
                         title="Expand all"
                     >
-                        <ListPlus size={18} />
+                        <ExpandIcon size={18} />
                     </button>
                     <button
                         onClick={() => applyMenuAction('collapse-all')}
@@ -219,7 +219,7 @@ export default function CustomAuthLayout({
                     ref={sidebarScrollRef}
                     className="h-[calc(100%-8rem)] overflow-y-auto px-2 pb-4"
                 >
-                    <ul className="space-y-1">
+                    <ul className="space-y-0">
                         {filteredMenu.map((item, index) => (
                             <SidebarMenuItem
                                 key={`${item.name}-${index}`}

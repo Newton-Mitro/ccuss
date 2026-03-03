@@ -169,6 +169,10 @@
     --sidebar-ring: var(--ring);
 }
 
+* {
+    @apply border-border font-roboto;
+}
+
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;

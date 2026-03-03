@@ -87,7 +87,7 @@ class VoucherController extends Controller
 
         $cashSubledgers = $cashLedger ? $cashLedgers : [];
 
-        return Inertia::render('accounting/vouchers/debit_voucher', [
+        return Inertia::render('accounting/vouchers/create/debit_voucher_entry_page', [
             'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
             'fiscalYears' => FiscalYear::select('id', 'code')->get(),
             'fiscalPeriods' => FiscalPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
@@ -108,19 +108,133 @@ class VoucherController extends Controller
         ]);
     }
 
-    public function createCreditVoucher(): Response
+    public function createCreditVoucher(Request $request): Response
     {
-        return $this->simpleVoucherView('credit_voucher');
+        $cashLedgerId = $request->input('cash_ledger_id');
+        $cashSubledgerId = $request->input('cash_subledger_id');
+        $cashLedger = LedgerAccount::find($cashLedgerId);
+
+        $cashControl = LedgerAccount::where([
+            ['name', 'Cash'],
+            ['is_control_account', true],
+            ['is_active', true],
+        ])->first();
+
+        $cashLedgers = $cashControl
+            ? LedgerAccount::where('parent_id', $cashControl->id)
+                ->where('is_active', true)
+                ->where('is_control_account', false)
+                ->orderBy('code')
+                ->get()
+            : collect();
+
+        $cashSubledgers = $cashLedger ? $cashLedgers : [];
+
+        return Inertia::render('accounting/vouchers/create/credit_voucher_entry_page', [
+            'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
+            'fiscalYears' => FiscalYear::select('id', 'code')->get(),
+            'fiscalPeriods' => FiscalPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
+            'branches' => Branch::select('id', 'name')->get(),
+            'cashLedgerId' => $cashLedgerId,
+            'cashLedgers' => $cashLedgers,
+            'cashSubledgerId' => $cashSubledgerId,
+            'cashSubledgers' => $cashSubledgers,
+            'activeFiscalYearId' => optional(FiscalYear::where('is_active', true)->first())->id,
+            'activeFiscalPeriodId' => optional(
+                FiscalPeriod::where('is_open', true)
+                    ->whereMonth('start_date', Carbon::now()->month)
+                    ->whereYear('start_date', Carbon::now()->year)
+                    ->first()
+            )->id,
+            'userBranchId' => auth()->user()->branch_id,
+            'backUrl' => route('vouchers.index'),
+        ]);
     }
 
-    public function createJournalVoucher(): Response
+    public function createJournalVoucher(Request $request): Response
     {
-        return $this->simpleVoucherView('journal_voucher');
+        $cashLedgerId = $request->input('cash_ledger_id');
+        $cashSubledgerId = $request->input('cash_subledger_id');
+        $cashLedger = LedgerAccount::find($cashLedgerId);
+
+        $cashControl = LedgerAccount::where([
+            ['name', 'Cash'],
+            ['is_control_account', true],
+            ['is_active', true],
+        ])->first();
+
+        $cashLedgers = $cashControl
+            ? LedgerAccount::where('parent_id', $cashControl->id)
+                ->where('is_active', true)
+                ->where('is_control_account', false)
+                ->orderBy('code')
+                ->get()
+            : collect();
+
+        $cashSubledgers = $cashLedger ? $cashLedgers : [];
+
+        return Inertia::render('accounting/vouchers/create/journal_voucher_entry_page', [
+            'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
+            'fiscalYears' => FiscalYear::select('id', 'code')->get(),
+            'fiscalPeriods' => FiscalPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
+            'branches' => Branch::select('id', 'name')->get(),
+            'cashLedgerId' => $cashLedgerId,
+            'cashLedgers' => $cashLedgers,
+            'cashSubledgerId' => $cashSubledgerId,
+            'cashSubledgers' => $cashSubledgers,
+            'activeFiscalYearId' => optional(FiscalYear::where('is_active', true)->first())->id,
+            'activeFiscalPeriodId' => optional(
+                FiscalPeriod::where('is_open', true)
+                    ->whereMonth('start_date', Carbon::now()->month)
+                    ->whereYear('start_date', Carbon::now()->year)
+                    ->first()
+            )->id,
+            'userBranchId' => auth()->user()->branch_id,
+            'backUrl' => route('vouchers.index'),
+        ]);
     }
 
-    public function createContraVoucher(): Response
+    public function createContraVoucher(Request $request): Response
     {
-        return $this->simpleVoucherView('contra_voucher');
+        $cashLedgerId = $request->input('cash_ledger_id');
+        $cashSubledgerId = $request->input('cash_subledger_id');
+        $cashLedger = LedgerAccount::find($cashLedgerId);
+
+        $cashControl = LedgerAccount::where([
+            ['name', 'Cash'],
+            ['is_control_account', true],
+            ['is_active', true],
+        ])->first();
+
+        $cashLedgers = $cashControl
+            ? LedgerAccount::where('parent_id', $cashControl->id)
+                ->where('is_active', true)
+                ->where('is_control_account', false)
+                ->orderBy('code')
+                ->get()
+            : collect();
+
+        $cashSubledgers = $cashLedger ? $cashLedgers : [];
+
+        return Inertia::render('accounting/vouchers/create/contra_voucher_entry_page', [
+            'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
+            'fiscalYears' => FiscalYear::select('id', 'code')->get(),
+            'fiscalPeriods' => FiscalPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
+            'branches' => Branch::select('id', 'name')->get(),
+            'cashLedgerId' => $cashLedgerId,
+            'cashLedgers' => $cashLedgers,
+            'cashSubledgerId' => $cashSubledgerId,
+            'cashSubledgers' => $cashSubledgers,
+            'activeFiscalYearId' => optional(FiscalYear::where('is_active', true)->first())->id,
+            'activeFiscalPeriodId' => optional(
+                FiscalPeriod::where('is_open', true)
+                    ->whereMonth('start_date', Carbon::now()->month)
+                    ->whereYear('start_date', Carbon::now()->year)
+                    ->first()
+            )->id,
+            'userBranchId' => auth()->user()->branch_id,
+            'backUrl' => route('vouchers.index'),
+        ]);
     }
 
     /* =====================================================
@@ -365,14 +479,5 @@ class VoucherController extends Controller
         ];
     }
 
-    private function simpleVoucherView(string $view): Response
-    {
-        return Inertia::render("accounting/vouchers/{$view}", [
-            'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
-            'fiscalYears' => FiscalYear::select('id', 'code')->get(),
-            'fiscalPeriods' => FiscalPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
-            'branches' => Branch::select('id', 'name')->get(),
-            'backUrl' => route('vouchers.index'),
-        ]);
-    }
+
 }
