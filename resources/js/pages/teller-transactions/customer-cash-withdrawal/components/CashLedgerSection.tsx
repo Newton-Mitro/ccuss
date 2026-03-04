@@ -26,7 +26,7 @@ function CashLedgerSection({
                 <h2 className="text-sm font-medium">Cash Ledger</h2>
             </div>
 
-            <div className="grid grid-cols-1 gap-x-3 p-3 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-x-3 p-3 md:grid-cols-2">
                 {/* Cash Ledger */}
                 <div>
                     <Label className="text-xs">Cash Ledger Account</Label>

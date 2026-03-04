@@ -31,7 +31,7 @@ function VoucherHeaderSection({
                 </span>
             </div>
 
-            <div className="grid grid-cols-1 gap-x-3 p-3 sm:grid-cols-2 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-x-3 p-3 sm:grid-cols-2 md:grid-cols-2">
                 {/* Voucher Type */}
                 <div>
                     <Label className="text-xs">Voucher Type</Label>
