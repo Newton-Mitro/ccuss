@@ -142,9 +142,9 @@ export default function CustomerCashWithdrawalPage() {
 
         data.lines.forEach((line: VoucherLine) => {
             if (line.ledger_account?.code === '1111') {
-                debit.push(line);
-            } else {
                 credit.push(line);
+            } else {
+                debit.push(line);
             }
         });
 
@@ -176,31 +176,9 @@ export default function CustomerCashWithdrawalPage() {
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
             },
-            {
-                id: -Date.now() - 1,
-                voucher_id: 0,
-                ledger_account_id: null,
-                ledger_account: null,
-                subledger_id: null,
-                subledger_type: null,
-                subledger: null,
-                reference_id: null,
-                reference_type: null,
-                reference: null,
-                instrument_type: 'CASH',
-                instrument_no: null,
-                particulars: null,
-                debit: 0,
-                credit: 0,
-                created_by: null,
-                updated_by: null,
-                is_selected: true,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-            },
         ];
 
-        setData('lines', newLines);
+        setData('lines', [...creditLines, ...newLines]);
         setData(
             'narration',
             `Withdrawal by "${customer.name}" (${customer.customer_no}) via cash counter.`,
@@ -281,7 +259,9 @@ export default function CustomerCashWithdrawalPage() {
 
                         {/* Cash Ledger Section */}
                         <CashLedgerSection
-                            data={debitLines.length > 0 ? debitLines[0] : data}
+                            data={
+                                creditLines.length > 0 ? creditLines[0] : data
+                            }
                             errors={errors}
                             setData={setData}
                             cash_ledgers={cash_ledgers}

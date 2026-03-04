@@ -200,7 +200,7 @@ export default function CustomerCashDepositPage() {
             },
         ];
 
-        setData('lines', newLines);
+        setData('lines', [...debitLines, ...newLines]);
         setData(
             'narration',
             `Deposit to "${customer.name}" (${customer.customer_no}) via cash counter.`,

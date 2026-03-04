@@ -89,7 +89,7 @@ function WithdrawalLedgerSection({
             {/* Main Grid */}
             <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
                 {/* Left Card */}
-                <div className="space-y-4 rounded-lg border border-border bg-card p-4 md:col-span-4">
+                <div className="space-y-2 rounded-lg border border-border bg-card p-4 md:col-span-4">
                     <h3 className="text-sm font-semibold text-muted-foreground">
                         Account Details
                     </h3>
@@ -156,12 +156,12 @@ function WithdrawalLedgerSection({
                     )}
 
                     {/* Account Holders Scrollable */}
-                    <div className="mt-4 space-y-1">
+                    <div className="mt-3 space-y-1">
                         <Label className="text-xs font-medium">
                             Account Holders
                         </Label>
 
-                        <div className="max-h-40 space-y-1 overflow-y-auto rounded-md border border-border bg-accent/10 p-2">
+                        <div className="max-h-48 space-y-1 overflow-y-auto rounded-md border border-border bg-accent/10 p-2">
                             {[
                                 {
                                     id: 1,
@@ -239,13 +239,13 @@ function WithdrawalLedgerSection({
                 </div>
 
                 {/* Right Card */}
-                <div className="flex flex-col justify-between rounded-lg border border-border bg-card p-4 md:col-span-8">
+                <div className="flex flex-col justify-between gap-3 rounded-lg border border-border bg-card p-4 md:col-span-8">
                     <div>
                         <h3 className="text-sm font-semibold text-muted-foreground">
                             Signature Verification
                         </h3>
 
-                        <div className="mt-3 flex h-60 items-center justify-center rounded-md border border-dashed border-muted text-xs text-muted-foreground">
+                        <div className="mt-2 flex h-60 items-center justify-center rounded-md border border-dashed border-muted text-xs text-muted-foreground">
                             <div
                                 style={{
                                     height: 240,
@@ -283,6 +283,36 @@ function WithdrawalLedgerSection({
                         <div className="">
                             <Label className="text-xs font-medium">
                                 Instrument Number
+                            </Label>
+                            <Select
+                                value={selectedAccount}
+                                onChange={(e) =>
+                                    setSelectedAccount(e.target.value)
+                                }
+                                options={accounts.map((acc) => ({
+                                    value: acc.value,
+                                    label: acc.value,
+                                }))}
+                            />
+                        </div>
+                        <div className="">
+                            <Label className="text-xs font-medium">
+                                Instrument Date
+                            </Label>
+                            <Select
+                                value={selectedAccount}
+                                onChange={(e) =>
+                                    setSelectedAccount(e.target.value)
+                                }
+                                options={accounts.map((acc) => ({
+                                    value: acc.value,
+                                    label: acc.value,
+                                }))}
+                            />
+                        </div>
+                        <div className="">
+                            <Label className="text-xs font-medium">
+                                Paid To
                             </Label>
                             <Select
                                 value={selectedAccount}

@@ -73,7 +73,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Customer" />
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <HeadingSmall
                     title="Create Customer"
                     description="Customer onboarding."
@@ -99,8 +99,32 @@ const Create = ({ backUrl }: { backUrl: string }) => {
             </div>
             <form
                 onSubmit={handleSubmit}
-                className="mt-4 space-y-6 rounded-md border border-border bg-card p-4 sm:p-6"
+                className="w-full space-y-4 rounded-md border border-border bg-card p-4 sm:p-6 lg:w-5xl"
             >
+                <div className="flex flex-col gap-4">
+                    <div className="">
+                        {photoPreview && (
+                            <img
+                                src={photoPreview}
+                                alt="Preview"
+                                className="h-20 w-20 rounded-md border object-cover sm:h-24 sm:w-24"
+                            />
+                        )}
+                    </div>
+                    {/* PHOTO */}
+
+                    <div className="flex items-center gap-1">
+                        <Label className="text-xs">Photo</Label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handlePhotoChange}
+                            className="h-8 rounded-md border border-border px-2 py-1 text-sm"
+                        />
+                        <InputError message={errors.photo} />
+                    </div>
+                </div>
+
                 {/* BASIC INFO */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div>
@@ -172,7 +196,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
 
                 {/* PERSONAL DETAILS */}
                 {data.type === 'Individual' && (
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-x-4 md:grid-cols-2 lg:grid-cols-3">
                         <div>
                             <Label className="text-xs">DOB</Label>
                             <AppDatePicker
@@ -220,7 +244,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
                 )}
 
                 {/* IDENTIFICATION */}
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-x-4 md:grid-cols-2 lg:grid-cols-3">
                     <div>
                         <Label className="text-xs">Identification Type</Label>
                         <select
@@ -261,29 +285,8 @@ const Create = ({ backUrl }: { backUrl: string }) => {
                     </div>
                 </div>
 
-                {/* PHOTO */}
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                    <div>
-                        <Label className="text-xs">Photo</Label>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handlePhotoChange}
-                            className="rounded-md border border-border p-1 text-sm"
-                        />
-                        <InputError message={errors.photo} />
-                    </div>
-                    {photoPreview && (
-                        <img
-                            src={photoPreview}
-                            alt="Preview"
-                            className="h-20 w-20 rounded-md border object-cover sm:h-24 sm:w-24"
-                        />
-                    )}
-                </div>
-
                 {/* KYC & STATUS */}
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-x-4 md:grid-cols-2 lg:grid-cols-3">
                     <div>
                         <Label className="text-xs">KYC Status</Label>
                         <select
@@ -318,7 +321,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
                 </div>
 
                 {/* SUBMIT */}
-                <div className="mt-4 flex justify-end">
+                <div className="flex justify-end">
                     <Button
                         type="submit"
                         disabled={processing}
