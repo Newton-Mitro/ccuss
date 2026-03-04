@@ -165,8 +165,7 @@ return new class extends Migration {
                 ->nullable()
                 ->comment('External reference number');
 
-            $table->decimal('total_debit', 18, 2)->default(0);
-            $table->decimal('total_credit', 18, 2)->default(0);
+            $table->decimal('total_amount', 18, 2)->default(0);
 
             $table->foreignId('created_by')->constrained('users');
             $table->foreignId('posted_by')->nullable()->constrained('users');
@@ -177,7 +176,7 @@ return new class extends Migration {
             $table->timestamp('rejected_at')->nullable();
 
             $table->text('narration')->comment('Description or remarks');
-            $table->enum('status', ['DRAFT', 'APPROVED', 'POSTED', 'CANCELLED'])->default('DRAFT');
+            $table->enum('status', ['PENDING', 'APPROVED', 'POSTED', 'CANCELLED'])->default('PENDING');
 
             $table->timestamps();
         });

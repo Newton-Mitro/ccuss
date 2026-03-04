@@ -19,6 +19,60 @@ class DatabaseSeeder extends Seeder
         );
 
         User::firstOrCreate(
+            ['email' => 'hr.admin@email.com'],
+            [
+                'name' => 'HR Admin',
+                'password' => 'password',
+                'email_verified_at' => now(),
+            ]
+        );
+
+        User::firstOrCreate(
+            ['email' => 'teller@email.com'],
+            [
+                'name' => 'Teller',
+                'password' => 'password',
+                'email_verified_at' => now(),
+            ]
+        );
+
+        User::firstOrCreate(
+            ['email' => 'collector@email.com'],
+            [
+                'name' => 'Cash Collector',
+                'password' => 'password',
+                'email_verified_at' => now(),
+            ]
+        );
+
+        User::firstOrCreate(
+            ['email' => 'vault.admin@email.com'],
+            [
+                'name' => 'Vault Admin',
+                'password' => 'password',
+                'email_verified_at' => now(),
+            ]
+        );
+
+        User::firstOrCreate(
+            ['email' => 'account.admin@email.com'],
+            [
+                'name' => 'Account Admin',
+                'password' => 'password',
+                'email_verified_at' => now(),
+            ]
+        );
+
+        User::firstOrCreate(
+            ['email' => 'accountant@email.com'],
+            [
+                'name' => 'Accountant',
+                'password' => 'password',
+                'email_verified_at' => now(),
+            ]
+        );
+
+        User::firstOrCreate(
             ['email' => 'test.user@email.com'],
             [
                 'name' => 'Test User',
@@ -26,8 +80,6 @@ class DatabaseSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
-
-        User::factory(10)->create();
 
         $this->call([
             FiscalYearSeeder::class,

@@ -1,7 +1,6 @@
-import { Input } from '../../../components/ui/input';
-import { Label } from '../../../components/ui/label';
-import { Select } from '../../../components/ui/select';
-import { LedgerAccount } from '../../../types/accounting';
+import { Label } from '../../../../components/ui/label';
+import { Select } from '../../../../components/ui/select';
+import { LedgerAccount } from '../../../../types/accounting';
 
 interface CashLedgerSectionProps {
     data: any;
@@ -93,30 +92,6 @@ function CashLedgerSection({
                         onChange={(e) =>
                             setData('instrument_type', e.target.value)
                         }
-                    />
-                </div>
-
-                {/* Instrument Ref */}
-                <div>
-                    <Label className="text-xs">Instrument Ref</Label>
-                    <Input
-                        placeholder="Instrument No"
-                        value={data.instrument_no || ''}
-                        onChange={(e) =>
-                            setData('instrument_no', e.target.value)
-                        }
-                        className="h-8 text-sm"
-                    />
-                </div>
-
-                {/* Invoice Ref */}
-                <div>
-                    <Label className="text-xs">Bill/Invoice Ref</Label>
-                    <Input
-                        placeholder="Customer / Vendor"
-                        value={data.invoice_id || ''}
-                        onChange={(e) => setData('invoice_id', e.target.value)}
-                        className="h-8 text-sm"
                     />
                 </div>
             </div>

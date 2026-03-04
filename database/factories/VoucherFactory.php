@@ -25,7 +25,7 @@ class VoucherFactory extends Factory
             'CONTRA',                // Bank/Cash transfer within accounts
         ];
 
-        $statuses = ['DRAFT', 'APPROVED', 'POSTED', 'CANCELLED'];
+        $statuses = ['PENDING', 'APPROVED', 'POSTED', 'CANCELLED'];
         $status = $this->faker->randomElement($statuses);
 
         $creator = User::factory();

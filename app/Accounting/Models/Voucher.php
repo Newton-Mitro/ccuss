@@ -21,13 +21,13 @@ class Voucher extends Model
     |--------------------------------------------------------------------------
     */
 
-    public const STATUS_DRAFT = 'DRAFT';
+    public const STATUS_PENDING = 'PENDING';
     public const STATUS_APPROVED = 'APPROVED';
     public const STATUS_POSTED = 'POSTED';
     public const STATUS_CANCELLED = 'CANCELLED';
 
     public const STATUSES = [
-        self::STATUS_DRAFT,
+        self::STATUS_PENDING,
         self::STATUS_APPROVED,
         self::STATUS_POSTED,
         self::STATUS_CANCELLED,
@@ -97,12 +97,12 @@ class Voucher extends Model
 
     public function canEdit(): bool
     {
-        return $this->status === self::STATUS_DRAFT;
+        return $this->status === self::STATUS_PENDING;
     }
 
     public function canPost(): bool
     {
-        return $this->status === self::STATUS_DRAFT;
+        return $this->status === self::STATUS_PENDING;
     }
 
     public function canApprove(): bool

@@ -1,10 +1,10 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
-import CustomAuthLayout from '../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../types';
-import { LedgerAccount } from '../../types/accounting';
-import { Customer } from '../../types/customer';
+import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { BreadcrumbItem } from '../../../types';
+import { LedgerAccount } from '../../../types/accounting';
+import { Customer } from '../../../types/customer';
 import CashLedgerSection from './components/CashLedgerSection';
 import CollectionLedgersSection from './components/CollectionLedgersSection';
 import VoucherHeaderSection from './components/VoucherHeaderSection';
@@ -90,7 +90,7 @@ interface VoucherFormData {
 /* -------------------------------------------------------
  | Component
  ------------------------------------------------------- */
-export default function CustomerCashCollectionPage() {
+export default function CustomerCashDepositPage() {
     const {
         fiscal_years,
         fiscal_periods,
@@ -290,7 +290,15 @@ export default function CustomerCashCollectionPage() {
                         />
 
                         {/* Voucher Queue Section */}
-                        <VoucherQueueSection vouchers={vouchers} />
+                        <VoucherQueueSection
+                            vouchers={vouchers}
+                            onCollect={function (): void {
+                                throw new Error('Function not implemented.');
+                            }}
+                            onCancel={function (): void {
+                                throw new Error('Function not implemented.');
+                            }}
+                        />
                     </div>
                 </div>
             </form>

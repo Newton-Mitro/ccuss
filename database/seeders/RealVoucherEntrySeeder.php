@@ -13,6 +13,8 @@ use App\UserRolePermissions\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Nette\Utils\Random;
 
 class RealVoucherEntrySeeder extends Seeder
 {
@@ -85,6 +87,8 @@ class RealVoucherEntrySeeder extends Seeder
                 'voucher_no' => 'OB-0001',
                 'narration' => 'Opening balances for fiscal year ' . $fiscalYear->code,
                 'status' => Voucher::STATUS_POSTED,
+                'reference' => random_int(100000, 999999),
+                'total_amount' => $totalCredit,
 
                 'branch_id' => Arr::random($branches),
                 'fiscal_year_id' => $fiscalYear->id,
@@ -132,6 +136,8 @@ class RealVoucherEntrySeeder extends Seeder
                 'voucher_no' => 'PC-4001',
                 'narration' => 'Tea, snacks and miscellaneous expenses',
                 'status' => Voucher::STATUS_POSTED,
+                'reference' => random_int(100000, 999999),
+                'total_amount' => 15000,
 
                 'branch_id' => Arr::random($branches),
                 'fiscal_year_id' => $fiscalYear->id,
@@ -167,6 +173,8 @@ class RealVoucherEntrySeeder extends Seeder
                 'voucher_no' => 'CNTR-5001',
                 'narration' => 'Cash deposited into bank',
                 'status' => Voucher::STATUS_POSTED,
+                'reference' => random_int(100000, 999999),
+                'total_amount' => 15000,
 
                 'branch_id' => Arr::random($branches),
                 'fiscal_year_id' => $fiscalYear->id,
@@ -202,6 +210,8 @@ class RealVoucherEntrySeeder extends Seeder
                 'voucher_no' => 'RCPT-1002',
                 'narration' => 'Member savings deposited via bank',
                 'status' => Voucher::STATUS_POSTED,
+                'reference' => random_int(100000, 999999),
+                'total_amount' => 15000,
 
                 'branch_id' => Arr::random($branches),
                 'fiscal_year_id' => $fiscalYear->id,
@@ -237,6 +247,8 @@ class RealVoucherEntrySeeder extends Seeder
                 'voucher_no' => 'JRNL-3002',
                 'narration' => 'Office expense accrued',
                 'status' => Voucher::STATUS_POSTED,
+                'reference' => random_int(100000, 999999),
+                'total_amount' => 15000,
 
                 'branch_id' => Arr::random($branches),
                 'fiscal_year_id' => $fiscalYear->id,
@@ -272,6 +284,8 @@ class RealVoucherEntrySeeder extends Seeder
                 'voucher_no' => 'JRNL-3003',
                 'narration' => 'Expense distribution',
                 'status' => Voucher::STATUS_POSTED,
+                'reference' => random_int(100000, 999999),
+                'total_amount' => 15000,
 
                 'branch_id' => Arr::random($branches),
                 'fiscal_year_id' => $fiscalYear->id,
@@ -313,6 +327,8 @@ class RealVoucherEntrySeeder extends Seeder
                 'voucher_no' => 'INC-7001',
                 'narration' => 'Loan interest received from member',
                 'status' => Voucher::STATUS_POSTED,
+                'reference' => random_int(100000, 999999),
+                'total_amount' => 15000,
 
                 'branch_id' => Arr::random($branches),
                 'fiscal_year_id' => $fiscalYear->id,
@@ -335,6 +351,39 @@ class RealVoucherEntrySeeder extends Seeder
                     'ledger_account_id' => $loanInterestIncome->id,
                     'debit' => 0,
                     'credit' => 15000,
+                ],
+            ]);
+
+            $voucher = Voucher::create([
+                'voucher_date' => now(),
+                'voucher_type' => 'CREDIT_OR_RECEIPT',
+                'voucher_no' => 'INC-7001',
+                'narration' => 'Loan interest received from member',
+                'status' => Voucher::STATUS_PENDING,
+                'reference' => random_int(100000, 999999),
+                'total_amount' => 1500,
+
+                'branch_id' => Arr::random($branches),
+                'fiscal_year_id' => $fiscalYear->id,
+                'fiscal_period_id' => Arr::random($fiscalPeriods),
+
+                'created_by' => $user->id,
+                'posted_by' => $user->id,
+                'posted_at' => now(),
+            ]);
+
+            VoucherLine::insert([
+                [
+                    'voucher_id' => $voucher->id,
+                    'ledger_account_id' => $cashInBank->id,
+                    'debit' => 1500,
+                    'credit' => 0,
+                ],
+                [
+                    'voucher_id' => $voucher->id,
+                    'ledger_account_id' => $loanInterestIncome->id,
+                    'debit' => 0,
+                    'credit' => 1500,
                 ],
             ]);
         });

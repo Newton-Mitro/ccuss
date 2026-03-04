@@ -82,6 +82,7 @@ export interface Voucher extends AuditFields {
     voucher_no: string;
     reference?: string | null;
     narration: string;
+    total_amount: number;
     lines?: VoucherLine[];
 
     posted_by?: number | null;
@@ -91,7 +92,7 @@ export interface Voucher extends AuditFields {
     rejected_by?: number | null;
     rejected_at?: string | null;
 
-    status: 'DRAFT' | 'APPROVED' | 'POSTED' | 'CANCELLED';
+    status: 'PENDING' | 'APPROVED' | 'POSTED' | 'CANCELLED';
 
     poster?: User;
     approver?: User;

@@ -1,10 +1,10 @@
 import { CheckCircle2, Clock, Loader2 } from 'lucide-react';
-import { Button } from '../../../components/ui/button';
-import { Checkbox } from '../../../components/ui/checkbox';
-import { Input } from '../../../components/ui/input';
-import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
-import { Customer } from '../../../types/customer';
-import { CustomerSearchBox } from '../../customer-mgmt/customers/customer-search-box';
+import { Button } from '../../../../components/ui/button';
+import { Checkbox } from '../../../../components/ui/checkbox';
+import { Input } from '../../../../components/ui/input';
+import { formatBDTCurrency } from '../../../../lib/bdtCurrencyFormatter';
+import { Customer } from '../../../../types/customer';
+import { CustomerSearchBox } from '../../../customer-mgmt/customers/customer-search-box';
 
 interface CollectionLine {
     id: number | string;
@@ -80,7 +80,7 @@ function CollectionLedgersSection({
                                 {lines.map((line, index) => (
                                     <tr
                                         key={`collection-ledger-${index}`}
-                                        className="rounded-md odd:bg-secondary/50 even:bg-primary/20"
+                                        className="rounded-md odd:bg-primary/10 even:bg-accent/10"
                                     >
                                         {/* Checkbox */}
                                         <td className="w-1/12 text-center align-middle">
