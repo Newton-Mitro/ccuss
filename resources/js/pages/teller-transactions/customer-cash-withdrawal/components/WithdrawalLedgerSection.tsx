@@ -161,7 +161,7 @@ function WithdrawalLedgerSection({
                             Account Holders
                         </Label>
 
-                        <div className="max-h-48 space-y-1 overflow-y-auto rounded-md border border-border bg-accent/10 p-2">
+                        <div className="max-h-[156px] space-y-2 overflow-y-auto rounded-md border border-border bg-accent/10 p-2">
                             {[
                                 {
                                     id: 1,
@@ -184,26 +184,8 @@ function WithdrawalLedgerSection({
                                 {
                                     id: 4,
                                     name: 'Fatima Akter',
-                                    relation: 'Primary',
+                                    relation: 'Signatory',
                                     account: 'AC-102347',
-                                },
-                                {
-                                    id: 5,
-                                    name: 'Ali Khan',
-                                    relation: 'Joint',
-                                    account: 'AC-102348',
-                                },
-                                {
-                                    id: 6,
-                                    name: 'Sara Ahmed',
-                                    relation: 'Joint',
-                                    account: 'AC-102349',
-                                },
-                                {
-                                    id: 7,
-                                    name: 'John Doe',
-                                    relation: 'Primary',
-                                    account: 'AC-102350',
                                 },
                             ].map((holder, index) => (
                                 <div
@@ -267,21 +249,6 @@ function WithdrawalLedgerSection({
                     <div className="grid grid-cols-3 gap-x-2">
                         <div className="">
                             <Label className="text-xs font-medium">
-                                Instrument Type
-                            </Label>
-                            <Select
-                                value={selectedAccount}
-                                onChange={(e) =>
-                                    setSelectedAccount(e.target.value)
-                                }
-                                options={accounts.map((acc) => ({
-                                    value: acc.value,
-                                    label: acc.value,
-                                }))}
-                            />
-                        </div>
-                        <div className="">
-                            <Label className="text-xs font-medium">
                                 Instrument Number
                             </Label>
                             <Select
@@ -310,7 +277,7 @@ function WithdrawalLedgerSection({
                                 }))}
                             />
                         </div>
-                        <div className="">
+                        {/* <div className="">
                             <Label className="text-xs font-medium">
                                 Paid To
                             </Label>
@@ -324,7 +291,7 @@ function WithdrawalLedgerSection({
                                     label: acc.value,
                                 }))}
                             />
-                        </div>
+                        </div> */}
                         <div className="">
                             <Label className="text-xs font-medium">
                                 Withdrawal Amount

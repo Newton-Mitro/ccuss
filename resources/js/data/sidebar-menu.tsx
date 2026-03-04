@@ -305,7 +305,7 @@ export const sidebarMenu: SidebarItem[] = [
         ],
     },
     {
-        name: 'Cash & Treasury Mgmt.',
+        name: 'Cash & Treasury',
         icon: <i className="fa-solid fa-cash-register" />,
         children_expanded: false,
         children: [
@@ -386,36 +386,85 @@ export const sidebarMenu: SidebarItem[] = [
                     },
                 ],
             },
-        ],
-    },
-    {
-        name: 'Teller Transactions',
-        icon: <i className="fa-solid fa-building-columns" />,
-        children_expanded: false,
-        children: [
             {
-                name: `Customer's Cash Deposit`,
-                icon: <i className="fa-solid fa-circle-dollar-to-slot" />,
-                path: '/customer-deposit',
-                match_path: 'customer-deposit',
+                name: `Treasurer's Operations`,
+                icon: <i className="fa-solid fa-building-columns" />,
+                children_expanded: false,
+                children: [
+                    {
+                        name: `Distribute To Drawer`,
+                        icon: (
+                            <i className="fa-solid fa-circle-dollar-to-slot" />
+                        ),
+                        path: '/distribute-to-drawer',
+                        match_path: 'distribute-to-drawer',
+                    },
+                    {
+                        name: `Vault To Vault Transfer`,
+                        icon: (
+                            <i className="fa-solid fa-circle-dollar-to-slot" />
+                        ),
+                        path: '/vault-to-vault-transfer',
+                        match_path: 'vault-to-vault-transfer',
+                    },
+                    {
+                        name: `Vault To Bank Transfer`,
+                        icon: (
+                            <i className="fa-solid fa-circle-dollar-to-slot" />
+                        ),
+                        path: '/vault-to-bank-transfer',
+                        match_path: 'vault-to-bank-transfer',
+                    },
+                    {
+                        name: `Bank To Vault Transfer`,
+                        icon: (
+                            <i className="fa-solid fa-circle-dollar-to-slot" />
+                        ),
+                        path: '/bank-to-vault-transfer',
+                        match_path: 'bank-to-vault-transfer',
+                    },
+                    {
+                        name: `Return From Drawer`,
+                        icon: (
+                            <i className="fa-solid fa-circle-dollar-to-slot" />
+                        ),
+                        path: '/return-from-drawer',
+                        match_path: 'return-from-drawer',
+                    },
+                ],
             },
             {
-                name: `Customer's Cash Withdrawal`,
-                icon: <i className="fa-solid fa-money-bill-transfer" />,
-                path: '/customer-withdrawal',
-                match_path: 'customer-withdrawal',
-            },
-            {
-                name: `Vault To Teller Distribution`,
-                icon: <i className="fa-solid fa-money-bill-transfer" />,
-                path: '/vault-to-teller-distribution',
-                match_path: 'vault-to-teller-distribution',
-            },
-            {
-                name: `Teller To Vault Return`,
-                icon: <i className="fa-solid fa-money-bill-transfer" />,
-                path: '/teller-to-vault-return',
-                match_path: 'teller-to-vault-return',
+                name: `Cashier's Operations`,
+                icon: <i className="fa-solid fa-building-columns" />,
+                children_expanded: false,
+                children: [
+                    {
+                        name: `Customer's Cash Deposit`,
+                        icon: (
+                            <i className="fa-solid fa-circle-dollar-to-slot" />
+                        ),
+                        path: '/customer-deposit',
+                        match_path: 'customer-deposit',
+                    },
+                    {
+                        name: `Customer's Cash Withdrawal`,
+                        icon: <i className="fa-solid fa-money-bill-transfer" />,
+                        path: '/customer-withdrawal',
+                        match_path: 'customer-withdrawal',
+                    },
+                    {
+                        name: `Cash Receipt From Vault`,
+                        icon: <i className="fa-solid fa-money-bill-transfer" />,
+                        path: '/cash-receipt-from-vault',
+                        match_path: 'cash-receipt-from-vault',
+                    },
+                    {
+                        name: `Return Cash To Vault`,
+                        icon: <i className="fa-solid fa-money-bill-transfer" />,
+                        path: '/return-cash-to-vault',
+                        match_path: 'return-cash-to-vault',
+                    },
+                ],
             },
         ],
     },
