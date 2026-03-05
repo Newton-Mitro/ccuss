@@ -31,7 +31,7 @@ function CashLedgerSection({
             <div className="grid grid-cols-1 gap-x-3 p-3 md:grid-cols-3">
                 {/* Cash Ledger */}
                 <div>
-                    <Label className="text-xs">Cash Ledger Account</Label>
+                    <Label className="text-xs">Ledger Account</Label>
                     <Select
                         disabled
                         error={errors?.cash_ledger_id}
@@ -40,11 +40,11 @@ function CashLedgerSection({
                             value: ledger.id.toString(),
                             label: `${ledger.code} - ${ledger.name}`,
                         }))}
-                        onChange={(e) => {
-                            handleCashLedgerChange(e.target.value);
+                        onChange={(value) => {
+                            handleCashLedgerChange(value);
                             setData(
                                 'cash_ledger_id',
-                                e.target.value ? Number(e.target.value) : null,
+                                value ? Number(value) : null,
                             );
                         }}
                     />
@@ -52,7 +52,7 @@ function CashLedgerSection({
 
                 {/* Cash Sub Ledger */}
                 <div>
-                    <Label className="text-xs">Cash Sub-Ledger</Label>
+                    <Label className="text-xs">Subledger Account</Label>
                     <Select
                         disabled
                         error={errors?.cash_subledger_id}
@@ -61,10 +61,10 @@ function CashLedgerSection({
                             value: ledger.id.toString(),
                             label: `${ledger.code} - ${ledger.name}`,
                         }))}
-                        onChange={(e) =>
+                        onChange={(value) =>
                             setData(
                                 'cash_subledger_id',
-                                e.target.value ? Number(e.target.value) : null,
+                                value ? Number(value) : null,
                             )
                         }
                     />
@@ -76,7 +76,6 @@ function CashLedgerSection({
                         Instrument Type
                     </Label>
                     <Select
-                        disabled
                         value={data.instrument_type || ''}
                         options={[
                             { value: 'CASH', label: 'Cash' },
@@ -89,9 +88,7 @@ function CashLedgerSection({
                             { value: 'CARD', label: 'Card' },
                             { value: 'OTHER', label: 'Other' },
                         ]}
-                        onChange={(e) =>
-                            setData('instrument_type', e.target.value)
-                        }
+                        onChange={(value) => setData('instrument_type', value)}
                     />
                 </div>
             </div>

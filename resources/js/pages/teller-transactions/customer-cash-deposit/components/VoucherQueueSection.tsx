@@ -58,77 +58,92 @@ function VoucherQueueSection({ vouchers, onCollect, onCancel }: Props) {
 
                 {/* Voucher List */}
                 <div className="flex-1 divide-y overflow-y-auto">
-                    {vouchers.map((voucher: Voucher) => (
-                        <div
-                            key={voucher.id}
-                            className="grid grid-cols-[2fr_1fr_1fr_auto] items-center gap-3 bg-background px-3 py-1 transition odd:bg-primary/10 even:bg-accent/10 hover:bg-muted/40"
-                        >
-                            {/* Info */}
-                            <div className="min-w-0">
-                                <p className="flex gap-x-2 truncate text-xs font-medium">
-                                    <span>
-                                        {formatDate(voucher.voucher_date)}
+                    {vouchers.map((voucher: Voucher) => {
+                        // Determine if this is the last updated voucher
+                        const isLastUpdated =
+                            Math.max(
+                                ...vouchers.map((v) =>
+                                    new Date(v.updated_at).getTime(),
+                                ),
+                            ) === new Date(voucher.updated_at).getTime();
+                        return (
+                            <div
+                                key={voucher.id}
+                                className="grid grid-cols-[2fr_1fr_1fr_auto] items-center gap-3 bg-background px-3 py-1 transition odd:bg-primary/10 even:bg-accent/10 hover:bg-muted/40"
+                            >
+                                {/* Info */}
+                                <div className="min-w-0">
+                                    <p className="flex gap-x-2 truncate text-xs font-medium">
+                                        <span>
+                                            {formatDate(voucher.voucher_date)}
+                                        </span>
+                                        •
+                                        <span className="text-orange-700">
+                                            #{voucher.voucher_no}
+                                        </span>
+                                        •
+                                        <span className="text-yellow-700">
+                                            {voucher.reference}
+                                        </span>
+                                    </p>
+                                    <p
+                                        className={`truncate text-[11px] ${
+                                            isLastUpdated
+                                                ? 'font-semibold text-orange-700'
+                                                : 'text-muted-foreground'
+                                        }`}
+                                    >
+                                        {voucher.narration || 'N/A'}
+                                    </p>
+                                </div>
+
+                                {/* Amount */}
+                                <div className="text-right text-xs font-semibold">
+                                    {formatBDTCurrency(voucher.total_amount)}
+                                </div>
+
+                                {/* Status */}
+                                <div>
+                                    <span
+                                        className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                                            voucher.status === 'PENDING'
+                                                ? 'bg-yellow-100 text-yellow-700'
+                                                : voucher.status === 'POSTED'
+                                                  ? 'bg-green-100 text-green-700'
+                                                  : 'bg-red-100 text-red-700'
+                                        }`}
+                                    >
+                                        {voucher.status}
                                     </span>
-                                    •
-                                    <span className="text-orange-700">
-                                        #{voucher.voucher_no}
-                                    </span>
-                                    •
-                                    <span className="text-yellow-700">
-                                        {voucher.reference}
-                                    </span>
-                                </p>
-                                <p className="truncate text-[11px] text-muted-foreground">
-                                    {voucher.narration || 'N/A'}
-                                </p>
-                            </div>
+                                </div>
 
-                            {/* Amount */}
-                            <div className="text-right text-xs font-semibold">
-                                {formatBDTCurrency(voucher.total_amount)}
-                            </div>
+                                {/* Actions */}
+                                <div className="flex gap-1">
+                                    <button
+                                        onClick={() => onCancel(voucher.id)}
+                                        className="rounded bg-primary px-2 py-1 text-[10px] text-primary-foreground disabled:opacity-50"
+                                    >
+                                        <Eye className="h-4 w-4 text-primary-foreground" />
+                                    </button>
+                                    <button
+                                        disabled={voucher.status !== 'PENDING'}
+                                        onClick={() => onCollect(voucher.id)}
+                                        className="rounded bg-primary px-2 py-1 text-[10px] text-primary-foreground disabled:opacity-50"
+                                    >
+                                        Collect
+                                    </button>
 
-                            {/* Status */}
-                            <div>
-                                <span
-                                    className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                                        voucher.status === 'PENDING'
-                                            ? 'bg-yellow-100 text-yellow-700'
-                                            : voucher.status === 'POSTED'
-                                              ? 'bg-green-100 text-green-700'
-                                              : 'bg-red-100 text-red-700'
-                                    }`}
-                                >
-                                    {voucher.status}
-                                </span>
+                                    <button
+                                        disabled={voucher.status == 'POSTED'}
+                                        onClick={() => onCancel(voucher.id)}
+                                        className="rounded bg-destructive px-2 py-1 text-[10px] text-destructive-foreground disabled:opacity-50"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
                             </div>
-
-                            {/* Actions */}
-                            <div className="flex gap-1">
-                                <button
-                                    onClick={() => onCancel(voucher.id)}
-                                    className="rounded bg-primary px-2 py-1 text-[10px] text-primary-foreground disabled:opacity-50"
-                                >
-                                    <Eye className="h-4 w-4 text-primary-foreground" />
-                                </button>
-                                <button
-                                    disabled={voucher.status !== 'PENDING'}
-                                    onClick={() => onCollect(voucher.id)}
-                                    className="rounded bg-primary px-2 py-1 text-[10px] text-primary-foreground disabled:opacity-50"
-                                >
-                                    Collect
-                                </button>
-
-                                <button
-                                    disabled={voucher.status == 'POSTED'}
-                                    onClick={() => onCancel(voucher.id)}
-                                    className="rounded bg-destructive px-2 py-1 text-[10px] text-destructive-foreground disabled:opacity-50"
-                                >
-                                    ✕
-                                </button>
-                            </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
 
                 {/* Footer */}

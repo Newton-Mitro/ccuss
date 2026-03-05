@@ -56,12 +56,11 @@ class Voucher extends Model
         'fiscal_year_id',
         'fiscal_period_id',
         'branch_id',
-
         'voucher_date',
         'voucher_type',
         'voucher_no',
         'reference',
-
+        'total_amount',
         'created_by',
         'posted_by',
         'posted_at',
@@ -69,7 +68,6 @@ class Voucher extends Model
         'approved_at',
         'rejected_by',
         'rejected_at',
-
         'narration',
         'status',
     ];
@@ -87,6 +85,7 @@ class Voucher extends Model
         'rejected_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'total_amount' => 'decimal:2',
     ];
 
     /*
@@ -94,21 +93,6 @@ class Voucher extends Model
     | Relationships
     |--------------------------------------------------------------------------
     */
-
-    public function canEdit(): bool
-    {
-        return $this->status === self::STATUS_PENDING;
-    }
-
-    public function canPost(): bool
-    {
-        return $this->status === self::STATUS_PENDING;
-    }
-
-    public function canApprove(): bool
-    {
-        return $this->status === self::STATUS_POSTED;
-    }
 
     public function branch(): BelongsTo
     {
@@ -157,6 +141,27 @@ class Voucher extends Model
 
     /*
     |--------------------------------------------------------------------------
+    | Status Helpers
+    |--------------------------------------------------------------------------
+    */
+
+    public function canEdit(): bool
+    {
+        return $this->status === self::STATUS_PENDING;
+    }
+
+    public function canPost(): bool
+    {
+        return $this->status === self::STATUS_PENDING;
+    }
+
+    public function canApprove(): bool
+    {
+        return $this->status === self::STATUS_POSTED;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | Factory
     |--------------------------------------------------------------------------
     */
@@ -164,5 +169,20 @@ class Voucher extends Model
     protected static function newFactory()
     {
         return VoucherFactory::new();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Helpers
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Automatically calculate total debit / credit from lines
+     */
+    public function calculateTotalAmount(): void
+    {
+        $this->total_amount = $this->lines()->sum('debit');
+        $this->save();
     }
 }

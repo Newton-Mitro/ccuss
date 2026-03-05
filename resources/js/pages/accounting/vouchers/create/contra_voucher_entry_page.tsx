@@ -15,6 +15,7 @@ import CustomAuthLayout from '../../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../../lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '../../../../types';
 import { VoucherLine } from '../../../../types/accounting';
+import { LedgerSearchInput } from '../../components/ledger-search-input';
 
 /* -------------------------------------------------------
  | Helpers
@@ -64,7 +65,7 @@ interface VoucherFormData {
 /* -------------------------------------------------------
  | Component
  ------------------------------------------------------- */
-export default function DebitVoucherEntryPage({
+export default function ContraVoucherEntryPage({
     backUrl,
 }: {
     backUrl: string;
@@ -92,7 +93,7 @@ export default function DebitVoucherEntryPage({
     } = useForm<VoucherFormData>({
         voucher_no: '',
         voucher_date: new Date().toISOString().split('T')[0],
-        voucher_type: 'DEBIT_OR_PAYMENT',
+        voucher_type: 'JOURNAL_OR_NON_CASH',
         fiscal_year_id: activeFiscalYearId || 0,
         fiscal_period_id: activeFiscalPeriodId || 0,
         branch_id: userBranchId || branches[0]?.id,
@@ -125,8 +126,11 @@ export default function DebitVoucherEntryPage({
                 subledger_id: null,
                 subledger_type: null,
                 subledger: null,
-                instrument_type_id: null,
-                instrument_id: null,
+                reference_id: null,
+                reference_type: null,
+                reference: null,
+                instrument_type: 'CASH',
+                instrument_no: null,
                 particulars: 'Purchase furniture for office',
                 debit: 0,
                 credit: 0,
@@ -207,21 +211,12 @@ export default function DebitVoucherEntryPage({
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Vouchers', href: '/vouchers' },
-        { title: 'Debit/Payment Voucher Entry', href: '' },
-    ];
-
-    const options = [
-        { value: 'CASH', label: 'Cash' },
-        { value: 'CHEQUE', label: 'Cheque' },
-        { value: 'BANK_TRANSFER', label: 'Bank Transfer' },
-        { value: 'MOBILE_BANKING', label: 'Mobile Banking' },
-        { value: 'CARD', label: 'Card' },
-        { value: 'OTHER', label: 'Other' },
+        { title: 'Journal/Non-Cash Voucher Entry', href: '' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Debit/Payment Voucher Entry" />
+            <Head title="Journal/Non-Cash Voucher Entry" />
 
             {/* ---------------- Form Card ---------------- */}
             <form onSubmit={handleSubmit} className="">
@@ -234,14 +229,12 @@ export default function DebitVoucherEntryPage({
                                 <h2 className="border-b border-border pb-3 text-sm font-medium text-primary">
                                     Voucher Details/Lines
                                 </h2>
-                                <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-2 md:grid-cols-4">
+                                <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-2 md:grid-cols-3">
                                     <div>
                                         <Label className="text-xs">
                                             Ledger Account
                                         </Label>
-                                        <Select value={''} options={options} />
-
-                                        {/* <LedgerSearchInput /> */}
+                                        <LedgerSearchInput />
                                         <InputError
                                             message={errors.voucher_no}
                                         />
@@ -252,65 +245,11 @@ export default function DebitVoucherEntryPage({
                                         </Label>
                                         <SubLedgerSearchInput />
                                     </div>
-
-                                    <div className="">
-                                        <Label className="text-xs font-medium">
-                                            Instrument Type
-                                        </Label>
-                                        <Select
-                                            value={data.instrument_type || ''}
-                                            options={[
-                                                {
-                                                    value: 'CASH',
-                                                    label: 'Cash',
-                                                },
-                                                {
-                                                    value: 'CHEQUE',
-                                                    label: 'Cheque',
-                                                },
-                                                {
-                                                    value: 'BANK_TRANSFER',
-                                                    label: 'Bank Transfer',
-                                                },
-                                                {
-                                                    value: 'MOBILE_BANKING',
-                                                    label: 'Mobile Banking',
-                                                },
-                                                {
-                                                    value: 'CARD',
-                                                    label: 'Card',
-                                                },
-                                                {
-                                                    value: 'OTHER',
-                                                    label: 'Other',
-                                                },
-                                            ]}
-                                            onChange={(e) =>
-                                                setData(
-                                                    'instrument_type',
-                                                    e.target.value,
-                                                )
-                                            }
-                                            className="w-full"
-                                            placeholder="Select instrument type"
-                                        />
-                                    </div>
-                                    <div className="">
+                                    <div>
                                         <Label className="text-xs">
-                                            Instrument Reference
+                                            Ref Subledger
                                         </Label>
-
-                                        <Input
-                                            placeholder="Instrument No"
-                                            value={data.instrument_no || ''}
-                                            onChange={(e) =>
-                                                setData(
-                                                    'instrument_no',
-                                                    e.target.value,
-                                                )
-                                            }
-                                            className="h-8 text-sm"
-                                        />
+                                        <SubLedgerSearchInput />
                                     </div>
                                     <div className="">
                                         <Label className="text-xs">
@@ -328,17 +267,31 @@ export default function DebitVoucherEntryPage({
                                             className="h-8 text-sm"
                                         />
                                     </div>
-
                                     <div className="">
-                                        <Label className="text-xs">
-                                            Debit Amount
-                                        </Label>
+                                        <Label className="text-xs">Debit</Label>
                                         <Input
                                             type="number"
                                             error={errors.debit}
                                             value={data.debit}
                                             onChange={(e) =>
                                                 setData('debit', e.target.value)
+                                            }
+                                            className="h-8 text-sm"
+                                        />
+                                    </div>
+                                    <div className="">
+                                        <Label className="text-xs">
+                                            Credit
+                                        </Label>
+                                        <Input
+                                            type="number"
+                                            error={errors.credit}
+                                            value={data.credit}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'credit',
+                                                    e.target.value,
+                                                )
                                             }
                                             className="h-8 text-sm"
                                         />
@@ -362,9 +315,11 @@ export default function DebitVoucherEntryPage({
                                                         Particulars
                                                     </th>
                                                     <th className="w-3/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
-                                                        Debit Amount
+                                                        Debit
                                                     </th>
-
+                                                    <th className="w-3/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                                        Credit
+                                                    </th>
                                                     <th className="w-1/12 border-b border-border p-2 text-center text-sm font-medium text-muted-foreground">
                                                         Action
                                                     </th>
@@ -404,12 +359,6 @@ export default function DebitVoucherEntryPage({
                                                                             -
                                                                             Number
                                                                         </span>
-                                                                        <span className="text-xs text-muted-foreground underline">
-                                                                            Inst.
-                                                                            Type
-                                                                            -
-                                                                            Number
-                                                                        </span>
                                                                     </div>
                                                                 </div>
                                                                 {line.particulars && (
@@ -436,6 +385,31 @@ export default function DebitVoucherEntryPage({
                                                                         handleLineChange(
                                                                             index,
                                                                             'debit',
+                                                                            Number(
+                                                                                e
+                                                                                    .target
+                                                                                    .value,
+                                                                            ),
+                                                                        )
+                                                                    }
+                                                                    className="h-8 rounded-none text-sm"
+                                                                />
+                                                            </td>
+
+                                                            {/* Amount */}
+                                                            <td className="w-3/12 align-middle">
+                                                                <Input
+                                                                    type="number"
+                                                                    value={
+                                                                        line.credit ||
+                                                                        ''
+                                                                    }
+                                                                    onChange={(
+                                                                        e,
+                                                                    ) =>
+                                                                        handleLineChange(
+                                                                            index,
+                                                                            'credit',
                                                                             Number(
                                                                                 e
                                                                                     .target
@@ -480,11 +454,15 @@ export default function DebitVoucherEntryPage({
                                                 </td>
 
                                                 <td className="w-3/12 p-2">
-                                                    {`Total: ${formatBDTCurrency(
+                                                    {formatBDTCurrency(
                                                         debitTotal,
-                                                    )}`}
+                                                    )}
                                                 </td>
-
+                                                <td className="w-3/12 p-2">
+                                                    {formatBDTCurrency(
+                                                        creditTotal,
+                                                    )}
+                                                </td>
                                                 <td className="w-1/12 p-2"></td>
                                             </tr>
                                         </tfoot>
@@ -559,7 +537,7 @@ export default function DebitVoucherEntryPage({
                                             },
                                             {
                                                 value: 'DEBIT_OR_PAYMENT',
-                                                label: 'Debit/Payment',
+                                                label: 'Journal/Non-Cash',
                                             },
                                             {
                                                 value: 'JOURNAL_OR_NON_CASH',
@@ -711,11 +689,12 @@ export default function DebitVoucherEntryPage({
                                     </Label>
                                     <Select
                                         error={errors.cash_ledger_id}
-                                        value={''}
+                                        value={data.cash_ledger_id || ''}
                                         options={cashLedgers.map((ledger) => ({
                                             value: ledger.id?.toString(),
                                             label: `${ledger.code} - ${ledger.name}`,
                                         }))}
+                                        onChange={handleCashLedgerChange}
                                     />
                                 </div>
                                 <div>
@@ -739,56 +718,6 @@ export default function DebitVoucherEntryPage({
                                                     : null,
                                             )
                                         }
-                                    />
-                                </div>
-                                <div className="">
-                                    <Label className="text-xs font-medium">
-                                        Instrument Type
-                                    </Label>
-                                    <Select
-                                        value={data.instrument_type || ''}
-                                        options={[
-                                            { value: 'CASH', label: 'Cash' },
-                                            {
-                                                value: 'CHEQUE',
-                                                label: 'Cheque',
-                                            },
-                                            {
-                                                value: 'BANK_TRANSFER',
-                                                label: 'Bank Transfer',
-                                            },
-                                            {
-                                                value: 'MOBILE_BANKING',
-                                                label: 'Mobile Banking',
-                                            },
-                                            { value: 'CARD', label: 'Card' },
-                                            { value: 'OTHER', label: 'Other' },
-                                        ]}
-                                        onChange={(e) =>
-                                            setData(
-                                                'instrument_type',
-                                                e.target.value,
-                                            )
-                                        }
-                                        className="mt-1 w-full"
-                                        placeholder="Select instrument type"
-                                    />
-                                </div>
-                                <div className="">
-                                    <Label className="text-xs">
-                                        Instrument Reference
-                                    </Label>
-
-                                    <Input
-                                        placeholder="Instrument No"
-                                        value={data.instrument_no || ''}
-                                        onChange={(e) =>
-                                            setData(
-                                                'instrument_no',
-                                                e.target.value,
-                                            )
-                                        }
-                                        className="h-8 text-sm"
                                     />
                                 </div>
                             </div>

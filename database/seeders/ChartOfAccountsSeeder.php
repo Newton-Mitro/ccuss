@@ -2,22 +2,15 @@
 
 namespace Database\Seeders;
 
-use App\Branch\Models\Branch;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use App\Accounting\Models\LedgerAccount;
-use App\Accounting\Models\FiscalYear;
 
 class ChartOfAccountsSeeder extends Seeder
 {
     public function run()
     {
         DB::transaction(function () {
-
-            /* ===================== FISCAL YEAR & PERIOD ===================== */
-            $fiscalYear = FiscalYear::all()->first();
-            $fiscalPeriodId = 1;
-            $branches = Branch::pluck('id')->all();
 
             /* ===================== ACCOUNTS ===================== */
             // ASSETS

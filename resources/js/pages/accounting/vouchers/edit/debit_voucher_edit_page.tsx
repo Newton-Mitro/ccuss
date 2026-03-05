@@ -4,17 +4,17 @@ import { useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 
-import HeadingSmall from '../../../components/heading-small';
-import { SubLedgerSearchInput } from '../../../components/sub-ledger-search-input';
-import AppDatePicker from '../../../components/ui/app_date_picker';
-import { Button } from '../../../components/ui/button';
-import { Input } from '../../../components/ui/input';
-import { Label } from '../../../components/ui/label';
-import { Select } from '../../../components/ui/select';
-import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../../types';
-import { VoucherLine } from '../../../types/accounting';
-import { LedgerSearchInput } from '../components/ledger-search-input';
+import HeadingSmall from '../../../../components/heading-small';
+import { SubLedgerSearchInput } from '../../../../components/sub-ledger-search-input';
+import AppDatePicker from '../../../../components/ui/app_date_picker';
+import { Button } from '../../../../components/ui/button';
+import { Input } from '../../../../components/ui/input';
+import { Label } from '../../../../components/ui/label';
+import { Select } from '../../../../components/ui/select';
+import CustomAuthLayout from '../../../../layouts/custom-auth-layout';
+import { BreadcrumbItem } from '../../../../types';
+import { VoucherLine } from '../../../../types/accounting';
+import { LedgerSearchInput } from '../../components/ledger-search-input';
 
 /* -------------------------------------------------------
  | Helpers
@@ -444,7 +444,7 @@ export default function EditDebitVoucherEntry({
                         <div className="grid grid-cols-1 gap-x-3 md:grid-cols-2">
                             <div>
                                 <Label className="text-xs">
-                                    Cash Ledger Account
+                                    Ledger Account
                                 </Label>
                                 <Select
                                     error={errors.cash_ledger_id}
@@ -459,7 +459,7 @@ export default function EditDebitVoucherEntry({
                             </div>
                             <div>
                                 <Label className="text-xs">
-                                    Cash Sub-Ledger
+                                    Subledger Account
                                 </Label>
                                 <Select
                                     error={errors.cash_subledger_id}
@@ -502,8 +502,7 @@ export default function EditDebitVoucherEntry({
                             <thead className="sticky top-0 bg-muted">
                                 <tr>
                                     <th className="w-7/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
-                                        Ledger & Sub-Ledger, Ref Sub-Ledger &
-                                        Particulars
+                                        Ledger, Subledger and Particulars
                                     </th>
                                     <th className="w-2/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
                                         Instrument Type

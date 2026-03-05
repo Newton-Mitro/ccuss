@@ -90,6 +90,13 @@ export default function Index() {
         return { totalDebit, totalCredit };
     };
 
+    const editRouteMap = {
+        DEBIT_OR_PAYMENT: 'vouchers.edit.debit',
+        CREDIT_OR_RECEIPT: 'vouchers.edit.credit',
+        JOURNAL_OR_NON_CASH: 'vouchers.edit.journal',
+        CONTRA: 'vouchers.edit.contra',
+    };
+
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Vouchers" />
@@ -103,55 +110,32 @@ export default function Index() {
                     />
 
                     {/* Voucher Type Buttons */}
-                    {/* Voucher Type Buttons */}
                     <div className="mt-2 flex flex-wrap gap-2 sm:mt-0">
                         {[
                             {
-                                type: 'DEBIT_OR_PAYMENT',
                                 label: 'Debit / Payment',
+                                route: 'vouchers.create.debit',
                                 color: 'bg-blue-600',
                             },
                             {
-                                type: 'CREDIT_OR_RECEIPT',
                                 label: 'Credit / Receipt',
+                                route: 'vouchers.create.credit',
                                 color: 'bg-green-600',
                             },
                             {
-                                type: 'JOURNAL_OR_NON_CASH',
                                 label: 'Journal / Non-Cash',
+                                route: 'vouchers.create.journal',
                                 color: 'bg-purple-600',
                             },
                             {
-                                type: 'PURCHASE',
-                                label: 'Purchase',
-                                color: 'bg-yellow-600',
-                            },
-                            {
-                                type: 'SALE',
-                                label: 'Sale',
-                                color: 'bg-pink-600',
-                            },
-                            {
-                                type: 'DEBIT_NOTE',
-                                label: 'Debit Note',
-                                color: 'bg-red-600',
-                            },
-                            {
-                                type: 'CREDIT_NOTE',
-                                label: 'Credit Note',
-                                color: 'bg-teal-600',
-                            },
-                            {
-                                type: 'CONTRA',
                                 label: 'Contra',
+                                route: 'vouchers.create.contra',
                                 color: 'bg-gray-600',
                             },
                         ].map((v) => (
                             <Link
-                                key={v.type}
-                                href={route('vouchers.create', {
-                                    type: v.type,
-                                })}
+                                key={v.route}
+                                href={route(v.route)}
                                 className={`min-w-[120px] flex-1 rounded-md px-3 py-2 text-center text-sm font-medium text-white hover:opacity-90 sm:flex-none ${v.color}`}
                             >
                                 {v.label}
@@ -218,6 +202,14 @@ export default function Index() {
                         <tbody>
                             {vouchers.data.length > 0 ? (
                                 vouchers.data.map((v) => {
+                                    const NON_EDITABLE = [
+                                        'OPENING_BALANCE',
+                                        'CLOSING_BALANCE',
+                                    ];
+                                    const canEdit = !NON_EDITABLE.includes(
+                                        v.voucher_type,
+                                    );
+
                                     const { totalDebit, totalCredit } =
                                         getTotals(v.lines);
                                     return (
@@ -258,6 +250,7 @@ export default function Index() {
                                             <td className="px-2 py-1">
                                                 <TooltipProvider>
                                                     <div className="flex space-x-2">
+                                                        {/* View */}
                                                         <Tooltip>
                                                             <TooltipTrigger
                                                                 asChild
@@ -277,25 +270,38 @@ export default function Index() {
                                                             </TooltipContent>
                                                         </Tooltip>
 
+                                                        {/* Edit */}
                                                         <Tooltip>
                                                             <TooltipTrigger
                                                                 asChild
                                                             >
-                                                                <Link
-                                                                    href={route(
-                                                                        'vouchers.edit',
-                                                                        v.id,
-                                                                    )}
-                                                                    className="text-green-600 hover:text-green-500 dark:text-green-400"
-                                                                >
-                                                                    <Pencil className="h-5 w-5" />
-                                                                </Link>
+                                                                {canEdit ? (
+                                                                    <Link
+                                                                        href={route(
+                                                                            editRouteMap[
+                                                                                v
+                                                                                    .voucher_type
+                                                                            ],
+                                                                            v.id,
+                                                                        )}
+                                                                        className="text-green-600 hover:text-green-500 dark:text-green-400"
+                                                                    >
+                                                                        <Pencil className="h-5 w-5" />
+                                                                    </Link>
+                                                                ) : (
+                                                                    <span className="cursor-not-allowed text-gray-400">
+                                                                        <Pencil className="h-5 w-5" />
+                                                                    </span>
+                                                                )}
                                                             </TooltipTrigger>
                                                             <TooltipContent>
-                                                                Edit
+                                                                {canEdit
+                                                                    ? 'Edit'
+                                                                    : 'Editing disabled'}
                                                             </TooltipContent>
                                                         </Tooltip>
 
+                                                        {/* Delete */}
                                                         <Tooltip>
                                                             <TooltipTrigger
                                                                 asChild

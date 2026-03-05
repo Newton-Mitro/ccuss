@@ -198,7 +198,6 @@ return new class extends Migration {
                 ->restrictOnDelete();
 
             $table->nullableMorphs('subledger');
-            $table->nullableMorphs('reference');
 
             $table->foreignId('instrument_type_id')
                 ->nullable()
@@ -208,6 +207,7 @@ return new class extends Migration {
             $table->string('particulars')->nullable();
             $table->decimal('debit', 18, 2)->default(0);
             $table->decimal('credit', 18, 2)->default(0);
+            $table->enum('dr_cr', ['DR', 'CR']);
 
             $table->timestamps();
 

@@ -221,21 +221,14 @@ function WithdrawalLedgerSection({
                 </div>
 
                 {/* Right Card */}
-                <div className="flex flex-col justify-between gap-3 rounded-lg border border-border bg-card p-4 md:col-span-8">
+                <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4 md:col-span-8">
                     <div>
                         <h3 className="text-sm font-semibold text-muted-foreground">
                             Signature Verification
                         </h3>
 
-                        <div className="mt-2 flex h-60 items-center justify-center rounded-md border border-dashed border-muted text-xs text-muted-foreground">
-                            <div
-                                style={{
-                                    height: 240,
-                                    borderRadius: 10,
-                                    position: 'relative',
-                                    overflow: 'hidden',
-                                }}
-                            >
+                        <div className="mt-2 flex items-center justify-center rounded-md border border-dashed border-muted text-xs text-muted-foreground">
+                            <div className="relative h-64 w-full overflow-hidden rounded-md">
                                 <ReactPanZoom
                                     image={
                                         'https://a.storyblok.com/f/191576/1176x882/0707bde47c/make_signature_hero_after.webp'
@@ -249,7 +242,7 @@ function WithdrawalLedgerSection({
                     <div className="grid grid-cols-3 gap-x-2">
                         <div className="">
                             <Label className="text-xs font-medium">
-                                Instrument Number
+                                Instrument Reference
                             </Label>
                             <Select
                                 value={selectedAccount}
@@ -326,7 +319,7 @@ function WithdrawalLedgerSection({
                     type="button"
                     disabled={processing}
                     onClick={onSubmit}
-                    className="min-w-[140px]"
+                    className="min-w-40"
                 >
                     {processing ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />

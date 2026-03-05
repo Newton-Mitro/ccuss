@@ -111,8 +111,10 @@ class RealVoucherEntrySeeder extends Seeder
                 VoucherLine::create([
                     'voucher_id' => $openingVoucher->id,
                     'ledger_account_id' => $account->id,
+                    'particulars' => 'Opening balance for ' . $account->name,
                     'debit' => $debit,
                     'credit' => $credit,
+                    'dr_cr' => $debit > 0 ? 'DR' : 'CR',
                 ]);
 
                 // Update account balances
@@ -152,14 +154,18 @@ class RealVoucherEntrySeeder extends Seeder
                 [
                     'voucher_id' => $voucher->id,
                     'ledger_account_id' => $officeExpense->id,
+                    'particulars' => 'Office expenses',
                     'debit' => 800,
                     'credit' => 0,
+                    'dr_cr' => 'DR',
                 ],
                 [
                     'voucher_id' => $voucher->id,
                     'ledger_account_id' => $cashInHand->id,
+                    'particulars' => 'Cash in hand',
                     'debit' => 0,
                     'credit' => 800,
+                    'dr_cr' => 'CR',
                 ],
             ]);
 
@@ -189,14 +195,18 @@ class RealVoucherEntrySeeder extends Seeder
                 [
                     'voucher_id' => $voucher->id,
                     'ledger_account_id' => $cashInBank->id,
+                    'particulars' => 'Cash in bank',
                     'debit' => 15000,
                     'credit' => 0,
+                    'dr_cr' => 'DR',
                 ],
                 [
                     'voucher_id' => $voucher->id,
                     'ledger_account_id' => $cashInHand->id,
+                    'particulars' => 'Cash in hand',
                     'debit' => 0,
                     'credit' => 15000,
+                    'dr_cr' => 'CR',
                 ],
             ]);
 
@@ -226,14 +236,18 @@ class RealVoucherEntrySeeder extends Seeder
                 [
                     'voucher_id' => $voucher->id,
                     'ledger_account_id' => $cashInBank->id,
+                    'particulars' => 'Cash in bank',
                     'debit' => 25000,
                     'credit' => 0,
+                    'dr_cr' => 'DR',
                 ],
                 [
                     'voucher_id' => $voucher->id,
                     'ledger_account_id' => $memberDeposits->id,
+                    'particulars' => 'Member deposits',
                     'debit' => 0,
                     'credit' => 25000,
+                    'dr_cr' => 'CR',
                 ],
             ]);
 
@@ -263,14 +277,18 @@ class RealVoucherEntrySeeder extends Seeder
                 [
                     'voucher_id' => $voucher->id,
                     'ledger_account_id' => $officeExpense->id,
+                    'particulars' => 'Office expense',
                     'debit' => 4000,
                     'credit' => 0,
+                    'dr_cr' => 'DR',
                 ],
                 [
                     'voucher_id' => $voucher->id,
                     'ledger_account_id' => $memberDeposits->id,
+                    'particulars' => 'Member deposits',
                     'debit' => 0,
                     'credit' => 4000,
+                    'dr_cr' => 'CR',
                 ],
             ]);
 
@@ -300,20 +318,26 @@ class RealVoucherEntrySeeder extends Seeder
                 [
                     'voucher_id' => $voucher->id,
                     'ledger_account_id' => $salaryExpense->id,
+                    'particulars' => 'Salary expense',
                     'debit' => 7000,
                     'credit' => 0,
+                    'dr_cr' => 'DR',
                 ],
                 [
                     'voucher_id' => $voucher->id,
                     'ledger_account_id' => $officeExpense->id,
+                    'particulars' => 'Office expense',
                     'debit' => 3000,
                     'credit' => 0,
+                    'dr_cr' => 'DR',
                 ],
                 [
                     'voucher_id' => $voucher->id,
                     'ledger_account_id' => $cashInBank->id,
+                    'particulars' => 'Cash in bank',
                     'debit' => 0,
                     'credit' => 10000,
+                    'dr_cr' => 'CR',
                 ],
             ]);
 
@@ -343,14 +367,18 @@ class RealVoucherEntrySeeder extends Seeder
                 [
                     'voucher_id' => $voucher->id,
                     'ledger_account_id' => $cashInBank->id,
+                    'particulars' => 'Cash in bank',
                     'debit' => 15000,
                     'credit' => 0,
+                    'dr_cr' => 'DR',
                 ],
                 [
                     'voucher_id' => $voucher->id,
                     'ledger_account_id' => $loanInterestIncome->id,
+                    'particulars' => 'Loan interest income',
                     'debit' => 0,
                     'credit' => 15000,
+                    'dr_cr' => 'CR',
                 ],
             ]);
 
@@ -376,14 +404,18 @@ class RealVoucherEntrySeeder extends Seeder
                 [
                     'voucher_id' => $voucher->id,
                     'ledger_account_id' => $cashInBank->id,
+                    'particulars' => 'Cash in bank',
                     'debit' => 1500,
                     'credit' => 0,
+                    'dr_cr' => 'DR',
                 ],
                 [
                     'voucher_id' => $voucher->id,
                     'ledger_account_id' => $loanInterestIncome->id,
+                    'particulars' => 'Loan interest income',
                     'debit' => 0,
                     'credit' => 1500,
+                    'dr_cr' => 'CR',
                 ],
             ]);
         });

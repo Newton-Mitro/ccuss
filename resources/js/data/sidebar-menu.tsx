@@ -26,8 +26,14 @@ export const sidebarMenu: SidebarItem[] = [
         children_expanded: false,
         children: [
             {
+                name: 'Companies',
+                icon: <i className="fa-solid fa-building-wheat" />,
+                path: '/companies',
+                match_path: 'companies',
+            },
+            {
                 name: 'Branches',
-                icon: <i className="fa-solid fa-location-dot" />,
+                icon: <i className="fa-solid fa-leaf" />,
                 path: '/branches',
                 match_path: 'branches',
             },
@@ -387,7 +393,46 @@ export const sidebarMenu: SidebarItem[] = [
                 ],
             },
             {
-                name: `Treasurer's Operations`,
+                name: `Cashier's Operations`,
+                icon: <i className="fa-solid fa-building-columns" />,
+                children_expanded: false,
+                children: [
+                    {
+                        name: `Customer's Cash Deposit`,
+                        icon: (
+                            <i className="fa-solid fa-circle-dollar-to-slot" />
+                        ),
+                        path: '/customer-deposit',
+                        match_path: 'customer-deposit',
+                    },
+                    {
+                        name: `Customer's Cash Withdrawal`,
+                        icon: <i className="fa-solid fa-money-bill-transfer" />,
+                        path: '/customer-withdrawal',
+                        match_path: 'customer-withdrawal',
+                    },
+                    {
+                        name: `Cash Payment`,
+                        icon: <i className="fa-solid fa-money-bill-transfer" />,
+                        path: '/cash-payment',
+                        match_path: 'cash-payment',
+                    },
+                    {
+                        name: `Cash Receipt From Vault`,
+                        icon: <i className="fa-solid fa-money-bill-transfer" />,
+                        path: '/cash-receipt-from-vault',
+                        match_path: 'cash-receipt-from-vault',
+                    },
+                    {
+                        name: `Return Cash To Vault`,
+                        icon: <i className="fa-solid fa-money-bill-transfer" />,
+                        path: '/return-cash-to-vault',
+                        match_path: 'return-cash-to-vault',
+                    },
+                ],
+            },
+            {
+                name: `Vault Operations`,
                 icon: <i className="fa-solid fa-building-columns" />,
                 children_expanded: false,
                 children: [
@@ -416,14 +461,6 @@ export const sidebarMenu: SidebarItem[] = [
                         match_path: 'vault-to-bank-transfer',
                     },
                     {
-                        name: `Bank To Vault Transfer`,
-                        icon: (
-                            <i className="fa-solid fa-circle-dollar-to-slot" />
-                        ),
-                        path: '/bank-to-vault-transfer',
-                        match_path: 'bank-to-vault-transfer',
-                    },
-                    {
                         name: `Return From Drawer`,
                         icon: (
                             <i className="fa-solid fa-circle-dollar-to-slot" />
@@ -434,35 +471,25 @@ export const sidebarMenu: SidebarItem[] = [
                 ],
             },
             {
-                name: `Cashier's Operations`,
+                name: `Bank Operations`,
                 icon: <i className="fa-solid fa-building-columns" />,
                 children_expanded: false,
                 children: [
                     {
-                        name: `Customer's Cash Deposit`,
+                        name: `Bank To Vault Transfer`,
                         icon: (
                             <i className="fa-solid fa-circle-dollar-to-slot" />
                         ),
-                        path: '/customer-deposit',
-                        match_path: 'customer-deposit',
+                        path: '/bank-to-vault-transfer',
+                        match_path: 'bank-to-vault-transfer',
                     },
                     {
-                        name: `Customer's Cash Withdrawal`,
-                        icon: <i className="fa-solid fa-money-bill-transfer" />,
-                        path: '/customer-withdrawal',
-                        match_path: 'customer-withdrawal',
-                    },
-                    {
-                        name: `Cash Receipt From Vault`,
-                        icon: <i className="fa-solid fa-money-bill-transfer" />,
-                        path: '/cash-receipt-from-vault',
-                        match_path: 'cash-receipt-from-vault',
-                    },
-                    {
-                        name: `Return Cash To Vault`,
-                        icon: <i className="fa-solid fa-money-bill-transfer" />,
-                        path: '/return-cash-to-vault',
-                        match_path: 'return-cash-to-vault',
+                        name: `Bank To Bank Transfer`,
+                        icon: (
+                            <i className="fa-solid fa-circle-dollar-to-slot" />
+                        ),
+                        path: '/bank-to-bank-transfer',
+                        match_path: 'bank-to-bank-transfer',
                     },
                 ],
             },
@@ -505,25 +532,25 @@ export const sidebarMenu: SidebarItem[] = [
                     {
                         name: 'Debit/Payment Voucher',
                         icon: <i className="fa-solid fa-chart-simple" />,
-                        path: '/voucher-entry/debit-voucher',
+                        path: '/debit-voucher/create',
                         match_path: 'debit-voucher',
                     },
                     {
                         name: 'Credit/Receipt Voucher',
                         icon: <i className="fa-solid fa-chart-simple" />,
-                        path: '/voucher-entry/credit-voucher',
+                        path: '/credit-voucher/create',
                         match_path: 'credit-voucher',
                     },
                     {
                         name: 'Journal/Non-Cash Voucher',
                         icon: <i className="fa-solid fa-chart-simple" />,
-                        path: '/voucher-entry/journal-voucher',
+                        path: '/journal-voucher/create',
                         match_path: 'journal-voucher',
                     },
                     {
                         name: 'Contra Voucher',
                         icon: <i className="fa-solid fa-chart-simple" />,
-                        path: '/voucher-entry/contra-voucher',
+                        path: '/contra-voucher/create',
                         match_path: 'contra-voucher',
                     },
                 ],

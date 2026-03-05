@@ -28,11 +28,9 @@ class VoucherFactory extends Factory
         $statuses = ['PENDING', 'APPROVED', 'POSTED', 'CANCELLED'];
         $status = $this->faker->randomElement($statuses);
 
-        $creator = User::factory();
-        $actor = User::factory(); // used for posted/approved/rejected
-
+        // IDs should be assigned in seeder or test, not factories directly
         return [
-            // Relations (assign explicitly when needed)
+            // Relations
             'fiscal_year_id' => null,
             'fiscal_period_id' => null,
             'branch_id' => null,
@@ -42,16 +40,17 @@ class VoucherFactory extends Factory
             'voucher_type' => $this->faker->randomElement($types),
             'voucher_no' => strtoupper($this->faker->bothify('VCHR-####')),
             'reference' => $this->faker->optional()->bothify('REF-####'),
+            'total_amount' => $this->faker->randomFloat(2, 1000, 50000),
             'narration' => $this->faker->sentence(),
             'status' => $status,
 
             // Audit fields
-            'created_by' => $creator,
-            'posted_by' => $actor,
-            'approved_by' => $status === 'APPROVED' ? $actor : null,
-            'rejected_by' => $status === 'CANCELLED' ? $actor : $actor,
+            'created_by' => User::factory(),  // Will auto-resolve to a user id
+            'posted_by' => $status === 'POSTED' ? User::factory() : null,
+            'approved_by' => $status === 'APPROVED' ? User::factory() : null,
+            'rejected_by' => $status === 'CANCELLED' ? User::factory() : null,
 
-            // Timestamps based on lifecycle
+            // Timestamps
             'posted_at' => $status === 'POSTED' ? now() : null,
             'approved_at' => $status === 'APPROVED' ? now() : null,
             'rejected_at' => $status === 'CANCELLED' ? now() : null,

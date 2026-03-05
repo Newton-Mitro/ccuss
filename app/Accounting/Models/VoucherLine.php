@@ -24,12 +24,13 @@ class VoucherLine extends Model
         'reference_type',
 
         // Instrument details
-        'instrument_type',
-        'instrument_no',
+        'instrument_type_id',
+        'instrument_id',
 
         'particulars',
         'debit',
         'credit',
+        'dr_cr',
     ];
 
     protected $casts = [
@@ -67,6 +68,14 @@ class VoucherLine extends Model
     public function reference(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    /**
+     * Optional Instrument Type
+     */
+    public function instrumentType(): BelongsTo
+    {
+        return $this->belongsTo(InstrumentType::class);
     }
 
     protected static function newFactory()

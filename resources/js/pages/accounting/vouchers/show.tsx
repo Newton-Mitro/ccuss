@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { formatDate, formatDateTime } from '../../../lib/date_util';
 import { takaToText } from '../../../lib/taka_to_text';
 import { BreadcrumbItem } from '../../../types';
@@ -43,6 +44,9 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
     ];
 
     const totals = getTotals(voucher.lines);
+    const disabledVoucherTypes = ['OPENING_BALANCE', 'CLOSING_BALANCE'];
+
+    const isDisabled = disabledVoucherTypes.includes(voucher.voucher_type);
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
@@ -63,9 +67,15 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                         <ArrowLeft className="h-4 w-4" />
                         Back
                     </button>
+
                     <Link
-                        href={`/vouchers/${voucher.id}/edit`}
-                        className="flex items-center gap-1 rounded bg-green-600 px-3 py-1.5 text-sm text-white hover:bg-green-500"
+                        href={isDisabled ? '#' : `/vouchers/${voucher.id}/edit`}
+                        onClick={(e) => isDisabled && e.preventDefault()}
+                        className={`flex items-center gap-1 rounded px-3 py-1.5 text-sm text-white ${
+                            isDisabled
+                                ? 'cursor-not-allowed bg-gray-400'
+                                : 'bg-green-600 hover:bg-green-500'
+                        }`}
                     >
                         <Edit2 className="h-4 w-4" />
                         Edit
@@ -136,9 +146,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                             Voucher Date
                         </span>
                         <p className="text-sm">
-                            {new Date(
-                                voucher.voucher_date,
-                            ).toLocaleDateString()}
+                            {formatDate(voucher.voucher_date) || '-'}
                         </p>
                     </div>
                     <div>
@@ -171,13 +179,19 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                     </div>
                     <div>
                         <span className="text-xs text-muted-foreground">
+                            Reference
+                        </span>
+                        <p className="text-sm">{voucher.reference || '-'}</p>
+                    </div>
+                    <div>
+                        <span className="text-xs text-muted-foreground">
                             Voucher Status
                         </span>
                         <p className="text-sm">{voucher.status || '-'}</p>
                     </div>
 
                     {voucher.narration && (
-                        <div className="sm:col-span-2 md:col-span-3">
+                        <div className="col-span-1 md:col-span-2">
                             <span className="text-xs text-muted-foreground">
                                 Narration
                             </span>
@@ -202,7 +216,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                                 ].map((h) => (
                                     <th
                                         key={h}
-                                        className={`border-b border-border p-2 text-sm font-medium text-muted-foreground ${
+                                        className={`border-b border-border px-2 py-4 text-sm font-medium text-muted-foreground ${
                                             h === 'Debit' || h === 'Credit'
                                                 ? 'text-right'
                                                 : 'text-left'
@@ -230,7 +244,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                                                     `}
                                                 </div>
                                                 {line.particulars ? (
-                                                    <div className="">
+                                                    <div className="-mt-1 text-sm text-muted-foreground">
                                                         {line.particulars}
                                                     </div>
                                                 ) : null}
@@ -243,10 +257,10 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                                             {line.instrument_no || '-'}
                                         </td>
                                         <td className="px-2 py-1 text-right">
-                                            {line.debit}
+                                            {formatBDTCurrency(line.debit)}
                                         </td>
                                         <td className="px-2 py-1 text-right">
-                                            {line.credit}
+                                            {formatBDTCurrency(line.credit)}
                                         </td>
                                     </tr>
                                 ))
@@ -269,16 +283,16 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                                     Totals:
                                 </td>
                                 <td className="px-2 py-1 text-right">
-                                    {totals.totalDebit?.toFixed(2)}
+                                    {formatBDTCurrency(totals.totalDebit)}
                                 </td>
                                 <td className="px-2 py-1 text-right">
-                                    {totals.totalCredit?.toFixed(2)}
+                                    {formatBDTCurrency(totals.totalCredit)}
                                 </td>
                                 <td></td>
                             </tr>
                             <tr className="border-t border-border text-right font-medium">
                                 <td colSpan={5} className="p-3">
-                                    {`In Word: ${takaToText(totals.totalCredit)} only.`}
+                                    {`in word: ${takaToText(totals.totalCredit)} only.`}
                                 </td>
                             </tr>
                         </tfoot>

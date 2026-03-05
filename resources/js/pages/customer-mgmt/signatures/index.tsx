@@ -114,14 +114,7 @@ export default function CustomerSignatureIndex() {
                             </p>
                         ) : (
                             <div className="">
-                                <div
-                                    style={{
-                                        height: 240,
-                                        borderRadius: 10,
-                                        position: 'relative',
-                                        overflow: 'hidden',
-                                    }}
-                                >
+                                <div className="relative h-60 w-full overflow-hidden rounded-md">
                                     <ReactPanZoom
                                         image={signature.url}
                                         alt="Image alt text"

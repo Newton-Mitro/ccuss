@@ -86,6 +86,7 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             BranchSeeder::class,
             CustomerSeeder::class,
+            InstrumentTypeSeeder::class,
             ChartOfAccountsSeeder::class,
             RealVoucherEntrySeeder::class
         ]);

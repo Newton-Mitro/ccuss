@@ -29,7 +29,7 @@ function CashLedgerSection({
             <div className="grid grid-cols-1 gap-x-3 p-3 md:grid-cols-2">
                 {/* Cash Ledger */}
                 <div>
-                    <Label className="text-xs">Cash Ledger Account</Label>
+                    <Label className="text-xs">Ledger Account</Label>
                     <Select
                         disabled
                         error={errors?.cash_ledger_id}
@@ -50,7 +50,7 @@ function CashLedgerSection({
 
                 {/* Cash Sub Ledger */}
                 <div>
-                    <Label className="text-xs">Cash Sub-Ledger</Label>
+                    <Label className="text-xs">Subledger Account</Label>
                     <Select
                         disabled
                         error={errors?.cash_subledger_id}

@@ -10,33 +10,41 @@ interface CollectionLine {
     id: number | string;
     credit?: number;
     particulars?: string;
+    is_selected?: boolean;
 }
 
 interface CollectionLedgersSectionProps {
     lines: CollectionLine[];
     processing: boolean;
     onCustomerSelect: (customer: Customer) => void;
-    handleLineChange: (
-        index: number,
+    toggleSelectAll: () => void;
+    toggleSelect: (id: number) => void;
+    handleCreditLineChange: (
+        id: number,
         field: keyof CollectionLine,
         value: any,
     ) => void;
-    onSubmit: () => void;
-    onCollectLater: () => void;
+    onCollectNowSubmit: () => void;
+    onCollectLaterSubmit: () => void;
 }
 
-function CollectionLedgersSection({
+function DepositLedgersSection({
     lines,
     processing,
     onCustomerSelect,
-    handleLineChange,
-    onSubmit,
-    onCollectLater,
+    toggleSelectAll,
+    toggleSelect,
+    handleCreditLineChange: handleLineChange,
+    onCollectNowSubmit: onSubmit,
+    onCollectLaterSubmit: onCollectLater,
 }: CollectionLedgersSectionProps) {
     const totalCredit = lines.reduce(
         (sum, line) => sum + (Number(line.credit) || 0),
         0,
     );
+
+    const allSelected =
+        lines.length > 0 && lines.every((line) => line.is_selected);
 
     return (
         <div className="flex flex-col gap-4 rounded-md border border-border bg-muted/30 p-4">
@@ -46,11 +54,7 @@ function CollectionLedgersSection({
                     Customer Cash Deposit
                 </h2>
 
-                <CustomerSearchBox
-                    onSelect={(customer) => {
-                        onCustomerSelect(customer);
-                    }}
-                />
+                <CustomerSearchBox onSelect={onCustomerSelect} />
 
                 {/* Table Wrapper */}
                 <div className="rounded-md border border-border md:block">
@@ -60,10 +64,13 @@ function CollectionLedgersSection({
                             <thead>
                                 <tr>
                                     <th className="w-1/12 border-b border-border p-2 text-center text-sm font-medium text-muted-foreground">
-                                        <Checkbox checked />
+                                        <Checkbox
+                                            checked={allSelected}
+                                            onCheckedChange={toggleSelectAll}
+                                        />
                                     </th>
                                     <th className="w-8/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
-                                        Ledger & Sub-Ledger
+                                        Ledger, Subledger and Particulars
                                     </th>
                                     <th className="w-3/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
                                         Amount
@@ -80,12 +87,23 @@ function CollectionLedgersSection({
                                 {lines.map((line, index) => (
                                     <tr
                                         key={`collection-ledger-${index}`}
-                                        className="rounded-md odd:bg-primary/10 even:bg-accent/10"
+                                        className={`rounded-md ${
+                                            line.is_selected
+                                                ? 'bg-primary/20'
+                                                : 'odd:bg-primary/10 even:bg-accent/10'
+                                        }`}
                                     >
                                         {/* Checkbox */}
                                         <td className="w-1/12 text-center align-middle">
                                             <div className="flex h-9 items-center justify-center">
-                                                <Checkbox checked />
+                                                <Checkbox
+                                                    checked={!!line.is_selected}
+                                                    onCheckedChange={() =>
+                                                        toggleSelect(
+                                                            Number(line.id),
+                                                        )
+                                                    }
+                                                />
                                             </div>
                                         </td>
 
@@ -120,7 +138,7 @@ function CollectionLedgersSection({
                                                 value={line.credit || ''}
                                                 onChange={(e) =>
                                                     handleLineChange(
-                                                        index,
+                                                        Number(line.id),
                                                         'credit',
                                                         Number(e.target.value),
                                                     )
@@ -145,10 +163,7 @@ function CollectionLedgersSection({
                                         must be equal and greater than zero.
                                     </div>
                                 </td>
-
-                                <td className="w-3/12 p-2">
-                                    {`Total: ${formatBDTCurrency(totalCredit)}`}
-                                </td>
+                                <td className="w-3/12 p-2">{`Total: ${formatBDTCurrency(totalCredit)}`}</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -184,4 +199,4 @@ function CollectionLedgersSection({
     );
 }
 
-export default CollectionLedgersSection;
+export default DepositLedgersSection;

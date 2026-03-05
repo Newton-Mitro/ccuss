@@ -47,14 +47,9 @@ export interface VoucherLine extends AuditFields {
     subledger_type?: string | null;
     subledger?: object | null;
 
-    // Polymorphic reference (Invoice, Cheque, Transfer, etc.)
-    reference_id?: number | null;
-    reference_type?: string | null;
-    reference?: object | null;
-
     // Instrument details
-    instrument_type?: string | null;
-    instrument_no?: string | null;
+    instrument_type_id?: number | null;
+    instrument_id?: number | null;
 
     particulars?: string | null;
 
@@ -70,14 +65,15 @@ export interface Voucher extends AuditFields {
     branch_id?: number | null;
     voucher_date: string; // timestamp
     voucher_type:
-        | 'RECEIPT'
-        | 'PAYMENT'
-        | 'JOURNAL'
+        | 'OPENING_BALANCE'
+        | 'CLOSING_BALANCE'
+        | 'CREDIT_OR_RECEIPT'
+        | 'DEBIT_OR_PAYMENT'
+        | 'JOURNAL_OR_NON_CASH'
         | 'PURCHASE'
         | 'SALE'
-        | 'DEBIT NOTE'
-        | 'CREDIT NOTE'
-        | 'PETTY CASH'
+        | 'DEBIT_NOTE'
+        | 'CREDIT_NOTE'
         | 'CONTRA';
     voucher_no: string;
     reference?: string | null;

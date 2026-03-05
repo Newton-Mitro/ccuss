@@ -40,6 +40,7 @@ class TellerTransactionController extends Controller
         $vouchers = Voucher::where('voucher_type', 'CREDIT_OR_RECEIPT')
             ->where('created_by', auth()->id())
             ->whereDate('created_at', today())
+            ->orderByRaw("FIELD(status, 'PENDING', 'APPROVED', 'POSTED', 'CANCELLED')")
             ->get();
 
         return Inertia::render('teller-transactions/customer-cash-deposit/CustomerCashDepositPage', [
@@ -51,7 +52,7 @@ class TellerTransactionController extends Controller
             'cash_subledgers' => $cashSubledgers,
             'lines' => [
                 [
-                    'id' => 0,
+                    'id' => 1,
                     'voucher_id' => 0,
                     'ledger_account_id' => $cashLedger->id,
                     'ledger_account' => $cashLedger,
@@ -66,7 +67,6 @@ class TellerTransactionController extends Controller
                     'debit' => 0,
                     'credit' => 0,
                     'particulars' => 'Cash in Hand',
-
                 ],
             ],
             'vouchers' => $vouchers,

@@ -313,7 +313,7 @@ class VoucherController extends Controller
     /* =====================================================
      |  EDIT
      ===================================================== */
-    public function edit(Request $request, Voucher $voucher): Response
+    public function editDebitVoucher(Request $request, Voucher $voucher): Response
     {
         $cashLedgerId = $request->input('cash_ledger_id');
         $cashSubledgerId = $request->input('cash_subledger_id');
@@ -335,7 +335,7 @@ class VoucherController extends Controller
 
         $cashSubledgers = $cashLedger ? $cashLedgers : [];
 
-        return Inertia::render('accounting/vouchers/edit', [
+        return Inertia::render('accounting/vouchers/edit/debit_voucher_edit_page', [
             'voucher' => $voucher->load('lines.ledgerAccount'),
             'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
             'fiscalYears' => FiscalYear::select('id', 'code')->get(),

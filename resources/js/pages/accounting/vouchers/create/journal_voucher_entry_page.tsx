@@ -311,8 +311,8 @@ export default function JournalVoucherEntryPage({
                                             <thead className="sticky top-0">
                                                 <tr className="">
                                                     <th className="w-8/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
-                                                        Ledger & Sub-Ledger, Ref
-                                                        Sub-Ledger
+                                                        Ledger, Subledger and
+                                                        Particulars
                                                     </th>
                                                     <th className="w-3/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
                                                         Debit
@@ -685,7 +685,7 @@ export default function JournalVoucherEntryPage({
                             <div className="grid grid-cols-1 gap-x-3 md:grid-cols-2">
                                 <div>
                                     <Label className="text-xs">
-                                        Cash Ledger Account
+                                        Ledger Account
                                     </Label>
                                     <Select
                                         error={errors.cash_ledger_id}
@@ -699,7 +699,7 @@ export default function JournalVoucherEntryPage({
                                 </div>
                                 <div>
                                     <Label className="text-xs">
-                                        Cash Sub-Ledger
+                                        Subledger Account
                                     </Label>
                                     <Select
                                         error={errors.cash_subledger_id}
@@ -718,65 +718,6 @@ export default function JournalVoucherEntryPage({
                                                     : null,
                                             )
                                         }
-                                    />
-                                </div>
-
-                                <div className="">
-                                    <Label className="text-xs">
-                                        Payee Type
-                                    </Label>
-                                    <Select
-                                        value={data.payee_type || ''}
-                                        options={[
-                                            {
-                                                value: 'CUSTOMER',
-                                                label: 'Customer',
-                                            },
-                                            {
-                                                value: 'VENDOR',
-                                                label: 'Vendor',
-                                            },
-                                        ]}
-                                        onChange={(e) =>
-                                            setData(
-                                                'payee_type',
-                                                e.target.value,
-                                            )
-                                        }
-                                    />
-                                </div>
-                                <div className="">
-                                    <Label className="text-xs">
-                                        Paid To Ref
-                                    </Label>
-
-                                    <Input
-                                        placeholder="Customer / Vendor"
-                                        value={data.instrument_no || ''}
-                                        onChange={(e) =>
-                                            setData(
-                                                'instrument_no',
-                                                e.target.value,
-                                            )
-                                        }
-                                        className="h-8 text-sm"
-                                    />
-                                </div>
-                                <div className="">
-                                    <Label className="text-xs">
-                                        Bill/Invoice Ref
-                                    </Label>
-
-                                    <Input
-                                        placeholder="Customer / Vendor"
-                                        value={data.invoice_id || ''}
-                                        onChange={(e) =>
-                                            setData(
-                                                'invoice_id',
-                                                e.target.value,
-                                            )
-                                        }
-                                        className="h-8 text-sm"
                                     />
                                 </div>
                             </div>

@@ -38,7 +38,6 @@ function VoucherHeaderSection({
                 <div>
                     <Label className="text-xs">Voucher Type</Label>
                     <Select
-                        disabled
                         error={errors?.voucher_type}
                         value={data.voucher_type || ''}
                         options={[
@@ -60,9 +59,7 @@ function VoucherHeaderSection({
                             { value: 'CREDIT_NOTE', label: 'Credit Note' },
                             { value: 'CONTRA', label: 'Contra' },
                         ]}
-                        onChange={(e) =>
-                            setData('voucher_type', e.target.value)
-                        }
+                        onChange={(value) => setData('voucher_type', value)}
                     />
                 </div>
 
@@ -77,8 +74,8 @@ function VoucherHeaderSection({
                             value: fy.id.toString(),
                             label: fy.code,
                         }))}
-                        onChange={(e) => {
-                            setData('fiscal_year_id', Number(e.target.value));
+                        onChange={(value) => {
+                            setData('fiscal_year_id', Number(value));
                             setData('fiscal_period_id', null);
                         }}
                     />
@@ -100,8 +97,8 @@ function VoucherHeaderSection({
                                 value: fp.id.toString(),
                                 label: fp.period_name,
                             }))}
-                        onChange={(e) =>
-                            setData('fiscal_period_id', Number(e.target.value))
+                        onChange={(value) =>
+                            setData('fiscal_period_id', Number(value))
                         }
                     />
                 </div>
@@ -117,8 +114,8 @@ function VoucherHeaderSection({
                             value: b.id.toString(),
                             label: b.name,
                         }))}
-                        onChange={(e) =>
-                            setData('branch_id', Number(e.target.value))
+                        onChange={(value) =>
+                            setData('branch_id', Number(value))
                         }
                     />
                 </div>
