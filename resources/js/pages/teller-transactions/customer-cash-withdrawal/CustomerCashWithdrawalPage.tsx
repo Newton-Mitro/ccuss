@@ -87,20 +87,20 @@ export default function CustomerCashWithdrawalPage() {
 
     const onCustomerSelected = async (customer: Customer) => {
         try {
-            const res = await axios.get('/customer-collection-ledgers');
-            const newCreditLines = res.data || [];
-            const newDebitLines = [
+            const res = await axios.get('/get-withdrawable-accounts');
+            const _newDebitLines = res.data || [];
+            const _newCreditLines = [
                 {
                     ...debitLines[0],
                     credit: 0,
-                    debit: newCreditLines.reduce((a, b) => a + b.credit, 0),
+                    debit: _newDebitLines.reduce((a, b) => a + b.credit, 0),
                 },
             ];
 
-            setData('lines', [...newDebitLines, ...newCreditLines]);
+            setData('lines', [..._newCreditLines, ..._newDebitLines]);
             setData(
                 'narration',
-                `${customer.name} (${customer.customer_no}) deposited to his/her accounts via cash counter.`,
+                `${customer.name} (${customer.customer_no}) withdrew from his/her accounts via cash counter.`,
             );
         } catch (err) {
             console.error(err);
@@ -177,6 +177,7 @@ export default function CustomerCashWithdrawalPage() {
                 <div className="md:col-span-8">
                     {/* Collection Ledger Section */}
                     <WithdrawalLedgerSection
+                        errors={errors}
                         lines={creditLines}
                         processing={processing}
                         handleDebitLineChange={handleDebitLineChange}
@@ -211,12 +212,8 @@ export default function CustomerCashWithdrawalPage() {
                     {/* Voucher Queue Section */}
                     <VoucherQueueSection
                         vouchers={vouchers}
-                        onCollect={function (): void {
-                            throw new Error('Function not implemented.');
-                        }}
-                        onCancel={function (): void {
-                            throw new Error('Function not implemented.');
-                        }}
+                        handleVoucherCancel={cancelVoucherHandler}
+                        handleVoucherView={viewVoucherHandler}
                     />
                 </div>
             </div>

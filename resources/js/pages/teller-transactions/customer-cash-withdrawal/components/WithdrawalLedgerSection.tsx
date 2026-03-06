@@ -1,6 +1,7 @@
 import { CheckCircle2, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import ReactPanZoom from 'react-image-pan-zoom-rotate';
+import AppDatePicker from '../../../../components/ui/app_date_picker';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Label } from '../../../../components/ui/label';
@@ -12,6 +13,7 @@ import { Customer } from '../../../../types/customer';
 import { CustomerSearchBox } from '../../../customer-mgmt/customers/customer-search-box';
 
 interface WithdrawalLedgersSectionProps {
+    errors: any;
     lines: VoucherLine[];
     processing: boolean;
     onCustomerSelect: (customer: Customer) => void;
@@ -24,6 +26,7 @@ interface WithdrawalLedgersSectionProps {
 }
 
 function WithdrawalLedgerSection({
+    errors,
     lines,
     processing,
     onCustomerSelect,
@@ -83,10 +86,6 @@ function WithdrawalLedgerSection({
             <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
                 {/* Left Card */}
                 <div className="space-y-2 rounded-lg border border-border bg-card p-4 md:col-span-4">
-                    <h3 className="text-sm font-semibold text-muted-foreground">
-                        Account Details
-                    </h3>
-
                     {/* Withdrawable Accounts */}
                     <div className="space-y-2">
                         <Label className="text-xs font-medium">
@@ -149,12 +148,12 @@ function WithdrawalLedgerSection({
                     )}
 
                     {/* Account Holders Scrollable */}
-                    <div className="mt-3 space-y-1">
+                    <div className="mt-2 space-y-1">
                         <Label className="text-xs font-medium">
                             Account Holders
                         </Label>
 
-                        <div className="max-h-[156px] space-y-2 overflow-y-auto rounded-md border border-border bg-accent/10 p-2">
+                        <div className="max-h-[206px] space-y-2 overflow-y-auto rounded-md border border-border bg-accent/10 p-2">
                             {[
                                 {
                                     id: 1,
@@ -215,23 +214,6 @@ function WithdrawalLedgerSection({
 
                 {/* Right Card */}
                 <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4 md:col-span-8">
-                    <div className="h-[calc(100vh/3-10px)]">
-                        <h3 className="text-sm font-semibold text-muted-foreground">
-                            Signature Verification
-                        </h3>
-
-                        <div className="mt-2 flex items-center justify-center rounded-md border border-dashed border-muted text-xs text-muted-foreground">
-                            <div className="relative h-64 w-full overflow-hidden rounded-md">
-                                <ReactPanZoom
-                                    image={
-                                        'https://a.storyblok.com/f/191576/1176x882/0707bde47c/make_signature_hero_after.webp'
-                                    }
-                                    alt="Signature Preview"
-                                />
-                            </div>
-                        </div>
-                    </div>
-
                     <div className="grid grid-cols-3 gap-x-2">
                         <div className="">
                             <Label className="text-xs font-medium">
@@ -250,13 +232,9 @@ function WithdrawalLedgerSection({
                             <Label className="text-xs font-medium">
                                 Instrument Date
                             </Label>
-                            <Select
-                                value={selectedAccount}
+                            <AppDatePicker
+                                value={'2023-01-01'}
                                 onChange={(value) => setSelectedAccount(value)}
-                                options={accounts.map((acc) => ({
-                                    value: acc.value,
-                                    label: acc.value,
-                                }))}
                             />
                         </div>
                         {/* <div className="">
@@ -286,6 +264,22 @@ function WithdrawalLedgerSection({
                                     setWithdrawalAmount(Number(e.target.value))
                                 }
                             />
+                        </div>
+                    </div>
+                    <div className="w-full">
+                        <h3 className="text-sm font-semibold text-muted-foreground">
+                            Signature Verification
+                        </h3>
+
+                        <div className="mt-2 flex w-full items-center justify-center rounded-md border border-dashed border-muted text-xs text-muted-foreground">
+                            <div className="relative h-64 w-full overflow-hidden rounded-md">
+                                <ReactPanZoom
+                                    image={
+                                        'https://a.storyblok.com/f/191576/1176x882/0707bde47c/make_signature_hero_after.webp'
+                                    }
+                                    alt="Signature Preview"
+                                />
+                            </div>
                         </div>
                     </div>
 

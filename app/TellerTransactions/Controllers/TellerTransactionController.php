@@ -223,4 +223,31 @@ class TellerTransactionController extends Controller
         ]);
     }
 
+    public function getWithdrawableAccounts(Request $request)
+    {
+        $savingDepositLedger = LedgerAccount::where([
+            ['name', 'Savings Deposit'],
+            ['is_active', true],
+        ])->first();
+
+        return response()->json([
+            [
+                'id' => 2,
+                'voucher_id' => 0,
+                'ledger_account_id' => $savingDepositLedger->id,
+                'ledger_account' => $savingDepositLedger,
+                'subledger_id' => null,
+                'subledger_type' => null,
+                'subledger' => null,
+                'instrument_type_id' => 1,
+                'instrument_id' => null,
+                'debit' => 0,
+                'credit' => 0,
+                'particulars' => 'tk. 500 cash withdrawn from savings deposit',
+                'dr_cr' => 'DR',
+                'is_selected' => true
+            ],
+        ]);
+    }
+
 }

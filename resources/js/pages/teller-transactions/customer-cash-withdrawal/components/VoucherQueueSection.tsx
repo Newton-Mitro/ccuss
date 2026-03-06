@@ -6,11 +6,15 @@ import { Voucher } from '../../../../types/accounting';
 
 interface Props {
     vouchers: Voucher[];
-    onCollect: (id: number) => void;
-    onCancel: (id: number) => void;
+    handleVoucherView: (id: number) => void;
+    handleVoucherCancel: (id: number) => void;
 }
 
-function VoucherQueueSection({ vouchers, onCollect, onCancel }: Props) {
+function VoucherQueueSection({
+    vouchers,
+    handleVoucherView,
+    handleVoucherCancel,
+}: Props) {
     const { pendingAmount, postedAmount } = useMemo(() => {
         return vouchers.reduce(
             (acc, voucher) => {
@@ -104,7 +108,9 @@ function VoucherQueueSection({ vouchers, onCollect, onCancel }: Props) {
                                 {/* Actions */}
                                 <div className="flex gap-1">
                                     <button
-                                        onClick={() => onCancel(voucher.id)}
+                                        onClick={() =>
+                                            handleVoucherView(voucher.id)
+                                        }
                                         className="rounded bg-primary p-1 text-[10px] text-primary-foreground disabled:opacity-50"
                                     >
                                         <Eye className="h-4 w-4 text-primary-foreground" />
@@ -112,7 +118,9 @@ function VoucherQueueSection({ vouchers, onCollect, onCancel }: Props) {
 
                                     <button
                                         disabled={voucher.status == 'POSTED'}
-                                        onClick={() => onCancel(voucher.id)}
+                                        onClick={() =>
+                                            handleVoucherCancel(voucher.id)
+                                        }
                                         className="rounded bg-destructive px-2 py-1 text-[10px] text-destructive-foreground disabled:opacity-50"
                                     >
                                         ✕
