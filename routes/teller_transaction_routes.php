@@ -4,11 +4,14 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/customer-deposit', [TellerTransactionController::class, 'deposit'])
-        ->name('teller-transaction.deposit');
+    Route::get('/customer-cash-receipt', [TellerTransactionController::class, 'customerCashReceipt'])
+        ->name('teller-transaction.customer-cash-receipt');
 
-    Route::get('/customer-withdrawal', [TellerTransactionController::class, 'withdrawal'])
-        ->name('teller-transaction.withdrawal');
+    Route::get('/customer-cash-payment', [TellerTransactionController::class, 'customerCashPayment'])
+        ->name('teller-transaction.customer-cash-payment');
+
+    Route::get('/customer-collection-ledgers', [TellerTransactionController::class, 'getCustomerCollectionLedgers'])
+        ->name('teller-transaction.customer-collection-ledgers');
 
 
 });

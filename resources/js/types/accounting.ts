@@ -55,6 +55,9 @@ export interface VoucherLine extends AuditFields {
 
     debit: number;
     credit: number;
+    dr_cr: 'DR' | 'CR';
+
+    is_selected?: boolean;
 }
 
 // Voucher

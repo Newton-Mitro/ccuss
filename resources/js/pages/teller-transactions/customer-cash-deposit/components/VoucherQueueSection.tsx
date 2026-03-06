@@ -7,11 +7,17 @@ import { Voucher } from '../../../../types/accounting';
 
 interface Props {
     vouchers: Voucher[];
-    onCollect: (id: number) => void;
-    onCancel: (id: number) => void;
+    onView: (id: number) => void;
+    voucherCollectNowHandler: (id: number) => void;
+    cancelVoucherHandler: (id: number) => void;
 }
 
-function VoucherQueueSection({ vouchers, onCollect, onCancel }: Props) {
+function VoucherQueueSection({
+    vouchers,
+    onView,
+    voucherCollectNowHandler,
+    cancelVoucherHandler,
+}: Props) {
     const [receivedAmount, setReceivedAmount] = useState<number>(0);
 
     const { pendingAmount, postedAmount } = useMemo(() => {
@@ -120,14 +126,16 @@ function VoucherQueueSection({ vouchers, onCollect, onCancel }: Props) {
                                 {/* Actions */}
                                 <div className="flex gap-1">
                                     <button
-                                        onClick={() => onCancel(voucher.id)}
+                                        onClick={() => onView(voucher.id)}
                                         className="rounded bg-primary px-2 py-1 text-[10px] text-primary-foreground disabled:opacity-50"
                                     >
                                         <Eye className="h-4 w-4 text-primary-foreground" />
                                     </button>
                                     <button
                                         disabled={voucher.status !== 'PENDING'}
-                                        onClick={() => onCollect(voucher.id)}
+                                        onClick={() =>
+                                            voucherCollectNowHandler(voucher.id)
+                                        }
                                         className="rounded bg-primary px-2 py-1 text-[10px] text-primary-foreground disabled:opacity-50"
                                     >
                                         Collect
@@ -135,7 +143,9 @@ function VoucherQueueSection({ vouchers, onCollect, onCancel }: Props) {
 
                                     <button
                                         disabled={voucher.status == 'POSTED'}
-                                        onClick={() => onCancel(voucher.id)}
+                                        onClick={() =>
+                                            cancelVoucherHandler(voucher.id)
+                                        }
                                         className="rounded bg-destructive px-2 py-1 text-[10px] text-destructive-foreground disabled:opacity-50"
                                     >
                                         ✕

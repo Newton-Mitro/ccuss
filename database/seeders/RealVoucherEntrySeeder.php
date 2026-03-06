@@ -13,8 +13,6 @@ use App\UserRolePermissions\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
-use Nette\Utils\Random;
 
 class RealVoucherEntrySeeder extends Seeder
 {
@@ -27,9 +25,11 @@ class RealVoucherEntrySeeder extends Seeder
             $user = User::first() ?? User::factory()->create();
 
             $branches = Branch::pluck('id')->all();
+
             $fiscalYear = FiscalYear::where('is_active', true)->firstOrFail();
-            $fiscalPeriods = FiscalPeriod::where('is_open', true)->pluck('id')->all();
-            $fiscalPeriodId = $fiscalPeriods[0];
+
+            $fiscalPeriod = FiscalPeriod::where('is_open', true)->firstOrFail();
+
 
             /* ===================== LEDGERS ===================== */
 
@@ -37,31 +37,37 @@ class RealVoucherEntrySeeder extends Seeder
             $cashInHand = LedgerAccount::where('code', '1111')->firstOrFail();
             $cashInBank = LedgerAccount::where('code', '1112')->firstOrFail();
 
-            // Liabilities & Equity
-            $memberDeposits = LedgerAccount::where('code', '2010')->firstOrFail();
-            $capital = LedgerAccount::where('code', '3100')->firstOrFail();
+            // Liabilities
+            $savingsDeposit = LedgerAccount::where('code', '2011')->firstOrFail();
+
+            // Equity
+            $shareCapital = LedgerAccount::where('code', '3010')->firstOrFail();
             $retainedEarnings = LedgerAccount::where('code', '3020')->firstOrFail();
 
-            // Expenses / Income
-            $salaryExpense = LedgerAccount::where('code', '5020')->firstOrFail();
-            $officeExpense = LedgerAccount::where('code', '5030')->firstOrFail();
-            $loanInterestIncome = LedgerAccount::where('code', '4020')->firstOrFail();
+            // Expenses
+            $salaryExpense = LedgerAccount::where('code', '5101')->firstOrFail();
+            $officeExpense = LedgerAccount::where('code', '5102')->firstOrFail();
+
+            // Income
+            $loanInterestIncome = LedgerAccount::where('code', '4101')->firstOrFail();
+
 
             /* ===================== OPENING BALANCES ===================== */
 
-            // Define opening balances: ledger_id => amount
             $openingBalances = [
                 $cashInHand->id => 20000,
                 $cashInBank->id => 40000,
-                $memberDeposits->id => 30000,
+                $savingsDeposit->id => 30000,
                 $retainedEarnings->id => 10000,
             ];
 
-            // Step 1: calculate totals
             $totalDebit = 0;
             $totalCredit = 0;
+
             foreach ($openingBalances as $ledgerId => $amount) {
+
                 $account = LedgerAccount::find($ledgerId);
+
                 if (in_array($account->type, ['ASSET', 'EXPENSE'])) {
                     $totalDebit += $amount;
                 } else {
@@ -69,57 +75,54 @@ class RealVoucherEntrySeeder extends Seeder
                 }
             }
 
-            // Step 2: balance difference via Capital / Retained Earnings
             $diff = $totalDebit - $totalCredit;
+
             if ($diff > 0) {
-                // debit > credit, add credit to Capital
-                $openingBalances[$capital->id] = $diff;
-            } elseif ($diff < 0) {
-                // credit > debit, add debit to Capital
-                $openingBalances[$capital->id] = abs($diff);
+                $openingBalances[$shareCapital->id] = $diff;
             }
 
-            /* ===================== CREATE VOUCHER ===================== */
+            /* ===================== OPENING BALANCE VOUCHER ===================== */
 
             $openingVoucher = Voucher::create([
-                'voucher_date' => $fiscalYear->start_date ?? now(),
+                'voucher_date' => $fiscalYear->start_date,
                 'voucher_type' => 'OPENING_BALANCE',
                 'voucher_no' => 'OB-0001',
-                'narration' => 'Opening balances for fiscal year ' . $fiscalYear->code,
+                'narration' => 'Opening balances for ' . $fiscalYear->code,
                 'status' => Voucher::STATUS_POSTED,
                 'reference' => random_int(100000, 999999),
-                'total_amount' => $totalCredit,
+                'total_amount' => max($totalDebit, $totalCredit),
 
                 'branch_id' => Arr::random($branches),
                 'fiscal_year_id' => $fiscalYear->id,
-                'fiscal_period_id' => $fiscalPeriodId,
+                'fiscal_period_id' => $fiscalPeriod->id,
 
                 'created_by' => $user->id,
                 'posted_by' => $user->id,
                 'posted_at' => now(),
             ]);
 
-            /* ===================== CREATE VOUCHER LINES ===================== */
 
             foreach ($openingBalances as $ledgerId => $amount) {
+
                 $account = LedgerAccount::find($ledgerId);
 
-                // Assign debit / credit correctly
                 $debit = in_array($account->type, ['ASSET', 'EXPENSE']) ? $amount : 0;
                 $credit = in_array($account->type, ['LIABILITY', 'EQUITY', 'INCOME']) ? $amount : 0;
 
                 VoucherLine::create([
                     'voucher_id' => $openingVoucher->id,
-                    'ledger_account_id' => $account->id,
-                    'particulars' => 'Opening balance for ' . $account->name,
+                    'ledger_account_id' => $ledgerId,
+                    'particulars' => 'Opening balance - ' . $account->name,
                     'debit' => $debit,
                     'credit' => $credit,
                     'dr_cr' => $debit > 0 ? 'DR' : 'CR',
                 ]);
 
-                // Update account balances
                 LedgerAccountBalance::updateOrCreate(
-                    ['ledger_account_id' => $account->id, 'fiscal_period_id' => $fiscalPeriodId],
+                    [
+                        'ledger_account_id' => $ledgerId,
+                        'fiscal_period_id' => $fiscalPeriod->id
+                    ],
                     [
                         'opening_balance' => $amount,
                         'debit_total' => 0,
@@ -128,22 +131,24 @@ class RealVoucherEntrySeeder extends Seeder
                     ]
                 );
             }
+
+
             /* ==========================================================
-             | 5️⃣ PETTY CASH — OFFICE EXPENSE
-             ========================================================== */
+             1️⃣ PETTY CASH EXPENSE
+            ========================================================== */
 
             $voucher = Voucher::create([
                 'voucher_date' => now(),
                 'voucher_type' => 'DEBIT_OR_PAYMENT',
                 'voucher_no' => 'PC-4001',
-                'narration' => 'Tea, snacks and miscellaneous expenses',
+                'narration' => 'Office petty expenses',
                 'status' => Voucher::STATUS_POSTED,
                 'reference' => random_int(100000, 999999),
-                'total_amount' => 15000,
+                'total_amount' => 800,
 
                 'branch_id' => Arr::random($branches),
                 'fiscal_year_id' => $fiscalYear->id,
-                'fiscal_period_id' => Arr::random($fiscalPeriods),
+                'fiscal_period_id' => $fiscalPeriod->id,
 
                 'created_by' => $user->id,
                 'posted_by' => $user->id,
@@ -162,29 +167,30 @@ class RealVoucherEntrySeeder extends Seeder
                 [
                     'voucher_id' => $voucher->id,
                     'ledger_account_id' => $cashInHand->id,
-                    'particulars' => 'Cash in hand',
+                    'particulars' => 'Cash paid',
                     'debit' => 0,
                     'credit' => 800,
                     'dr_cr' => 'CR',
                 ],
             ]);
 
+
             /* ==========================================================
-             | 6️⃣ CONTRA — CASH TO BANK
-             ========================================================== */
+             2️⃣ CONTRA (CASH → BANK)
+            ========================================================== */
 
             $voucher = Voucher::create([
                 'voucher_date' => now(),
                 'voucher_type' => 'CONTRA',
                 'voucher_no' => 'CNTR-5001',
-                'narration' => 'Cash deposited into bank',
+                'narration' => 'Cash deposited to bank',
                 'status' => Voucher::STATUS_POSTED,
                 'reference' => random_int(100000, 999999),
                 'total_amount' => 15000,
 
                 'branch_id' => Arr::random($branches),
                 'fiscal_year_id' => $fiscalYear->id,
-                'fiscal_period_id' => Arr::random($fiscalPeriods),
+                'fiscal_period_id' => $fiscalPeriod->id,
 
                 'created_by' => $user->id,
                 'posted_by' => $user->id,
@@ -195,7 +201,7 @@ class RealVoucherEntrySeeder extends Seeder
                 [
                     'voucher_id' => $voucher->id,
                     'ledger_account_id' => $cashInBank->id,
-                    'particulars' => 'Cash in bank',
+                    'particulars' => 'Cash deposited',
                     'debit' => 15000,
                     'credit' => 0,
                     'dr_cr' => 'DR',
@@ -203,29 +209,30 @@ class RealVoucherEntrySeeder extends Seeder
                 [
                     'voucher_id' => $voucher->id,
                     'ledger_account_id' => $cashInHand->id,
-                    'particulars' => 'Cash in hand',
+                    'particulars' => 'Cash transferred',
                     'debit' => 0,
                     'credit' => 15000,
                     'dr_cr' => 'CR',
                 ],
             ]);
 
+
             /* ==========================================================
-             | 7️⃣ BANK RECEIPT — MEMBER DEPOSIT
-             ========================================================== */
+             3️⃣ MEMBER SAVINGS DEPOSIT
+            ========================================================== */
 
             $voucher = Voucher::create([
                 'voucher_date' => now(),
                 'voucher_type' => 'CREDIT_OR_RECEIPT',
                 'voucher_no' => 'RCPT-1002',
-                'narration' => 'Member savings deposited via bank',
+                'narration' => 'Member savings deposit',
                 'status' => Voucher::STATUS_POSTED,
                 'reference' => random_int(100000, 999999),
-                'total_amount' => 15000,
+                'total_amount' => 25000,
 
                 'branch_id' => Arr::random($branches),
                 'fiscal_year_id' => $fiscalYear->id,
-                'fiscal_period_id' => Arr::random($fiscalPeriods),
+                'fiscal_period_id' => $fiscalPeriod->id,
 
                 'created_by' => $user->id,
                 'posted_by' => $user->id,
@@ -236,78 +243,38 @@ class RealVoucherEntrySeeder extends Seeder
                 [
                     'voucher_id' => $voucher->id,
                     'ledger_account_id' => $cashInBank->id,
-                    'particulars' => 'Cash in bank',
+                    'particulars' => 'Bank received',
                     'debit' => 25000,
                     'credit' => 0,
                     'dr_cr' => 'DR',
                 ],
                 [
                     'voucher_id' => $voucher->id,
-                    'ledger_account_id' => $memberDeposits->id,
-                    'particulars' => 'Member deposits',
+                    'ledger_account_id' => $savingsDeposit->id,
+                    'particulars' => 'Savings deposit',
                     'debit' => 0,
                     'credit' => 25000,
                     'dr_cr' => 'CR',
                 ],
             ]);
 
+
             /* ==========================================================
-             | 8️⃣ JOURNAL — EXPENSE ACCRUAL
-             ========================================================== */
+             4️⃣ SALARY PAYMENT
+            ========================================================== */
 
             $voucher = Voucher::create([
                 'voucher_date' => now(),
-                'voucher_type' => 'JOURNAL_OR_NON_CASH',
-                'voucher_no' => 'JRNL-3002',
-                'narration' => 'Office expense accrued',
+                'voucher_type' => 'DEBIT_OR_PAYMENT',
+                'voucher_no' => 'PAY-6001',
+                'narration' => 'Salary payment',
                 'status' => Voucher::STATUS_POSTED,
                 'reference' => random_int(100000, 999999),
-                'total_amount' => 15000,
+                'total_amount' => 7000,
 
                 'branch_id' => Arr::random($branches),
                 'fiscal_year_id' => $fiscalYear->id,
-                'fiscal_period_id' => Arr::random($fiscalPeriods),
-
-                'created_by' => $user->id,
-                'posted_by' => $user->id,
-                'posted_at' => now(),
-            ]);
-
-            VoucherLine::insert([
-                [
-                    'voucher_id' => $voucher->id,
-                    'ledger_account_id' => $officeExpense->id,
-                    'particulars' => 'Office expense',
-                    'debit' => 4000,
-                    'credit' => 0,
-                    'dr_cr' => 'DR',
-                ],
-                [
-                    'voucher_id' => $voucher->id,
-                    'ledger_account_id' => $memberDeposits->id,
-                    'particulars' => 'Member deposits',
-                    'debit' => 0,
-                    'credit' => 4000,
-                    'dr_cr' => 'CR',
-                ],
-            ]);
-
-            /* ==========================================================
-             | 9️⃣ JOURNAL — EXPENSE DISTRIBUTION
-             ========================================================== */
-
-            $voucher = Voucher::create([
-                'voucher_date' => now(),
-                'voucher_type' => 'JOURNAL_OR_NON_CASH',
-                'voucher_no' => 'JRNL-3003',
-                'narration' => 'Expense distribution',
-                'status' => Voucher::STATUS_POSTED,
-                'reference' => random_int(100000, 999999),
-                'total_amount' => 15000,
-
-                'branch_id' => Arr::random($branches),
-                'fiscal_year_id' => $fiscalYear->id,
-                'fiscal_period_id' => Arr::random($fiscalPeriods),
+                'fiscal_period_id' => $fiscalPeriod->id,
 
                 'created_by' => $user->id,
                 'posted_by' => $user->id,
@@ -325,38 +292,31 @@ class RealVoucherEntrySeeder extends Seeder
                 ],
                 [
                     'voucher_id' => $voucher->id,
-                    'ledger_account_id' => $officeExpense->id,
-                    'particulars' => 'Office expense',
-                    'debit' => 3000,
-                    'credit' => 0,
-                    'dr_cr' => 'DR',
-                ],
-                [
-                    'voucher_id' => $voucher->id,
                     'ledger_account_id' => $cashInBank->id,
-                    'particulars' => 'Cash in bank',
+                    'particulars' => 'Bank payment',
                     'debit' => 0,
-                    'credit' => 10000,
+                    'credit' => 7000,
                     'dr_cr' => 'CR',
                 ],
             ]);
 
+
             /* ==========================================================
-                | 🔟 BANK RECEIPT — LOAN INTEREST INCOME
-                ========================================================== */
+             5️⃣ LOAN INTEREST RECEIVED
+            ========================================================== */
 
             $voucher = Voucher::create([
                 'voucher_date' => now(),
                 'voucher_type' => 'CREDIT_OR_RECEIPT',
                 'voucher_no' => 'INC-7001',
-                'narration' => 'Loan interest received from member',
+                'narration' => 'Loan interest received',
                 'status' => Voucher::STATUS_POSTED,
                 'reference' => random_int(100000, 999999),
                 'total_amount' => 15000,
 
                 'branch_id' => Arr::random($branches),
                 'fiscal_year_id' => $fiscalYear->id,
-                'fiscal_period_id' => Arr::random($fiscalPeriods),
+                'fiscal_period_id' => $fiscalPeriod->id,
 
                 'created_by' => $user->id,
                 'posted_by' => $user->id,
@@ -367,7 +327,7 @@ class RealVoucherEntrySeeder extends Seeder
                 [
                     'voucher_id' => $voucher->id,
                     'ledger_account_id' => $cashInBank->id,
-                    'particulars' => 'Cash in bank',
+                    'particulars' => 'Interest received',
                     'debit' => 15000,
                     'credit' => 0,
                     'dr_cr' => 'DR',
@@ -381,45 +341,8 @@ class RealVoucherEntrySeeder extends Seeder
                     'dr_cr' => 'CR',
                 ],
             ]);
-
-            $voucher = Voucher::create([
-                'voucher_date' => now(),
-                'voucher_type' => 'CREDIT_OR_RECEIPT',
-                'voucher_no' => 'INC-7001',
-                'narration' => 'Loan interest received from member',
-                'status' => Voucher::STATUS_PENDING,
-                'reference' => random_int(100000, 999999),
-                'total_amount' => 1500,
-
-                'branch_id' => Arr::random($branches),
-                'fiscal_year_id' => $fiscalYear->id,
-                'fiscal_period_id' => Arr::random($fiscalPeriods),
-
-                'created_by' => $user->id,
-                'posted_by' => $user->id,
-                'posted_at' => now(),
-            ]);
-
-            VoucherLine::insert([
-                [
-                    'voucher_id' => $voucher->id,
-                    'ledger_account_id' => $cashInBank->id,
-                    'particulars' => 'Cash in bank',
-                    'debit' => 1500,
-                    'credit' => 0,
-                    'dr_cr' => 'DR',
-                ],
-                [
-                    'voucher_id' => $voucher->id,
-                    'ledger_account_id' => $loanInterestIncome->id,
-                    'particulars' => 'Loan interest income',
-                    'debit' => 0,
-                    'credit' => 1500,
-                    'dr_cr' => 'CR',
-                ],
-            ]);
         });
 
-        $this->command->info('✅ Real Voucher Entries created');
+        $this->command->info('✅ Real Voucher Entries Seeded Successfully');
     }
 }

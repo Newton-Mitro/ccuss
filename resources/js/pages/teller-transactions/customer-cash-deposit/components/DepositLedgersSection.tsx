@@ -3,55 +3,51 @@ import { Button } from '../../../../components/ui/button';
 import { Checkbox } from '../../../../components/ui/checkbox';
 import { Input } from '../../../../components/ui/input';
 import { formatBDTCurrency } from '../../../../lib/bdtCurrencyFormatter';
+import { VoucherLine } from '../../../../types/accounting';
 import { Customer } from '../../../../types/customer';
 import { CustomerSearchBox } from '../../../customer-mgmt/customers/customer-search-box';
 
-interface CollectionLine {
-    id: number | string;
-    credit?: number;
-    particulars?: string;
-    is_selected?: boolean;
-}
-
 interface CollectionLedgersSectionProps {
-    lines: CollectionLine[];
+    errors: any;
+    creditLines: VoucherLine[];
     processing: boolean;
     onCustomerSelect: (customer: Customer) => void;
     toggleSelectAll: () => void;
     toggleSelect: (id: number) => void;
     handleCreditLineChange: (
         id: number,
-        field: keyof CollectionLine,
+        field: keyof VoucherLine,
         value: any,
     ) => void;
-    onCollectNowSubmit: () => void;
-    onCollectLaterSubmit: () => void;
+    collectNowHandler: () => void;
+    collectLaterHandler: () => void;
 }
 
 function DepositLedgersSection({
-    lines,
+    errors,
+    creditLines,
     processing,
     onCustomerSelect,
     toggleSelectAll,
     toggleSelect,
-    handleCreditLineChange: handleLineChange,
-    onCollectNowSubmit: onSubmit,
-    onCollectLaterSubmit: onCollectLater,
+    handleCreditLineChange,
+    collectNowHandler,
+    collectLaterHandler,
 }: CollectionLedgersSectionProps) {
-    const totalCredit = lines.reduce(
+    const totalCredit = creditLines.reduce(
         (sum, line) => sum + (Number(line.credit) || 0),
         0,
     );
 
     const allSelected =
-        lines.length > 0 && lines.every((line) => line.is_selected);
+        creditLines.length > 0 && creditLines.every((line) => line.is_selected);
 
     return (
         <div className="flex flex-col gap-4 rounded-md border border-border bg-muted/30 p-4">
             {/* Header */}
             <div className="space-y-4">
                 <h2 className="text-sm font-medium text-primary">
-                    Customer Cash Deposit
+                    Cash Receipt
                 </h2>
 
                 <CustomerSearchBox onSelect={onCustomerSelect} />
@@ -84,14 +80,14 @@ function DepositLedgersSection({
                     <div className="h-[calc(100vh/2-86px)] overflow-y-auto bg-card p-2">
                         <table className="w-full table-fixed border-separate border-spacing-y-2">
                             <tbody>
-                                {lines.map((line, index) => (
+                                {creditLines.map((line, index) => (
                                     <tr
                                         key={`collection-ledger-${index}`}
                                         className={`rounded-md ${
                                             line.is_selected
                                                 ? 'bg-primary/20'
                                                 : 'odd:bg-primary/10 even:bg-accent/10'
-                                        }`}
+                                        } ${errors?.lines?.[index]?.credit && 'bg-destructive/20'} `}
                                     >
                                         {/* Checkbox */}
                                         <td className="w-1/12 text-center align-middle">
@@ -112,7 +108,10 @@ function DepositLedgersSection({
                                             <div className="-mt-1 flex items-center justify-end border-x border-border px-2 py-1">
                                                 <div className="flex gap-2">
                                                     <span className="text-xs text-muted-foreground underline">
-                                                        Ledger Code - Name
+                                                        {`${
+                                                            line.ledger_account
+                                                                ?.name
+                                                        } - ${line.ledger_account?.code}`}
                                                     </span>
                                                     <span className="text-xs text-muted-foreground underline">
                                                         Acc. Name - Number
@@ -136,13 +135,13 @@ function DepositLedgersSection({
                                             <Input
                                                 type="number"
                                                 value={line.credit || ''}
-                                                onChange={(e) =>
-                                                    handleLineChange(
+                                                onChange={(e) => {
+                                                    handleCreditLineChange(
                                                         Number(line.id),
                                                         'credit',
                                                         Number(e.target.value),
-                                                    )
-                                                }
+                                                    );
+                                                }}
                                                 className="h-8 rounded-none text-sm"
                                             />
                                         </td>
@@ -157,11 +156,7 @@ function DepositLedgersSection({
                         <tfoot>
                             <tr className="bg-muted/30 font-medium">
                                 <td className="w-9/12 p-2" colSpan={2}>
-                                    <div className="text-sm text-destructive">
-                                        Debit total: 0, Credit total:{' '}
-                                        {formatBDTCurrency(totalCredit)}. Both
-                                        must be equal and greater than zero.
-                                    </div>
+                                    <div className="text-sm text-destructive"></div>
                                 </td>
                                 <td className="w-3/12 p-2">{`Total: ${formatBDTCurrency(totalCredit)}`}</td>
                             </tr>
@@ -176,7 +171,7 @@ function DepositLedgersSection({
                     type="button"
                     variant="ghost"
                     disabled={processing}
-                    onClick={onCollectLater}
+                    onClick={collectLaterHandler}
                 >
                     {processing ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -186,7 +181,11 @@ function DepositLedgersSection({
                     Collect Later
                 </Button>
 
-                <Button type="button" disabled={processing} onClick={onSubmit}>
+                <Button
+                    type="button"
+                    disabled={processing}
+                    onClick={collectNowHandler}
+                >
                     {processing ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (

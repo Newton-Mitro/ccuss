@@ -1,7 +1,7 @@
-import { useForm } from '@inertiajs/react';
 import axios from 'axios';
 import { Search } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
+import { route } from 'ziggy-js';
 import { Label } from '../../../components/ui/label';
 import { Customer } from '../../../types/customer';
 import CustomerViewModal from './customer_view_modal';
@@ -25,21 +25,6 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
     const [open, setOpen] = useState(false);
 
     const dropdownRef = useRef<HTMLDivElement | null>(null);
-    const { data, setData } = useForm<Customer | null>(null);
-
-    const onSelectCustomer = async (customer: Customer) => {
-        setData(customer);
-        try {
-            setLoading(true);
-            const res = await axios.get(`/api/find-customers/${customer.id}`);
-            onSelect(res.data || null);
-            setCustomer(res.data || null);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     // ----------------------- API SEARCH
     const searchCustomers = async () => {
@@ -123,7 +108,8 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
                             key={customer.id}
                             className="flex cursor-pointer items-center gap-2 px-3 py-2 text-xs hover:bg-muted"
                             onClick={() => {
-                                onSelectCustomer(customer);
+                                onSelect(customer);
+                                setCustomer(customer);
                                 setQuery(customer.name);
                                 setShowDropdown(false);
                             }}
@@ -168,21 +154,21 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
             )}
 
             {/* CUSTOMER DETAILS / SKELETON */}
-            {data?.id ? (
+            {customer?.id ? (
                 // Loaded customer
                 <div className="mt-3 flex flex-col gap-4 rounded-md border bg-background/60 p-3 md:flex-row">
                     <div className="flex items-center justify-center">
                         {/* Avatar */}
                         <div className="h-20 w-20 overflow-hidden rounded-full border bg-muted">
-                            {data.photo?.url ? (
+                            {customer.photo?.url ? (
                                 <img
-                                    src={data.photo.url}
-                                    alt={data.name}
+                                    src={customer.photo.url}
+                                    alt={customer.name}
                                     className="h-full w-full object-cover"
                                 />
                             ) : (
                                 <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
-                                    {data.name.charAt(0)}
+                                    {customer.name.charAt(0)}
                                 </div>
                             )}
                         </div>
@@ -191,27 +177,30 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
                     {/* Info */}
                     <div className="flex-1 space-y-1">
                         <div>
-                            <button
-                                onClick={() => setOpen(true)}
-                                className="text-sm font-semibold underline hover:cursor-pointer"
+                            <a
+                                href={route('customers.show', customer.id)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="cursor-pointer text-sm font-semibold underline"
+                                onClick={(e) => e.stopPropagation()}
                             >
-                                {`${data.name} • ${data.customer_no}`}
-                            </button>
+                                {`${customer.name} • ${customer.customer_no}`}
+                            </a>
                             <p className="text-xs text-muted-foreground">
-                                {data.status} • {data.type}
+                                {customer.status} • {customer.type}
                             </p>
                         </div>
 
                         <div className="grid grid-cols-1 gap-1 text-xs md:grid-cols-4">
-                            <Info label="Phone" value={data.phone} />
-                            <Info label="Email" value={data.email} />
+                            <Info label="Phone" value={customer.phone} />
+                            <Info label="Email" value={customer.email} />
                             <Info
                                 label="Identification Type"
-                                value={data.identification_type}
+                                value={customer.identification_type}
                             />
                             <Info
                                 label="Identification Number"
-                                value={data.identification_number}
+                                value={customer.identification_number}
                             />
                         </div>
                     </div>

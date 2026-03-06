@@ -154,17 +154,6 @@ function Show({ customer, backUrl }: ShowProps) {
                                 label="KYC Status"
                                 value={customer.kyc_status}
                             />
-                        </InfoGrid>
-                    </div>
-                </SectionCard>
-
-                {/* ================= Identification ================= */}
-                <SectionCard
-                    title="Identification"
-                    icon={<UserCheckIcon size={16} />}
-                >
-                    <div className="rounded-md border bg-card p-3">
-                        <InfoGrid>
                             <Info
                                 label="Type"
                                 value={customer.identification_type}

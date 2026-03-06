@@ -1,25 +1,28 @@
 import { Label } from '../../../../components/ui/label';
 import { Select } from '../../../../components/ui/select';
-import { LedgerAccount } from '../../../../types/accounting';
+import { LedgerAccount, VoucherLine } from '../../../../types/accounting';
 
 interface CashLedgerSectionProps {
     data: any;
     errors: any;
-    setData: (key: string, value: any) => void;
     cash_ledgers: LedgerAccount[];
     cash_subledgers: LedgerAccount[];
-    handleCashLedgerChange: (value: string) => void;
+    instrument_types: any;
+    handleDebitLineChange: (
+        id: number,
+        field: keyof VoucherLine,
+        value: any,
+    ) => void;
 }
 
 function CashLedgerSection({
     data,
     errors,
-    setData,
     cash_ledgers,
     cash_subledgers,
-    handleCashLedgerChange,
+    instrument_types,
+    handleDebitLineChange,
 }: CashLedgerSectionProps) {
-    console.log(data);
     return (
         <div className="rounded-md border border-border bg-card md:col-span-6">
             <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-muted/30 px-4 py-3">
@@ -34,16 +37,16 @@ function CashLedgerSection({
                     <Label className="text-xs">Ledger Account</Label>
                     <Select
                         disabled
-                        error={errors?.cash_ledger_id}
-                        value={data.ledger_account_id?.toString() || ''}
+                        error={errors?.ledger_account_id}
+                        value={data[0].ledger_account_id?.toString() || ''}
                         options={cash_ledgers.map((ledger) => ({
                             value: ledger.id.toString(),
                             label: `${ledger.code} - ${ledger.name}`,
                         }))}
                         onChange={(value) => {
-                            handleCashLedgerChange(value);
-                            setData(
-                                'cash_ledger_id',
+                            handleDebitLineChange(
+                                1,
+                                'ledger_account_id',
                                 value ? Number(value) : null,
                             );
                         }}
@@ -55,15 +58,16 @@ function CashLedgerSection({
                     <Label className="text-xs">Subledger Account</Label>
                     <Select
                         disabled
-                        error={errors?.cash_subledger_id}
-                        value={data.cash_subledger_id?.toString() || ''}
+                        error={errors?.subledger_id}
+                        value={data[0].subledger_id?.toString() || ''}
                         options={cash_subledgers.map((ledger) => ({
                             value: ledger.id.toString(),
                             label: `${ledger.code} - ${ledger.name}`,
                         }))}
                         onChange={(value) =>
-                            setData(
-                                'cash_subledger_id',
+                            handleDebitLineChange(
+                                1,
+                                'subledger_id',
                                 value ? Number(value) : null,
                             )
                         }
@@ -76,19 +80,20 @@ function CashLedgerSection({
                         Instrument Type
                     </Label>
                     <Select
-                        value={data.instrument_type || ''}
-                        options={[
-                            { value: 'CASH', label: 'Cash' },
-                            { value: 'CHEQUE', label: 'Cheque' },
-                            { value: 'BANK_TRANSFER', label: 'Bank Transfer' },
-                            {
-                                value: 'MOBILE_BANKING',
-                                label: 'Mobile Banking',
-                            },
-                            { value: 'CARD', label: 'Card' },
-                            { value: 'OTHER', label: 'Other' },
-                        ]}
-                        onChange={(value) => setData('instrument_type', value)}
+                        disabled
+                        error={errors?.instrument_type_id}
+                        value={data[0].instrument_type_id || ''}
+                        options={instrument_types.map((type) => ({
+                            value: type.id,
+                            label: type.name,
+                        }))}
+                        onChange={(value) =>
+                            handleDebitLineChange(
+                                1,
+                                'instrument_type_id',
+                                value,
+                            )
+                        }
                     />
                 </div>
             </div>

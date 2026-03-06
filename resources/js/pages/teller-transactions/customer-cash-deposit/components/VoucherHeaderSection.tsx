@@ -38,6 +38,7 @@ function VoucherHeaderSection({
                 <div>
                     <Label className="text-xs">Voucher Type</Label>
                     <Select
+                        disabled
                         error={errors?.voucher_type}
                         value={data.voucher_type || ''}
                         options={[

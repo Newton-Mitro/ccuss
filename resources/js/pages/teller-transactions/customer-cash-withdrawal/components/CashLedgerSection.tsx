@@ -1,23 +1,27 @@
 import { Label } from '../../../../components/ui/label';
 import { Select } from '../../../../components/ui/select';
-import { LedgerAccount } from '../../../../types/accounting';
+import { LedgerAccount, VoucherLine } from '../../../../types/accounting';
 
 interface CashLedgerSectionProps {
     data: any;
     errors: any;
-    setData: (key: string, value: any) => void;
     cash_ledgers: LedgerAccount[];
     cash_subledgers: LedgerAccount[];
-    handleCashLedgerChange: (value: string) => void;
+    instrument_types: any;
+    handleCashLedgerLineChange: (
+        id: number,
+        field: keyof VoucherLine,
+        value: any,
+    ) => void;
 }
 
 function CashLedgerSection({
     data,
     errors,
-    setData,
     cash_ledgers,
     cash_subledgers,
-    handleCashLedgerChange,
+    instrument_types,
+    handleCashLedgerLineChange,
 }: CashLedgerSectionProps) {
     console.log(data);
     return (
@@ -38,11 +42,11 @@ function CashLedgerSection({
                             value: ledger.id.toString(),
                             label: `${ledger.code} - ${ledger.name}`,
                         }))}
-                        onChange={(e) => {
-                            handleCashLedgerChange(e.target.value);
-                            setData(
-                                'cash_ledger_id',
-                                e.target.value ? Number(e.target.value) : null,
+                        onChange={(value) => {
+                            handleCashLedgerLineChange(
+                                1,
+                                'ledger_account_id',
+                                value ? Number(value) : null,
                             );
                         }}
                     />
@@ -59,12 +63,13 @@ function CashLedgerSection({
                             value: ledger.id.toString(),
                             label: `${ledger.code} - ${ledger.name}`,
                         }))}
-                        onChange={(e) =>
-                            setData(
-                                'cash_subledger_id',
-                                e.target.value ? Number(e.target.value) : null,
-                            )
-                        }
+                        onChange={(value) => {
+                            handleCashLedgerLineChange(
+                                1,
+                                'subledger_id',
+                                value ? Number(value) : null,
+                            );
+                        }}
                     />
                 </div>
 
@@ -76,20 +81,17 @@ function CashLedgerSection({
                     <Select
                         disabled
                         value={data.instrument_type || ''}
-                        options={[
-                            { value: 'CASH', label: 'Cash' },
-                            { value: 'CHEQUE', label: 'Cheque' },
-                            { value: 'BANK_TRANSFER', label: 'Bank Transfer' },
-                            {
-                                value: 'MOBILE_BANKING',
-                                label: 'Mobile Banking',
-                            },
-                            { value: 'CARD', label: 'Card' },
-                            { value: 'OTHER', label: 'Other' },
-                        ]}
-                        onChange={(e) =>
-                            setData('instrument_type', e.target.value)
-                        }
+                        options={instrument_types.map((type) => ({
+                            value: type.id,
+                            label: type.name,
+                        }))}
+                        onChange={(value) => {
+                            handleCashLedgerLineChange(
+                                1,
+                                'instrument_id',
+                                value ? Number(value) : null,
+                            );
+                        }}
                     />
                 </div>
             </div>

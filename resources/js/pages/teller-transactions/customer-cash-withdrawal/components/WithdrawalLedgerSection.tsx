@@ -7,35 +7,28 @@ import { Label } from '../../../../components/ui/label';
 import { Select } from '../../../../components/ui/select';
 import { formatBDTCurrency } from '../../../../lib/bdtCurrencyFormatter';
 import { takaToText } from '../../../../lib/taka_to_text';
+import { VoucherLine } from '../../../../types/accounting';
 import { Customer } from '../../../../types/customer';
 import { CustomerSearchBox } from '../../../customer-mgmt/customers/customer-search-box';
 
-interface CollectionLine {
-    id: number | string;
-    credit?: number;
-    particulars?: string;
-}
-
 interface WithdrawalLedgersSectionProps {
-    lines: CollectionLine[];
+    lines: VoucherLine[];
     processing: boolean;
     onCustomerSelect: (customer: Customer) => void;
-    handleLineChange: (
+    handleDebitLineChange: (
         index: number,
-        field: keyof CollectionLine,
+        field: keyof VoucherLine,
         value: any,
     ) => void;
     onSubmit: () => void;
-    onCollectLater: () => void;
 }
 
 function WithdrawalLedgerSection({
     lines,
     processing,
     onCustomerSelect,
-    handleLineChange,
+    handleDebitLineChange,
     onSubmit,
-    onCollectLater,
 }: WithdrawalLedgersSectionProps) {
     const [selectedAccount, setSelectedAccount] = useState<string>('');
     const [withdrawalAmount, setWithdrawalAmount] = useState<number>(0);
@@ -81,7 +74,7 @@ function WithdrawalLedgerSection({
             {/* Header */}
             <div className="space-y-3">
                 <h2 className="text-base font-semibold text-muted-foreground">
-                    Customer Cash Withdrawal
+                    Cash Payment
                 </h2>
                 <CustomerSearchBox onSelect={onCustomerSelect} />
             </div>
@@ -101,7 +94,7 @@ function WithdrawalLedgerSection({
                         </Label>
                         <Select
                             value={selectedAccount}
-                            onChange={(e) => setSelectedAccount(e.target.value)}
+                            onChange={(value) => setSelectedAccount(value)}
                             options={accounts.map((acc) => ({
                                 value: acc.value,
                                 label: acc.value,
@@ -222,7 +215,7 @@ function WithdrawalLedgerSection({
 
                 {/* Right Card */}
                 <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4 md:col-span-8">
-                    <div>
+                    <div className="h-[calc(100vh/3-10px)]">
                         <h3 className="text-sm font-semibold text-muted-foreground">
                             Signature Verification
                         </h3>
@@ -246,9 +239,7 @@ function WithdrawalLedgerSection({
                             </Label>
                             <Select
                                 value={selectedAccount}
-                                onChange={(e) =>
-                                    setSelectedAccount(e.target.value)
-                                }
+                                onChange={(value) => setSelectedAccount(value)}
                                 options={accounts.map((acc) => ({
                                     value: acc.value,
                                     label: acc.value,
@@ -261,9 +252,7 @@ function WithdrawalLedgerSection({
                             </Label>
                             <Select
                                 value={selectedAccount}
-                                onChange={(e) =>
-                                    setSelectedAccount(e.target.value)
-                                }
+                                onChange={(value) => setSelectedAccount(value)}
                                 options={accounts.map((acc) => ({
                                     value: acc.value,
                                     label: acc.value,

@@ -1,76 +1,17 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { useEffect, useMemo, useState } from 'react';
+import axios from 'axios';
+import { useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
+import { normalizeErrors } from '../../../lib/normalize_errors';
 import { BreadcrumbItem } from '../../../types';
-import { LedgerAccount } from '../../../types/accounting';
+import { VoucherLine } from '../../../types/accounting';
 import { Customer } from '../../../types/customer';
 import CashLedgerSection from './components/CashLedgerSection';
 import VoucherHeaderSection from './components/VoucherHeaderSection';
 import VoucherQueueSection from './components/VoucherQueueSection';
 import WithdrawalLedgerSection from './components/WithdrawalLedgerSection';
-
-/* -------------------------------------------------------
- | Helpers
- ------------------------------------------------------- */
-function normalizeErrors(errors: Record<string, string>) {
-    const result: any = {};
-    const lines: any[] = [];
-
-    Object.entries(errors || {}).forEach(([key, message]) => {
-        const lineMatch = key.match(/^lines\.(\d+)\.(.+)$/);
-        if (lineMatch) {
-            const index = Number(lineMatch[1]);
-            const field = lineMatch[2];
-            lines[index] = lines[index] || {};
-            lines[index][field] = message
-                .replace(/^The lines\.\d+\./, '')
-                .trim();
-        } else {
-            result[key] = message;
-        }
-    });
-
-    if (lines.length > 0) result.lines = lines;
-    return result;
-}
-
-/* -------------------------------------------------------
- | Types
- ------------------------------------------------------- */
-
-interface VoucherLine {
-    id: number;
-    voucher_id: number;
-
-    ledger_account_id: number;
-    ledger_account?: LedgerAccount;
-
-    // Polymorphic subledger (DepositAccount, LoanAccount, etc.)
-    subledger_id?: number | null;
-    subledger_type?: string | null;
-    subledger?: object | null;
-
-    // Polymorphic reference (Invoice, Cheque, Transfer, etc.)
-    reference_id?: number | null;
-    reference_type?: string | null;
-    reference?: object | null;
-
-    // Instrument details
-    instrument_type?: string | null;
-    instrument_no?: string | null;
-
-    particulars?: string | null;
-
-    debit: number;
-    credit: number;
-
-    created_by?: number | null;
-    updated_by?: number | null;
-    created_at?: string | null;
-    updated_at?: string | null;
-    is_selected: boolean;
-}
 
 interface VoucherFormData {
     voucher_no: string;
@@ -78,18 +19,14 @@ interface VoucherFormData {
     voucher_type: string;
     fiscal_year_id?: number;
     fiscal_period_id?: number;
+
     branch_id?: number;
     status: string;
     reference?: string;
     narration: string;
-    cash_ledger_id?: number;
-    cash_subledger_id?: number;
     lines: VoucherLine[];
 }
 
-/* -------------------------------------------------------
- | Component
- ------------------------------------------------------- */
 export default function CustomerCashWithdrawalPage() {
     const {
         fiscal_years,
@@ -97,6 +34,7 @@ export default function CustomerCashWithdrawalPage() {
         branches,
         cash_ledgers,
         cash_subledgers,
+        instrument_types,
         lines,
         vouchers,
         user_branch_id,
@@ -120,13 +58,11 @@ export default function CustomerCashWithdrawalPage() {
         branch_id: user_branch_id || branches[0]?.id,
         status: 'DRAFT',
         reference: '',
-        narration: 'Customer withdrawal via cash counter.',
+        narration: '',
         lines: lines || [],
     });
 
-    const [debitLines, setDebitLines] = useState<VoucherLine[]>([]);
-    const [creditLines, setCreditLines] = useState<VoucherLine[]>([]);
-
+    console.log(data);
     const errors = useMemo(() => normalizeErrors(rawErrors), [rawErrors]);
 
     useEffect(() => {
@@ -134,90 +70,99 @@ export default function CustomerCashWithdrawalPage() {
         if (flash?.error) toast.error(flash.error);
     }, [flash]);
 
-    useEffect(() => {
-        if (!data.lines || !Array.isArray(data.lines)) return;
+    const creditLines = useMemo(
+        () =>
+            data.lines.filter((line) => line.dr_cr === 'CR' || line.credit > 0),
+        [data.lines],
+    );
 
-        const debit: VoucherLine[] = [];
-        const credit: VoucherLine[] = [];
+    const debitLines = useMemo(
+        () =>
+            data.lines.filter(
+                (line) =>
+                    line.debit > 0 || line.ledger_account?.code === '1111',
+            ),
+        [data.lines],
+    );
 
-        data.lines.forEach((line: VoucherLine) => {
-            if (line.ledger_account?.code === '1111') {
-                credit.push(line);
-            } else {
-                debit.push(line);
-            }
-        });
+    const onCustomerSelected = async (customer: Customer) => {
+        try {
+            const res = await axios.get('/customer-collection-ledgers');
+            const newCreditLines = res.data || [];
+            const newDebitLines = [
+                {
+                    ...debitLines[0],
+                    credit: 0,
+                    debit: newCreditLines.reduce((a, b) => a + b.credit, 0),
+                },
+            ];
 
-        setDebitLines(debit);
-        setCreditLines(credit);
-    }, [data.lines]);
-
-    const onCustomerSelected = (customer: Customer) => {
-        const newLines: VoucherLine[] = [
-            {
-                id: -Date.now(),
-                voucher_id: 0,
-                ledger_account_id: null,
-                ledger_account: null,
-                subledger_id: null,
-                subledger_type: null,
-                subledger: null,
-                reference_id: null,
-                reference_type: null,
-                reference: null,
-                instrument_type: 'CASH',
-                instrument_no: null,
-                particulars: null,
-                debit: 0,
-                credit: 0,
-                created_by: null,
-                updated_by: null,
-                is_selected: true,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-            },
-        ];
-
-        setData('lines', [...creditLines, ...newLines]);
-        setData(
-            'narration',
-            `Withdrawal by "${customer.name}" (${customer.customer_no}) via cash counter.`,
-        );
+            setData('lines', [...newDebitLines, ...newCreditLines]);
+            setData(
+                'narration',
+                `${customer.name} (${customer.customer_no}) deposited to his/her accounts via cash counter.`,
+            );
+        } catch (err) {
+            console.error(err);
+        }
     };
 
-    const handleLineChange = (
-        index: number,
+    const handleCreditLineChange = (
+        id: number,
         field: keyof VoucherLine,
         value: any,
     ) => {
-        const updated = [...data.lines];
-        updated[index] = { ...updated[index], [field]: value };
+        let creditLineUpdate = [];
+        if (field === 'credit') {
+            creditLineUpdate = data.lines.map((line) =>
+                line.id === id
+                    ? {
+                          ...line,
+                          [field]: value,
+                          particulars: `${formatBDTCurrency(value)} cash deposited to ${line.ledger_account?.name}`,
+                      }
+                    : line,
+            );
+        } else {
+            creditLineUpdate = data.lines.map((line) =>
+                line.id === id ? { ...line, [field]: value } : line,
+            );
+        }
+
+        const totalDebit = creditLineUpdate.reduce((a, b) => a + b.credit, 0);
+        const debitLineUpdate = creditLineUpdate.map((line) =>
+            line.id === 1 ? { ...line, debit: totalDebit } : line,
+        );
+        setData('lines', debitLineUpdate);
+    };
+
+    const handleDebitLineChange = (
+        id: number,
+        field: keyof VoucherLine,
+        value: any,
+    ) => {
+        const updated = data.lines.map((line) =>
+            line.id === id ? { ...line, [field]: value } : line,
+        );
         setData('lines', updated);
     };
-    const toggleSelectAll = () => {
-        // TODO: Add toggleSelectAll
-    };
-    const toggleSelect = (index: number) => {
-        // TODO: Add toggleSelect
-    };
 
-    const handleCashLedgerChange = (value: string) => {
-        setData('cash_subledger_id', null);
-        setData('cash_ledger_id', value ? Number(value) : null);
+    const collectNowHandler = () =>
+        post('/vouchers', {
+            preserveScroll: true,
+            onSuccess: () => toast.success('Voucher saved'),
+        });
 
-        router.get(
-            '/customer-cash-withdrawal',
-            {
-                cash_ledger_id: value ? Number(value) : null,
-                cash_subledger_id: data.cash_subledger_id,
-            },
-            { preserveState: true },
-        );
+    const viewVoucherHandler = (voucherId: number) => {
+        window.open(`/vouchers/${voucherId}`, '_blank', 'noopener,noreferrer');
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        post('/vouchers', { preserveScroll: true });
+    const cancelVoucherHandler = (voucherId: number) => {
+        if (!confirm('Cancel this voucher?')) return;
+        router.delete(`/vouchers/${voucherId}`, {
+            preserveScroll: true,
+            onSuccess: () => toast.success('Voucher cancelled'),
+        });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -228,60 +173,53 @@ export default function CustomerCashWithdrawalPage() {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Customer Cash Withdrawal" />
-            <form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
-                    <div className="md:col-span-8">
-                        {/* Collection Ledger Section */}
-                        <WithdrawalLedgerSection
-                            lines={creditLines}
-                            processing={processing}
-                            handleLineChange={handleLineChange}
-                            onSubmit={function (): void {
-                                throw new Error('Function not implemented.');
-                            }}
-                            onCollectLater={function (): void {
-                                throw new Error('Function not implemented.');
-                            }}
-                            onCustomerSelect={onCustomerSelected}
-                        />
-                    </div>
-
-                    <div className="flex flex-col gap-6 md:col-span-4">
-                        {/* Voucher Header Section */}
-                        <VoucherHeaderSection
-                            data={data}
-                            errors={errors}
-                            setData={setData}
-                            fiscal_years={fiscal_years}
-                            fiscal_periods={fiscal_periods}
-                            branches={branches}
-                        />
-
-                        {/* Cash Ledger Section */}
-                        <CashLedgerSection
-                            data={
-                                creditLines.length > 0 ? creditLines[0] : data
-                            }
-                            errors={errors}
-                            setData={setData}
-                            cash_ledgers={cash_ledgers}
-                            cash_subledgers={cash_subledgers}
-                            handleCashLedgerChange={handleCashLedgerChange}
-                        />
-
-                        {/* Voucher Queue Section */}
-                        <VoucherQueueSection
-                            vouchers={vouchers}
-                            onCollect={function (): void {
-                                throw new Error('Function not implemented.');
-                            }}
-                            onCancel={function (): void {
-                                throw new Error('Function not implemented.');
-                            }}
-                        />
-                    </div>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
+                <div className="md:col-span-8">
+                    {/* Collection Ledger Section */}
+                    <WithdrawalLedgerSection
+                        lines={creditLines}
+                        processing={processing}
+                        handleDebitLineChange={handleDebitLineChange}
+                        onSubmit={function (): void {
+                            throw new Error('Function not implemented.');
+                        }}
+                        onCustomerSelect={onCustomerSelected}
+                    />
                 </div>
-            </form>
+
+                <div className="flex flex-col gap-6 md:col-span-4">
+                    {/* Voucher Header Section */}
+                    <VoucherHeaderSection
+                        data={data}
+                        errors={errors}
+                        setData={setData}
+                        fiscal_years={fiscal_years}
+                        fiscal_periods={fiscal_periods}
+                        branches={branches}
+                    />
+
+                    {/* Cash Ledger Section */}
+                    <CashLedgerSection
+                        data={creditLines.length > 0 ? creditLines[0] : data}
+                        errors={errors}
+                        cash_ledgers={cash_ledgers}
+                        cash_subledgers={cash_subledgers}
+                        instrument_types={instrument_types}
+                        handleCashLedgerLineChange={handleCreditLineChange}
+                    />
+
+                    {/* Voucher Queue Section */}
+                    <VoucherQueueSection
+                        vouchers={vouchers}
+                        onCollect={function (): void {
+                            throw new Error('Function not implemented.');
+                        }}
+                        onCancel={function (): void {
+                            throw new Error('Function not implemented.');
+                        }}
+                    />
+                </div>
+            </div>
         </CustomAuthLayout>
     );
 }

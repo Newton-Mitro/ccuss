@@ -4,6 +4,7 @@ namespace App\TellerTransactions\Controllers;
 
 use App\Accounting\Models\FiscalPeriod;
 use App\Accounting\Models\FiscalYear;
+use App\Accounting\Models\InstrumentType;
 use App\Accounting\Models\LedgerAccount;
 use App\Accounting\Models\Voucher;
 use App\Branch\Models\Branch;
@@ -14,11 +15,11 @@ use Inertia\Inertia;
 
 class TellerTransactionController extends Controller
 {
-    public function deposit(Request $request)
+    public function customerCashReceipt(Request $request)
     {
 
         $cashLedger = LedgerAccount::where([
-            ['name', 'Cash in Hand'],
+            ['name', 'Cash In Hand'],
             ['is_active', true],
         ])->first();
 
@@ -37,10 +38,13 @@ class TellerTransactionController extends Controller
             : collect();
 
         $cashSubledgers = $cashLedger ? $cashLedgers : [];
+
+        $instrumentTypes = InstrumentType::all();
+
         $vouchers = Voucher::where('voucher_type', 'CREDIT_OR_RECEIPT')
             ->where('created_by', auth()->id())
             ->whereDate('created_at', today())
-            ->orderByRaw("FIELD(status, 'PENDING', 'APPROVED', 'POSTED', 'CANCELLED')")
+            ->orderBy('id', 'desc')
             ->get();
 
         return Inertia::render('teller-transactions/customer-cash-deposit/CustomerCashDepositPage', [
@@ -50,6 +54,7 @@ class TellerTransactionController extends Controller
             'branches' => Branch::select('id', 'name')->get(),
             'cash_ledgers' => $cashLedgers,
             'cash_subledgers' => $cashSubledgers,
+            'instrument_types' => $instrumentTypes,
             'lines' => [
                 [
                     'id' => 1,
@@ -59,14 +64,13 @@ class TellerTransactionController extends Controller
                     'subledger_id' => null,
                     'subledger_type' => null,
                     'subledger' => null,
-                    'reference_id' => null,
-                    'reference_type' => null,
-                    'reference' => null,
-                    'instrument_type' => 'CASH',
-                    'instrument_no' => null,
+                    'instrument_type_id' => 1,
+                    'instrument_id' => null,
                     'debit' => 0,
                     'credit' => 0,
-                    'particulars' => 'Cash in Hand',
+                    'particulars' => 'Cash In Hand',
+                    'dr_cr' => 'DR',
+                    'is_selected' => true
                 ],
             ],
             'vouchers' => $vouchers,
@@ -81,11 +85,11 @@ class TellerTransactionController extends Controller
         ]);
     }
 
-    public function withdrawal(Request $request)
+    public function customerCashPayment(Request $request)
     {
 
         $cashLedger = LedgerAccount::where([
-            ['name', 'Cash in Hand'],
+            ['name', 'Cash In Hand'],
             ['is_active', true],
         ])->first();
 
@@ -104,9 +108,11 @@ class TellerTransactionController extends Controller
             : collect();
 
         $cashSubledgers = $cashLedger ? $cashLedgers : [];
+        $instrumentTypes = InstrumentType::all();
         $vouchers = Voucher::where('voucher_type', 'DEBIT_OR_PAYMENT')
             ->where('created_by', auth()->id())
             ->whereDate('created_at', today())
+            ->orderBy('id', 'desc')
             ->get();
 
         return Inertia::render('teller-transactions/customer-cash-withdrawal/CustomerCashWithdrawalPage', [
@@ -116,24 +122,23 @@ class TellerTransactionController extends Controller
             'branches' => Branch::select('id', 'name')->get(),
             'cash_ledgers' => $cashLedgers,
             'cash_subledgers' => $cashSubledgers,
+            'instrument_types' => $instrumentTypes,
             'lines' => [
                 [
-                    'id' => 0,
+                    'id' => 1,
                     'voucher_id' => 0,
                     'ledger_account_id' => $cashLedger->id,
                     'ledger_account' => $cashLedger,
                     'subledger_id' => null,
                     'subledger_type' => null,
                     'subledger' => null,
-                    'reference_id' => null,
-                    'reference_type' => null,
-                    'reference' => null,
-                    'instrument_type' => 'CASH',
-                    'instrument_no' => null,
+                    'instrument_type_id' => 1,
+                    'instrument_id' => null,
                     'debit' => 0,
                     'credit' => 0,
-                    'particulars' => 'Cash in Hand',
-
+                    'particulars' => 'Cash In Hand',
+                    'dr_cr' => 'CR',
+                    'is_selected' => true
                 ],
             ],
             'vouchers' => $vouchers,
@@ -145,6 +150,76 @@ class TellerTransactionController extends Controller
                     ->whereYear('start_date', Carbon::now()->year)
                     ->first()
             )->id,
+        ]);
+    }
+
+    public function getCustomerCollectionLedgers(Request $request)
+    {
+        $loanInterestLedger = LedgerAccount::where([
+            ['name', 'Loan Interest Income'],
+            ['is_active', true],
+        ])->first();
+
+        $savingDepositLedger = LedgerAccount::where([
+            ['name', 'Savings Deposit'],
+            ['is_active', true],
+        ])->first();
+
+        $termDepositLedger = LedgerAccount::where([
+            ['name', 'Term Deposit'],
+            ['is_active', true],
+        ])->first();
+
+
+        return response()->json([
+            [
+                'id' => 2,
+                'voucher_id' => 0,
+                'ledger_account_id' => $savingDepositLedger->id,
+                'ledger_account' => $savingDepositLedger,
+                'subledger_id' => null,
+                'subledger_type' => null,
+                'subledger' => null,
+                'instrument_type_id' => 1,
+                'instrument_id' => null,
+                'debit' => 0,
+                'credit' => 500,
+                'particulars' => 'tk. 500 cash deposited for savings deposit',
+                'dr_cr' => 'CR',
+                'is_selected' => true
+            ],
+            [
+                'id' => 3,
+                'voucher_id' => 0,
+                'ledger_account_id' => $termDepositLedger->id,
+                'ledger_account' => $termDepositLedger,
+                'subledger_id' => null,
+                'subledger_type' => null,
+                'subledger' => null,
+                'instrument_type_id' => 1,
+                'instrument_id' => null,
+                'debit' => 0,
+                'credit' => 1500,
+                'particulars' => 'tk. 1500 cash deposited for term deposit',
+                'dr_cr' => 'CR',
+                'is_selected' => true
+            ],
+            [
+                'id' => 4,
+                'voucher_id' => 0,
+                'ledger_account_id' => $loanInterestLedger->id,
+                'ledger_account' => $loanInterestLedger,
+                'subledger_id' => null,
+                'subledger_type' => null,
+                'subledger' => null,
+                'instrument_type_id' => 1,
+                'instrument_id' => null,
+                'debit' => 0,
+                'credit' => 100,
+                'particulars' => 'tk. 100 cash deposited for loan interest',
+                'dr_cr' => 'CR',
+                'is_selected' => true
+            ],
         ]);
     }
 
