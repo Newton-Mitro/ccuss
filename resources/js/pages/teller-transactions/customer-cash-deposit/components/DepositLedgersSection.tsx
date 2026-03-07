@@ -85,8 +85,8 @@ function DepositLedgersSection({
                                         key={`collection-ledger-${index}`}
                                         className={`rounded-md ${
                                             line.is_selected
-                                                ? 'bg-primary/20'
-                                                : 'odd:bg-primary/10 even:bg-accent/10'
+                                                ? 'odd:bg-primary/10 even:bg-accent/10'
+                                                : 'odd:bg-primary/5 even:bg-accent/5'
                                         } ${errors?.lines?.[index]?.credit && 'bg-destructive/20'} `}
                                     >
                                         {/* Checkbox */}
@@ -113,17 +113,11 @@ function DepositLedgersSection({
                                                                 ?.name
                                                         } - ${line.ledger_account?.code}`}
                                                     </span>
-                                                    <span className="text-xs text-muted-foreground underline">
-                                                        Acc. Name - Number
-                                                    </span>
-                                                    <span className="text-xs text-muted-foreground underline">
-                                                        Ref. Acc. Name - Number
-                                                    </span>
                                                 </div>
                                             </div>
                                             {line.particulars && (
                                                 <div className="-mt-1 flex items-center justify-end border-x border-border px-2">
-                                                    <span className="text-xs text-muted-foreground underline">
+                                                    <span className="text-xs text-muted-foreground">
                                                         {line.particulars}
                                                     </span>
                                                 </div>

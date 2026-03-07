@@ -11,36 +11,6 @@ return new class extends Migration {
     {
         /*
         |--------------------------------------------------------------------------
-        | Fiscal Years
-        |--------------------------------------------------------------------------
-        */
-        Schema::create('fiscal_years', function (Blueprint $table) {
-            $table->id();
-            $table->string('code')->unique()->comment('(FY-2025-26)');
-            $table->date('start_date');
-            $table->date('end_date');
-            $table->boolean('is_active')->default(false);
-            $table->boolean('is_closed')->default(false);
-            $table->timestamps();
-        });
-
-        /*
-        |--------------------------------------------------------------------------
-        | Fiscal Periods
-        |--------------------------------------------------------------------------
-        */
-        Schema::create('fiscal_periods', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('fiscal_year_id')->constrained()->cascadeOnDelete();
-            $table->string('period_name')->comment('(JAN-2026)');
-            $table->date('start_date');
-            $table->date('end_date');
-            $table->boolean('is_open')->default(true);
-            $table->timestamps();
-        });
-
-        /*
-        |--------------------------------------------------------------------------
         | Ledger Accounts
         |--------------------------------------------------------------------------
         */
@@ -157,8 +127,6 @@ return new class extends Migration {
             ]);
 
             $table->string('voucher_no', 50);
-
-
 
             // ✅ Reference field
             $table->string('reference', 150)
@@ -466,7 +434,5 @@ return new class extends Migration {
         Schema::dropIfExists('bank_transfer_instruments');
         Schema::dropIfExists('mobile_banking_instruments');
         Schema::dropIfExists('ledger_accounts');
-        Schema::dropIfExists('fiscal_periods');
-        Schema::dropIfExists('fiscal_years');
     }
 };
