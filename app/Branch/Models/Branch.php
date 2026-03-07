@@ -13,6 +13,7 @@ class Branch extends Model
     use HasFactory, Auditable;
 
     protected $fillable = [
+        'organization_id',
         'code',
         'name',
         'address',

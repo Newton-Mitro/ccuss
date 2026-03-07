@@ -23,7 +23,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { Breadcrumbs } from '../components/breadcrumbs';
 import { SidebarMenuItem } from '../components/sidebar-menu-item';
+import { adminPermissions } from '../data/role-permissions';
 import { sidebarMenu } from '../data/sidebar-menu';
+import { filterMenuByPermission } from '../lib/filter_menu_by_permission';
 import { edit } from '../routes/profile';
 import { BreadcrumbItem, SharedData, SidebarItem } from '../types';
 
@@ -127,6 +129,10 @@ export default function CustomAuthLayout({
         router.post(logout(), {}, { preserveScroll: false });
     };
 
+    const permissionFilteredMenu = filterMenuByPermission(
+        sidebarMenu,
+        adminPermissions,
+    );
     /* ------------------------------------------------------------------
      * Sidebar search filter
      * ------------------------------------------------------------------ */

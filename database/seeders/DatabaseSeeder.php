@@ -84,7 +84,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             FiscalYearSeeder::class,
             PermissionSeeder::class,
-            BranchSeeder::class,
+            OrganizationStructureSeeder::class,
             CustomerSeeder::class,
             InstrumentTypeSeeder::class,
             ChartOfAccountsSeeder::class,

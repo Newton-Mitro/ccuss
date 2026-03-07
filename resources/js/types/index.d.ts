@@ -48,5 +48,6 @@ export interface SidebarItem {
     path?: string;
     match_path?: string;
     children_expanded?: boolean;
+    permission?: string[];
     children?: SidebarItem[];
 }

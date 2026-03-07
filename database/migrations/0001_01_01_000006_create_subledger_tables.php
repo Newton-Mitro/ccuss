@@ -113,11 +113,11 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('transaction_id')->constrained()->cascadeOnDelete();
             $table->foreignId('account_id')->nullable()->constrained('accounts')->nullOnDelete();
-            $table->string('component')->nullable();// optional component (principal, interest, penalty)
             $table->decimal('amount', 18, 2);
             // optional subledger reference
             $table->nullableMorphs('subledger');
-            $table->string('component')->nullable(); // 'INTEREST', 'FINE' ,'CASH_IN', 'PRINCIPAL'
+            $table->string('component')->nullable(); // 'INTEREST', 'PENALTY' ,'CASH_IN', 'PRINCIPAL'
+            $table->string(column: 'description')->nullable();
             $table->timestamps();
         });
     }
