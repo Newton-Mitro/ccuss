@@ -10,6 +10,42 @@ return new class extends Migration {
     public function up(): void
     {
         /*
+       |--------------------------------------------------------------------------
+       | Fiscal Years
+       |--------------------------------------------------------------------------
+       */
+        Schema::create('fiscal_years', function (Blueprint $table) {
+            $table->id();
+            $table->string('code')->unique()->comment('(FY-2025-26)');
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->boolean('is_active')->default(false);
+            $table->boolean('is_closed')->default(false);
+            $table->timestamps();
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Fiscal Periods
+        |--------------------------------------------------------------------------
+        */
+        Schema::create('accounting_periods', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('fiscal_year_id')->constrained()->cascadeOnDelete();
+            $table->string('period_name')->comment('(JAN-2026)');
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->boolean('is_open')->default(true);
+            $table->timestamps();
+        });
+
+        Schema::create('closing_entries', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('accounting_period_id')->constrained();
+            $table->timestamp('closed_at');
+        });
+
+        /*
         |--------------------------------------------------------------------------
         | Ledger Accounts
         |--------------------------------------------------------------------------
@@ -20,11 +56,10 @@ return new class extends Migration {
             $table->string('name', 100)->comment('Account name');
             $table->enum('type', ['ASSET', 'LIABILITY', 'EQUITY', 'INCOME', 'EXPENSE']);
             $table->boolean('is_control_account')->default(false);
+            $table->boolean('requires_subledger')->default(false);
             $table->boolean('is_active')->default(true);
             $table->boolean('is_leaf')->default(true);
-            $table->foreignId('parent_id')->nullable()
-                ->constrained('ledger_accounts')
-                ->nullOnDelete();
+            $table->foreignId('parent_id')->nullable()->constrained('ledger_accounts')->nullOnDelete();
             $table->timestamps();
         });
 
@@ -103,8 +138,8 @@ return new class extends Migration {
             $table->foreignId('fiscal_year_id')->nullable()
                 ->constrained('fiscal_years')->nullOnDelete();
 
-            $table->foreignId('fiscal_period_id')->nullable()
-                ->constrained('fiscal_periods')->nullOnDelete();
+            $table->foreignId('accounting_period_id')->nullable()
+                ->constrained('accounting_periods')->nullOnDelete();
 
             $table->foreignId('branch_id')->nullable()
                 ->constrained('branches')->nullOnDelete();
@@ -194,7 +229,7 @@ return new class extends Migration {
         Schema::create('ledger_account_balances', function (Blueprint $table) {
             $table->id();
             $table->foreignId('ledger_account_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('fiscal_period_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('accounting_period_id')->constrained()->cascadeOnDelete();
             $table->decimal('opening_balance', 18, 2)->default(0);
             $table->decimal('debit_total', 18, 2)->default(0);
             $table->decimal('credit_total', 18, 2)->default(0);
@@ -227,7 +262,7 @@ return new class extends Migration {
             a.type AS account_type,
             v.fiscal_year_id,
             fy.code AS fiscal_year_code,
-            v.fiscal_period_id,
+            v.accounting_period_id,
             fp.period_name,
             SUM(ve.debit)  AS total_debit,
             SUM(ve.credit) AS total_credit,
@@ -241,11 +276,11 @@ return new class extends Migration {
         JOIN voucher_lines ve ON ve.ledger_account_id = a.id
         JOIN vouchers v ON v.id = ve.voucher_id AND v.status = 'POSTED'
         JOIN fiscal_years fy ON fy.id = v.fiscal_year_id
-        JOIN fiscal_periods fp ON fp.id = v.fiscal_period_id
+        JOIN accounting_periods fp ON fp.id = v.accounting_period_id
         WHERE a.is_active = TRUE
         GROUP BY a.id, a.code, a.name, a.type,
                  v.fiscal_year_id, fy.code,
-                 v.fiscal_period_id, fp.period_name
+                 v.accounting_period_id, fp.period_name
         ORDER BY a.code
         ");
 
@@ -266,7 +301,7 @@ return new class extends Migration {
             a.name AS account_name,
             v.fiscal_year_id,
             fy.code AS fiscal_year_code,
-            v.fiscal_period_id,
+            v.accounting_period_id,
             fp.period_name,
             COALESCE(SUM(
                 CASE 
@@ -278,13 +313,13 @@ return new class extends Migration {
         LEFT JOIN voucher_lines ve ON ve.ledger_account_id = a.id
         LEFT JOIN vouchers v ON v.id = ve.voucher_id AND v.status = 'POSTED'
         LEFT JOIN fiscal_years fy ON fy.id = v.fiscal_year_id
-        LEFT JOIN fiscal_periods fp ON fp.id = v.fiscal_period_id
+        LEFT JOIN accounting_periods fp ON fp.id = v.accounting_period_id
         WHERE a.type IN ('INCOME','EXPENSE')
           AND a.is_active = TRUE
           AND a.is_control_account = FALSE
         GROUP BY a.id, a.code, a.name, category,
                  v.fiscal_year_id, fy.code,
-                 v.fiscal_period_id, fp.period_name
+                 v.accounting_period_id, fp.period_name
         ORDER BY a.code
         ");
 
@@ -302,7 +337,7 @@ return new class extends Migration {
             a.name AS account_name,
             v.fiscal_year_id,
             fy.code AS fiscal_year_code,
-            v.fiscal_period_id,
+            v.accounting_period_id,
             fp.period_name,
             SUM(
                 CASE
@@ -316,12 +351,12 @@ return new class extends Migration {
         JOIN voucher_lines vl ON vl.ledger_account_id = a.id
         JOIN vouchers v ON v.id = vl.voucher_id AND v.status = 'POSTED'
         JOIN fiscal_years fy ON fy.id = v.fiscal_year_id
-        JOIN fiscal_periods fp ON fp.id = v.fiscal_period_id
+        JOIN accounting_periods fp ON fp.id = v.accounting_period_id
         WHERE a.type IN ('ASSET','LIABILITY','EQUITY')
           AND a.is_active = TRUE
         GROUP BY a.id, a.code, a.name, a.type,
                  v.fiscal_year_id, fy.code,
-                 v.fiscal_period_id, fp.period_name
+                 v.accounting_period_id, fp.period_name
         ORDER BY a.code
         ");
 
@@ -335,7 +370,7 @@ return new class extends Migration {
         SELECT
             v.fiscal_year_id,
             fy.code AS fiscal_year_code,
-            v.fiscal_period_id,
+            v.accounting_period_id,
             fp.period_name,
             CASE
                 WHEN v.voucher_type IN ('DEBIT_OR_PAYMENT','CREDIT_OR_RECEIPT','JOURNAL_OR_NON_CASH')
@@ -356,12 +391,12 @@ return new class extends Migration {
         JOIN vouchers v ON v.id = vl.voucher_id AND v.status = 'POSTED'
         JOIN ledger_accounts la ON la.id = vl.ledger_account_id
         JOIN fiscal_years fy ON fy.id = v.fiscal_year_id
-        JOIN fiscal_periods fp ON fp.id = v.fiscal_period_id
+        JOIN accounting_periods fp ON fp.id = v.accounting_period_id
         WHERE la.is_active = TRUE
         GROUP BY v.fiscal_year_id, fy.code,
-                 v.fiscal_period_id, fp.period_name,
+                 v.accounting_period_id, fp.period_name,
                  cash_category
-        ORDER BY v.fiscal_year_id, v.fiscal_period_id, cash_category
+        ORDER BY v.fiscal_year_id, v.accounting_period_id, cash_category
         ");
 
         /*
@@ -379,7 +414,7 @@ return new class extends Migration {
         net_profit AS (
             SELECT
                 v.fiscal_year_id,
-                v.fiscal_period_id,
+                v.accounting_period_id,
                 COALESCE(SUM(
                     CASE 
                         WHEN la.type = 'INCOME' THEN vl.credit - vl.debit
@@ -391,11 +426,11 @@ return new class extends Migration {
             JOIN vouchers v ON v.id = vl.voucher_id AND v.status = 'POSTED'
             JOIN ledger_accounts la ON la.id = vl.ledger_account_id
             WHERE la.type IN ('INCOME','EXPENSE')
-            GROUP BY v.fiscal_year_id, v.fiscal_period_id
+            GROUP BY v.fiscal_year_id, v.accounting_period_id
         ),
         equity_balances AS (
             SELECT 
-                lb.fiscal_period_id,
+                lb.accounting_period_id,
                 lb.ledger_account_id,
                 lb.opening_balance,
                 lb.closing_balance
@@ -406,14 +441,14 @@ return new class extends Migration {
             eq.code AS account_code,
             eq.name AS account_name,
             fp.period_name,
-            lb.fiscal_period_id,
+            lb.accounting_period_id,
             lb.opening_balance,
             np.net_profit,
             lb.closing_balance AS ending_balance
         FROM equity_accounts eq
         LEFT JOIN equity_balances lb ON lb.ledger_account_id = eq.id
-        LEFT JOIN net_profit np ON np.fiscal_period_id = lb.fiscal_period_id
-        LEFT JOIN fiscal_periods fp ON fp.id = lb.fiscal_period_id
+        LEFT JOIN net_profit np ON np.accounting_period_id = lb.accounting_period_id
+        LEFT JOIN accounting_periods fp ON fp.id = lb.accounting_period_id
         ORDER BY eq.code, fp.start_date
         ");
     }
@@ -434,5 +469,7 @@ return new class extends Migration {
         Schema::dropIfExists('bank_transfer_instruments');
         Schema::dropIfExists('mobile_banking_instruments');
         Schema::dropIfExists('ledger_accounts');
+        Schema::dropIfExists('accounting_periods');
+        Schema::dropIfExists('fiscal_years');
     }
 };

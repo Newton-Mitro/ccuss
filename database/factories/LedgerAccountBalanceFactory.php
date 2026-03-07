@@ -4,7 +4,7 @@ namespace Database\Factories;
 
 use App\Accounting\Models\LedgerAccount;
 use App\Accounting\Models\LedgerAccountBalance;
-use App\Accounting\Models\FiscalPeriod;
+use App\Accounting\Models\AccountingPeriod;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class LedgerAccountBalanceFactory extends Factory
@@ -20,7 +20,7 @@ class LedgerAccountBalanceFactory extends Factory
 
         return [
             'ledger_account_id' => LedgerAccount::factory(),
-            'fiscal_period_id' => FiscalPeriod::factory(),
+            'accounting_period_id' => AccountingPeriod::factory(),
             'opening_balance' => $opening,
             'debit_total' => $debit,
             'credit_total' => $credit,

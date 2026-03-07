@@ -2,7 +2,7 @@
 
 namespace App\Audit\Traits;
 
-use App\Audit\Models\Audit;
+use App\Audit\Models\AuditLog;
 use Illuminate\Support\Str;
 
 trait Auditable
@@ -37,7 +37,7 @@ trait Auditable
             return;
         }
 
-        Audit::create([
+        AuditLog::create([
             // ✅ SAFE fallback
             'batch_id' => app()->bound('audit.batch_id')
                 ? app('audit.batch_id')
@@ -57,6 +57,6 @@ trait Auditable
 
     public function audits()
     {
-        return $this->morphMany(Audit::class, 'auditable');
+        return $this->morphMany(AuditLog::class, 'auditable');
     }
 }

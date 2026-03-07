@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Accounting\Models\FiscalPeriod;
+use App\Accounting\Models\AccountingPeriod;
 use App\Accounting\Models\FiscalYear;
 use Illuminate\Database\Seeder;
 use Carbon\Carbon;
@@ -32,7 +32,7 @@ class FiscalYearSeeder extends Seeder
         for ($i = 0; $i < 12; $i++) {
             $periodStart = (clone $start)->addMonths($i);
 
-            FiscalPeriod::create([
+            AccountingPeriod::create([
                 'fiscal_year_id' => $fy->id,
                 'period_name' => strtoupper($periodStart->format('M-Y')),
                 'start_date' => $periodStart->copy()->startOfMonth(),

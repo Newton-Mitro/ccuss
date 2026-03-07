@@ -2,7 +2,7 @@
 
 namespace App\TellerTransactions\Controllers;
 
-use App\Accounting\Models\FiscalPeriod;
+use App\Accounting\Models\AccountingPeriod;
 use App\Accounting\Models\FiscalYear;
 use App\Accounting\Models\InstrumentType;
 use App\Accounting\Models\LedgerAccount;
@@ -50,7 +50,7 @@ class TellerTransactionController extends Controller
         return Inertia::render('teller-transactions/customer-cash-deposit/CustomerCashDepositPage', [
             'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
             'fiscal_years' => FiscalYear::select('id', 'code')->get(),
-            'fiscal_periods' => FiscalPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
+            'accounting_periods' => AccountingPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
             'branches' => Branch::select('id', 'name')->get(),
             'cash_ledgers' => $cashLedgers,
             'cash_subledgers' => $cashSubledgers,
@@ -76,8 +76,8 @@ class TellerTransactionController extends Controller
             'vouchers' => $vouchers,
             'user_branch_id' => auth()->user()->branch_id,
             'fiscal_year_id' => optional(FiscalYear::where('is_active', true)->first())->id,
-            'fiscal_period_id' => optional(
-                FiscalPeriod::where('is_open', true)
+            'accounting_period_id' => optional(
+                AccountingPeriod::where('is_open', true)
                     ->whereMonth('start_date', Carbon::now()->month)
                     ->whereYear('start_date', Carbon::now()->year)
                     ->first()
@@ -118,7 +118,7 @@ class TellerTransactionController extends Controller
         return Inertia::render('teller-transactions/customer-cash-withdrawal/CustomerCashWithdrawalPage', [
             'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
             'fiscal_years' => FiscalYear::select('id', 'code')->get(),
-            'fiscal_periods' => FiscalPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
+            'accounting_periods' => AccountingPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
             'branches' => Branch::select('id', 'name')->get(),
             'cash_ledgers' => $cashLedgers,
             'cash_subledgers' => $cashSubledgers,
@@ -144,8 +144,8 @@ class TellerTransactionController extends Controller
             'vouchers' => $vouchers,
             'user_branch_id' => auth()->user()->branch_id,
             'fiscal_year_id' => optional(FiscalYear::where('is_active', true)->first())->id,
-            'fiscal_period_id' => optional(
-                FiscalPeriod::where('is_open', true)
+            'accounting_period_id' => optional(
+                AccountingPeriod::where('is_open', true)
                     ->whereMonth('start_date', Carbon::now()->month)
                     ->whereYear('start_date', Carbon::now()->year)
                     ->first()

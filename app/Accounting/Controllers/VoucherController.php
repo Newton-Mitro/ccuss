@@ -2,7 +2,7 @@
 
 namespace App\Accounting\Controllers;
 
-use App\Accounting\Models\FiscalPeriod;
+use App\Accounting\Models\AccountingPeriod;
 use App\Accounting\Models\FiscalYear;
 use App\Accounting\Models\LedgerAccount;
 use App\Accounting\Models\Voucher;
@@ -57,7 +57,7 @@ class VoucherController extends Controller
         return Inertia::render('accounting/vouchers/edit', [
             'ledger_accounts' => LedgerAccount::all(),
             'fiscalYears' => FiscalYear::all(),
-            'fiscalPeriods' => FiscalPeriod::all(),
+            'fiscalPeriods' => AccountingPeriod::all(),
             'branches' => Branch::all(),
         ]);
     }
@@ -90,7 +90,7 @@ class VoucherController extends Controller
         return Inertia::render('accounting/vouchers/create/debit_voucher_entry_page', [
             'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
             'fiscalYears' => FiscalYear::select('id', 'code')->get(),
-            'fiscalPeriods' => FiscalPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
+            'fiscalPeriods' => AccountingPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
             'branches' => Branch::select('id', 'name')->get(),
             'cashLedgerId' => $cashLedgerId,
             'cashLedgers' => $cashLedgers,
@@ -98,7 +98,7 @@ class VoucherController extends Controller
             'cashSubledgers' => $cashSubledgers,
             'activeFiscalYearId' => optional(FiscalYear::where('is_active', true)->first())->id,
             'activeFiscalPeriodId' => optional(
-                FiscalPeriod::where('is_open', true)
+                AccountingPeriod::where('is_open', true)
                     ->whereMonth('start_date', Carbon::now()->month)
                     ->whereYear('start_date', Carbon::now()->year)
                     ->first()
@@ -133,7 +133,7 @@ class VoucherController extends Controller
         return Inertia::render('accounting/vouchers/create/credit_voucher_entry_page', [
             'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
             'fiscalYears' => FiscalYear::select('id', 'code')->get(),
-            'fiscalPeriods' => FiscalPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
+            'fiscalPeriods' => AccountingPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
             'branches' => Branch::select('id', 'name')->get(),
             'cashLedgerId' => $cashLedgerId,
             'cashLedgers' => $cashLedgers,
@@ -141,7 +141,7 @@ class VoucherController extends Controller
             'cashSubledgers' => $cashSubledgers,
             'activeFiscalYearId' => optional(FiscalYear::where('is_active', true)->first())->id,
             'activeFiscalPeriodId' => optional(
-                FiscalPeriod::where('is_open', true)
+                AccountingPeriod::where('is_open', true)
                     ->whereMonth('start_date', Carbon::now()->month)
                     ->whereYear('start_date', Carbon::now()->year)
                     ->first()
@@ -176,7 +176,7 @@ class VoucherController extends Controller
         return Inertia::render('accounting/vouchers/create/journal_voucher_entry_page', [
             'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
             'fiscalYears' => FiscalYear::select('id', 'code')->get(),
-            'fiscalPeriods' => FiscalPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
+            'fiscalPeriods' => AccountingPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
             'branches' => Branch::select('id', 'name')->get(),
             'cashLedgerId' => $cashLedgerId,
             'cashLedgers' => $cashLedgers,
@@ -184,7 +184,7 @@ class VoucherController extends Controller
             'cashSubledgers' => $cashSubledgers,
             'activeFiscalYearId' => optional(FiscalYear::where('is_active', true)->first())->id,
             'activeFiscalPeriodId' => optional(
-                FiscalPeriod::where('is_open', true)
+                AccountingPeriod::where('is_open', true)
                     ->whereMonth('start_date', Carbon::now()->month)
                     ->whereYear('start_date', Carbon::now()->year)
                     ->first()
@@ -219,7 +219,7 @@ class VoucherController extends Controller
         return Inertia::render('accounting/vouchers/create/contra_voucher_entry_page', [
             'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
             'fiscalYears' => FiscalYear::select('id', 'code')->get(),
-            'fiscalPeriods' => FiscalPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
+            'fiscalPeriods' => AccountingPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
             'branches' => Branch::select('id', 'name')->get(),
             'cashLedgerId' => $cashLedgerId,
             'cashLedgers' => $cashLedgers,
@@ -227,7 +227,7 @@ class VoucherController extends Controller
             'cashSubledgers' => $cashSubledgers,
             'activeFiscalYearId' => optional(FiscalYear::where('is_active', true)->first())->id,
             'activeFiscalPeriodId' => optional(
-                FiscalPeriod::where('is_open', true)
+                AccountingPeriod::where('is_open', true)
                     ->whereMonth('start_date', Carbon::now()->month)
                     ->whereYear('start_date', Carbon::now()->year)
                     ->first()
@@ -257,7 +257,7 @@ class VoucherController extends Controller
                 'voucher_date' => $data['voucher_date'],
                 'voucher_type' => $data['voucher_type'],
                 'fiscal_year_id' => $data['fiscal_year_id'],
-                'fiscal_period_id' => $data['fiscal_period_id'],
+                'accounting_period_id' => $data['accounting_period_id'],
                 'branch_id' => $data['branch_id'] ?? null,
                 'narration' => $data['narration'] ?? null,
                 'reference' => $data['reference'] ?? null,
@@ -339,14 +339,14 @@ class VoucherController extends Controller
             'voucher' => $voucher->load('lines.ledgerAccount'),
             'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
             'fiscalYears' => FiscalYear::select('id', 'code')->get(),
-            'fiscalPeriods' => FiscalPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
+            'fiscalPeriods' => AccountingPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
             'branches' => Branch::select('id', 'name')->get(),
             'cashLedgerId' => $cashLedgerId,
             'cashLedgers' => $cashLedgers,
             'cashSubledgerId' => $cashSubledgerId,
             'cashSubledgers' => $cashSubledgers,
             'activeFiscalYearId' => optional(FiscalYear::where('is_active', true)->first())->id,
-            'activeFiscalPeriodId' => optional(FiscalPeriod::where('is_open', true)->first())->id,
+            'activeFiscalPeriodId' => optional(AccountingPeriod::where('is_open', true)->first())->id,
             'userBranchId' => auth()->user()->branch_id,
             'backUrl' => route('vouchers.index'),
         ]);
@@ -366,7 +366,7 @@ class VoucherController extends Controller
                 'voucher_date' => $data['voucher_date'],
                 'voucher_type' => $data['voucher_type'],
                 'fiscal_year_id' => $data['fiscal_year_id'],
-                'fiscal_period_id' => $data['fiscal_period_id'],
+                'accounting_period_id' => $data['accounting_period_id'],
                 'branch_id' => $data['branch_id'] ?? null,
                 'status' => $data['status'],
                 'narration' => $data['narration'] ?? null,

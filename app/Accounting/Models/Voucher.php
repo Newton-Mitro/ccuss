@@ -54,7 +54,7 @@ class Voucher extends Model
 
     protected $fillable = [
         'fiscal_year_id',
-        'fiscal_period_id',
+        'accounting_period_id',
         'branch_id',
         'voucher_date',
         'voucher_type',
@@ -106,7 +106,7 @@ class Voucher extends Model
 
     public function fiscalPeriod(): BelongsTo
     {
-        return $this->belongsTo(FiscalPeriod::class);
+        return $this->belongsTo(AccountingPeriod::class);
     }
 
     public function lines(): HasMany

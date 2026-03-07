@@ -6,7 +6,7 @@ use App\Accounting\Controllers\VoucherController;
 use Illuminate\Support\Facades\Route;
 
 use App\Accounting\Controllers\FiscalYearController;
-use App\Accounting\Controllers\FiscalPeriodController;
+use App\Accounting\Controllers\AccountingPeriodController;
 
 // Fiscal Years
 Route::middleware(['auth',])->group(function () {
@@ -21,7 +21,7 @@ Route::middleware(['auth',])->group(function () {
         ]);
 
     // Fiscal Periods
-    Route::resource('fiscal-periods', FiscalPeriodController::class)
+    Route::resource('accounting-periods', AccountingPeriodController::class)
         ->names([
             'index' => 'fiscal-periods.index',
             'create' => 'fiscal-periods.create',

@@ -20,7 +20,7 @@ interface VoucherFormData {
     voucher_date: string;
     voucher_type: string;
     fiscal_year_id?: number;
-    fiscal_period_id?: number;
+    accounting_period_id?: number;
     branch_id?: number;
     status: string;
     reference?: string;
@@ -31,7 +31,7 @@ interface VoucherFormData {
 export default function CustomerCashDepositPage() {
     const {
         fiscal_years,
-        fiscal_periods,
+        accounting_periods,
         branches,
         cash_ledgers,
         cash_subledgers,
@@ -40,7 +40,7 @@ export default function CustomerCashDepositPage() {
         vouchers,
         user_branch_id,
         fiscal_year_id,
-        fiscal_period_id,
+        accounting_period_id,
         flash,
     } = usePage().props as any;
 
@@ -55,7 +55,7 @@ export default function CustomerCashDepositPage() {
         voucher_date: new Date().toISOString().split('T')[0],
         voucher_type: 'CREDIT_OR_RECEIPT',
         fiscal_year_id: fiscal_year_id || 0,
-        fiscal_period_id: fiscal_period_id || 0,
+        accounting_period_id: accounting_period_id || 0,
         branch_id: user_branch_id || branches[0]?.id,
         status: 'DRAFT',
         reference: '',
@@ -224,7 +224,7 @@ export default function CustomerCashDepositPage() {
                         errors={errors}
                         setData={setData}
                         fiscal_years={fiscal_years}
-                        fiscal_periods={fiscal_periods}
+                        accounting_periods={accounting_periods}
                         branches={branches}
                     />
 

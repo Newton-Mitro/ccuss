@@ -1312,3 +1312,86 @@ CREATE TABLE audits (
 - schedules + payments + interest_accruals allow full auditability of repayments and charges.
 - cheques and pending_cheque_debits handle real-world payment holds and clearance.
 - audits provide full history of user actions for compliance.
+
+1️⃣ Organization & Structure
+organizations
+branches
+departments
+users
+roles
+permissions
+
+2️⃣ Customers & Membership
+customers
+customer_contacts
+members
+share_accounts
+share_transactions
+nominees
+kyc_documents
+
+3️⃣ Deposit System
+deposit_products
+deposit_accounts
+deposit_transactions
+deposit_interest_accruals
+deposit_maturity
+
+Deposit product examples:
+Savings Deposit
+Recurring Deposit
+Fixed Deposit
+Share Deposit
+
+4️⃣ Loan System
+loan_products
+loan_accounts
+loan_applications
+loan_schedules
+loan_transactions
+loan_repayments
+loan_penalties
+loan_collaterals
+
+Example flow:
+Loan Application
+↓
+Loan Approval
+↓
+Loan Account
+↓
+Repayment Schedule
+↓
+Loan Repayment Transactions
+
+5️⃣ Core Transaction Layer
+transactions
+transaction_items
+product_events
+channels
+
+6️⃣ Accounting / GL System
+gl_account_groups
+gl_accounts
+vouchers
+voucher_lines
+voucher_types
+subledger_types
+
+7️⃣ Fiscal Control
+fiscal_years
+accounting_periods
+closing_entries
+
+8️⃣ Cash & Teller System
+tellers
+cash_drawers
+petty_cash_accounts
+cash_transactions
+cash_balancing
+
+9️⃣ Reporting & Audit
+audit_logs
+activity_logs
+report_templates
+system_settings

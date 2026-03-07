@@ -8,7 +8,7 @@ return new class extends Migration {
 
     public function up(): void
     {
-        Schema::create('audits', function (Blueprint $table) {
+        Schema::create('audit_logs', function (Blueprint $table) {
             $table->id();
 
             // Polymorphic target
@@ -19,16 +19,9 @@ return new class extends Migration {
             $table->uuid('batch_id')->index();
 
             // Actor & context
-            $table->foreignId('user_id')
-                ->nullable()
-                ->constrained()
-                ->nullOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
 
-            $table->enum('event', [
-                'CREATED',
-                'UPDATED',
-                'DELETED',
-            ]);
+            $table->enum('event', ['CREATED', 'UPDATED', 'DELETED',]);
 
             // Change snapshots
             $table->json('old_values')->nullable();
@@ -46,10 +39,39 @@ return new class extends Migration {
             $table->index('user_id', 'idx_user');
             $table->index('event', 'idx_event');
         });
+
+        // User login
+        // Loan approved
+        // Deposit created
+        // Report generated
+        Schema::create('activity_logs', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->nullable()->constrained();
+            $table->string('activity');
+            $table->string('subject_type')->nullable();
+            $table->unsignedBigInteger('subject_id')->nullable();
+            $table->string('ip_address')->nullable();
+            $table->timestamp('created_at');
+        });
+
+        // Trial Balance
+        // Loan Statement
+        // Deposit Ledger
+        // Member Statement
+        Schema::create('report_templates', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('report_key')->unique();
+            $table->string('file_path');
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+        });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('audits');
+        Schema::dropIfExists('audit_logs');
+        Schema::dropIfExists('activity_logs');
+        Schema::dropIfExists('report_templates');
     }
 };

@@ -2,17 +2,17 @@
 
 namespace App\Accounting\Controllers;
 
-use App\Accounting\Models\FiscalPeriod;
+use App\Accounting\Models\AccountingPeriod;
 use App\Accounting\Models\FiscalYear;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class FiscalPeriodController
+class AccountingPeriodController
 {
     public function index(Request $request): Response
     {
-        $query = FiscalPeriod::with('fiscalYear');
+        $query = AccountingPeriod::with('fiscalYear');
 
         // Search by period name
         if ($request->filled('search')) {
@@ -58,12 +58,12 @@ class FiscalPeriodController
             'is_open' => 'boolean',
         ]);
 
-        FiscalPeriod::create($validated);
+        AccountingPeriod::create($validated);
 
         return redirect()->route('fiscal-periods.index')->with('success', 'Fiscal Period created.');
     }
 
-    public function edit(FiscalPeriod $fiscalPeriod): Response
+    public function edit(AccountingPeriod $fiscalPeriod): Response
     {
         $fiscalYears = FiscalYear::orderBy('start_date')->get();
         return Inertia::render('accounting/fiscal-periods/fiscal-period-edit', [
@@ -72,7 +72,7 @@ class FiscalPeriodController
         ]);
     }
 
-    public function update(Request $request, FiscalPeriod $fiscalPeriod)
+    public function update(Request $request, AccountingPeriod $fiscalPeriod)
     {
         $validated = $request->validate([
             'fiscal_year_id' => 'required|exists:fiscal_years,id',
@@ -87,7 +87,7 @@ class FiscalPeriodController
         return redirect()->route('fiscal-periods.index')->with('success', 'Fiscal Period updated.');
     }
 
-    public function destroy(FiscalPeriod $fiscalPeriod)
+    public function destroy(AccountingPeriod $fiscalPeriod)
     {
         $fiscalPeriod->delete();
         return redirect()->route('fiscal-periods.index')->with('success', 'Fiscal Period deleted.');

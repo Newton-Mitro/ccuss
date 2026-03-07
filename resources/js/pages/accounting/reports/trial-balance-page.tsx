@@ -16,7 +16,7 @@ interface TrialBalanceRow {
     account_type: string;
     fiscal_year_id: number;
     fiscal_year_code: string;
-    fiscal_period_id: number;
+    accounting_period_id: number;
     period_name: string;
     total_debit: number;
     total_credit: number;
@@ -62,7 +62,7 @@ export default function TrialBalancePage() {
         setFiscalYear(year);
         router.get(
             '/reports/trial-balance',
-            { fiscal_year_id: year, fiscal_period_id: fiscalPeriod },
+            { fiscal_year_id: year, accounting_period_id: fiscalPeriod },
             { preserveState: true },
         );
     };
@@ -74,7 +74,7 @@ export default function TrialBalancePage() {
         setFiscalPeriod(period);
         router.get(
             '/reports/trial-balance',
-            { fiscal_year_id: fiscalYear, fiscal_period_id: period },
+            { fiscal_year_id: fiscalYear, accounting_period_id: period },
             { preserveState: true },
         );
     };

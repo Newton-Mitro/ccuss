@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Accounting\Models\LedgerAccountBalance;
-use App\Accounting\Models\FiscalPeriod;
+use App\Accounting\Models\AccountingPeriod;
 use App\Accounting\Models\FiscalYear;
 use App\Accounting\Models\LedgerAccount;
 use App\Accounting\Models\Voucher;
@@ -28,7 +28,7 @@ class RealVoucherEntrySeeder extends Seeder
 
             $fiscalYear = FiscalYear::where('is_active', true)->firstOrFail();
 
-            $fiscalPeriod = FiscalPeriod::where('is_open', true)->firstOrFail();
+            $fiscalPeriod = AccountingPeriod::where('is_open', true)->firstOrFail();
 
 
             /* ===================== LEDGERS ===================== */
@@ -94,7 +94,7 @@ class RealVoucherEntrySeeder extends Seeder
 
                 'branch_id' => Arr::random($branches),
                 'fiscal_year_id' => $fiscalYear->id,
-                'fiscal_period_id' => $fiscalPeriod->id,
+                'accounting_period_id' => $fiscalPeriod->id,
 
                 'created_by' => $user->id,
                 'posted_by' => $user->id,
@@ -121,7 +121,7 @@ class RealVoucherEntrySeeder extends Seeder
                 LedgerAccountBalance::updateOrCreate(
                     [
                         'ledger_account_id' => $ledgerId,
-                        'fiscal_period_id' => $fiscalPeriod->id
+                        'accounting_period_id' => $fiscalPeriod->id
                     ],
                     [
                         'opening_balance' => $amount,
@@ -148,7 +148,7 @@ class RealVoucherEntrySeeder extends Seeder
 
                 'branch_id' => Arr::random($branches),
                 'fiscal_year_id' => $fiscalYear->id,
-                'fiscal_period_id' => $fiscalPeriod->id,
+                'accounting_period_id' => $fiscalPeriod->id,
 
                 'created_by' => $user->id,
                 'posted_by' => $user->id,
@@ -190,7 +190,7 @@ class RealVoucherEntrySeeder extends Seeder
 
                 'branch_id' => Arr::random($branches),
                 'fiscal_year_id' => $fiscalYear->id,
-                'fiscal_period_id' => $fiscalPeriod->id,
+                'accounting_period_id' => $fiscalPeriod->id,
 
                 'created_by' => $user->id,
                 'posted_by' => $user->id,
@@ -232,7 +232,7 @@ class RealVoucherEntrySeeder extends Seeder
 
                 'branch_id' => Arr::random($branches),
                 'fiscal_year_id' => $fiscalYear->id,
-                'fiscal_period_id' => $fiscalPeriod->id,
+                'accounting_period_id' => $fiscalPeriod->id,
 
                 'created_by' => $user->id,
                 'posted_by' => $user->id,
@@ -274,7 +274,7 @@ class RealVoucherEntrySeeder extends Seeder
 
                 'branch_id' => Arr::random($branches),
                 'fiscal_year_id' => $fiscalYear->id,
-                'fiscal_period_id' => $fiscalPeriod->id,
+                'accounting_period_id' => $fiscalPeriod->id,
 
                 'created_by' => $user->id,
                 'posted_by' => $user->id,
@@ -316,7 +316,7 @@ class RealVoucherEntrySeeder extends Seeder
 
                 'branch_id' => Arr::random($branches),
                 'fiscal_year_id' => $fiscalYear->id,
-                'fiscal_period_id' => $fiscalPeriod->id,
+                'accounting_period_id' => $fiscalPeriod->id,
 
                 'created_by' => $user->id,
                 'posted_by' => $user->id,

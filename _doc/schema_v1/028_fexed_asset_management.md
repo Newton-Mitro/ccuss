@@ -14,7 +14,7 @@ Schema::create('fixed_assets', function (Blueprint $table) {
 Schema::create('asset_depreciations', function (Blueprint $table) {
     $table->id();
     $table->foreignId('fixed_asset_id')->constrained();
-    $table->foreignId('fiscal_period_id')->constrained();
+    $table->foreignId('accounting_period_id')->constrained();
     $table->decimal('amount', 14, 2);
     $table->foreignId('voucher_id')->constrained();
 });

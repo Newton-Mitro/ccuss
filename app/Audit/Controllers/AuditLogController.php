@@ -2,12 +2,12 @@
 
 namespace App\Audit\Controllers;
 
-use App\Audit\Models\Audit;
+use App\Audit\Models\AuditLog;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class AuditController extends Controller
+class AuditLogController extends Controller
 {
     /**
      * Global audit list (Admin view)
@@ -16,7 +16,7 @@ class AuditController extends Controller
     {
         $perPage = $request->input('per_page', 10);
 
-        $audits = Audit::query()
+        $audits = AuditLog::query()
             ->with('creator')
             ->when($request->event, fn($q) => $q->where('event', $request->event))
             ->when($request->user_id, fn($q) => $q->where('user_id', $request->user_id))
@@ -44,7 +44,7 @@ class AuditController extends Controller
             'id' => 'required|integer',
         ]);
 
-        $batches = Audit::query()
+        $batches = AuditLog::query()
             ->select('a.*')
             ->from('audits as a')
             ->join('audits as b', 'b.batch_id', '=', 'a.batch_id')
@@ -69,7 +69,7 @@ class AuditController extends Controller
      */
     public function batch(string $batchId)
     {
-        $audits = Audit::where('batch_id', $batchId)
+        $audits = AuditLog::where('batch_id', $batchId)
             ->with('creator')
             ->orderBy('created_at')
             ->get();

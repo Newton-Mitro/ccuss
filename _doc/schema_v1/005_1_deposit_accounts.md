@@ -66,8 +66,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('deposit_account_id')->constrained()->cascadeOnDelete();
             $table->foreignId('nominee_customer_id')->nullable()->constrained('customers');
-            $table->string('name', 100);
-            $table->enum('gender', ['MALE', 'FEMALE', 'OTHER'])->nullable();
+            $table->string('phone')->nullable();
+            $table->date('date_of_birth')->nullable();
+            $table->string('national_id')->nullable();
             $relations = [
                 'FATHER','MOTHER','SON','DAUGHTER','BROTHER','COUSIN_BROTHER','COUSIN_SISTER','SISTER','HUSBAND','WIFE',
                 'GRANDFATHER','GRANDMOTHER','GRANDSON','GRANDDAUGHTER','UNCLE','AUNT','NEPHEW','NIECE',

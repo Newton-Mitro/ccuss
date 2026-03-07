@@ -77,7 +77,7 @@ Schema::create('teller_sessions', function (Blueprint $table) {
     $table->id();
     $table->foreignId('cash_location_id')->constrained();
     $table->foreignId('user_id')->constrained();
-    $table->foreignId('fiscal_period_id')->constrained();
+    $table->foreignId('accounting_period_id')->constrained();
     $table->timestamp('opened_at');
     $table->decimal('opening_balance', 14, 2);
     $table->timestamp('closed_at')->nullable();

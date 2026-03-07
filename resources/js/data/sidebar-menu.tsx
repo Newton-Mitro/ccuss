@@ -21,7 +21,7 @@ export const sidebarMenu: SidebarItem[] = [
         ],
     },
     {
-        name: 'Organizational Structure',
+        name: 'Organization & Structure',
         icon: <i className="fa-solid fa-building-flag" />,
         children_expanded: false,
         children: [
@@ -37,10 +37,41 @@ export const sidebarMenu: SidebarItem[] = [
                 path: '/branches',
                 match_path: 'branches',
             },
+            {
+                name: 'Roles',
+                icon: <i className="fa-solid fa-user-shield" />,
+                path: '/users/roles',
+                match_path: 'roles',
+            },
+            {
+                name: 'Assign Role Permissions',
+                icon: <i className="fa-solid fa-user-lock" />,
+                path: '/users/role-permissions',
+                match_path: 'role-permissions',
+            },
+            {
+                name: 'Users',
+                icon: <i className="fa-solid fa-user" />,
+                path: '/users',
+                match_path: 'users',
+            },
+            {
+                name: 'Assign User Roles',
+                icon: <i className="fa-solid fa-user-gear" />,
+                path: '/users/user-roles',
+                match_path: 'user-roles',
+            },
+            {
+                name: 'Assign User Permissions',
+                icon: <i className="fa-solid fa-key" />,
+                path: '/users/user-permissions',
+                match_path: 'user-permissions',
+            },
         ],
     },
+
     {
-        name: 'Customer Mgmt.',
+        name: 'Customers & Membership',
         icon: <i className="fa-solid fa-users" />,
         children_expanded: false,
         children: [
@@ -80,11 +111,39 @@ export const sidebarMenu: SidebarItem[] = [
                 path: '/online-service-clients',
                 match_path: 'online-service-clients',
             },
+            {
+                name: 'Member List',
+                icon: <i className="fa-solid fa-id-card" />,
+                path: '/member-list',
+                match_path: 'member-list',
+            },
+            {
+                name: 'Share Capital Mgmt.',
+                icon: <i className="fa-solid fa-coins" />,
+                children_expanded: false,
+                children: [
+                    {
+                        name: 'Share Accounts',
+                        icon: <i className="fa-solid fa-layer-group" />,
+                        match_path: '/share-capital/ledger_accounts',
+                    },
+                    {
+                        name: 'Share Ledger',
+                        icon: <i className="fa-solid fa-book" />,
+                        match_path: '/share-capital/ledger',
+                    },
+                    {
+                        name: 'Dividends',
+                        icon: <i className="fa-solid fa-percent" />,
+                        path: '/share-dividends',
+                        match_path: 'share-dividends',
+                    },
+                ],
+            },
         ],
     },
-
     {
-        name: 'Saving Deposit Mgmt.',
+        name: 'Deposit System',
         icon: <i className="fa-solid fa-sack-dollar" />,
         children_expanded: false,
         children: [
@@ -175,44 +234,9 @@ export const sidebarMenu: SidebarItem[] = [
             },
         ],
     },
+
     {
-        name: 'Membership Mgmt.',
-        icon: <i className="fa-solid fa-id-card" />,
-        children_expanded: false,
-        children: [
-            {
-                name: 'Member List',
-                icon: <i className="fa-solid fa-id-card" />,
-                path: '/member-list',
-                match_path: 'member-list',
-            },
-        ],
-    },
-    {
-        name: 'Share Capital Mgmt.',
-        icon: <i className="fa-solid fa-coins" />,
-        children_expanded: false,
-        children: [
-            {
-                name: 'Share Accounts',
-                icon: <i className="fa-solid fa-layer-group" />,
-                match_path: '/share-capital/ledger_accounts',
-            },
-            {
-                name: 'Share Ledger',
-                icon: <i className="fa-solid fa-book" />,
-                match_path: '/share-capital/ledger',
-            },
-            {
-                name: 'Dividends',
-                icon: <i className="fa-solid fa-percent" />,
-                path: '/share-dividends',
-                match_path: 'share-dividends',
-            },
-        ],
-    },
-    {
-        name: 'Loan Mgmt.',
+        name: 'Loan System',
         icon: <i className="fa-solid fa-hand-holding-dollar" />,
         children_expanded: false,
         children: [
@@ -503,108 +527,9 @@ export const sidebarMenu: SidebarItem[] = [
             },
         ],
     },
-    {
-        name: 'General Accounting',
-        icon: <i className="fa-solid fa-calculator" />,
-        children_expanded: false,
-        children: [
-            {
-                name: 'Fiscal Years',
-                icon: <i className="fa-solid fa-calendar-check" />,
-                path: '/fiscal-years',
-                match_path: 'fiscal-years',
-            },
-            {
-                name: 'Fiscal Periods',
-                icon: <i className="fa-solid fa-calendar-day" />,
-                path: '/fiscal-periods',
-                match_path: 'fiscal-periods',
-            },
-            {
-                name: 'Ledger Accounts',
-                icon: <i className="fa-solid fa-book-open" />,
-                path: '/ledger_accounts',
-                match_path: 'ledger_accounts',
-            },
-            {
-                name: 'Vouchers',
-                icon: <i className="fa-solid fa-list-check" />,
-                path: '/vouchers',
-                match_path: 'vouchers',
-            },
-            {
-                name: 'Voucher Entry',
-                icon: <i className="fa-solid fa-chart-simple" />,
-                children_expanded: false,
-                children: [
-                    {
-                        name: 'Debit/Payment Voucher',
-                        icon: <i className="fa-solid fa-chart-simple" />,
-                        path: '/debit-voucher/create',
-                        match_path: 'debit-voucher',
-                    },
-                    {
-                        name: 'Credit/Receipt Voucher',
-                        icon: <i className="fa-solid fa-chart-simple" />,
-                        path: '/credit-voucher/create',
-                        match_path: 'credit-voucher',
-                    },
-                    {
-                        name: 'Journal/Non-Cash Voucher',
-                        icon: <i className="fa-solid fa-chart-simple" />,
-                        path: '/journal-voucher/create',
-                        match_path: 'journal-voucher',
-                    },
-                    {
-                        name: 'Contra Voucher',
-                        icon: <i className="fa-solid fa-chart-simple" />,
-                        path: '/contra-voucher/create',
-                        match_path: 'contra-voucher',
-                    },
-                ],
-            },
-            {
-                name: 'Reports',
-                icon: <i className="fa-solid fa-chart-simple" />,
-                children_expanded: false,
-                children: [
-                    {
-                        name: 'Trial Balance',
-                        icon: <i className="fa-solid fa-balance-scale" />,
-                        path: '/reports/trial-balance',
-                        match_path: 'trial-balance',
-                    },
-                    {
-                        name: 'Income Statement',
-                        icon: <i className="fa-solid fa-file-invoice" />,
-                        path: '/reports/profit-loss',
-                        match_path: 'profit-loss',
-                    },
-                    {
-                        name: 'Balance Sheet',
-                        icon: <i className="fa-solid fa-landmark" />,
-                        path: '/reports/balance-sheet',
-                        match_path: 'balance-sheet',
-                    },
-                    {
-                        name: 'Cash Flow Statement',
-                        icon: <i className="fa-solid fa-water" />,
-                        path: '/reports/cash-flow',
-                        match_path: 'cash-flow',
-                    },
-                    {
-                        name: 'Shareholders Equity',
-                        icon: <i className="fa-solid fa-users" />,
-                        path: '/reports/shareholders-equity',
-                        match_path: 'shareholders-equity',
-                    },
-                ],
-            },
-        ],
-    },
 
     {
-        name: 'Procurement Mgmt.',
+        name: 'Procurement System',
         icon: <i className="fa-solid fa-sack-dollar" />,
         children_expanded: false,
         children: [
@@ -783,41 +708,115 @@ export const sidebarMenu: SidebarItem[] = [
             },
         ],
     },
-
     {
-        name: 'User, Role & Permissions',
-        icon: <i className="fa-solid fa-user-gear" />,
+        name: 'Accounting / GL System',
+        icon: <i className="fa-solid fa-calculator" />,
         children_expanded: false,
         children: [
             {
-                name: 'Roles',
-                icon: <i className="fa-solid fa-user-shield" />,
-                path: '/users/roles',
-                match_path: 'roles',
+                name: 'Ledger Accounts',
+                icon: <i className="fa-solid fa-book-open" />,
+                path: '/ledger_accounts',
+                match_path: 'ledger_accounts',
             },
             {
-                name: 'Assign Role Permissions',
-                icon: <i className="fa-solid fa-user-lock" />,
-                path: '/users/role-permissions',
-                match_path: 'role-permissions',
+                name: 'Vouchers',
+                icon: <i className="fa-solid fa-list-check" />,
+                path: '/vouchers',
+                match_path: 'vouchers',
             },
             {
-                name: 'Users',
-                icon: <i className="fa-solid fa-user" />,
-                path: '/users',
-                match_path: 'users',
+                name: 'Voucher Entry',
+                icon: <i className="fa-solid fa-chart-simple" />,
+                children_expanded: false,
+                children: [
+                    {
+                        name: 'Debit/Payment Voucher',
+                        icon: <i className="fa-solid fa-chart-simple" />,
+                        path: '/debit-voucher/create',
+                        match_path: 'debit-voucher',
+                    },
+                    {
+                        name: 'Credit/Receipt Voucher',
+                        icon: <i className="fa-solid fa-chart-simple" />,
+                        path: '/credit-voucher/create',
+                        match_path: 'credit-voucher',
+                    },
+                    {
+                        name: 'Journal/Non-Cash Voucher',
+                        icon: <i className="fa-solid fa-chart-simple" />,
+                        path: '/journal-voucher/create',
+                        match_path: 'journal-voucher',
+                    },
+                    {
+                        name: 'Contra Voucher',
+                        icon: <i className="fa-solid fa-chart-simple" />,
+                        path: '/contra-voucher/create',
+                        match_path: 'contra-voucher',
+                    },
+                ],
             },
             {
-                name: 'Assign User Roles',
-                icon: <i className="fa-solid fa-user-gear" />,
-                path: '/users/user-roles',
-                match_path: 'user-roles',
+                name: 'Reports',
+                icon: <i className="fa-solid fa-chart-simple" />,
+                children_expanded: false,
+                children: [
+                    {
+                        name: 'Trial Balance',
+                        icon: <i className="fa-solid fa-balance-scale" />,
+                        path: '/reports/trial-balance',
+                        match_path: 'trial-balance',
+                    },
+                    {
+                        name: 'Income Statement',
+                        icon: <i className="fa-solid fa-file-invoice" />,
+                        path: '/reports/profit-loss',
+                        match_path: 'profit-loss',
+                    },
+                    {
+                        name: 'Balance Sheet',
+                        icon: <i className="fa-solid fa-landmark" />,
+                        path: '/reports/balance-sheet',
+                        match_path: 'balance-sheet',
+                    },
+                    {
+                        name: 'Cash Flow Statement',
+                        icon: <i className="fa-solid fa-water" />,
+                        path: '/reports/cash-flow',
+                        match_path: 'cash-flow',
+                    },
+                    {
+                        name: 'Shareholders Equity',
+                        icon: <i className="fa-solid fa-users" />,
+                        path: '/reports/shareholders-equity',
+                        match_path: 'shareholders-equity',
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        name: 'Fiscal Control',
+        icon: <i className="fa-solid fa-calculator" />,
+        children_expanded: false,
+        children: [
+            {
+                name: 'Fiscal Years',
+                icon: <i className="fa-solid fa-calendar-check" />,
+                path: '/fiscal-years',
+                match_path: 'fiscal-years',
             },
             {
-                name: 'Assign User Permissions',
-                icon: <i className="fa-solid fa-key" />,
-                path: '/users/user-permissions',
-                match_path: 'user-permissions',
+                name: 'Accounting Periods',
+                icon: <i className="fa-solid fa-calendar-day" />,
+                path: '/accounting-periods',
+                match_path: 'accounting-periods',
+            },
+            {
+                name: 'Closing Entries',
+                icon: <i className="fa-solid fa-book-open" />,
+                path: '/closing-entries',
+                match_path: 'closing-entries',
             },
         ],
     },
@@ -892,15 +891,21 @@ export const sidebarMenu: SidebarItem[] = [
         ],
     },
     {
-        name: 'Audits',
+        name: 'Reporting & Audit',
         icon: <i className="fa-solid fa-clipboard-list" />,
         children_expanded: false,
         children: [
             {
                 name: 'Audit Logs',
                 icon: <i className="fa-solid fa-file-alt" />,
-                path: '/audits',
-                match_path: 'audits',
+                path: '/audit-logs',
+                match_path: 'audit-logs',
+            },
+            {
+                name: 'Activity Logs',
+                icon: <i className="fa-solid fa-file-alt" />,
+                path: '/activity-logs',
+                match_path: 'activity-logs',
             },
         ],
     },

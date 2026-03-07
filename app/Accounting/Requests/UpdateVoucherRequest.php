@@ -34,7 +34,7 @@ class UpdateVoucherRequest extends FormRequest
             ],
 
             'fiscal_year_id' => ['required', 'exists:fiscal_years,id'],
-            'fiscal_period_id' => ['required', 'exists:fiscal_periods,id'],
+            'accounting_period_id' => ['required', 'exists:accounting_periods,id'],
             'branch_id' => ['required', 'exists:branches,id'],
             'status' => ['required', 'string'],
             'narration' => ['required', 'string'],

@@ -2,7 +2,7 @@
 
 namespace App\Accounting\Controllers;
 
-use App\Accounting\Models\FiscalPeriod;
+use App\Accounting\Models\AccountingPeriod;
 use App\Accounting\Models\FiscalYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +21,7 @@ class AccountingReportController
     public function trialBalance(Request $request): Response
     {
         $fiscalYearId = $request->integer('fiscal_year_id');
-        $fiscalPeriodId = $request->integer('fiscal_period_id');
+        $fiscalPeriodId = $request->integer('accounting_period_id');
 
         $query = DB::table('view_trial_balance')
             ->select(
@@ -31,7 +31,7 @@ class AccountingReportController
                 'account_type',
                 'fiscal_year_id',
                 'fiscal_year_code',
-                'fiscal_period_id',
+                'accounting_period_id',
                 'period_name',
                 DB::raw('CAST(total_debit AS DECIMAL(15,2)) as total_debit'),
                 DB::raw('CAST(total_credit AS DECIMAL(15,2)) as total_credit'),
@@ -45,13 +45,13 @@ class AccountingReportController
         }
 
         if ($fiscalPeriodId) {
-            $query->where('fiscal_period_id', $fiscalPeriodId);
+            $query->where('accounting_period_id', $fiscalPeriodId);
         }
 
         return Inertia::render('accounting/reports/trial-balance-page', [
             'trialBalance' => $query->get(),
             'fiscalYears' => FiscalYear::orderBy('id')->get(),
-            'fiscalPeriods' => FiscalPeriod::orderBy('id')->get(),
+            'fiscalPeriods' => AccountingPeriod::orderBy('id')->get(),
             'selectedFiscalYear' => $fiscalYearId,
             'selectedFiscalPeriod' => $fiscalPeriodId,
         ]);
@@ -65,7 +65,7 @@ class AccountingReportController
     public function profitAndLoss(Request $request): Response
     {
         $fiscalYearId = $request->input('fiscal_year_id');
-        $fiscalPeriodId = $request->input('fiscal_period_id');
+        $fiscalPeriodId = $request->input('accounting_period_id');
 
         $query = DB::table('view_profit_and_loss')
             ->orderBy('category')
@@ -76,13 +76,13 @@ class AccountingReportController
         }
 
         if ($fiscalPeriodId) {
-            $query->where('fiscal_period_id', $fiscalPeriodId);
+            $query->where('accounting_period_id', $fiscalPeriodId);
         }
 
         return Inertia::render('accounting/reports/profit-and-loss-page', [
             'profitAndLoss' => $query->get(),
             'fiscalYears' => FiscalYear::all(),
-            'fiscalPeriods' => FiscalPeriod::all(),
+            'fiscalPeriods' => AccountingPeriod::all(),
             'selectedFiscalYear' => $fiscalYearId,
             'selectedFiscalPeriod' => $fiscalPeriodId,
         ]);
@@ -122,10 +122,10 @@ class AccountingReportController
     public function cashFlow(Request $request): Response
     {
         $fiscalYearId = $request->integer('fiscal_year_id');
-        $fiscalPeriodId = $request->integer('fiscal_period_id');
+        $fiscalPeriodId = $request->integer('accounting_period_id');
 
         $query = DB::table('view_cash_flow')
-            ->orderBy('fiscal_period_id')
+            ->orderBy('accounting_period_id')
             ->orderBy('cash_category');
 
         if ($fiscalYearId) {
@@ -133,13 +133,13 @@ class AccountingReportController
         }
 
         if ($fiscalPeriodId) {
-            $query->where('fiscal_period_id', $fiscalPeriodId);
+            $query->where('accounting_period_id', $fiscalPeriodId);
         }
 
         return Inertia::render('accounting/reports/cash-flow-page', [
             'cashFlows' => $query->get(), // ✅ plural & consistent
             'fiscalYears' => FiscalYear::orderBy('id')->get(),
-            'fiscalPeriods' => FiscalPeriod::orderBy('id')->get(),
+            'fiscalPeriods' => AccountingPeriod::orderBy('id')->get(),
             'selectedFiscalYear' => $fiscalYearId,
             'selectedFiscalPeriod' => $fiscalPeriodId,
         ]);
@@ -153,11 +153,11 @@ class AccountingReportController
     public function shareholdersEquity(Request $request): Response
     {
         $fiscalYearId = $request->input('fiscal_year_id');
-        $fiscalPeriodId = $request->input('fiscal_period_id');
+        $fiscalPeriodId = $request->input('accounting_period_id');
 
         $query = DB::table('view_shareholders_equity')
             ->orderBy('account_code')
-            ->orderBy('fiscal_period_id');
+            ->orderBy('accounting_period_id');
 
         /*
          |------------------------------------------------------------
@@ -165,25 +165,25 @@ class AccountingReportController
          |------------------------------------------------------------
          */
         if ($fiscalPeriodId) {
-            $query->where('fiscal_period_id', $fiscalPeriodId);
+            $query->where('accounting_period_id', $fiscalPeriodId);
         }
 
         /*
          |------------------------------------------------------------
-         | Filter by Fiscal Year (via fiscal_periods table)
+         | Filter by Fiscal Year (via accounting_periods table)
          |------------------------------------------------------------
          */
         if ($fiscalYearId) {
-            $periodIds = FiscalPeriod::where('fiscal_year_id', $fiscalYearId)
+            $periodIds = AccountingPeriod::where('fiscal_year_id', $fiscalYearId)
                 ->pluck('id');
 
-            $query->whereIn('fiscal_period_id', $periodIds);
+            $query->whereIn('accounting_period_id', $periodIds);
         }
 
         return Inertia::render('accounting/reports/shareholders-equity-page', [
             'equityStatement' => $query->get(),
             'fiscalYears' => FiscalYear::orderBy('start_date')->get(),
-            'fiscalPeriods' => FiscalPeriod::orderBy('start_date')->get(),
+            'fiscalPeriods' => AccountingPeriod::orderBy('start_date')->get(),
             'selectedFiscalYear' => $fiscalYearId,
             'selectedFiscalPeriod' => $fiscalPeriodId,
         ]);

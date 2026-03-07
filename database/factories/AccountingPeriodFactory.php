@@ -2,13 +2,13 @@
 
 namespace Database\Factories;
 
-use App\Accounting\Models\FiscalPeriod;
+use App\Accounting\Models\AccountingPeriod;
 use App\Accounting\Models\FiscalYear;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class FiscalPeriodFactory extends Factory
+class AccountingPeriodFactory extends Factory
 {
-    protected $model = FiscalPeriod::class;
+    protected $model = AccountingPeriod::class;
 
     public function definition()
     {

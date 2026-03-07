@@ -32,7 +32,7 @@ return new class extends Migration {
 
         Schema::create('branches', function (Blueprint $table) {
             $table->id();
-
+            $table->foreignId('organization_id')->constrained();
             $table->string('code', 20)->unique()->comment('Unique branch code');
             $table->string('name', 100)->comment('Branch name');
             $table->string('address', 255)->nullable()->comment('Full address');
@@ -47,41 +47,20 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        /*
-        |--------------------------------------------------------------------------
-        | Fiscal Years
-        |--------------------------------------------------------------------------
-        */
-        Schema::create('fiscal_years', function (Blueprint $table) {
+        Schema::create('departments', function (Blueprint $table) {
             $table->id();
-            $table->string('code')->unique()->comment('(FY-2025-26)');
-            $table->date('start_date');
-            $table->date('end_date');
-            $table->boolean('is_active')->default(false);
-            $table->boolean('is_closed')->default(false);
+            $table->foreignId('branch_id')->constrained();
+            $table->string('name');
             $table->timestamps();
         });
 
-        /*
-        |--------------------------------------------------------------------------
-        | Fiscal Periods
-        |--------------------------------------------------------------------------
-        */
-        Schema::create('fiscal_periods', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('fiscal_year_id')->constrained()->cascadeOnDelete();
-            $table->string('period_name')->comment('(JAN-2026)');
-            $table->date('start_date');
-            $table->date('end_date');
-            $table->boolean('is_open')->default(true);
-            $table->timestamps();
-        });
+
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('organizations');
         Schema::dropIfExists('branches');
-        Schema::dropIfExists('fiscal_periods');
-        Schema::dropIfExists('fiscal_years');
+
     }
 };

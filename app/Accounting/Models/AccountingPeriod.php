@@ -3,13 +3,13 @@
 namespace App\Accounting\Models;
 
 use App\Audit\Traits\Auditable;
-use Database\Factories\FiscalPeriodFactory;
+use Database\Factories\AccountingPeriodFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class FiscalPeriod extends Model
+class AccountingPeriod extends Model
 {
     use HasFactory, Auditable;
     protected $fillable = [
@@ -38,6 +38,6 @@ class FiscalPeriod extends Model
 
     protected static function newFactory()
     {
-        return FiscalPeriodFactory::new();
+        return AccountingPeriodFactory::new();
     }
 }

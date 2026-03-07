@@ -6,7 +6,7 @@ use App\UserRolePermissions\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class Audit extends Model
+class AuditLog extends Model
 {
     protected $fillable = [
         'auditable_type',

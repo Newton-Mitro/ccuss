@@ -13,7 +13,7 @@ class LedgerAccountBalance extends Model
     use HasFactory, Auditable;
     protected $fillable = [
         'ledger_account_id',
-        'fiscal_period_id',
+        'accounting_period_id',
         'opening_balance',
         'debit_total',
         'credit_total',
@@ -34,7 +34,7 @@ class LedgerAccountBalance extends Model
 
     public function fiscalPeriod(): BelongsTo
     {
-        return $this->belongsTo(FiscalPeriod::class);
+        return $this->belongsTo(AccountingPeriod::class);
     }
 
     protected static function newFactory()

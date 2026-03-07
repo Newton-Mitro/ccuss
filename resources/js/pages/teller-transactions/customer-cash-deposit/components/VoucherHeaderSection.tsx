@@ -10,7 +10,7 @@ interface VoucherHeaderSectionProps {
     errors: any;
     setData: (key: string, value: any) => void;
     fiscal_years: FiscalYear[];
-    fiscal_periods: FiscalPeriod[];
+    accounting_periods: FiscalPeriod[];
     branches: Branch[];
 }
 
@@ -19,7 +19,7 @@ function VoucherHeaderSection({
     errors,
     setData,
     fiscal_years,
-    fiscal_periods,
+    accounting_periods,
     branches,
 }: VoucherHeaderSectionProps) {
     return (
@@ -77,7 +77,7 @@ function VoucherHeaderSection({
                         }))}
                         onChange={(value) => {
                             setData('fiscal_year_id', Number(value));
-                            setData('fiscal_period_id', null);
+                            setData('accounting_period_id', null);
                         }}
                     />
                 </div>
@@ -87,9 +87,9 @@ function VoucherHeaderSection({
                     <Label className="text-xs">Fiscal Period</Label>
                     <Select
                         disabled
-                        error={errors?.fiscal_period_id}
-                        value={data.fiscal_period_id?.toString() || ''}
-                        options={fiscal_periods
+                        error={errors?.accounting_period_id}
+                        value={data.accounting_period_id?.toString() || ''}
+                        options={accounting_periods
                             .filter(
                                 (fp) =>
                                     fp.fiscal_year_id === data.fiscal_year_id,
@@ -99,7 +99,7 @@ function VoucherHeaderSection({
                                 label: fp.period_name,
                             }))}
                         onChange={(value) =>
-                            setData('fiscal_period_id', Number(value))
+                            setData('accounting_period_id', Number(value))
                         }
                     />
                 </div>

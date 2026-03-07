@@ -63,7 +63,7 @@ class LedgerAccount extends Model
     public function balanceForPeriod($periodId)
     {
         return $this->hasOne(LedgerAccountBalance::class)
-            ->where('fiscal_period_id', $periodId);
+            ->where('accounting_period_id', $periodId);
     }
 
     // 🔹 Get balances filtered by fiscal year or period dynamically
@@ -73,7 +73,7 @@ class LedgerAccount extends Model
             ->when($fiscalYearId, function ($q) use ($fiscalYearId) {
                 $q->whereHas('fiscalPeriod', fn($p) => $p->where('fiscal_year_id', $fiscalYearId));
             })
-            ->when($fiscalPeriodId, fn($q) => $q->where('fiscal_period_id', $fiscalPeriodId));
+            ->when($fiscalPeriodId, fn($q) => $q->where('accounting_period_id', $fiscalPeriodId));
     }
 
     // 🔹 Recursive balances including children

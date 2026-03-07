@@ -17,7 +17,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('fiscal_periods', function (Blueprint $table) {
+        Schema::create('accounting_periods', function (Blueprint $table) {
             $table->id();
             $table->foreignId('fiscal_year_id')->constrained()->cascadeOnDelete();
             $table->string('period_name')->comment('(JAN-2026)');
@@ -42,7 +42,7 @@ return new class extends Migration
         Schema::create('vouchers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('fiscal_year_id')->constrained()->nullOnDelete();
-            $table->foreignId('fiscal_period_id')->constrained()->nullOnDelete();
+            $table->foreignId('accounting_period_id')->constrained()->nullOnDelete();
             $table->foreignId('branch_id')->constrained('branches')->nullOnDelete()->comment('Branch where transaction was recorded');
 
             $table->timestamp('voucher_date')->useCurrent()->comment('Posting timestamp');
@@ -91,7 +91,7 @@ return new class extends Migration
         Schema::create('account_balances', function (Blueprint $table) {
             $table->id();
             $table->foreignId('ledger_account_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('fiscal_period_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('accounting_period_id')->constrained()->cascadeOnDelete();
             $table->decimal('opening_balance', 18, 2)->default(0);
             $table->decimal('debit_total', 18, 2)->default(0);
             $table->decimal('credit_total', 18, 2)->default(0);
@@ -182,7 +182,7 @@ return new class extends Migration
         Schema::dropIfExists('voucher_entries');
         Schema::dropIfExists('ledger_accounts');
         Schema::dropIfExists('account_balances');
-        Schema::dropIfExists('fiscal_periods');
+        Schema::dropIfExists('accounting_periods');
         Schema::dropIfExists('fiscal_years');
         DB::statement('DROP VIEW IF EXISTS view_trial_balance');
         DB::statement('DROP VIEW IF EXISTS view_profit_and_loss');

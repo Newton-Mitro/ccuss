@@ -125,7 +125,7 @@ export default function GlAccountsIndex({
                 opening_balance_fiscal_year_id:
                     account.opening_balance?.fiscal_year_id || '',
                 opening_balance_fiscal_period_id:
-                    account.opening_balance?.fiscal_period_id || '',
+                    account.opening_balance?.accounting_period_id || '',
             });
         } else {
             reset();
@@ -326,12 +326,12 @@ export default function GlAccountsIndex({
                                     'fiscal_year_id',
                                     Number(e.target.value),
                                 );
-                                setData('fiscal_period_id', null);
+                                setData('accounting_period_id', null);
                             }}
                         />
                         <Select
-                            error={errors.fiscal_period_id}
-                            value={data.fiscal_period_id?.toString() || ''}
+                            error={errors.accounting_period_id}
+                            value={data.accounting_period_id?.toString() || ''}
                             options={fiscalPeriods
                                 .filter(
                                     (fp) =>
@@ -344,7 +344,7 @@ export default function GlAccountsIndex({
                                 }))}
                             onChange={(e) =>
                                 setData(
-                                    'fiscal_period_id',
+                                    'accounting_period_id',
                                     Number(e.target.value),
                                 )
                             }

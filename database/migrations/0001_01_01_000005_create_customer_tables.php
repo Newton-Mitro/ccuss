@@ -170,6 +170,21 @@ return new class extends Migration {
             $table->timestamps();
         });
 
+        Schema::create('nominees', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('customer_id')->constrained();
+            $table->string('name');
+            $table->string('relation');
+            $table->decimal('distribute_percent', 8);
+        });
+
+        Schema::create('kyc_documents', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('customer_id')->constrained();
+            $table->string('document_type');
+            $table->string('file_path');
+        });
+
         /*
         |--------------------------------------------------------------------------
         | Customer Family Photos

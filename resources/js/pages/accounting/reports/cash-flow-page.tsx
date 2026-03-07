@@ -58,7 +58,7 @@ export default function CashFlowStatementPage() {
             '/reports/cash-flow',
             {
                 fiscal_year_id: year || undefined,
-                fiscal_period_id: fiscalPeriod || undefined,
+                accounting_period_id: fiscalPeriod || undefined,
             },
             { preserveState: false, replace: true },
         );
@@ -73,7 +73,7 @@ export default function CashFlowStatementPage() {
             '/reports/cash-flow',
             {
                 fiscal_year_id: fiscalYear || undefined,
-                fiscal_period_id: period || undefined,
+                accounting_period_id: period || undefined,
             },
             { preserveState: false, replace: true },
         );

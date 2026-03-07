@@ -28,7 +28,7 @@ class FiscalYear extends Model
 
     public function periods(): HasMany
     {
-        return $this->hasMany(FiscalPeriod::class);
+        return $this->hasMany(AccountingPeriod::class);
     }
 
     public function vouchers(): HasMany

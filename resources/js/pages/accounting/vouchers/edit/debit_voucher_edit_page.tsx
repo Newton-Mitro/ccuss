@@ -49,7 +49,7 @@ interface VoucherFormData {
     voucher_date: string;
     voucher_type: string;
     fiscal_year_id?: number;
-    fiscal_period_id?: number;
+    accounting_period_id?: number;
     branch_id?: number;
     status: string;
     narration: string;
@@ -95,7 +95,7 @@ export default function EditDebitVoucherEntry({
         voucher_date: voucher.voucher_date,
         voucher_type: voucher.voucher_type,
         fiscal_year_id: voucher.fiscal_year_id,
-        fiscal_period_id: voucher.fiscal_period_id,
+        accounting_period_id: voucher.accounting_period_id,
         branch_id: voucher.branch_id,
         status: voucher.status,
         narration: voucher.narration || '',
@@ -346,7 +346,7 @@ export default function EditDebitVoucherEntry({
                                             'fiscal_year_id',
                                             Number(e.target.value),
                                         );
-                                        setData('fiscal_period_id', null);
+                                        setData('accounting_period_id', null);
                                     }}
                                 />
                             </div>
@@ -355,9 +355,10 @@ export default function EditDebitVoucherEntry({
                             <div>
                                 <Label className="text-xs">Fiscal Period</Label>
                                 <Select
-                                    error={errors.fiscal_period_id}
+                                    error={errors.accounting_period_id}
                                     value={
-                                        data.fiscal_period_id?.toString() || ''
+                                        data.accounting_period_id?.toString() ||
+                                        ''
                                     }
                                     disabled={disabled}
                                     options={fiscalPeriods
@@ -372,7 +373,7 @@ export default function EditDebitVoucherEntry({
                                         }))}
                                     onChange={(e) =>
                                         setData(
-                                            'fiscal_period_id',
+                                            'accounting_period_id',
                                             Number(e.target.value),
                                         )
                                     }

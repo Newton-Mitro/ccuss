@@ -2,7 +2,7 @@
 
 namespace App\Accounting\Controllers;
 
-use App\Accounting\Models\FiscalPeriod;
+use App\Accounting\Models\AccountingPeriod;
 use App\Accounting\Models\FiscalYear;
 use App\Accounting\Models\LedgerAccount;
 use App\Accounting\Models\Voucher;
@@ -76,7 +76,7 @@ class LedgerAccountController extends Controller
                 'childrenRecursive',
                 'balances' => function ($q) use ($periodId) {
                     if ($periodId) {
-                        $q->where('fiscal_period_id', $periodId);
+                        $q->where('accounting_period_id', $periodId);
                     }
                 }
             ])
@@ -92,7 +92,7 @@ class LedgerAccountController extends Controller
             ->orderBy('code', 'desc')
             ->get(['id', 'code']);
 
-        $fiscalPeriods = FiscalPeriod::query()
+        $fiscalPeriods = AccountingPeriod::query()
             ->orderBy('period_name')
             ->get(['id', 'period_name']);
 
@@ -121,7 +121,7 @@ class LedgerAccountController extends Controller
             'parent_id' => 'nullable|exists:ledger_accounts,id',
             'opening_balance' => 'nullable|numeric|min:0',
             'fiscal_year_id' => 'required|exists:fiscal_years,id',
-            'fiscal_period_id' => 'required|exists:fiscal_periods,id',
+            'accounting_period_id' => 'required|exists:accounting_periods,id',
         ]);
 
         // Wrap everything in a transaction
@@ -150,7 +150,7 @@ class LedgerAccountController extends Controller
                     'narration' => 'Opening balance for ' . $account->name,
                     'status' => Voucher::STATUS_POSTED,
                     'fiscal_year_id' => $data['fiscal_year_id'],
-                    'fiscal_period_id' => $data['fiscal_period_id'],
+                    'accounting_period_id' => $data['accounting_period_id'],
                     'created_by' => auth()->id(),
                     'posted_by' => auth()->id(),
                     'posted_at' => now(),
@@ -198,7 +198,7 @@ class LedgerAccountController extends Controller
             ],
             'opening_balance' => 'nullable|numeric|min:0',
             'fiscal_year_id' => 'required|exists:fiscal_years,id',
-            'fiscal_period_id' => 'required|exists:fiscal_periods,id',
+            'accounting_period_id' => 'required|exists:accounting_periods,id',
         ];
 
         if ($request->code !== $ledgerAccount->code) {
@@ -240,7 +240,7 @@ class LedgerAccountController extends Controller
                         'narration' => 'Opening balance for ' . $ledgerAccount->name,
                         'status' => Voucher::STATUS_POSTED,
                         'fiscal_year_id' => $data['fiscal_year_id'],
-                        'fiscal_period_id' => $data['fiscal_period_id'],
+                        'accounting_period_id' => $data['accounting_period_id'],
                         'created_by' => auth()->id(),
                         'posted_by' => auth()->id(),
                         'posted_at' => now(),

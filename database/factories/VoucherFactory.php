@@ -32,7 +32,7 @@ class VoucherFactory extends Factory
         return [
             // Relations
             'fiscal_year_id' => null,
-            'fiscal_period_id' => null,
+            'accounting_period_id' => null,
             'branch_id' => null,
 
             // Core fields
