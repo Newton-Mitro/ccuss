@@ -147,74 +147,7 @@ function WithdrawalLedgerSection({
                         </div>
                     )}
 
-                    {/* Account Holders Scrollable */}
-                    <div className="mt-2 space-y-1">
-                        <Label className="text-xs font-medium">
-                            Account Holders
-                        </Label>
-
-                        <div className="max-h-[206px] space-y-2 overflow-y-auto rounded-md border border-border bg-accent/10 p-2">
-                            {[
-                                {
-                                    id: 1,
-                                    name: 'Abdul Karim',
-                                    relation: 'Primary',
-                                    account: 'AC-102345',
-                                },
-                                {
-                                    id: 2,
-                                    name: 'Nusrat Jahan',
-                                    relation: 'Joint',
-                                    account: 'AC-102345',
-                                },
-                                {
-                                    id: 3,
-                                    name: 'Md. Rahim',
-                                    relation: 'Joint',
-                                    account: 'AC-102346',
-                                },
-                                {
-                                    id: 4,
-                                    name: 'Fatima Akter',
-                                    relation: 'Signatory',
-                                    account: 'AC-102347',
-                                },
-                            ].map((holder, index) => (
-                                <div
-                                    key={holder.id}
-                                    className={`flex cursor-pointer items-center justify-between rounded-md border bg-background px-2 py-1.5 text-xs transition hover:bg-muted/30`}
-                                >
-                                    <div className="flex items-center gap-2">
-                                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-[10px] font-semibold text-muted-foreground">
-                                            {holder.name
-                                                .split(' ')
-                                                .map((n) => n[0])
-                                                .join('')
-                                                .slice(0, 2)}
-                                        </div>
-
-                                        <div className="flex flex-col leading-tight">
-                                            <span className="font-medium">
-                                                {holder.name}
-                                            </span>
-                                            <span className="text-[10px] text-muted-foreground">
-                                                {holder.relation}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <span className="text-[10px] text-muted-foreground">
-                                        {holder.account}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Right Card */}
-                <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4 md:col-span-8">
-                    <div className="grid grid-cols-3 gap-x-2">
+                    <div className="flex flex-col gap-2">
                         <div className="">
                             <Label className="text-xs font-medium">
                                 Instrument Reference
@@ -265,32 +198,102 @@ function WithdrawalLedgerSection({
                                 }
                             />
                         </div>
-                    </div>
-                    <div className="w-full">
-                        <h3 className="text-sm font-semibold text-muted-foreground">
-                            Signature Verification
-                        </h3>
 
-                        <div className="mt-2 flex w-full items-center justify-center rounded-md border border-dashed border-muted text-xs text-muted-foreground">
-                            <div className="relative h-64 w-full overflow-hidden rounded-md">
-                                <ReactPanZoom
-                                    image={
-                                        'https://a.storyblok.com/f/191576/1176x882/0707bde47c/make_signature_hero_after.webp'
-                                    }
-                                    alt="Signature Preview"
-                                />
+                        <div className="mt-2 rounded-md bg-muted/30 p-2">
+                            <div className="flex items-center justify-between text-sm">
+                                <span className="text-muted-foreground">
+                                    In Words:
+                                </span>
+                                <span className="font-semibold text-red-600">
+                                    {takaToText(withdrawalAmount)}
+                                </span>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div className="rounded-md bg-muted/30 p-2">
-                        <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">
-                                In Words:
-                            </span>
-                            <span className="font-semibold text-red-600">
-                                {takaToText(withdrawalAmount)}
-                            </span>
+                {/* Right Card */}
+                <div className="flex flex-col gap-4 md:col-span-8">
+                    <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4">
+                        {/* Account Holders Scrollable */}
+                        <div className="space-y-1">
+                            <Label className="text-xs font-medium">
+                                Account Holders
+                            </Label>
+
+                            <div className="grid max-h-[106px] grid-cols-2 gap-2 overflow-y-auto rounded-md border border-border bg-accent/10 p-2">
+                                {[
+                                    {
+                                        id: 1,
+                                        name: 'Abdul Karim',
+                                        relation: 'Primary',
+                                        account: 'AC-102345',
+                                    },
+                                    {
+                                        id: 2,
+                                        name: 'Nusrat Jahan',
+                                        relation: 'Joint',
+                                        account: 'AC-102345',
+                                    },
+                                    {
+                                        id: 3,
+                                        name: 'Md. Rahim',
+                                        relation: 'Joint',
+                                        account: 'AC-102346',
+                                    },
+                                    {
+                                        id: 4,
+                                        name: 'Fatima Akter',
+                                        relation: 'Signatory',
+                                        account: 'AC-102347',
+                                    },
+                                ].map((holder, index) => (
+                                    <div
+                                        key={holder.id}
+                                        className={`flex cursor-pointer items-center justify-between rounded-md border bg-background px-2 py-1.5 text-xs transition hover:bg-muted/30`}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-[10px] font-semibold text-muted-foreground">
+                                                {holder.name
+                                                    .split(' ')
+                                                    .map((n) => n[0])
+                                                    .join('')
+                                                    .slice(0, 2)}
+                                            </div>
+
+                                            <div className="flex flex-col leading-tight">
+                                                <span className="font-medium">
+                                                    {holder.name}
+                                                </span>
+                                                <span className="text-[10px] text-muted-foreground">
+                                                    {holder.relation}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <span className="text-[10px] text-muted-foreground">
+                                            {holder.account}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="w-full">
+                            <h3 className="text-sm font-semibold text-muted-foreground">
+                                Signature Verification
+                            </h3>
+
+                            <div className="mt-2 flex w-full items-center justify-center rounded-md border border-dashed border-muted text-xs text-muted-foreground">
+                                <div className="relative h-64 w-full overflow-hidden rounded-md">
+                                    <ReactPanZoom
+                                        image={
+                                            'https://a.storyblok.com/f/191576/1176x882/0707bde47c/make_signature_hero_after.webp'
+                                        }
+                                        alt="Signature Preview"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

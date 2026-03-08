@@ -72,25 +72,6 @@ Route::middleware(['auth', 'verified'])
     });
 
 
-Route::middleware(['auth', 'verified'])
-    ->group(function () {
-        Route::get(
-            '/customer/signatures',
-            [CustomerSignatureController::class, 'index']
-        )->name('signatures.index');
-        Route::get(
-            '/api/customer/signature',
-            [CustomerSignatureController::class, 'getCustomerSignature']
-        )->name('customer.signature.show');
-        Route::post(
-            '/api/customer/signature',
-            [CustomerSignatureController::class, 'store']
-        )->name('customer.signature.store');
-        Route::delete(
-            '/api/customer/signature/{signature}',
-            [CustomerSignatureController::class, 'destroy']
-        )->name('customer.signature.destroy');
-    });
 
 Route::middleware(['auth', 'verified'])->group(function () {
 

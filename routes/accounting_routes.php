@@ -32,30 +32,29 @@ Route::middleware(['auth',])->group(function () {
         ]);
 });
 
-
 Route::middleware(['auth',])->group(function () {
-    Route::get('/ledger_accounts', [LedgerAccountController::class, 'index'])->name('ledger_accounts.index');
     Route::get('/api/search-ledger', [LedgerAccountController::class, 'ledgerSearch'])->name('ledger_accounts.search');
     Route::get('/api/get-cash-ledgers', [LedgerAccountController::class, 'cashLedgerList'])->name('ledger_accounts.cash-ledger-list');
+});
 
+
+Route::prefix('accounting')->middleware(['auth',])->group(function () {
+    Route::get('/chart-of-accounts', [LedgerAccountController::class, 'index'])->name('ledger_accounts.index');
     Route::post('/ledger_accounts', [LedgerAccountController::class, 'store'])->name('ledger_accounts.store');
     Route::put('/ledger_accounts/{gl_account}', [LedgerAccountController::class, 'update'])->name('ledger_accounts.update');
     Route::delete('/ledger_accounts/{gl_account}', [LedgerAccountController::class, 'destroy'])->name('ledger_accounts.destroy');
-});
 
-Route::middleware(['auth',])->group(function () {
-    // Voucher listing
     Route::get('vouchers', [VoucherController::class, 'index'])->name('vouchers.index');
 
     // Voucher create routes per type
-    Route::get('debit-voucher/create', [VoucherController::class, 'createDebitVoucher'])->name('vouchers.create.debit');
-    Route::get('debit-voucher/{voucher}/edit', [VoucherController::class, 'editDebitVoucher'])->name('vouchers.edit.debit');
-    Route::get('credit-voucher/create', [VoucherController::class, 'createCreditVoucher'])->name('vouchers.create.credit');
-    Route::get('credit-voucher/{voucher}/edit', [VoucherController::class, 'editCreditVoucher'])->name('vouchers.edit.credit');
-    Route::get('journal-voucher/create', [VoucherController::class, 'createJournalVoucher'])->name('vouchers.create.journal');
-    Route::get('journal-voucher/{voucher}/edit', [VoucherController::class, 'editJournalVoucher'])->name('vouchers.edit.journal');
-    Route::get('contra-voucher/create', [VoucherController::class, 'createContraVoucher'])->name('vouchers.create.contra');
-    Route::get('contra-voucher/{voucher}/edit', [VoucherController::class, 'editContraVoucher'])->name('vouchers.edit.contra');
+    Route::get('vouchers/debit-voucher/create', [VoucherController::class, 'createDebitVoucher'])->name('vouchers.create.debit');
+    Route::get('vouchers/debit-voucher/{voucher}/edit', [VoucherController::class, 'editDebitVoucher'])->name('vouchers.edit.debit');
+    Route::get('vouchers/credit-voucher/create', [VoucherController::class, 'createCreditVoucher'])->name('vouchers.create.credit');
+    Route::get('vouchers/credit-voucher/{voucher}/edit', [VoucherController::class, 'editCreditVoucher'])->name('vouchers.edit.credit');
+    Route::get('vouchers/journal', [VoucherController::class, 'createJournalVoucher'])->name('vouchers.create.journal');
+    Route::get('vouchers/journal-voucher/{voucher}/edit', [VoucherController::class, 'editJournalVoucher'])->name('vouchers.edit.journal');
+    Route::get('vouchers/contra-voucher/create', [VoucherController::class, 'createContraVoucher'])->name('vouchers.create.contra');
+    Route::get('vouchers/contra-voucher/{voucher}/edit', [VoucherController::class, 'editContraVoucher'])->name('vouchers.edit.contra');
     // Transfer can reuse store with type 'transfer' in request
 
     // Store voucher (handles all types dynamically)
@@ -66,13 +65,14 @@ Route::middleware(['auth',])->group(function () {
     Route::get('vouchers/{voucher}/edit', [VoucherController::class, 'edit'])->name('vouchers.edit');
     Route::put('vouchers/{voucher}', [VoucherController::class, 'update'])->name('vouchers.update');
     Route::delete('vouchers/{voucher}', [VoucherController::class, 'destroy'])->name('vouchers.destroy');
+
+
+    Route::get('/trial-balance', [AccountingReportController::class, 'trialBalance'])->name('reports.trial-balance');
+
+    Route::get('/financial-reports/profit-loss', [AccountingReportController::class, 'profitAndLoss'])->name('reports.profit-loss');
+    Route::get('/financial-reports/balance-sheet', [AccountingReportController::class, 'balanceSheet'])->name('reports.balance-sheet');
+    Route::get('/financial-reports/cash-flow', [AccountingReportController::class, 'cashFlow'])->name('reports.cash-flow');
+    Route::get('/financial-reports/shareholders-equity', [AccountingReportController::class, 'shareholdersEquity'])->name('reports.shareholders-equity');
 });
 
 
-Route::middleware(['auth',])->group(function () {
-    Route::get('/reports/trial-balance', [AccountingReportController::class, 'trialBalance'])->name('reports.trial-balance');
-    Route::get('/reports/profit-loss', [AccountingReportController::class, 'profitAndLoss'])->name('reports.profit-loss');
-    Route::get('/reports/balance-sheet', [AccountingReportController::class, 'balanceSheet'])->name('reports.balance-sheet');
-    Route::get('/reports/cash-flow', [AccountingReportController::class, 'cashFlow'])->name('reports.cash-flow');
-    Route::get('/reports/shareholders-equity', [AccountingReportController::class, 'shareholdersEquity'])->name('reports.shareholders-equity');
-});

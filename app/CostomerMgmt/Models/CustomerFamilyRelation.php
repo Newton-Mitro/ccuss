@@ -3,6 +3,7 @@
 namespace App\CostomerMgmt\Models;
 
 use App\Audit\Traits\Auditable;
+use App\UserRolePermissions\Models\User;
 use Database\Factories\CustomerFamilyRelationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,23 +16,24 @@ class CustomerFamilyRelation extends Model
     protected $fillable = [
         'customer_id',
         'relative_id',
-        'name',
-        'phone',
-        'email',
-        'dob',
-        'gender',
-        'religion',
-        'identification_type',
-        'identification_number',
-        'photo',
         'relation_type',
+
+        'verification_status',
+        'verified_by',
+        'verified_at',
+        'remarks',
+
         'created_by',
         'updated_by',
     ];
 
     protected $casts = [
-        'dob' => 'date',
+        'verified_at' => 'datetime',
     ];
+
+    /* ========================
+     * Relationships
+     * ======================== */
 
     public function customer(): BelongsTo
     {
@@ -41,6 +43,30 @@ class CustomerFamilyRelation extends Model
     public function relative(): BelongsTo
     {
         return $this->belongsTo(Customer::class, 'relative_id');
+    }
+
+    public function verifier(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'verified_by');
+    }
+
+    /* ========================
+     * Helper Methods
+     * ======================== */
+
+    public function isVerified(): bool
+    {
+        return $this->verification_status === 'VERIFIED';
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->verification_status === 'REJECTED';
+    }
+
+    public function isPending(): bool
+    {
+        return $this->verification_status === 'PENDING';
     }
 
     protected static function newFactory()

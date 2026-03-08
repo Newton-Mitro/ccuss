@@ -8,23 +8,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class CustomerIntroducer extends Model
+class KycProfile extends Model
 {
     use HasFactory, Auditable;
 
     protected $fillable = [
-        'introduced_customer_id',
-        'introducer_customer_id',
-        'introducer_account_id',
-        'relationship_type',
-
+        'customer_id',
+        'kyc_level',
+        'risk_level',
         'verification_status',
         'verified_by',
         'verified_at',
         'remarks',
-
-        'created_by',
-        'updated_by',
     ];
 
     protected $casts = [
@@ -35,25 +30,11 @@ class CustomerIntroducer extends Model
      * Relationships
      * ======================== */
 
-    // The customer who was introduced
-    public function introducedCustomer(): BelongsTo
+    public function customer(): BelongsTo
     {
-        return $this->belongsTo(Customer::class, 'introduced_customer_id');
+        return $this->belongsTo(Customer::class);
     }
 
-    // The customer who is the introducer
-    public function introducerCustomer(): BelongsTo
-    {
-        return $this->belongsTo(Customer::class, 'introducer_customer_id');
-    }
-
-    // Optional account used for introducer
-    public function introducerAccount(): BelongsTo
-    {
-        return $this->belongsTo(OnlineServiceClient::class, 'introducer_account_id');
-    }
-
-    // The user who verified this introducer
     public function verifier(): BelongsTo
     {
         return $this->belongsTo(User::class, 'verified_by');
@@ -63,9 +44,9 @@ class CustomerIntroducer extends Model
      * Helper Methods
      * ======================== */
 
-    public function isVerified(): bool
+    public function isApproved(): bool
     {
-        return $this->verification_status === 'VERIFIED';
+        return $this->verification_status === 'APPROVED';
     }
 
     public function isRejected(): bool
@@ -76,5 +57,25 @@ class CustomerIntroducer extends Model
     public function isPending(): bool
     {
         return $this->verification_status === 'PENDING';
+    }
+
+    public function isHighRisk(): bool
+    {
+        return $this->risk_level === 'HIGH';
+    }
+
+    public function isMediumRisk(): bool
+    {
+        return $this->risk_level === 'MEDIUM';
+    }
+
+    public function isLowRisk(): bool
+    {
+        return $this->risk_level === 'LOW';
+    }
+
+    protected static function newFactory()
+    {
+        return KycProfileFactory::new();
     }
 }

@@ -3,7 +3,6 @@ import { User } from './user';
 
 export type AddressVerificationStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
 export type FamilyVerificationStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
-export type CustomerStatus = 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'CLOSED';
 export type CustomerType = 'Individual' | 'Organization';
 export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
 export type Religion =
@@ -41,15 +40,12 @@ export interface Customer extends AuditFields {
     identification_type: IdentificationType;
     identification_number: string;
 
-    kyc_level: KycLevel;
     kyc_status: KycStatus;
 
     kyc_verified_by?: ID | null;
     kyc_verified_at?: Timestamp | null;
 
     photo?: CustomerPhoto | null;
-
-    status: CustomerStatus;
 }
 
 export interface CustomerPhoto extends AuditFields {
@@ -227,5 +223,5 @@ export interface OnlineServiceClient extends AuditFields {
     password: string; // hashed
     last_login_at?: Timestamp | null;
 
-    status: Exclude<CustomerStatus, 'PENDING'>;
+    status: 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'CLOSED';
 }

@@ -12,39 +12,47 @@ class CustomerFamilyRelationFactory extends Factory
 
     public function definition(): array
     {
+        $relationTypes = [
+            'FATHER',
+            'MOTHER',
+            'SON',
+            'DAUGHTER',
+            'BROTHER',
+            'SISTER',
+            'HUSBAND',
+            'WIFE',
+            'GRANDFATHER',
+            'GRANDMOTHER',
+            'UNCLE',
+            'AUNT',
+            'NEPHEW',
+            'NIECE',
+            'FATHER_IN_LAW',
+            'MOTHER_IN_LAW',
+            'SON_IN_LAW',
+            'DAUGHTER_IN_LAW',
+            'BROTHER_IN_LAW',
+            'SISTER_IN_LAW'
+        ];
+
+        // Generate unique relative for each customer if needed
+        $customer = Customer::factory()->create();
+        $relative = Customer::factory()->create();
+
         return [
-            'customer_id' => Customer::factory(),
-            'name' => $this->faker->name(),
-            'phone' => $this->faker->phoneNumber(),
-            'email' => $this->faker->safeEmail(),
-            'dob' => $this->faker->date(),
-            'gender' => $this->faker->randomElement(['MALE', 'FEMALE']),
-            'religion' => $this->faker->randomElement(['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER']),
-            'identification_type' => $this->faker->randomElement(['NID', 'PASSPORT']),
-            'identification_number' => $this->faker->numerify('############'),
-            'relation_type' => $this->faker->randomElement([
-                'FATHER',
-                'MOTHER',
-                'SON',
-                'DAUGHTER',
-                'BROTHER',
-                'SISTER',
-                'HUSBAND',
-                'WIFE',
-                'GRANDFATHER',
-                'GRANDMOTHER',
-                'UNCLE',
-                'AUNT',
-                'NEPHEW',
-                'NIECE',
-                'FATHER_IN_LAW',
-                'MOTHER_IN_LAW',
-                'SON_IN_LAW',
-                'DAUGHTER_IN_LAW',
-                'BROTHER_IN_LAW',
-                'SISTER_IN_LAW'
-            ]),
+            'customer_id' => $customer->id,
+            'relative_id' => $relative->id,
+            'relation_type' => $this->faker->randomElement($relationTypes),
+
+            // Verification
             'verification_status' => 'PENDING',
+            'verified_by' => null,
+            'verified_at' => null,
+            'remarks' => $this->faker->optional()->sentence(),
+
+            // Audit
+            'created_by' => null,
+            'updated_by' => null,
         ];
     }
 }

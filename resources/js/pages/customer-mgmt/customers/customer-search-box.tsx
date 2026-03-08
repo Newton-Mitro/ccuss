@@ -138,7 +138,7 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
                             {customer.customer_no && (
                                 <span className="text-muted-foreground">
                                     | {customer.customer_no} | {customer.type} |{' '}
-                                    {customer.status}
+                                    {customer.kyc_status}
                                 </span>
                             )}
                         </li>
@@ -187,7 +187,7 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
                                 {`${customer.name} • ${customer.customer_no}`}
                             </a>
                             <p className="text-xs text-muted-foreground">
-                                {customer.status} • {customer.type}
+                                {customer.kyc_status} • {customer.type}
                             </p>
                         </div>
 

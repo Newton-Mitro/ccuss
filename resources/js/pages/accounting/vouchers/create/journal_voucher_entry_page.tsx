@@ -561,11 +561,8 @@ export default function JournalVoucherEntryPage({
                                                 label: 'Contra',
                                             },
                                         ]}
-                                        onChange={(e) =>
-                                            setData(
-                                                'voucher_type',
-                                                e.target.value,
-                                            )
+                                        onChange={(value) =>
+                                            setData('voucher_type', value)
                                         }
                                     />
                                 </div>
@@ -584,10 +581,10 @@ export default function JournalVoucherEntryPage({
                                             value: fy.id.toString(),
                                             label: fy.code,
                                         }))}
-                                        onChange={(e) => {
+                                        onChange={(value) => {
                                             setData(
                                                 'fiscal_year_id',
-                                                Number(e.target.value),
+                                                Number(value),
                                             );
                                             setData(
                                                 'accounting_period_id',
@@ -617,10 +614,10 @@ export default function JournalVoucherEntryPage({
                                                 value: fp.id.toString(),
                                                 label: fp.period_name,
                                             }))}
-                                        onChange={(e) =>
+                                        onChange={(value) =>
                                             setData(
                                                 'accounting_period_id',
-                                                Number(e.target.value),
+                                                Number(value),
                                             )
                                         }
                                     />
@@ -642,8 +639,8 @@ export default function JournalVoucherEntryPage({
                                                 label: 'Cancelled',
                                             },
                                         ]}
-                                        onChange={(e) =>
-                                            setData('status', e.target.value)
+                                        onChange={(value) =>
+                                            setData('status', value)
                                         }
                                     />
                                 </div>
@@ -658,11 +655,8 @@ export default function JournalVoucherEntryPage({
                                             value: b.id.toString(),
                                             label: b.name,
                                         }))}
-                                        onChange={(e) =>
-                                            setData(
-                                                'branch_id',
-                                                Number(e.target.value),
-                                            )
+                                        onChange={(value) =>
+                                            setData('branch_id', Number(value))
                                         }
                                     />
                                 </div>
@@ -675,52 +669,6 @@ export default function JournalVoucherEntryPage({
                                             setData('narration', e.target.value)
                                         }
                                         className="h-8 text-sm"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Cash Ledger */}
-                        <div className="space-y-2 rounded-md border border-border bg-muted/30 p-3">
-                            <h2 className="border-b border-border pb-3 text-sm font-medium text-primary">
-                                Cash Ledger
-                            </h2>
-                            <div className="grid grid-cols-1 gap-x-3 md:grid-cols-2">
-                                <div>
-                                    <Label className="text-xs">
-                                        Ledger Account
-                                    </Label>
-                                    <Select
-                                        error={errors.cash_ledger_id}
-                                        value={data.cash_ledger_id || ''}
-                                        options={cashLedgers.map((ledger) => ({
-                                            value: ledger.id?.toString(),
-                                            label: `${ledger.code} - ${ledger.name}`,
-                                        }))}
-                                        onChange={handleCashLedgerChange}
-                                    />
-                                </div>
-                                <div>
-                                    <Label className="text-xs">
-                                        Subledger Account
-                                    </Label>
-                                    <Select
-                                        error={errors.cash_subledger_id}
-                                        value={data.cash_subledger_id || ''}
-                                        options={cashSubledgers.map(
-                                            (ledger) => ({
-                                                value: ledger.id?.toString(),
-                                                label: `${ledger.code} - ${ledger.name}`,
-                                            }),
-                                        )}
-                                        onChange={(e) =>
-                                            setData(
-                                                'cash_subledger_id',
-                                                e.target.value
-                                                    ? Number(e.target.value)
-                                                    : null,
-                                            )
-                                        }
                                     />
                                 </div>
                             </div>

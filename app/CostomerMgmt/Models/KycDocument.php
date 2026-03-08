@@ -4,19 +4,23 @@ namespace App\CostomerMgmt\Models;
 
 use App\Audit\Traits\Auditable;
 use App\UserRolePermissions\Models\User;
+use Database\Factories\KycDocumentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
-class CustomerIntroducer extends Model
+class KycDocument extends Model
 {
     use HasFactory, Auditable;
 
     protected $fillable = [
-        'introduced_customer_id',
-        'introducer_customer_id',
-        'introducer_account_id',
-        'relationship_type',
+        'customer_id',
+        'document_type',
+        'file_name',
+        'file_path',
+        'mime',
+        'alt_text',
 
         'verification_status',
         'verified_by',
@@ -31,36 +35,37 @@ class CustomerIntroducer extends Model
         'verified_at' => 'datetime',
     ];
 
+    protected $appends = ['url'];
+
     /* ========================
      * Relationships
      * ======================== */
 
-    // The customer who was introduced
-    public function introducedCustomer(): BelongsTo
+    public function customer(): BelongsTo
     {
-        return $this->belongsTo(Customer::class, 'introduced_customer_id');
+        return $this->belongsTo(Customer::class);
     }
 
-    // The customer who is the introducer
-    public function introducerCustomer(): BelongsTo
-    {
-        return $this->belongsTo(Customer::class, 'introducer_customer_id');
-    }
-
-    // Optional account used for introducer
-    public function introducerAccount(): BelongsTo
-    {
-        return $this->belongsTo(OnlineServiceClient::class, 'introducer_account_id');
-    }
-
-    // The user who verified this introducer
     public function verifier(): BelongsTo
     {
         return $this->belongsTo(User::class, 'verified_by');
     }
 
     /* ========================
-     * Helper Methods
+     * Accessors
+     * ======================== */
+
+    public function getUrlAttribute(): ?string
+    {
+        if (!$this->file_path) {
+            return null;
+        }
+
+        return url(Storage::url($this->file_path));
+    }
+
+    /* ========================
+     * Helpers
      * ======================== */
 
     public function isVerified(): bool
@@ -76,5 +81,10 @@ class CustomerIntroducer extends Model
     public function isPending(): bool
     {
         return $this->verification_status === 'PENDING';
+    }
+
+    protected static function newFactory()
+    {
+        return KycDocumentFactory::new();
     }
 }

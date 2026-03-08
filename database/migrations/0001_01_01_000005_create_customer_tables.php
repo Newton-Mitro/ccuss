@@ -8,11 +8,6 @@ return new class extends Migration {
 
     public function up(): void
     {
-        /*
-        |--------------------------------------------------------------------------
-        | Customers
-        |--------------------------------------------------------------------------
-        */
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
 
@@ -22,10 +17,8 @@ return new class extends Migration {
             $table->string('phone', 50)->nullable();
             $table->string('email', 100)->nullable();
             $table->date('dob')->nullable();
-
             $table->enum('gender', ['MALE', 'FEMALE', 'OTHER'])->nullable();
             $table->enum('religion', ['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER'])->nullable();
-
             $table->enum('identification_type', [
                 'NID',
                 'BRN',
@@ -33,34 +26,18 @@ return new class extends Migration {
                 'PASSPORT',
                 'DRIVING_LICENSE'
             ]);
-
             $table->string('identification_number', 50);
-
-            // KYC
-            $table->enum('kyc_level', ['MIN', 'STD', 'ENH'])->default('MIN');
             $table->enum('kyc_status', ['PENDING', 'VERIFIED', 'REJECTED'])->default('PENDING');
-
-            $table->enum('status', ['PENDING', 'ACTIVE', 'SUSPENDED', 'CLOSED'])->default('PENDING');
 
             // Audit
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
-
             $table->timestamps();
         });
 
-        /*
-        |--------------------------------------------------------------------------
-        | Customer Addresses
-        |--------------------------------------------------------------------------
-        */
         Schema::create('customer_addresses', function (Blueprint $table) {
             $table->id();
-
-            $table->foreignId('customer_id')
-                ->constrained('customers')
-                ->cascadeOnDelete();
-
+            $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
             $table->string('line1', 255);
             $table->string('line2', 255)->nullable();
             $table->string('division', 100)->nullable();
@@ -69,15 +46,7 @@ return new class extends Migration {
             $table->string('union_ward', 100)->nullable();
             $table->string('postal_code', 20)->nullable();
             $table->string('country', 150)->default('Bangladesh');
-
-            $table->enum('type', [
-                'CURRENT',
-                'PERMANENT',
-                'MAILING',
-                'WORK',
-                'REGISTERED',
-                'OTHER'
-            ]);
+            $table->enum('type', ['CURRENT', 'PERMANENT', 'MAILING', 'WORK', 'REGISTERED', 'OTHER']);
 
             // Verification
             $table->enum('verification_status', ['PENDING', 'VERIFIED', 'REJECTED'])->default('PENDING');
@@ -88,49 +57,16 @@ return new class extends Migration {
             // Audit
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
-
             $table->timestamps();
 
             // One address per type per customer
             $table->unique(['customer_id', 'type'], 'uq_customer_address_type');
         });
 
-        /*
-        |--------------------------------------------------------------------------
-        | Customer Family Relations
-        |--------------------------------------------------------------------------
-        */
         Schema::create('customer_family_relations', function (Blueprint $table) {
             $table->id();
-
-            $table->foreignId('customer_id')
-                ->constrained('customers')
-                ->cascadeOnDelete();
-
-            $table->foreignId('relative_id')
-                ->nullable()
-                ->constrained('customers')
-                ->nullOnDelete();
-
-            // Raw identity (used when relative_id is null)
-            $table->string('name', 150);
-            $table->string('phone', 50)->nullable();
-            $table->string('email', 100)->nullable();
-            $table->date('dob')->nullable();
-
-            $table->enum('gender', ['MALE', 'FEMALE', 'OTHER'])->nullable();
-            $table->enum('religion', ['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER'])->nullable();
-
-            $table->enum('identification_type', [
-                'NID',
-                'BRN',
-                'PASSPORT',
-                'DRIVING_LICENSE'
-            ]);
-
-            $table->string('identification_number', 50);
-            $table->string('photo', 255)->nullable();
-
+            $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
+            $table->foreignId('relative_id')->constrained('customers');
             $table->enum('relation_type', [
                 'FATHER',
                 'MOTHER',
@@ -166,105 +102,70 @@ return new class extends Migration {
             // Audit
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
-
             $table->timestamps();
         });
 
-        Schema::create('nominees', function (Blueprint $table) {
+        Schema::create('kyc_profiles', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('customer_id')->constrained();
-            $table->string('name');
-            $table->string('relation');
-            $table->decimal('distribute_percent', 8);
+            $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
+            $table->enum('kyc_level', ['BASIC', 'FULL', 'ENHANCED'])->default('BASIC');
+            $table->enum('risk_level', ['LOW', 'MEDIUM', 'HIGH'])->default('LOW');
+            $table->enum('verification_status', ['PENDING', 'APPROVED', 'REJECTED'])->default('pending');
+            $table->foreignId('verified_by')->nullable()->constrained('users');
+            $table->timestamp('verified_at')->nullable();
+            $table->text('remarks')->nullable();
+            $table->timestamps();
         });
 
         Schema::create('kyc_documents', function (Blueprint $table) {
             $table->id();
             $table->foreignId('customer_id')->constrained();
-            $table->string('document_type');
-            $table->string('file_path');
-        });
+            $table->enum('document_type', [
+                'NID_FRONT',
+                'NID_BACK',
+                'SMART_NID',
+                'PASSPORT',
+                'DRIVING_LICENSE',
+                'BIRTH_CERTIFICATE',
 
-        /*
-        |--------------------------------------------------------------------------
-        | Customer Family Photos
-        |--------------------------------------------------------------------------
-        */
-        Schema::create('customer_family_photos', function (Blueprint $table) {
-            $table->id();
+                'UTILITY_BILL',
+                'ELECTRICITY_BILL',
+                'WATER_BILL',
+                'GAS_BILL',
+                'BANK_STATEMENT',
+                'RENTAL_AGREEMENT',
 
-            $table->foreignId('customer_id')
-                ->unique()
-                ->constrained('customers')
-                ->cascadeOnDelete();
+                'TIN_CERTIFICATE',
+                'TAX_RETURN',
+                'SALARY_SLIP',
+                'INCOME_CERTIFICATE',
 
+                'TRADE_LICENSE',
+                'CERTIFICATE_OF_INCORPORATION',
+                'MEMORANDUM_OF_ASSOCIATION',
+                'ARTICLES_OF_ASSOCIATION',
+                'PARTNERSHIP_DEED',
+
+                'PHOTO',
+                'SIGNATURE',
+                'LIVE_SELFIE',
+
+                'PEP_DECLARATION',
+                'FATCA_FORM'
+            ]);
             $table->string('file_name');
             $table->string('file_path');
             $table->string('mime');
             $table->string('alt_text')->nullable();
-
-            // Audit
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
-
-            $table->timestamps();
-        });
-
-        /*
-        |--------------------------------------------------------------------------
-        | Customer Photos
-        |--------------------------------------------------------------------------
-        */
-        Schema::create('customer_photos', function (Blueprint $table) {
-            $table->id();
-
-            $table->foreignId('customer_id')
-                ->constrained('customers')
-                ->unique()
-                ->cascadeOnDelete();
-
-            $table->string('file_name');
-            $table->string('file_path');
-            $table->string('mime');
-            $table->string('alt_text')->nullable();
-
-            // Audit
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
+            // Verification
+            $table->enum('verification_status', ['PENDING', 'VERIFIED', 'REJECTED'])->default('PENDING');
+            $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('verified_at')->nullable();
+            $table->text('remarks')->nullable();
 
             $table->timestamps();
         });
 
-        /*
-        |--------------------------------------------------------------------------
-        | Customer Signatures
-        |--------------------------------------------------------------------------
-        */
-        Schema::create('customer_signatures', function (Blueprint $table) {
-            $table->id();
-
-            $table->foreignId('customer_id')
-                ->unique()
-                ->constrained('customers')
-                ->cascadeOnDelete();
-
-            $table->string('file_name');
-            $table->string('file_path');
-            $table->string('mime');
-            $table->string('alt_text')->nullable();
-
-            // Audit
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
-
-            $table->timestamps();
-        });
-
-        /*
-        |--------------------------------------------------------------------------
-        | Customer Introducers
-        |--------------------------------------------------------------------------
-        */
         Schema::create('customer_introducers', function (Blueprint $table) {
             $table->id();
 
@@ -304,11 +205,6 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        /*
-        |--------------------------------------------------------------------------
-        | Online Service Users
-        |--------------------------------------------------------------------------
-        */
         Schema::create('online_service_clients', function (Blueprint $table) {
             $table->id();
 
@@ -337,8 +233,8 @@ return new class extends Migration {
     {
         Schema::dropIfExists('online_service_clients');
         Schema::dropIfExists('customer_introducers');
-        Schema::dropIfExists('customer_signatures');
-        Schema::dropIfExists('customer_photos');
+        Schema::dropIfExists('kyc_documents');
+        Schema::dropIfExists('kyc_profiles');
         Schema::dropIfExists('customer_family_relations');
         Schema::dropIfExists('customer_addresses');
         Schema::dropIfExists('customers');

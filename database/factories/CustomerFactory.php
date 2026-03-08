@@ -15,6 +15,10 @@ class CustomerFactory extends Factory
         $type = $this->faker->randomElement(['Individual', 'Organization']);
         $prefix = $type === 'Individual' ? 'IND' : 'ORG';
 
+        // Identification types
+        $individualIds = ['NID', 'BRN', 'PASSPORT', 'DRIVING_LICENSE'];
+        $organizationIds = ['REGISTRATION_NO', 'BRN'];
+
         return [
             'customer_no' => sprintf(
                 '%s-%05d',
@@ -28,8 +32,13 @@ class CustomerFactory extends Factory
                 ? $this->faker->name()
                 : $this->faker->company(),
 
-            'phone' => $this->faker->phoneNumber(),
-            'email' => $this->faker->safeEmail(),
+            'phone' => $type === 'Individual'
+                ? $this->faker->phoneNumber()
+                : null,
+
+            'email' => $type === 'Individual'
+                ? $this->faker->safeEmail()
+                : null,
 
             // Individual-only fields
             'dob' => $type === 'Individual'
@@ -50,26 +59,17 @@ class CustomerFactory extends Factory
                 ])
                 : null,
 
-            // 🔑 Identification logic (business-rule driven)
-            'identification_type' => $type === 'Organization'
-                ? 'REGISTRATION_NO'
-                : $this->faker->randomElement([
-                    'NID',
-                    'BRN',
-                    'PASSPORT',
-                    'DRIVING_LICENSE'
-                ]),
+            // Identification
+            'identification_type' => $type === 'Individual'
+                ? $this->faker->randomElement($individualIds)
+                : $this->faker->randomElement($organizationIds),
 
             'identification_number' => strtoupper(Str::random(12)),
+            'kyc_status' => 'PENDING', // default status
 
-            // KYC + lifecycle
-            'kyc_level' => $this->faker->randomElement(['MIN', 'STD', 'ENH']),
-            'status' => $this->faker->randomElement([
-                'PENDING',
-                'ACTIVE',
-                'SUSPENDED',
-                'CLOSED'
-            ]),
+            // Audit fields can be null
+            'created_by' => null,
+            'updated_by' => null,
         ];
     }
 }

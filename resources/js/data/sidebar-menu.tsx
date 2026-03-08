@@ -58,19 +58,27 @@ export const sidebarMenu: SidebarItem[] = [
                 permission: ['customer.family.view'],
             },
             {
-                name: 'Signatures',
-                icon: <i className="fa-solid fa-signature" />,
-                path: '/customer/signatures',
-                match_path: 'signatures',
-                permission: ['customer.signatures.view'],
-            },
-            {
                 name: 'Introducers',
                 icon: <i className="fa-solid fa-people-arrows" />,
                 path: '/introducers',
                 match_path: 'introducers',
                 permission: ['customer.introducers.view'],
             },
+            {
+                name: 'KYC Documents',
+                icon: <i className="fa-solid fa-people-arrows" />,
+                path: '/kyc-documents',
+                match_path: 'kyc-documents',
+                permission: ['customer.kyc-documents.view'],
+            },
+            {
+                name: 'KYC Profiles',
+                icon: <i className="fa-solid fa-signature" />,
+                path: '/customer/kyc-profiles',
+                match_path: 'kyc-profiles',
+                permission: ['customer.kyc-profiles.view'],
+            },
+
             {
                 name: 'Online Service Clients',
                 icon: <i className="fa-solid fa-street-view" />,
@@ -403,46 +411,111 @@ export const sidebarMenu: SidebarItem[] = [
         permission: ['accounting.view'],
         children: [
             {
-                name: 'Chart of Accounts',
-                icon: <i className="fa-solid fa-list" />,
-                path: '/chart-of-accounts',
-                match_path: 'chart-of-accounts',
-                permission: ['accounting.coa.view'],
+                name: 'Vouchers',
+                icon: <i className="fa-solid fa-receipt" />,
+                children_expanded: false,
+                permission: ['accounting.voucher.view'],
+                children: [
+                    {
+                        name: 'Cash Voucher',
+                        icon: <i className="fa-solid fa-money-bill-wave" />,
+                        path: '/accounting/vouchers/cash',
+                        match_path: 'accounting/vouchers/cash',
+                        permission: ['accounting.voucher.cash.view'],
+                        description:
+                            'Record cash receipts or payments using vouchers.',
+                    },
+                    {
+                        name: 'Bank Voucher',
+                        icon: <i className="fa-solid fa-university" />,
+                        path: '/accounting/vouchers/bank',
+                        match_path: 'accounting/vouchers/bank',
+                        permission: ['accounting.voucher.bank.view'],
+                        description: 'Record bank transactions using vouchers.',
+                    },
+                    {
+                        name: 'Journal Voucher',
+                        icon: <i className="fa-solid fa-book" />,
+                        path: '/accounting/vouchers/journal',
+                        match_path: 'accounting/vouchers/journal',
+                        permission: ['accounting.voucher.journal.view'],
+                        description:
+                            'Record general journal entries via vouchers.',
+                    },
+                    {
+                        name: 'Payment Voucher',
+                        icon: <i className="fa-solid fa-credit-card" />,
+                        path: '/accounting/vouchers/payment',
+                        match_path: 'accounting/vouchers/payment',
+                        permission: ['accounting.voucher.payment.view'],
+                        description:
+                            'Record payments to vendors or third parties.',
+                    },
+                ],
             },
             {
-                name: 'Journal Entries',
-                icon: <i className="fa-solid fa-book" />,
-                path: '/journal-entries',
-                match_path: 'journal-entries',
-                permission: ['accounting.journal.view'],
+                name: 'Chart of Accounts',
+                icon: <i className="fa-solid fa-list" />,
+                path: '/accounting/chart-of-accounts',
+                match_path: 'accounting/chart-of-accounts',
+                permission: ['accounting.coa.view'],
+                description:
+                    'Define and manage all accounts (Assets, Liabilities, Equity, Revenue, Expenses).',
             },
             {
                 name: 'General Ledger',
                 icon: <i className="fa-solid fa-book-open-reader" />,
-                path: '/general-ledger',
-                match_path: 'general-ledger',
+                path: '/accounting/general-ledger',
+                match_path: 'accounting/general-ledger',
                 permission: ['accounting.gl.view'],
+                description:
+                    'View account balances consolidated from posted vouchers.',
             },
             {
                 name: 'Trial Balance',
                 icon: <i className="fa-solid fa-scale-balanced" />,
-                path: '/trial-balance',
-                match_path: 'trial-balance',
+                path: '/accounting/trial-balance',
+                match_path: 'accounting/trial-balance',
                 permission: ['accounting.trial.view'],
+                description:
+                    'Verify total debits equal total credits; catch errors before reports.',
             },
             {
-                name: 'Profit & Loss',
-                icon: <i className="fa-solid fa-chart-line" />,
-                path: '/profit-loss',
-                match_path: 'profit-loss',
-                permission: ['accounting.profit_loss.view'],
-            },
-            {
-                name: 'Balance Sheet',
+                name: 'Financial Reports',
                 icon: <i className="fa-solid fa-file-invoice-dollar" />,
-                path: '/balance-sheet',
-                match_path: 'balance-sheet',
-                permission: ['accounting.balance_sheet.view'],
+                children_expanded: false,
+                permission: ['accounting.reports.view'],
+                children: [
+                    {
+                        name: 'Profit & Loss',
+                        icon: <i className="fa-solid fa-chart-line" />,
+                        path: '/accounting/financial-reports/profit-loss',
+                        match_path: 'accounting/financial-reports/profit-loss',
+                        permission: ['accounting.profit_loss.view'],
+                        description:
+                            'Summarizes revenues and expenses to calculate net profit/loss.',
+                    },
+                    {
+                        name: 'Balance Sheet',
+                        icon: <i className="fa-solid fa-file-invoice" />,
+                        path: '/accounting/financial-reports/balance-sheet',
+                        match_path:
+                            'accounting/financial-reports/balance-sheet',
+                        permission: ['accounting.balance_sheet.view'],
+                        description:
+                            'Snapshot of assets, liabilities, and equity derived from posted vouchers.',
+                    },
+                    {
+                        name: 'Shareholders Equity',
+                        icon: <i className="fa-solid fa-user-group" />,
+                        path: '/accounting/financial-reports/shareholders-equity',
+                        match_path:
+                            'accounting/financial-reports/shareholders-equity',
+                        permission: ['accounting.shareholders-equity.view'],
+                        description:
+                            'Track capital contributions, retained earnings, and equity movements from vouchers.',
+                    },
+                ],
             },
         ],
     },

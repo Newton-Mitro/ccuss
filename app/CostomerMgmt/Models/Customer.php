@@ -26,18 +26,13 @@ class Customer extends Model
         'religion',
         'identification_type',
         'identification_number',
-        'kyc_level',
         'kyc_status',
-        'kyc_verified_by',
-        'kyc_verified_at',
-        'status',
         'created_by',
         'updated_by',
     ];
 
     protected $casts = [
         'dob' => 'date:Y-m-d',
-        'kyc_verified_at' => 'datetime',
     ];
 
     /* ========================
@@ -54,14 +49,26 @@ class Customer extends Model
         return $this->hasMany(CustomerFamilyRelation::class);
     }
 
+    public function kycProfile(): HasOne
+    {
+        return $this->hasOne(KycProfile::class);
+    }
+
+    public function kycDocuments(): HasMany
+    {
+        return $this->hasMany(KycDocument::class);
+    }
+
     public function photo(): HasOne
     {
-        return $this->hasOne(CustomerPhoto::class);
+        return $this->hasOne(KycDocument::class)
+            ->where('document_type', 'PHOTO');
     }
 
     public function signature(): HasOne
     {
-        return $this->hasOne(CustomerSignature::class);
+        return $this->hasOne(KycDocument::class)
+            ->where('document_type', 'SIGNATURE');
     }
 
     public function introducers(): HasMany
@@ -69,14 +76,24 @@ class Customer extends Model
         return $this->hasMany(CustomerIntroducer::class, 'introduced_customer_id');
     }
 
-    public function onlineUser(): HasOne
+    public function introducedCustomers(): HasMany
+    {
+        return $this->hasMany(CustomerIntroducer::class, 'introducer_customer_id');
+    }
+
+    public function onlineServiceClient(): HasOne
     {
         return $this->hasOne(OnlineServiceClient::class);
     }
 
-    public function kycVerifier(): BelongsTo
+    public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'kyc_verified_by');
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     protected static function newFactory()
