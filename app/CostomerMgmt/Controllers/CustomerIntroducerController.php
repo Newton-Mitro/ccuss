@@ -21,7 +21,7 @@ class CustomerIntroducerController extends Controller
             ->with([
                 'introducedCustomer:id,name,customer_no',
                 'introducerCustomer:id,name,customer_no',
-                'verifiedBy:id,name',
+                'verifier:id,name',
             ]);
 
         // 🔍 Search filter
@@ -97,7 +97,7 @@ class CustomerIntroducerController extends Controller
         )
             ->with([
                 'introducerCustomer:id,name,customer_no',
-                'verifiedBy:id,name',
+                'verifier:id,name',
             ])
             ->latest()
             ->get();
@@ -115,7 +115,7 @@ class CustomerIntroducerController extends Controller
             'introducedCustomer.photo',
             'introducerCustomer',
             'introducerCustomer.photo',
-            'verifiedBy',
+            'verifier',
         ]);
 
         return Inertia::render(

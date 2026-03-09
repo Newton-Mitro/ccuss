@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\CostomerMgmt\Models\Customer;
 use App\CostomerMgmt\Models\KycDocument;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -49,7 +48,6 @@ class KycDocumentFactory extends Factory
         $verificationStatuses = ['PENDING', 'VERIFIED', 'REJECTED'];
 
         return [
-            'customer_id' => Customer::factory(),
             'document_type' => $docType,
             'file_name' => $fileName,
             'file_path' => $filePath,

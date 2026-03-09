@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\CostomerMgmt\Models\Customer;
 use App\CostomerMgmt\Models\CustomerAddress;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -13,7 +12,6 @@ class CustomerAddressFactory extends Factory
     public function definition(): array
     {
         return [
-            'customer_id' => Customer::factory(),
             'line1' => $this->faker->streetAddress(),
             'line2' => $this->faker->optional()->secondaryAddress(),
             'division' => $this->faker->randomElement(['Dhaka', 'Chattogram', 'Khulna']),

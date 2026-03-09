@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\CostomerMgmt\Models\Customer;
 use App\CostomerMgmt\Models\CustomerFamilyRelation;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -35,13 +34,7 @@ class CustomerFamilyRelationFactory extends Factory
             'SISTER_IN_LAW'
         ];
 
-        // Generate unique relative for each customer if needed
-        $customer = Customer::factory()->create();
-        $relative = Customer::factory()->create();
-
         return [
-            'customer_id' => $customer->id,
-            'relative_id' => $relative->id,
             'relation_type' => $this->faker->randomElement($relationTypes),
 
             // Verification

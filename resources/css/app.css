@@ -113,8 +113,63 @@
     --sidebar-ring: var(--ring);
 }
 
-/* 🌙 Dark Theme */
 .dark {
+    /* 🌌 Base Background & Foreground */
+    --background: oklch(0.05 0.03 260); /* almost pure black */
+    --foreground: oklch(0.98 0.01 260); /* bright text for contrast */
+
+    /* 🪄 Surfaces */
+    --card: oklch(0.08 0.03 260); /* very dark card */
+    --card-foreground: oklch(0.98 0.01 260);
+
+    --popover: oklch(0.1 0.03 260);
+    --popover-foreground: oklch(0.98 0.01 260);
+
+    /* 🎯 Primary — Electric Indigo Glow */
+    --primary: oklch(0.68 0.16 250);
+    --primary-foreground: oklch(0.14 0.03 250);
+
+    /* 🌿 Secondary — Muted Lilac / Soft Neutral */
+    --secondary: oklch(0.35 0.04 280);
+    --secondary-foreground: oklch(0.95 0.02 280);
+
+    /* 💫 Accent — Coral Glow for Highlights */
+    --accent: oklch(0.67 0.18 25);
+    --accent-foreground: oklch(0.98 0.01 25);
+
+    /* 🧊 Muted & Supporting */
+    --muted: oklch(0.12 0.02 260); /* darker muted for true black background */
+    --muted-foreground: oklch(0.75 0.03 260);
+
+    /* ⚠️ Destructive — Coral Red */
+    --destructive: oklch(0.5 0.18 25);
+    --destructive-foreground: oklch(0.98 0.01 25);
+
+    /* 🔲 Borders & Input Fields */
+    --border: oklch(23.27% 0.03468 266.625); /* subtle dark border */
+    --input: oklch(0.12 0.02 260);
+    --ring: oklch(0.62 0.15 280);
+
+    /* 📊 Charts */
+    --chart-1: oklch(0.7 0.2 280);
+    --chart-2: oklch(0.68 0.16 200);
+    --chart-3: oklch(0.8 0.18 90);
+    --chart-4: oklch(0.7 0.2 40);
+    --chart-5: oklch(0.6 0.15 10);
+
+    /* 🧭 Sidebar */
+    --sidebar: oklch(0.08 0.03 260); /* dark sidebar */
+    --sidebar-foreground: oklch(0.98 0.02 260);
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--primary-foreground);
+    --sidebar-accent: var(--accent);
+    --sidebar-accent-foreground: var(--accent-foreground);
+    --sidebar-border: var(--border);
+    --sidebar-ring: var(--ring);
+}
+
+/* 🌙 Dark Theme */
+.dark2 {
     /* 🌌 Base Background & Foreground */
     --background: oklch(0.18 0.03 260); /* slightly lighter than before */
     --foreground: oklch(0.95 0.01 260);

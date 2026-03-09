@@ -14,9 +14,9 @@ return new class extends Migration {
             $table->string('name');
             $table->string('short_name')->nullable();
             $table->enum('type', ['Deposit', 'Loan', 'Share']);
-            $table->string('subtype'); // Deposit- (Savings, Reccurring, Fixed), Loan- (Member/Personal Loan, SME, Education, Housing), Share- (Share Capital), Cash- (Drawer Cash, Vault Cash, Bank Cash, Petty Cash)
+            $table->string('subtype'); // Savings, Reccurring, Fixed
             $table->decimal('interest_rate', 5, 2)->nullable();
-            $table->integer('term_months')->nullable();
+            $table->decimal('minimum_balance', 15, 2)->default(0);
             $table->boolean('is_active')->default(true);
 
             // Audit
@@ -27,16 +27,33 @@ return new class extends Migration {
 
         Schema::create('deposit_accounts', function (Blueprint $table) {
             $table->id();
-            $table->string('account_no', 50)->unique();
-            $table->foreignId('deposit_product_id')->nullable()->constrained()->nullOnDelete();
-            $table->enum('account_type', ['GL', 'CUSTOMER', 'VENDOR', 'BANK', 'CASH', 'PETTY_CASH']);
-            $table->decimal('balance', 18, 2)->default(0);
-            $table->enum('status', ['ACTIVE', 'CLOSED', 'FROZEN'])->default('ACTIVE');
-            $table->timestamp('opened_at')->nullable();
-            $table->timestamp('closed_at')->nullable();
-            // Audit
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
+
+            // account identifier
+            $table->string('account_no', 30)->unique();
+            $table->string('account_name');
+
+            // relationships
+            $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('deposit_product_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
+
+            // balances
+            $table->decimal('balance', 15, 2)->default(0);
+            $table->decimal('available_balance', 15, 2)->default(0);
+            $table->decimal('hold_balance', 15, 2)->default(0);
+
+            // account settings
+            $table->decimal('interest_rate', 5, 2)->nullable();
+            $table->decimal('minimum_balance', 15, 2)->default(0);
+
+            // dates
+            $table->date('opened_at');
+            $table->date('closed_at')->nullable();
+
+            // status
+            $table->enum('status', ['PENDING', 'ACTIVE', 'DORMANT', 'FROZEN', 'CLOSED'])->default('PENDING');
+
+            $table->text('remarks')->nullable();
             $table->timestamps();
         });
 

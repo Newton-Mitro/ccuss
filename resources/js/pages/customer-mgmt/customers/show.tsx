@@ -2,13 +2,12 @@ import { Head, Link, router } from '@inertiajs/react';
 import {
     ArrowLeft,
     Edit2,
-    EyeClosed,
     HomeIcon,
     ListFilter,
+    Plus,
     UserCheckIcon,
     UserIcon,
     UsersIcon,
-    X,
 } from 'lucide-react';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatDate } from '../../../lib/date_util';
@@ -20,6 +19,15 @@ import {
     CustomerIntroducer,
 } from '../../../types/customer_kyc_module';
 
+// -------------------- Theme Colors --------------------
+const themeColors = {
+    primary: 'bg-primary text-primary-foreground',
+    secondary: 'bg-secondary text-secondary-foreground',
+    accent: 'bg-accent text-accent-foreground',
+    muted: 'bg-muted text-muted-foreground',
+    destructive: 'bg-destructive text-destructive-foreground',
+};
+
 interface ShowProps {
     customer: Customer & {
         addresses?: CustomerAddress[];
@@ -29,8 +37,7 @@ interface ShowProps {
     backUrl: string;
 }
 
-function Show({ customer, backUrl }: ShowProps) {
-    console.log(customer);
+export default function Show({ customer, backUrl }: ShowProps) {
     const handleBack = () =>
         router.visit(backUrl, { preserveState: true, preserveScroll: true });
 
@@ -46,306 +53,366 @@ function Show({ customer, backUrl }: ShowProps) {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Customer - ${customer.name}`} />
 
-            <div className="space-y-6">
-                {/* ================= Header ================= */}
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <div className="flex items-center gap-4">
-                        {customer.photo ? (
-                            <img
-                                src={customer.photo.url}
-                                alt={customer.name}
-                                className="h-20 w-20 rounded-full border border-gray-300 object-cover dark:border-gray-700"
-                            />
-                        ) : (
-                            <div className="flex h-20 w-20 items-center justify-center rounded-full border border-gray-300 bg-gray-100 text-xl font-semibold text-gray-700 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-200">
-                                {customer.name.charAt(0)}
-                            </div>
-                        )}
-                        <div>
-                            <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                                {customer.name}
-                            </h1>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                {customer.customer_no} | {customer.type}
-                            </p>
-                            <p
-                                className={`mt-1 text-xs font-medium ${getStatusColor(customer.kyc_status)}`}
-                            >
-                                {customer.kyc_status}
-                            </p>
+            {/* ================= Header ================= */}
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex items-center gap-3">
+                    {customer.photo ? (
+                        <img
+                            src={customer.photo.url}
+                            alt={customer.name}
+                            className="h-16 w-16 rounded-full border border-gray-300 object-cover dark:border-gray-700"
+                        />
+                    ) : (
+                        <div className="flex h-16 w-16 items-center justify-center rounded-full border border-gray-300 bg-gray-100 text-lg font-semibold text-gray-700 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-200">
+                            {customer.name.charAt(0)}
                         </div>
-                    </div>
-                    <div className="flex gap-2">
-                        <button
-                            type="button"
-                            onClick={handleBack}
-                            className="flex items-center gap-1 rounded bg-muted px-3 py-1 text-muted-foreground transition hover:bg-muted/90"
+                    )}
+                    <div className="flex flex-col gap-0.5">
+                        <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                            {customer.name}
+                        </h1>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {customer.customer_no} | {customer.type}
+                        </p>
+                        <p
+                            className={`text-xs font-medium ${getStatusColor(customer.kyc_status)}`}
                         >
-                            <ArrowLeft size={16} />
-                            <span className="hidden sm:inline">Back</span>
-                        </button>
-
-                        <Link
-                            href={`/customers/${customer.id}/edit`}
-                            className="flex items-center gap-1 rounded bg-accent px-3 py-1 text-accent-foreground transition hover:bg-accent/90"
-                        >
-                            <Edit2 size={16} />
-                            <span className="hidden sm:inline">Edit</span>
-                        </Link>
-
-                        <button
-                            type="button"
-                            className="flex items-center gap-1 rounded bg-destructive px-3 py-1 text-destructive-foreground transition hover:bg-destructive/90"
-                        >
-                            <EyeClosed size={16} />
-                            <span className="hidden sm:inline">Suspend</span>
-                        </button>
-
-                        <button
-                            type="button"
-                            className="flex items-center gap-1 rounded bg-destructive px-3 py-1 text-destructive-foreground transition hover:bg-destructive/90"
-                        >
-                            <X size={16} />
-                            <span className="hidden sm:inline">
-                                Close Account
-                            </span>
-                        </button>
-
-                        <Link
-                            href={`/customers`}
-                            className="flex items-center gap-1 rounded bg-secondary px-3 py-1 text-secondary-foreground transition hover:bg-secondary/90"
-                        >
-                            <ListFilter size={16} />
-                            <span className="hidden sm:inline">Customers</span>
-                        </Link>
+                            {customer.kyc_status}
+                        </p>
                     </div>
                 </div>
 
-                {/* ================= Basic Info ================= */}
-                <SectionCard
-                    title="Basic Information"
-                    icon={<UserIcon size={16} />}
+                <div className="flex flex-wrap gap-2">
+                    <ActionButton
+                        onClick={handleBack}
+                        color="muted"
+                        icon={<ArrowLeft />}
+                    >
+                        Back
+                    </ActionButton>
+                    <ActionButton
+                        as={Link}
+                        href="/customers"
+                        color="secondary"
+                        icon={<ListFilter />}
+                    >
+                        Customers
+                    </ActionButton>
+                </div>
+            </div>
+
+            {/* ================= Basic Info ================= */}
+            <SectionHeader
+                icon={<UserIcon />}
+                title="Basic Information"
+                actions={
+                    <Link
+                        href={`/customers/${customer.id}/edit`}
+                        className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground transition hover:bg-accent/80"
+                    >
+                        <Edit2 size={14} /> Edit
+                    </Link>
+                }
+            >
+                <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
+                    {isIndividual && (
+                        <InfoItem
+                            label="Date of Birth"
+                            value={formatDate(customer.dob)}
+                        />
+                    )}
+                    {isIndividual && (
+                        <InfoItem label="Gender" value={customer.gender} />
+                    )}
+                    {isIndividual && (
+                        <InfoItem label="Religion" value={customer.religion} />
+                    )}
+                    {isOrganization && (
+                        <InfoItem label="Organization" value={customer.name} />
+                    )}
+                    <InfoItem label="Phone" value={customer.phone} />
+                    <InfoItem label="Email" value={customer.email} />
+                    <InfoItem
+                        label="KYC Status"
+                        value={customer.kyc_status}
+                        badge
+                    />
+                    <InfoItem
+                        label="Type"
+                        value={customer.identification_type}
+                    />
+                    <InfoItem
+                        label="ID Number"
+                        value={customer.identification_number}
+                    />
+                </div>
+            </SectionHeader>
+
+            {/* ================= Addresses ================= */}
+            {customer.addresses?.length > 0 && (
+                <SectionHeader
+                    icon={<HomeIcon />}
+                    title="Addresses"
+                    actions={<AddButton />}
                 >
-                    <div className="rounded-md border bg-card p-3">
-                        <InfoGrid>
-                            {isIndividual && (
-                                <Info
-                                    label="Date of Birth"
-                                    value={formatDate(customer.dob)}
-                                />
-                            )}
-                            {isIndividual && (
-                                <Info label="Gender" value={customer.gender} />
-                            )}
-                            {isIndividual && (
-                                <Info
-                                    label="Religion"
-                                    value={customer.religion}
-                                />
-                            )}
-                            {isOrganization && (
-                                <Info
-                                    label="Organization Name"
-                                    value={customer.name}
-                                />
-                            )}
-                            <Info label="Phone" value={customer.phone} />
-                            <Info label="Email" value={customer.email} />
-                            <Info
-                                label="KYC Status"
-                                value={customer.kyc_status}
-                            />
-                            <Info
-                                label="Type"
-                                value={customer.identification_type}
-                            />
-                            <Info
-                                label="Identification Number"
-                                value={customer.identification_number}
-                            />
-                        </InfoGrid>
+                    <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+                        {customer.addresses.map((addr, i) => (
+                            <DataCard
+                                key={addr.id}
+                                title={`${i + 1}. ${addr.type}`}
+                            >
+                                <div className="text-xs opacity-80">
+                                    {addr.line1}, {addr.line2}, {addr.district}
+                                </div>
+                                <div className="mt-1 text-[10px] opacity-70">
+                                    {addr.division}, {addr.upazila},{' '}
+                                    {addr.union_ward}, {addr.postal_code},{' '}
+                                    {addr.country}
+                                </div>
+                                <div className="mt-1 flex flex-wrap gap-1">
+                                    <Badge
+                                        text={addr.verification_status}
+                                        color="accent"
+                                    />
+                                </div>
+                            </DataCard>
+                        ))}
                     </div>
-                </SectionCard>
+                </SectionHeader>
+            )}
 
-                {/* ================= Addresses ================= */}
-                {customer.addresses?.length > 0 && (
-                    <SectionCard
-                        title="Addresses"
-                        icon={<HomeIcon size={16} />}
-                    >
-                        {customer.addresses.length && (
-                            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                                {customer.addresses.map((address, index) => (
-                                    <div
-                                        key={address.id}
-                                        className="rounded-md border bg-card p-3"
-                                    >
-                                        <div className="flex flex-col gap-4 rounded-md border bg-background/60 p-3 md:flex-row">
-                                            <div className="flex items-start justify-between">
-                                                <div className="space-y-1 text-sm">
-                                                    <p className="font-semibold">
-                                                        {index + 1}.{' '}
-                                                        {address.line1},{' '}
-                                                        {address.line2} –{' '}
-                                                        {address.district}
-                                                    </p>
-                                                    <p className="text-xs text-muted-foreground">
-                                                        {address.type} |{' '}
-                                                        {
-                                                            address.verification_status
-                                                        }
-                                                    </p>
-                                                    <p className="text-xs text-muted-foreground">
-                                                        {address.division},{' '}
-                                                        {address.upazila},{' '}
-                                                        {address.union_ward},{' '}
-                                                        {address.postal_code},{' '}
-                                                        {address.country}
-                                                    </p>
-                                                </div>
-                                            </div>
+            {/* ================= Family Relations ================= */}
+            {customer.family_relations?.length > 0 && (
+                <SectionHeader
+                    icon={<UsersIcon />}
+                    title="Family Relations"
+                    actions={<AddButton />}
+                >
+                    <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+                        {customer.family_relations.map((rel) => (
+                            <DataCard key={rel.id} title={''}>
+                                <div className="flex items-center gap-2">
+                                    {rel.relative?.photo?.url ? (
+                                        <img
+                                            src={rel.relative.photo.url}
+                                            alt={rel.relative.name}
+                                            className="h-10 w-10 rounded-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-xs">
+                                            {rel.relative?.name?.charAt(0)}
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </SectionCard>
-                )}
-
-                {/* ================= Family Relations ================= */}
-                {customer.family_relations?.length > 0 && (
-                    <SectionCard
-                        title="Family Relations"
-                        icon={<UsersIcon size={16} />}
-                    >
-                        {customer.addresses.length && (
-                            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                                {customer.family_relations.map(
-                                    (family_relation) => (
-                                        <div
-                                            key={family_relation.id}
-                                            className="rounded-md border bg-card p-3"
-                                        >
-                                            <div className="flex flex-col gap-4 rounded-md border bg-background/60 p-3 md:flex-row">
-                                                <div className="h-20 w-20 overflow-hidden rounded-full border bg-muted">
-                                                    {family_relation?.relative
-                                                        ?.photo?.url ? (
-                                                        <img
-                                                            src={
-                                                                family_relation
-                                                                    ?.relative
-                                                                    ?.photo?.url
-                                                            }
-                                                            alt={
-                                                                family_relation
-                                                                    ?.relative
-                                                                    ?.name
-                                                            }
-                                                            className="h-full w-full object-cover"
-                                                        />
-                                                    ) : (
-                                                        <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
-                                                            {family_relation?.relative?.name?.charAt(
-                                                                0,
-                                                            ) ?? '-'}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
+                                    )}
+                                    <div className="flex flex-col gap-1 text-xs">
+                                        <div className="text-sm font-medium">
+                                            {rel.relative?.name}
                                         </div>
-                                    ),
-                                )}
-                            </div>
-                        )}
-                    </SectionCard>
-                )}
 
-                {/* ================= Introducers ================= */}
-                {customer.introducers?.length > 0 && (
-                    <SectionCard
-                        title="Introducers"
-                        icon={<UserCheckIcon size={16} />}
-                    >
-                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                            {customer.introducers.map((intro) => (
-                                <div
-                                    key={intro.id}
-                                    className="rounded-md border bg-card p-3"
-                                >
-                                    <div className="flex flex-col gap-4 rounded-md border bg-background/60 p-3 md:flex-row">
-                                        <Info
-                                            label="Introduced By"
-                                            value={
-                                                intro.introducer_customer?.name
-                                            }
-                                        />
-                                        <Info
-                                            label="Relationship"
-                                            value={intro.relationship_type}
-                                        />
-                                        <Info
-                                            label="Status"
-                                            value={intro.verification_status}
-                                        />
+                                        <div className="flex gap-2">
+                                            <div className="text-xs opacity-80">
+                                                {rel.relation_type}
+                                            </div>
+                                            <Badge
+                                                text={rel.verification_status}
+                                                color="accent"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                    </SectionCard>
-                )}
-            </div>
+                            </DataCard>
+                        ))}
+                    </div>
+                </SectionHeader>
+            )}
+
+            {/* ================= Introducers ================= */}
+            {customer.introducers?.length > 0 && (
+                <SectionHeader
+                    icon={<UserCheckIcon />}
+                    title="Introducers"
+                    actions={<AddButton />}
+                >
+                    <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+                        {customer.introducers.map((intro) => (
+                            <DataCard key={intro.id} title={''}>
+                                <div className="flex items-center gap-2">
+                                    {intro.introducer_customer?.photo?.url ? (
+                                        <img
+                                            src={
+                                                intro.introducer_customer.photo
+                                                    .url
+                                            }
+                                            alt={intro.introducer_customer.name}
+                                            className="h-10 w-10 rounded-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-full border-border bg-secondary text-xs">
+                                            {intro.introducer_customer?.name?.charAt(
+                                                0,
+                                            )}
+                                        </div>
+                                    )}
+                                    <div className="flex flex-col gap-1 text-xs">
+                                        <div className="text-sm font-medium">
+                                            {intro.introducer_customer?.name}
+                                        </div>
+
+                                        <div className="flex gap-2 text-xs">
+                                            <div className="text-xs opacity-80">
+                                                {intro.relationship_type}
+                                            </div>
+
+                                            <Badge
+                                                text={`${intro.verification_status}`}
+                                                color="accent"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </DataCard>
+                        ))}
+                    </div>
+                </SectionHeader>
+            )}
         </CustomAuthLayout>
     );
 }
 
-export default Show;
-
 // -------------------- Helpers --------------------
-function Info({
+const ActionButton = ({
+    children,
+    icon,
+    color = 'muted',
+    as = 'button',
+    ...props
+}: {
+    children: React.ReactNode;
+    icon: React.ReactNode;
+    color?: keyof typeof themeColors;
+    as?: 'button' | typeof Link;
+    [key: string]: any;
+}) =>
+    as === 'button' ? (
+        <button
+            className={`flex items-center gap-1 rounded px-2 py-1 ${themeColors[color]} transition hover:brightness-90`}
+            {...props}
+        >
+            {icon} {children}
+        </button>
+    ) : (
+        <Link
+            className={`flex items-center gap-1 rounded px-2 py-1 ${themeColors[color]} transition hover:brightness-90`}
+            {...props}
+        >
+            {icon} {children}
+        </Link>
+    );
+
+const InfoItem = ({
     label,
     value,
-    full = false,
+    badge = false,
 }: {
     label: string;
     value?: string | null;
-    full?: boolean;
-}) {
-    return (
-        <div className={full ? 'md:col-span-2' : ''}>
-            <p className="text-[10px] font-medium text-gray-500 uppercase dark:text-gray-400">
-                {label}
-            </p>
-            <p className="mt-0.5 text-sm text-gray-900 dark:text-gray-100">
+    badge?: boolean;
+}) => (
+    <div className="flex flex-col gap-0.5">
+        <span className="text-[10px] font-semibold text-gray-500 uppercase dark:text-gray-400">
+            {label}
+        </span>
+        {badge ? (
+            <div className="">
+                <span className="mt-0.5 inline-block rounded-full bg-accent/20 px-2 py-0.5 text-xs font-medium text-accent-foreground">
+                    {value || '—'}
+                </span>
+            </div>
+        ) : (
+            <span className="mt-0.5 text-sm text-gray-900 dark:text-gray-100">
                 {value || '—'}
-            </p>
-        </div>
-    );
-}
+            </span>
+        )}
+    </div>
+);
 
-function SectionCard({
+const DataCard = ({
+    children,
+    onEdit,
+    onDelete,
+}: {
+    children: React.ReactNode;
+    onEdit?: () => void;
+    onDelete?: () => void;
+}) => (
+    <div className="group relative rounded-md border border-border bg-card p-3 shadow-sm transition hover:shadow-md">
+        {/* Edit/Delete buttons */}
+        {(onEdit || onDelete) && (
+            <div className="absolute top-1 right-1 flex gap-1 opacity-0 transition group-hover:opacity-100">
+                {onEdit && (
+                    <button
+                        onClick={onEdit}
+                        className="rounded bg-secondary p-1 text-secondary-foreground hover:bg-secondary/80"
+                    >
+                        <Edit2 size={14} />
+                    </button>
+                )}
+                {onDelete && (
+                    <button
+                        onClick={onDelete}
+                        className="rounded bg-destructive p-1 text-destructive-foreground hover:bg-destructive/80"
+                    >
+                        <X size={14} />
+                    </button>
+                )}
+            </div>
+        )}
+        {children}
+    </div>
+);
+
+const Badge = ({
+    text,
+    color = 'accent',
+}: {
+    text: string;
+    color?: keyof typeof themeColors;
+}) => (
+    <span
+        className={`rounded-full px-2 py-0.5 text-[10px] font-medium bg-${color}/20 text-${color}-foreground`}
+    >
+        {text}
+    </span>
+);
+
+const AddButton = () => (
+    <button className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-secondary-foreground transition hover:bg-accent/80">
+        <Plus size={16} /> Add
+    </button>
+);
+
+const SectionHeader = ({
     title,
     icon,
+    actions,
     children,
 }: {
     title: string;
     icon: React.ReactNode;
+    actions?: React.ReactNode;
     children: React.ReactNode;
-}) {
-    return (
-        <section className="rounded-md border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+}) => (
+    <section className="mt-4">
+        <div className="mb-2 flex items-center justify-between text-sm font-semibold text-card-foreground">
+            <div className="flex items-center gap-2">
                 {icon} <span>{title}</span>
             </div>
-            {children}
-        </section>
-    );
-}
-
-function InfoGrid({ children }: { children: React.ReactNode }) {
-    return (
-        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">{children}</div>
-    );
-}
+            {actions && (
+                <div className="flex items-center gap-2">{actions}</div>
+            )}
+        </div>
+        {children}
+    </section>
+);
 
 function getStatusColor(status?: string) {
     switch (status) {

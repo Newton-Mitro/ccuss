@@ -5,11 +5,12 @@ import toast from 'react-hot-toast';
 
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-import { Customer } from '../../../types/customer';
 
+import { route } from 'ziggy-js';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { normalizeErrors } from '../../../lib/normalize_errors';
 import { VoucherLine } from '../../../types/accounting';
+import { Customer } from '../../../types/customer_kyc_module';
 import CashLedgerSection from './components/CashLedgerSection';
 import DepositLedgersSection from './components/DepositLedgersSection';
 import VoucherHeaderSection from './components/VoucherHeaderSection';
@@ -179,7 +180,11 @@ export default function CustomerCashDepositPage() {
     };
 
     const viewVoucherHandler = (voucherId: number) => {
-        window.open(`/vouchers/${voucherId}`, '_blank', 'noopener,noreferrer');
+        window.open(
+            route('vouchers.show', voucherId),
+            '_blank',
+            'noopener,noreferrer',
+        );
     };
 
     const cancelVoucherHandler = (voucherId: number) => {

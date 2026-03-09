@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\CostomerMgmt\Models\Customer;
 use App\CostomerMgmt\Models\KycProfile;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -17,7 +16,6 @@ class KycProfileFactory extends Factory
         $verificationStatuses = ['PENDING', 'APPROVED', 'REJECTED'];
 
         return [
-            'customer_id' => Customer::factory(),
             'kyc_level' => $this->faker->randomElement($kycLevels),
             'risk_level' => $this->faker->randomElement($riskLevels),
             'verification_status' => $this->faker->randomElement($verificationStatuses),

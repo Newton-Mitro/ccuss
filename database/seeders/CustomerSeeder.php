@@ -51,8 +51,7 @@ class CustomerSeeder extends Seeder
             // Addresses (2–3 per customer)
             // ---------------------------
             foreach ($addressTypes as $type) {
-                CustomerAddress::factory()->create([
-                    'customer_id' => $customer->id,
+                CustomerAddress::factory()->for($customer)->create([
                     'type' => $type,
                 ]);
             }
@@ -82,19 +81,14 @@ class CustomerSeeder extends Seeder
                 'mime' => 'image/jpeg',
             ]);
 
-            // Randomly approve or reject
             $states = ['approved', 'rejected', null];
             $state = collect($states)->random();
-
-            $factory = KycProfile::factory()->for($customer);
-
-            if ($state === 'approved') {
-                $factory->approved()->create();
-            } elseif ($state === 'rejected') {
-                $factory->rejected()->create();
-            } else {
-                $factory->create(); // PENDING by default
-            }
+            $factory = KycProfile::factory()->for($customer); // do NOT create yet
+            match ($state) {
+                'approved' => $factory->approved()->create(),
+                'rejected' => $factory->rejected()->create(),
+                default => $factory->create(), // PENDING
+            };
 
             // NID (Front)
             $nidFileName = 'nid_front_' . Str::slug($customer->customer_no) . '.jpg';
@@ -119,14 +113,6 @@ class CustomerSeeder extends Seeder
                 'status' => 'ACTIVE',
             ]);
 
-            // ---------------------------
-            // Family Relations (2–4)
-            // ---------------------------
-            CustomerFamilyRelation::factory()
-                ->count(rand(2, 4))
-                ->create([
-                    'customer_id' => $customer->id,
-                ]);
 
             // ---------------------------
             // Introducer (1)
@@ -149,6 +135,17 @@ class CustomerSeeder extends Seeder
                 'verification_status' => 'VERIFIED',
                 'verified_at' => now(),
             ]);
+        }
+
+        foreach ($customers as $customer) {
+            $relatives = $customers->where('id', '!=', $customer->id)->random(rand(2, 4));
+
+            foreach ($relatives as $relative) {
+                CustomerFamilyRelation::factory()->create([
+                    'customer_id' => $customer->id,
+                    'relative_id' => $relative->id,
+                ]);
+            }
         }
 
         $this->command->info('✅ Customers with Photo, Signature, and NID created.');

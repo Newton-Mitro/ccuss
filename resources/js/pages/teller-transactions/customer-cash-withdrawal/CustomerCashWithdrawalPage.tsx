@@ -2,12 +2,13 @@ import { Head, router, useForm, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
+import { route } from 'ziggy-js';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { normalizeErrors } from '../../../lib/normalize_errors';
 import { BreadcrumbItem } from '../../../types';
 import { VoucherLine } from '../../../types/accounting';
-import { Customer } from '../../../types/customer';
+import { Customer } from '../../../types/customer_kyc_module';
 import CashLedgerSection from './components/CashLedgerSection';
 import VoucherHeaderSection from './components/VoucherHeaderSection';
 import VoucherQueueSection from './components/VoucherQueueSection';
@@ -154,7 +155,11 @@ export default function CustomerCashWithdrawalPage() {
         });
 
     const viewVoucherHandler = (voucherId: number) => {
-        window.open(`/vouchers/${voucherId}`, '_blank', 'noopener,noreferrer');
+        window.open(
+            route('vouchers.show', voucherId),
+            '_blank',
+            'noopener,noreferrer',
+        );
     };
 
     const cancelVoucherHandler = (voucherId: number) => {

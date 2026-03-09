@@ -31,14 +31,14 @@ export const sidebarMenu: SidebarItem[] = [
         ],
     },
     {
-        name: 'Customers',
-        icon: <i className="fa-solid fa-users" />,
+        name: `Customer Management`,
+        icon: <i className="fa-solid fa-user-group" />,
         children_expanded: false,
         permission: ['customer.view'],
         children: [
             {
                 name: 'Customers',
-                icon: <i className="fa-solid fa-users-viewfinder" />,
+                icon: <i className="fa-solid fa-users" />,
                 path: '/customers',
                 match_path: 'customers',
                 permission: ['customer.list.view'],
@@ -52,7 +52,7 @@ export const sidebarMenu: SidebarItem[] = [
             },
             {
                 name: 'Family Relations',
-                icon: <i className="fa-solid fa-person-breastfeeding" />,
+                icon: <i className="fa-solid fa-people-roof" />,
                 path: '/family-relations',
                 match_path: 'family-relations',
                 permission: ['customer.family.view'],
@@ -64,24 +64,39 @@ export const sidebarMenu: SidebarItem[] = [
                 match_path: 'introducers',
                 permission: ['customer.introducers.view'],
             },
-            {
-                name: 'KYC Documents',
-                icon: <i className="fa-solid fa-people-arrows" />,
-                path: '/kyc-documents',
-                match_path: 'kyc-documents',
-                permission: ['customer.kyc-documents.view'],
-            },
+        ],
+    },
+    {
+        name: `KYC Verification`,
+        icon: <i className="fa-solid fa-id-card" />,
+        children_expanded: false,
+        permission: ['customer.kyc.view'],
+        children: [
             {
                 name: 'KYC Profiles',
-                icon: <i className="fa-solid fa-signature" />,
+                icon: <i className="fa-solid fa-address-card" />,
                 path: '/customer/kyc-profiles',
                 match_path: 'kyc-profiles',
                 permission: ['customer.kyc-profiles.view'],
             },
-
+            {
+                name: 'KYC Documents',
+                icon: <i className="fa-solid fa-file-shield" />,
+                path: '/kyc-documents',
+                match_path: 'kyc-documents',
+                permission: ['customer.kyc-documents.view'],
+            },
+        ],
+    },
+    {
+        name: `Online Services`,
+        icon: <i className="fa-solid fa-user-lock" />,
+        children_expanded: false,
+        permission: ['customer.online_clients.view'],
+        children: [
             {
                 name: 'Online Service Clients',
-                icon: <i className="fa-solid fa-street-view" />,
+                icon: <i className="fa-solid fa-user-shield" />,
                 path: '/online-service-clients',
                 match_path: 'online-service-clients',
                 permission: ['customer.online_clients.view'],
