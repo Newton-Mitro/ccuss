@@ -12,8 +12,8 @@ class CustomerFactory extends Factory
 
     public function definition(): array
     {
-        $type = $this->faker->randomElement(['Individual', 'Organization']);
-        $prefix = $type === 'Individual' ? 'IND' : 'ORG';
+        $type = $this->faker->randomElement(['INDIVIDUAL', 'ORGANIZATION']);
+        $prefix = $type === 'INDIVIDUAL' ? 'IND' : 'ORG';
 
         // Identification types
         $individualIds = ['NID', 'BRN', 'PASSPORT', 'DRIVING_LICENSE'];
@@ -28,28 +28,24 @@ class CustomerFactory extends Factory
 
             'type' => $type,
 
-            'name' => $type === 'Individual'
+            'name' => $type === 'INDIVIDUAL'
                 ? $this->faker->name()
                 : $this->faker->company(),
 
-            'phone' => $type === 'Individual'
-                ? $this->faker->phoneNumber()
-                : null,
+            'phone' => $this->faker->phoneNumber(),
 
-            'email' => $type === 'Individual'
-                ? $this->faker->safeEmail()
-                : null,
+            'email' => $this->faker->safeEmail(),
 
             // Individual-only fields
-            'dob' => $type === 'Individual'
+            'dob' => $type === 'INDIVIDUAL'
                 ? $this->faker->dateTimeBetween('-65 years', '-18 years')->format('Y-m-d')
                 : null,
 
-            'gender' => $type === 'Individual'
+            'gender' => $type === 'INDIVIDUAL'
                 ? $this->faker->randomElement(['MALE', 'FEMALE', 'OTHER'])
                 : null,
 
-            'religion' => $type === 'Individual'
+            'religion' => $type === 'INDIVIDUAL'
                 ? $this->faker->randomElement([
                     'CHRISTIANITY',
                     'ISLAM',
@@ -60,7 +56,7 @@ class CustomerFactory extends Factory
                 : null,
 
             // Identification
-            'identification_type' => $type === 'Individual'
+            'identification_type' => $type === 'INDIVIDUAL'
                 ? $this->faker->randomElement($individualIds)
                 : $this->faker->randomElement($organizationIds),
 

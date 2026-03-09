@@ -115,7 +115,7 @@ erDiagram
 CREATE TABLE customers (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     customer_no VARCHAR(50) UNIQUE NOT NULL,
-    type ENUM('Individual','Organization') NOT NULL,
+    type ENUM('INDIVIDUAL','Organization') NOT NULL,
     name VARCHAR(150) NOT NULL,
     phone VARCHAR(50),
     email VARCHAR(100),

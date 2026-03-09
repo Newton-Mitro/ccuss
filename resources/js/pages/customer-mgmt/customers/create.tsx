@@ -146,7 +146,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
                             onChange={(e) => {
                                 const newType = e.target.value;
                                 setData('type', newType);
-                                if (newType === 'Organization') {
+                                if (newType === 'ORGANIZATION') {
                                     setData(
                                         'identification_type',
                                         'REGISTRATION_NO',
@@ -195,7 +195,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
                 </div>
 
                 {/* PERSONAL DETAILS */}
-                {data.type === 'Individual' && (
+                {data.type === 'INDIVIDUAL' && (
                     <div className="grid grid-cols-1 gap-x-4 md:grid-cols-2 lg:grid-cols-3">
                         <div>
                             <Label className="text-xs">DOB</Label>
@@ -254,7 +254,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
                             }
                             className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                         >
-                            {data.type === 'Organization' ? (
+                            {data.type === 'ORGANIZATION' ? (
                                 <option value="REGISTRATION_NO">
                                     Registration No
                                 </option>

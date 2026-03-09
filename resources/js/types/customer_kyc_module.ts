@@ -4,7 +4,7 @@ import { User } from './user';
 /* ===========================
  * Enums / Types
  * =========================== */
-export type CustomerType = 'Individual' | 'Organization';
+export type CustomerType = 'INDIVIDUAL' | 'ORGANIZATION';
 export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
 export type Religion =
     | 'CHRISTIANITY'
@@ -56,12 +56,12 @@ export interface Customer extends AuditFields {
     signature?: KycDocument | null;
 
     addresses?: CustomerAddress[];
-    familyRelations?: CustomerFamilyRelation[];
+    family_relations?: CustomerFamilyRelation[];
     introducers?: CustomerIntroducer[];
-    introducedCustomers?: CustomerIntroducer[];
-    onlineServiceClient?: OnlineServiceClient | null;
-    kycProfile?: KycProfile | null;
-    kycDocuments?: KycDocument[];
+    introduced_customers?: CustomerIntroducer[];
+    online_service_client?: OnlineServiceClient | null;
+    kyc_profile?: KycProfile | null;
+    kyc_documents?: KycDocument[];
 }
 
 /* ===========================

@@ -44,14 +44,7 @@ export const sidebarMenu: SidebarItem[] = [
                 permission: ['customer.list.view'],
             },
             {
-                name: 'Addresses',
-                icon: <i className="fa-solid fa-map-location-dot" />,
-                path: '/addresses',
-                match_path: 'addresses',
-                permission: ['customer.address.view'],
-            },
-            {
-                name: 'Family Relations',
+                name: 'Family & Relatives',
                 icon: <i className="fa-solid fa-people-roof" />,
                 path: '/family-relations',
                 match_path: 'family-relations',
@@ -64,27 +57,12 @@ export const sidebarMenu: SidebarItem[] = [
                 match_path: 'introducers',
                 permission: ['customer.introducers.view'],
             },
-        ],
-    },
-    {
-        name: `KYC Verification`,
-        icon: <i className="fa-solid fa-id-card" />,
-        children_expanded: false,
-        permission: ['customer.kyc.view'],
-        children: [
             {
                 name: 'KYC Profiles',
                 icon: <i className="fa-solid fa-address-card" />,
                 path: '/customer/kyc-profiles',
                 match_path: 'kyc-profiles',
                 permission: ['customer.kyc-profiles.view'],
-            },
-            {
-                name: 'KYC Documents',
-                icon: <i className="fa-solid fa-file-shield" />,
-                path: '/kyc-documents',
-                match_path: 'kyc-documents',
-                permission: ['customer.kyc-documents.view'],
             },
         ],
     },

@@ -301,7 +301,7 @@ return new class extends Migration {
             $table->id();
 
             $table->string('customer_no', 50)->unique()->comment('Unique customer number');
-            $table->enum('type', ['Individual', 'Organization'])->comment('Customer type');
+            $table->enum('type', ['INDIVIDUAL', 'ORGANIZATION'])->comment('Customer type');
             $table->string('name', 150);
             $table->string('phone', 50)->nullable();
             $table->string('email', 100)->nullable();

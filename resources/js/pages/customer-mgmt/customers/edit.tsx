@@ -72,8 +72,8 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
         { title: `Edit ${customer.name}`, href: '' },
     ];
 
-    const isIndividual = data.type === 'Individual';
-    const isOrganization = data.type === 'Organization';
+    const isIndividual = data.type === 'INDIVIDUAL';
+    const isOrganization = data.type === 'ORGANIZATION';
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
@@ -126,7 +126,7 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                             onChange={(e) => {
                                 const newType = e.target.value;
                                 setData('type', newType);
-                                if (newType === 'Organization') {
+                                if (newType === 'ORGANIZATION') {
                                     setData(
                                         'identification_type',
                                         'REGISTRATION_NO',

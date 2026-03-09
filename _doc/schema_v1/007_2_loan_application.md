@@ -41,7 +41,7 @@ return new class extends Migration {
 
             $table->foreignId('loan_application_id')->constrained()->cascadeOnDelete();
 
-            $table->enum('applicant_type', ['Individual','Organization']);
+            $table->enum('applicant_type', ['INDIVIDUAL','Organization']);
             $table->string('name', 150);
             $table->string('phone', 50)->nullable();
             $table->string('email', 100)->nullable();

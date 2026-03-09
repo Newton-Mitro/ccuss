@@ -138,7 +138,16 @@ class CustomerSeeder extends Seeder
         }
 
         foreach ($customers as $customer) {
-            $relatives = $customers->where('id', '!=', $customer->id)->random(rand(2, 4));
+
+            // Skip family relations for organization customers
+            if ($customer->type === 'ORGANIZATION') {
+                continue;
+            }
+
+            $relatives = $customers
+                ->where('id', '!=', $customer->id)
+                ->where('type', '!=', 'ORGANIZATION') // optional: only individuals
+                ->random(rand(2, 4));
 
             foreach ($relatives as $relative) {
                 CustomerFamilyRelation::factory()->create([

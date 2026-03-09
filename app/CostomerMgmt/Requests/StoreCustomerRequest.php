@@ -15,7 +15,7 @@ class StoreCustomerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type' => ['required', Rule::in(['Individual', 'Organization'])],
+            'type' => ['required', Rule::in(['INDIVIDUAL', 'ORGANIZATION'])],
             'name' => ['required', 'string', 'max:150'],
             'phone' => ['nullable', 'string', 'max:50'],
             'email' => ['nullable', 'email', 'max:100'],

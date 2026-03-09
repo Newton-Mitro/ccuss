@@ -128,7 +128,7 @@ class CustomerController extends Controller
         }
 
         DB::transaction(function () use (&$data) {
-            $typePrefix = $data['type'] === 'Individual' ? 'IND' : 'ORG';
+            $typePrefix = $data['type'] === 'INDIVIDUAL' ? 'IND' : 'ORG';
             $lastId = Customer::lockForUpdate()->max('id') ?? 0;
             $nextNumber = str_pad($lastId + 1, 5, '0', STR_PAD_LEFT);
             $data['customer_no'] = "{$typePrefix}-{$nextNumber}";
@@ -153,7 +153,8 @@ class CustomerController extends Controller
             'introducers.introducerCustomer',
             'introducers.introducedCustomer',
             'kycProfile',
-            'kycDocuments'
+            'kycDocuments',
+            'onlineServiceClient'
         ]);
 
         return Inertia::render('customer-mgmt/customers/show', [
@@ -200,7 +201,7 @@ class CustomerController extends Controller
 
         // Regenerate customer_no if type or identification type changed
         if ($data['type'] !== $customer->type || $data['identification_type'] !== $customer->identification_type) {
-            $typePrefix = $data['type'] === 'Individual' ? 'IND' : 'ORG';
+            $typePrefix = $data['type'] === 'INDIVIDUAL' ? 'IND' : 'ORG';
             $data['customer_no'] = "{$typePrefix}-" . str_pad($customer->id, 5, '0', STR_PAD_LEFT);
         }
 

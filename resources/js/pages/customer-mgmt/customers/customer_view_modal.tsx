@@ -20,8 +20,8 @@ export default function CustomerViewModal({
 }: CustomerViewModalProps) {
     if (!customer) return null;
 
-    const isIndividual = customer.type === 'Individual';
-    const isOrganization = customer.type === 'Organization';
+    const isIndividual = customer.type === 'INDIVIDUAL';
+    const isOrganization = customer.type === 'ORGANIZATION';
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
