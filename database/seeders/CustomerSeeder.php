@@ -7,6 +7,7 @@ use App\CostomerMgmt\Models\CustomerAddress;
 use App\CostomerMgmt\Models\CustomerFamilyRelation;
 use App\CostomerMgmt\Models\CustomerIntroducer;
 use App\CostomerMgmt\Models\KycDocument;
+use App\CostomerMgmt\Models\KycProfile;
 use App\CostomerMgmt\Models\OnlineServiceClient;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -80,6 +81,20 @@ class CustomerSeeder extends Seeder
                 'file_path' => $signaturePath,
                 'mime' => 'image/jpeg',
             ]);
+
+            // Randomly approve or reject
+            $states = ['approved', 'rejected', null];
+            $state = collect($states)->random();
+
+            $factory = KycProfile::factory()->for($customer);
+
+            if ($state === 'approved') {
+                $factory->approved()->create();
+            } elseif ($state === 'rejected') {
+                $factory->rejected()->create();
+            } else {
+                $factory->create(); // PENDING by default
+            }
 
             // NID (Front)
             $nidFileName = 'nid_front_' . Str::slug($customer->customer_no) . '.jpg';

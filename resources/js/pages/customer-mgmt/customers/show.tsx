@@ -18,7 +18,7 @@ import {
     CustomerAddress,
     CustomerFamilyRelation,
     CustomerIntroducer,
-} from '../../../types/customer';
+} from '../../../types/customer_kyc_module';
 
 interface ShowProps {
     customer: Customer & {
@@ -30,6 +30,7 @@ interface ShowProps {
 }
 
 function Show({ customer, backUrl }: ShowProps) {
+    console.log(customer);
     const handleBack = () =>
         router.visit(backUrl, { preserveState: true, preserveScroll: true });
 
@@ -68,9 +69,9 @@ function Show({ customer, backUrl }: ShowProps) {
                                 {customer.customer_no} | {customer.type}
                             </p>
                             <p
-                                className={`mt-1 text-xs font-medium ${getStatusColor(customer.status)}`}
+                                className={`mt-1 text-xs font-medium ${getStatusColor(customer.kyc_status)}`}
                             >
-                                {customer.status}
+                                {customer.kyc_status}
                             </p>
                         </div>
                     </div>
@@ -227,82 +228,28 @@ function Show({ customer, backUrl }: ShowProps) {
                                         >
                                             <div className="flex flex-col gap-4 rounded-md border bg-background/60 p-3 md:flex-row">
                                                 <div className="h-20 w-20 overflow-hidden rounded-full border bg-muted">
-                                                    {family_relation.photo
-                                                        ?.url ? (
+                                                    {family_relation?.relative
+                                                        ?.photo?.url ? (
                                                         <img
                                                             src={
                                                                 family_relation
-                                                                    .photo.url
+                                                                    ?.relative
+                                                                    ?.photo?.url
                                                             }
                                                             alt={
-                                                                family_relation.name
+                                                                family_relation
+                                                                    ?.relative
+                                                                    ?.name
                                                             }
                                                             className="h-full w-full object-cover"
                                                         />
                                                     ) : (
                                                         <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
-                                                            {family_relation.name?.charAt(
+                                                            {family_relation?.relative?.name?.charAt(
                                                                 0,
                                                             ) ?? '-'}
                                                         </div>
                                                     )}
-                                                </div>
-
-                                                <div className="flex-1 space-y-2">
-                                                    <div>
-                                                        <p className="text-sm font-semibold">
-                                                            {
-                                                                family_relation.name
-                                                            }
-                                                        </p>
-                                                        <p className="text-xs text-muted-foreground">
-                                                            {
-                                                                family_relation.gender
-                                                            }{' '}
-                                                            •{' '}
-                                                            {
-                                                                family_relation.relation_type
-                                                            }
-                                                            •{' '}
-                                                            {
-                                                                family_relation.religion
-                                                            }
-                                                        </p>
-                                                    </div>
-
-                                                    <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-3">
-                                                        <Info
-                                                            label="Date of Birth"
-                                                            value={formatDate(
-                                                                family_relation.dob,
-                                                            )}
-                                                        />
-
-                                                        <Info
-                                                            label="Identification Type"
-                                                            value={
-                                                                family_relation.identification_type
-                                                            }
-                                                        />
-                                                        <Info
-                                                            label="Identification No"
-                                                            value={
-                                                                family_relation.identification_number
-                                                            }
-                                                        />
-                                                        <Info
-                                                            label="Phone"
-                                                            value={
-                                                                family_relation.phone
-                                                            }
-                                                        />
-                                                        <Info
-                                                            label="Email"
-                                                            value={
-                                                                family_relation.email
-                                                            }
-                                                        />
-                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

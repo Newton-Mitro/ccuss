@@ -2,7 +2,7 @@ import axios from 'axios';
 import { Search } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { Label } from '../../../components/ui/label';
-import { Customer } from '../../../types/customer';
+import { Customer } from '../../../types/customer_kyc_module';
 
 interface CustomerSearchInputProps {
     onSelect: (customer: Customer) => void;

@@ -3,7 +3,7 @@ import { Search } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { route } from 'ziggy-js';
 import { Label } from '../../../components/ui/label';
-import { Customer } from '../../../types/customer';
+import { Customer } from '../../../types/customer_kyc_module';
 import CustomerViewModal from './customer_view_modal';
 
 interface CustomerSearchBoxProps {
@@ -23,6 +23,8 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
     const [loading, setLoading] = useState(false);
     const [query, setQuery] = useState('');
     const [open, setOpen] = useState(false);
+
+    console.log(customers);
 
     const dropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -116,9 +118,9 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
                         >
                             {/* Avatar */}
                             <div className="h-6 w-6 shrink-0 overflow-hidden rounded-full border bg-muted">
-                                {customer.photo?.url ? (
+                                {customer?.photo?.url ? (
                                     <img
-                                        src={customer.photo.url}
+                                        src={customer?.photo?.url}
                                         alt={customer.name}
                                         className="h-full w-full object-cover"
                                     />
@@ -160,9 +162,9 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
                     <div className="flex items-center justify-center">
                         {/* Avatar */}
                         <div className="h-20 w-20 overflow-hidden rounded-full border bg-muted">
-                            {customer.photo?.url ? (
+                            {customer?.photo?.url ? (
                                 <img
-                                    src={customer.photo.url}
+                                    src={customer?.photo?.url}
                                     alt={customer.name}
                                     className="h-full w-full object-cover"
                                 />

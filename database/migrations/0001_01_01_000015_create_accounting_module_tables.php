@@ -134,42 +134,27 @@ return new class extends Migration {
         */
         Schema::create('vouchers', function (Blueprint $table) {
             $table->id();
-
-            $table->foreignId('fiscal_year_id')->nullable()
-                ->constrained('fiscal_years')->nullOnDelete();
-
-            $table->foreignId('accounting_period_id')->nullable()
-                ->constrained('accounting_periods')->nullOnDelete();
-
-            $table->foreignId('branch_id')->nullable()
-                ->constrained('branches')->nullOnDelete();
-
-            $table->timestamp('voucher_date')
-                ->useCurrent()
-                ->comment('Posting timestamp');
-
+            $table->foreignId('fiscal_year_id')->nullable()->constrained('fiscal_years')->nullOnDelete();
+            $table->foreignId('accounting_period_id')->nullable()->constrained('accounting_periods')->nullOnDelete();
+            $table->foreignId('branch_id')->nullable()->constrained('branches')->nullOnDelete();
+            $table->timestamp('voucher_date')->useCurrent()->comment('Posting timestamp');
             $table->enum('voucher_type', [
-                'OPENING_BALANCE',       // Initial balance of accounts
-                'CLOSING_BALANCE',       // Closing balance (optional)
-                'CREDIT_OR_RECEIPT',     // Cash/bank inflow
-                'DEBIT_OR_PAYMENT',      // Cash/bank outflow
-                'JOURNAL_OR_NON_CASH',   // Non-cash adjustments / transfers
-                'PURCHASE',              // Purchase invoice
-                'SALE',                  // Sales invoice
-                'DEBIT_NOTE',            // Adjustment reducing payable
-                'CREDIT_NOTE',           // Adjustment reducing receivable
-                'CONTRA',                // Bank/Cash transfer within accounts
+                'OPENING_BALANCE',
+                'CLOSING_BALANCE',
+                'CREDIT_OR_RECEIPT',
+                'DEBIT_OR_PAYMENT',
+                'JOURNAL_OR_NON_CASH',
+                'PURCHASE',
+                'SALE',
+                'DEBIT_NOTE',
+                'CREDIT_NOTE',
+                'CONTRA',
             ]);
-
             $table->string('voucher_no', 50);
-
+            $table->enum('channel', ['TELLER', 'ATM', 'MOBILE', 'ONLINE', 'SYSTEM'])->nullable();
             // ✅ Reference field
-            $table->string('reference', 150)
-                ->nullable()
-                ->comment('External reference number');
-
+            $table->string('reference', 150)->nullable()->comment('External reference number');
             $table->decimal('total_amount', 18, 2)->default(0);
-
             $table->foreignId('created_by')->constrained('users');
             $table->foreignId('posted_by')->nullable()->constrained('users');
             $table->timestamp('posted_at')->nullable();
@@ -177,10 +162,8 @@ return new class extends Migration {
             $table->timestamp('approved_at')->nullable();
             $table->foreignId('rejected_by')->nullable()->constrained('users');
             $table->timestamp('rejected_at')->nullable();
-
             $table->text('narration')->comment('Description or remarks');
             $table->enum('status', ['PENDING', 'APPROVED', 'POSTED', 'CANCELLED'])->default('PENDING');
-
             $table->timestamps();
         });
 
@@ -191,29 +174,25 @@ return new class extends Migration {
         */
         Schema::create('voucher_lines', function (Blueprint $table) {
             $table->id();
-
-            $table->foreignId('voucher_id')
-                ->constrained('vouchers')
-                ->cascadeOnDelete();
-
-            $table->foreignId('ledger_account_id')
-                ->constrained('ledger_accounts')
-                ->restrictOnDelete();
-
+            $table->foreignId('voucher_id')->constrained('vouchers')->cascadeOnDelete();
+            $table->foreignId('ledger_account_id')->constrained('ledger_accounts')->restrictOnDelete();
             $table->nullableMorphs('subledger');
-
-            $table->foreignId('instrument_type_id')
-                ->nullable()
-                ->constrained('instrument_types');
+            $table->foreignId('instrument_type_id')->nullable()->constrained('instrument_types');
             $table->unsignedBigInteger('instrument_id')->nullable();
-
+            $table->enum('component', [
+                'PRINCIPAL',
+                'INTEREST',
+                'PENALTY',
+                'DEPOSIT',
+                'WITHDRAWAL',
+                'CASH_IN',
+                'CASH_OUT'
+            ])->nullable();
             $table->string('particulars')->nullable();
             $table->decimal('debit', 18, 2)->default(0);
             $table->decimal('credit', 18, 2)->default(0);
             $table->enum('dr_cr', ['DR', 'CR']);
-
             $table->timestamps();
-
             // $table->check(
             //     '(debit > 0 AND credit = 0) OR (credit > 0 AND debit = 0)'
             // );

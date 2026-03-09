@@ -12,7 +12,7 @@ import Swal from 'sweetalert2';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
-import { Customer } from '../../../types/customer';
+import { Customer } from '../../../types/customer_kyc_module';
 
 export default function Index() {
     const { props } = usePage<
@@ -138,7 +138,7 @@ export default function Index() {
                                     'Type',
                                     'Phone',
                                     'Email',
-                                    'Status',
+                                    'KYC Status',
                                     'Actions',
                                 ].map((h) => (
                                     <th
@@ -164,7 +164,9 @@ export default function Index() {
                                     <td className="px-2 py-1">{c.type}</td>
                                     <td className="px-2 py-1">{c.phone}</td>
                                     <td className="px-2 py-1">{c.email}</td>
-                                    <td className="px-2 py-1">{c.status}</td>
+                                    <td className="px-2 py-1">
+                                        {c.kyc_status}
+                                    </td>
                                     <td className="px-2 py-1 whitespace-nowrap">
                                         <TooltipProvider>
                                             <div className="flex gap-2">
@@ -240,7 +242,7 @@ export default function Index() {
                                     </p>
                                 </div>
                                 <span className="rounded-full bg-muted px-2 py-0.5 text-xs">
-                                    {c.status}
+                                    {c.kyc_status}
                                 </span>
                             </div>
 

@@ -1,8 +1,9 @@
 import { AuditFields, ID, Timestamp } from './base_types';
 import { User } from './user';
 
-export type AddressVerificationStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
-export type FamilyVerificationStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
+/* ===========================
+ * Enums / Types
+ * =========================== */
 export type CustomerType = 'Individual' | 'Organization';
 export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
 export type Religion =
@@ -17,13 +18,19 @@ export type IdentificationType =
     | 'REGISTRATION_NO'
     | 'PASSPORT'
     | 'DRIVING_LICENSE';
-export type KycLevel = 'MIN' | 'STD' | 'ENH';
 export type KycStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
+export type AddressType =
+    | 'CURRENT'
+    | 'PERMANENT'
+    | 'MAILING'
+    | 'WORK'
+    | 'REGISTERED'
+    | 'OTHER';
+export type VerificationStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
 
 /* ===========================
  * Customer
  * =========================== */
-
 export interface Customer extends AuditFields {
     id: ID;
     customer_no: string;
@@ -41,36 +48,47 @@ export interface Customer extends AuditFields {
     identification_number: string;
 
     kyc_status: KycStatus;
-
     kyc_verified_by?: ID | null;
+    kyc_verified_by_user?: User | null;
     kyc_verified_at?: Timestamp | null;
 
-    photo?: CustomerPhoto | null;
+    photo?: KycDocument | null;
+    signature?: KycDocument | null;
+
+    addresses?: CustomerAddress[];
+    familyRelations?: CustomerFamilyRelation[];
+    introducers?: CustomerIntroducer[];
+    introducedCustomers?: CustomerIntroducer[];
+    onlineServiceClient?: OnlineServiceClient | null;
+    kycProfile?: KycProfile | null;
+    kycDocuments?: KycDocument[];
 }
 
-export interface CustomerPhoto extends AuditFields {
-    id: number;
+/* ===========================
+ * KYC Documents
+ * =========================== */
+export interface KycDocument extends AuditFields {
+    id: ID;
     customer_id: ID;
     customer?: Customer | null;
+
+    document_type: string;
     file_name: string;
     file_path: string;
     file_type: string;
     alt_text?: string | null;
     url: string;
+
+    verification_status: VerificationStatus;
+    verified_by?: ID | null;
+    verified_by_user?: User | null;
+    verified_at?: Timestamp | null;
+    remarks?: string | null;
 }
 
 /* ===========================
  * Customer Addresses
  * =========================== */
-
-export type AddressType =
-    | 'CURRENT'
-    | 'PERMANENT'
-    | 'MAILING'
-    | 'WORK'
-    | 'REGISTERED'
-    | 'OTHER';
-
 export interface CustomerAddress extends AuditFields {
     id: ID;
     customer_id: ID;
@@ -78,7 +96,6 @@ export interface CustomerAddress extends AuditFields {
 
     line1: string;
     line2?: string | null;
-
     division?: string | null;
     district?: string | null;
     upazila?: string | null;
@@ -88,7 +105,7 @@ export interface CustomerAddress extends AuditFields {
 
     type: AddressType;
 
-    verification_status: AddressVerificationStatus;
+    verification_status: VerificationStatus;
     verified_by?: ID | null;
     verified_by_user?: User | null;
     verified_at?: Timestamp | null;
@@ -98,7 +115,6 @@ export interface CustomerAddress extends AuditFields {
 /* ===========================
  * Customer Family Relations
  * =========================== */
-
 export type RelationType =
     | 'FATHER'
     | 'MOTHER'
@@ -126,62 +142,21 @@ export interface CustomerFamilyRelation extends AuditFields {
     customer_id: ID;
     customer?: Customer | null;
 
-    // Linked customer (optional)
     relative_id?: ID | null;
-
-    // Raw identity (used when relative_id is null)
-    name: string;
-    phone?: string | null;
-    email?: string | null;
-    dob?: string | null;
-
-    gender?: Gender | null;
-    religion?: Religion | null;
-
-    identification_type: Exclude<IdentificationType, 'REGISTRATION_NO'>;
-    identification_number: string;
-
-    photo?: FamilyRelationPhoto | null;
+    relative?: Customer | null;
 
     relation_type: RelationType;
 
-    verification_status: FamilyVerificationStatus;
+    verification_status: VerificationStatus;
     verified_by?: ID | null;
     verified_by_user?: User | null;
     verified_at?: Timestamp | null;
     remarks?: string | null;
 }
 
-export interface FamilyRelationPhoto extends AuditFields {
-    id: number;
-    customer_id: ID;
-    customer?: Customer | null;
-    file_name: string;
-    file_path: string;
-    file_type: string;
-    alt_text?: string | null;
-    url: string;
-}
-
-/* ===========================
- * Customer Signatures
- * =========================== */
-
-export interface CustomerSignature extends AuditFields {
-    id: ID;
-    customer_id: ID;
-    customer?: Customer | null;
-    file_name: string;
-    file_path: string;
-    mime: string;
-    alt_text?: string | null;
-    url?: string | null;
-}
-
 /* ===========================
  * Customer Introducers
  * =========================== */
-
 export type IntroducerRelationshipType =
     | 'FAMILY'
     | 'FRIEND'
@@ -194,13 +169,15 @@ export interface CustomerIntroducer extends AuditFields {
 
     introduced_customer_id: ID;
     introduced_customer?: Customer | null;
+
     introducer_customer_id: ID;
     introducer_customer?: Customer | null;
-    introducer_account_id: ID;
+
+    introducer_account_id?: ID | null;
 
     relationship_type: IntroducerRelationshipType;
 
-    verification_status: AddressVerificationStatus;
+    verification_status: VerificationStatus;
     verified_by?: ID | null;
     verified_by_user?: User | null;
     verified_at?: Timestamp | null;
@@ -208,9 +185,29 @@ export interface CustomerIntroducer extends AuditFields {
 }
 
 /* ===========================
- * Online Service Users
+ * KYC Profile
  * =========================== */
+export type KycLevel = 'BASIC' | 'FULL' | 'ENHANCED';
+export type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH';
 
+export interface KycProfile extends AuditFields {
+    id: ID;
+    customer_id: ID;
+    customer?: Customer | null;
+
+    kyc_level: KycLevel;
+    risk_level: RiskLevel;
+
+    verification_status: 'PENDING' | 'APPROVED' | 'REJECTED';
+    verified_by?: ID | null;
+    verified_by_user?: User | null;
+    verified_at?: Timestamp | null;
+    remarks?: string | null;
+}
+
+/* ===========================
+ * Online Service Clients
+ * =========================== */
 export interface OnlineServiceClient extends AuditFields {
     id: ID;
     customer_id: ID;
@@ -219,9 +216,8 @@ export interface OnlineServiceClient extends AuditFields {
     username: string;
     email?: string | null;
     phone?: string | null;
+    password: string;
 
-    password: string; // hashed
     last_login_at?: Timestamp | null;
-
     status: 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'CLOSED';
 }

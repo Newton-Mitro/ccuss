@@ -12,22 +12,22 @@ use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class CustomerController extends Controller
 {
+    /* ==========================
+     * Search Customers (AJAX)
+     * ========================== */
     public function searchCustomers(Request $request): JsonResponse
     {
         $search = $request->query('search');
 
-        // If search is empty, return empty array
         if (empty($search)) {
             return response()->json(['data' => []]);
         }
 
-        $query = Customer::query()->with('photo');
+        $query = Customer::query()->with(['photo', 'kycProfile', 'kycDocuments']);
 
-        // Apply search filter
         $query->where(function ($q) use ($search) {
             $q->where('name', 'like', "%{$search}%")
                 ->orWhere('customer_no', 'like', "%{$search}%")
@@ -35,37 +35,43 @@ class CustomerController extends Controller
                 ->orWhere('phone', 'like', "%{$search}%");
         });
 
-        // ✅ Status filter
         $status = $request->input('status');
         if ($status && $status !== 'all') {
             $query->where('status', $status);
         }
 
-        // ✅ Get all results
         $customers = $query->latest()->get();
 
         return response()->json($customers);
-
     }
 
+    /* ==========================
+     * Find Customer by ID
+     * ========================== */
     public function findCustomer(int $id): JsonResponse
     {
         $customer = Customer::with([
             'photo',
             'addresses',
             'familyRelations',
-            'introducers',
+            'familyRelations.relative',
+            'familyRelations.relative.photo',
+            'introducers.introducerCustomer',
+            'introducers.introducedCustomer',
+            'kycProfile',
+            'kycDocuments'
         ])->findOrFail($id);
 
         return response()->json($customer);
     }
 
+    /* ==========================
+     * List Customers
+     * ========================== */
     public function index(Request $request): Response
     {
-        $query = Customer::query()
-            ->with('photo'); // eager load media
+        $query = Customer::with(['photo', 'kycProfile']);
 
-        // ✅ Search
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -75,7 +81,6 @@ class CustomerController extends Controller
             });
         }
 
-        // ✅ Status filter
         if ($status = $request->input('status')) {
             if ($status !== 'all') {
                 $query->where('status', $status);
@@ -92,72 +97,63 @@ class CustomerController extends Controller
         ]);
     }
 
-    public function create(Request $request): Response
+    /* ==========================
+     * Create Customer Page
+     * ========================== */
+    public function create(): Response
     {
-
         return Inertia::render('customer-mgmt/customers/create', [
             'backUrl' => url()->previous(),
         ]);
     }
 
+    /* ==========================
+     * Store Customer
+     * ========================== */
     public function store(StoreCustomerRequest $request): RedirectResponse
     {
         $data = $request->validated();
 
-        // ✅ Require at least phone or email
         if (empty($data['phone']) && empty($data['email'])) {
-
-            return back()
-                ->withInput()
-                ->with('error', 'Please provide at least a phone number or an email address.');
+            return back()->withInput()->with('error', 'Please provide at least a phone number or an email address.');
         }
 
-        // ✅ Check if customer already exists
         $exists = Customer::where('identification_number', $data['identification_number'])
             ->when(!empty($data['email']), fn($q) => $q->orWhere('email', $data['email']))
             ->when(!empty($data['phone']), fn($q) => $q->orWhere('phone', $data['phone']))
             ->exists();
 
         if ($exists) {
-            return back()
-                ->withInput()
-                ->with('error', 'A customer with the same identification number, email, or phone already exists.');
+            return back()->withInput()->with('error', 'A customer with the same identification number, email, or phone already exists.');
         }
 
         DB::transaction(function () use (&$data) {
-
-            // ✅ Type prefix
             $typePrefix = $data['type'] === 'Individual' ? 'IND' : 'ORG';
-
-            // ✅ Safe sequential number (locked)
             $lastId = Customer::lockForUpdate()->max('id') ?? 0;
             $nextNumber = str_pad($lastId + 1, 5, '0', STR_PAD_LEFT);
-
-            // ✅ Build customer_no
-            $parts = array_filter([
-                $typePrefix,
-                $nextNumber,
-            ]);
-
-            $data['customer_no'] = implode('-', $parts);
+            $data['customer_no'] = "{$typePrefix}-{$nextNumber}";
 
             Customer::create($data);
         });
 
-        return redirect()
-            ->route('customers.index')
-            ->with('success', 'Customer created successfully.');
+        return redirect()->route('customers.index')->with('success', 'Customer created successfully.');
     }
 
+    /* ==========================
+     * Show Customer
+     * ========================== */
     public function show(Customer $customer): Response
     {
-        // Eager load all related data
         $customer->load([
-            'photo',                 // Customer photo
-            'addresses',             // Customer addresses
-            'familyRelations',       // Family relations
-            'introducers.introducerCustomer',   // The introducer customer
-            'introducers.introducedCustomer',   // The customer who was introduced
+            'photo',
+            'addresses',
+            'familyRelations',
+            'familyRelations.relative',
+            'familyRelations.relative.photo',
+            'introducers.introducerCustomer',
+            'introducers.introducedCustomer',
+            'kycProfile',
+            'kycDocuments'
         ]);
 
         return Inertia::render('customer-mgmt/customers/show', [
@@ -166,11 +162,12 @@ class CustomerController extends Controller
         ]);
     }
 
-
-    public function edit(Request $request, Customer $customer): Response
+    /* ==========================
+     * Edit Customer Page
+     * ========================== */
+    public function edit(Customer $customer): Response
     {
-
-        $customer->load('photo');
+        $customer->load(['photo', 'kycProfile', 'kycDocuments']);
 
         return Inertia::render('customer-mgmt/customers/edit', [
             'customer' => $customer,
@@ -178,70 +175,47 @@ class CustomerController extends Controller
         ]);
     }
 
+    /* ==========================
+     * Update Customer
+     * ========================== */
     public function update(UpdateCustomerRequest $request, Customer $customer): RedirectResponse
     {
         $data = $request->validated();
 
-        // ✅ Require at least phone or email
         if (empty($data['phone']) && empty($data['email'])) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Please provide at least a phone number or an email address.');
+            return redirect()->back()->withInput()->with('error', 'Please provide at least a phone number or an email address.');
         }
 
-        // ✅ Check for duplicate (excluding current customer)
         $exists = Customer::where(function ($q) use ($data) {
             $q->where('identification_number', $data['identification_number']);
-
-            if (!empty($data['email'])) {
+            if (!empty($data['email']))
                 $q->orWhere('email', $data['email']);
-            }
-
-            if (!empty($data['phone'])) {
+            if (!empty($data['phone']))
                 $q->orWhere('phone', $data['phone']);
-            }
-        })
-            ->where('id', '!=', $customer->id)
-            ->exists();
+        })->where('id', '!=', $customer->id)->exists();
 
         if ($exists) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Another customer with the same identification number, email, or phone already exists.');
+            return redirect()->back()->withInput()->with('error', 'Another customer with the same identification number, email, or phone already exists.');
         }
 
-        // ✅ Check if we need to regenerate customer_no
-        $shouldRegenerateNo =
-            $data['type'] !== $customer->type ||
-            $data['identification_type'] !== $customer->identification_type;
-
-        if ($shouldRegenerateNo) {
-            // ✅ Determine type prefix
+        // Regenerate customer_no if type or identification type changed
+        if ($data['type'] !== $customer->type || $data['identification_type'] !== $customer->identification_type) {
             $typePrefix = $data['type'] === 'Individual' ? 'IND' : 'ORG';
-
-            // ✅ Keep existing numeric ID sequence
-            $formattedNumber = str_pad($customer->id, 5, '0', STR_PAD_LEFT);
-
-            // ✅ Build new customer_no
-            $parts = [$typePrefix, $formattedNumber];
-
-            $data['customer_no'] = strtoupper(implode('', $parts));
+            $data['customer_no'] = "{$typePrefix}-" . str_pad($customer->id, 5, '0', STR_PAD_LEFT);
         }
 
-        // ✅ Update record
         $customer->update($data);
 
-        return redirect()->back()
-            ->with('success', 'Customer updated successfully.');
+        return redirect()->back()->with('success', 'Customer updated successfully.');
     }
 
+    /* ==========================
+     * Delete Customer
+     * ========================== */
     public function destroy(Customer $customer): RedirectResponse
     {
         $customer->delete();
 
-        return redirect()->route('customers.index')
-            ->with('success', 'Customer deleted successfully.');
+        return redirect()->route('customers.index')->with('success', 'Customer deleted successfully.');
     }
-
-
 }
