@@ -17,13 +17,63 @@ return new class extends Migration {
             $table->string('name');
             $table->string('short_name')->nullable();
             $table->enum('type', ['PERSONAL', 'SME', 'EDUCATION', 'HOUSING']);
-            $table->decimal('interest_rate', 5, 2)->default(0);
-            $table->decimal('min_amount', 15, 2)->default(0);
-            $table->decimal('max_amount', 15, 2)->default(0);
-            $table->integer('max_tenure_months')->default(12);
-            $table->enum('repayment_frequency', ['DAILY', 'WEEKLY', 'MONTHLY'])->default('MONTHLY');
-            $table->decimal('processing_fee', 15, 2)->default(0);
-            $table->decimal('penalty_rate', 5, 2)->default(0);
+            // Financial parameters
+            $table->decimal('interest_rate', 5, 2)->nullable();
+            $table->enum('interest_type', ['fixed', 'floating'])->default('fixed');
+            $table->enum('interest_compounding', ['daily', 'monthly', 'quarterly', 'yearly'])->default('monthly');
+
+            $table->decimal('min_loan_amount', 15, 2)->default(0);
+            $table->decimal('max_loan_amount', 15, 2)->nullable();
+            $table->integer('min_tenure_months')->nullable();
+            $table->integer('max_tenure_months')->nullable();
+            $table->enum('repayment_frequency', ['weekly', 'monthly', 'quarterly'])->default('monthly');
+            $table->enum('repayment_type', ['principal_and_interest', 'principal_only', 'interest_only', 'balloon', 'equal_installments'])->default('principal_and_interest');
+
+            // Policy / JSON for flexible rules
+            $table->json('policies')->nullable();
+            /*
+            Example:
+            {
+                "min_loan_amount": 0,                      // Minimum loan principal
+                "max_loan_amount": null,                    // Maximum loan principal
+                "loan_tenure_months": null,                 // Default/maximum tenure
+                "min_tenure_months": null,
+                "max_tenure_months": null,
+
+                "interest_type": "fixed",                   // fixed, floating
+                "interest_rate": 0,                          // Annual interest rate in %
+                "interest_compounding": "monthly",          // daily, monthly, quarterly, yearly
+                "grace_period_days": 0,                      // Grace period for repayment after disbursement
+
+                "repayment_frequency": "monthly",           // weekly, monthly, quarterly
+                "repayment_type": "principal_and_interest", // principal_only, interest_only, balloon, equal_installments
+
+                "penalty_on_late_payment": 0,               // % of installment or fixed amount
+                "prepayment_allowed": false,                // Can borrower repay early?
+                "prepayment_penalty": 0,                    // % of principal if prepayment occurs
+
+                "collateral_required": false,               // Secured or unsecured loan
+                "collateral_type": null,                    // Property, vehicle, guarantee, etc.
+                "insurance_required": false,                // Optional insurance coverage
+
+                "age_limit_min": null,
+                "age_limit_max": null,
+                "income_requirement": null,                 // Minimum income for eligibility
+                "credit_score_min": null,                   // Minimum credit score if applicable
+
+                "auto_disburse_on_approval": false,         // Automatic disbursement after approval
+                "loan_processing_fee": 0,                   // Fixed or percentage fee
+                "service_charges": 0,                       // Additional charges
+
+                "special_conditions": {
+                    "high_risk": false,
+                    "subsidized_rate": false,
+                    "promotional_scheme": false
+                },
+
+                "notes": ""                                 // Free-form internal notes
+            }
+            */
             $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
@@ -263,10 +313,56 @@ return new class extends Migration {
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
+
+        Schema::create('loan_notification_templates', function (Blueprint $table) {
+            $table->id();
+
+            $table->string('name'); // e.g., 'Repayment Reminder', 'Overdue Alert'
+            $table->string('type'); // e.g., 'REPAYMENT_REMINDER', 'OVERDUE_ALERT'
+            $table->text('message'); // Template message with placeholders e.g., "Your installment of {{amount}} is due on {{due_date}}"
+
+            // Recurrence configuration
+            $table->enum('recurrence', ['ONCE', 'DAILY', 'WEEKLY', 'MONTHLY'])->default('ONCE');
+            $table->integer('days_before_due')->nullable(); // e.g., 3 days before due date
+            $table->time('send_time')->nullable(); // Time of day to send
+
+            // Optional channels
+            $table->boolean('via_email')->default(true);
+            $table->boolean('via_sms')->default(false);
+
+            $table->boolean('is_active')->default(true);
+
+            // Audit
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamps();
+        });
+
+        Schema::create('loan_notifications', function (Blueprint $table) {
+            $table->id();
+
+            $table->foreignId('loan_account_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('template_id')->constrained('loan_notification_templates')->cascadeOnDelete();
+
+            $table->text('message'); // Final message after placeholder replacement
+            $table->enum('status', ['PENDING', 'SENT', 'FAILED'])->default('PENDING');
+            $table->dateTime('scheduled_at'); // When this notification should go out
+            $table->dateTime('sent_at')->nullable(); // Actual send time
+
+            $table->boolean('via_email')->default(true);
+            $table->boolean('via_sms')->default(false);
+
+            // Audit
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamps();
+        });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('loan_notifications');
+        Schema::dropIfExists('loan_notification_templates');
         Schema::dropIfExists('loan_writeoffs');
         Schema::dropIfExists('loan_charges');
         Schema::dropIfExists('loan_penalties');
