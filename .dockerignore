@@ -1,0 +1,32 @@
+# Node modules (don’t copy huge folders)
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Composer vendor directory
+vendor
+
+# Environment file
+.env
+.env.local
+.env.*.backup
+
+# Git folder
+.git
+.gitignore
+
+# Logs and cache
+storage/logs
+storage/framework/cache
+storage/framework/sessions
+storage/framework/views
+
+# Build artifacts
+public/build
+public/hot
+dist
+build
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -64,14 +64,6 @@ export const sidebarMenu: SidebarItem[] = [
                 match_path: 'kyc-profiles',
                 permission: ['customer.kyc-profiles.view'],
             },
-        ],
-    },
-    {
-        name: `Online Services`,
-        icon: <i className="fa-solid fa-user-lock" />,
-        children_expanded: false,
-        permission: ['customer.online_clients.view'],
-        children: [
             {
                 name: 'Online Service Clients',
                 icon: <i className="fa-solid fa-user-shield" />,
@@ -196,14 +188,14 @@ export const sidebarMenu: SidebarItem[] = [
         permission: ['transaction.view'],
         children: [
             {
-                name: 'Deposit',
+                name: 'Customer Deposit/Collection',
                 icon: <i className="fa-solid fa-circle-dollar-to-slot" />,
                 path: '/deposit',
                 match_path: 'deposit',
                 permission: ['transaction.deposit.create'],
             },
             {
-                name: 'Withdrawal',
+                name: 'Customer Withdrawal',
                 icon: <i className="fa-solid fa-money-bill-transfer" />,
                 path: '/withdrawal',
                 match_path: 'withdrawal',

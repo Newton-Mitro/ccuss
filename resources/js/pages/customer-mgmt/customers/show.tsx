@@ -4,20 +4,22 @@ import {
     CheckCircle2,
     Clock,
     Edit2,
-    Eye,
     FileText,
     Globe,
     HomeIcon,
     ListFilter,
+    Plus,
     UserCheckIcon,
     UserIcon,
     UsersIcon,
+    X,
     XCircle,
 } from 'lucide-react';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatDate } from '../../../lib/date_util';
 import { BreadcrumbItem } from '../../../types';
 
+import { route } from 'ziggy-js';
 import { Customer } from '../../../types/customer_kyc_module';
 
 /* ================= Theme ================= */
@@ -117,7 +119,7 @@ export default function Show({ customer, backUrl }: ShowProps) {
             {/* ================= Basic Info ================= */}
 
             <SectionHeader
-                icon={<UserIcon />}
+                icon={<UserIcon size={18} />}
                 title="Basic Information"
                 actions={
                     <Link
@@ -166,7 +168,7 @@ export default function Show({ customer, backUrl }: ShowProps) {
             {/* ================= KYC Profile ================= */}
             {customer.kyc_profile && (
                 <SectionHeader
-                    icon={<UserCheckIcon />}
+                    icon={<UserCheckIcon size={18} />}
                     title="KYC Profile"
                     actions={
                         <Link
@@ -204,10 +206,25 @@ export default function Show({ customer, backUrl }: ShowProps) {
             {/* ================= Addresses ================= */}
 
             {customer.addresses?.length > 0 && (
-                <SectionHeader icon={<HomeIcon />} title="Addresses">
+                <SectionHeader
+                    icon={<HomeIcon size={18} />}
+                    title="Addresses"
+                    actions={
+                        <Link
+                            href={`/customers/${customer.id}/edit`}
+                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs"
+                        >
+                            <Plus size={14} /> Add
+                        </Link>
+                    }
+                >
                     <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
                         {customer.addresses.map((addr) => (
-                            <DataCard key={addr.id}>
+                            <DataCard
+                                key={addr.id}
+                                onEdit={() => {}}
+                                onDelete={() => {}}
+                            >
                                 <div className="text-sm font-semibold">
                                     {addr.type}
                                 </div>
@@ -228,10 +245,25 @@ export default function Show({ customer, backUrl }: ShowProps) {
             {/* ================= Family ================= */}
 
             {customer.family_relations?.length > 0 && (
-                <SectionHeader icon={<UsersIcon />} title="Family & Relatives">
+                <SectionHeader
+                    icon={<UsersIcon size={18} />}
+                    title="Family & Relatives"
+                    actions={
+                        <Link
+                            href={`/customers/${customer.id}/edit`}
+                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs"
+                        >
+                            <Plus size={14} /> Add
+                        </Link>
+                    }
+                >
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
                         {customer.family_relations.map((rel) => (
-                            <DataCard key={rel.id}>
+                            <DataCard
+                                key={rel.id}
+                                onEdit={() => {}}
+                                onDelete={() => {}}
+                            >
                                 <div className="flex items-center gap-2">
                                     {rel.relative?.photo?.url ? (
                                         <img
@@ -246,7 +278,20 @@ export default function Show({ customer, backUrl }: ShowProps) {
 
                                     <div className="flex flex-col text-xs">
                                         <div className="text-sm font-medium">
-                                            {rel.relative?.name}
+                                            <a
+                                                href={route(
+                                                    'customers.show',
+                                                    rel.relative?.id,
+                                                )}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="cursor-pointer text-sm font-semibold hover:underline"
+                                                onClick={(e) =>
+                                                    e.stopPropagation()
+                                                }
+                                            >
+                                                {`${rel.relative?.name} • ${rel.relative?.customer_no}`}
+                                            </a>
                                         </div>
 
                                         <div className="flex gap-2">
@@ -267,12 +312,38 @@ export default function Show({ customer, backUrl }: ShowProps) {
             {/* ================= Introducers ================= */}
 
             {customer.introducers?.length > 0 && (
-                <SectionHeader icon={<UserCheckIcon />} title="Introducers">
+                <SectionHeader
+                    icon={<UserCheckIcon size={18} />}
+                    title="Introducers"
+                    actions={
+                        <Link
+                            href={`/customers/${customer.id}/edit`}
+                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs"
+                        >
+                            <Plus size={14} /> Add
+                        </Link>
+                    }
+                >
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
                         {customer.introducers.map((intro) => (
-                            <DataCard key={intro.id}>
+                            <DataCard
+                                key={intro.id}
+                                onEdit={() => {}}
+                                onDelete={() => {}}
+                            >
                                 <div className="text-sm font-medium">
-                                    {intro.introducer_customer?.name}
+                                    <a
+                                        href={route(
+                                            'customers.show',
+                                            intro.introducer_customer?.id,
+                                        )}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="cursor-pointer text-sm font-semibold hover:underline"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        {`${intro.introducer_customer?.name} • ${intro.introducer_customer?.customer_no}`}
+                                    </a>
                                 </div>
 
                                 <div className="flex gap-2 text-xs">
@@ -289,26 +360,36 @@ export default function Show({ customer, backUrl }: ShowProps) {
             {/* ================= KYC Documents ================= */}
 
             {customer.kyc_documents?.length > 0 && (
-                <SectionHeader icon={<FileText />} title="KYC Documents">
+                <SectionHeader
+                    icon={<FileText size={18} />}
+                    title="KYC Documents"
+                    actions={
+                        <Link
+                            href={`/customers/${customer.id}/edit`}
+                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs"
+                        >
+                            <Plus size={14} /> Add
+                        </Link>
+                    }
+                >
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
                         {customer.kyc_documents.map((doc) => (
-                            <DataCard key={doc.id}>
+                            <DataCard key={doc.id} onDelete={() => {}}>
                                 <div className="flex items-center gap-2">
-                                    <div className="text-sm font-semibold">
-                                        {doc.document_type}
-                                    </div>
-
                                     <VerificationStatus
                                         status={doc.verification_status}
                                     />
-
-                                    <a
-                                        href={doc.url}
-                                        target="_blank"
-                                        className="text-xs text-primary underline"
-                                    >
-                                        <Eye />
-                                    </a>
+                                    <div className="text-sm font-semibold">
+                                        <a
+                                            href={doc.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="cursor-pointer text-sm font-semibold hover:underline"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            {doc.document_type}
+                                        </a>
+                                    </div>
                                 </div>
                             </DataCard>
                         ))}
@@ -319,23 +400,45 @@ export default function Show({ customer, backUrl }: ShowProps) {
             {/* ================= Online Service ================= */}
 
             {customer.online_service_client && (
-                <SectionHeader icon={<Globe />} title="Online Service Client">
-                    <div className="grid grid-cols-1 md:grid-cols-4">
-                        <DataCard>
-                            <div className="text-xs">
-                                {customer.online_service_client.email}
-                            </div>
-                            <div className="text-[10px] opacity-70">
-                                Last Login:{' '}
-                                {formatDate(
-                                    customer.online_service_client
-                                        .last_login_at,
-                                )}
-                            </div>
-                            <Badge
-                                text={customer.online_service_client.status}
-                            />
-                        </DataCard>
+                <SectionHeader
+                    icon={<Globe size={18} />}
+                    title="Online Service Client"
+                    actions={
+                        <Link
+                            href={`/customers/${customer.id}/edit`}
+                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs"
+                        >
+                            <Edit2 size={14} /> Edit
+                        </Link>
+                    }
+                >
+                    <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
+                        <InfoItem
+                            label="Username"
+                            value={customer.online_service_client.username}
+                        />
+
+                        <InfoItem
+                            label="User Email"
+                            value={customer.online_service_client.email}
+                        />
+
+                        <InfoItem
+                            label="User Phone"
+                            value={customer.online_service_client.phone}
+                        />
+
+                        <div className="flex flex-col">
+                            <span className="text-[10px] text-muted-foreground uppercase">
+                                User Status
+                            </span>
+                            <span className="text-sm">
+                                {' '}
+                                <Badge
+                                    text={customer.online_service_client.status}
+                                />
+                            </span>
+                        </div>
                     </div>
                 </SectionHeader>
             )}
@@ -377,8 +480,37 @@ const InfoItem = ({ label, value }: any) => (
     </div>
 );
 
-const DataCard = ({ children }: any) => (
-    <div className="rounded border bg-card px-3 py-2 shadow-sm hover:shadow">
+const DataCard = ({
+    children,
+    onEdit,
+    onDelete,
+}: {
+    children: React.ReactNode;
+    onEdit?: () => void;
+    onDelete?: () => void;
+}) => (
+    <div className="group relative rounded-md border border-border bg-card p-3 shadow-sm transition hover:shadow-md">
+        {/* Edit/Delete buttons */}
+        {(onEdit || onDelete) && (
+            <div className="absolute top-1 right-1 flex gap-1 opacity-0 transition group-hover:opacity-100">
+                {onEdit && (
+                    <button
+                        onClick={onEdit}
+                        className="rounded bg-secondary p-1 text-secondary-foreground hover:bg-secondary/80"
+                    >
+                        <Edit2 size={14} />
+                    </button>
+                )}
+                {onDelete && (
+                    <button
+                        onClick={onDelete}
+                        className="rounded bg-destructive p-1 text-destructive-foreground hover:bg-destructive/80"
+                    >
+                        <X size={14} />
+                    </button>
+                )}
+            </div>
+        )}
         {children}
     </div>
 );
@@ -391,12 +523,26 @@ const Badge = ({ text, color = 'accent' }: any) => (
     </span>
 );
 
-const SectionHeader = ({ title, icon, children }: any) => (
+const SectionHeader = ({
+    title,
+    icon,
+    actions,
+    children,
+}: {
+    title: string;
+    icon: React.ReactNode;
+    actions?: React.ReactNode;
+    children: React.ReactNode;
+}) => (
     <section className="mt-4">
-        <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
-            {icon} {title}
+        <div className="mb-2 flex items-center justify-between text-sm font-semibold text-card-foreground">
+            <div className="flex items-center gap-2">
+                {icon} <span>{title}</span>
+            </div>
+            {actions && (
+                <div className="flex items-center gap-2">{actions}</div>
+            )}
         </div>
-
         {children}
     </section>
 );
@@ -410,21 +556,21 @@ const VerificationStatus = ({
         case 'VERIFIED':
             return (
                 <span className="flex items-center gap-1 text-xs text-green-600">
-                    <CheckCircle2 size={14} /> Approved
+                    <CheckCircle2 size={18} />
                 </span>
             );
 
         case 'REJECTED':
             return (
                 <span className="flex items-center gap-1 text-xs text-red-600">
-                    <XCircle size={14} /> Rejected
+                    <XCircle size={18} />
                 </span>
             );
 
         default:
             return (
                 <span className="flex items-center gap-1 text-xs text-yellow-600">
-                    <Clock size={14} /> Pending
+                    <Clock size={18} />
                 </span>
             );
     }

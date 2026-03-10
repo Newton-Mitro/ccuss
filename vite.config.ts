@@ -24,4 +24,9 @@ export default defineConfig({
     esbuild: {
         jsx: 'automatic',
     },
+    // server: {
+    //     host: '0.0.0.0', // VERY IMPORTANT for Docker
+    //     port: 5173,
+    //     watch: { usePolling: true },
+    // },
 });

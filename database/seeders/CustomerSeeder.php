@@ -56,30 +56,57 @@ class CustomerSeeder extends Seeder
                 ]);
             }
 
-            // ---------------------------
-            // KYC Documents
-            // ---------------------------
             // Photo
             $photoFileName = 'photo_' . Str::slug($customer->customer_no) . '.jpg';
             $photoPath = 'customers/photos/' . $photoFileName;
             $disk->putFileAs('customers/photos', $photoSource, $photoFileName);
 
-            KycDocument::factory()->for($customer)->type('PHOTO')->verified()->create([
-                'file_name' => $photoFileName,
-                'file_path' => $photoPath,
-                'mime' => 'image/jpeg',
-            ]);
+            // NID (Front)
+            $nidFileName = 'nid_front_' . Str::slug($customer->customer_no) . '.jpg';
+            $nidPath = 'customers/nid/' . $nidFileName;
+            $disk->putFileAs('customers/nid', $nidSource, $nidFileName);
 
             // Signature
             $signatureFileName = 'signature_' . Str::slug($customer->customer_no) . '.jpg';
             $signaturePath = 'customers/signatures/' . $signatureFileName;
             $disk->putFileAs('customers/signatures', $signatureSource, $signatureFileName);
 
-            KycDocument::factory()->for($customer)->type('SIGNATURE')->verified()->create([
-                'file_name' => $signatureFileName,
-                'file_path' => $signaturePath,
-                'mime' => 'image/jpeg',
-            ]);
+            // ---------------------------
+            // KYC Documents
+            // ---------------------------
+            if ($customer->type === 'ORGANIZATION') {
+                KycDocument::factory()->for($customer)->type('PHOTO')->verified()->create([
+                    'file_name' => $photoFileName,
+                    'file_path' => $photoPath,
+                    'mime' => 'image/jpeg',
+                ]);
+
+                KycDocument::factory()->for($customer)->type('TRADE_LICENSE')->create([
+                    'file_name' => $nidFileName,
+                    'file_path' => $nidPath,
+                    'mime' => 'image/jpeg',
+                ]);
+            } else {
+                KycDocument::factory()->for($customer)->type('PHOTO')->verified()->create([
+                    'file_name' => $photoFileName,
+                    'file_path' => $photoPath,
+                    'mime' => 'image/jpeg',
+                ]);
+
+                KycDocument::factory()->for($customer)->type('SIGNATURE')->verified()->create([
+                    'file_name' => $signatureFileName,
+                    'file_path' => $signaturePath,
+                    'mime' => 'image/jpeg',
+                ]);
+
+                KycDocument::factory()->for($customer)->type('NID_FRONT')->create([
+                    'file_name' => $nidFileName,
+                    'file_path' => $nidPath,
+                    'mime' => 'image/jpeg',
+                ]);
+            }
+
+
 
             $states = ['approved', 'rejected', null];
             $state = collect($states)->random();
@@ -90,16 +117,6 @@ class CustomerSeeder extends Seeder
                 default => $factory->create(), // PENDING
             };
 
-            // NID (Front)
-            $nidFileName = 'nid_front_' . Str::slug($customer->customer_no) . '.jpg';
-            $nidPath = 'customers/nid/' . $nidFileName;
-            $disk->putFileAs('customers/nid', $nidSource, $nidFileName);
-
-            KycDocument::factory()->for($customer)->type('NID_FRONT')->verified()->create([
-                'file_name' => $nidFileName,
-                'file_path' => $nidPath,
-                'mime' => 'image/jpeg',
-            ]);
 
             // ---------------------------
             // Online Service User (1)
