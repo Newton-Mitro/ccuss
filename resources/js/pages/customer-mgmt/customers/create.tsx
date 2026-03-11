@@ -39,7 +39,6 @@ const Create = ({ backUrl }: { backUrl: string }) => {
         identification_number: '',
         photo: null as File | null,
         kyc_status: 'PENDING',
-        status: 'PENDING',
     });
 
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -95,7 +94,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
                         <ListFilter className="h-4 w-4" />
                         <span className="hidden sm:inline">Customers</span>
                     </Link>
-                </div>
+                 </div>
             </div>
             <form
                 onSubmit={handleSubmit}
@@ -121,7 +120,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
                             onChange={handlePhotoChange}
                             className="h-8 rounded-md border border-border px-2 py-1 text-sm"
                         />
-                        <InputError message={errors.photo} />
+                            <InputError message={errors.photo} />
                     </div>
                 </div>
 
@@ -303,21 +302,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
                         </select>
                         <InputError message={errors.kyc_status} />
                     </div>
-                    <div>
-                        <Label className="text-xs">Account Status</Label>
-                        <select
-                            value={data.status}
-                            disabled
-                            onChange={(e) => setData('status', e.target.value)}
-                            className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                        >
-                            <option>PENDING</option>
-                            <option>ACTIVE</option>
-                            <option>SUSPENDED</option>
-                            <option>CLOSED</option>
-                        </select>
-                        <InputError message={errors.status} />
-                    </div>
+                    
                 </div>
 
                 {/* SUBMIT */}

@@ -10,7 +10,7 @@ import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-import { Customer } from '../../../types/customer';
+import { Customer } from '../../../types/customer_kyc_module';
 
 interface EditProps {
     customer: Customer;
@@ -43,7 +43,6 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
         identification_number: customer.identification_number || '',
         photo: null as File | null,
         kyc_status: (customer.kyc_status as string) || 'PENDING',
-        status: (customer.status as string) || 'ACTIVE',
     });
 
     const [photoPreview, setPhotoPreview] = useState<string | null>(
@@ -106,8 +105,31 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
 
             <form
                 onSubmit={handleSubmit}
-                className="mt-4 space-y-6 rounded-md border border-border bg-card p-6"
+                className="w-full space-y-4 rounded-md border border-border bg-card p-4 sm:p-6 lg:w-5xl"
             >
+                <div className="flex flex-col gap-4">
+                    <div className="">
+                        {photoPreview && (
+                            <img
+                                src={photoPreview}
+                                alt="Preview"
+                                className="h-20 w-20 rounded-md border object-cover sm:h-24 sm:w-24"
+                            />
+                        )}
+                    </div>
+                    {/* PHOTO */}
+
+                    <div className="flex items-center gap-1">
+                        <Label className="text-xs">Photo</Label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handlePhotoChange}
+                            className="h-8 rounded-md border border-border px-2 py-1 text-sm"
+                        />
+                        <InputError message={errors.photo} />
+                    </div>
+                </div>
                 {/* BASIC INFO */}
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
                     <div>
@@ -261,28 +283,6 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                     </div>
                 </div>
 
-                {/* PHOTO */}
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-                    <div>
-                        <Label className="text-xs">Photo</Label>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handlePhotoChange}
-                            className="w-full rounded-md border border-border p-1 text-sm sm:w-auto"
-                        />
-                        <InputError message={errors.photo} />
-                    </div>
-
-                    {photoPreview && (
-                        <img
-                            src={photoPreview}
-                            alt="Preview"
-                            className="h-20 w-20 rounded-md border object-cover"
-                        />
-                    )}
-                </div>
-
                 {/* KYC & STATUS */}
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
                     <div>
@@ -298,20 +298,6 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                             <option>PENDING</option>
                             <option>VERIFIED</option>
                             <option>REJECTED</option>
-                        </select>
-                    </div>
-                    <div>
-                        <Label className="text-xs">Account Status</Label>
-                        <select
-                            value={data.status}
-                            disabled
-                            onChange={(e) => setData('status', e.target.value)}
-                            className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                        >
-                            <option>ACTIVE</option>
-                            <option>PENDING</option>
-                            <option>SUSPENDED</option>
-                            <option>CLOSED</option>
                         </select>
                     </div>
                 </div>
