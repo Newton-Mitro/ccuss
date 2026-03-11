@@ -77,7 +77,7 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Edit Customer - ${customer.name}`} />
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <HeadingSmall
                     title="Edit Customer"
                     description="Update customer information."
