@@ -3,19 +3,21 @@
 Example structure:
 
 ```
-project-root
-│
-├── docker
-│ ├── nginx
-│ │ └── default.conf
-│ └── php
-│ └── Dockerfile
-│
-├── docker-compose.yml
-├── .env
-├── storage
-├── public
-└── (laravel files)
+my-app/
+├─ docker/
+│  ├─ php/
+│  │  └─ Dockerfile
+│  ├─ node/
+│  │  └─ Dockerfile
+│  └─ nginx/
+│     └─ default.conf
+├─ docker-compose.yml
+├─ package.json
+├─ tsconfig.json
+├─ vite.config.ts
+├─ .env
+├─ app/
+└─ ...
 ```
 
 ## Start Containers

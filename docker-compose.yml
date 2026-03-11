@@ -1,3 +1,5 @@
+# version: "3.9"
+
 services:
   app:
     build:
@@ -5,57 +7,69 @@ services:
       dockerfile: docker/php/Dockerfile
     container_name: ccuss_app
     restart: unless-stopped
-    working_dir: /var/www
     volumes:
-      - ./:/var/www
+      - ./:/var/www/ccuss
+      - ./storage:/var/www/ccuss/storage
+      - ./bootstrap/cache:/var/www/ccuss/bootstrap/cache
+    environment:
+      - APP_ENV=local
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=ccuss
+      - DB_USERNAME=ccuss_user
+      - DB_PASSWORD=secret
     networks:
-      - ccuss_network
-
-  nginx:
-    image: nginx:latest
-    container_name: ccuss_nginx_webserver
-    restart: unless-stopped
-    ports:
-      - '8000:80'
-    volumes:
-      - ./:/var/www
-      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
-    depends_on:
-      - app
-    networks:
-      - ccuss_network
+      - ccuss-network
 
   node:
-    image: node:20
-    container_name: ccuss_node_service
+    build:
+      context: .
+      dockerfile: docker/node/Dockerfile
+    container_name: ccuss_node
     restart: unless-stopped
-    working_dir: /var/www
     volumes:
-      - ./:/var/www
-    command: sh -c "npm install && npm run dev"
+      - ./:/var/www/ccuss
+      - node_modules:/var/www/ccuss/node_modules
     ports:
       - '5173:5173'
     networks:
-      - ccuss_network
+      - ccuss-network
+    command: sh -c "npm install && npm run dev"
+
+  nginx:
+    image: nginx:alpine
+    container_name: ccuss_nginx
+    ports:
+      - '8000:80'
+    volumes:
+      - ./:/var/www/ccuss
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+      - node
+    networks:
+      - ccuss-network
 
   mysql:
-    image: mysql:8
+    image: mysql:8.1
     container_name: ccuss_mysql
     restart: unless-stopped
     environment:
+      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: ccuss
       MYSQL_USER: ccuss_user
       MYSQL_PASSWORD: secret
-      MYSQL_ROOT_PASSWORD: root
     ports:
       - '3307:3306'
     volumes:
-      - mysql_data:/var/lib/mysql
+      - dbdata:/var/lib/mysql
     networks:
-      - ccuss_network
+      - ccuss-network
 
 networks:
-  ccuss_network:
+  ccuss-network:
+    driver: bridge
 
 volumes:
-  mysql_data:
+  dbdata:
+  node_modules:

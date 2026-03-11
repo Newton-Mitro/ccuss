@@ -10,7 +10,7 @@ import {
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-import { CustomerIntroducer } from '../../../types/customer';
+import { CustomerIntroducer } from '../../../types/customer_kyc_module';
 
 interface Props {
     introducer: CustomerIntroducer;
@@ -126,10 +126,9 @@ export default function ViewIntroducer({ introducer }: Props) {
                                     </div>
                                     <p className="text-xs text-muted-foreground">
                                         {introducer.introduced_customer?.type} •{' '}
-                                        {introducer.introduced_customer?.status}
+                                        {introducer.introduced_customer?.kyc_status}
                                     </p>
                                     <div className="text-xs text-muted-foreground">
-                                        {introducer.introduced_customer?.id} •{' '}
                                         {
                                             introducer.introduced_customer
                                                 ?.customer_no
@@ -149,7 +148,7 @@ export default function ViewIntroducer({ introducer }: Props) {
                         <span>Introducer Information</span>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-2 md:grid-cols-4">
                         <Info
                             label="Introducer Name"
                             value={
@@ -163,13 +162,6 @@ export default function ViewIntroducer({ introducer }: Props) {
                                 ) : (
                                     '—'
                                 )
-                            }
-                        />
-                        <Info
-                            label="Introducer ID"
-                            value={
-                                introducer.introducer_customer_id?.toString() ||
-                                '—'
                             }
                         />
                         <Info

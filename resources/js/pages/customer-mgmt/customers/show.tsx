@@ -413,10 +413,7 @@ export default function Show({ customer, backUrl }: ShowProps) {
                     }
                 >
                     <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
-                        <InfoItem
-                            label="Username"
-                            value={customer.online_service_client.username}
-                        />
+                        
 
                         <InfoItem
                             label="User Email"
@@ -428,12 +425,16 @@ export default function Show({ customer, backUrl }: ShowProps) {
                             value={customer.online_service_client.phone}
                         />
 
+                        <InfoItem
+                            label="Last Login"
+                            value={customer.online_service_client.last_login_at}
+                        />
+
                         <div className="flex flex-col">
                             <span className="text-[10px] text-muted-foreground uppercase">
                                 User Status
                             </span>
                             <span className="text-sm">
-                                {' '}
                                 <Badge
                                     text={customer.online_service_client.status}
                                 />

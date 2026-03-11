@@ -36,31 +36,16 @@ return new class extends Migration {
             $table->string('code', 20)->unique()->comment('Unique branch code');
             $table->string('name', 100)->comment('Branch name');
             $table->string('address', 255)->nullable()->comment('Full address');
-
             $table->decimal('latitude', 10, 8)->nullable()->comment('Latitude for map/GPS');
             $table->decimal('longitude', 11, 8)->nullable()->comment('Longitude for map/GPS');
-
-            $table->foreignId('manager_id')
-                ->nullable()
-                ->comment('Branch manager customer ID (no constraint)');
-
+            $table->foreignId('manager_id')->nullable()->comment('Branch manager customer ID (no constraint)');
             $table->timestamps();
         });
-
-        Schema::create('departments', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('branch_id')->constrained();
-            $table->string('name');
-            $table->timestamps();
-        });
-
-
     }
 
     public function down(): void
     {
         Schema::dropIfExists('organizations');
         Schema::dropIfExists('branches');
-
     }
 };

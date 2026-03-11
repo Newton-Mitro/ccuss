@@ -12,7 +12,7 @@ import Swal from 'sweetalert2';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
-import { CustomerFamilyRelation } from '../../../types/customer';
+import { CustomerFamilyRelation } from '../../../types/customer_kyc_module';
 
 export default function FamilyRelationIndex() {
     const { props } = usePage<
@@ -145,9 +145,9 @@ export default function FamilyRelationIndex() {
                                         <td className="px-2 py-1">
                                             {f.customer?.name || '—'}
                                         </td>
-                                        <td className="px-2 py-1">{f.name}</td>
+                                        <td className="px-2 py-1">{f.relative?.name}</td>
                                         <td className="px-2 py-1">
-                                            {f.phone || '—'}
+                                            {f.relative?.phone || '—'}
                                         </td>
                                         <td className="px-2 py-1 text-blue-600 dark:text-blue-400">
                                             {f.relation_type.replace(/_/g, ' ')}
@@ -223,7 +223,7 @@ export default function FamilyRelationIndex() {
                         >
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="font-medium">{f.name}</p>
+                                    <p className="font-medium">{f.relative?.name}</p>
                                     <p className="text-xs text-muted-foreground">
                                         {f.customer?.name || '—'}
                                     </p>
@@ -234,7 +234,7 @@ export default function FamilyRelationIndex() {
                             </div>
 
                             <div className="mt-2 space-y-1 text-xs text-muted-foreground">
-                                <p> {f.phone || '—'}</p>
+                                <p> {f.relative?.phone || '—'}</p>
                                 <p> {f.verification_status || '—'}</p>
                             </div>
 
