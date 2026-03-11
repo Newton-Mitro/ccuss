@@ -1,0 +1,55 @@
+<?php
+
+namespace App\CostomerModule\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+class StoreCustomerRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true; // set to true if any authenticated user can create
+    }
+
+    public function rules(): array
+    {
+        return [
+            'type' => ['required', Rule::in(['INDIVIDUAL', 'ORGANIZATION'])],
+            'name' => ['required', 'string', 'max:150'],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'email' => ['nullable', 'email', 'max:100'],
+            'kyc_level' => ['nullable', Rule::in(['MIN', 'STD', 'ENH'])],
+            'status' => ['nullable', Rule::in(['PENDING', 'ACTIVE', 'SUSPENDED', 'CLOSED'])],
+
+            // Personal info (required only for Individual)
+            'dob' => [
+                'nullable',
+                'date',
+                'required_if:type,Individual',
+            ],
+            'gender' => [
+                'nullable',
+                Rule::in(['MALE', 'FEMALE', 'OTHER']),
+                'required_if:type,Individual',
+            ],
+            'religion' => [
+                'nullable',
+                Rule::in([
+                    'CHRISTIANITY',
+                    'ISLAM',
+                    'HINDUISM',
+                    'BUDDHISM',
+                    'OTHER',
+                ])
+            ],
+
+            'identification_type' => [
+                'required',
+                Rule::in(['NID', 'BRN', 'PASSPORT', 'DRIVING_LICENSE', 'REGISTRATION_NO']),
+            ],
+            'identification_number' => ['required', 'string', 'max:50'],
+        ];
+    }
+
+}

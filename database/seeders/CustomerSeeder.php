@@ -2,13 +2,13 @@
 
 namespace Database\Seeders;
 
-use App\CostomerMgmt\Models\Customer;
-use App\CostomerMgmt\Models\CustomerAddress;
-use App\CostomerMgmt\Models\CustomerFamilyRelation;
-use App\CostomerMgmt\Models\CustomerIntroducer;
-use App\CostomerMgmt\Models\KycDocument;
-use App\CostomerMgmt\Models\KycProfile;
-use App\CostomerMgmt\Models\OnlineServiceClient;
+use App\CostomerModule\Models\Customer;
+use App\CostomerModule\Models\CustomerAddress;
+use App\CostomerModule\Models\CustomerFamilyRelation;
+use App\CostomerModule\Models\CustomerIntroducer;
+use App\CostomerModule\Models\KycDocument;
+use App\CostomerModule\Models\KycProfile;
+use App\CostomerModule\Models\OnlineServiceClient;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;

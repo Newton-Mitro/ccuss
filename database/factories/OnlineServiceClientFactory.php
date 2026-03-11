@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\CostomerMgmt\Models\OnlineServiceClient;
+use App\CostomerModule\Models\OnlineServiceClient;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 

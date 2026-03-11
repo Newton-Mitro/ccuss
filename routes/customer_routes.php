@@ -1,11 +1,11 @@
 <?php
 
-use App\CostomerMgmt\Controllers\CustomerAddressController;
-use App\CostomerMgmt\Controllers\CustomerController;
-use App\CostomerMgmt\Controllers\CustomerFamilyRelationController;
-use App\CostomerMgmt\Controllers\CustomerIntroducerController;
-use App\CostomerMgmt\Controllers\CustomerSignatureController;
-use App\CostomerMgmt\Controllers\OnlineServiceClientController;
+use App\CostomerModule\Controllers\CustomerAddressController;
+use App\CostomerModule\Controllers\CustomerController;
+use App\CostomerModule\Controllers\CustomerFamilyRelationController;
+use App\CostomerModule\Controllers\CustomerIntroducerController;
+use App\CostomerModule\Controllers\CustomerSignatureController;
+use App\CostomerModule\Controllers\OnlineServiceClientController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified'])

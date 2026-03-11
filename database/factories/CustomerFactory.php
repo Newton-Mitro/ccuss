@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\CostomerMgmt\Models\Customer;
+use App\CostomerModule\Models\Customer;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 

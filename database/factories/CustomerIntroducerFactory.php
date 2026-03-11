@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\CostomerMgmt\Models\Customer;
-use App\CostomerMgmt\Models\CustomerIntroducer;
+use App\CostomerModule\Models\Customer;
+use App\CostomerModule\Models\CustomerIntroducer;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class CustomerIntroducerFactory extends Factory

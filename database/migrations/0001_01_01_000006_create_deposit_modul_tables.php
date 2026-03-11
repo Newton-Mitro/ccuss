@@ -8,33 +8,26 @@ return new class extends Migration {
 
     public function up(): void
     {
+        // =========================
+        // 1. Deposit Products
+        // =========================
         Schema::create('deposit_products', function (Blueprint $table) {
             $table->id();
-
-            // Basic product info
             $table->string('code', 20)->unique();
             $table->string('name');
             $table->string('short_name')->nullable();
             $table->enum('type', ['Deposit', 'Loan', 'Share']);
-            $table->string('subtype'); // e.g., Savings, Recurring, Fixed
-
-            // Financial parameters
+            $table->string('subtype');
             $table->decimal('interest_rate', 5, 2)->nullable();
             $table->enum('interest_compounding', ['daily', 'monthly', 'quarterly', 'yearly'])->default('monthly');
             $table->decimal('minimum_balance', 15, 2)->default(0);
             $table->decimal('maximum_balance', 15, 2)->nullable();
             $table->decimal('monthly_deposit_limit', 15, 2)->nullable();
-
-            // Tenure rules
             $table->integer('minimum_tenure_months')->nullable();
             $table->integer('maximum_tenure_months')->nullable();
-
-            // Policy flags
             $table->boolean('allow_partial_withdrawal')->default(false);
             $table->boolean('allow_early_closure')->default(false);
             $table->boolean('is_active')->default(true);
-
-            // Dynamic policy/config JSON for future flexibility
             $table->json('policies')->nullable();
             /*
               Example JSON:
@@ -72,78 +65,67 @@ return new class extends Migration {
                 "notes": ""                                 // Any free-form remarks or internal notes
             }
             */
-
-            // Audit
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
         });
 
+        // =========================
+        // 2. Deposit Accounts
+        // =========================
         Schema::create('deposit_accounts', function (Blueprint $table) {
             $table->id();
-
-            // account identifier
             $table->string('account_no', 30)->unique();
             $table->string('account_name');
-
-            // relationships
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->foreignId('deposit_product_id')->constrained()->cascadeOnDelete();
             $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
-
-            // balances
             $table->decimal('balance', 15, 2)->default(0);
             $table->decimal('available_balance', 15, 2)->default(0);
             $table->decimal('hold_balance', 15, 2)->default(0);
-
-            // account settings
             $table->decimal('interest_rate', 5, 2)->nullable();
             $table->decimal('minimum_balance', 15, 2)->default(0);
-
-            // dates
             $table->date('opened_at');
             $table->date('closed_at')->nullable();
-
-            // status
             $table->enum('status', ['PENDING', 'ACTIVE', 'DORMANT', 'FROZEN', 'CLOSED'])->default('PENDING');
-
             $table->text('remarks')->nullable();
             $table->timestamps();
         });
 
+        // =========================
+        // 3. Account Holders
+        // =========================
         Schema::create('deposit_account_holders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('deposit_account_id')->constrained()->cascadeOnDelete();
             $table->foreignId('customer_id')->constrained();
-            $table->string('holder_type')->default('PRIMARY');
-            // PRIMARY, JOINT, AUTHORIZED
+            $table->string('holder_type')->default('PRIMARY'); // PRIMARY, JOINT, AUTHORIZED
             $table->decimal('ownership_percent', 5, 2)->nullable();
-            // Audit
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
 
+        // =========================
+        // 4. Account Nominees
+        // =========================
         Schema::create('deposit_account_nominees', function (Blueprint $table) {
             $table->id();
-
-            // The deposit account
-            $table->foreignId('deposit_account_id')->constrained('deposit_accounts')->cascadeOnDelete();
-
-            // Nominee details
-            $table->string('name');                   // Nominee name
-            $table->string('relation');               // Relation to account holder (e.g., Spouse, Child)
+            $table->foreignId('deposit_account_id')->constrained()->cascadeOnDelete();
+            $table->string('name');
+            $table->string('relation');
             $table->date('date_of_birth')->nullable();
-            $table->decimal('allocation_percent', 5, 2)->default(100); // % of proceeds for this nominee
-            $table->text('remarks')->nullable();       // Any notes or instructions
-
-            // Audit
+            $table->decimal('allocation_percent', 5, 2)->default(100);
+            $table->text('remarks')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
 
+        // =========================
+        // 5. Share Account Details
+        // =========================
         Schema::create('share_account_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('deposit_account_id')->constrained('deposit_accounts');
@@ -153,6 +135,9 @@ return new class extends Migration {
             $table->timestamps();
         });
 
+        // =========================
+        // 6. Term Deposit Details
+        // =========================
         Schema::create('term_deposit_details', function (Blueprint $table) {
             $table->foreignId('deposit_account_id')->primary()->constrained('deposit_accounts');
             $table->integer('tenure_months');
@@ -161,6 +146,9 @@ return new class extends Migration {
             $table->enum('payout_mode', ['MATURITY', 'MONTHLY'])->default('MATURITY');
         });
 
+        // =========================
+        // 7. Recurring Deposit Details
+        // =========================
         Schema::create('recurring_deposit_details', function (Blueprint $table) {
             $table->foreignId('deposit_account_id')->primary()->constrained('deposit_accounts');
             $table->decimal('installment_amount', 15, 2);
@@ -185,6 +173,9 @@ return new class extends Migration {
             $table->decimal('penalty_amount', 15, 2)->default(0);
         });
 
+        // =========================
+        // 8. Deposit Transactions
+        // =========================
         Schema::create('deposit_transactions', function (Blueprint $table) {
             $table->id();
             $table->string('transaction_no')->unique();
@@ -218,6 +209,9 @@ return new class extends Migration {
             $table->timestamps();
         });
 
+        // =========================
+        // 9. Account Statements
+        // =========================
         Schema::create('deposit_account_statements', function (Blueprint $table) {
             $table->id();
             $table->foreignId('deposit_account_id')->constrained()->cascadeOnDelete();
@@ -229,55 +223,97 @@ return new class extends Migration {
             $table->timestamps();
         });
 
+        // =========================
+        // 10. Interest Accruals
+        // =========================
         Schema::create('deposit_interest_accruals', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('deposit_account_id')->constrained('deposit_accounts')->cascadeOnDelete();
+            $table->foreignId('deposit_account_id')->constrained()->cascadeOnDelete();
             $table->date('accrual_date');
             $table->decimal('accrued_interest', 18, 2);
             $table->boolean('is_posted')->default(false);
-            $table->foreignId('deposit_transaction_id')->nullable()->constrained('deposit_transactions')->nullOnDelete()->comment('Linked transaction when posted');
+            $table->foreignId('deposit_transaction_id')->nullable()->constrained('deposit_transactions')->nullOnDelete();
             $table->timestamps();
-            $table->unique(['deposit_account_id', 'accrual_date']); // prevent duplicate accrual
+            $table->unique(['deposit_account_id', 'accrual_date']);
         });
 
+        // =========================
+        // 11. Penalties
+        // =========================
         Schema::create('deposit_penalties', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('deposit_account_id')->constrained('deposit_accounts')->cascadeOnDelete();
+            $table->foreignId('deposit_account_id')->constrained()->cascadeOnDelete();
             $table->date('penalty_date');
             $table->decimal('penalty_amount', 18, 2);
             $table->enum('penalty_type', ['LATE_PAYMENT', 'PREMATURE_WITHDRAWAL', 'OVERDUE', 'OTHER']);
             $table->boolean('is_posted')->default(false);
-            $table->foreignId('deposit_transaction_id')->nullable()->constrained('deposit_transactions')->nullOnDelete()->comment('Linked transaction when posted');
+            $table->foreignId('deposit_transaction_id')->nullable()->constrained('deposit_transactions')->nullOnDelete();
             $table->text('remarks')->nullable();
             $table->timestamps();
-            $table->unique(
-                ['deposit_account_id', 'penalty_date', 'penalty_type'],
-                'dep_penalty_unique'
-            );
+            $table->unique(['deposit_account_id', 'penalty_date', 'penalty_type'], 'dep_penalty_unique');
         });
 
+        // =========================
+        // 12. Account Fees
+        // =========================
         Schema::create('deposit_account_fees', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('deposit_account_id')->constrained('deposit_accounts')->cascadeOnDelete();
-            $table->string('fee_type'); // e.g., OPENING, MAINTENANCE, TRANSACTION
+            $table->foreignId('deposit_account_id')->constrained()->cascadeOnDelete();
+            $table->string('fee_type');
             $table->decimal('amount', 15, 2);
             $table->enum('frequency', ['ONE_TIME', 'MONTHLY', 'QUARTERLY', 'YEARLY'])->default('ONE_TIME');
-            $table->date('applied_on')->nullable(); // date when fee was applied
-            $table->boolean('is_paid')->default(false); // track payment status
+            $table->date('applied_on')->nullable();
+            $table->boolean('is_paid')->default(false);
             $table->foreignId('paid_transaction_id')->nullable()->constrained('deposit_transactions')->nullOnDelete();
             $table->text('remarks')->nullable();
             $table->timestamps();
         });
 
+        // =========================
+        // 13. Cheque Books & Cheques
+        // =========================
+        Schema::create('cheque_books', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('deposit_account_id')->constrained()->cascadeOnDelete();
+            $table->string('book_no');
+            $table->integer('start_number');
+            $table->integer('end_number');
+            $table->date('issued_at')->nullable();
+            $table->foreignId('issued_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamps();
+            $table->unique(['deposit_account_id', 'book_no']);
+        });
 
+        Schema::create('cheques', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('cheque_book_id')->constrained()->cascadeOnDelete();
+            $table->string('cheque_number');
+            $table->date('cheque_date')->nullable();
+            $table->decimal('amount', 18, 2);
+            $table->string('payee_name')->nullable();
+            $table->text('remarks')->nullable();
+            $table->enum('status', ['UNUSED', 'ISSUED', 'PRESENTED', 'CLEARED', 'BOUNCED', 'CANCELLED'])->default('UNUSED');
+            $table->foreignId('deposit_transaction_id')->nullable()->constrained('deposit_transactions')->nullOnDelete();
+            $table->timestamps();
+            $table->unique(['cheque_book_id', 'cheque_number']);
+        });
+
+        Schema::create('cheque_stop_payments', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('cheque_id')->constrained()->cascadeOnDelete();
+            $table->text('reason')->nullable();
+            $table->foreignId('requested_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('requested_at')->useCurrent();
+            $table->timestamps();
+        });
     }
-
 
     public function down(): void
     {
-        // Child / dependent tables first
+        Schema::dropIfExists('cheque_stop_payments');
+        Schema::dropIfExists('cheques');
+        Schema::dropIfExists('cheque_books');
         Schema::dropIfExists('deposit_account_fees');
-        Schema::dropIfExists('deposit_account_nominees');
         Schema::dropIfExists('deposit_penalties');
         Schema::dropIfExists('deposit_interest_accruals');
         Schema::dropIfExists('deposit_account_statements');
@@ -287,9 +323,8 @@ return new class extends Migration {
         Schema::dropIfExists('recurring_deposit_details');
         Schema::dropIfExists('term_deposit_details');
         Schema::dropIfExists('share_account_details');
+        Schema::dropIfExists('deposit_account_nominees');
         Schema::dropIfExists('deposit_account_holders');
-
-        // Parent tables
         Schema::dropIfExists('deposit_accounts');
         Schema::dropIfExists('deposit_products');
     }

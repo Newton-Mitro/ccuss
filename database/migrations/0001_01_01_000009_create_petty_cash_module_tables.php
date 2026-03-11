@@ -22,7 +22,6 @@ return new class extends Migration {
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 
-            $table->index(['branch_id', 'custodian_id']);
         });
 
         // =========================
@@ -49,7 +48,6 @@ return new class extends Migration {
             $table->foreignId('created_by')->constrained('users');
             $table->timestamps();
 
-            $table->index(['petty_cash_account_id', 'created_by']);
         });
 
         // =========================
@@ -64,7 +62,6 @@ return new class extends Migration {
             $table->string('receipt_no')->nullable();
             $table->timestamps();
 
-            $table->index(['petty_cash_voucher_id', 'expense_category_id']);
         });
 
         // =========================
@@ -81,7 +78,6 @@ return new class extends Migration {
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
 
-            $table->index(['petty_cash_account_id', 'approved_by']);
         });
 
         // =========================
@@ -97,7 +93,6 @@ return new class extends Migration {
             $table->date('transaction_date');
             $table->timestamps();
 
-            $table->index(['petty_cash_account_id', 'transaction_date']);
         });
     }
 

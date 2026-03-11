@@ -3,7 +3,7 @@
 namespace App\Branch\Models;
 
 use App\Audit\Traits\Auditable;
-use App\CostomerMgmt\Models\Customer;
+use App\CostomerModule\Models\Customer;
 use Database\Factories\BranchFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
