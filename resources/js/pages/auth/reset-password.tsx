@@ -17,7 +17,7 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
         <div className="flex min-h-screen items-center justify-center bg-background p-6 font-mono">
             <Head title="Reset password" />
 
-            <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-lg md:p-10">
+            <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow md:p-10">
                 {/* Logo + Intro */}
                 <div className="mb-6 flex flex-col items-center text-center">
                     <AppLogoIcon className="mb-3 h-20 w-20 fill-current text-primary" />

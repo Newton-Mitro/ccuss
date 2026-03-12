@@ -41,6 +41,8 @@ return new class extends Migration {
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             $table->string('code', 20)->unique();
             $table->string('name');
+            $table->decimal('max_cash_limit', 18, 2);
+            $table->decimal('max_transaction_limit', 18, 2);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
@@ -108,14 +110,6 @@ return new class extends Migration {
             $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('balanced_at');
             $table->text('remarks')->nullable();
-            $table->timestamps();
-        });
-
-        Schema::create('teller_limits', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('teller_id')->constrained()->cascadeOnDelete();
-            $table->decimal('max_cash_limit', 18, 2);
-            $table->decimal('max_transaction_limit', 18, 2);
             $table->timestamps();
         });
 

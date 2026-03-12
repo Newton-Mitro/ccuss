@@ -3,6 +3,7 @@
 namespace App\UserRolePermissions\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Branch\Models\Branch;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -18,6 +19,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'branch_id',
     ];
 
     protected $hidden = [
@@ -34,6 +36,11 @@ class User extends Authenticatable
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
         ];
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
     }
 
     // 🔗 Relationships

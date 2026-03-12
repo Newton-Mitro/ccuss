@@ -1,55 +1,114 @@
-# Petty Cash Module Documentation
+# Petty Cash Operational Flow
 
-### Step-by-Step Actions
+## Actors
 
-1. **Petty Cash Account Setup**
-    - Create account per branch.
-    - Table: `petty_cash_accounts`
-    - Key Fields: `name`, `code`, `branch_id`, `custodian_id`, `imprest_amount`, `current_balance`
-
-2. **Define Expense Categories**
-    - Table: `expense_categories`
-    - Key Fields: `name`, `code`, `description`
-
-3. **Voucher Creation**
-    - Table: `petty_cash_vouchers`
-    - Key Fields: `voucher_no`, `petty_cash_account_id`, `voucher_date`, `total_amount`, `created_by`
-    - Sub-action: Add voucher items (`petty_cash_voucher_items`)
-        - Fields: `petty_cash_voucher_id`, `expense_category_id`, `amount`, `description`, `receipt_no`
-
-4. **Replenishment / Top-up**
-    - Table: `petty_cash_replenishments`
-    - Fields: `replenish_no`, `petty_cash_account_id`, `source_account`, `amount`, `replenish_date`, `approved_by`
-
-5. **Transaction Logging**
-    - Table: `petty_cash_transactions`
-    - All vouchers, replenishments, and adjustments are logged here.
-    - Fields: `petty_cash_account_id`, `reference_type`, `reference_id`, `debit`, `credit`, `balance`, `transaction_date`
-
-6. **Optional Adjustments**
-    - Record shortages/excesses manually.
-    - Logged as `reference_type = adjustment` in `petty_cash_transactions`.
+- **Branch Staff / Petty Cash Custodian** – manages petty cash, creates vouchers.
+- **Finance Manager / Approver** – approves replenishments.
+- **System / Database** – maintains records, logs transactions automatically.
 
 ---
 
-## 3. Visual Flowchart
+## 1. Petty Cash Account Setup
+
+**Actor:** Branch Staff / System
+
+**Actions:**
+
+1. Create a petty cash account for the branch.
+2. Assign a custodian (optional).
+3. Set `imprest_amount` (fixed fund) and initial `current_balance`.
+4. Activate account (`is_active = true`).
+
+**System:** Stores account in `petty_cash_accounts`.
+
+---
+
+## 2. Define Expense Categories
+
+**Actor:** Finance / Branch Staff
+
+**Actions:**
+
+1. Define expense categories (e.g., Office Supplies, Travel, Utilities).
+2. Assign unique `code` and optional description.
+
+**System:** Stores categories in `expense_categories`.
+
+---
+
+## 3. Voucher Creation
+
+**Actor:** Petty Cash Custodian
+
+**Actions:**
+
+1. Create a petty cash voucher for a specific account.
+2. Enter voucher details: `voucher_no`, `voucher_date`, `total_amount`, `remarks`.
+3. Add voucher line items:
+    - Select `expense_category`.
+    - Enter `amount`, optional `description` and `receipt_no`.
+
+**System:**
+
+- Saves voucher in `petty_cash_vouchers`.
+- Saves line items in `petty_cash_voucher_items`.
+- Updates `petty_cash_transactions` (debit) and `current_balance`.
+
+---
+
+## 4. Replenishment / Top-up
+
+**Actor:** Branch Staff / Finance Manager
+
+**Actions:**
+
+1. Custodian requests replenishment when petty cash is low.
+2. Enter `replenish_no`, `source_account`, `amount`, `replenish_date`, `remarks`.
+3. Finance Manager approves (optional).
+
+**System:**
+
+- Records in `petty_cash_replenishments`.
+- Updates `petty_cash_transactions` (credit) and `current_balance`.
+
+---
+
+## 5. Transaction Logging
+
+**Actor:** System
+
+**Actions:**
+
+1. On every voucher or replenishment, log transaction in `petty_cash_transactions`.
+2. Track `debit`, `credit`, `balance`, `transaction_date`.
+3. Polymorphic `reference` links to voucher, replenishment, or adjustments.
+
+---
+
+## 6. Daily / Periodic Operations
+
+**Actor:** Branch Staff / Finance
+
+**Actions:**
+
+1. Review petty cash balance and transactions.
+2. Ensure vouchers match replenishments.
+3. Close or reconcile petty cash accounts periodically.
+
+---
+
+## Visual Action Flow
 
 ```mermaid
 flowchart TD
-    A[Create Petty Cash Account] --> B[Define Expense Categories]
-    B --> C[Create Petty Cash Voucher]
-    C --> D[Add Voucher Items]
-    D --> E[Record Voucher Transaction]
-    A --> F[Replenish Petty Cash Account]
-    F --> G[Record Replenishment Transaction]
-    H[Optional: Cash Adjustment] --> I[Record Adjustment Transaction]
-
-    %% Transactions table consolidation
-    E --> J[Petty Cash Transactions Table]
-    G --> J
-    I --> J
-
-    %% Styling
-    classDef action fill:#f9f,stroke:#333,stroke-width:1px;
-    class A,B,C,D,F,H action;
+    A["Setup Petty Cash Account"] --> B["Define Expense Categories"]
+    B --> C["Create Petty Cash Voucher"]
+    C --> D["Add Voucher Line Items"]
+    D --> E["System Logs Transaction (Debit)"]
+    E --> F{"Balance Low?"}
+    F -- Yes --> G["Request Replenishment"]
+    G --> H["Finance Approves Replenishment"]
+    H --> I["System Logs Transaction (Credit)"]
+    F -- No --> J["Continue Operations"]
+    J --> K["Review & Reconcile Periodically"]
 ```

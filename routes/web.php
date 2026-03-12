@@ -30,6 +30,7 @@ Route::middleware(['auth', 'verified'])
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/customer_routes.php';
+require __DIR__ . '/cash_management_routes.php';
 require __DIR__ . '/transaction_routes.php';
 require __DIR__ . '/accounting_routes.php';
 

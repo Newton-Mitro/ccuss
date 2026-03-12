@@ -1,104 +1,183 @@
-# Bank Module Action Flow Description
+# Branch Finance System – Operational Flow
 
-## 1. Create Bank
+## Actors
 
-- **Purpose:** Set up a bank entity in the system.
-- **Key Fields:** `name`, `short_name`, `swift_code`, `routing_number`, `status`
-- **Outcome:** A bank is ready to have branches and accounts assigned.
-
----
-
-## 2. Create Bank Branch
-
-- **Purpose:** Define physical or operational branches under the bank.
-- **Key Fields:** `bank_id`, `name`, `routing_number`, `address`
-- **Outcome:** Branches represent locations or departments where accounts and transactions are managed.
+- **Admin / System Admin** – manages banks, branches, and accounts
+- **Branch Manager** – manages branch setup and oversight
+- **Finance Officer / Teller / Vault Officer** – executes transactions, manages vaults, teller sessions, and reconciliations
+- **Approver** – approves cheques or high-value transactions
+- **Auditor** – verifies reconciliations and audits
 
 ---
 
-## 3. Create Bank Account
+## 1. Branch Cash & Vault Operations
 
-- **Purpose:** Set up accounts for the bank or branch, which can hold deposits, withdrawals, and other financial activities.
-- **Key Fields:** `bank_id`, `bank_branch_id`, `account_name`, `account_number`, `iban`, `currency`, `status`
-- **Outcome:** Each account is ready to process transactions and track balances.
+### Flow Steps
+
+1. **Open Branch Day**
+    - **Actor:** Branch Manager / Admin
+    - **Table:** `branch_days`
+    - Description: The branch day is opened with a specific business date to track all cash operations.
+
+2. **Start Teller Session**
+    - **Actor:** Teller / Vault Officer
+    - **Table:** `teller_sessions`
+    - Description: Teller session begins with initial opening cash balance.
+
+3. **Assign Cash Drawer**
+    - **Actor:** Teller
+    - **Table:** `cash_drawers`
+    - Description: Each teller is assigned a cash drawer linked to a vault.
+
+4. **Record Vault Denominations**
+    - **Actor:** Vault Officer
+    - **Table:** `vault_denominations`
+    - Description: Denominations of notes/coins in the vault are recorded.
+
+5. **Deposit / Withdraw Cash**
+    - **Actor:** Teller / Finance Officer
+    - **Table:** `cash_transactions`
+    - Description: Cash movements in/out of the drawer are tracked.
+
+6. **Vault Transactions (IN/OUT)**
+    - **Actor:** Vault Officer
+    - **Table:** `vault_transactions`
+    - Description: Cash received into or transferred out of the vault is recorded.
+
+7. **Cash Transfers**
+    - **Actor:** Vault Officer
+    - **Tables:** `teller_vault_transfers`, `vault_transfers`
+    - Description: Funds move between vaults or between vault and teller.
+
+8. **Balance Cash Drawer**
+    - **Actor:** Teller / Vault Officer
+    - **Table:** `cash_balancings`
+    - Description: Physical cash counted and balanced against system records.
+
+9. **Record Cash Adjustments**
+    - **Actor:** Teller / Vault Officer
+    - **Table:** `cash_adjustments`
+    - Description: Shortages or excesses recorded with reason and approval.
+
+10. **Audit Logs**
+    - **Actor:** Auditor / Admin
+    - **Table:** `cash_audit_logs`
+    - Description: All critical actions are logged for auditing purposes.
+
+11. **Close Teller Session / Branch Day**
+    - **Actor:** Branch Manager / Teller
+    - **Tables:** `teller_sessions`, `branch_days`
+    - Description: Closing cash and end-of-day status are recorded.
 
 ---
 
-## 4. Perform Transactions
+## 2. Bank Module Operations
 
-- **Purpose:** Record deposits, withdrawals, transfers, and cheque activities.
-- **Transaction Types:** `DEPOSIT`, `WITHDRAW`, `TRANSFER`, `CHEQUE_DEPOSIT`, `CHEQUE_ISSUE`
+### Flow Steps
 
-**Flow:**
+1. **Create Bank**
+    - **Actor:** Admin
+    - **Table:** `banks`
+    - Description: Add a new bank with full details (name, short_name, SWIFT, routing).
 
-- If the transaction involves a cheque, it creates a **Bank Cheque** and links the transaction.
-- Non-cheque transactions are directly recorded in the **BankTransaction** table.
+2. **Create Bank Branch**
+    - **Actor:** Branch Manager / Admin
+    - **Table:** `bank_branches`
+    - Description: Link branch to a bank with branch-specific info.
 
-- **Outcome:** The system updates the account balances (`balance_after`) and logs the transaction.
+3. **Create Bank Account**
+    - **Actor:** Finance Officer / Admin
+    - **Table:** `bank_accounts`
+    - Description: Setup accounts for bank operations including opening balance and currency.
 
----
+4. **Bank Transactions**
+    - **Actor:** Teller / Finance Officer
+    - **Table:** `bank_transactions`
+    - Description: Record deposits, withdrawals, transfers, cheque deposits, and cheque issues.
 
-## 5. Bank Cheques
+5. **Bank Cheques**
+    - **Actor:** Teller / Finance Officer / Approver
+    - **Table:** `bank_cheques`
+    - Description: Manage ISSUED or RECEIVED cheques, track status (Pending/Cleared/Bounced/Cancelled).
 
-- **Purpose:** Handle cheques issued or received.
-- **Key Fields:** `bank_account_id`, `cheque_no`, `type`, `amount`, `payee`, `cheque_date`, `status`
-- **Statuses:** `PENDING`, `CLEARED`, `BOUNCED`, `CANCELLED`
-- **Outcome:** Cheque status is tracked, and transactions are linked to the cheque for traceability.
-
----
-
-## 6. Bank Reconciliation
-
-- **Purpose:** Ensure that the system’s records match the bank statement.
-- **Key Fields:** `bank_account_id`, `reconcile_date`, `statement_balance`, `system_balance`, `notes`
-- **Outcome:** Any differences are noted, and the account is verified, ensuring accuracy and preventing discrepancies.
-
----
-
-## 7. Audit & Accountability
-
-- **Purpose:** Track who created or approved transactions, cheques, and reconciliations.
-- **Key Fields:** `created_by`, `approved_by`
-- **Outcome:** Provides a full audit trail for compliance and financial control.
+6. **Bank Reconciliation**
+    - **Actor:** Finance Officer / Accountant / Auditor
+    - **Table:** `bank_reconciliations`
+    - Description: Reconcile statement balance with system balance, notes optional.
 
 ---
 
-## Summary
+## 3. Vault Cash Received from Bank
 
-The **Bank Module Flow** ensures that:
+### Flow Steps
 
-- Banks and branches are properly set up.
-- Accounts can perform various types of financial transactions.
-- Cheques are accurately processed and tracked.
-- Reconciliations validate balances, ensuring system integrity.
-- Audit trails maintain accountability at all levels.
+1. **Receive Cash from Bank**
+    - **Actor:** Vault Officer / Teller
+    - **Table:** `vault_transactions`
+    - Description: Record cash received from the bank into the vault.
 
-# Bank Module Action Flow
+2. **Update Vault Balance**
+    - **Actor:** Vault Officer
+    - **Table:** `vaults`
+    - Description: Increase vault total balance by received amount.
 
-## Overview
+3. **Record Denominations**
+    - **Actor:** Vault Officer
+    - **Table:** `vault_denominations`
+    - Description: Update the denominations count for tracking physical cash.
 
-This flow describes the lifecycle of bank operations including Banks, Branches, Accounts, Transactions, Cheques, and Reconciliation.
+4. **Audit Logs**
+    - **Actor:** Auditor / Admin
+    - **Table:** `cash_audit_logs`
+    - Description: Log the cash receipt action for auditing.
 
-## Mermaid Flowchart
+---
+
+## 4. End-to-End Operational Flow Diagram
 
 ```mermaid
 flowchart TD
-    A[Start] --> B[Create Bank]
-    B --> C[Create Branch]
-    C --> D[Create Bank Account]
-    D --> E{Perform Transaction?}
+    %% Branch Cash Flow
+    A[Admin / Branch Manager] --> B[Open Branch Day]
+    B --> C[Start Teller Session]
+    C --> D[Assign Cash Drawer]
+    D --> E[Cash Deposit / Withdrawal]
+    E --> F[Vault Transactions IN/OUT]
+    F --> G[Cash Transfers: Vault ↔ Teller / Vault ↔ Vault]
+    G --> H[Balance Cash Drawer]
+    H --> I[Cash Adjustments]
+    I --> J[Audit Logs]
+    J --> K[Close Teller Session / Branch Day]
 
-    E -- Yes --> F[Create BankTransaction]
-    F --> G{Is it Cheque?}
-    G -- Yes --> H[Create Bank Cheque]
-    H --> I[Link Transaction to Cheque]
-    G -- No --> J[Proceed without Cheque]
+    %% Bank Flow
+    L[Admin] --> M[Create Bank] --> N[Create Bank Branch] --> O[Create Bank Account]
+    O --> P[Bank Transactions: Deposit/Withdraw/Transfer/Cheque]
+    P --> Q[Bank Cheques ISSUED / RECEIVED]
+    Q --> R[Bank Reconciliation]
 
-    E -- No --> K[End Transaction]
+    %% Vault Cash Received from Bank
+    S[Bank] --> T[Vault Officer receives cash]
+    T --> F
+    T --> J
 
-    I --> L[Reconcile Account]
-    J --> L
-    K --> L
-    L --> M[Bank Reconciliation Completed]
-    M --> N[End]
+    %% Actors
+    subgraph Actors
+        X[Admin / System Admin]
+        Y[Branch Manager]
+        Z[Teller / Vault Officer / Finance Officer]
+        W[Approver]
+        V[Auditor]
+    end
+
+    X --> A
+    Y --> A
+    Z --> C
+    Z --> D
+    Z --> E
+    Z --> F
+    W --> Q
+    V --> H
+    V --> I
+    V --> J
+    V --> R
 ```
