@@ -103,5 +103,13 @@ Run:
 docker compose down
 docker compose up -d --build
 docker exec -it ccuss_app sh
-docker exec -it ccuss_app sh
+
+```
+
+```
+docker exec -it ccuss_scheduler php artisan schedule:list
+docker exec -it ccuss_scheduler php artisan schedule:run
+docker logs -f ccuss_queue
+docker exec -it ccuss_scheduler chown -R www-data:www-data storage
+docker exec -it ccuss_scheduler chmod -R 775 storage
 ```

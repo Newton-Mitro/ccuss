@@ -10,7 +10,7 @@ Artisan::command('inspire', function () {
 
 // UTC Time
 Schedule::command('backup:run')
-    ->dailyAt('11:19')
+    ->dailyAt('15:23')
     ->name('database-full-backup')
     ->withoutOverlapping();
 
