@@ -1146,6 +1146,20 @@ export const sidebarMenu: SidebarItem[] = [
                 match_path: 'report-templates',
                 permission: ['settings.report_templates.view'],
             },
+            {
+                name: 'Database Backup Logs',
+                icon: <i className="fa-solid fa-file-lines" />,
+                path: '/database/backup/history',
+                match_path: 'database/backup/history',
+                permission: ['settings.report_templates.view'],
+            },
+            {
+                name: 'Database Backup',
+                icon: <i className="fa-solid fa-file-lines" />,
+                path: '/database/backup',
+                match_path: 'database/backup',
+                permission: ['settings.report_templates.view'],
+            },
         ],
     },
 ];

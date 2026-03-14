@@ -2,6 +2,7 @@
 
 use App\Branch\Controllers\BranchController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DatabaseBackupController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -27,6 +28,18 @@ Route::middleware(['auth', 'verified'])
         Route::resource('branches', BranchController::class);
         // Route::resource('introducers', CustomerIntroducerController::class);
     });
+
+Route::middleware(['auth',])->group(function () {
+    Route::get('database/backup/history', [DatabaseBackupController::class, 'history'])
+        ->name('backup.history');
+
+    Route::get('database/backup/{id}/download', [DatabaseBackupController::class, 'download'])
+        ->name('backup.download');
+    Route::get('/database/backup', [DatabaseBackupController::class, 'index'])
+        ->name('database.backup.index');
+    Route::post('/database/backup', [DatabaseBackupController::class, 'backup'])
+        ->name('database.backup.run');
+});
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/customer_routes.php';

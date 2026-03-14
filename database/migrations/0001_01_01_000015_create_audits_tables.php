@@ -66,10 +66,51 @@ return new class extends Migration {
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
+
+        Schema::create('database_backup_logs', function (Blueprint $table) {
+            $table->id();
+
+            $table->string('file_name')->nullable();
+            $table->string('file_path')->nullable();
+            $table->unsignedBigInteger('file_size')->nullable();
+
+            $table->string('storage_disk')->default('local');
+
+            $table->enum('backup_type', [
+                'FULL',
+                'DATABASE_ONLY',
+                'FILES_ONLY'
+            ])->default('FULL');
+
+            $table->enum('status', [
+                'RUNNING',
+                'SUCCESS',
+                'FAILED'
+            ])->default('RUNNING');
+
+            $table->string('checksum')->nullable();
+            $table->integer('duration_seconds')->nullable();
+
+            $table->text('message')->nullable();
+            $table->text('error')->nullable();
+
+            $table->foreignId('created_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+            $table->timestamp('started_at')->nullable();
+            $table->timestamp('completed_at')->nullable();
+
+            $table->timestamps();
+
+            $table->index('status');
+        });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('database_backup_logs');
         Schema::dropIfExists('audit_logs');
         Schema::dropIfExists('activity_logs');
         Schema::dropIfExists('report_templates');
