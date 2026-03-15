@@ -2,7 +2,7 @@
 
 namespace App\CashTreasuryModule\Models;
 
-use App\UserRolePermissions\Models\User;
+use App\SystemAdministration\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

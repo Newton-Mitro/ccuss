@@ -3,7 +3,7 @@
 namespace App\CashTreasuryModule\Models;
 
 use App\Branch\Models\Branch;
-use App\UserRolePermissions\Models\User;
+use App\SystemAdministration\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;

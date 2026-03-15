@@ -3,7 +3,7 @@
 namespace App\PettyCashModule\Models;
 
 use App\Branch\Models\Branch;
-use App\UserRolePermissions\Models\User;
+use App\SystemAdministration\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 

@@ -1,0 +1,1 @@
+export const financeAndAccountingPermissions: string[] = [];

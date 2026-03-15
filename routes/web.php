@@ -1,8 +1,8 @@
 <?php
 
-use App\Branch\Controllers\BranchController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DatabaseBackupController;
+use App\SystemAdministration\Controllers\BranchController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -30,15 +30,9 @@ Route::middleware(['auth', 'verified'])
     });
 
 Route::middleware(['auth',])->group(function () {
-    Route::get('database/backup/history', [DatabaseBackupController::class, 'history'])
-        ->name('backup.history');
-
-    Route::get('database/backup/{id}/download', [DatabaseBackupController::class, 'download'])
-        ->name('backup.download');
-    Route::get('/database/backup', [DatabaseBackupController::class, 'index'])
-        ->name('database.backup.index');
-    Route::post('/database/backup', [DatabaseBackupController::class, 'backup'])
-        ->name('database.backup.run');
+    Route::get('database/backups', [DatabaseBackupController::class, 'history'])->name('backup.history');
+    Route::post('/database/backups', [DatabaseBackupController::class, 'backup'])->name('backup.run');
+    Route::delete('/database/backups/{id}', [DatabaseBackupController::class, 'destroy'])->name('backup.destroy');
 });
 
 require __DIR__ . '/settings.php';

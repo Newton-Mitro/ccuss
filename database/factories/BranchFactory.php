@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Branch\Models\Branch;
-use App\UserRolePermissions\Models\User;
+use App\SystemAdministration\Models\Branch;
+use App\SystemAdministration\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class BranchFactory extends Factory

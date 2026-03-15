@@ -1,0 +1,94 @@
+<?php
+
+namespace App\SystemAdministration\Models;
+
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Fortify\TwoFactorAuthenticatable;
+
+class User extends Authenticatable
+{
+    use HasFactory, Notifiable, TwoFactorAuthenticatable;
+
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'branch_id',
+    ];
+
+    protected $hidden = [
+        'password',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'remember_token',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'two_factor_confirmed_at' => 'datetime',
+        ];
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    // 🔗 Relationships
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class);
+    }
+
+    public function permissions(): BelongsToMany
+    {
+        return $this->belongsToMany(Permission::class);
+    }
+
+    // ✅ Check if user has specific role(s)
+    public function hasRole(string $role): bool
+    {
+        return $this->roles->contains('name', $role);
+    }
+
+    public function hasAnyRole(array $roles): bool
+    {
+        return $this->roles->whereIn('name', $roles)->isNotEmpty();
+    }
+
+    // ✅ Check if user has specific permission(s)
+    public function hasPermission(string $permission): bool
+    {
+        // Check direct permission
+        if ($this->permissions->contains('name', $permission)) {
+            return true;
+        }
+
+        // Check permissions via roles
+        return $this->roles->flatMap->permissions->pluck('name')->contains($permission);
+    }
+
+    public function hasAnyPermission(array $permissions): bool
+    {
+        foreach ($permissions as $permission) {
+            if ($this->hasPermission($permission)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected static function newFactory()
+    {
+        return UserFactory::new();
+    }
+
+}

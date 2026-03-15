@@ -14,6 +14,11 @@ Schedule::command('backup:run')
     ->name('database-full-backup')
     ->withoutOverlapping();
 
+Schedule::command('backup:run')
+    ->hourlyAt(5)
+    ->name('database-full-backup')
+    ->withoutOverlapping();
+
 Schedule::command('backup:cleanup')
     ->dailyAt('03:00')
     ->name('cleanup-backups')

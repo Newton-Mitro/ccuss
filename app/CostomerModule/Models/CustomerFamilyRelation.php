@@ -3,7 +3,7 @@
 namespace App\CostomerModule\Models;
 
 use App\Audit\Traits\Auditable;
-use App\UserRolePermissions\Models\User;
+use App\SystemAdministration\Models\User;
 use Database\Factories\CustomerFamilyRelationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

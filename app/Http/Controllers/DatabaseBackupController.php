@@ -4,18 +4,66 @@ namespace App\Http\Controllers;
 
 use App\Audit\Models\DatabaseBackupLog;
 use App\Jobs\RunDatabaseBackup;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Inertia\Inertia;
 
 class DatabaseBackupController extends Controller
 {
-    public function index()
+    public function history(Request $request)
     {
-        return Inertia::render('database-backup/backup', [
+        // Get filters from query parameters
+        $search = $request->input('search');
+        $perPage = $request->input('per_page', 10);
+
+        // Build query
+        $query = DatabaseBackupLog::query();
+
+        if ($search) {
+            $query->where('file_name', 'like', "%{$search}%");
+        }
+
+        $logs = $query->latest()->paginate($perPage)->withQueryString();
+
+        // Return Inertia response with filters included
+        return Inertia::render('database-backup/history', [
+            'logs' => $logs,
+            'filters' => [
+                'search' => $search,
+                'per_page' => $perPage,
+                'page' => $request->input('page', 1),
+            ],
+            'flash' => [
+                'success' => session('success'),
+                'error' => session('error'),
+            ],
         ]);
     }
 
-    public function run()
+    public function destroy($id)
+    {
+        try {
+            $log = DatabaseBackupLog::findOrFail($id);
+
+            // Delete the backup file if it exists
+            if ($log->file_path && File::exists($log->file_path)) {
+                File::delete($log->file_path);
+            }
+
+            // Delete the database record
+            $log->delete();
+
+            // Redirect back with success message
+            return redirect()->back()->with('success', 'Backup deleted successfully.');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return redirect()->back()->with('error', 'Backup record not found.');
+        } catch (\Exception $e) {
+            \Log::error('Failed to delete backup: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to delete the backup. Please try again.');
+        }
+    }
+
+    public function backup()
     {
         $log = DatabaseBackupLog::create([
             'status' => 'RUNNING',
@@ -26,71 +74,6 @@ class DatabaseBackupController extends Controller
 
         RunDatabaseBackup::dispatch($log->id);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Backup started. You will be notified when it finishes.'
-        ]);
-    }
-
-    public function history()
-    {
-        $logs = DatabaseBackupLog::latest()
-            ->paginate(20);
-
-        return Inertia::render('database-backup/history', [
-            'logs' => $logs
-        ]);
-    }
-
-    public function download($id)
-    {
-        $log = DatabaseBackupLog::findOrFail($id);
-
-        return response()->download($log->file_path);
-    }
-
-    public function backup()
-    {
-        try {
-            $path = storage_path('app/backups');
-
-            if (!File::exists($path)) {
-                File::makeDirectory($path, 0755, true);
-            }
-
-            $filename = 'db_ccuss_' . date('Y_M_d') . '.sql';
-            $fullPath = storage_path("app/backups/$filename");
-
-            $host = env('DB_HOST');
-            $user = env('DB_USERNAME');
-            $pass = env('DB_PASSWORD');
-            $db = env('DB_DATABASE');
-
-            // Build mysqldump command with SSL disabled
-            $command = "mysqldump --skip-ssl -h $host -u $user -p$pass $db > " . escapeshellarg($fullPath) . " 2>&1";
-
-            exec($command, $output, $result);
-
-            if ($result !== 0) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Database backup failed',
-                    'error' => implode("\n", $output),
-                ], 500);
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Database backup created successfully',
-                'file' => asset("storage/app/backups/$filename"),
-            ]);
-
-        } catch (\Throwable $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Database backup failed',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+        return redirect()->back()->with('success', 'Backup created successfully.');
     }
 }

@@ -16,6 +16,7 @@ return new class extends Migration {
        */
         Schema::create('fiscal_years', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->constrained();
             $table->string('code')->unique()->comment('(FY-2025-26)');
             $table->date('start_date');
             $table->date('end_date');
@@ -31,6 +32,7 @@ return new class extends Migration {
         */
         Schema::create('accounting_periods', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->constrained();
             $table->foreignId('fiscal_year_id')->constrained()->cascadeOnDelete();
             $table->string('period_name')->comment('(JAN-2026)');
             $table->date('start_date');
@@ -41,6 +43,7 @@ return new class extends Migration {
 
         Schema::create('closing_entries', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->constrained();
             $table->foreignId('accounting_period_id')->constrained();
             $table->timestamp('closed_at');
         });
@@ -52,6 +55,7 @@ return new class extends Migration {
         */
         Schema::create('ledger_accounts', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->constrained();
             $table->string('code', 50)->unique()->comment('Unique GL code');
             $table->string('name', 100)->comment('Account name');
             $table->enum('type', ['ASSET', 'LIABILITY', 'EQUITY', 'INCOME', 'EXPENSE']);
@@ -70,6 +74,7 @@ return new class extends Migration {
         */
         Schema::create('instrument_types', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->constrained();
             $table->string('code', 50)->unique();
             $table->string('name', 100);
             $table->timestamps();
@@ -134,6 +139,8 @@ return new class extends Migration {
         */
         Schema::create('vouchers', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->constrained();
+            $table->foreignId('branch_id')->constrained();
             $table->foreignId('fiscal_year_id')->nullable()->constrained('fiscal_years')->nullOnDelete();
             $table->foreignId('accounting_period_id')->nullable()->constrained('accounting_periods')->nullOnDelete();
             $table->foreignId('branch_id')->nullable()->constrained('branches')->nullOnDelete();
@@ -174,6 +181,8 @@ return new class extends Migration {
         */
         Schema::create('voucher_lines', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->constrained();
+            $table->foreignId('branch_id')->constrained();
             $table->foreignId('voucher_id')->constrained('vouchers')->cascadeOnDelete();
             $table->foreignId('ledger_account_id')->constrained('ledger_accounts')->restrictOnDelete();
             $table->nullableMorphs('subledger');
@@ -207,6 +216,7 @@ return new class extends Migration {
         */
         Schema::create('ledger_account_balances', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->constrained();
             $table->foreignId('ledger_account_id')->constrained()->cascadeOnDelete();
             $table->foreignId('accounting_period_id')->constrained()->cascadeOnDelete();
             $table->decimal('opening_balance', 18, 2)->default(0);

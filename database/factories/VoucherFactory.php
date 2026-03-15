@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Accounting\Models\Voucher;
-use App\UserRolePermissions\Models\User;
+use App\SystemAdministration\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class VoucherFactory extends Factory

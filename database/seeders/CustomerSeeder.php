@@ -59,15 +59,11 @@ class CustomerSeeder extends Seeder
         $customers = collect();
 
         foreach ($customersData as $index => $type) {
-
-            // Determine DB type and gender
-            $dbType = $type === 'ORGANIZATION' ? 'ORGANIZATION' : 'INDIVIDUAL';
-            $gender = in_array($type, ['MALE', 'FEMALE']) ? $type : null;
-
-            $customer = Customer::factory()->create([
-                'type' => $dbType,
-                'gender' => $gender,
-            ]);
+            $customer = match ($type) {
+                'MALE' => Customer::factory()->individualMale()->create(),
+                'FEMALE' => Customer::factory()->individualFemale()->create(),
+                'ORGANIZATION' => Customer::factory()->organization()->create(),
+            };
             $customers->push($customer);
 
             // Assign photo based on type
@@ -147,7 +143,7 @@ class CustomerSeeder extends Seeder
             // Online Service Client
             OnlineServiceClient::create([
                 'customer_id' => $customer->id,
-                'username' => 'user_' . $customer->customer_no,
+                'username' => $customer->name,
                 'email' => $customer->email,
                 'phone' => $customer->phone,
                 'password' => Hash::make('password'),
@@ -170,51 +166,91 @@ class CustomerSeeder extends Seeder
 
         // Family relations (skip organizations)
         foreach ($customers as $customer) {
-            if ($customer->type === 'ORGANIZATION')
+
+            if ($customer->type === 'ORGANIZATION') {
                 continue;
+            }
 
             $relatives = $customers
                 ->where('id', '!=', $customer->id)
-                ->where('type', '!=', 'ORGANIZATION')
-                ->random(rand(2, 4));
+                ->where('type', 'INDIVIDUAL')
+                ->shuffle()
+                ->take(rand(2, 4));
 
             foreach ($relatives as $relative) {
-                // Gender-based relationship options (must match ENUM)
-                $relationshipOptions = match ($customer->gender) {
-                    'MALE' => [
-                        'FATHER',
-                        'BROTHER',
-                        'SON',
-                        'HUSBAND',
-                        'GRANDFATHER',
-                        'UNCLE',
-                        'NEPHEW',
-                        'FATHER_IN_LAW',
-                        'SON_IN_LAW',
-                        'BROTHER_IN_LAW'
-                    ],
-                    'FEMALE' => [
-                        'MOTHER',
-                        'SISTER',
-                        'DAUGHTER',
-                        'WIFE',
-                        'GRANDMOTHER',
-                        'AUNT',
-                        'NIECE',
-                        'MOTHER_IN_LAW',
-                        'DAUGHTER_IN_LAW',
-                        'SISTER_IN_LAW'
-                    ],
-                    default => ['FATHER', 'MOTHER', 'SON', 'DAUGHTER'] // fallback
-                };
 
-                CustomerFamilyRelation::factory()->create([
+                // Determine relation options based on both genders
+                $relationshipOptions = [];
+
+                if ($customer->gender === 'MALE') {
+
+                    if ($relative->gender === 'MALE') {
+                        $relationshipOptions = [
+                            'FATHER',
+                            'BROTHER',
+                            'SON',
+                            'GRANDFATHER',
+                            'UNCLE',
+                            'NEPHEW',
+                            'FATHER_IN_LAW',
+                            'SON_IN_LAW',
+                            'BROTHER_IN_LAW'
+                        ];
+                    } else {
+                        $relationshipOptions = [
+                            'MOTHER',
+                            'SISTER',
+                            'DAUGHTER',
+                            'WIFE',
+                            'GRANDMOTHER',
+                            'AUNT',
+                            'NIECE',
+                            'MOTHER_IN_LAW',
+                            'DAUGHTER_IN_LAW',
+                            'SISTER_IN_LAW'
+                        ];
+                    }
+
+                } elseif ($customer->gender === 'FEMALE') {
+
+                    if ($relative->gender === 'MALE') {
+                        $relationshipOptions = [
+                            'FATHER',
+                            'BROTHER',
+                            'SON',
+                            'HUSBAND',
+                            'GRANDFATHER',
+                            'UNCLE',
+                            'NEPHEW',
+                            'FATHER_IN_LAW',
+                            'SON_IN_LAW',
+                            'BROTHER_IN_LAW'
+                        ];
+                    } else {
+                        $relationshipOptions = [
+                            'MOTHER',
+                            'SISTER',
+                            'DAUGHTER',
+                            'WIFE',
+                            'GRANDMOTHER',
+                            'AUNT',
+                            'NIECE',
+                            'MOTHER_IN_LAW',
+                            'DAUGHTER_IN_LAW',
+                            'SISTER_IN_LAW'
+                        ];
+                    }
+                }
+
+                CustomerFamilyRelation::firstOrCreate([
                     'customer_id' => $customer->id,
                     'relative_id' => $relative->id,
+                ], [
                     'relation_type' => collect($relationshipOptions)->random(),
                 ]);
             }
         }
+
 
         $this->command->info('✅ Customers with male, female, organization photos, signatures, and NIDs created successfully.');
     }

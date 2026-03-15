@@ -1,6 +1,6 @@
 <?php
 
-use App\UserRolePermissions\Models\User;
+use App\SystemAdministration\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 test('password update page is displayed', function () {

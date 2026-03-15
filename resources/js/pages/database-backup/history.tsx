@@ -1,36 +1,106 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { CheckCircle, DatabaseBackup, Download, XCircle } from 'lucide-react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import {
+    CheckCircle,
+    DatabaseBackup,
+    Hourglass,
+    Trash2,
+    XCircle,
+} from 'lucide-react';
+import { useEffect } from 'react';
+import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
+import { route } from 'ziggy-js';
 
 import HeadingSmall from '@/components/heading-small';
-import { Button } from '@/components/ui/button';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { useEffect } from 'react';
-import { route } from 'ziggy-js';
 
 interface BackupLog {
     id: number;
     file_name: string;
     file_size: number;
-    status: string;
-    created_at: string;
+    backup_type: 'FULL' | 'DATABASE_ONLY' | 'FILES_ONLY';
+    status: 'RUNNING' | 'SUCCESS' | 'FAILED';
+    started_at: string;
+    completed_at?: string;
+    duration_seconds?: number;
+    message?: string;
     error?: string;
 }
 
-export default function History({ logs }: any) {
-    const formatSize = (bytes: number) => {
-        if (!bytes) return '-';
+interface BackupPageProps {
+    logs: {
+        data: BackupLog[];
+        links: { url: string | null; label: string; active: boolean }[];
+    };
+    filters: { search?: string; per_page?: number; page?: number };
+}
 
-        const mb = bytes / 1024 / 1024;
-        return mb.toFixed(2) + ' MB';
+export default function History() {
+    const { logs, filters, flash } = usePage().props as BackupPageProps & {
+        flash?: { success?: string; error?: string };
     };
 
+    const { data, setData, get } = useForm({
+        search: filters.search || '',
+        per_page: filters.per_page || 10,
+        page: filters.page || 1,
+    });
+
+    // Auto-refresh every minute
     useEffect(() => {
         const interval = setInterval(() => {
-            router.reload({ only: ['logs'] });
-        }, 5000);
-
+            get(route('backup.history'), { preserveState: true });
+        }, 60000);
         return () => clearInterval(interval);
     }, []);
+
+    // Flash messages
+    useEffect(() => {
+        if (flash?.success) toast.success(flash.success);
+        if (flash?.error) toast.error(flash.error);
+    }, [flash]);
+
+    // Auto-search
+    useEffect(() => {
+        const delay = setTimeout(() => {
+            get(route('backup.history'), { preserveState: true });
+        }, 400);
+        return () => clearTimeout(delay);
+    }, [data.search, data.per_page, data.page]);
+
+    const formatSize = (bytes?: number) =>
+        bytes ? (bytes / 1024 / 1024).toFixed(2) + ' MB' : '-';
+
+    const formatDuration = (seconds?: number) =>
+        seconds ? `${Math.floor(seconds / 60)}m ${seconds % 60}s` : '-';
+
+    // Trigger backup
+    const createBackup = () => {
+        router.post(route('backup.run'), {}, { preserveState: true });
+    };
+
+    // Delete backup
+    const handleDelete = (log: BackupLog) => {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `Backup "${log.file_name}" will be permanently deleted!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.delete(route('backup.destroy', log.id), {
+                    preserveState: true,
+                });
+            }
+        });
+    };
 
     return (
         <CustomAuthLayout
@@ -46,83 +116,172 @@ export default function History({ logs }: any) {
                     title="Database Backup History"
                     description="All generated system backups."
                 />
+                <button
+                    onClick={createBackup}
+                    className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                >
+                    <DatabaseBackup className="h-4 w-4" /> Create Backup Now
+                </button>
             </div>
 
-            <div className="rounded-md border bg-card">
-                <table className="w-full text-sm">
-                    <thead className="border-b bg-muted">
+            {/* Filters */}
+            <div className="flex flex-col gap-2 pb-2 sm:flex-row sm:items-center sm:justify-between">
+                <input
+                    type="text"
+                    placeholder="Search backups..."
+                    value={data.search}
+                    onChange={(e) => {
+                        setData('search', e.target.value);
+                        setData('page', 1);
+                    }}
+                    className="h-9 w-full max-w-sm rounded-md border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+                />
+                <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Show</span>
+                    <select
+                        value={data.per_page}
+                        onChange={(e) => {
+                            setData('per_page', Number(e.target.value));
+                            setData('page', 1);
+                        }}
+                        className="h-9 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+                    >
+                        {[5, 10, 20, 50, 100].map((n) => (
+                            <option key={n} value={n}>
+                                {n}
+                            </option>
+                        ))}
+                    </select>
+                    <span className="text-sm text-muted-foreground">
+                        records
+                    </span>
+                </div>
+            </div>
+
+            {/* Table */}
+            <div className="overflow-auto rounded-md border border-border">
+                <table className="w-full border-collapse">
+                    <thead className="sticky top-0 bg-muted">
                         <tr>
-                            <th className="px-4 py-2 text-left">File</th>
-                            <th className="px-4 py-2 text-left">Size</th>
-                            <th className="px-4 py-2 text-left">Status</th>
-                            <th className="px-4 py-2 text-left">Date</th>
-                            <th className="px-4 py-2 text-right">Action</th>
+                            {[
+                                'File',
+                                'Size',
+                                'Type',
+                                'Status',
+                                'Started',
+                                'Completed',
+                                'Actions',
+                            ].map((header) => (
+                                <th
+                                    key={header}
+                                    className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground"
+                                >
+                                    {header}
+                                </th>
+                            ))}
                         </tr>
                     </thead>
-
                     <tbody>
-                        {logs.data.map((log: BackupLog) => (
-                            <tr key={log.id} className="border-b">
-                                <td className="flex items-center gap-2 px-4 py-3">
-                                    <DatabaseBackup size={16} />
-                                    {log.file_name ?? 'Processing...'}
-                                </td>
+                        {logs.data.length > 0 ? (
+                            logs.data.map((log) => (
+                                <tr
+                                    key={log.id}
+                                    className="border-b border-border even:bg-muted/30"
+                                >
+                                    <td className="flex items-center gap-2 px-2 py-1">
+                                        <DatabaseBackup size={16} />
+                                        {log.file_name ?? 'Processing...'}
+                                    </td>
+                                    <td className="px-2 py-1">
+                                        {formatSize(log.file_size)}
+                                    </td>
+                                    <td className="px-2 py-1">
+                                        {log.backup_type}
+                                    </td>
+                                    <td className="px-2 py-1">
+                                        {log.status === 'SUCCESS' && (
+                                            <span className="flex items-center gap-1 text-green-600">
+                                                <CheckCircle size={16} />{' '}
+                                                Success
+                                            </span>
+                                        )}
+                                        {log.status === 'FAILED' && (
+                                            <span className="flex items-center gap-1 text-red-600">
+                                                <XCircle size={16} /> Failed
+                                            </span>
+                                        )}
+                                        {log.status === 'RUNNING' && (
+                                            <span className="flex items-center gap-1 text-yellow-600">
+                                                <Hourglass size={16} /> Running
+                                            </span>
+                                        )}
+                                    </td>
+                                    <td className="px-2 py-1">
+                                        {new Date(
+                                            log.started_at,
+                                        ).toLocaleString()}
+                                    </td>
+                                    <td className="px-2 py-1">
+                                        {log.completed_at
+                                            ? new Date(
+                                                  log.completed_at,
+                                              ).toLocaleString()
+                                            : '-'}
+                                    </td>
 
-                                <td className="px-4 py-3">
-                                    {formatSize(log.file_size)}
-                                </td>
-
-                                <td className="px-4 py-3">
-                                    {log.status === 'SUCCESS' && (
-                                        <span className="flex items-center gap-1 text-green-600">
-                                            <CheckCircle size={16} />
-                                            Success
-                                        </span>
-                                    )}
-
-                                    {log.status === 'FAILED' && (
-                                        <span className="flex items-center gap-1 text-red-600">
-                                            <XCircle size={16} />
-                                            Failed
-                                        </span>
-                                    )}
-
-                                    {log.status === 'RUNNING' && (
-                                        <span className="text-yellow-600">
-                                            Running
-                                        </span>
-                                    )}
-                                </td>
-
-                                <td className="px-4 py-3">
-                                    {new Date(log.created_at).toLocaleString()}
-                                </td>
-
-                                <td className="px-4 py-3 text-right">
-                                    {log.status === 'SUCCESS' && (
-                                        <Link
-                                            href={route(
-                                                'backup.download',
-                                                log.id,
-                                            )}
-                                        >
-                                            <Button size="sm">
-                                                <Download size={16} />
-                                                Download
-                                            </Button>
-                                        </Link>
-                                    )}
+                                    <td className="px-2 py-1">
+                                        <TooltipProvider>
+                                            <div className="flex gap-2">
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <button
+                                                            onClick={() =>
+                                                                handleDelete(
+                                                                    log,
+                                                                )
+                                                            }
+                                                            className="text-destructive hover:text-destructive/80"
+                                                        >
+                                                            <Trash2 className="h-5 w-5" />
+                                                        </button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        Delete
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </div>
+                                        </TooltipProvider>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td
+                                    colSpan={8}
+                                    className="px-4 py-6 text-center text-muted-foreground"
+                                >
+                                    No backups available.
                                 </td>
                             </tr>
-                        ))}
+                        )}
                     </tbody>
                 </table>
+            </div>
 
-                {logs.data.length === 0 && (
-                    <div className="p-6 text-center text-muted-foreground">
-                        No backups available.
-                    </div>
-                )}
+            {/* Pagination */}
+            <div className="mt-2 flex justify-center gap-1">
+                {logs.links.map((link, i) => (
+                    <Link
+                        key={i}
+                        href={link.url || '#'}
+                        className={`rounded-full px-3 py-1 text-sm transition-colors ${
+                            link.active
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                        }`}
+                        dangerouslySetInnerHTML={{ __html: link.label }}
+                    />
+                ))}
             </div>
         </CustomAuthLayout>
     );

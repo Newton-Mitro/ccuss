@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Branch\Models\Organization;
+use App\SystemAdministration\Models\Branch;
+use App\SystemAdministration\Models\Organization;
 use Illuminate\Database\Seeder;
-use App\Branch\Models\Branch;
 
 class OrganizationStructureSeeder extends Seeder
 {

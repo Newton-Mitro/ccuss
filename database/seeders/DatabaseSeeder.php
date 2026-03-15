@@ -2,7 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\UserRolePermissions\Models\User;
+
+use App\SystemAdministration\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
