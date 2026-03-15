@@ -2,7 +2,7 @@
 
 namespace App\CashTreasuryModule\Controllers;
 
-use App\Branch\Models\Branch;
+use App\SystemAdministration\Models\Branch;
 use App\CashTreasuryModule\Models\BranchDay;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;

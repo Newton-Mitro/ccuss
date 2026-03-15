@@ -1,26 +1,25 @@
 <?php
 
-namespace App\CostomerModule\Models;
+namespace App\CustomerModule\Models;
 
 use App\Audit\Traits\Auditable;
 use App\SystemAdministration\Models\User;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Branch;
-use Database\Factories\CustomerFamilyRelationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class CustomerFamilyRelation extends Model
+class CustomerIntroducer extends Model
 {
     use HasFactory, Auditable;
 
     protected $fillable = [
-        'organization_id',
-        'branch_id',
-        'customer_id',
-        'relative_id',
-        'relation_type',
+        'introduced_customer_id',
+        'introducer_customer_id',
+        'introducer_account_id',
+
+        'relationship_type',
 
         'verification_status',
         'verified_by',
@@ -35,28 +34,27 @@ class CustomerFamilyRelation extends Model
         'verified_at' => 'datetime',
     ];
 
+
     /* ========================
-     * Core Relationships
+     * Customer Relationships
      * ======================== */
 
-    public function organization(): BelongsTo
+    // The customer who was introduced
+    public function introducedCustomer(): BelongsTo
     {
-        return $this->belongsTo(Organization::class);
+        return $this->belongsTo(Customer::class, 'introduced_customer_id');
     }
 
-    public function branch(): BelongsTo
+    // The customer who introduced someone
+    public function introducerCustomer(): BelongsTo
     {
-        return $this->belongsTo(Branch::class);
+        return $this->belongsTo(Customer::class, 'introducer_customer_id');
     }
 
-    public function customer(): BelongsTo
+    // Optional account used for introducer
+    public function introducerAccount(): BelongsTo
     {
-        return $this->belongsTo(Customer::class);
-    }
-
-    public function relative(): BelongsTo
-    {
-        return $this->belongsTo(Customer::class, 'relative_id');
+        return $this->belongsTo(OnlineServiceClient::class, 'introducer_account_id');
     }
 
     /* ========================
@@ -99,10 +97,5 @@ class CustomerFamilyRelation extends Model
     public function isPending(): bool
     {
         return $this->verification_status === 'PENDING';
-    }
-
-    protected static function newFactory()
-    {
-        return CustomerFamilyRelationFactory::new();
     }
 }

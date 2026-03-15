@@ -1,15 +1,15 @@
 <?php
 
-namespace App\CostomerModule\Requests;
+namespace App\CustomerModule\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class UpdateCustomerRequest extends FormRequest
+class StoreCustomerRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return true; // set to true if any authenticated user can create
     }
 
     public function rules(): array
@@ -41,7 +41,7 @@ class UpdateCustomerRequest extends FormRequest
                     'HINDUISM',
                     'BUDDHISM',
                     'OTHER',
-                ]),
+                ])
             ],
 
             'identification_type' => [
@@ -51,4 +51,5 @@ class UpdateCustomerRequest extends FormRequest
             'identification_number' => ['required', 'string', 'max:50'],
         ];
     }
+
 }

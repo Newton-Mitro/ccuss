@@ -1,10 +1,10 @@
 <?php
 
-namespace App\CostomerModule\Controllers;
+namespace App\CustomerModule\Controllers;
 
-use App\CostomerModule\Models\CustomerFamilyRelation;
-use App\CostomerModule\Requests\StoreFamilyRelationRequest;
-use App\CostomerModule\Requests\UpdateFamilyRelationRequest;
+use App\CustomerModule\Models\CustomerFamilyRelation;
+use App\CustomerModule\Requests\StoreFamilyRelationRequest;
+use App\CustomerModule\Requests\UpdateFamilyRelationRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

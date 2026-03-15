@@ -1,10 +1,10 @@
 <?php
 
-namespace App\CostomerModule\Requests;
+namespace App\CustomerModule\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateAddressRequest extends FormRequest
+class StoreAddressRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -14,21 +14,20 @@ class UpdateAddressRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'customer_id' => ['sometimes', 'required', 'exists:customers,id'],
+            'customer_id' => ['required', 'exists:customers,id'],
 
-            'line1' => ['sometimes', 'required', 'string', 'max:255'],
+            'line1' => ['required', 'string', 'max:255'],
             'line2' => ['nullable', 'string', 'max:255'],
 
-            'division' => ['sometimes', 'required', 'string', 'max:100'],
-            'district' => ['sometimes', 'required', 'string', 'max:100'],
+            'division' => ['required', 'string', 'max:100'],
+            'district' => ['required', 'string', 'max:100'],
             'upazila' => ['nullable', 'string', 'max:100'],
             'union_ward' => ['nullable', 'string', 'max:100'],
-            'village_locality' => ['nullable', 'string', 'max:150'],
             'postal_code' => ['nullable', 'string', 'max:20'],
 
-            'country_code' => ['sometimes', 'required', 'string', 'max:150'],
+            'country' => ['required', 'string', 'max:150'],
 
-            'type' => ['sometimes', 'required', 'in:CURRENT,PERMANENT,MAILING,WORK,REGISTERED,OTHER'],
+            'type' => ['required', 'in:CURRENT,PERMANENT,MAILING,WORK,REGISTERED,OTHER'],
         ];
     }
 

@@ -40,8 +40,6 @@ return new class extends Migration {
         Schema::create('customer_addresses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
-            $table->foreignId('organization_id')->constrained();
-            $table->foreignId('branch_id')->constrained();
             $table->string('line1', 255);
             $table->string('line2', 255)->nullable();
             $table->string('division', 100)->nullable();
@@ -69,8 +67,6 @@ return new class extends Migration {
 
         Schema::create('customer_family_relations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->constrained();
-            $table->foreignId('branch_id')->constrained();
             $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
             $table->foreignId('relative_id')->constrained('customers');
             $table->enum('relation_type', [
@@ -113,8 +109,6 @@ return new class extends Migration {
 
         Schema::create('kyc_profiles', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->constrained();
-            $table->foreignId('branch_id')->constrained();
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->enum('kyc_level', ['BASIC', 'FULL', 'ENHANCED'])->default('BASIC');
             $table->enum('risk_level', ['LOW', 'MEDIUM', 'HIGH'])->default('LOW');
@@ -127,8 +121,6 @@ return new class extends Migration {
 
         Schema::create('kyc_documents', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->constrained();
-            $table->foreignId('branch_id')->constrained();
             $table->foreignId('customer_id')->constrained();
             $table->enum('document_type', [
                 'NID_FRONT',
@@ -178,8 +170,6 @@ return new class extends Migration {
 
         Schema::create('customer_introducers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->constrained();
-            $table->foreignId('branch_id')->constrained();
             $table->foreignId('introduced_customer_id')
                 ->constrained('customers')
                 ->cascadeOnDelete();

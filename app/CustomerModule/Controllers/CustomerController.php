@@ -1,10 +1,10 @@
 <?php
 
-namespace App\CostomerModule\Controllers;
+namespace App\CustomerModule\Controllers;
 
-use App\CostomerModule\Models\Customer;
-use App\CostomerModule\Requests\StoreCustomerRequest;
-use App\CostomerModule\Requests\UpdateCustomerRequest;
+use App\CustomerModule\Models\Customer;
+use App\CustomerModule\Requests\StoreCustomerRequest;
+use App\CustomerModule\Requests\UpdateCustomerRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -147,6 +147,11 @@ class CustomerController extends Controller
         $customer->load([
             'photo',
             'addresses',
+
+            'relatedToMe',
+            'relatedToMe.customer',
+            'relatedToMe.customer.photo',
+
             'familyRelations',
             'familyRelations.relative',
             'familyRelations.relative.photo',

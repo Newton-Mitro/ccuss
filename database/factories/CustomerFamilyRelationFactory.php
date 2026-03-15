@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\CostomerModule\Models\CustomerFamilyRelation;
+use App\CustomerModule\Models\CustomerFamilyRelation;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class CustomerFamilyRelationFactory extends Factory

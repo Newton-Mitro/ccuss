@@ -2,7 +2,9 @@
 
 namespace Database\Factories;
 
-use App\CostomerModule\Models\OnlineServiceClient;
+use App\CustomerModule\Models\OnlineServiceClient;
+use App\CustomerModule\Models\Customer;
+use App\SystemAdministration\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 
@@ -12,12 +14,45 @@ class OnlineServiceClientFactory extends Factory
 
     public function definition(): array
     {
+        // Pick a random customer
+        $customer = Customer::inRandomOrder()->first();
+
+        // Pick a random existing user for audit
+        $creator = User::inRandomOrder()->first();
+
         return [
+            'organization_id' => $customer->organization_id ?? null,
+            'branch_id' => $customer->branch_id ?? null,
+            'customer_id' => $customer->id ?? null,
+
             'username' => $this->faker->unique()->userName(),
             'email' => $this->faker->unique()->safeEmail(),
-            'phone' => $this->faker->phoneNumber(),
+            'phone' => $this->faker->unique()->phoneNumber(),
             'password' => Hash::make('password'),
             'status' => 'ACTIVE',
+
+            'created_by' => $creator->id ?? null,
+            'updated_by' => $creator->id ?? null,
         ];
+    }
+
+    /**
+     * State for pending status
+     */
+    public function pending()
+    {
+        return $this->state(fn(array $attributes) => [
+            'status' => 'PENDING',
+        ]);
+    }
+
+    /**
+     * State for suspended status
+     */
+    public function suspended()
+    {
+        return $this->state(fn(array $attributes) => [
+            'status' => 'SUSPENDED',
+        ]);
     }
 }

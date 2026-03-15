@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\CostomerModule\Models\KycProfile;
+use App\CustomerModule\Models\KycProfile;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class KycProfileFactory extends Factory

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\CostomerModule\Models;
+namespace App\CustomerModule\Models;
 
 use App\Audit\Traits\Auditable;
 use App\SystemAdministration\Models\User;

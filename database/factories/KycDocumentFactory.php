@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\CostomerModule\Models\KycDocument;
+use App\CustomerModule\Models\KycDocument;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 

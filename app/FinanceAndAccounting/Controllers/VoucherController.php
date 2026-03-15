@@ -9,7 +9,7 @@ use App\FinanceAndAccounting\Models\Voucher;
 use App\FinanceAndAccounting\Models\VoucherLine;
 use App\FinanceAndAccounting\Requests\StoreVoucherRequest;
 use App\FinanceAndAccounting\Requests\UpdateVoucherRequest;
-use App\Branch\Models\Branch;
+use App\SystemAdministration\Models\Branch;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Http\Request;

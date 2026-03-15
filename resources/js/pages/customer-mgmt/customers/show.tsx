@@ -20,7 +20,6 @@ import { formatDate } from '../../../lib/date_util';
 import { BreadcrumbItem } from '../../../types';
 
 import { route } from 'ziggy-js';
-import { Customer } from '../../../types/customer_kyc_module';
 
 /* ================= Theme ================= */
 
@@ -41,13 +40,14 @@ const badgeColors = {
 /* ================= Props ================= */
 
 interface ShowProps {
-    customer: Customer;
+    customer: any;
     backUrl: string;
 }
 
 /* ================= Page ================= */
 
 export default function Show({ customer, backUrl }: ShowProps) {
+    console.log(customer);
     const handleBack = () =>
         router.visit(backUrl, { preserveState: true, preserveScroll: true });
 
@@ -413,8 +413,6 @@ export default function Show({ customer, backUrl }: ShowProps) {
                     }
                 >
                     <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
-                        
-
                         <InfoItem
                             label="User Email"
                             value={customer.online_service_client.email}

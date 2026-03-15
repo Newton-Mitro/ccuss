@@ -1,11 +1,11 @@
 <?php
 
-namespace App\CostomerModule\Controllers;
+namespace App\CustomerModule\Controllers;
 
-use App\CostomerModule\Models\Customer;
-use App\CostomerModule\Models\OnlineServiceClient;
-use App\CostomerModule\Requests\StoreOnlineClientRequest;
-use App\CostomerModule\Requests\UpdateOnlineClientRequest;
+use App\CustomerModule\Models\Customer;
+use App\CustomerModule\Models\OnlineServiceClient;
+use App\CustomerModule\Requests\StoreOnlineClientRequest;
+use App\CustomerModule\Requests\UpdateOnlineClientRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;

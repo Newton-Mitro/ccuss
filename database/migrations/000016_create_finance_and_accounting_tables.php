@@ -143,7 +143,6 @@ return new class extends Migration {
             $table->foreignId('branch_id')->constrained();
             $table->foreignId('fiscal_year_id')->nullable()->constrained('fiscal_years')->nullOnDelete();
             $table->foreignId('accounting_period_id')->nullable()->constrained('accounting_periods')->nullOnDelete();
-            $table->foreignId('branch_id')->nullable()->constrained('branches')->nullOnDelete();
             $table->timestamp('voucher_date')->useCurrent()->comment('Posting timestamp');
             $table->enum('voucher_type', [
                 'OPENING_BALANCE',
@@ -181,8 +180,6 @@ return new class extends Migration {
         */
         Schema::create('voucher_lines', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->constrained();
-            $table->foreignId('branch_id')->constrained();
             $table->foreignId('voucher_id')->constrained('vouchers')->cascadeOnDelete();
             $table->foreignId('ledger_account_id')->constrained('ledger_accounts')->restrictOnDelete();
             $table->nullableMorphs('subledger');

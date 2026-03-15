@@ -1,37 +1,34 @@
 <?php
 
-namespace App\CostomerModule\Models;
+namespace App\CustomerModule\Models;
 
 use App\Audit\Traits\Auditable;
 use App\SystemAdministration\Models\User;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Branch;
-use Database\Factories\CustomerAddressFactory;
+use Database\Factories\KycDocumentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
-class CustomerAddress extends Model
+class KycDocument extends Model
 {
     use HasFactory, Auditable;
 
     protected $fillable = [
         'customer_id',
-        'organization_id',
-        'branch_id',
-        'line1',
-        'line2',
-        'division',
-        'district',
-        'upazila',
-        'union_ward',
-        'postal_code',
-        'country',
-        'type',
+        'document_type',
+        'file_name',
+        'file_path',
+        'mime',
+        'alt_text',
+
         'verification_status',
         'verified_by',
         'verified_at',
         'remarks',
+
         'created_by',
         'updated_by',
     ];
@@ -40,6 +37,8 @@ class CustomerAddress extends Model
         'verified_at' => 'datetime',
     ];
 
+    protected $appends = ['url'];
+
     /* ========================
      * Core Relationships
      * ======================== */
@@ -47,16 +46,6 @@ class CustomerAddress extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
-    }
-
-    public function organization(): BelongsTo
-    {
-        return $this->belongsTo(Organization::class);
-    }
-
-    public function branch(): BelongsTo
-    {
-        return $this->belongsTo(Branch::class);
     }
 
     /* ========================
@@ -82,8 +71,40 @@ class CustomerAddress extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
+    /* ========================
+     * Accessors
+     * ======================== */
+
+    public function getUrlAttribute(): ?string
+    {
+        if (!$this->file_path) {
+            return null;
+        }
+
+        return url(Storage::url($this->file_path));
+    }
+
+    /* ========================
+     * Helpers
+     * ======================== */
+
+    public function isVerified(): bool
+    {
+        return $this->verification_status === 'VERIFIED';
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->verification_status === 'REJECTED';
+    }
+
+    public function isPending(): bool
+    {
+        return $this->verification_status === 'PENDING';
+    }
+
     protected static function newFactory()
     {
-        return CustomerAddressFactory::new();
+        return KycDocumentFactory::new();
     }
 }

@@ -1,30 +1,24 @@
 <?php
 
-namespace App\CostomerModule\Models;
+namespace App\CustomerModule\Models;
 
 use App\Audit\Traits\Auditable;
 use App\SystemAdministration\Models\User;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Branch;
-use Database\Factories\KycDocumentFactory;
+use Database\Factories\CustomerFamilyRelationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
-class KycDocument extends Model
+class CustomerFamilyRelation extends Model
 {
     use HasFactory, Auditable;
 
     protected $fillable = [
-        'organization_id',
-        'branch_id',
         'customer_id',
-        'document_type',
-        'file_name',
-        'file_path',
-        'mime',
-        'alt_text',
+        'relative_id',
+        'relation_type',
 
         'verification_status',
         'verified_by',
@@ -39,25 +33,18 @@ class KycDocument extends Model
         'verified_at' => 'datetime',
     ];
 
-    protected $appends = ['url'];
-
     /* ========================
      * Core Relationships
      * ======================== */
 
-    public function organization(): BelongsTo
-    {
-        return $this->belongsTo(Organization::class);
-    }
-
-    public function branch(): BelongsTo
-    {
-        return $this->belongsTo(Branch::class);
-    }
-
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function relative(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class, 'relative_id');
     }
 
     /* ========================
@@ -84,20 +71,7 @@ class KycDocument extends Model
     }
 
     /* ========================
-     * Accessors
-     * ======================== */
-
-    public function getUrlAttribute(): ?string
-    {
-        if (!$this->file_path) {
-            return null;
-        }
-
-        return url(Storage::url($this->file_path));
-    }
-
-    /* ========================
-     * Helpers
+     * Helper Methods
      * ======================== */
 
     public function isVerified(): bool
@@ -117,6 +91,6 @@ class KycDocument extends Model
 
     protected static function newFactory()
     {
-        return KycDocumentFactory::new();
+        return CustomerFamilyRelationFactory::new();
     }
 }

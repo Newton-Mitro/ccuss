@@ -3,7 +3,7 @@
 namespace App\FinanceAndAccounting\Models;
 
 use App\Audit\Traits\Auditable;
-use App\Branch\Models\Branch;
+use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\User;
 use Database\Factories\VoucherFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

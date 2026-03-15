@@ -39,8 +39,8 @@ return new class extends Migration {
             $table->decimal('amount', 18, 2);
 
             // Accounts involved in double-entry
-            $table->foreignId('account_from')->nullable()->constrained('cash_accounts'); // can morph to other account tables if needed
-            $table->foreignId('account_to')->nullable()->constrained('cash_accounts');
+            // $table->foreignId('account_from')->nullable()->constrained('cash_accounts'); // can morph to other account tables if needed
+            // $table->foreignId('account_to')->nullable()->constrained('cash_accounts');
 
             $table->string('description')->nullable();
             $table->dateTime('transaction_date')->default(DB::raw('CURRENT_TIMESTAMP'));

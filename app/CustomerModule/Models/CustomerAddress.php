@@ -1,30 +1,37 @@
 <?php
 
-namespace App\CostomerModule\Models;
+namespace App\CustomerModule\Models;
 
 use App\Audit\Traits\Auditable;
 use App\SystemAdministration\Models\User;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Branch;
-use Database\Factories\KycProfileFactory;
+use Database\Factories\CustomerAddressFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class KycProfile extends Model
+class CustomerAddress extends Model
 {
     use HasFactory, Auditable;
 
     protected $fillable = [
-        'organization_id',
-        'branch_id',
         'customer_id',
-        'kyc_level',
-        'risk_level',
+        'line1',
+        'line2',
+        'division',
+        'district',
+        'upazila',
+        'union_ward',
+        'postal_code',
+        'country',
+        'type',
         'verification_status',
         'verified_by',
         'verified_at',
         'remarks',
+        'created_by',
+        'updated_by',
     ];
 
     protected $casts = [
@@ -34,16 +41,6 @@ class KycProfile extends Model
     /* ========================
      * Core Relationships
      * ======================== */
-
-    public function organization(): BelongsTo
-    {
-        return $this->belongsTo(Organization::class);
-    }
-
-    public function branch(): BelongsTo
-    {
-        return $this->belongsTo(Branch::class);
-    }
 
     public function customer(): BelongsTo
     {
@@ -60,41 +57,21 @@ class KycProfile extends Model
     }
 
     /* ========================
-     * Helper Methods
+     * Audit
      * ======================== */
 
-    public function isApproved(): bool
+    public function creator(): BelongsTo
     {
-        return $this->verification_status === 'APPROVED';
+        return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function isRejected(): bool
+    public function updater(): BelongsTo
     {
-        return $this->verification_status === 'REJECTED';
-    }
-
-    public function isPending(): bool
-    {
-        return $this->verification_status === 'PENDING';
-    }
-
-    public function isHighRisk(): bool
-    {
-        return $this->risk_level === 'HIGH';
-    }
-
-    public function isMediumRisk(): bool
-    {
-        return $this->risk_level === 'MEDIUM';
-    }
-
-    public function isLowRisk(): bool
-    {
-        return $this->risk_level === 'LOW';
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     protected static function newFactory()
     {
-        return KycProfileFactory::new();
+        return CustomerAddressFactory::new();
     }
 }

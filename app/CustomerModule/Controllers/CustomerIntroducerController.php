@@ -1,8 +1,8 @@
 <?php
 
-namespace App\CostomerModule\Controllers;
+namespace App\CustomerModule\Controllers;
 
-use App\CostomerModule\Models\CustomerIntroducer;
+use App\CustomerModule\Models\CustomerIntroducer;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

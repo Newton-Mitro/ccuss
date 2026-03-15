@@ -1,10 +1,10 @@
 <?php
 
-namespace App\CostomerModule\Controllers;
+namespace App\CustomerModule\Controllers;
 
-use App\CostomerModule\Models\CustomerAddress;
-use App\CostomerModule\Requests\StoreAddressRequest;
-use App\CostomerModule\Requests\UpdateAddressRequest;
+use App\CustomerModule\Models\CustomerAddress;
+use App\CustomerModule\Requests\StoreAddressRequest;
+use App\CustomerModule\Requests\UpdateAddressRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
