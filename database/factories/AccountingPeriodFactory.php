@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Accounting\Models\AccountingPeriod;
-use App\Accounting\Models\FiscalYear;
+use App\FinanceAndAccounting\Models\AccountingPeriod;
+use App\FinanceAndAccounting\Models\FiscalYear;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AccountingPeriodFactory extends Factory

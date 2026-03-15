@@ -4,6 +4,8 @@ namespace App\CostomerModule\Models;
 
 use App\Audit\Traits\Auditable;
 use App\SystemAdministration\Models\User;
+use App\SystemAdministration\Models\Organization;
+use App\SystemAdministration\Models\Branch;
 use Database\Factories\CustomerFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +18,8 @@ class Customer extends Model
     use HasFactory, Auditable;
 
     protected $fillable = [
+        'organization_id',
+        'branch_id',
         'customer_no',
         'type',
         'name',
@@ -36,7 +40,21 @@ class Customer extends Model
     ];
 
     /* ========================
-     * Relationships
+     * Core Relationships
+     * ======================== */
+
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    /* ========================
+     * Customer Information
      * ======================== */
 
     public function addresses(): HasMany
@@ -48,6 +66,10 @@ class Customer extends Model
     {
         return $this->hasMany(CustomerFamilyRelation::class);
     }
+
+    /* ========================
+     * KYC
+     * ======================== */
 
     public function kycProfile(): HasOne
     {
@@ -71,6 +93,10 @@ class Customer extends Model
             ->where('document_type', 'SIGNATURE');
     }
 
+    /* ========================
+     * Introducer System
+     * ======================== */
+
     public function introducers(): HasMany
     {
         return $this->hasMany(CustomerIntroducer::class, 'introduced_customer_id');
@@ -81,10 +107,18 @@ class Customer extends Model
         return $this->hasMany(CustomerIntroducer::class, 'introducer_customer_id');
     }
 
+    /* ========================
+     * Online Service
+     * ======================== */
+
     public function onlineServiceClient(): HasOne
     {
         return $this->hasOne(OnlineServiceClient::class);
     }
+
+    /* ========================
+     * Audit
+     * ======================== */
 
     public function creator(): BelongsTo
     {

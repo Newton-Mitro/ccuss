@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Accounting\Controllers;
+namespace App\FinanceAndAccounting\Controllers;
 
-use App\Accounting\Models\AccountingPeriod;
-use App\Accounting\Models\FiscalYear;
+use App\FinanceAndAccounting\Models\AccountingPeriod;
+use App\FinanceAndAccounting\Models\FiscalYear;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

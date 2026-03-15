@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Accounting\Models\LedgerAccountBalance;
-use App\Accounting\Models\AccountingPeriod;
-use App\Accounting\Models\FiscalYear;
-use App\Accounting\Models\LedgerAccount;
-use App\Accounting\Models\Voucher;
-use App\Accounting\Models\VoucherLine;
+use App\FinanceAndAccounting\Models\LedgerAccountBalance;
+use App\FinanceAndAccounting\Models\AccountingPeriod;
+use App\FinanceAndAccounting\Models\FiscalYear;
+use App\FinanceAndAccounting\Models\LedgerAccount;
+use App\FinanceAndAccounting\Models\Voucher;
+use App\FinanceAndAccounting\Models\VoucherLine;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\User;
 use Illuminate\Database\Seeder;

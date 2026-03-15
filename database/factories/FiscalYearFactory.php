@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Accounting\Models\FiscalYear;
+use App\FinanceAndAccounting\Models\FiscalYear;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class FiscalYearFactory extends Factory

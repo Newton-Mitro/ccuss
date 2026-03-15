@@ -2,9 +2,9 @@
 
 namespace App\SystemAdministration\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -15,10 +15,11 @@ class User extends Authenticatable
     use HasFactory, Notifiable, TwoFactorAuthenticatable;
 
     protected $fillable = [
+        'organization_id',
+        'branch_id',
         'name',
         'email',
         'password',
-        'branch_id',
     ];
 
     protected $hidden = [
@@ -37,12 +38,22 @@ class User extends Authenticatable
         ];
     }
 
-    public function branch()
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
+    }
+
+    public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);
     }
 
-    // 🔗 Relationships
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class);
@@ -53,7 +64,12 @@ class User extends Authenticatable
         return $this->belongsToMany(Permission::class);
     }
 
-    // ✅ Check if user has specific role(s)
+    /*
+    |--------------------------------------------------------------------------
+    | Role Helpers
+    |--------------------------------------------------------------------------
+    */
+
     public function hasRole(string $role): bool
     {
         return $this->roles->contains('name', $role);
@@ -64,16 +80,24 @@ class User extends Authenticatable
         return $this->roles->whereIn('name', $roles)->isNotEmpty();
     }
 
-    // ✅ Check if user has specific permission(s)
+    /*
+    |--------------------------------------------------------------------------
+    | Permission Helpers
+    |--------------------------------------------------------------------------
+    */
+
     public function hasPermission(string $permission): bool
     {
-        // Check direct permission
+        // Direct permission
         if ($this->permissions->contains('name', $permission)) {
             return true;
         }
 
-        // Check permissions via roles
-        return $this->roles->flatMap->permissions->pluck('name')->contains($permission);
+        // Permission through roles
+        return $this->roles
+            ->flatMap->permissions
+            ->pluck('name')
+            ->contains($permission);
     }
 
     public function hasAnyPermission(array $permissions): bool
@@ -83,6 +107,7 @@ class User extends Authenticatable
                 return true;
             }
         }
+
         return false;
     }
 
@@ -90,5 +115,4 @@ class User extends Authenticatable
     {
         return UserFactory::new();
     }
-
 }

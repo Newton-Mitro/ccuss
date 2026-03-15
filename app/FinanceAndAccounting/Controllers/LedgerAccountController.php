@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Accounting\Controllers;
+namespace App\FinanceAndAccounting\Controllers;
 
-use App\Accounting\Models\AccountingPeriod;
-use App\Accounting\Models\FiscalYear;
-use App\Accounting\Models\LedgerAccount;
-use App\Accounting\Models\Voucher;
-use App\Accounting\Models\VoucherLine;
+use App\FinanceAndAccounting\Models\AccountingPeriod;
+use App\FinanceAndAccounting\Models\FiscalYear;
+use App\FinanceAndAccounting\Models\LedgerAccount;
+use App\FinanceAndAccounting\Models\Voucher;
+use App\FinanceAndAccounting\Models\VoucherLine;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

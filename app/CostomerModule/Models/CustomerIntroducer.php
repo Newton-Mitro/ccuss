@@ -4,6 +4,8 @@ namespace App\CostomerModule\Models;
 
 use App\Audit\Traits\Auditable;
 use App\SystemAdministration\Models\User;
+use App\SystemAdministration\Models\Organization;
+use App\SystemAdministration\Models\Branch;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,9 +15,13 @@ class CustomerIntroducer extends Model
     use HasFactory, Auditable;
 
     protected $fillable = [
+        'organization_id',
+        'branch_id',
+
         'introduced_customer_id',
         'introducer_customer_id',
         'introducer_account_id',
+
         'relationship_type',
 
         'verification_status',
@@ -32,7 +38,21 @@ class CustomerIntroducer extends Model
     ];
 
     /* ========================
-     * Relationships
+     * Core Relationships
+     * ======================== */
+
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    /* ========================
+     * Customer Relationships
      * ======================== */
 
     // The customer who was introduced
@@ -41,7 +61,7 @@ class CustomerIntroducer extends Model
         return $this->belongsTo(Customer::class, 'introduced_customer_id');
     }
 
-    // The customer who is the introducer
+    // The customer who introduced someone
     public function introducerCustomer(): BelongsTo
     {
         return $this->belongsTo(Customer::class, 'introducer_customer_id');
@@ -53,10 +73,27 @@ class CustomerIntroducer extends Model
         return $this->belongsTo(OnlineServiceClient::class, 'introducer_account_id');
     }
 
-    // The user who verified this introducer
+    /* ========================
+     * Verification
+     * ======================== */
+
     public function verifier(): BelongsTo
     {
         return $this->belongsTo(User::class, 'verified_by');
+    }
+
+    /* ========================
+     * Audit
+     * ======================== */
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     /* ========================

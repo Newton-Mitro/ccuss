@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Accounting\Models;
+namespace App\FinanceAndAccounting\Models;
 
 use App\Audit\Traits\Auditable;
 use App\Branch\Models\Branch;

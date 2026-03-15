@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Accounting\Models\LedgerAccount;
-use App\Accounting\Models\Voucher;
-use App\Accounting\Models\VoucherLine;
+use App\FinanceAndAccounting\Models\LedgerAccount;
+use App\FinanceAndAccounting\Models\Voucher;
+use App\FinanceAndAccounting\Models\VoucherLine;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class VoucherLineFactory extends Factory

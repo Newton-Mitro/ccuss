@@ -9,7 +9,6 @@ return new class extends Migration {
     {
         Schema::create('permissions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->constrained();
             $table->string('name');
             $table->string('slug')->unique();
             $table->string('description')->nullable();
@@ -18,7 +17,6 @@ return new class extends Migration {
 
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->constrained();
             $table->string('name');
             $table->string('slug')->unique();
             $table->string('description')->nullable();

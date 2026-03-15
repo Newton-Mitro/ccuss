@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Accounting\Models\InstrumentType;
+use App\FinanceAndAccounting\Models\InstrumentType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class InstrumentTypeFactory extends Factory

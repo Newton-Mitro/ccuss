@@ -1,12 +1,12 @@
 <?php
 
-use App\Accounting\Controllers\AccountingReportController;
-use App\Accounting\Controllers\LedgerAccountController;
-use App\Accounting\Controllers\VoucherController;
+use App\FinanceAndAccounting\Controllers\AccountingReportController;
+use App\FinanceAndAccounting\Controllers\LedgerAccountController;
+use App\FinanceAndAccounting\Controllers\VoucherController;
 use Illuminate\Support\Facades\Route;
 
-use App\Accounting\Controllers\FiscalYearController;
-use App\Accounting\Controllers\AccountingPeriodController;
+use App\FinanceAndAccounting\Controllers\FiscalYearController;
+use App\FinanceAndAccounting\Controllers\AccountingPeriodController;
 
 // Fiscal Years
 Route::middleware(['auth',])->group(function () {

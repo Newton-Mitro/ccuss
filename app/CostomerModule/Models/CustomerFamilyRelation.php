@@ -4,6 +4,8 @@ namespace App\CostomerModule\Models;
 
 use App\Audit\Traits\Auditable;
 use App\SystemAdministration\Models\User;
+use App\SystemAdministration\Models\Organization;
+use App\SystemAdministration\Models\Branch;
 use Database\Factories\CustomerFamilyRelationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +16,8 @@ class CustomerFamilyRelation extends Model
     use HasFactory, Auditable;
 
     protected $fillable = [
+        'organization_id',
+        'branch_id',
         'customer_id',
         'relative_id',
         'relation_type',
@@ -32,8 +36,18 @@ class CustomerFamilyRelation extends Model
     ];
 
     /* ========================
-     * Relationships
+     * Core Relationships
      * ======================== */
+
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
 
     public function customer(): BelongsTo
     {
@@ -45,9 +59,27 @@ class CustomerFamilyRelation extends Model
         return $this->belongsTo(Customer::class, 'relative_id');
     }
 
+    /* ========================
+     * Verification
+     * ======================== */
+
     public function verifier(): BelongsTo
     {
         return $this->belongsTo(User::class, 'verified_by');
+    }
+
+    /* ========================
+     * Audit
+     * ======================== */
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     /* ========================

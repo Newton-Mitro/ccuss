@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Accounting\Models\LedgerAccount;
-use App\Accounting\Models\LedgerAccountBalance;
-use App\Accounting\Models\AccountingPeriod;
+use App\FinanceAndAccounting\Models\LedgerAccount;
+use App\FinanceAndAccounting\Models\LedgerAccountBalance;
+use App\FinanceAndAccounting\Models\AccountingPeriod;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class LedgerAccountBalanceFactory extends Factory

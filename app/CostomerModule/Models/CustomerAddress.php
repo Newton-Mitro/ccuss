@@ -4,6 +4,8 @@ namespace App\CostomerModule\Models;
 
 use App\Audit\Traits\Auditable;
 use App\SystemAdministration\Models\User;
+use App\SystemAdministration\Models\Organization;
+use App\SystemAdministration\Models\Branch;
 use Database\Factories\CustomerAddressFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +17,8 @@ class CustomerAddress extends Model
 
     protected $fillable = [
         'customer_id',
+        'organization_id',
+        'branch_id',
         'line1',
         'line2',
         'division',
@@ -36,14 +40,46 @@ class CustomerAddress extends Model
         'verified_at' => 'datetime',
     ];
 
+    /* ========================
+     * Core Relationships
+     * ======================== */
+
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    /* ========================
+     * Verification
+     * ======================== */
+
     public function verifier(): BelongsTo
     {
         return $this->belongsTo(User::class, 'verified_by');
+    }
+
+    /* ========================
+     * Audit
+     * ======================== */
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     protected static function newFactory()

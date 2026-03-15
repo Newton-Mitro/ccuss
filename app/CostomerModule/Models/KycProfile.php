@@ -4,6 +4,8 @@ namespace App\CostomerModule\Models;
 
 use App\Audit\Traits\Auditable;
 use App\SystemAdministration\Models\User;
+use App\SystemAdministration\Models\Organization;
+use App\SystemAdministration\Models\Branch;
 use Database\Factories\KycProfileFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +16,8 @@ class KycProfile extends Model
     use HasFactory, Auditable;
 
     protected $fillable = [
+        'organization_id',
+        'branch_id',
         'customer_id',
         'kyc_level',
         'risk_level',
@@ -28,13 +32,27 @@ class KycProfile extends Model
     ];
 
     /* ========================
-     * Relationships
+     * Core Relationships
      * ======================== */
+
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
 
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
+
+    /* ========================
+     * Verification
+     * ======================== */
 
     public function verifier(): BelongsTo
     {
