@@ -13,34 +13,66 @@ class VoucherLine extends Model
 {
     use HasFactory, Auditable;
 
+    /*
+    |--------------------------------------------------------------------------
+    | Constants
+    |--------------------------------------------------------------------------
+    */
+
+    public const COMPONENTS = [
+        'PRINCIPAL',
+        'INTEREST',
+        'PENALTY',
+        'DEPOSIT',
+        'WITHDRAWAL',
+        'CASH_IN',
+        'CASH_OUT',
+    ];
+
+    public const DR_CR = ['DR', 'CR'];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mass Assignment
+    |--------------------------------------------------------------------------
+    */
+
     protected $fillable = [
         'voucher_id',
         'ledger_account_id',
 
-        // Polymorphic relations
+        // Polymorphic subledger
         'subledger_id',
         'subledger_type',
-        'reference_id',
-        'reference_type',
 
         // Instrument details
         'instrument_type_id',
         'instrument_id',
 
+        'component',
         'particulars',
+
         'debit',
         'credit',
         'dr_cr',
     ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Casts
+    |--------------------------------------------------------------------------
+    */
 
     protected $casts = [
         'debit' => 'decimal:2',
         'credit' => 'decimal:2',
     ];
 
-    /* =======================
-     |  Relationships
-     ======================= */
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
 
     public function voucher(): BelongsTo
     {
@@ -54,7 +86,10 @@ class VoucherLine extends Model
 
     /**
      * Polymorphic subledger
-     * Example: DepositAccount, LoanAccount, MemberAccount
+     * Example:
+     * - DepositAccount
+     * - LoanAccount
+     * - MemberAccount
      */
     public function subledger(): MorphTo
     {
@@ -62,23 +97,65 @@ class VoucherLine extends Model
     }
 
     /**
-     * Optional reference
-     * Example: Transaction, Cheque, Invoice, Transfer
-     */
-    public function reference(): MorphTo
-    {
-        return $this->morphTo();
-    }
-
-    /**
-     * Optional Instrument Type
+     * Instrument Type
+     * Example: Cheque, Card, Mobile Txn
      */
     public function instrumentType(): BelongsTo
     {
         return $this->belongsTo(InstrumentType::class);
     }
 
-    protected static function newFactory()
+    /*
+    |--------------------------------------------------------------------------
+    | Helpers
+    |--------------------------------------------------------------------------
+    */
+
+    public function isDebit(): bool
+    {
+        return $this->dr_cr === 'DR';
+    }
+
+    public function isCredit(): bool
+    {
+        return $this->dr_cr === 'CR';
+    }
+
+    public function amount(): float
+    {
+        return $this->isDebit()
+            ? (float) $this->debit
+            : (float) $this->credit;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Model Events
+    |--------------------------------------------------------------------------
+    */
+
+    protected static function booted()
+    {
+        static::saving(function ($line) {
+
+            // Auto sync debit/credit with DR_CR
+            if ($line->dr_cr === 'DR') {
+                $line->credit = 0;
+            }
+
+            if ($line->dr_cr === 'CR') {
+                $line->debit = 0;
+            }
+        });
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
+
+    protected static function newFactory(): VoucherLineFactory
     {
         return VoucherLineFactory::new();
     }

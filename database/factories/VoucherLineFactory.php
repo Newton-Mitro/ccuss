@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\FinanceAndAccounting\Models\LedgerAccount;
 use App\FinanceAndAccounting\Models\Voucher;
 use App\FinanceAndAccounting\Models\VoucherLine;
+use App\SystemAdministration\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class VoucherLineFactory extends Factory
@@ -13,18 +14,25 @@ class VoucherLineFactory extends Factory
 
     public function definition(): array
     {
+        // Create organization
+        $organization = Organization::factory()->create();
+
+        // Create voucher and ledger account in the same organization
+        $voucher = Voucher::factory()->create(['organization_id' => $organization->id]);
+        $ledgerAccount = LedgerAccount::factory()->create(['organization_id' => $organization->id]);
+
         $amount = $this->faker->randomFloat(2, 100, 1000);
         $isDebit = $this->faker->boolean();
 
         return [
-            'voucher_id' => Voucher::factory(),
-            'ledger_account_id' => LedgerAccount::factory(),
+            'voucher_id' => $voucher->id,
+            'ledger_account_id' => $ledgerAccount->id,
 
-            // Polymorphic subledger (optional: e.g., Customer, Vendor, DepositAccount)
+            // Polymorphic subledger (optional)
             'subledger_id' => null,
             'subledger_type' => null,
 
-            // Polymorphic reference (optional: e.g., Invoice, Cheque)
+            // Polymorphic reference (optional)
             'reference_id' => null,
             'reference_type' => null,
 

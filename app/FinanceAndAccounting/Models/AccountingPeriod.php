@@ -3,6 +3,7 @@
 namespace App\FinanceAndAccounting\Models;
 
 use App\Audit\Traits\Auditable;
+use App\SystemAdministration\Models\Organization;
 use Database\Factories\AccountingPeriodFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class AccountingPeriod extends Model
 {
     use HasFactory, Auditable;
+
     protected $fillable = [
+        'organization_id',
         'fiscal_year_id',
         'period_name',
         'start_date',
@@ -26,6 +29,17 @@ class AccountingPeriod extends Model
         'is_open' => 'boolean',
     ];
 
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
+    }
+
     public function fiscalYear(): BelongsTo
     {
         return $this->belongsTo(FiscalYear::class);
@@ -36,7 +50,13 @@ class AccountingPeriod extends Model
         return $this->hasMany(Voucher::class);
     }
 
-    protected static function newFactory()
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
+
+    protected static function newFactory(): AccountingPeriodFactory
     {
         return AccountingPeriodFactory::new();
     }

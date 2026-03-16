@@ -17,14 +17,14 @@ class BranchDayController extends Controller
             ->latest()
             ->first();
 
-        return Inertia::render('cash-management/branch-day/status', [
+        return Inertia::render('cash-and-treasury-module/branch-day/status', [
             'branch_day' => $branchDay
         ]);
     }
 
     public function create()
     {
-        return Inertia::render('cash-management/branch-day/open', [
+        return Inertia::render('cash-and-treasury-module/branch-day/open', [
             'business_date' => now()->toDateString(),
             'branch_id' => auth()->user()->branch_id ?? 1,
             'branches' => Branch::all()
@@ -88,7 +88,7 @@ class BranchDayController extends Controller
 
         $history = $query->orderByDesc('business_date')->get();
 
-        return Inertia::render('cash-management/branch-day/history', [
+        return Inertia::render('cash-and-treasury-module/branch-day/history', [
             'history' => $history,
             'branch_id' => $branchId,
             'from_date' => $fromDate,

@@ -28,7 +28,7 @@ class VoucherController extends Controller
         $query = Voucher::with([
             'lines.ledgerAccount',
             'fiscalYear',
-            'fiscalPeriod',
+            'accountingPeriod',
             'branch',
         ]);
 
@@ -43,7 +43,7 @@ class VoucherController extends Controller
             });
         }
 
-        return Inertia::render('accounting/vouchers/index', [
+        return Inertia::render('finance-and-accounting/vouchers/index', [
             'vouchers' => $query->latest()->paginate(10)->withQueryString(),
             'filters' => $request->only(['search', 'status']),
         ]);
@@ -54,7 +54,7 @@ class VoucherController extends Controller
      ===================================================== */
     public function create(): Response
     {
-        return Inertia::render('accounting/vouchers/edit', [
+        return Inertia::render('finance-and-accounting/vouchers/edit', [
             'ledger_accounts' => LedgerAccount::all(),
             'fiscalYears' => FiscalYear::all(),
             'fiscalPeriods' => AccountingPeriod::all(),
@@ -87,7 +87,7 @@ class VoucherController extends Controller
 
         $cashSubledgers = $cashLedger ? $cashLedgers : [];
 
-        return Inertia::render('accounting/vouchers/create/debit_voucher_entry_page', [
+        return Inertia::render('finance-and-accounting/vouchers/create/debit_voucher_entry_page', [
             'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
             'fiscalYears' => FiscalYear::select('id', 'code')->get(),
             'fiscalPeriods' => AccountingPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
@@ -130,7 +130,7 @@ class VoucherController extends Controller
 
         $cashSubledgers = $cashLedger ? $cashLedgers : [];
 
-        return Inertia::render('accounting/vouchers/create/credit_voucher_entry_page', [
+        return Inertia::render('finance-and-accounting/vouchers/create/credit_voucher_entry_page', [
             'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
             'fiscalYears' => FiscalYear::select('id', 'code')->get(),
             'fiscalPeriods' => AccountingPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
@@ -173,7 +173,7 @@ class VoucherController extends Controller
 
         $cashSubledgers = $cashLedger ? $cashLedgers : [];
 
-        return Inertia::render('accounting/vouchers/create/journal_voucher_entry_page', [
+        return Inertia::render('finance-and-accounting/vouchers/create/journal_voucher_entry_page', [
             'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
             'fiscalYears' => FiscalYear::select('id', 'code')->get(),
             'fiscalPeriods' => AccountingPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
@@ -216,7 +216,7 @@ class VoucherController extends Controller
 
         $cashSubledgers = $cashLedger ? $cashLedgers : [];
 
-        return Inertia::render('accounting/vouchers/create/contra_voucher_entry_page', [
+        return Inertia::render('finance-and-accounting/vouchers/create/contra_voucher_entry_page', [
             'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
             'fiscalYears' => FiscalYear::select('id', 'code')->get(),
             'fiscalPeriods' => AccountingPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
@@ -295,11 +295,11 @@ class VoucherController extends Controller
      ===================================================== */
     public function show(Voucher $voucher): Response
     {
-        return Inertia::render('accounting/vouchers/show', [
+        return Inertia::render('finance-and-accounting/vouchers/show', [
             'voucher' => $voucher->load([
                 'lines.ledgerAccount',
                 'fiscalYear',
-                'fiscalPeriod',
+                'accountingPeriod',
                 'branch',
                 'creator',
                 'poster',
@@ -335,7 +335,7 @@ class VoucherController extends Controller
 
         $cashSubledgers = $cashLedger ? $cashLedgers : [];
 
-        return Inertia::render('accounting/vouchers/edit/debit_voucher_edit_page', [
+        return Inertia::render('finance-and-accounting/vouchers/edit/debit_voucher_edit_page', [
             'voucher' => $voucher->load('lines.ledgerAccount'),
             'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
             'fiscalYears' => FiscalYear::select('id', 'code')->get(),

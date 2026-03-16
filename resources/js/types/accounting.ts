@@ -98,7 +98,7 @@ export interface Voucher extends AuditFields {
     rejector?: User;
     branch?: Branch;
     fiscal_year?: FiscalYear;
-    fiscal_period?: FiscalPeriod;
+    accounting_period?: FiscalPeriod;
 }
 
 // Account Balance

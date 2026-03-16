@@ -4,6 +4,7 @@ namespace App\FinanceAndAccounting\Models;
 
 use App\Audit\Traits\Auditable;
 use App\SystemAdministration\Models\Branch;
+use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\User;
 use Database\Factories\VoucherFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -34,16 +35,24 @@ class Voucher extends Model
     ];
 
     public const TYPES = [
-        'OPENING_BALANCE',       // Initial balance of accounts
-        'CLOSING_BALANCE',       // Closing balance (optional)
-        'CREDIT_OR_RECEIPT',     // Cash/bank inflow
-        'DEBIT_OR_PAYMENT',      // Cash/bank outflow
-        'JOURNAL_OR_NON_CASH',   // Non-cash adjustments / transfers
-        'PURCHASE',              // Purchase invoice
-        'SALE',                  // Sales invoice
-        'DEBIT_NOTE',            // Adjustment reducing payable
-        'CREDIT_NOTE',           // Adjustment reducing receivable
-        'CONTRA',                // Bank/Cash transfer within accounts
+        'OPENING_BALANCE',
+        'CLOSING_BALANCE',
+        'CREDIT_OR_RECEIPT',
+        'DEBIT_OR_PAYMENT',
+        'JOURNAL_OR_NON_CASH',
+        'PURCHASE',
+        'SALE',
+        'DEBIT_NOTE',
+        'CREDIT_NOTE',
+        'CONTRA',
+    ];
+
+    public const CHANNELS = [
+        'TELLER',
+        'ATM',
+        'MOBILE',
+        'ONLINE',
+        'SYSTEM',
     ];
 
     /*
@@ -53,12 +62,14 @@ class Voucher extends Model
     */
 
     protected $fillable = [
+        'organization_id',
+        'branch_id',
         'fiscal_year_id',
         'accounting_period_id',
-        'branch_id',
         'voucher_date',
         'voucher_type',
         'voucher_no',
+        'channel',
         'reference',
         'total_amount',
         'created_by',
@@ -83,8 +94,6 @@ class Voucher extends Model
         'posted_at' => 'datetime',
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
         'total_amount' => 'decimal:2',
     ];
 
@@ -93,6 +102,11 @@ class Voucher extends Model
     | Relationships
     |--------------------------------------------------------------------------
     */
+
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
+    }
 
     public function branch(): BelongsTo
     {
@@ -104,7 +118,7 @@ class Voucher extends Model
         return $this->belongsTo(FiscalYear::class);
     }
 
-    public function fiscalPeriod(): BelongsTo
+    public function accountingPeriod(): BelongsTo
     {
         return $this->belongsTo(AccountingPeriod::class);
     }
@@ -152,10 +166,32 @@ class Voucher extends Model
 
     public function canPost(): bool
     {
-        return $this->status === self::STATUS_PENDING;
+        return $this->status === self::STATUS_APPROVED;
     }
 
     public function canApprove(): bool
+    {
+        return $this->status === self::STATUS_PENDING;
+    }
+
+    public function canCancel(): bool
+    {
+        return $this->status !== self::STATUS_POSTED;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Business Helpers
+    |--------------------------------------------------------------------------
+    */
+
+    public function calculateTotalAmount(): void
+    {
+        $this->total_amount = $this->lines()->sum('debit');
+        $this->save();
+    }
+
+    public function isPosted(): bool
     {
         return $this->status === self::STATUS_POSTED;
     }
@@ -166,23 +202,8 @@ class Voucher extends Model
     |--------------------------------------------------------------------------
     */
 
-    protected static function newFactory()
+    protected static function newFactory(): VoucherFactory
     {
         return VoucherFactory::new();
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Helpers
-    |--------------------------------------------------------------------------
-    */
-
-    /**
-     * Automatically calculate total debit / credit from lines
-     */
-    public function calculateTotalAmount(): void
-    {
-        $this->total_amount = $this->lines()->sum('debit');
-        $this->save();
     }
 }

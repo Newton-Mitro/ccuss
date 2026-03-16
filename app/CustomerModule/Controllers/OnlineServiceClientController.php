@@ -34,7 +34,7 @@ class OnlineServiceClientController extends Controller
 
         $onlineServiceClients = $query->paginate($perPage)->withQueryString();
 
-        return Inertia::render('customer-mgmt/online-service-clients/index', [
+        return Inertia::render('customer-module/online-service-clients/index', [
             'onlineServiceClients' => $onlineServiceClients,
             'filters' => $filters,
         ]);
@@ -44,7 +44,7 @@ class OnlineServiceClientController extends Controller
     {
         $customers = Customer::select('id', 'name', 'customer_no')->get();
 
-        return Inertia::render('customer-mgmt/online-service-clients/create', [
+        return Inertia::render('customer-module/online-service-clients/create', [
             'customers' => $customers,
         ]);
     }
@@ -73,14 +73,14 @@ class OnlineServiceClientController extends Controller
 
     public function show(OnlineServiceClient $onlineServiceClient): Response
     {
-        return Inertia::render('customer-mgmt/online-service-clients/show', [
+        return Inertia::render('customer-module/online-service-clients/show', [
             'onlineServiceClient' => $onlineServiceClient->load('customer'),
         ]);
     }
 
     public function edit(OnlineServiceClient $onlineServiceClient): Response
     {
-        return Inertia::render('customer-mgmt/online-service-clients/edit', [
+        return Inertia::render('customer-module/online-service-clients/edit', [
             'onlineServiceClient' => $onlineServiceClient->load('customer'),
         ]);
     }

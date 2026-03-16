@@ -3,6 +3,7 @@
 namespace App\FinanceAndAccounting\Models;
 
 use App\Audit\Traits\Auditable;
+use App\SystemAdministration\Models\Organization;
 use Database\Factories\LedgerAccountBalanceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +12,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class LedgerAccountBalance extends Model
 {
     use HasFactory, Auditable;
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mass Assignment
+    |--------------------------------------------------------------------------
+    */
+
     protected $fillable = [
+        'organization_id',
         'ledger_account_id',
         'accounting_period_id',
         'opening_balance',
@@ -20,6 +29,12 @@ class LedgerAccountBalance extends Model
         'closing_balance',
     ];
 
+    /*
+    |--------------------------------------------------------------------------
+    | Casts
+    |--------------------------------------------------------------------------
+    */
+
     protected $casts = [
         'opening_balance' => 'decimal:2',
         'debit_total' => 'decimal:2',
@@ -27,17 +42,47 @@ class LedgerAccountBalance extends Model
         'closing_balance' => 'decimal:2',
     ];
 
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
+    }
+
     public function ledgerAccount(): BelongsTo
     {
         return $this->belongsTo(LedgerAccount::class);
     }
 
-    public function fiscalPeriod(): BelongsTo
+    public function accountingPeriod(): BelongsTo
     {
         return $this->belongsTo(AccountingPeriod::class);
     }
 
-    protected static function newFactory()
+    /*
+    |--------------------------------------------------------------------------
+    | Helpers
+    |--------------------------------------------------------------------------
+    */
+
+    public function calculateClosingBalance(): void
+    {
+        $this->closing_balance = $this->opening_balance
+            + $this->debit_total
+            - $this->credit_total;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
+
+    protected static function newFactory(): LedgerAccountBalanceFactory
     {
         return LedgerAccountBalanceFactory::new();
     }

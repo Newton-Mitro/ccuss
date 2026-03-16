@@ -96,7 +96,7 @@ class LedgerAccountController extends Controller
             ->orderBy('period_name')
             ->get(['id', 'period_name']);
 
-        return Inertia::render('accounting/ledger-accounts/index', [
+        return Inertia::render('finance-and-accounting/ledger-accounts/index', [
             'glAccounts' => $glAccounts,
             'groupAccounts' => $groupAccounts,
             'fiscalYears' => $fiscalYears,

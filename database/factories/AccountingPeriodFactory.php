@@ -4,23 +4,32 @@ namespace Database\Factories;
 
 use App\FinanceAndAccounting\Models\AccountingPeriod;
 use App\FinanceAndAccounting\Models\FiscalYear;
+use App\SystemAdministration\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Carbon\Carbon;
 
 class AccountingPeriodFactory extends Factory
 {
     protected $model = AccountingPeriod::class;
 
-    public function definition()
+    public function definition(): array
     {
-        $start = $this->faker->dateTimeBetween('-1 year', 'now');
-        $end = (clone $start)->modify('+1 month');
+        $start = Carbon::instance(
+            $this->faker->dateTimeBetween('-1 year', 'now')
+        )->startOfMonth();
+
+        $end = $start->copy()->endOfMonth();
 
         return [
+            'organization_id' => Organization::factory(),
             'fiscal_year_id' => FiscalYear::factory(),
-            'period_name' => strtoupper($this->faker->monthName) . '-' . now()->year,
-            'start_date' => now()->startOfMonth(),
-            'end_date' => now()->endOfMonth(),
-            'is_open' => true,
+
+            'period_name' => strtoupper($start->format('M-Y')),
+
+            'start_date' => $start,
+            'end_date' => $end,
+
+            'is_open' => $this->faker->boolean(80),
         ];
     }
 }

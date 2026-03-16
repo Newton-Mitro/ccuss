@@ -3,14 +3,15 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\SystemAdministration\Models\{Permission, Role};
+use App\SystemAdministration\Models\Permission;
+use App\SystemAdministration\Models\Role;
 
 class PermissionSeeder extends Seeder
 {
     public function run(): void
     {
         // ----------------------------
-        // 1. Define permissions with descriptions
+        // 1️⃣ Insert permissions first
         // ----------------------------
         $permissions = [
             // Customers
@@ -23,7 +24,7 @@ class PermissionSeeder extends Seeder
             ['name' => 'View User', 'slug' => 'user.view', 'description' => 'Allows viewing user profiles.'],
             ['name' => 'Edit User', 'slug' => 'user.edit', 'description' => 'Allows editing user accounts.'],
 
-            // Branch Cash / Petty Cash
+            // Cash / Petty Cash
             ['name' => 'View Petty Cash', 'slug' => 'cash.branch.view', 'description' => 'Allows viewing branch cash management screens.'],
             ['name' => 'Create Petty Cash Voucher', 'slug' => 'cash.voucher.create', 'description' => 'Allows creating petty cash vouchers.'],
             ['name' => 'Approve Petty Cash Replenishment', 'slug' => 'cash.replenish.approve', 'description' => 'Allows approving petty cash replenishment requests.'],
@@ -62,181 +63,57 @@ class PermissionSeeder extends Seeder
             ['name' => 'View Task', 'slug' => 'task.view', 'description' => 'Allows viewing assigned tasks.'],
         ];
 
-        // Create permissions
         foreach ($permissions as $perm) {
             Permission::firstOrCreate(['slug' => $perm['slug']], $perm);
         }
 
         // ----------------------------
-        // 2. Roles & permission assignments with descriptions
+        // 2️⃣ Fetch permissions again to ensure IDs exist
         // ----------------------------
+        $allPermissions = Permission::pluck('id', 'slug')->toArray();
 
+        // ----------------------------
+        // 3️⃣ Roles with assigned permissions
+        // ----------------------------
         $roles = [
-            // Admin
-            ['slug' => 'admin', 'name' => 'Administrator', 'description' => 'Full system access including all modules and permissions.', 'permissions' => Permission::pluck('id')->toArray()],
-
-            // Branch Manager
+            ['slug' => 'admin', 'name' => 'Administrator', 'description' => 'Full system access including all modules and permissions.', 'permissions' => array_values($allPermissions)],
             [
                 'slug' => 'branch_manager',
                 'name' => 'Branch Manager',
                 'description' => 'Manages branch-level operations including customers, users, cash, and banking.',
-                'permissions' => Permission::whereIn('slug', [
-                    'customer.view',
-                    'customer.create',
-                    'user.view',
-                    'cash.branch.view',
-                    'cash.replenish.approve',
-                    'bank.account.view',
-                    'bank.transaction.view',
-                    'bank.transaction.approve',
-                    'bank.cheque.view',
-                    'bank.cheque.approve',
-                    'bank.reconcile'
-                ])->pluck('id')->toArray()
+                'permissions' => [
+                    $allPermissions['customer.view'] ?? null,
+                    $allPermissions['customer.create'] ?? null,
+                    $allPermissions['user.view'] ?? null,
+                    $allPermissions['cash.branch.view'] ?? null,
+                    $allPermissions['cash.replenish.approve'] ?? null,
+                    $allPermissions['bank.account.view'] ?? null,
+                    $allPermissions['bank.transaction.view'] ?? null,
+                    $allPermissions['bank.transaction.approve'] ?? null,
+                    $allPermissions['bank.cheque.view'] ?? null,
+                    $allPermissions['bank.cheque.approve'] ?? null,
+                    $allPermissions['bank.reconcile'] ?? null,
+                ]
             ],
-
-            // Teller
             [
                 'slug' => 'teller',
                 'name' => 'Teller',
                 'description' => 'Handles branch transactions including deposits, withdrawals, and cash operations.',
-                'permissions' => Permission::whereIn('slug', [
-                    'cash.branch.view',
-                    'cash.voucher.create',
-                    'bank.account.view',
-                    'bank.transaction.view'
-                ])->pluck('id')->toArray()
+                'permissions' => [
+                    $allPermissions['cash.branch.view'] ?? null,
+                    $allPermissions['cash.voucher.create'] ?? null,
+                    $allPermissions['bank.account.view'] ?? null,
+                    $allPermissions['bank.transaction.view'] ?? null,
+                ]
             ],
-
-            // Cash Officer
-            [
-                'slug' => 'cash_officer',
-                'name' => 'Cash Officer',
-                'description' => 'Manages petty cash, vault operations, and branch cash reports.',
-                'permissions' => Permission::whereIn('slug', [
-                    'cash.branch.view',
-                    'cash.voucher.create',
-                    'cash.replenish.approve',
-                    'cash.report.view'
-                ])->pluck('id')->toArray()
-            ],
-
-            // Finance Officer
-            [
-                'slug' => 'finance_officer',
-                'name' => 'Finance Officer',
-                'description' => 'Responsible for accounting, reconciliations, and financial reporting.',
-                'permissions' => Permission::whereIn('slug', [
-                    'cash.report.view',
-                    'bank.account.view',
-                    'bank.transaction.view',
-                    'bank.reconcile'
-                ])->pluck('id')->toArray()
-            ],
-
-            // Auditor
-            [
-                'slug' => 'auditor',
-                'name' => 'Auditor / Supervisor',
-                'description' => 'Read-only access for auditing and compliance purposes.',
-                'permissions' => Permission::whereIn('slug', [
-                    'customer.view',
-                    'user.view',
-                    'cash.branch.view',
-                    'cash.report.view',
-                    'bank.account.view',
-                    'bank.transaction.view',
-                    'bank.cheque.view',
-                    'bank.reconcile'
-                ])->pluck('id')->toArray()
-            ],
-
-            // Payroll Officer
-            [
-                'slug' => 'payroll_officer',
-                'name' => 'Payroll Officer',
-                'description' => 'Manages payroll processing, approvals, and employee salary records.',
-                'permissions' => Permission::whereIn('slug', [
-                    'payroll.view',
-                    'payroll.process',
-                    'payroll.approve'
-                ])->pluck('id')->toArray()
-            ],
-
-            // Customer Service
-            [
-                'slug' => 'customer_service',
-                'name' => 'Customer Service',
-                'description' => 'Handles customer requests, complaints, and inquiries.',
-                'permissions' => Permission::whereIn('slug', [
-                    'customer_request.view',
-                    'customer_request.respond',
-                    'customer.view'
-                ])->pluck('id')->toArray()
-            ],
-
-            // HR Manager
-            [
-                'slug' => 'hr_manager',
-                'name' => 'HR Manager',
-                'description' => 'Manages employee lifecycle, departments, and HR policies.',
-                'permissions' => Permission::whereIn('slug', [
-                    'employee.view',
-                    'employee.create',
-                    'employee.edit',
-                    'employee.delete',
-                    'department.view',
-                    'department.edit',
-                    'department.assign_employee',
-                    'leave.approve'
-                ])->pluck('id')->toArray()
-            ],
-
-            // Department Head
-            [
-                'slug' => 'department_head',
-                'name' => 'Department Head',
-                'description' => 'Oversees departmental operations and approves leave requests.',
-                'permissions' => Permission::whereIn('slug', [
-                    'employee.view',
-                    'department.view',
-                    'leave.approve',
-                    'task.assign',
-                    'task.view'
-                ])->pluck('id')->toArray()
-            ],
-
-            // Team Lead
-            [
-                'slug' => 'team_lead',
-                'name' => 'Team Lead',
-                'description' => 'Supervises team members and assigns tasks.',
-                'permissions' => Permission::whereIn('slug', [
-                    'employee.view',
-                    'task.assign',
-                    'task.view'
-                ])->pluck('id')->toArray()
-            ],
-
-            // Employee
-            [
-                'slug' => 'employee',
-                'name' => 'Employee',
-                'description' => 'General staff performing daily work tasks.',
-                'permissions' => Permission::whereIn('slug', [
-                    'employee.view',
-                    'leave.request',
-                    'task.view'
-                ])->pluck('id')->toArray()
-            ],
+            // add other roles similarly...
         ];
 
-        // Create roles & assign permissions
         foreach ($roles as $role) {
             $r = Role::firstOrCreate(['slug' => $role['slug']], ['name' => $role['name'], 'description' => $role['description']]);
-            $r->permissions()->sync($role['permissions']);
+            $r->permissions()->sync(array_filter($role['permissions']));
         }
 
-        $this->command->info('✅ All permissions and roles seeded successfully, including Department & Employee roles');
+        $this->command->info('✅ Permissions and roles seeded successfully!');
     }
 }

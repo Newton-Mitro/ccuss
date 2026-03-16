@@ -48,7 +48,7 @@ class AccountingReportController
             $query->where('accounting_period_id', $fiscalPeriodId);
         }
 
-        return Inertia::render('accounting/reports/trial-balance-page', [
+        return Inertia::render('finance-and-accounting/reports/trial-balance-page', [
             'trialBalance' => $query->get(),
             'fiscalYears' => FiscalYear::orderBy('id')->get(),
             'fiscalPeriods' => AccountingPeriod::orderBy('id')->get(),
@@ -79,7 +79,7 @@ class AccountingReportController
             $query->where('accounting_period_id', $fiscalPeriodId);
         }
 
-        return Inertia::render('accounting/reports/profit-and-loss-page', [
+        return Inertia::render('finance-and-accounting/reports/profit-and-loss-page', [
             'profitAndLoss' => $query->get(),
             'fiscalYears' => FiscalYear::all(),
             'fiscalPeriods' => AccountingPeriod::all(),
@@ -107,7 +107,7 @@ class AccountingReportController
             ->orderBy('account_code')
             ->get();
 
-        return Inertia::render('accounting/reports/balance-sheet-page', [
+        return Inertia::render('finance-and-accounting/reports/balance-sheet-page', [
             'balanceSheet' => $balanceSheet,
             'fiscalYears' => FiscalYear::all(),
             'selectedFiscalYear' => $fiscalYearId,
@@ -136,7 +136,7 @@ class AccountingReportController
             $query->where('accounting_period_id', $fiscalPeriodId);
         }
 
-        return Inertia::render('accounting/reports/cash-flow-page', [
+        return Inertia::render('finance-and-accounting/reports/cash-flow-page', [
             'cashFlows' => $query->get(), // ✅ plural & consistent
             'fiscalYears' => FiscalYear::orderBy('id')->get(),
             'fiscalPeriods' => AccountingPeriod::orderBy('id')->get(),
@@ -180,7 +180,7 @@ class AccountingReportController
             $query->whereIn('accounting_period_id', $periodIds);
         }
 
-        return Inertia::render('accounting/reports/shareholders-equity-page', [
+        return Inertia::render('finance-and-accounting/reports/shareholders-equity-page', [
             'equityStatement' => $query->get(),
             'fiscalYears' => FiscalYear::orderBy('start_date')->get(),
             'fiscalPeriods' => AccountingPeriod::orderBy('start_date')->get(),

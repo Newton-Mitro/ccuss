@@ -3,23 +3,29 @@
 namespace Database\Factories;
 
 use App\FinanceAndAccounting\Models\LedgerAccount;
+use App\SystemAdministration\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class LedgerAccountFactory extends Factory
 {
     protected $model = LedgerAccount::class;
 
-    public function definition()
+    public function definition(): array
     {
         $types = ['ASSET', 'LIABILITY', 'EQUITY', 'INCOME', 'EXPENSE'];
+
+        $isControl = $this->faker->boolean(30); // 30% chance to be control account
+
         return [
+            'organization_id' => Organization::factory(),
+
             'code' => $this->faker->unique()->numerify('1###'),
-            'name' => $this->faker->word() . ' Account',
+            'name' => ucfirst($this->faker->word()) . ' Account',
             'type' => $this->faker->randomElement($types),
-            'is_control_account' => $this->faker->boolean(30),
+            'is_control_account' => $isControl,
             'is_active' => true,
-            'is_leaf' => true,
-            'parent_id' => null, // assign manually for tree hierarchy
+            'is_leaf' => !$isControl, // control accounts are never leaf
+            'parent_id' => null, // assign manually if needed
         ];
     }
 }

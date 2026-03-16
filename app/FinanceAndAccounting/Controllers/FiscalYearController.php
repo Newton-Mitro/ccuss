@@ -36,7 +36,7 @@ class FiscalYearController
             ->paginate($perPage)
             ->withQueryString();
 
-        return Inertia::render('accounting/fiscal-years/index', [
+        return Inertia::render('finance-and-accounting/fiscal-years/index', [
             'fiscalYears' => $fiscalYears,
             'filters' => $request->only(['search', 'status', 'per_page', 'page']),
         ]);
@@ -44,7 +44,7 @@ class FiscalYearController
 
     public function create(): Response
     {
-        return Inertia::render('accounting/fiscal-years/fiscal-year-edit');
+        return Inertia::render('finance-and-accounting/fiscal-years/fiscal-year-edit');
     }
 
     public function store(Request $request)
@@ -75,7 +75,7 @@ class FiscalYearController
 
     public function edit(FiscalYear $fiscalYear): Response
     {
-        return Inertia::render('accounting/fiscal-years/fiscal-year-edit', [
+        return Inertia::render('finance-and-accounting/fiscal-years/fiscal-year-edit', [
             'fiscalYear' => $fiscalYear,
         ]);
     }

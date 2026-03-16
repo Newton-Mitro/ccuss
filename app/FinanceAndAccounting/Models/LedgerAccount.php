@@ -3,6 +3,7 @@
 namespace App\FinanceAndAccounting\Models;
 
 use App\Audit\Traits\Auditable;
+use App\SystemAdministration\Models\Organization;
 use Database\Factories\LedgerAccountFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,10 +15,12 @@ class LedgerAccount extends Model
     use HasFactory, Auditable;
 
     protected $fillable = [
+        'organization_id',
         'code',
         'name',
         'type',
         'is_control_account',
+        'requires_subledger',
         'is_active',
         'is_leaf',
         'parent_id',
@@ -25,23 +28,35 @@ class LedgerAccount extends Model
 
     protected $casts = [
         'is_control_account' => 'boolean',
+        'requires_subledger' => 'boolean',
         'is_active' => 'boolean',
         'is_leaf' => 'boolean',
     ];
 
-    // 🔗 Direct children
-    public function children(): HasMany
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    public function organization(): BelongsTo
     {
-        return $this->hasMany(LedgerAccount::class, 'parent_id')->orderBy('code');
+        return $this->belongsTo(Organization::class);
     }
 
-    // 🔗 Parent
+    // Parent account
     public function parent(): BelongsTo
     {
         return $this->belongsTo(LedgerAccount::class, 'parent_id');
     }
 
-    // 🧠 Recursive children for hierarchy
+    // Direct children
+    public function children(): HasMany
+    {
+        return $this->hasMany(LedgerAccount::class, 'parent_id')->orderBy('code');
+    }
+
+    // Recursive tree
     public function childrenRecursive()
     {
         return $this->children()->with(['childrenRecursive', 'balances']);
@@ -53,36 +68,44 @@ class LedgerAccount extends Model
         return $this->hasMany(VoucherLine::class);
     }
 
-    // All balances
+    // Account balances
     public function balances(): HasMany
     {
         return $this->hasMany(LedgerAccountBalance::class);
     }
 
-    // 🔹 Get balance for a specific fiscal period
+    // Balance for a specific period
     public function balanceForPeriod($periodId)
     {
         return $this->hasOne(LedgerAccountBalance::class)
             ->where('accounting_period_id', $periodId);
     }
 
-    // 🔹 Get balances filtered by fiscal year or period dynamically
+    // Dynamic balance filter
     public function balancesForFilter($fiscalYearId = null, $fiscalPeriodId = null)
     {
         return $this->hasMany(LedgerAccountBalance::class)
             ->when($fiscalYearId, function ($q) use ($fiscalYearId) {
-                $q->whereHas('fiscalPeriod', fn($p) => $p->where('fiscal_year_id', $fiscalYearId));
+                $q->whereHas(
+                    'fiscalPeriod',
+                    fn($p) =>
+                    $p->where('fiscal_year_id', $fiscalYearId)
+                );
             })
-            ->when($fiscalPeriodId, fn($q) => $q->where('accounting_period_id', $fiscalPeriodId));
+            ->when(
+                $fiscalPeriodId,
+                fn($q) =>
+                $q->where('accounting_period_id', $fiscalPeriodId)
+            );
     }
 
-    // 🔹 Recursive balances including children
+    // Recursive balance calculation
     public function recursiveBalances($fiscalYearId = null, $fiscalPeriodId = null)
     {
         $balanceSum = $this->balancesForFilter($fiscalYearId, $fiscalPeriodId)->sum('amount');
 
-        if ($this->children_recursive) {
-            foreach ($this->children_recursive as $child) {
+        if ($this->childrenRecursive) {
+            foreach ($this->childrenRecursive as $child) {
                 $balanceSum += $child->recursiveBalances($fiscalYearId, $fiscalPeriodId);
             }
         }
@@ -90,15 +113,20 @@ class LedgerAccount extends Model
         return $balanceSum;
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Model Events
+    |--------------------------------------------------------------------------
+    */
+
     protected static function booted()
     {
         static::saving(function ($account) {
-            // Control accounts are never leaf nodes
+            // Control accounts are not leaf nodes
             $account->is_leaf = !$account->is_control_account;
         });
 
         static::created(function ($account) {
-            // If this account has a parent, parent can’t be a leaf
             if ($account->parent_id) {
                 self::where('id', $account->parent_id)
                     ->update([
@@ -109,7 +137,13 @@ class LedgerAccount extends Model
         });
     }
 
-    protected static function newFactory()
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
+
+    protected static function newFactory(): LedgerAccountFactory
     {
         return LedgerAccountFactory::new();
     }

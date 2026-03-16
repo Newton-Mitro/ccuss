@@ -10,7 +10,7 @@ import CustomAuthLayout from '../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../types';
 import { Branch } from '../../types/branch';
 import { Customer } from '../../types/customer';
-import { CustomerSearchInput } from '../customer-mgmt/customers/customer-search-input';
+import { CustomerSearchInput } from '../customer-module/customers/customer-search-input';
 
 interface EditBranchProps {
     branch: Branch;

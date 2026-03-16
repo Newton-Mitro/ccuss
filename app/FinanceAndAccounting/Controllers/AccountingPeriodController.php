@@ -34,7 +34,7 @@ class AccountingPeriodController
             ->paginate($perPage)
             ->withQueryString();
 
-        return Inertia::render('accounting/fiscal-periods/index', [
+        return Inertia::render('finance-and-accounting/fiscal-periods/index', [
             'fiscalPeriods' => $fiscalPeriods,
             'filters' => $request->only(['search', 'status', 'per_page', 'page']),
         ]);
@@ -43,7 +43,7 @@ class AccountingPeriodController
     public function create(): Response
     {
         $fiscalYears = FiscalYear::orderBy('start_date')->get();
-        return Inertia::render('accounting/fiscal-periods/fiscal-period-edit', [
+        return Inertia::render('finance-and-accounting/fiscal-periods/fiscal-period-edit', [
             'fiscalYears' => $fiscalYears,
         ]);
     }
@@ -66,7 +66,7 @@ class AccountingPeriodController
     public function edit(AccountingPeriod $fiscalPeriod): Response
     {
         $fiscalYears = FiscalYear::orderBy('start_date')->get();
-        return Inertia::render('accounting/fiscal-periods/fiscal-period-edit', [
+        return Inertia::render('finance-and-accounting/fiscal-periods/fiscal-period-edit', [
             'fiscalPeriod' => $fiscalPeriod,
             'fiscalYears' => $fiscalYears,
         ]);

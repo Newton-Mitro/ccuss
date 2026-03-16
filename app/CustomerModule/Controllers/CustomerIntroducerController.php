@@ -54,7 +54,7 @@ class CustomerIntroducerController extends Controller
             ->withQueryString();
 
         return Inertia::render(
-            'customer-mgmt/introducers/introducers_index',
+            'customer-module/introducers/introducers_index',
             [
                 'introducers' => $introducers,
                 'filters' => $request->only([
@@ -73,7 +73,7 @@ class CustomerIntroducerController extends Controller
     public function customerIntroducers(Request $request): Response
     {
         return Inertia::render(
-            'customer-mgmt/introducers/customer_introducers'
+            'customer-module/introducers/customer_introducers'
         );
     }
 
@@ -119,7 +119,7 @@ class CustomerIntroducerController extends Controller
         ]);
 
         return Inertia::render(
-            'customer-mgmt/introducers/view_introducer_page',
+            'customer-module/introducers/view_introducer_page',
             [
                 'introducer' => $customerIntroducer,
             ]
