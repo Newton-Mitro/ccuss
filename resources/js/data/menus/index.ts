@@ -12,14 +12,12 @@ import { pettyCashManagementMenu } from './pettyCashManagement';
 import { reportsMenu } from './reports';
 import { settingsMenu } from './settings';
 import { systemAdminMenu } from './systemAdmin';
-import { transactionManagementMenu } from './transactionManagement';
 
 export const sidebarMenu: SidebarItem[] = [
     ...systemAdminMenu,
     ...customerManagementMenu,
     ...depositManagementMenu,
     ...loanManagementMenu,
-    ...transactionManagementMenu,
     ...branchTreasuryManagementMenu,
     ...pettyCashManagementMenu,
     ...bankManagementMenu,

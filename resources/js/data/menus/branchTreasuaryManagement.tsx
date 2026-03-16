@@ -179,23 +179,25 @@ export const branchTreasuryManagementMenu: SidebarItem[] = [
                 permission: ['vault_to_teller.create'],
             },
             {
-                name: 'Teller Cash Transactions',
+                name: 'Teller Transactions',
                 icon: <i className="fa-solid fa-receipt" />,
                 children_expanded: false,
                 children: [
                     {
-                        name: 'Cash Deposit',
-                        icon: <i className="fa-solid fa-arrow-down" />,
-                        path: '/cash-transactions/deposit',
-                        match_path: 'cash-transactions/deposit',
-                        permission: ['cash_transaction.deposit'],
+                        name: 'Customer Deposit',
+                        icon: (
+                            <i className="fa-solid fa-circle-dollar-to-slot" />
+                        ),
+                        path: '/deposit',
+                        match_path: 'deposit',
+                        permission: ['transaction.deposit.create'],
                     },
                     {
-                        name: 'Cash Withdrawal',
-                        icon: <i className="fa-solid fa-arrow-up" />,
-                        path: '/cash-transactions/withdrawal',
-                        match_path: 'cash-transactions/withdrawal',
-                        permission: ['cash_transaction.withdrawal'],
+                        name: 'Customer Withdrawal',
+                        icon: <i className="fa-solid fa-money-bill-transfer" />,
+                        path: '/withdrawal',
+                        match_path: 'withdrawal',
+                        permission: ['transaction.withdraw.create'],
                     },
                     {
                         name: 'Transaction History',

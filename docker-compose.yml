@@ -7,17 +7,22 @@ services:
       dockerfile: docker/php/Dockerfile
     container_name: ccuss_app
     restart: unless-stopped
+    working_dir: /var/www/ccuss
     volumes:
       - ./:/var/www/ccuss
       - ./storage:/var/www/ccuss/storage
       - ./bootstrap/cache:/var/www/ccuss/bootstrap/cache
     environment:
-      - APP_ENV=local
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_DATABASE=ccuss
-      - DB_USERNAME=ccuss_user
-      - DB_PASSWORD=secret
+      APP_ENV: local
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ccuss
+      DB_USERNAME: ccuss_user
+      DB_PASSWORD: secret
+      REDIS_HOST: redis
+    depends_on:
+      - mysql
+      - redis
     networks:
       - ccuss-network
 
@@ -27,6 +32,7 @@ services:
       dockerfile: docker/node/Dockerfile
     container_name: ccuss_node
     restart: unless-stopped
+    working_dir: /var/www/ccuss
     volumes:
       - ./:/var/www/ccuss
       - node_modules:/var/www/ccuss/node_modules
@@ -39,6 +45,7 @@ services:
   nginx:
     image: nginx:alpine
     container_name: ccuss_nginx
+    restart: unless-stopped
     ports:
       - '8000:80'
     volumes:
@@ -46,7 +53,6 @@ services:
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - app
-      - node
     networks:
       - ccuss-network
 
@@ -66,6 +72,15 @@ services:
     networks:
       - ccuss-network
 
+  redis:
+    image: redis:alpine
+    container_name: ccuss_redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    networks:
+      - ccuss-network
+
   scheduler:
     build:
       context: .
@@ -78,6 +93,7 @@ services:
     command: php artisan schedule:work
     depends_on:
       - mysql
+      - redis
     networks:
       - ccuss-network
 
@@ -90,8 +106,25 @@ services:
     working_dir: /var/www/ccuss
     volumes:
       - ./:/var/www/ccuss
-    command: php artisan queue:work --sleep=3 --tries=3
+    command: php artisan queue:work redis --sleep=3 --tries=3 --timeout=90
     depends_on:
+      - mysql
+      - redis
+    networks:
+      - ccuss-network
+
+  horizon:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: ccuss_horizon
+    restart: unless-stopped
+    working_dir: /var/www/ccuss
+    volumes:
+      - ./:/var/www/ccuss
+    command: php artisan horizon
+    depends_on:
+      - redis
       - mysql
     networks:
       - ccuss-network

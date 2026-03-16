@@ -8,18 +8,36 @@ RUN apt-get update && apt-get install -y \
     unzip \
     default-mysql-client \
     libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
     libonig-dev \
     libxml2-dev \
-    supervisor \
+    libzip-dev \
+    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 # PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+RUN docker-php-ext-install \
+    pdo_mysql \
+    mbstring \
+    zip \
+    exif \
+    pcntl \
+    bcmath \
+    gd
 
-# Install Composer
+# Install Redis extension
+RUN pecl install redis \
+    && docker-php-ext-enable redis
+
+# ----------------------------
+# Install Composer globally
+# ----------------------------
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Set working directory
 WORKDIR /var/www/ccuss
+
+# ----------------------------
+# Optional: run composer install on build (if you want)
+# ----------------------------
+# COPY composer.json composer.lock ./
+# RUN composer install --no-dev --optimize-autoloader
