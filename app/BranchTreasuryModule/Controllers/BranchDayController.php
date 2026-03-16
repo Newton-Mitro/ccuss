@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Auth;
 
 class BranchDayController extends Controller
 {
+    public function sop()
+    {
+        return Inertia::render('cash-and-treasury-module/sop/branch-cash-management-page');
+    }
+
     public function index()
     {
         $branchDay = BranchDay::where('branch_id', auth()->user()->branch_id)

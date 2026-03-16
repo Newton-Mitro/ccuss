@@ -10,8 +10,9 @@ use App\BranchTreasuryModule\Controllers\VaultTransferController;
 use Illuminate\Support\Facades\Route;
 
 
-Route::prefix('branch-cash')->group(function () {
+Route::get('sop', [BranchDayController::class, 'sop'])->name('branch-treasury.sop');
 
+Route::prefix('branch-cash')->group(function () {
     Route::get('branch-day/status', [BranchDayController::class, 'index'])->name('branch-day.index');
     Route::get('branch-day/open', [BranchDayController::class, 'create'])->name('branch-day.open.page');
     Route::post('branch-day/open', [BranchDayController::class, 'open'])->name('branch-day.open');

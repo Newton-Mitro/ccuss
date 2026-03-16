@@ -2,7 +2,7 @@ import { SidebarItem } from '../../types';
 import { assetManagementMenu } from './assetManagement';
 import { auditMenu } from './audit';
 import { bankManagementMenu } from './bankManagement';
-import { branchCashManagementMenu } from './branchCashManagement';
+import { branchTreasuryManagementMenu } from './branchTreasuaryManagement';
 import { customerManagementMenu } from './customerManagement';
 import { depositManagementMenu } from './depositManagement';
 import { financeAndAccountingMenu } from './financeAndAccounting';
@@ -20,7 +20,7 @@ export const sidebarMenu: SidebarItem[] = [
     ...depositManagementMenu,
     ...loanManagementMenu,
     ...transactionManagementMenu,
-    ...branchCashManagementMenu,
+    ...branchTreasuryManagementMenu,
     ...pettyCashManagementMenu,
     ...bankManagementMenu,
     ...financeAndAccountingMenu,
