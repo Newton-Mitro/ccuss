@@ -76,37 +76,125 @@ class PermissionSeeder extends Seeder
         // 3️⃣ Roles with assigned permissions
         // ----------------------------
         $roles = [
-            ['slug' => 'admin', 'name' => 'Administrator', 'description' => 'Full system access including all modules and permissions.', 'permissions' => array_values($allPermissions)],
+            // 1. System Administrator / Super Admin
+            [
+                'slug' => 'super_admin',
+                'name' => 'System Administrator',
+                'description' => 'Full system access to all modules, settings, and user management.',
+                'permissions' => array_values($allPermissions),
+            ],
+
+            // 2. Branch Manager
             [
                 'slug' => 'branch_manager',
                 'name' => 'Branch Manager',
-                'description' => 'Manages branch-level operations including customers, users, cash, and banking.',
+                'description' => 'Manages branch operations including customers, users, cash, and banking.',
                 'permissions' => [
                     $allPermissions['customer.view'] ?? null,
                     $allPermissions['customer.create'] ?? null,
                     $allPermissions['user.view'] ?? null,
                     $allPermissions['cash.branch.view'] ?? null,
-                    $allPermissions['cash.replenish.approve'] ?? null,
                     $allPermissions['bank.account.view'] ?? null,
                     $allPermissions['bank.transaction.view'] ?? null,
                     $allPermissions['bank.transaction.approve'] ?? null,
                     $allPermissions['bank.cheque.view'] ?? null,
                     $allPermissions['bank.cheque.approve'] ?? null,
                     $allPermissions['bank.reconcile'] ?? null,
-                ]
+                ],
             ],
+
+            // 3. Teller / Cashier
             [
                 'slug' => 'teller',
-                'name' => 'Teller',
-                'description' => 'Handles branch transactions including deposits, withdrawals, and cash operations.',
+                'name' => 'Teller / Cashier',
+                'description' => 'Handles branch cash operations, deposits, and withdrawals.',
                 'permissions' => [
-                    $allPermissions['cash.branch.view'] ?? null,
                     $allPermissions['cash.voucher.create'] ?? null,
                     $allPermissions['bank.account.view'] ?? null,
                     $allPermissions['bank.transaction.view'] ?? null,
-                ]
+                ],
             ],
-            // add other roles similarly...
+
+            // 4. Loan Officer / Credit Officer
+            [
+                'slug' => 'loan_officer',
+                'name' => 'Loan / Credit Officer',
+                'description' => 'Handles loan applications, approvals, and member credit evaluations.',
+                'permissions' => [
+                    $allPermissions['customer.view'] ?? null,
+                    $allPermissions['customer.create'] ?? null,
+                ],
+            ],
+
+            // 5. Customer Service
+            [
+                'slug' => 'customer_service',
+                'name' => 'Customer Service',
+                'description' => 'Manages member requests and support.',
+                'permissions' => [
+                    $allPermissions['customer_request.view'] ?? null,
+                    $allPermissions['customer_request.respond'] ?? null,
+                ],
+            ],
+
+            // 6. HR Officer
+            [
+                'slug' => 'hr_officer',
+                'name' => 'HR Officer',
+                'description' => 'Manages employee records, leaves, and assignments.',
+                'permissions' => [
+                    $allPermissions['employee.view'] ?? null,
+                    $allPermissions['employee.create'] ?? null,
+                    $allPermissions['leave.request'] ?? null,
+                    $allPermissions['leave.approve'] ?? null,
+                ],
+            ],
+
+            // 7. Accountant / Finance Officer
+            [
+                'slug' => 'accountant',
+                'name' => 'Accountant / Finance Officer',
+                'description' => 'Handles accounting, treasury, and financial reporting.',
+                'permissions' => [
+                    $allPermissions['bank.account.view'] ?? null,
+                    $allPermissions['bank.transaction.view'] ?? null,
+                    $allPermissions['bank.reconcile'] ?? null,
+                    $allPermissions['cash.report.view'] ?? null,
+                    $allPermissions['payroll.approve'] ?? null,
+                ],
+            ],
+
+            // 8. Audit Officer
+            [
+                'slug' => 'audit_officer',
+                'name' => 'Audit Officer',
+                'description' => 'Audits branch transactions and financial compliance.',
+                'permissions' => [
+                    $allPermissions['cash.report.view'] ?? null,
+                    $allPermissions['bank.reconcile'] ?? null,
+                ],
+            ],
+
+            // 9. IT Officer
+            [
+                'slug' => 'it_officer',
+                'name' => 'IT Officer',
+                'description' => 'Manages IT systems, access, and technical support.',
+                'permissions' => [
+                    $allPermissions['user.view'] ?? null,
+                    $allPermissions['user.edit'] ?? null,
+                ],
+            ],
+
+            // 10. Online Banking User
+            [
+                'slug' => 'online_banking_user',
+                'name' => 'Online Banking User',
+                'description' => 'Limited access for online members to view their accounts and transactions.',
+                'permissions' => [
+                    $allPermissions['customer.view'] ?? null,
+                ],
+            ],
         ];
 
         foreach ($roles as $role) {
@@ -117,3 +205,31 @@ class PermissionSeeder extends Seeder
         $this->command->info('✅ Permissions and roles seeded successfully!');
     }
 }
+
+// 1. System Administrator / Super Admin
+// 2. Branch Manager
+// 3. Teller
+// 4. Cash Collector
+// 5. Cashier
+// 6. Treasury / Finance Officer
+// 7. Accountant
+// 8. Supervisor
+// 9. Manager
+// 10. Loan Officer / Credit Officer
+// 11. Customer Service 
+// 12. Audit Officer
+// 13. HR Officer
+// 14. IT Officer
+// 15. Marketing Officer
+// 16. Sales Officer
+// 17. Operations Officer
+// 18. General Manager
+// 19. Chief Executive Officer
+// 20. Chief Financial Officer
+// 21. Chief Operating Officer
+// 22. Chief Technology Officer
+// 23. Chief Marketing Officer
+// 24. Chief Sales Officer
+// 25. Chief Operations Officer
+// 26. Chief Human Resource Officer
+// 27. Online Banking User

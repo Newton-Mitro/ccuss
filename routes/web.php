@@ -35,11 +35,12 @@ Route::middleware(['auth',])->group(function () {
     Route::delete('/database/backups/{id}', [DatabaseBackupController::class, 'destroy'])->name('backup.destroy');
 });
 
-require __DIR__ . '/settings.php';
-require __DIR__ . '/customer_routes.php';
-require __DIR__ . '/cash_management_routes.php';
+require __DIR__ . '/system_administration_routes.php';
+require __DIR__ . '/settings_routes.php';
+require __DIR__ . '/customer_module_routes.php';
+require __DIR__ . '/branch_treasury_module_routes.php';
 require __DIR__ . '/transaction_routes.php';
-require __DIR__ . '/accounting_routes.php';
+require __DIR__ . '/finance_and_accounting_routes.php';
 
 
 require __DIR__ . '/audit_routes.php';

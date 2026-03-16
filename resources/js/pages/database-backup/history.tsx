@@ -1,4 +1,4 @@
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
 import {
     CheckCircle,
     DatabaseBackup,
@@ -77,9 +77,6 @@ export default function History() {
     const formatSize = (bytes?: number) =>
         bytes ? (bytes / 1024 / 1024).toFixed(2) + ' MB' : '-';
 
-    const formatDuration = (seconds?: number) =>
-        seconds ? `${Math.floor(seconds / 60)}m ${seconds % 60}s` : '-';
-
     // Trigger backup
     const createBackup = () => {
         router.post(route('backup.run'), {}, { preserveState: true });
@@ -87,11 +84,16 @@ export default function History() {
 
     // Delete backup
     const handleDelete = (log: BackupLog) => {
+        const isDark = document.documentElement.classList.contains('dark');
         Swal.fire({
             title: 'Are you sure?',
             text: `Backup "${log.file_name}" will be permanently deleted!`,
             icon: 'warning',
             showCancelButton: true,
+            confirmButtonColor: isDark ? '#ef4444' : '#d33',
+            cancelButtonColor: isDark ? '#3b82f6' : '#3085d6',
+            background: isDark ? '#1f2937' : '#fff',
+            color: isDark ? '#f9fafb' : '#111827',
             confirmButtonText: 'Yes, delete it!',
         }).then((result) => {
             if (result.isConfirmed) {
@@ -124,164 +126,169 @@ export default function History() {
                 </button>
             </div>
 
-            {/* Filters */}
-            <div className="flex flex-col gap-2 pb-2 sm:flex-row sm:items-center sm:justify-between">
-                <input
-                    type="text"
-                    placeholder="Search backups..."
-                    value={data.search}
-                    onChange={(e) => {
-                        setData('search', e.target.value);
-                        setData('page', 1);
-                    }}
-                    className="h-9 w-full max-w-sm rounded-md border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-                />
-                <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">Show</span>
-                    <select
-                        value={data.per_page}
+            <div className="space-y-4">
+                {/* Filters */}
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <input
+                        type="text"
+                        placeholder="Search backups..."
+                        value={data.search}
                         onChange={(e) => {
-                            setData('per_page', Number(e.target.value));
+                            setData('search', e.target.value);
                             setData('page', 1);
                         }}
-                        className="h-9 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-                    >
-                        {[5, 10, 20, 50, 100].map((n) => (
-                            <option key={n} value={n}>
-                                {n}
-                            </option>
-                        ))}
-                    </select>
-                    <span className="text-sm text-muted-foreground">
-                        records
-                    </span>
+                        className="h-9 w-full max-w-sm rounded-md border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+                    />
                 </div>
-            </div>
 
-            {/* Table */}
-            <div className="overflow-auto rounded-md border border-border">
-                <table className="w-full border-collapse">
-                    <thead className="sticky top-0 bg-muted">
-                        <tr>
-                            {[
-                                'File',
-                                'Size',
-                                'Type',
-                                'Status',
-                                'Started',
-                                'Completed',
-                                'Actions',
-                            ].map((header) => (
-                                <th
-                                    key={header}
-                                    className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground"
-                                >
-                                    {header}
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {logs.data.length > 0 ? (
-                            logs.data.map((log) => (
-                                <tr
-                                    key={log.id}
-                                    className="border-b border-border even:bg-muted/30"
-                                >
-                                    <td className="flex items-center gap-2 px-2 py-1">
-                                        <DatabaseBackup size={16} />
-                                        {log.file_name ?? 'Processing...'}
-                                    </td>
-                                    <td className="px-2 py-1">
-                                        {formatSize(log.file_size)}
-                                    </td>
-                                    <td className="px-2 py-1">
-                                        {log.backup_type}
-                                    </td>
-                                    <td className="px-2 py-1">
-                                        {log.status === 'SUCCESS' && (
-                                            <span className="flex items-center gap-1 text-green-600">
-                                                <CheckCircle size={16} />{' '}
-                                                Success
-                                            </span>
-                                        )}
-                                        {log.status === 'FAILED' && (
-                                            <span className="flex items-center gap-1 text-red-600">
-                                                <XCircle size={16} /> Failed
-                                            </span>
-                                        )}
-                                        {log.status === 'RUNNING' && (
-                                            <span className="flex items-center gap-1 text-yellow-600">
-                                                <Hourglass size={16} /> Running
-                                            </span>
-                                        )}
-                                    </td>
-                                    <td className="px-2 py-1">
-                                        {new Date(
-                                            log.started_at,
-                                        ).toLocaleString()}
-                                    </td>
-                                    <td className="px-2 py-1">
-                                        {log.completed_at
-                                            ? new Date(
-                                                  log.completed_at,
-                                              ).toLocaleString()
-                                            : '-'}
-                                    </td>
+                {/* Table */}
+                <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border border-border md:block">
+                    <table className="w-full border-collapse">
+                        <thead className="sticky top-0 bg-muted">
+                            <tr>
+                                {[
+                                    'File',
+                                    'Size',
+                                    'Type',
+                                    'Status',
+                                    'Started',
+                                    'Completed',
+                                    'Actions',
+                                ].map((header) => (
+                                    <th
+                                        key={header}
+                                        className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground"
+                                    >
+                                        {header}
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {logs.data.length > 0 ? (
+                                logs.data.map((log) => (
+                                    <tr
+                                        key={log.id}
+                                        className="border-b border-border even:bg-muted/30"
+                                    >
+                                        <td className="flex items-center gap-2 px-2 py-1">
+                                            <DatabaseBackup size={16} />
+                                            {log.file_name ?? 'Processing...'}
+                                        </td>
+                                        <td className="px-2 py-1">
+                                            {formatSize(log.file_size)}
+                                        </td>
+                                        <td className="px-2 py-1">
+                                            {log.backup_type}
+                                        </td>
+                                        <td className="px-2 py-1">
+                                            {log.status === 'SUCCESS' && (
+                                                <span className="flex items-center gap-1 text-green-600">
+                                                    <CheckCircle size={16} />{' '}
+                                                    Success
+                                                </span>
+                                            )}
+                                            {log.status === 'FAILED' && (
+                                                <span className="flex items-center gap-1 text-red-600">
+                                                    <XCircle size={16} /> Failed
+                                                </span>
+                                            )}
+                                            {log.status === 'RUNNING' && (
+                                                <span className="flex items-center gap-1 text-yellow-600">
+                                                    <Hourglass size={16} />{' '}
+                                                    Running
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="px-2 py-1">
+                                            {new Date(
+                                                log.started_at,
+                                            ).toLocaleString()}
+                                        </td>
+                                        <td className="px-2 py-1">
+                                            {log.completed_at
+                                                ? new Date(
+                                                      log.completed_at,
+                                                  ).toLocaleString()
+                                                : '-'}
+                                        </td>
 
-                                    <td className="px-2 py-1">
-                                        <TooltipProvider>
-                                            <div className="flex gap-2">
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <button
-                                                            onClick={() =>
-                                                                handleDelete(
-                                                                    log,
-                                                                )
-                                                            }
-                                                            className="text-destructive hover:text-destructive/80"
-                                                        >
-                                                            <Trash2 className="h-5 w-5" />
-                                                        </button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>
-                                                        Delete
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </div>
-                                        </TooltipProvider>
+                                        <td className="px-2 py-1">
+                                            <TooltipProvider>
+                                                <div className="flex gap-2">
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <button
+                                                                onClick={() =>
+                                                                    handleDelete(
+                                                                        log,
+                                                                    )
+                                                                }
+                                                                className="text-destructive hover:text-destructive/80"
+                                                            >
+                                                                <Trash2 className="h-5 w-5" />
+                                                            </button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            Delete
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </div>
+                                            </TooltipProvider>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td
+                                        colSpan={8}
+                                        className="px-4 py-6 text-center text-muted-foreground"
+                                    >
+                                        No backups available.
                                     </td>
                                 </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td
-                                    colSpan={8}
-                                    className="px-4 py-6 text-center text-muted-foreground"
-                                >
-                                    No backups available.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
 
-            {/* Pagination */}
-            <div className="mt-2 flex justify-center gap-1">
-                {logs.links.map((link, i) => (
-                    <Link
-                        key={i}
-                        href={link.url || '#'}
-                        className={`rounded-full px-3 py-1 text-sm transition-colors ${
-                            link.active
-                                ? 'bg-primary text-primary-foreground'
-                                : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                        }`}
-                        dangerouslySetInnerHTML={{ __html: link.label }}
-                    />
-                ))}
+                {/* Pagination */}
+                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">
+                            Show
+                        </span>
+                        <select
+                            value={data.per_page}
+                            onChange={(e) => {
+                                setData('per_page', Number(e.target.value));
+                                setData('page', 1);
+                            }}
+                            className="h-9 rounded-md border border-border bg-background px-3 text-sm"
+                        >
+                            {[5, 10, 20, 50].map((n) => (
+                                <option key={n} value={n}>
+                                    {n}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="flex gap-1 overflow-x-auto">
+                        {logs.links.map((link: any, i: number) => (
+                            <a
+                                key={i}
+                                href={link.url || '#'}
+                                className={`rounded-full px-3 py-1 text-sm ${
+                                    link.active
+                                        ? 'bg-primary text-primary-foreground'
+                                        : 'bg-muted text-muted-foreground'
+                                }`}
+                                dangerouslySetInnerHTML={{ __html: link.label }}
+                            />
+                        ))}
+                    </div>
+                </div>
             </div>
         </CustomAuthLayout>
     );
