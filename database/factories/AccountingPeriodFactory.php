@@ -15,7 +15,7 @@ class AccountingPeriodFactory extends Factory
     public function definition(): array
     {
         $start = Carbon::instance(
-            $this->faker->dateTimeBetween('-1 year', 'now')
+            fake()->dateTimeBetween('-1 year', 'now')
         )->startOfMonth();
 
         $end = $start->copy()->endOfMonth();
@@ -29,7 +29,7 @@ class AccountingPeriodFactory extends Factory
             'start_date' => $start,
             'end_date' => $end,
 
-            'is_open' => $this->faker->boolean(80),
+            'is_open' => fake()->boolean(80),
         ];
     }
 }

@@ -5,134 +5,134 @@ services:
     build:
       context: .
       dockerfile: docker/development/php/Dockerfile
-    container_name: ccuss_app
+    container_name: cfs_app
     restart: unless-stopped
-    working_dir: /var/www/ccuss
+    working_dir: /var/www/cfs
     volumes:
-      - ./:/var/www/ccuss
-      - ./storage:/var/www/ccuss/storage
-      - ./bootstrap/cache:/var/www/ccuss/bootstrap/cache
+      - ./:/var/www/cfs
+      - ./storage:/var/www/cfs/storage
+      - ./bootstrap/cache:/var/www/cfs/bootstrap/cache
     environment:
       APP_ENV: local
       DB_HOST: mysql
       DB_PORT: 3306
-      DB_DATABASE: ccuss
-      DB_USERNAME: ccuss_user
+      DB_DATABASE: cfs
+      DB_USERNAME: cfs_user
       DB_PASSWORD: secret
       REDIS_HOST: redis
     depends_on:
       - mysql
       - redis
     networks:
-      - ccuss-network
+      - cfs-network
 
   node:
     build:
       context: .
       dockerfile: docker/development/node/Dockerfile
-    container_name: ccuss_node
+    container_name: cfs_node
     restart: unless-stopped
-    working_dir: /var/www/ccuss
+    working_dir: /var/www/cfs
     volumes:
-      - ./:/var/www/ccuss
-      - node_modules:/var/www/ccuss/node_modules
+      - ./:/var/www/cfs
+      - node_modules:/var/www/cfs/node_modules
     ports:
       - '5173:5173'
     networks:
-      - ccuss-network
+      - cfs-network
     # command: sh -c "npm install && npm run dev"
 
   nginx:
     image: nginx:alpine
-    container_name: ccuss_nginx
+    container_name: cfs_nginx
     restart: unless-stopped
     ports:
       - '8000:80'
     volumes:
-      - ./:/var/www/ccuss
+      - ./:/var/www/cfs
       - ./docker/development/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - app
     networks:
-      - ccuss-network
+      - cfs-network
 
   mysql:
     image: mysql:8.1
-    container_name: ccuss_mysql
+    container_name: cfs_mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: ccuss
-      MYSQL_USER: ccuss_user
+      MYSQL_DATABASE: cfs
+      MYSQL_USER: cfs_user
       MYSQL_PASSWORD: secret
     ports:
       - '3307:3306'
     volumes:
-      - dbdata:/var/lib/mysql
+      - db_data:/var/lib/mysql
     networks:
-      - ccuss-network
+      - cfs-network
 
   redis:
     image: redis:alpine
-    container_name: ccuss_redis
+    container_name: cfs_redis
     restart: unless-stopped
     ports:
       - '6379:6379'
     networks:
-      - ccuss-network
+      - cfs-network
 
   scheduler:
     build:
       context: .
       dockerfile: docker/development/php/Dockerfile
-    container_name: ccuss_scheduler
+    container_name: cfs_scheduler
     restart: unless-stopped
-    working_dir: /var/www/ccuss
+    working_dir: /var/www/cfs
     volumes:
-      - ./:/var/www/ccuss
+      - ./:/var/www/cfs
     command: php artisan schedule:work
     depends_on:
       - mysql
       - redis
     networks:
-      - ccuss-network
+      - cfs-network
 
   queue:
     build:
       context: .
       dockerfile: docker/development/php/Dockerfile
-    container_name: ccuss_queue
+    container_name: cfs_queue
     restart: unless-stopped
-    working_dir: /var/www/ccuss
+    working_dir: /var/www/cfs
     volumes:
-      - ./:/var/www/ccuss
+      - ./:/var/www/cfs
     command: php artisan queue:work redis --sleep=3 --tries=3 --timeout=90
     depends_on:
       - mysql
       - redis
     networks:
-      - ccuss-network
+      - cfs-network
 
   horizon:
     build:
       context: .
       dockerfile: docker/development/php/Dockerfile
-    container_name: ccuss_horizon
+    container_name: cfs_horizon
     restart: unless-stopped
-    working_dir: /var/www/ccuss
+    working_dir: /var/www/cfs
     volumes:
-      - ./:/var/www/ccuss
+      - ./:/var/www/cfs
     command: php artisan horizon
     depends_on:
       - redis
       - mysql
     networks:
-      - ccuss-network
+      - cfs-network
 
 networks:
-  ccuss-network:
+  cfs-network:
     driver: bridge
 
 volumes:
-  dbdata:
+  db_data:
   node_modules:

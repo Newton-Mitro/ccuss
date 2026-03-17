@@ -16,12 +16,12 @@ class KycProfileFactory extends Factory
         $verificationStatuses = ['PENDING', 'APPROVED', 'REJECTED'];
 
         return [
-            'kyc_level' => $this->faker->randomElement($kycLevels),
-            'risk_level' => $this->faker->randomElement($riskLevels),
-            'verification_status' => $this->faker->randomElement($verificationStatuses),
+            'kyc_level' => fake()->randomElement($kycLevels),
+            'risk_level' => fake()->randomElement($riskLevels),
+            'verification_status' => fake()->randomElement($verificationStatuses),
             'verified_by' => null, // can be a user ID if needed
             'verified_at' => null,
-            'remarks' => $this->faker->optional()->sentence(),
+            'remarks' => fake()->optional()->sentence(),
         ];
     }
 

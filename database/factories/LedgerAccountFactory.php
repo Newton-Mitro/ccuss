@@ -14,14 +14,14 @@ class LedgerAccountFactory extends Factory
     {
         $types = ['ASSET', 'LIABILITY', 'EQUITY', 'INCOME', 'EXPENSE'];
 
-        $isControl = $this->faker->boolean(30); // 30% chance to be control account
+        $isControl = fake()->boolean(30); // 30% chance to be control account
 
         return [
             'organization_id' => Organization::factory(),
 
-            'code' => $this->faker->unique()->numerify('1###'),
-            'name' => ucfirst($this->faker->word()) . ' Account',
-            'type' => $this->faker->randomElement($types),
+            'code' => fake()->unique()->numerify('1###'),
+            'name' => ucfirst(fake()->word()) . ' Account',
+            'type' => fake()->randomElement($types),
             'is_control_account' => $isControl,
             'is_active' => true,
             'is_leaf' => !$isControl, // control accounts are never leaf

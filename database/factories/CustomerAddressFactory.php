@@ -12,15 +12,15 @@ class CustomerAddressFactory extends Factory
     public function definition(): array
     {
         return [
-            'line1' => $this->faker->streetAddress(),
-            'line2' => $this->faker->optional()->secondaryAddress(),
-            'division' => $this->faker->randomElement(['Dhaka', 'Chattogram', 'Khulna']),
-            'district' => $this->faker->city(),
-            'upazila' => $this->faker->citySuffix(),
-            'union_ward' => $this->faker->word(),
-            'postal_code' => $this->faker->postcode(),
+            'line1' => fake()->streetAddress(),
+            'line2' => fake()->optional()->secondaryAddress(),
+            'division' => fake()->randomElement(['Dhaka', 'Chattogram', 'Khulna']),
+            'district' => fake()->city(),
+            'upazila' => fake()->citySuffix(),
+            'union_ward' => fake()->word(),
+            'postal_code' => fake()->postcode(),
             'country' => 'Bangladesh',
-            'type' => $this->faker->randomElement([
+            'type' => fake()->randomElement([
                 'CURRENT',
                 'PERMANENT',
                 'WORK',

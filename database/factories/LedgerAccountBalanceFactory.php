@@ -27,9 +27,9 @@ class LedgerAccountBalanceFactory extends Factory
         ]);
 
         // Generate balances
-        $opening = $this->faker->randomFloat(2, 0, 5000);
-        $debit = $this->faker->randomFloat(2, 0, 2000);
-        $credit = $this->faker->randomFloat(2, 0, 2000);
+        $opening = fake()->randomFloat(2, 0, 5000);
+        $debit = fake()->randomFloat(2, 0, 2000);
+        $credit = fake()->randomFloat(2, 0, 2000);
         $closing = $opening + $debit - $credit;
 
         return [

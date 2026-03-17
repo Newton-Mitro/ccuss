@@ -15,18 +15,18 @@ class CustomerFactory extends Factory
 
     public function definition(): array
     {
-        $type = $this->faker->randomElement(['INDIVIDUAL', 'ORGANIZATION']);
+        $type = fake()->randomElement(['INDIVIDUAL', 'ORGANIZATION']);
 
         $gender = $type === 'INDIVIDUAL'
-            ? $this->faker->randomElement(['MALE', 'FEMALE', 'OTHER', null])
+            ? fake()->randomElement(['MALE', 'FEMALE', 'OTHER', null])
             : null;
 
         $name = $type === 'ORGANIZATION'
-            ? $this->faker->company()
+            ? fake()->company()
             : match ($gender) {
-                'MALE' => $this->faker->firstNameMale() . ' ' . $this->faker->lastName(),
-                'FEMALE' => $this->faker->firstNameFemale() . ' ' . $this->faker->lastName(),
-                default => $this->faker->name(),
+                'MALE' => fake()->firstNameMale() . ' ' . fake()->lastName(),
+                'FEMALE' => fake()->firstNameFemale() . ' ' . fake()->lastName(),
+                default => fake()->name(),
             };
 
         $prefix = $type === 'INDIVIDUAL' ? 'IND' : 'ORG';
@@ -43,21 +43,21 @@ class CustomerFactory extends Factory
             'organization_id' => $organization->id ?? null,
             'branch_id' => $branch->id ?? null,
 
-            'customer_no' => sprintf('%s-%05d', $prefix, $this->faker->unique()->numberBetween(1, 99999)),
+            'customer_no' => sprintf('%s-%05d', $prefix, fake()->unique()->numberBetween(1, 99999)),
             'type' => $type,
             'name' => $name,
-            'phone' => $this->faker->phoneNumber(),
-            'email' => $this->faker->safeEmail(),
+            'phone' => fake()->phoneNumber(),
+            'email' => fake()->safeEmail(),
             'dob' => $type === 'INDIVIDUAL'
-                ? $this->faker->dateTimeBetween('-65 years', '-18 years')->format('Y-m-d')
+                ? fake()->dateTimeBetween('-65 years', '-18 years')->format('Y-m-d')
                 : null,
             'gender' => $gender,
             'religion' => $type === 'INDIVIDUAL'
-                ? $this->faker->randomElement(['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER'])
+                ? fake()->randomElement(['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER'])
                 : null,
             'identification_type' => $type === 'INDIVIDUAL'
-                ? $this->faker->randomElement($individualIds)
-                : $this->faker->randomElement($organizationIds),
+                ? fake()->randomElement($individualIds)
+                : fake()->randomElement($organizationIds),
             'identification_number' => strtoupper(Str::random(12)),
             'kyc_status' => 'PENDING',
             'created_by' => $creator->id ?? null,
@@ -70,11 +70,11 @@ class CustomerFactory extends Factory
         return $this->state(fn(array $attributes) => [
             'type' => 'INDIVIDUAL',
             'gender' => 'MALE',
-            'name' => $this->faker->firstNameMale() . ' ' . $this->faker->lastName(),
-            'customer_no' => 'IND-' . $this->faker->unique()->numberBetween(1, 99999),
-            'dob' => $this->faker->dateTimeBetween('-65 years', '-18 years')->format('Y-m-d'),
-            'religion' => $this->faker->randomElement(['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER']),
-            'identification_type' => $this->faker->randomElement(['NID', 'BRN', 'PASSPORT', 'DRIVING_LICENSE']),
+            'name' => fake()->firstNameMale() . ' ' . fake()->lastName(),
+            'customer_no' => 'IND-' . fake()->unique()->numberBetween(1, 99999),
+            'dob' => fake()->dateTimeBetween('-65 years', '-18 years')->format('Y-m-d'),
+            'religion' => fake()->randomElement(['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER']),
+            'identification_type' => fake()->randomElement(['NID', 'BRN', 'PASSPORT', 'DRIVING_LICENSE']),
         ]);
     }
 
@@ -83,11 +83,11 @@ class CustomerFactory extends Factory
         return $this->state(fn(array $attributes) => [
             'type' => 'INDIVIDUAL',
             'gender' => 'FEMALE',
-            'name' => $this->faker->firstNameFemale() . ' ' . $this->faker->lastName(),
-            'customer_no' => 'IND-' . $this->faker->unique()->numberBetween(1, 99999),
-            'dob' => $this->faker->dateTimeBetween('-65 years', '-18 years')->format('Y-m-d'),
-            'religion' => $this->faker->randomElement(['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER']),
-            'identification_type' => $this->faker->randomElement(['NID', 'BRN', 'PASSPORT', 'DRIVING_LICENSE']),
+            'name' => fake()->firstNameFemale() . ' ' . fake()->lastName(),
+            'customer_no' => 'IND-' . fake()->unique()->numberBetween(1, 99999),
+            'dob' => fake()->dateTimeBetween('-65 years', '-18 years')->format('Y-m-d'),
+            'religion' => fake()->randomElement(['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER']),
+            'identification_type' => fake()->randomElement(['NID', 'BRN', 'PASSPORT', 'DRIVING_LICENSE']),
         ]);
     }
 
@@ -96,8 +96,8 @@ class CustomerFactory extends Factory
         return $this->state(fn(array $attributes) => [
             'type' => 'ORGANIZATION',
             'gender' => null,
-            'name' => $this->faker->company(),
-            'customer_no' => 'ORG-' . $this->faker->unique()->numberBetween(1, 99999),
+            'name' => fake()->company(),
+            'customer_no' => 'ORG-' . fake()->unique()->numberBetween(1, 99999),
             'identification_type' => 'REGISTRATION_NO',
         ]);
     }

@@ -21,8 +21,8 @@ class VoucherLineFactory extends Factory
         $voucher = Voucher::factory()->create(['organization_id' => $organization->id]);
         $ledgerAccount = LedgerAccount::factory()->create(['organization_id' => $organization->id]);
 
-        $amount = $this->faker->randomFloat(2, 100, 1000);
-        $isDebit = $this->faker->boolean();
+        $amount = fake()->randomFloat(2, 100, 1000);
+        $isDebit = fake()->boolean();
 
         return [
             'voucher_id' => $voucher->id,
@@ -40,7 +40,7 @@ class VoucherLineFactory extends Factory
             'instrument_type_id' => null,
             'instrument_id' => null,
 
-            'particulars' => $this->faker->optional()->sentence(),
+            'particulars' => fake()->optional()->sentence(),
 
             // Debit/Credit XOR logic
             'debit' => $isDebit ? $amount : 0,
@@ -58,7 +58,7 @@ class VoucherLineFactory extends Factory
 
     public function debit(float $amount = null): static
     {
-        $amount ??= $this->faker->randomFloat(2, 100, 1000);
+        $amount ??= fake()->randomFloat(2, 100, 1000);
 
         return $this->state(fn() => [
             'debit' => $amount,
@@ -69,7 +69,7 @@ class VoucherLineFactory extends Factory
 
     public function credit(float $amount = null): static
     {
-        $amount ??= $this->faker->randomFloat(2, 100, 1000);
+        $amount ??= fake()->randomFloat(2, 100, 1000);
 
         return $this->state(fn() => [
             'debit' => 0,

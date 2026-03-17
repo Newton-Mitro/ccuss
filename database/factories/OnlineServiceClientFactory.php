@@ -25,9 +25,9 @@ class OnlineServiceClientFactory extends Factory
             'branch_id' => $customer->branch_id ?? null,
             'customer_id' => $customer->id ?? null,
 
-            'username' => $this->faker->unique()->userName(),
-            'email' => $this->faker->unique()->safeEmail(),
-            'phone' => $this->faker->unique()->phoneNumber(),
+            'username' => fake()->unique()->userName(),
+            'email' => fake()->unique()->safeEmail(),
+            'phone' => fake()->unique()->phoneNumber(),
             'password' => Hash::make('password'),
             'status' => 'ACTIVE',
 

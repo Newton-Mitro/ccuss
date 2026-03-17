@@ -35,13 +35,13 @@ class CustomerFamilyRelationFactory extends Factory
         ];
 
         return [
-            'relation_type' => $this->faker->randomElement($relationTypes),
+            'relation_type' => fake()->randomElement($relationTypes),
 
             // Verification
             'verification_status' => 'PENDING',
             'verified_by' => null,
             'verified_at' => null,
-            'remarks' => $this->faker->optional()->sentence(),
+            'remarks' => fake()->optional()->sentence(),
 
             // Audit
             'created_by' => null,

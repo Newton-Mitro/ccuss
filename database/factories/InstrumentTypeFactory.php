@@ -15,9 +15,9 @@ class InstrumentTypeFactory extends Factory
         return [
             'organization_id' => Organization::factory(),
 
-            'code' => strtoupper($this->faker->unique()->bothify('INST-###')),
+            'code' => strtoupper(fake()->unique()->bothify('INST-###')),
 
-            'name' => $this->faker->randomElement([
+            'name' => fake()->randomElement([
                 'Cash',
                 'Cheque',
                 'Bank Transfer',

@@ -30,7 +30,7 @@ class VoucherFactory extends Factory
         ];
 
         $statuses = ['PENDING', 'APPROVED', 'POSTED', 'CANCELLED'];
-        $status = $this->faker->randomElement($statuses);
+        $status = fake()->randomElement($statuses);
 
         // Create organization
         $organization = Organization::factory()->create();
@@ -55,12 +55,12 @@ class VoucherFactory extends Factory
             'accounting_period_id' => $accountingPeriod->id,
             'branch_id' => $branch->id,
 
-            'voucher_date' => $this->faker->dateTimeThisYear(),
-            'voucher_type' => $this->faker->randomElement($types),
-            'voucher_no' => strtoupper($this->faker->bothify('VCHR-####')),
-            'reference' => $this->faker->optional()->bothify('REF-####'),
-            'total_amount' => $this->faker->randomFloat(2, 1000, 50000),
-            'narration' => $this->faker->sentence(),
+            'voucher_date' => fake()->dateTimeThisYear(),
+            'voucher_type' => fake()->randomElement($types),
+            'voucher_no' => strtoupper(fake()->bothify('VCHR-####')),
+            'reference' => fake()->optional()->bothify('REF-####'),
+            'total_amount' => fake()->randomFloat(2, 1000, 50000),
+            'narration' => fake()->sentence(),
             'status' => $status,
 
             'created_by' => $creator->id,

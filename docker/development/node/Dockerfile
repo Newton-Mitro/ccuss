@@ -1,6 +1,6 @@
 FROM node:20-alpine
 
-WORKDIR /var/www/ccuss
+WORKDIR /var/www/cfs
 
 # Copy package files
 COPY package*.json ./

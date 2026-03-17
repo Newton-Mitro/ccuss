@@ -41,7 +41,7 @@ class KycDocumentFactory extends Factory
             'FATCA_FORM'
         ];
 
-        $docType = $this->faker->randomElement($documentTypes);
+        $docType = fake()->randomElement($documentTypes);
         $fileName = strtolower($docType) . '_' . Str::random(6) . '.jpg';
         $filePath = 'kyc/' . $fileName;
 
@@ -53,10 +53,10 @@ class KycDocumentFactory extends Factory
             'file_path' => $filePath,
             'mime' => 'image/jpeg',
             'alt_text' => ucfirst(str_replace('_', ' ', $docType)),
-            'verification_status' => $this->faker->randomElement($verificationStatuses),
+            'verification_status' => fake()->randomElement($verificationStatuses),
             'verified_by' => null,
             'verified_at' => null,
-            'remarks' => $this->faker->optional()->sentence(),
+            'remarks' => fake()->optional()->sentence(),
         ];
     }
 

@@ -19,7 +19,7 @@ class FiscalYearFactory extends Factory
     public function definition(): array
     {
         $start = Carbon::instance(
-            $this->faker->dateTimeBetween('-3 years', 'now')
+            fake()->dateTimeBetween('-3 years', 'now')
         )->startOfYear();
 
         $end = $start->copy()->addYear()->subDay();

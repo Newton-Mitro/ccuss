@@ -36,14 +36,14 @@ class BranchFactory extends Factory
 
     public function definition(): array
     {
-        $name = $this->faker->unique()->randomElement($this->dhakaBranches);
+        $name = fake()->unique()->randomElement($this->dhakaBranches);
 
         return [
-            'code' => strtoupper($this->faker->unique()->bothify('DHK###')),
+            'code' => strtoupper(fake()->unique()->bothify('DHK###')),
             'name' => $name,
-            'address' => $this->faker->streetAddress . ', ' . $name,
-            'latitude' => $this->faker->latitude(23.4, 24.5),
-            'longitude' => $this->faker->longitude(89.5, 91.5),
+            'address' => fake()->streetAddress . ', ' . $name,
+            'latitude' => fake()->latitude(23.4, 24.5),
+            'longitude' => fake()->longitude(89.5, 91.5),
             'manager_id' => User::query()->inRandomOrder()->value('id'),
         ];
     }

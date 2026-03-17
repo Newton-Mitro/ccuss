@@ -34,7 +34,7 @@ RUN pecl install redis \
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Set working directory
-WORKDIR /var/www/ccuss
+WORKDIR /var/www/cfs
 
 # ----------------------------
 # Optional: run composer install on build (if you want)

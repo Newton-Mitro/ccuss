@@ -15,13 +15,13 @@ class CustomerIntroducerFactory extends Factory
         return [
             'introduced_customer_id' => Customer::factory(),
             'introducer_customer_id' => Customer::factory(),
-            'relationship_type' => $this->faker->randomElement([
+            'relationship_type' => fake()->randomElement([
                 'FRIEND',
                 'RELATIVE',
                 'BUSINESS'
             ]),
             'verification_status' => 'PENDING',
-            'remarks' => $this->faker->sentence(),
+            'remarks' => fake()->sentence(),
         ];
     }
 }

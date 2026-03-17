@@ -18,8 +18,8 @@ class UserFactory extends Factory
         return [
             'organization_id' => Organization::factory(), // create or link org
             'branch_id' => Branch::factory(),             // create or link branch
-            'name' => $this->faker->name(),
-            'email' => $this->faker->unique()->safeEmail(),
+            'name' => fake()->name(),
+            'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= bcrypt('password'), // hashed password
             'remember_token' => Str::random(10),

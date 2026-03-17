@@ -8,74 +8,74 @@ services:
     build:
       context: .
       dockerfile: docker/production/php/Dockerfile
-    container_name: ccuss_prod_app
+    container_name: prod_cfs_app
     restart: unless-stopped
-    working_dir: /var/www/ccuss
+    working_dir: /var/www/cfs
     volumes:
-      - ./.env.production:/var/www/ccuss/.env:ro
-      - storage_data:/var/www/ccuss/storage
-      - cache_data:/var/www/ccuss/bootstrap/cache
+      - ./.env.production:/var/www/cfs/.env:ro
+      - storage_data:/var/www/cfs/storage
+      - cache_data:/var/www/cfs/bootstrap/cache
     environment:
       APP_ENV: 'production'
       APP_DEBUG: 'false'
       DB_HOST: 'mysql'
       DB_PORT: '3306'
-      DB_DATABASE: 'ccuss'
-      DB_USERNAME: 'ccuss_user'
+      DB_DATABASE: 'cfs'
+      DB_USERNAME: 'cfs_user'
       DB_PASSWORD: '${DB_PASSWORD}'
       REDIS_HOST: 'redis'
     depends_on:
       - mysql
       - redis
     networks:
-      - ccuss-prod-network
+      - prod_cfs_network
 
   # -------------------------------
   # Nginx Web Server
   # -------------------------------
   nginx:
     image: nginx:alpine
-    container_name: ccuss_prod_nginx
+    container_name: prod_cfs_nginx
     restart: unless-stopped
     ports:
       - '80:80'
       - '443:443'
     volumes:
       - ./docker/production/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - storage_data:/var/www/ccuss/storage
-      - cache_data:/var/www/ccuss/bootstrap/cache
-      - ./public:/var/www/ccuss/public:ro
+      - storage_data:/var/www/cfs/storage
+      - cache_data:/var/www/cfs/bootstrap/cache
+      - ./public:/var/www/cfs/public:ro
     depends_on:
       - app
     networks:
-      - ccuss-prod-network
+      - prod_cfs_network
 
   # -------------------------------
   # MySQL Database
   # -------------------------------
   mysql:
     image: mysql:8.1
-    container_name: ccuss_prod_mysql
+    container_name: prod_cfs_mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
-      MYSQL_DATABASE: ccuss
-      MYSQL_USER: ccuss_user
+      MYSQL_DATABASE: cfs
+      MYSQL_USER: cfs_user
       MYSQL_PASSWORD: '${DB_PASSWORD}'
     volumes:
-      - dbdata:/var/lib/mysql
+      - db_data:/var/lib/mysql
     networks:
-      - ccuss-prod-network
+      - prod_cfs_network
 
   # -------------------------------
   # Redis Cache
   # -------------------------------
   redis:
     image: redis:alpine
-    container_name: ccuss_prod_redis
+    container_name: prod_cfs_redis
     restart: unless-stopped
     networks:
-      - ccuss-prod-network
+      - prod_cfs_network
 
   # -------------------------------
   # Laravel Scheduler
@@ -84,18 +84,18 @@ services:
     build:
       context: .
       dockerfile: docker/production/php/Dockerfile
-    container_name: ccuss_prod_scheduler
+    container_name: prod_cfs_scheduler
     restart: unless-stopped
-    working_dir: /var/www/ccuss
+    working_dir: /var/www/cfs
     volumes:
-      - storage_data:/var/www/ccuss/storage
-      - cache_data:/var/www/ccuss/bootstrap/cache
+      - storage_data:/var/www/cfs/storage
+      - cache_data:/var/www/cfs/bootstrap/cache
     command: php artisan schedule:work
     depends_on:
       - mysql
       - redis
     networks:
-      - ccuss-prod-network
+      - prod_cfs_network
 
   # -------------------------------
   # Laravel Queue Worker
@@ -104,24 +104,24 @@ services:
     build:
       context: .
       dockerfile: docker/production/php/Dockerfile
-    container_name: ccuss_prod_queue
+    container_name: prod_cfs_queue
     restart: unless-stopped
-    working_dir: /var/www/ccuss
+    working_dir: /var/www/cfs
     volumes:
-      - storage_data:/var/www/ccuss/storage
-      - cache_data:/var/www/ccuss/bootstrap/cache
+      - storage_data:/var/www/cfs/storage
+      - cache_data:/var/www/cfs/bootstrap/cache
     command: php artisan queue:work redis --sleep=3 --tries=3 --timeout=90
     depends_on:
       - mysql
       - redis
     networks:
-      - ccuss-prod-network
+      - prod_cfs_network
 
 networks:
-  ccuss-prod-network:
+  prod_cfs_network:
     driver: bridge
 
 volumes:
-  dbdata:
+  db_data:
   storage_data:
   cache_data:
