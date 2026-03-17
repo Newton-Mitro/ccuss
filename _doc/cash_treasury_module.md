@@ -397,3 +397,134 @@ H --> I
 
 I --> J[Branch Day Close]
 ```
+
+# Cash Transactions and Affected Tables
+
+This document outlines all possible cash-related transactions in the system and the tables that are affected for each action. It also highlights how `cash_audit_logs` captures every activity for auditing purposes.
+
+---
+
+## 1. Branch Operations
+
+### Opening a Branch Day
+
+- **Action:** Open branch for the day.
+- **Affected Tables:**
+    - `branch_days` → status set to `OPEN`, `opened_at`, `opened_by`
+    - `cash_audit_logs` → log `"BRANCH_OPENED"`
+
+### Closing a Branch Day
+
+- **Action:** Close branch at end of day.
+- **Affected Tables:**
+    - `branch_days` → status set to `CLOSED`, `closed_at`, `closed_by`
+    - `cash_audit_logs` → log `"BRANCH_CLOSED"`
+
+---
+
+## 2. Teller Operations
+
+### Opening a Teller Session
+
+- **Action:** Teller starts shift and receives opening cash.
+- **Affected Tables:**
+    - `teller_sessions` → `status = OPEN`, `opening_cash`, `opened_at`
+    - `cash_drawers` → `opening_balance`
+    - `cash_audit_logs` → `"TELLER_SESSION_OPENED"`
+
+### Closing a Teller Session
+
+- **Action:** Teller ends shift, reports closing cash.
+- **Affected Tables:**
+    - `teller_sessions` → `status = CLOSED`, `closing_cash`, `closed_at`
+    - `cash_drawers` → `closing_balance`
+    - `cash_balancings` → record expected vs actual cash, difference
+    - `cash_audit_logs` → `"TELLER_SESSION_CLOSED"`, `"CASH_BALANCED"`
+
+---
+
+## 3. Cash Transactions
+
+### Cash In / Cash Out (from customers)
+
+- **Action:** Teller receives or gives cash for deposits, withdrawals, or payments.
+- **Affected Tables:**
+    - `cash_transactions` → `amount`, `type` (`CASH_IN` / `CASH_OUT`), `source`, `reference`
+    - `cash_drawers` → balance update
+    - `vault_transactions` → if vault is involved
+    - `cash_audit_logs` → log `"CASH_IN"` or `"CASH_OUT"` with details
+
+### Vault Deposit / Withdrawal
+
+- **Action:** Move cash between vault and teller.
+- **Affected Tables:**
+    - `vault_transactions` → `amount`, `type` (`IN` / `OUT`)
+    - `cash_drawers` → balance update if moving to teller
+    - `teller_vault_transfers` → log transfer
+    - `cash_audit_logs` → `"CASH_TRANSFER_TO_TELLER"` / `"CASH_TRANSFER_TO_VAULT"`
+
+### Vault-to-Vault Transfers
+
+- **Action:** Moving cash between vaults, approved by a manager.
+- **Affected Tables:**
+    - `vault_transfers` → `from_vault_id`, `to_vault_id`, `amount`, `approved_by`
+    - `vault_transactions` → two entries: `OUT` from source, `IN` to destination
+    - `cash_audit_logs` → `"VAULT_TRANSFER"`
+
+---
+
+## 4. Cash Adjustments
+
+### Handling Shortages or Excess
+
+- **Action:** Adjust discrepancies after balancing.
+- **Affected Tables:**
+    - `cash_adjustments` → `amount`, `type` (`SHORTAGE` / `EXCESS`), `reason`, `approved_by`
+    - `cash_drawers` → balance update
+    - `cash_audit_logs` → `"CASH_ADJUSTED"` with reason
+
+### Balancing Cash Drawer
+
+- **Action:** Verify cash in drawer against expected.
+- **Affected Tables:**
+    - `cash_balancings` → record `expected_balance`, `actual_balance`, `difference`, `verified_by`
+    - `cash_drawers` → closing balance
+    - `cash_audit_logs` → `"CASH_BALANCED"`
+
+---
+
+## 5. Denominations Handling
+
+### Vault Denomination Update
+
+- **Action:** Count or adjust notes in vault.
+- **Affected Tables:**
+    - `vault_denominations` → `count` update
+    - `vault_transactions` → optional if adjustment involves movement
+    - `cash_audit_logs` → `"DENOMINATION_COUNT_UPDATED"`
+
+---
+
+## 6. Miscellaneous / Reference Actions
+
+- **Teller creation / activation / deactivation**
+    - Tables: `tellers`, `cash_audit_logs` → `"TELLER_CREATED"`, `"TELLER_DEACTIVATED"`
+- **Vault creation / activation / deactivation**
+    - Tables: `vaults`, `cash_audit_logs` → `"VAULT_CREATED"`, `"VAULT_DEACTIVATED"`
+
+---
+
+## Summary Table
+
+| Transaction Type        | Primary Tables                                                 | Audit Logs                                               |
+| ----------------------- | -------------------------------------------------------------- | -------------------------------------------------------- |
+| Open Branch Day         | `branch_days`                                                  | `"BRANCH_OPENED"`                                        |
+| Close Branch Day        | `branch_days`                                                  | `"BRANCH_CLOSED"`                                        |
+| Open Teller Session     | `teller_sessions`, `cash_drawers`                              | `"TELLER_SESSION_OPENED"`                                |
+| Close Teller Session    | `teller_sessions`, `cash_drawers`, `cash_balancings`           | `"TELLER_SESSION_CLOSED"`                                |
+| Cash In/Out             | `cash_transactions`, `cash_drawers`, `vault_transactions`      | `"CASH_IN"` / `"CASH_OUT"`                               |
+| Teller-Vault Transfer   | `teller_vault_transfers`, `vault_transactions`, `cash_drawers` | `"CASH_TRANSFER_TO_TELLER"` / `"CASH_TRANSFER_TO_VAULT"` |
+| Vault-to-Vault Transfer | `vault_transfers`, `vault_transactions`                        | `"VAULT_TRANSFER"`                                       |
+| Cash Adjustment         | `cash_adjustments`, `cash_drawers`                             | `"CASH_ADJUSTED"`                                        |
+| Cash Balancing          | `cash_balancings`, `cash_drawers`                              | `"CASH_BALANCED"`                                        |
+| Denomination Count      | `vault_denominations`                                          | `"DENOMINATION_COUNT_UPDATED"`                           |

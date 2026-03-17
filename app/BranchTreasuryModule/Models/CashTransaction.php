@@ -8,13 +8,28 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CashTransaction extends Model
 {
-    protected $fillable = ['cash_drawer_id', 'amount', 'type', 'source_type', 'source_id', 'reference', 'transaction_date', 'remarks'];
+    protected $fillable = [
+        'teller_session_id',
+        'amount',
+        'type',
+        'source_type',
+        'source_id',
+        'reference',
+        'transaction_date',
+        'remarks'
+    ];
 
-    public function cashDrawer(): BelongsTo
+    /**
+     * Link transaction to a teller session
+     */
+    public function tellerSession(): BelongsTo
     {
-        return $this->belongsTo(CashDrawer::class);
+        return $this->belongsTo(TellerSession::class);
     }
 
+    /**
+     * Polymorphic relation for the source (e.g., deposit, withdrawal, adjustment)
+     */
     public function source(): MorphTo
     {
         return $this->morphTo();

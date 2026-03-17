@@ -4,7 +4,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: docker/php/Dockerfile
+      dockerfile: docker/development/php/Dockerfile
     container_name: ccuss_app
     restart: unless-stopped
     working_dir: /var/www/ccuss
@@ -29,7 +29,7 @@ services:
   node:
     build:
       context: .
-      dockerfile: docker/node/Dockerfile
+      dockerfile: docker/development/node/Dockerfile
     container_name: ccuss_node
     restart: unless-stopped
     working_dir: /var/www/ccuss
@@ -50,7 +50,7 @@ services:
       - '8000:80'
     volumes:
       - ./:/var/www/ccuss
-      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/development/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - app
     networks:
@@ -84,7 +84,7 @@ services:
   scheduler:
     build:
       context: .
-      dockerfile: docker/php/Dockerfile
+      dockerfile: docker/development/php/Dockerfile
     container_name: ccuss_scheduler
     restart: unless-stopped
     working_dir: /var/www/ccuss
@@ -100,7 +100,7 @@ services:
   queue:
     build:
       context: .
-      dockerfile: docker/php/Dockerfile
+      dockerfile: docker/development/php/Dockerfile
     container_name: ccuss_queue
     restart: unless-stopped
     working_dir: /var/www/ccuss
@@ -116,7 +116,7 @@ services:
   horizon:
     build:
       context: .
-      dockerfile: docker/php/Dockerfile
+      dockerfile: docker/development/php/Dockerfile
     container_name: ccuss_horizon
     restart: unless-stopped
     working_dir: /var/www/ccuss

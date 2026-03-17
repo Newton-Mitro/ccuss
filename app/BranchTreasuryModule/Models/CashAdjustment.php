@@ -9,18 +9,24 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class CashAdjustment extends Model
 {
     protected $fillable = [
-        'cash_drawer_id',
+        'teller_session_id',
         'amount',
         'type',
         'reason',
         'approved_by'
     ];
 
-    public function cashDrawer(): BelongsTo
+    /**
+     * Link adjustment to the teller session instead of cash drawer
+     */
+    public function tellerSession(): BelongsTo
     {
-        return $this->belongsTo(CashDrawer::class);
+        return $this->belongsTo(TellerSession::class);
     }
 
+    /**
+     * Who approved this adjustment
+     */
     public function approvedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');

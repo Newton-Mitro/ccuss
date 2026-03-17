@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class CashBalancing extends Model
 {
     protected $fillable = [
-        'cash_drawer_id',
+        'teller_session_id',
         'expected_balance',
         'actual_balance',
         'difference',
@@ -18,11 +18,17 @@ class CashBalancing extends Model
         'remarks'
     ];
 
-    public function cashDrawer(): BelongsTo
+    /**
+     * Link the balancing record to a teller session
+     */
+    public function tellerSession(): BelongsTo
     {
-        return $this->belongsTo(CashDrawer::class);
+        return $this->belongsTo(TellerSession::class);
     }
 
+    /**
+     * User who verified the balancing
+     */
     public function verifiedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'verified_by');

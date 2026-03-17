@@ -9,18 +9,24 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class CashAuditLog extends Model
 {
     protected $fillable = [
-        'cash_drawer_id',
+        'teller_session_id',
         'user_id',
         'action',
         'details',
         'action_time'
     ];
 
-    public function cashDrawer(): BelongsTo
+    /**
+     * Link the audit log to a teller session
+     */
+    public function tellerSession(): BelongsTo
     {
-        return $this->belongsTo(CashDrawer::class);
+        return $this->belongsTo(TellerSession::class);
     }
 
+    /**
+     * The user who performed the action
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

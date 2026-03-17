@@ -1,0 +1,215 @@
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
+import React, { useEffect } from 'react';
+import toast from 'react-hot-toast';
+import HeadingSmall from '../../../components/heading-small';
+import InputError from '../../../components/input-error';
+import { Button } from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label';
+import { Select } from '../../../components/ui/select';
+import {
+    ToggleGroup,
+    ToggleGroupItem,
+} from '../../../components/ui/toggle-group';
+import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { BreadcrumbItem } from '../../../types';
+import { Branch } from '../../../types/branch';
+
+interface VaultFormPageProps {
+    backUrl: string;
+    vault?: {
+        id: number;
+        name: string;
+        branch_id: number;
+        total_balance: number;
+        is_active: boolean;
+    };
+    branches: Branch[];
+}
+
+const VaultForm = ({ backUrl, vault, branches }: VaultFormPageProps) => {
+    const { flash } = usePage().props;
+
+    useEffect(() => {
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) toast.success(flash.success);
+    }, [flash]);
+
+    const handleBack = () => {
+        router.visit(backUrl, { preserveState: true, preserveScroll: true });
+    };
+
+    const isEdit = !!vault;
+
+    const { data, setData, post, put, processing, errors } = useForm({
+        name: vault?.name || '',
+        branch_id: vault?.branch_id || '',
+        total_balance: vault?.total_balance || 0,
+        is_active: vault?.is_active ?? true,
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const payload = new FormData();
+        Object.entries(data).forEach(([key, value]) => {
+            payload.append(key, value as any);
+        });
+
+        if (isEdit) {
+            put(`/vaults/${vault.id}`, {
+                data: payload,
+                preserveScroll: true,
+                onSuccess: () => toast.success('Vault updated successfully!'),
+            });
+        } else {
+            post('/vaults', {
+                data: payload,
+                preserveScroll: true,
+                onSuccess: () => toast.success('Vault created successfully!'),
+            });
+        }
+    };
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Vaults', href: '/vaults' },
+        {
+            title: isEdit ? `Edit Vault: ${vault?.name}` : 'Create Vault',
+            href: '',
+        },
+    ];
+
+    return (
+        <CustomAuthLayout breadcrumbs={breadcrumbs}>
+            <Head
+                title={isEdit ? `Edit Vault - ${vault?.name}` : 'Create Vault'}
+            />
+
+            {/* Header */}
+            <div className="flex flex-col gap-3 pb-4 sm:flex-row sm:items-center sm:justify-between">
+                <HeadingSmall
+                    title={
+                        isEdit ? `Edit Vault: ${vault?.name}` : 'Create Vault'
+                    }
+                    description="Manage vault details."
+                />
+                <div className="flex flex-wrap gap-2">
+                    <button
+                        type="button"
+                        onClick={handleBack}
+                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        <span className="hidden sm:inline">Back</span>
+                    </button>
+                </div>
+            </div>
+
+            {/* Form */}
+            <form
+                onSubmit={handleSubmit}
+                className="w-full space-y-4 rounded-md border border-border bg-card p-4 sm:p-6 lg:w-3xl"
+            >
+                {/* Vault Info */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <div>
+                        <Label className="text-xs">Vault Name</Label>
+                        <Input
+                            value={data.name}
+                            onChange={(e) => setData('name', e.target.value)}
+                            className="h-8 text-sm"
+                        />
+                        <InputError message={errors.name} />
+                    </div>
+
+                    <div>
+                        <Label className="text-xs">Branch</Label>
+                        <Select
+                            value={data.branch_id.toString()}
+                            onChange={(val) =>
+                                setData('branch_id', Number(val))
+                            }
+                            options={branches.map((b) => ({
+                                value: b.id.toString(),
+                                label: b.name,
+                            }))}
+                            placeholder="Select Branch"
+                        />
+                        <InputError message={errors.branch_id} />
+                    </div>
+
+                    <div>
+                        <Label className="text-xs">Total Balance</Label>
+                        <Input
+                            type="number"
+                            value={data.total_balance}
+                            onChange={(e) =>
+                                setData('total_balance', Number(e.target.value))
+                            }
+                            className="h-8 text-sm"
+                        />
+                        <InputError message={errors.total_balance} />
+                    </div>
+                </div>
+
+                {/* Active/Inactive Toggle */}
+                <div className="flex flex-col gap-2">
+                    <Label className="text-xs">Status</Label>
+                    <ToggleGroup
+                        type="single"
+                        value={data.is_active ? 'true' : 'false'}
+                        onValueChange={(val) =>
+                            setData('is_active', val === 'true')
+                        }
+                        size="sm"
+                        variant="outline"
+                    >
+                        <ToggleGroupItem
+                            value="true"
+                            className={
+                                data.is_active
+                                    ? 'bg-primary text-primary-foreground'
+                                    : ''
+                            }
+                        >
+                            Active
+                        </ToggleGroupItem>
+                        <ToggleGroupItem
+                            value="false"
+                            className={
+                                !data.is_active
+                                    ? 'bg-destructive text-destructive-foreground'
+                                    : ''
+                            }
+                        >
+                            Inactive
+                        </ToggleGroupItem>
+                    </ToggleGroup>
+                </div>
+
+                {/* Submit Button */}
+                <div className="flex justify-end">
+                    <Button
+                        type="submit"
+                        disabled={processing}
+                        className="flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground hover:bg-primary/90"
+                    >
+                        {processing ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Saving...
+                            </>
+                        ) : (
+                            <>
+                                <CheckCheck className="mr-2 h-4 w-4" />
+                                {isEdit ? 'Update Vault' : 'Create Vault'}
+                            </>
+                        )}
+                    </Button>
+                </div>
+            </form>
+        </CustomAuthLayout>
+    );
+};
+
+export default VaultForm;

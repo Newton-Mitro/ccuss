@@ -3,14 +3,26 @@
 use App\BranchTreasuryModule\Controllers\BranchDayController;
 use App\BranchTreasuryModule\Controllers\CashAdjustmentController;
 use App\BranchTreasuryModule\Controllers\CashBalancingController;
-use App\BranchTreasuryModule\Controllers\CashDrawerController;
 use App\BranchTreasuryModule\Controllers\CashTransactionController;
+use App\BranchTreasuryModule\Controllers\TellerController;
 use App\BranchTreasuryModule\Controllers\TellerSessionController;
+use App\BranchTreasuryModule\Controllers\VaultController;
 use App\BranchTreasuryModule\Controllers\VaultTransferController;
 use Illuminate\Support\Facades\Route;
 
 
 Route::get('sop', [BranchDayController::class, 'sop'])->name('branch-treasury.sop');
+
+Route::resource('vaults', VaultController::class);
+Route::resource('tellers', TellerController::class);
+
+Route::prefix('teller-sessions')->name('teller-sessions.')->middleware(['auth'])->group(function () {
+    Route::get('/', [TellerSessionController::class, 'index'])->name('index');
+    // Route::get('/{id}', [TellerSessionController::class, 'show'])->name('show');
+    Route::get('/create', [TellerSessionController::class, 'create'])->name('create');
+    Route::post('/open', [TellerSessionController::class, 'openSession'])->name('open');
+    Route::post('/{id}/close', [TellerSessionController::class, 'closeSession'])->name('close');
+});
 
 Route::prefix('branch-cash')->group(function () {
     Route::get('branch-day/status', [BranchDayController::class, 'index'])->name('branch-day.index');
@@ -18,13 +30,6 @@ Route::prefix('branch-cash')->group(function () {
     Route::post('branch-day/open', [BranchDayController::class, 'open'])->name('branch-day.open');
     Route::post('branch-day/close', [BranchDayController::class, 'branch-day.close'])->name('branch-day.close');
     Route::get('branch-day/history', [BranchDayController::class, 'history'])->name('branch-day.history');
-
-    Route::get('teller-session/open', [TellerSessionController::class, 'create'])->name('teller-session.open.page');
-    Route::post('teller-session/open', [TellerSessionController::class, 'openSession'])->name('teller-session.open');
-    Route::post('teller-session/{id}/close', [TellerSessionController::class, 'closeSession'])->name('teller-session.close');
-
-    Route::get('cash-drawer/assign', [CashDrawerController::class, 'create'])->name('cash-drawer.assign.page');
-    Route::post('cash-drawer/assign', [CashDrawerController::class, 'assignDrawer'])->name('cash-drawer.assign');
 
     Route::get('vault-transfer/teller', [VaultTransferController::class, 'createVaultToTeller'])->name('vault.transfer.teller.page');
     Route::post('vault-transfer/teller', [VaultTransferController::class, 'vaultToTeller'])->name('vault.transfer.teller');

@@ -88,11 +88,10 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('bank_account_id')->constrained()->cascadeOnDelete();
             $table->string('cheque_no')->unique();
-            $table->enum('type', ['ISSUED', 'RECEIVED']);
             $table->decimal('amount', 18, 2);
             $table->string('payee')->nullable();
             $table->date('cheque_date');
-            $table->enum('status', ['PENDING', 'CLEARED', 'BOUNCED', 'CANCELLED'])->default('PENDING');
+            $table->enum('status', ['ISSUED', 'CLEARED', 'BOUNCED', 'CANCELLED'])->default('ISSUED');
             $table->text('remarks')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();

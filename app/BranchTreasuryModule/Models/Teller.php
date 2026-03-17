@@ -10,7 +10,23 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Teller extends Model
 {
-    protected $fillable = ['user_id', 'branch_id', 'code', 'name', 'is_active'];
+    // ✅ Add new numeric fields to fillable
+    protected $fillable = [
+        'user_id',
+        'branch_id',
+        'code',
+        'name',
+        'max_cash_limit',
+        'max_transaction_limit',
+        'is_active',
+    ];
+
+    // ✅ Cast numeric fields and boolean
+    protected $casts = [
+        'max_cash_limit' => 'float',
+        'max_transaction_limit' => 'float',
+        'is_active' => 'boolean',
+    ];
 
     public function user(): BelongsTo
     {

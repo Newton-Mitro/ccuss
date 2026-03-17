@@ -1,0 +1,82 @@
+# -----------------------------
+# Stage 1: PHP + Composer + Build tools
+# -----------------------------
+FROM php:8.3-fpm-alpine AS php-base
+
+# Build dependencies for PECL extensions and Laravel optimizations
+RUN apk add --no-cache \
+    git curl zip unzip autoconf make g++ libtool \
+    libpng-dev libxml2-dev libzip-dev oniguruma-dev \
+    mysql-client
+
+# PHP extensions
+RUN docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath gd
+
+# Redis extension
+RUN pecl install redis && docker-php-ext-enable redis
+
+WORKDIR /app
+
+# Composer
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+    && php composer-setup.php --install-dir=/usr/bin --filename=composer \
+    && rm composer-setup.php
+
+# Copy PHP dependencies first (cache layer)
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# Copy full PHP app
+COPY . .
+
+# Generate Wayfinder types (optional, can move to frontend stage if preferred)
+RUN php artisan wayfinder:generate --with-form
+
+# -----------------------------
+# Stage 2: Frontend build (Node only here)
+# -----------------------------
+FROM php-base AS frontend-build
+
+# Install Node for build only
+RUN apk add --no-cache nodejs npm
+
+WORKDIR /app
+
+# Install JS dependencies
+COPY package*.json ./
+RUN npm ci
+
+# Copy frontend source and build assets
+COPY . .
+RUN npm run build
+
+# -----------------------------
+# Stage 3: Production PHP container (runtime only)
+# -----------------------------
+FROM php:8.3-fpm-alpine AS production
+
+# Runtime dependencies only
+RUN apk add --no-cache \
+    git curl zip unzip \
+    libpng-dev libxml2-dev libzip-dev oniguruma-dev mysql-client
+
+# PHP extensions
+RUN docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath gd
+
+# Redis extension
+RUN pecl install redis && docker-php-ext-enable redis
+
+WORKDIR /var/www/ccuss
+
+# Copy PHP app + Composer deps
+COPY --from=php-base /app /var/www/ccuss
+
+# Copy frontend build only (no Node)
+COPY --from=frontend-build /app/public/build /var/www/ccuss/public/build
+
+# Laravel runtime optimizations
+RUN php artisan config:cache \
+    && php artisan route:cache \
+    && php artisan view:cache
+
+CMD ["php-fpm"]

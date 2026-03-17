@@ -15,11 +15,17 @@ class TellerVaultTransfer extends Model
         'transfer_date'
     ];
 
+    /**
+     * Vault involved in the transfer
+     */
     public function vault(): BelongsTo
     {
         return $this->belongsTo(Vault::class);
     }
 
+    /**
+     * Teller session involved in the transfer
+     */
     public function tellerSession(): BelongsTo
     {
         return $this->belongsTo(TellerSession::class);
