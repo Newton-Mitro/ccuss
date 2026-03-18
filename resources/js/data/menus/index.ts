@@ -1,30 +1,30 @@
 import { SidebarItem } from '../../types';
-import { bankManagementMenu } from './bankManagement';
-import { branchTreasuryManagementMenu } from './branchTreasuaryManagement';
-import { customerManagementMenu } from './customerManagement';
-import { depositManagementMenu } from './depositManagement';
-import { financeAndAccountingMenu } from './financeAndAccounting';
-import { fixedAssetManagementMenu } from './fixedAssetManagement';
-import { hrManagementMenu } from './hrManagement';
+import { bankAndChequeMenu } from './bankAndChequeMenu';
+import { branchCashAndTreasuryMenu } from './branchCashAndTreasuaryMenu';
+import { customerKycMenu } from './customerKycMenu';
+import { financeAndAccountingMenu } from './financeAndAccountingMenu';
+import { fixedAssetMenu } from './fixedAssetMenu';
+import { hrAndPayrollMenu } from './hrAndPayrollMenu';
 import { inventoryManagementMenu } from './inventoryManagement';
 import { loanManagementMenu } from './loanManagement';
-import { pettyCashManagementMenu } from './pettyCashManagement';
-import { procurementManagementMenu } from './procurementManagement';
+import { pettyCashMenu } from './pettyCashMenu';
+import { procurementMenu } from './procurementMenu';
+import { savingDepositMenu } from './savingDepositMenu';
 import { settingsMenu } from './settings';
-import { systemAdminMenu } from './systemAdmin';
+import { systemAdministrationMenu } from './systemAdministrationMenu';
 
 export const sidebarMenu: SidebarItem[] = [
-    ...systemAdminMenu,
-    ...customerManagementMenu,
-    ...depositManagementMenu,
+    ...systemAdministrationMenu,
+    ...customerKycMenu,
+    ...savingDepositMenu,
     ...loanManagementMenu,
-    ...branchTreasuryManagementMenu,
-    ...pettyCashManagementMenu,
-    ...bankManagementMenu,
-    ...procurementManagementMenu,
-    ...fixedAssetManagementMenu,
+    ...branchCashAndTreasuryMenu,
+    ...pettyCashMenu,
+    ...bankAndChequeMenu,
+    ...procurementMenu,
+    ...fixedAssetMenu,
     ...inventoryManagementMenu,
-    ...hrManagementMenu,
+    ...hrAndPayrollMenu,
     ...financeAndAccountingMenu,
     ...settingsMenu,
 ];

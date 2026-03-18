@@ -1,6 +1,6 @@
 import { SidebarItem } from '../../types';
 
-export const branchTreasuryManagementMenu: SidebarItem[] = [
+export const branchCashAndTreasuryMenu: SidebarItem[] = [
     {
         name: 'Branch Cash / Treasury',
         icon: <i className="fa-solid fa-money-bill-transfer" />,

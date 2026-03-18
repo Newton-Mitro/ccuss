@@ -1,6 +1,6 @@
 import { SidebarItem } from '../../types';
 
-export const pettyCashManagementMenu: SidebarItem[] = [
+export const pettyCashMenu: SidebarItem[] = [
     {
         name: 'Petty Cash Management',
         icon: <i className="fa-solid fa-money-bill-transfer" />,

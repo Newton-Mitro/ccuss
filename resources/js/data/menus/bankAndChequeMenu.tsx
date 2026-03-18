@@ -1,8 +1,8 @@
 import { SidebarItem } from '../../types';
 
-export const bankManagementMenu: SidebarItem[] = [
+export const bankAndChequeMenu: SidebarItem[] = [
     {
-        name: 'Bank Management',
+        name: 'Bank & Cheques',
         icon: <i className="fa-solid fa-university" />,
         children_expanded: false,
         permission: ['bank.view'],

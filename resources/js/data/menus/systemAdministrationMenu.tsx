@@ -1,6 +1,6 @@
 import { SidebarItem } from '../../types';
 
-export const systemAdminMenu: SidebarItem[] = [
+export const systemAdministrationMenu: SidebarItem[] = [
     {
         name: 'System Administration',
         icon: <i className="fa-solid fa-building-flag" />,

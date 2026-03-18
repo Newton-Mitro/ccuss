@@ -1,6 +1,6 @@
 import { SidebarItem } from '../../types';
 
-export const depositManagementMenu: SidebarItem[] = [
+export const savingDepositMenu: SidebarItem[] = [
     {
         name: 'Saving Deposit',
         icon: <i className="fa-solid fa-piggy-bank" />, // overall deposit
