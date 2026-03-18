@@ -9,7 +9,7 @@ import { Select } from '../../../../components/ui/select';
 import { formatBDTCurrency } from '../../../../lib/bdtCurrencyFormatter';
 import { takaToText } from '../../../../lib/taka_to_text';
 import { VoucherLine } from '../../../../types/accounting';
-import { Customer } from '../../../../types/customer';
+import { Customer } from '../../../../types/customer_kyc_module';
 import { CustomerSearchBox } from '../../../customer-module/customers/customer-search-box';
 
 interface WithdrawalLedgersSectionProps {
@@ -221,7 +221,7 @@ function WithdrawalLedgerSection({
                                 Account Holders
                             </Label>
 
-                            <div className="grid max-h-[106px] grid-cols-2 gap-2 overflow-y-auto rounded-md border border-border bg-accent/10 p-2">
+                            <div className="grid max-h-[110px] grid-cols-2 gap-2 overflow-y-auto rounded-md border border-border bg-accent/10 p-2">
                                 {[
                                     {
                                         id: 1,

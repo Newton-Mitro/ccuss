@@ -36,7 +36,7 @@ function VoucherQueueSection({
 
     return (
         <div className="flex flex-col gap-4 bg-card">
-            <div className="flex h-[calc(100vh/3+16px)] flex-col overflow-hidden rounded-md border border-border">
+            <div className="flex h-[calc(100vh/3+18px)] flex-col overflow-hidden rounded-md border border-border">
                 {/* Header */}
                 <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-destructive/5 px-4 py-3">
                     <h2 className="text-sm font-medium">Voucher Queue</h2>

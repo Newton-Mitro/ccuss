@@ -115,7 +115,7 @@ class TellerTransactionController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
-        return Inertia::render('branch-cash-and-treasury/customer-cash-withdrawal/CustomerCashWithdrawalPage', [
+        return Inertia::render('branch-cash-and-treasury/customer-cheque-withdrawal/CustomerCashWithdrawalPage', [
             'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
             'fiscal_years' => FiscalYear::select('id', 'code')->get(),
             'accounting_periods' => AccountingPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
