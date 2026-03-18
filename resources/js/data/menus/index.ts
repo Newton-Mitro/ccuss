@@ -10,7 +10,7 @@ import { loanManagementMenu } from './loanManagement';
 import { pettyCashMenu } from './pettyCashMenu';
 import { procurementMenu } from './procurementMenu';
 import { savingDepositMenu } from './savingDepositMenu';
-import { settingsMenu } from './settings';
+import { settingsMenu } from './settingsMenu';
 import { systemAdministrationMenu } from './systemAdministrationMenu';
 
 export const sidebarMenu: SidebarItem[] = [
