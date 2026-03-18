@@ -12,13 +12,13 @@ import Swal from 'sweetalert2';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
-import { OnlineServiceClient } from '../../../types/customer';
+import { Organization } from '../../../types/organization';
 
 export default function Index() {
     const { props } = usePage<
         SharedData & {
-            onlineServiceClients: {
-                data: OnlineServiceClient[];
+            organizations: {
+                data: Organization[];
                 links: { url: string | null; label: string; active: boolean }[];
                 current_page: number;
                 per_page: number;
@@ -27,7 +27,7 @@ export default function Index() {
         }
     >();
 
-    const { onlineServiceClients, filters } = props;
+    const { organizations, filters } = props;
 
     const { data, setData, get } = useForm({
         search: filters.search || '',
@@ -136,59 +136,44 @@ export default function Index() {
                             </tr>
                         </thead>
                         <tbody>
-                            {onlineServiceClients.data.length > 0 ? (
-                                onlineServiceClients.data.map((user, i) => (
+                            {organizations.data.length > 0 ? (
+                                organizations.data.map((organization, i) => (
                                     <tr
-                                        key={user.id}
+                                        key={organization.id}
                                         className="border-b border-border even:bg-muted/30"
                                     >
                                         <td className="px-2 py-1">
-                                            {(onlineServiceClients.current_page -
-                                                1) *
-                                                onlineServiceClients.per_page +
+                                            {(organizations.current_page - 1) *
+                                                organizations.per_page +
                                                 i +
                                                 1}
                                         </td>
+                                        <td className="px-2 py-1"></td>
+                                        <td className="px-2 py-1 font-medium"></td>
+                                        <td className="px-2 py-1"></td>
+                                        <td className="px-2 py-1"></td>
                                         <td className="px-2 py-1">
-                                            {user.customer?.name || '—'}
-                                        </td>
-                                        <td className="px-2 py-1 font-medium">
-                                            {user.username}
-                                        </td>
-                                        <td className="px-2 py-1">
-                                            {user.email || '—'}
-                                        </td>
-                                        <td className="px-2 py-1">
-                                            {user.phone || '—'}
-                                        </td>
-                                        <td className="px-2 py-1">
-                                            <span
+                                            {/* <span
                                                 className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                                                    user.status === 'ACTIVE'
+                                                    organization.status === 'ACTIVE'
                                                         ? 'bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300'
-                                                        : user.status ===
+                                                        : organization.status ===
                                                             'SUSPENDED'
                                                           ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300'
                                                           : 'bg-red-100 text-red-700 dark:bg-red-700/20 dark:text-red-300'
                                                 }`}
                                             >
-                                                {user.status}
-                                            </span>
+                                                {organization.status}
+                                            </span> */}
                                         </td>
-                                        <td className="px-2 py-1">
-                                            {user.last_login_at
-                                                ? new Date(
-                                                      user.last_login_at,
-                                                  ).toLocaleString()
-                                                : '—'}
-                                        </td>
+                                        <td className="px-2 py-1"></td>
                                         <td className="px-2 py-1">
                                             <TooltipProvider>
                                                 <div className="flex space-x-2">
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link
-                                                                href={`/online-service-clients/${user.id}`}
+                                                                href={`/online-service-clients/${organization.id}`}
                                                                 className="text-primary hover:text-primary/80"
                                                             >
                                                                 <Eye className="h-5 w-5" />
@@ -202,7 +187,7 @@ export default function Index() {
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link
-                                                                href={`/online-service-clients/${user.id}/edit`}
+                                                                href={`/online-service-clients/${organization.id}/edit`}
                                                                 className="text-green-600 hover:text-green-500"
                                                             >
                                                                 <Pencil className="h-5 w-5" />
@@ -219,8 +204,8 @@ export default function Index() {
                                                                 type="button"
                                                                 onClick={() =>
                                                                     handleDelete(
-                                                                        user.id,
-                                                                        user.username,
+                                                                        organization.id,
+                                                                        organization.name,
                                                                     )
                                                                 }
                                                                 className="text-destructive hover:text-destructive/80"
@@ -277,7 +262,7 @@ export default function Index() {
                     </div>
 
                     <div className="flex gap-1">
-                        {onlineServiceClients.links.map((link, i) => (
+                        {organizations.links.map((link, i) => (
                             <Link
                                 key={i}
                                 href={link.url || '#'}

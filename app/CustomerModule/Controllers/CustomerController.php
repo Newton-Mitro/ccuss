@@ -159,7 +159,9 @@ class CustomerController extends Controller
             'introducers.introducedCustomer',
             'kycProfile',
             'kycDocuments',
-            'onlineServiceClient'
+            'onlineServiceClient',
+            'onlineServiceClient.organization',
+            'onlineServiceClient.branch',
         ]);
 
         return Inertia::render('customer-module/customers/show', [

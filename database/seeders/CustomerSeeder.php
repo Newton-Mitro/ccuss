@@ -8,9 +8,7 @@ use App\CustomerModule\Models\CustomerFamilyRelation;
 use App\CustomerModule\Models\CustomerIntroducer;
 use App\CustomerModule\Models\KycDocument;
 use App\CustomerModule\Models\KycProfile;
-use App\CustomerModule\Models\OnlineServiceClient;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -133,18 +131,6 @@ class CustomerSeeder extends Seeder
                 'rejected' => $factory->rejected()->create(),
                 default => $factory->create(),
             };
-
-            // Online Service Client
-            OnlineServiceClient::factory()->create([
-                'customer_id' => $customer->id,
-                'organization_id' => $customer->organization_id,
-                'branch_id' => $customer->branch_id,
-                'username' => Str::slug($customer->name),
-                'email' => $customer->email,
-                'phone' => $customer->phone,
-                'password' => Hash::make('password'),
-                'status' => 'ACTIVE',
-            ]);
         }
 
         // Introducers

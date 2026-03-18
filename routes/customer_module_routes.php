@@ -4,8 +4,6 @@ use App\CustomerModule\Controllers\CustomerAddressController;
 use App\CustomerModule\Controllers\CustomerController;
 use App\CustomerModule\Controllers\CustomerFamilyRelationController;
 use App\CustomerModule\Controllers\CustomerIntroducerController;
-use App\CustomerModule\Controllers\CustomerSignatureController;
-use App\CustomerModule\Controllers\OnlineServiceClientController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified'])
@@ -104,8 +102,3 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('introducers.destroy');
 });
 
-
-Route::middleware(['auth', 'verified'])
-    ->group(function () {
-        Route::resource('/online-service-clients', OnlineServiceClientController::class);
-    });

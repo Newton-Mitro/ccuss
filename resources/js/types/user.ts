@@ -31,9 +31,9 @@ export interface User {
     organization?: Organization;
     branch?: Branch;
     roles: Role[];
-    permissions: Permission[];
     permissions?: Permission[];
     email_verified_at?: string | null;
+    avatar?: string | null;
     created_at?: string;
     updated_at?: string;
 }

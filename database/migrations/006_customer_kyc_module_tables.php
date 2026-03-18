@@ -205,35 +205,10 @@ return new class extends Migration {
 
             $table->timestamps();
         });
-
-        Schema::create('online_service_clients', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('organization_id')->constrained();
-            $table->foreignId('branch_id')->constrained();
-            $table->foreignId('customer_id')
-                ->unique()
-                ->constrained('customers')
-                ->cascadeOnDelete();
-
-            $table->string('username', 100);
-            $table->string('email', 150)->unique()->nullable();
-            $table->string('phone', 20)->unique()->nullable();
-            $table->string('password', 255);
-
-            $table->timestamp('last_login_at')->nullable();
-            $table->enum('status', ['PENDING', 'ACTIVE', 'SUSPENDED', 'CLOSED'])->default('ACTIVE');
-
-            // Audit
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
-
-            $table->timestamps();
-        });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('online_service_clients');
         Schema::dropIfExists('customer_introducers');
         Schema::dropIfExists('kyc_documents');
         Schema::dropIfExists('kyc_profiles');

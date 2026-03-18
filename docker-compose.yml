@@ -5,132 +5,132 @@ services:
     build:
       context: .
       dockerfile: docker/development/php/Dockerfile
-    container_name: cfs_app
+    container_name: unity_banking_app
     restart: unless-stopped
-    working_dir: /var/www/cfs
+    working_dir: /var/www/unity_banking
     volumes:
-      - ./:/var/www/cfs
-      - ./storage:/var/www/cfs/storage
-      - ./bootstrap/cache:/var/www/cfs/bootstrap/cache
+      - ./:/var/www/unity_banking
+      - ./storage:/var/www/unity_banking/storage
+      - ./bootstrap/cache:/var/www/unity_banking/bootstrap/cache
     environment:
       APP_ENV: local
       DB_HOST: mysql
       DB_PORT: 3306
-      DB_DATABASE: cfs
-      DB_USERNAME: cfs_user
+      DB_DATABASE: unity_banking
+      DB_USERNAME: unity_banking_user
       DB_PASSWORD: secret
       REDIS_HOST: redis
     depends_on:
       - mysql
       - redis
     networks:
-      - cfs-network
+      - unity_banking_network
 
-  node:
-    build:
-      context: .
-      dockerfile: docker/development/node/Dockerfile
-    container_name: cfs_node
-    restart: unless-stopped
-    working_dir: /var/www/cfs
-    volumes:
-      - ./:/var/www/cfs
-      - node_modules:/var/www/cfs/node_modules
-    ports:
-      - '5173:5173'
-    networks:
-      - cfs-network
-    # command: sh -c "npm install && npm run dev"
+  # node:
+  #   build:
+  #     context: .
+  #     dockerfile: docker/development/node/Dockerfile
+  #   container_name: unity_banking_node
+  #   restart: unless-stopped
+  #   working_dir: /var/www/unity_banking
+  #   volumes:
+  #     - ./:/var/www/unity_banking
+  #     - node_modules:/var/www/unity_banking/node_modules
+  #   ports:
+  #     - '5173:5173'
+  #   networks:
+  #     - unity_banking_network
+  #   command: sh -c "npm install && npm run build && npm run dev"
 
   nginx:
     image: nginx:alpine
-    container_name: cfs_nginx
+    container_name: unity_banking_nginx
     restart: unless-stopped
     ports:
       - '8000:80'
     volumes:
-      - ./:/var/www/cfs
+      - ./:/var/www/unity_banking
       - ./docker/development/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - app
     networks:
-      - cfs-network
+      - unity_banking_network
 
   mysql:
     image: mysql:8.1
-    container_name: cfs_mysql
+    container_name: unity_banking_mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: cfs
-      MYSQL_USER: cfs_user
+      MYSQL_DATABASE: unity_banking
+      MYSQL_USER: unity_banking_user
       MYSQL_PASSWORD: secret
     ports:
       - '3307:3306'
     volumes:
       - db_data:/var/lib/mysql
     networks:
-      - cfs-network
+      - unity_banking_network
 
   redis:
     image: redis:alpine
-    container_name: cfs_redis
+    container_name: unity_banking_redis
     restart: unless-stopped
     ports:
       - '6379:6379'
     networks:
-      - cfs-network
+      - unity_banking_network
 
   scheduler:
     build:
       context: .
       dockerfile: docker/development/php/Dockerfile
-    container_name: cfs_scheduler
+    container_name: unity_banking_scheduler
     restart: unless-stopped
-    working_dir: /var/www/cfs
+    working_dir: /var/www/unity_banking
     volumes:
-      - ./:/var/www/cfs
+      - ./:/var/www/unity_banking
     command: php artisan schedule:work
     depends_on:
       - mysql
       - redis
     networks:
-      - cfs-network
+      - unity_banking_network
 
   queue:
     build:
       context: .
       dockerfile: docker/development/php/Dockerfile
-    container_name: cfs_queue
+    container_name: unity_banking_queue
     restart: unless-stopped
-    working_dir: /var/www/cfs
+    working_dir: /var/www/unity_banking
     volumes:
-      - ./:/var/www/cfs
+      - ./:/var/www/unity_banking
     command: php artisan queue:work redis --sleep=3 --tries=3 --timeout=90
     depends_on:
       - mysql
       - redis
     networks:
-      - cfs-network
+      - unity_banking_network
 
   horizon:
     build:
       context: .
       dockerfile: docker/development/php/Dockerfile
-    container_name: cfs_horizon
+    container_name: unity_banking_horizon
     restart: unless-stopped
-    working_dir: /var/www/cfs
+    working_dir: /var/www/unity_banking
     volumes:
-      - ./:/var/www/cfs
+      - ./:/var/www/unity_banking
     command: php artisan horizon
     depends_on:
       - redis
       - mysql
     networks:
-      - cfs-network
+      - unity_banking_network
 
 networks:
-  cfs-network:
+  unity_banking_network:
     driver: bridge
 
 volumes:

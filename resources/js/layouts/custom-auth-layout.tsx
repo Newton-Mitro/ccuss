@@ -183,7 +183,7 @@ export default function CustomAuthLayout({
                             sidebarOpen ? 'inline-block' : 'hidden w-0',
                         )}
                     >
-                        CCUSS
+                        {import.meta.env.VITE_APP_NAME}
                     </span>
                 </div>
 

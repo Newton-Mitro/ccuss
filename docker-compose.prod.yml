@@ -8,74 +8,73 @@ services:
     build:
       context: .
       dockerfile: docker/production/php/Dockerfile
-    container_name: prod_cfs_app
+    container_name: prod_unity_banking_app
     restart: unless-stopped
-    working_dir: /var/www/cfs
+    working_dir: /var/www/unity_banking
     volumes:
-      - ./.env.production:/var/www/cfs/.env:ro
-      - storage_data:/var/www/cfs/storage
-      - cache_data:/var/www/cfs/bootstrap/cache
+      - storage_data:/var/www/unity_banking/storage
+      - cache_data:/var/www/unity_banking/bootstrap/cache
     environment:
       APP_ENV: 'production'
       APP_DEBUG: 'false'
       DB_HOST: 'mysql'
       DB_PORT: '3306'
-      DB_DATABASE: 'cfs'
-      DB_USERNAME: 'cfs_user'
+      DB_DATABASE: 'unity_banking'
+      DB_USERNAME: 'unity_banking_user'
       DB_PASSWORD: '${DB_PASSWORD}'
       REDIS_HOST: 'redis'
     depends_on:
       - mysql
       - redis
     networks:
-      - prod_cfs_network
+      - prod_unity_banking_network
 
   # -------------------------------
   # Nginx Web Server
   # -------------------------------
   nginx:
     image: nginx:alpine
-    container_name: prod_cfs_nginx
+    container_name: prod_unity_banking_nginx
     restart: unless-stopped
     ports:
       - '80:80'
       - '443:443'
     volumes:
       - ./docker/production/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - storage_data:/var/www/cfs/storage
-      - cache_data:/var/www/cfs/bootstrap/cache
-      - ./public:/var/www/cfs/public:ro
+      - storage_data:/var/www/unity_banking/storage
+      - cache_data:/var/www/unity_banking/bootstrap/cache
+      - ./public:/var/www/unity_banking/public:ro
     depends_on:
       - app
     networks:
-      - prod_cfs_network
+      - prod_unity_banking_network
 
   # -------------------------------
   # MySQL Database
   # -------------------------------
   mysql:
     image: mysql:8.1
-    container_name: prod_cfs_mysql
+    container_name: prod_unity_banking_mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
-      MYSQL_DATABASE: cfs
-      MYSQL_USER: cfs_user
+      MYSQL_DATABASE: unity_banking
+      MYSQL_USER: unity_banking_user
       MYSQL_PASSWORD: '${DB_PASSWORD}'
     volumes:
       - db_data:/var/lib/mysql
     networks:
-      - prod_cfs_network
+      - prod_unity_banking_network
 
   # -------------------------------
   # Redis Cache
   # -------------------------------
   redis:
     image: redis:alpine
-    container_name: prod_cfs_redis
+    container_name: prod_unity_banking_redis
     restart: unless-stopped
     networks:
-      - prod_cfs_network
+      - prod_unity_banking_network
 
   # -------------------------------
   # Laravel Scheduler
@@ -84,18 +83,18 @@ services:
     build:
       context: .
       dockerfile: docker/production/php/Dockerfile
-    container_name: prod_cfs_scheduler
+    container_name: prod_unity_banking_scheduler
     restart: unless-stopped
-    working_dir: /var/www/cfs
+    working_dir: /var/www/unity_banking
     volumes:
-      - storage_data:/var/www/cfs/storage
-      - cache_data:/var/www/cfs/bootstrap/cache
+      - storage_data:/var/www/unity_banking/storage
+      - cache_data:/var/www/unity_banking/bootstrap/cache
     command: php artisan schedule:work
     depends_on:
       - mysql
       - redis
     networks:
-      - prod_cfs_network
+      - prod_unity_banking_network
 
   # -------------------------------
   # Laravel Queue Worker
@@ -104,21 +103,21 @@ services:
     build:
       context: .
       dockerfile: docker/production/php/Dockerfile
-    container_name: prod_cfs_queue
+    container_name: prod_unity_banking_queue
     restart: unless-stopped
-    working_dir: /var/www/cfs
+    working_dir: /var/www/unity_banking
     volumes:
-      - storage_data:/var/www/cfs/storage
-      - cache_data:/var/www/cfs/bootstrap/cache
+      - storage_data:/var/www/unity_banking/storage
+      - cache_data:/var/www/unity_banking/bootstrap/cache
     command: php artisan queue:work redis --sleep=3 --tries=3 --timeout=90
     depends_on:
       - mysql
       - redis
     networks:
-      - prod_cfs_network
+      - prod_unity_banking_network
 
 networks:
-  prod_cfs_network:
+  prod_unity_banking_network:
     driver: bridge
 
 volumes:

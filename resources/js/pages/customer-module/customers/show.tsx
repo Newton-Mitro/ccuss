@@ -5,12 +5,12 @@ import {
     Clock,
     Edit2,
     FileText,
-    Globe,
     HomeIcon,
     ListFilter,
     Plus,
     UserCheckIcon,
     UserIcon,
+    Users,
     UsersIcon,
     X,
     XCircle,
@@ -20,6 +20,7 @@ import { formatDate } from '../../../lib/date_util';
 import { BreadcrumbItem } from '../../../types';
 
 import { route } from 'ziggy-js';
+import { UserInfo } from '../../../components/user-info';
 
 /* ================= Theme ================= */
 
@@ -401,42 +402,15 @@ export default function Show({ customer, backUrl }: ShowProps) {
 
             {customer.online_service_client && (
                 <SectionHeader
-                    icon={<Globe size={18} />}
-                    title="Online Service Client"
-                    actions={
-                        <Link
-                            href={`/customers/${customer.id}/edit`}
-                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs"
-                        >
-                            <Edit2 size={14} /> Edit
-                        </Link>
-                    }
+                    icon={<Users size={18} />}
+                    title="Online Service Account"
                 >
                     <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
-                        <InfoItem
-                            label="User Email"
-                            value={customer.online_service_client.email}
-                        />
-
-                        <InfoItem
-                            label="User Phone"
-                            value={customer.online_service_client.phone}
-                        />
-
-                        <InfoItem
-                            label="Last Login"
-                            value={customer.online_service_client.last_login_at}
-                        />
-
-                        <div className="flex flex-col">
-                            <span className="text-[10px] text-muted-foreground uppercase">
-                                User Status
-                            </span>
-                            <span className="text-sm">
-                                <Badge
-                                    text={customer.online_service_client.status}
-                                />
-                            </span>
+                        <div className="flex items-center gap-2">
+                            <UserInfo
+                                user={customer.online_service_client}
+                                showEmail
+                            />
                         </div>
                     </div>
                 </SectionHeader>

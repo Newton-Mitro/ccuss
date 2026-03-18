@@ -118,7 +118,7 @@ class Customer extends Model
 
     public function onlineServiceClient(): HasOne
     {
-        return $this->hasOne(OnlineServiceClient::class);
+        return $this->hasOne(User::class);
     }
 
     /* ========================

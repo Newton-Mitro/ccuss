@@ -186,7 +186,7 @@ export default function CustomAuthLayoutX({
                                 : 'w-0 overflow-hidden opacity-0',
                         )}
                     >
-                        CCUSS
+                        {import.meta.env.VITE_APP_NAME}
                     </div>
                 </div>
 

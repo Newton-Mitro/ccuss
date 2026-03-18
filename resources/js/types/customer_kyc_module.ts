@@ -59,7 +59,7 @@ export interface Customer extends AuditFields {
     family_relations?: CustomerFamilyRelation[];
     introducers?: CustomerIntroducer[];
     introduced_customers?: CustomerIntroducer[];
-    online_service_client?: OnlineServiceClient | null;
+    online_service_client?: User | null;
     kyc_profile?: KycProfile | null;
     kyc_documents?: KycDocument[];
 }
@@ -203,21 +203,4 @@ export interface KycProfile extends AuditFields {
     verified_by_user?: User | null;
     verified_at?: Timestamp | null;
     remarks?: string | null;
-}
-
-/* ===========================
- * Online Service Clients
- * =========================== */
-export interface OnlineServiceClient extends AuditFields {
-    id: ID;
-    customer_id: ID;
-    customer?: Customer | null;
-
-    username: string;
-    email?: string | null;
-    phone?: string | null;
-    password: string;
-
-    last_login_at?: Timestamp | null;
-    status: 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'CLOSED';
 }

@@ -2,6 +2,7 @@
 
 namespace App\SystemAdministration\Models;
 
+use App\CustomerModule\Models\Customer;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,6 +18,7 @@ class User extends Authenticatable
     protected $fillable = [
         'organization_id',
         'branch_id',
+        'customer_id',
         'name',
         'email',
         'password',
@@ -52,6 +54,11 @@ class User extends Authenticatable
     public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
     }
 
     public function roles(): BelongsToMany

@@ -1,14 +1,15 @@
 import { SidebarItem } from '../../types';
-import { assetManagementMenu } from './assetManagement';
-import { auditMenu } from './audit';
 import { bankManagementMenu } from './bankManagement';
 import { branchTreasuryManagementMenu } from './branchTreasuaryManagement';
 import { customerManagementMenu } from './customerManagement';
 import { depositManagementMenu } from './depositManagement';
 import { financeAndAccountingMenu } from './financeAndAccounting';
+import { fixedAssetManagementMenu } from './fixedAssetManagement';
+import { hrManagementMenu } from './hrManagement';
+import { inventoryManagementMenu } from './inventoryManagement';
 import { loanManagementMenu } from './loanManagement';
-import { payrollMenu } from './payroll';
 import { pettyCashManagementMenu } from './pettyCashManagement';
+import { procurementManagementMenu } from './procurementManagement';
 import { reportsMenu } from './reports';
 import { settingsMenu } from './settings';
 import { systemAdminMenu } from './systemAdmin';
@@ -21,10 +22,11 @@ export const sidebarMenu: SidebarItem[] = [
     ...branchTreasuryManagementMenu,
     ...pettyCashManagementMenu,
     ...bankManagementMenu,
+    ...procurementManagementMenu,
+    ...fixedAssetManagementMenu,
+    ...inventoryManagementMenu,
+    ...hrManagementMenu,
     ...financeAndAccountingMenu,
-    ...assetManagementMenu,
-    ...payrollMenu,
     ...reportsMenu,
-    ...auditMenu,
     ...settingsMenu,
 ];

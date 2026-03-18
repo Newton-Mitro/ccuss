@@ -39,6 +39,8 @@ class OrganizationStructureSeeder extends Seeder
         ];
 
         // Assign each user to a random branch
+        $customerId = 1; // ✅ start from 1
+
         foreach ($defaultUsers as $userData) {
             User::firstOrCreate(
                 ['email' => $userData['email']],
@@ -46,10 +48,12 @@ class OrganizationStructureSeeder extends Seeder
                     'name' => $userData['name'],
                     'organization_id' => $organization->id,
                     'branch_id' => $branches->random()->id,
+                    'customer_id' => $customerId,
                     'password' => Hash::make('password'),
                     'email_verified_at' => now(),
                 ]
             );
+            $customerId++;
         }
 
         $this->command->info('✅ Default users created and assigned to branches.');

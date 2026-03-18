@@ -36,7 +36,9 @@ export default function Login({
                     <AppLogoIcon className="mb-3 h-20 w-20 fill-current text-primary transition-colors duration-300" />
                     <div className="text-sm font-medium text-primary transition-colors duration-300">
                         Welcome back to{' '}
-                        <span className="text-foreground">DCCCEC</span>
+                        <span className="text-foreground">
+                            {import.meta.env.VITE_APP_NAME}
+                        </span>
                     </div>
                     <div className="text-xs text-muted-foreground transition-colors duration-300">
                         Authenticate to continue
