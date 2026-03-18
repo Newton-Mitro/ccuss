@@ -6,6 +6,7 @@ use App\BranchTreasuryModule\Controllers\CashBalancingController;
 use App\BranchTreasuryModule\Controllers\CashTransactionController;
 use App\BranchTreasuryModule\Controllers\TellerController;
 use App\BranchTreasuryModule\Controllers\TellerSessionController;
+use App\BranchTreasuryModule\Controllers\TellerTransactionController;
 use App\BranchTreasuryModule\Controllers\VaultController;
 use App\BranchTreasuryModule\Controllers\VaultTransferController;
 use Illuminate\Support\Facades\Route;
@@ -45,5 +46,18 @@ Route::prefix('branch-cash')->group(function () {
 
     Route::get('cash-adjustment', [CashAdjustmentController::class, 'index'])->name('cash.adjustment.page');
     Route::post('cash/adjustment', [CashAdjustmentController::class, 'approveAdjustment'])->name('cash.adjustment.approve');
+});
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/deposit', [TellerTransactionController::class, 'customerCashReceipt'])
+        ->name('transaction.deposit');
+
+    Route::get('/withdrawal', [TellerTransactionController::class, 'customerCashPayment'])
+        ->name('transaction.withdrawal');
+
+    Route::get('/customer-collection-ledgers', [TellerTransactionController::class, 'getCustomerCollectionLedgers'])
+        ->name('teller-transaction.customer-collection-ledgers');
+
+    Route::get('/get-withdrawable-accounts', [TellerTransactionController::class, 'getWithdrawableAccounts'])
+        ->name('teller-transaction.customer-withdrawable-accounts');
 });

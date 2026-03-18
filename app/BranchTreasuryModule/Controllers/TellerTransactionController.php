@@ -1,6 +1,6 @@
 <?php
 
-namespace App\TellerTransactions\Controllers;
+namespace App\BranchTreasuryModule\Controllers;
 
 use App\FinanceAndAccounting\Models\AccountingPeriod;
 use App\FinanceAndAccounting\Models\FiscalYear;
@@ -47,7 +47,7 @@ class TellerTransactionController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
-        return Inertia::render('teller-transactions/customer-cash-deposit/CustomerCashDepositPage', [
+        return Inertia::render('branch-cash-and-treasury/customer-cash-deposit/CustomerCashDepositPage', [
             'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
             'fiscal_years' => FiscalYear::select('id', 'code')->get(),
             'accounting_periods' => AccountingPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
@@ -115,7 +115,7 @@ class TellerTransactionController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
-        return Inertia::render('teller-transactions/customer-cash-withdrawal/CustomerCashWithdrawalPage', [
+        return Inertia::render('branch-cash-and-treasury/customer-cash-withdrawal/CustomerCashWithdrawalPage', [
             'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
             'fiscal_years' => FiscalYear::select('id', 'code')->get(),
             'accounting_periods' => AccountingPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),

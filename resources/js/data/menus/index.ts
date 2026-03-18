@@ -10,7 +10,6 @@ import { inventoryManagementMenu } from './inventoryManagement';
 import { loanManagementMenu } from './loanManagement';
 import { pettyCashManagementMenu } from './pettyCashManagement';
 import { procurementManagementMenu } from './procurementManagement';
-import { reportsMenu } from './reports';
 import { settingsMenu } from './settings';
 import { systemAdminMenu } from './systemAdmin';
 
@@ -27,6 +26,5 @@ export const sidebarMenu: SidebarItem[] = [
     ...inventoryManagementMenu,
     ...hrManagementMenu,
     ...financeAndAccountingMenu,
-    ...reportsMenu,
     ...settingsMenu,
 ];

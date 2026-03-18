@@ -37,7 +37,7 @@ export default function Index() {
 
     // Debounced search
     const handleSearch = () => {
-        get('/online-service-clients', {
+        get('/organizations', {
             preserveState: true,
             replace: true,
         });
@@ -49,12 +49,12 @@ export default function Index() {
     }, [data.search, data.per_page, data.page]);
 
     // Delete action
-    const handleDelete = (id: number, username: string) => {
+    const handleDelete = (id: number, name: string) => {
         const isDark = document.documentElement.classList.contains('dark');
 
         Swal.fire({
             title: 'Are you sure?',
-            text: `Online user "${username}" will be permanently deleted!`,
+            text: `Organization "${name}" will be permanently deleted!`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: isDark ? '#ef4444' : '#d33',
@@ -64,36 +64,37 @@ export default function Index() {
             confirmButtonText: 'Yes, delete it!',
         }).then((result) => {
             if (result.isConfirmed) {
-                router.delete(`/online-service-clients/${id}`, {
+                router.delete(`/organizations/${id}`, {
                     preserveScroll: true,
                     preserveState: true,
                     onSuccess: () =>
-                        toast.success(`User deleted successfully!`),
-                    onError: () => toast.error('Failed to delete user.'),
+                        toast.success(`Organization deleted successfully!`),
+                    onError: () =>
+                        toast.error('Failed to delete organization.'),
                 });
             }
         });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Online Service Clients', href: '/online-service-clients' },
+        { title: 'Organizations', href: '/organizations' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Online Service Clients" />
+            <Head title="Organizations" />
             <div className="space-y-4 text-foreground">
                 {/* Header */}
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
-                        title="Online Service Clients"
-                        description="Manage customer online access ledger_accounts."
+                        title="Organizations"
+                        description="Manage all organizations and their details."
                     />
                     <Link
-                        href="/online-service-clients/create"
+                        href="/organizations/create"
                         className="inline-block rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                     >
-                        Add Online Service Client
+                        Add Organization
                     </Link>
                 </div>
 
@@ -101,7 +102,7 @@ export default function Index() {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <input
                         type="text"
-                        placeholder="Search by username, email, or phone..."
+                        placeholder="Search by name, code, email, or phone..."
                         value={data.search}
                         onChange={(e) => {
                             setData('search', e.target.value);
@@ -118,12 +119,10 @@ export default function Index() {
                             <tr>
                                 {[
                                     '#',
-                                    'Customer',
-                                    'Username',
+                                    'Code',
+                                    'Name',
                                     'Email',
                                     'Phone',
-                                    'Status',
-                                    'Last Login',
                                     'Actions',
                                 ].map((header) => (
                                     <th
@@ -148,32 +147,25 @@ export default function Index() {
                                                 i +
                                                 1}
                                         </td>
-                                        <td className="px-2 py-1"></td>
-                                        <td className="px-2 py-1 font-medium"></td>
-                                        <td className="px-2 py-1"></td>
-                                        <td className="px-2 py-1"></td>
-                                        <td className="px-2 py-1">
-                                            {/* <span
-                                                className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                                                    organization.status === 'ACTIVE'
-                                                        ? 'bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300'
-                                                        : organization.status ===
-                                                            'SUSPENDED'
-                                                          ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300'
-                                                          : 'bg-red-100 text-red-700 dark:bg-red-700/20 dark:text-red-300'
-                                                }`}
-                                            >
-                                                {organization.status}
-                                            </span> */}
+                                        <td className="px-2 py-1 font-medium">
+                                            {organization.code}
                                         </td>
-                                        <td className="px-2 py-1"></td>
+                                        <td className="px-2 py-1">
+                                            {organization.name}
+                                        </td>
+                                        <td className="px-2 py-1">
+                                            {organization.email || '-'}
+                                        </td>
+                                        <td className="px-2 py-1">
+                                            {organization.phone || '-'}
+                                        </td>
                                         <td className="px-2 py-1">
                                             <TooltipProvider>
                                                 <div className="flex space-x-2">
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link
-                                                                href={`/online-service-clients/${organization.id}`}
+                                                                href={`/organizations/${organization.id}`}
                                                                 className="text-primary hover:text-primary/80"
                                                             >
                                                                 <Eye className="h-5 w-5" />
@@ -187,7 +179,7 @@ export default function Index() {
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link
-                                                                href={`/online-service-clients/${organization.id}/edit`}
+                                                                href={`/organizations/${organization.id}/edit`}
                                                                 className="text-green-600 hover:text-green-500"
                                                             >
                                                                 <Pencil className="h-5 w-5" />
@@ -225,10 +217,10 @@ export default function Index() {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={8}
+                                        colSpan={6}
                                         className="px-4 py-6 text-center text-muted-foreground"
                                     >
-                                        No online users found.
+                                        No organizations found.
                                     </td>
                                 </tr>
                             )}

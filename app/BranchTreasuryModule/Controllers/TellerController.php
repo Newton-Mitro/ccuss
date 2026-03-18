@@ -26,7 +26,7 @@ class TellerController extends Controller
             ->paginate($request->input('per_page', 10))
             ->withQueryString();
 
-        return Inertia::render('cash-and-treasury-module/tellers/index', [
+        return Inertia::render('branch-cash-and-treasury/tellers/index', [
             'tellers' => $tellers,
             'filters' => $request->only(['search', 'per_page', 'page']),
         ]);
@@ -37,7 +37,7 @@ class TellerController extends Controller
     {
         $users = User::all();
         $branches = Branch::all();
-        return Inertia::render('cash-and-treasury-module/tellers/teller-form', [
+        return Inertia::render('branch-cash-and-treasury/tellers/teller-form', [
             'users' => $users,
             'branches' => $branches,
             'backUrl' => route('tellers.index'),
@@ -68,7 +68,7 @@ class TellerController extends Controller
     {
         $users = User::all();
         $branches = Branch::all();
-        return Inertia::render('cash-and-treasury-module/tellers/teller-form', [
+        return Inertia::render('branch-cash-and-treasury/tellers/teller-form', [
             'users' => $users,
             'teller' => $teller,
             'branches' => $branches,

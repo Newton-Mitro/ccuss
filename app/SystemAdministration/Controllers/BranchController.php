@@ -27,7 +27,7 @@ class BranchController extends Controller
                 $request->input('per_page', 10)
             )->withQueryString();
 
-        return Inertia::render('branches/index', [
+        return Inertia::render('system-administration/branches/index', [
             'branches' => $branches,
             'filters' => $request->only(['search', 'per_page', 'page']),
         ]);
@@ -35,7 +35,7 @@ class BranchController extends Controller
 
     public function create(): Response
     {
-        return Inertia::render('branches/create');
+        return Inertia::render('system-administration/branches/create');
     }
 
     public function store(StoreBranchRequest $request)
@@ -49,7 +49,7 @@ class BranchController extends Controller
 
     public function show(Branch $branch): Response
     {
-        return Inertia::render('branches/show', [
+        return Inertia::render('system-administration/branches/show', [
             'branch' => $branch->load('manager'),
         ]);
     }

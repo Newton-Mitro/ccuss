@@ -29,7 +29,7 @@ class VaultController extends Controller
             )
             ->withQueryString();
 
-        return Inertia::render('cash-and-treasury-module/vaults/index', [
+        return Inertia::render('branch-cash-and-treasury/vaults/index', [
             'vaults' => $vaults,
             'filters' => $request->only(['search', 'per_page', 'page']),
         ]);
@@ -38,7 +38,7 @@ class VaultController extends Controller
 
     public function create()
     {
-        return Inertia::render('cash-and-treasury-module/vaults/create', [
+        return Inertia::render('branch-cash-and-treasury/vaults/create', [
             'branches' => Branch::select('id', 'name')->get(),
         ]);
     }
@@ -60,7 +60,7 @@ class VaultController extends Controller
 
     public function edit(Vault $vault)
     {
-        return Inertia::render('cash-and-treasury-module/vaults/edit', [
+        return Inertia::render('branch-cash-and-treasury/vaults/edit', [
             'vault' => $vault,
             'branches' => Branch::select('id', 'name')->get(),
         ]);

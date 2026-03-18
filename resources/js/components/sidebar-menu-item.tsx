@@ -14,17 +14,6 @@ interface Props {
     menuAction?: 'expand-all' | 'collapse-all' | null;
 }
 
-const borderColors = [
-    'border-l-red-400',
-    'border-l-blue-400',
-    'border-l-green-400',
-    'border-l-yellow-400',
-    'border-l-purple-400',
-    'border-l-pink-400',
-    'border-l-cyan-400',
-    'border-l-amber-400',
-];
-
 /** Recursively check if item or its children are active */
 function isItemActive(item: SidebarItem, url: string): boolean {
     if (item.match_path && url.includes(item.match_path)) return true;
@@ -51,14 +40,6 @@ export function SidebarMenuItem({
             item.children.some((c) => isItemActive(c, url)),
         [item.children, url],
     );
-
-    const colorIndex =
-        Math.abs(
-            item.name
-                .split('')
-                .reduce((acc, char) => acc + char.charCodeAt(0), 0),
-        ) % borderColors.length;
-    const borderColor = borderColors[colorIndex];
 
     const storageKey = `${STORAGE_KEY}:${item.name}`;
 
@@ -134,13 +115,15 @@ export function SidebarMenuItem({
                                     {item.name}
                                 </span>
                                 {hasChildren && (
-                                    <ChevronDown
-                                        size={16}
-                                        className={cn(
-                                            'transition-transform duration-200',
-                                            open && 'rotate-180',
-                                        )}
-                                    />
+                                    <span className="flex h-4 w-4 flex-shrink-0 items-center justify-center">
+                                        <ChevronDown
+                                            size={16}
+                                            className={cn(
+                                                'transition-transform duration-200',
+                                                open && 'rotate-180',
+                                            )}
+                                        />
+                                    </span>
                                 )}
                             </>
                         )}
@@ -156,8 +139,7 @@ export function SidebarMenuItem({
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.35, ease: 'easeInOut' }}
                         className={cn(
-                            'mt-1 space-y-1 border-l bg-secondary/10',
-                            borderColor, // 🎨 dynamic color class
+                            'mt-1 space-y-1 bg-secondary/10 hover:bg-secondary/20',
                         )}
                     >
                         {item.children!.map((child, idx) => (

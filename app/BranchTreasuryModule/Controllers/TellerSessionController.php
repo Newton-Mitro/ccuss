@@ -31,7 +31,7 @@ class TellerSessionController extends Controller
             ->paginate($perPage)
             ->withQueryString(); // preserve search & pagination query strings
 
-        return Inertia::render('cash-and-treasury-module/teller-session/index', [
+        return Inertia::render('branch-cash-and-treasury/teller-session/index', [
             'sessions' => $sessions,
             'filters' => [
                 'search' => $search,
@@ -42,7 +42,7 @@ class TellerSessionController extends Controller
 
     public function create(Request $request)
     {
-        return Inertia::render('cash-and-treasury-module/teller-session/open-session', [
+        return Inertia::render('branch-cash-and-treasury/teller-session/open-session', [
         ]);
     }
 
@@ -69,7 +69,7 @@ class TellerSessionController extends Controller
             'status' => 'OPEN'
         ]);
 
-        return Inertia::render('cash-and-treasury-module/teller-session/index', [
+        return Inertia::render('branch-cash-and-treasury/teller-session/index', [
             'session' => $session,
             'message' => 'Session opened successfully'
         ]);
@@ -92,7 +92,7 @@ class TellerSessionController extends Controller
             'status' => 'CLOSED'
         ]);
 
-        return Inertia::render('cash-and-treasury-module/teller-session/index', [
+        return Inertia::render('branch-cash-and-treasury/teller-session/index', [
             'session' => $session,
             'message' => 'Session closed successfully'
         ]);

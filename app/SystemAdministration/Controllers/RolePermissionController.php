@@ -21,7 +21,7 @@ class RolePermissionController extends Controller
         // Fetch all available permissions
         $permissions = Permission::all();
 
-        return Inertia::render('system-administration/role/role-permissions', [
+        return Inertia::render('system-administration/roles/role-permissions', [
             'roles' => $roles,
             'permissions' => $permissions,
         ]);

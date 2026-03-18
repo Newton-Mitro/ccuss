@@ -8,7 +8,7 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import CustomAuthLayout from '../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../types';
-import { Customer } from '../../types/customer';
+import { Customer } from '../../types/customer_kyc_module';
 import { CustomerSearchInput } from '../customer-module/customers/customer-search-input';
 
 function Create() {

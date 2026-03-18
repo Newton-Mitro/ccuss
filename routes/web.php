@@ -38,10 +38,7 @@ Route::middleware(['auth',])->group(function () {
 require __DIR__ . '/system_administration_routes.php';
 require __DIR__ . '/settings_routes.php';
 require __DIR__ . '/customer_module_routes.php';
-require __DIR__ . '/branch_treasury_module_routes.php';
-require __DIR__ . '/transaction_routes.php';
+require __DIR__ . '/branch_cash_and_treasury_routes.php';
 require __DIR__ . '/finance_and_accounting_routes.php';
 
-
-require __DIR__ . '/audit_routes.php';
 

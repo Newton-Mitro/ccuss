@@ -12,8 +12,8 @@ import { cn } from '@/lib/utils';
 import { logout } from '@/routes';
 import { Link, router, usePage } from '@inertiajs/react';
 import {
-    ExpandIcon,
-    ListCollapse,
+    ChevronsDown,
+    ChevronsUp,
     LogOut,
     Menu,
     Search,
@@ -190,7 +190,7 @@ export default function CustomAuthLayout({
                 {/* Search + controls */}
                 <div
                     className={cn(
-                        'my-3 flex items-center gap-2 px-2',
+                        'my-3 flex items-center gap-2 px-4',
                         !sidebarOpen && 'hidden',
                     )}
                 >
@@ -204,20 +204,22 @@ export default function CustomAuthLayout({
                             className="w-full bg-transparent text-sm outline-none"
                         />
                     </div>
-                    <button
-                        onClick={() => applyMenuAction('expand-all')}
-                        className="rounded p-1 hover:bg-muted"
-                        title="Expand all"
-                    >
-                        <ExpandIcon size={18} />
-                    </button>
-                    <button
-                        onClick={() => applyMenuAction('collapse-all')}
-                        className="rounded p-1 hover:bg-muted"
-                        title="Collapse all"
-                    >
-                        <ListCollapse size={18} />
-                    </button>
+                    <div className="">
+                        <button
+                            onClick={() => applyMenuAction('expand-all')}
+                            className="rounded p-1 hover:bg-muted"
+                            title="Expand all"
+                        >
+                            <ChevronsDown size={18} />
+                        </button>
+                        <button
+                            onClick={() => applyMenuAction('collapse-all')}
+                            className="rounded p-1 hover:bg-muted"
+                            title="Collapse all"
+                        >
+                            <ChevronsUp size={18} />
+                        </button>
+                    </div>
                 </div>
 
                 {/* Menu */}

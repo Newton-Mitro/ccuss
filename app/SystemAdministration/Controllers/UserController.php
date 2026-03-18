@@ -32,7 +32,7 @@ class UserController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return Inertia::render('system-administration/user-management/user-index', [
+        return Inertia::render('system-administration/users/user-index', [
             'users' => $users,
             'filters' => $filters,
         ]);
@@ -46,7 +46,7 @@ class UserController extends Controller
         $roles = Role::all();
         $organizations = Organization::all();
         $branches = Branch::all();
-        return Inertia::render('system-administration/user-management/user-form-page', compact('roles', 'organizations', 'branches'));
+        return Inertia::render('system-administration/users/user-form-page', compact('roles', 'organizations', 'branches'));
     }
 
     // -----------------------------
