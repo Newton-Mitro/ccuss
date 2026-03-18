@@ -104,15 +104,16 @@ docker compose down
 docker compose up -d --build
 docker compose -f docker-compose.prod.yml up -d --build
 docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build
-docker exec -it ccuss_app sh
-docker exec -it ccuss_app php artisan migrate:fresh
-docker exec -it ccuss_app php artisan db:seed
+docker exec -it unity_banking_app sh
+docker exec -it unity_banking_app php artisan migrate:fresh
+docker exec -it unity_banking_app php artisan db:seed
+docker exec -it unity_banking_app php artisan storage:link
 ```
 
 ```
-docker exec -it ccuss_scheduler php artisan schedule:list
-docker exec -it ccuss_scheduler php artisan schedule:run
-docker logs -f ccuss_queue
-docker exec -it ccuss_scheduler chown -R www-data:www-data storage
-docker exec -it ccuss_scheduler chmod -R 775 storage
+docker exec -it unity_banking_scheduler php artisan schedule:list
+docker exec -it unity_banking_scheduler php artisan schedule:run
+docker logs -f unity_banking_queue
+docker exec -it unity_banking_scheduler chown -R www-data:www-data storage
+docker exec -it unity_banking_scheduler chmod -R 775 storage
 ```

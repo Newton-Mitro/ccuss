@@ -9,7 +9,7 @@ export default function HomePage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Home" />
 
-            <div className="flex min-h-[calc(100vh-80px)] flex-col items-center justify-center px-4">
+            <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center gap-10 px-4">
                 {/* Hero Card */}
                 <div className="relative w-full max-w-5xl bg-background">
                     <div className="flex items-center justify-center">
@@ -17,17 +17,22 @@ export default function HomePage() {
                             <img
                                 src="/logo.png"
                                 alt="Logo"
-                                className="relative h-56 w-56 rounded-full border border-border bg-background object-contain p-4 md:h-64 md:w-64"
+                                className="relative h-32 w-32 rounded-full border border-border bg-background object-contain p-4 md:h-48 md:w-48"
                             />
                         </div>
                     </div>
                 </div>
 
                 {/* Footer Hint */}
-                <p className="mt-6 text-center text-sm text-muted-foreground/50">
-                    Designed for finance teams • Built with Laravel, Inertia &
-                    React
-                </p>
+                <div className="flex flex-col items-center justify-center">
+                    <h1 className="text-3xl font-semibold">
+                        <span className="text-accent">Welcome to</span> Unity
+                        Banking
+                    </h1>
+                    <p className="text-sm text-muted-foreground/50">
+                        Core banking and credit solution for credit unions.
+                    </p>
+                </div>
             </div>
         </CustomAuthLayout>
     );
