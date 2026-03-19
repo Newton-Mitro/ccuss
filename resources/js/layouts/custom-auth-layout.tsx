@@ -195,7 +195,7 @@ export default function CustomAuthLayout({
                 <div className="flex h-16 items-center gap-2 border-b pl-4">
                     <img
                         src="/logo.png"
-                        className="h-10 w-10 rounded-full p-1"
+                        className="h-10 w-10 rounded-full border p-1"
                     />
                     <span
                         className={cn(
