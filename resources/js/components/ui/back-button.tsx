@@ -22,7 +22,7 @@ const BackButton: React.FC<BackButtonProps> = ({
         font-medium rounded-md
         border border-border
         bg-background text-foreground
-        hover:bg-background/90 hover:shadow-sm
+        hover:bg-background/90 hover:shadow-md
         transition-all duration-200
         focus:outline-none focus:ring-2 focus:ring-primary/50
       `}

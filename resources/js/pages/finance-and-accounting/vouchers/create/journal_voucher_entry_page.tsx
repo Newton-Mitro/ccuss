@@ -473,7 +473,7 @@ export default function JournalVoucherEntryPage({
                                     <Button
                                         type="submit"
                                         disabled={processing || !isBalanced}
-                                        className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2 font-medium text-primary-foreground shadow-md transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2 font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         {processing ? (
                                             <Loader2 className="h-5 w-5 animate-spin" />

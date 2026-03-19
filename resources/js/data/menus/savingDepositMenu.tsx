@@ -2,7 +2,7 @@ import { SidebarItem } from '../../types';
 
 export const savingDepositMenu: SidebarItem[] = [
     {
-        name: 'Saving Deposit Management',
+        name: 'Deposit Management',
         icon: <i className="fa-solid fa-piggy-bank" />,
         children_expanded: false,
         permission: ['account.view'],

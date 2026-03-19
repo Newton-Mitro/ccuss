@@ -103,7 +103,7 @@ export default function View({ familyRelation }: ViewFamilyRelationProps) {
             <Card className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
                 <CardContent className="">
                     <div className="">
-                        <div className="flex gap-6 items-center justify-between">
+                        <div className="flex items-center justify-between gap-6">
                             <div className="">
                                 <div className="mb-4 flex items-center gap-2 text-sm font-semibold">
                                     <UserIcon size={16} />
@@ -177,8 +177,6 @@ export default function View({ familyRelation }: ViewFamilyRelationProps) {
                                     <span>Relative Info</span>
                                 </div>
                                 <div className="mt-3 flex items-center gap-4">
-                                    
-
                                     <div className="flex-1 space-y-2 text-right">
                                         <div>
                                             <div className="flex items-center justify-end gap-2">
@@ -242,7 +240,7 @@ export default function View({ familyRelation }: ViewFamilyRelationProps) {
                         </div>
 
                         {/* Relation Info */}
-                        <div className="space-y-4  pt-4 my-6">
+                        <div className="my-6 space-y-4 pt-4">
                             <h3 className="flex items-center gap-1 text-sm font-semibold text-muted-foreground">
                                 <ShieldCheck className="h-4 w-4" /> Relation
                             </h3>

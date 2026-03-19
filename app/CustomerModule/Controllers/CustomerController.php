@@ -91,7 +91,7 @@ class CustomerController extends Controller
             ->paginate($request->input('per_page', 10))
             ->withQueryString();
 
-        return Inertia::render('customer-module/customers/index', [
+        return Inertia::render('customer-kyc/customers/index', [
             'customers' => $customers,
             'filters' => $request->only(['search', 'status', 'per_page', 'page']),
         ]);
@@ -102,7 +102,7 @@ class CustomerController extends Controller
      * ========================== */
     public function create(): Response
     {
-        return Inertia::render('customer-module/customers/create', [
+        return Inertia::render('customer-kyc/customers/create', [
             'backUrl' => url()->previous(),
         ]);
     }
@@ -164,7 +164,7 @@ class CustomerController extends Controller
             'onlineServiceClient.branch',
         ]);
 
-        return Inertia::render('customer-module/customers/show', [
+        return Inertia::render('customer-kyc/customers/show', [
             'customer' => $customer,
             'backUrl' => url()->previous(),
         ]);
@@ -177,7 +177,7 @@ class CustomerController extends Controller
     {
         $customer->load(['photo', 'kycProfile', 'kycDocuments']);
 
-        return Inertia::render('customer-module/customers/edit', [
+        return Inertia::render('customer-kyc/customers/edit', [
             'customer' => $customer,
             'backUrl' => url()->previous(),
         ]);

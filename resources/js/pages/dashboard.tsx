@@ -310,7 +310,7 @@ export default function DashboardPage() {
                         <div
                             key={idx}
                             onClick={() => router.visit(card.route)}
-                            className="flex cursor-pointer items-center rounded-xl border bg-card p-4 shadow transition-all hover:scale-[1.02] hover:shadow-md"
+                            className="flex cursor-pointer items-center rounded-xl border bg-card p-4 shadow-sm transition-all hover:scale-[1.02] hover:shadow-md"
                             style={{
                                 backgroundColor: `${card.color}15`,
                                 borderColor: `${card.color}40`,

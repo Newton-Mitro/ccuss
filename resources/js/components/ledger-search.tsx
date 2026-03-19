@@ -84,7 +84,7 @@ export const LedgerSearch: React.FC<LedgerSearchProps> = ({
             <InputError message={error} />
 
             {showDropdown && results.length > 0 && (
-                <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-border bg-background shadow-lg">
+                <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-border bg-background shadow-sm">
                     {results.map((ledger) => (
                         <li
                             key={ledger.id}

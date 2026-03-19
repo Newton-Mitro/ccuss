@@ -36,7 +36,7 @@ class CustomerFamilyRelationController extends Controller
             ->paginate($request->integer('per_page', 10))
             ->withQueryString();
 
-        return Inertia::render('customer-module/family-relations/family_relation_index', [
+        return Inertia::render('customer-kyc/family-relations/family_relation_index', [
             'familyRelations' => $relations,
             'filters' => $request->only([
                 'search',
@@ -48,7 +48,7 @@ class CustomerFamilyRelationController extends Controller
 
     public function customerRelations(Request $request): Response
     {
-        return Inertia::render('customer-module/family-relations/customer_family_relations');
+        return Inertia::render('customer-kyc/family-relations/customer_family_relations');
     }
 
     public function getCustomerRelations(Request $request): JsonResponse
@@ -80,7 +80,7 @@ class CustomerFamilyRelationController extends Controller
     {
         $familyRelation->load(['customer', 'relative', 'customer.photo', 'relative.photo']);
 
-        return Inertia::render('customer-module/family-relations/view_family_relation', [
+        return Inertia::render('customer-kyc/family-relations/view_family_relation', [
             'familyRelation' => $familyRelation,
         ]);
     }

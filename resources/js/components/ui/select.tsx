@@ -65,7 +65,7 @@ const Select: React.FC<SelectSearchProps> = ({
         disabled={disabled}
         onClick={() => !disabled && setOpen(!open)}
         className={cn(
-          "w-full rounded-md border px-2 text-left text-sm bg-background text-base shadow-xs flex justify-between items-center transition-[color,box-shadow] outline-none h-8",
+          "w-full rounded-md border px-2 text-left text-sm bg-background text-base shadow-sm-xs flex justify-between items-center transition-[color,box-shadow] outline-none h-8",
           error ? "border-destructive" : "border-input",
           "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
           "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
@@ -84,7 +84,7 @@ const Select: React.FC<SelectSearchProps> = ({
       </button>
 
       {open && !disabled && (
-        <div className="absolute z-50 mt-1 w-full rounded-md border border-input bg-background shadow-xs">
+        <div className="absolute z-50 mt-1 w-full rounded-md border border-input bg-background shadow-sm-xs">
           <input
             type="text"
             value={search}

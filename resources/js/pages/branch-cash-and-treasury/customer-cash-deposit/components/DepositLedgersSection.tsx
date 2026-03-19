@@ -5,7 +5,7 @@ import { Input } from '../../../../components/ui/input';
 import { formatBDTCurrency } from '../../../../lib/bdtCurrencyFormatter';
 import { VoucherLine } from '../../../../types/accounting';
 import { Customer } from '../../../../types/customer';
-import { CustomerSearchBox } from '../../../customer-module/customers/customer-search-box';
+import { CustomerSearchBox } from '../../../customer-kyc/customers/customer-search-box';
 
 interface CollectionLedgersSectionProps {
     errors: any;

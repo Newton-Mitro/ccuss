@@ -88,7 +88,7 @@ export default function Show({ branch }: ShowProps) {
 
                 {/* Optional Map */}
                 {hasCoordinates && (
-                    <div className="rounded-md border border-border bg-card/40 p-2 shadow-inner">
+                    <div className="shadow-sm-inner rounded-md border border-border bg-card/40 p-2">
                         <iframe
                             title="Branch Map"
                             src={`https://maps.google.com/maps?q=${branch.latitude},${branch.longitude}&z=15&output=embed`}

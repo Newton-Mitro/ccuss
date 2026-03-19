@@ -10,7 +10,7 @@ import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 import { Branch } from '../../../types/branch';
 import { Customer } from '../../../types/customer_kyc_module';
-import { CustomerSearchInput } from '../../customer-module/customers/customer-search-input';
+import { CustomerSearchInput } from '../../customer-kyc/customers/customer-search-input';
 
 interface EditBranchProps {
     branch: Branch;
@@ -58,7 +58,7 @@ function Edit({ branch }: EditBranchProps) {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="space-y-5 rounded-xl border border-border bg-card/80 p-8 shadow backdrop-blur-sm transition-all duration-300"
+                    className="space-y-5 rounded-xl border border-border bg-card/80 p-8 shadow-sm backdrop-blur-sm transition-all duration-300"
                 >
                     {/* Basic Details */}
                     <div>

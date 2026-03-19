@@ -21,7 +21,7 @@ export default function CustomerSignatureIndex() {
     const { signature, loading, fetchSignature } = useCustomerSignature();
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Signatures', href: '/customer-module/signatures' },
+        { title: 'Signatures', href: '/customer-kyc/signatures' },
     ];
 
     /* ================= Customer Select ================= */

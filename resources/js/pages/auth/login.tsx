@@ -30,7 +30,7 @@ export default function Login({
         <div className="flex min-h-screen items-center justify-center bg-background p-6 font-mono transition-colors duration-300">
             <Head title="Log in" />
 
-            <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow transition-colors duration-300 md:p-10 dark:shadow-black/30">
+            <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-sm transition-colors duration-300 md:p-10 dark:shadow-black/30">
                 {/* Logo + Intro */}
                 <div className="mb-6 flex flex-col items-center text-center">
                     <AppLogoIcon className="mb-3 h-20 w-20 fill-current text-primary transition-colors duration-300" />

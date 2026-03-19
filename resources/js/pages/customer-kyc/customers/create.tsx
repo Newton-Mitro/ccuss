@@ -1,5 +1,6 @@
-import { Head, Link, router, useForm } from '@inertiajs/react';
-import { ArrowLeft, CheckCheck, ListFilter, SpaceIcon } from 'lucide-react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { ArrowLeft, CheckCheck, ListFilter, Loader2 } from 'lucide-react';
+
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
@@ -10,44 +11,37 @@ import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-import { Customer } from '../../../types/customer_kyc_module';
 
-interface EditProps {
-    customer: Customer;
-    backUrl: string;
-    flash?: {
-        error?: string;
-        success?: string;
-    };
-}
+const Create = ({ backUrl }: { backUrl: string }) => {
+    const { flash } = usePage().props;
 
-const Edit = ({ customer, backUrl, flash }: EditProps) => {
     useEffect(() => {
         if (flash?.error) toast.error(flash.error);
         if (flash?.success) toast.success(flash.success);
     }, [flash]);
 
-    const handleBack = () =>
-        router.visit(backUrl, { preserveState: true, preserveScroll: true });
-
-    const { data, setData, put, processing, errors } = useForm({
-        customer_no: customer.customer_no || '',
-        type: (customer.type as string) || '',
-        name: customer.name || '',
-        phone: customer.phone || '',
-        email: customer.email || '',
-        dob: customer.dob || '',
-        gender: (customer.gender as string) || '',
-        religion: customer.religion || '',
-        identification_type: customer.identification_type || '',
-        identification_number: customer.identification_number || '',
+    const handleBack = () => {
+        router.visit(backUrl, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+    const { data, setData, post, processing, errors } = useForm({
+        customer_no: '',
+        type: '',
+        name: '',
+        phone: '',
+        email: '',
+        dob: '',
+        gender: '',
+        religion: '',
+        identification_type: '',
+        identification_number: '',
         photo: null as File | null,
-        kyc_status: (customer.kyc_status as string) || 'PENDING',
+        kyc_status: 'PENDING',
     });
 
-    const [photoPreview, setPhotoPreview] = useState<string | null>(
-        customer.photo?.url || null,
-    );
+    const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -59,30 +53,30 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
-        put(`/customers/${customer.id}`, {
+        const formData = new FormData();
+        Object.entries(data).forEach(([key, value]) => {
+            if (value !== null) formData.append(key, value as any);
+        });
+        post('/customers', {
+            data: formData,
             preserveScroll: true,
-            onError: () => toast.error('Please fix errors in the form.'),
+            onError: (e) => toast.error(JSON.stringify(e)),
         });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customers', href: '/customers' },
-        { title: `Edit ${customer.name}`, href: '' },
+        { title: 'Add Customer', href: '' },
     ];
-
-    const isIndividual = data.type === 'INDIVIDUAL';
-    const isOrganization = data.type === 'ORGANIZATION';
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title={`Edit Customer - ${customer.name}`} />
+            <Head title="Create Customer" />
             <div className="flex flex-col gap-3 pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <HeadingSmall
-                    title="Edit Customer"
-                    description="Update customer information."
+                    title="Create Customer"
+                    description="Customer onboarding."
                 />
-
                 <div className="flex flex-wrap gap-2">
                     <button
                         type="button"
@@ -102,7 +96,6 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                     </Link>
                 </div>
             </div>
-
             <form
                 onSubmit={handleSubmit}
                 className="w-full space-y-4 rounded-md border border-border bg-card p-4 sm:p-6 lg:w-5xl"
@@ -130,21 +123,25 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                         <InputError message={errors.photo} />
                     </div>
                 </div>
+
                 {/* BASIC INFO */}
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div>
                         <Label className="text-xs">Customer No</Label>
                         <Input
                             value={data.customer_no}
                             disabled
+                            onChange={(e) =>
+                                setData('customer_no', e.target.value)
+                            }
                             className="h-8 text-sm"
                         />
+                        <InputError message={errors.customer_no} />
                     </div>
                     <div>
-                        <Label className="text-xs">Type</Label>
+                        <Label className="text-xs">Customer Type</Label>
                         <select
                             value={data.type}
-                            disabled
                             onChange={(e) => {
                                 const newType = e.target.value;
                                 setData('type', newType);
@@ -161,8 +158,9 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                             }}
                             className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                         >
-                            <option>Individual</option>
-                            <option>Organization</option>
+                            <option value={''}>Select Customer Type</option>
+                            <option value="Individual">Individual</option>
+                            <option value="Organization">Organization</option>
                         </select>
                         <InputError message={errors.type} />
                     </div>
@@ -196,15 +194,16 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                 </div>
 
                 {/* PERSONAL DETAILS */}
-                {isIndividual && (
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                {data.type === 'INDIVIDUAL' && (
+                    <div className="grid grid-cols-1 gap-x-4 md:grid-cols-2 lg:grid-cols-3">
                         <div>
-                            <Label className="text-xs">Date of Birth</Label>
+                            <Label className="text-xs">DOB</Label>
                             <AppDatePicker
                                 label=""
                                 value={data.dob}
                                 onChange={(val) => setData('dob', val)}
                             />
+                            <InputError message={errors.dob} />
                         </div>
                         <div>
                             <Label className="text-xs">Gender</Label>
@@ -220,6 +219,7 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                                 <option>FEMALE</option>
                                 <option>OTHER</option>
                             </select>
+                            <InputError message={errors.gender} />
                         </div>
                         <div>
                             <Label className="text-xs">Religion</Label>
@@ -237,12 +237,13 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                                 <option>BUDDHISM</option>
                                 <option>OTHER</option>
                             </select>
+                            <InputError message={errors.religion} />
                         </div>
                     </div>
                 )}
 
                 {/* IDENTIFICATION */}
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-x-4 md:grid-cols-2 lg:grid-cols-3">
                     <div>
                         <Label className="text-xs">Identification Type</Label>
                         <select
@@ -252,7 +253,7 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                             }
                             className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                         >
-                            {isOrganization ? (
+                            {data.type === 'ORGANIZATION' ? (
                                 <option value="REGISTRATION_NO">
                                     Registration No
                                 </option>
@@ -284,7 +285,7 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                 </div>
 
                 {/* KYC & STATUS */}
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-x-4 md:grid-cols-2 lg:grid-cols-3">
                     <div>
                         <Label className="text-xs">KYC Status</Label>
                         <select
@@ -299,27 +300,28 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                             <option>VERIFIED</option>
                             <option>REJECTED</option>
                         </select>
+                        <InputError message={errors.kyc_status} />
                     </div>
                 </div>
 
                 {/* SUBMIT */}
-                <div className="mt-4 flex justify-end">
+                <div className="flex justify-end">
                     <Button
                         type="submit"
                         disabled={processing}
-                        className="flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-lg"
+                        className="flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
                     >
                         {processing ? (
                             <>
                                 {/* spinning loader icon */}
-                                <SpaceIcon className="" />
+                                <Loader2 className="" />
                                 Saving...
                             </>
                         ) : (
                             <>
                                 {/* check / save icon */}
                                 <CheckCheck className="" />
-                                Update
+                                Store/Submit
                             </>
                         )}
                     </Button>
@@ -329,4 +331,4 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
     );
 };
 
-export default Edit;
+export default Create;

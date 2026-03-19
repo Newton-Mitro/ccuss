@@ -175,7 +175,7 @@ const RolePermissionForm = ({
                     <Button
                         type="submit"
                         disabled={processing || !selectedRole}
-                        className="flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-lg"
+                        className="flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
                     >
                         {processing ? (
                             <>

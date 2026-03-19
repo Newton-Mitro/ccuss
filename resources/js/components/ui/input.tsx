@@ -15,7 +15,7 @@ function Input({ className, type, error,showErrorText = false, ...props }: Input
         data-slot="input"
         className={cn(
           // base
-          "flex h-9 w-full min-w-0 rounded-md border bg-background px-3 py-1 text-base shadow-xs outline-none transition-[color,box-shadow]",
+          "flex h-9 w-full min-w-0 rounded-md border bg-background px-3 py-1 text-base shadow-sm-xs outline-none transition-[color,box-shadow]",
           "file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium",
           "placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground md:text-sm",
 

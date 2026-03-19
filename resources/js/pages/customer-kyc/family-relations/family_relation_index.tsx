@@ -145,7 +145,9 @@ export default function FamilyRelationIndex() {
                                         <td className="px-2 py-1">
                                             {f.customer?.name || '—'}
                                         </td>
-                                        <td className="px-2 py-1">{f.relative?.name}</td>
+                                        <td className="px-2 py-1">
+                                            {f.relative?.name}
+                                        </td>
                                         <td className="px-2 py-1">
                                             {f.relative?.phone || '—'}
                                         </td>
@@ -223,7 +225,9 @@ export default function FamilyRelationIndex() {
                         >
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="font-medium">{f.relative?.name}</p>
+                                    <p className="font-medium">
+                                        {f.relative?.name}
+                                    </p>
                                     <p className="text-xs text-muted-foreground">
                                         {f.customer?.name || '—'}
                                     </p>
