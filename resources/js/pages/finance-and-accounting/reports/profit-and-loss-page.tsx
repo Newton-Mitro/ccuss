@@ -123,7 +123,7 @@ export default function ProfitAndLossPage() {
                         <button
                             type="button"
                             onClick={() => window.print()}
-                            className="ml-2 rounded-md bg-primary px-3 py-1 text-sm font-medium text-primary-foreground hover:bg-primary/80"
+                            className="hover:bg-primary/80 ml-2 rounded-md bg-primary px-3 py-1 text-sm font-medium text-primary-foreground"
                         >
                             Print
                         </button>
@@ -142,11 +142,11 @@ export default function ProfitAndLossPage() {
                     <p className="text-sm">
                         Income and Expense summary for the selected period
                     </p>
-                    <hr className="my-2 border-t border-border" />
+                    <hr className="my-2 border-t" />
                 </div>
 
                 {/* Table */}
-                <div className="overflow-x-auto rounded-md border border-border print:block print:overflow-visible print:rounded-none print:border-none">
+                <div className="overflow-x-auto rounded-md border print:block print:overflow-visible print:rounded-none print:border-none">
                     <table className="w-full border-collapse text-sm print:text-base">
                         <thead className="bg-muted print:bg-transparent">
                             <tr>
@@ -154,7 +154,7 @@ export default function ProfitAndLossPage() {
                                     (h) => (
                                         <th
                                             key={h}
-                                            className="border-b border-border px-2 py-1 text-left font-medium text-muted-foreground print:text-black"
+                                            className="border-b px-2 py-1 text-left font-medium text-muted-foreground print:text-black"
                                         >
                                             {h}
                                         </th>

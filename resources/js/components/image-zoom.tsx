@@ -77,7 +77,7 @@ export default function InteractiveImage({
             {/* Image Container */}
             <div
                 ref={containerRef}
-                className={`relative cursor-grab overflow-hidden rounded border border-border`}
+                className={`relative cursor-grab overflow-hidden rounded border`}
                 style={{ maxHeight, maxWidth }}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}

@@ -184,7 +184,7 @@ export default function IntroducerModal({
                                     e.target.value as Form['relationship_type'],
                                 )
                             }
-                            className={`h-8 w-full rounded-md border border-border bg-background px-2 text-sm ${errorClass(
+                            className={`h-8 w-full rounded-md border bg-background px-2 text-sm ${errorClass(
                                 'relationship_type',
                             )}`}
                         >

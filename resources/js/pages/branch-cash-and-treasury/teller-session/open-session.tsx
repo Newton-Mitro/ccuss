@@ -56,7 +56,7 @@ export default function OpenTellerSession() {
                                 setData('opening_cash', e.target.value)
                             }
                             placeholder="Enter opening cash amount"
-                            className="w-full rounded-md border border-border px-3 py-2 focus:ring-2 focus:ring-ring focus:outline-none"
+                            className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring"
                         />
                         {errors.opening_cash && (
                             <p className="mt-1 text-sm text-red-600">
@@ -68,7 +68,7 @@ export default function OpenTellerSession() {
                     <button
                         type="submit"
                         disabled={processing}
-                        className="w-full rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90 disabled:opacity-50"
+                        className="hover:bg-primary/90 w-full rounded-md bg-primary px-4 py-2 text-white disabled:opacity-50"
                     >
                         Open Session
                     </button>

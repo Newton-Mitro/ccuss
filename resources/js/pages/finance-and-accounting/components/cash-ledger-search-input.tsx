@@ -88,13 +88,13 @@ export const CashLedgerSearchInput: React.FC<CashLedgerSearchInputProps> = ({
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={placeholder || 'Search ledgers...'}
-                    className="h-8 w-full rounded-md border border-border bg-background px-3 pr-10 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                    className="focus:ring-primary/50 h-8 w-full rounded-md border bg-background px-3 pr-10 text-sm focus:outline-none focus:ring-2"
                 />
 
                 <button
                     type="button"
                     onClick={searchLedgers}
-                    className="absolute top-1/2 right-1 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-primary"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-primary"
                     title="Search"
                 >
                     {loading ? (
@@ -107,7 +107,7 @@ export const CashLedgerSearchInput: React.FC<CashLedgerSearchInputProps> = ({
 
             {/* DROPDOWN RESULTS */}
             {showDropdown && ledgers.length > 0 && (
-                <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-border bg-background shadow-sm">
+                <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-background shadow-sm">
                     {ledgers.map((ledger) => (
                         <li
                             key={ledger.id}
@@ -134,7 +134,7 @@ export const CashLedgerSearchInput: React.FC<CashLedgerSearchInputProps> = ({
 
             {/* EMPTY STATE */}
             {showDropdown && !loading && query && ledgers.length === 0 && (
-                <div className="absolute z-10 mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-xs text-muted-foreground">
+                <div className="absolute z-10 mt-1 w-full rounded-md border bg-background px-3 py-2 text-xs text-muted-foreground">
                     No personal ledgers found.
                 </div>
             )}

@@ -29,7 +29,7 @@ import { SidebarMenuItem } from '../components/sidebar-menu-item';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { sidebarMenu } from '../data/menus';
 import { sidebarMenuPermissions } from '../data/permissions';
-import { Appearance, useAppearance } from '../hooks/use-appearance';
+import { useAppearance } from '../hooks/use-appearance';
 import { filterMenuByPermission } from '../lib/filter_menu_by_permission';
 import { edit } from '../routes/profile';
 import { BreadcrumbItem, SharedData, SidebarItem } from '../types';
@@ -70,6 +70,14 @@ export default function CustomAuthLayout({
 
     const [searchTerm, setSearchTerm] = useState('');
 
+    const THEME_COLORS = [
+        { value: 'default', label: 'Default', preview: 'bg-neutral-400' },
+        { value: 'blue', label: 'Blue', preview: 'bg-blue-500' },
+        { value: 'green', label: 'Green', preview: 'bg-green-500' },
+        { value: 'brown', label: 'Brown', preview: 'bg-amber-700' },
+        { value: 'violet', label: 'Violet', preview: 'bg-violet-500' },
+    ];
+
     /* ------------------------------------------------------------------
      * Persist sidebar open/close
      * ------------------------------------------------------------------ */
@@ -82,7 +90,7 @@ export default function CustomAuthLayout({
      * ------------------------------------------------------------------ */
     const sidebarScrollRef = useRef<HTMLDivElement | null>(null);
     const getInitials = useInitials();
-    const { appearance, updateAppearance } = useAppearance();
+    const { mode, color, updateMode, updateColor } = useAppearance();
 
     // Save scroll position
     useEffect(() => {
@@ -177,7 +185,7 @@ export default function CustomAuthLayout({
             {/* Sidebar */}
             <aside
                 className={cn(
-                    'flex flex-col border-r transition-all duration-300 print:hidden', // flex-col for vertical layout
+                    'flex flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-300 print:hidden', // flex-col for vertical layout
                     sidebarOpen ? 'w-72' : 'w-16',
                 )}
             >
@@ -198,7 +206,7 @@ export default function CustomAuthLayout({
                                 <span className="text-accent"> Unity </span>{' '}
                                 Banking
                             </h1>
-                            <p className="text-xs text-muted-foreground/50">
+                            <p className="text-muted/70 text-xs">
                                 Core banking & credit solution.
                             </p>
                         </div>
@@ -260,7 +268,7 @@ export default function CustomAuthLayout({
                 {/* Footer */}
                 <div
                     className={cn(
-                        'bg-sidebar-footer mt-auto flex flex-col border-t border-muted/20 px-4 py-3 transition-colors',
+                        'bg-sidebar-footer border-muted/20 mt-auto flex flex-col border-t px-4 py-3 transition-colors',
                         !sidebarOpen && 'items-center',
                     )}
                 >
@@ -268,7 +276,7 @@ export default function CustomAuthLayout({
                     <Link
                         href={'/settings/profile'}
                         className={cn(
-                            'group flex w-full items-center gap-3 rounded p-2 transition-colors hover:bg-muted/20',
+                            'hover:bg-muted/20 group flex w-full items-center gap-3 rounded p-2 transition-colors',
                             !sidebarOpen && 'justify-center',
                         )}
                     >
@@ -286,7 +294,7 @@ export default function CustomAuthLayout({
                                 <span className="text-sm font-medium group-hover:underline">
                                     {auth?.user?.name}
                                 </span>
-                                <span className="text-xs text-muted-foreground/70">
+                                <span className="text-muted/70 text-xs">
                                     {auth?.user?.email}
                                 </span>
                             </div>
@@ -295,7 +303,7 @@ export default function CustomAuthLayout({
 
                     {/* Organization & Branch Info */}
                     {sidebarOpen && (
-                        <div className="flex flex-col gap-0.5 px-2 text-xs text-muted-foreground/60">
+                        <div className="text-muted/70 flex flex-col gap-0.5 px-2 text-xs">
                             <span>
                                 Organization:{' '}
                                 {auth?.user?.organization?.name || 'N/A'}
@@ -311,7 +319,7 @@ export default function CustomAuthLayout({
                         <button
                             onClick={handleLogout}
                             className={cn(
-                                'flex items-center gap-2 rounded p-2 text-destructive transition-colors hover:bg-destructive/10',
+                                'hover:bg-destructive/10 flex items-center gap-2 rounded p-2 text-destructive transition-colors',
                                 !sidebarOpen && 'justify-center',
                             )}
                             title="Logout"
@@ -325,7 +333,7 @@ export default function CustomAuthLayout({
 
             {/* Main */}
             <div className="flex flex-1 flex-col">
-                <header className="flex h-16 items-center justify-between border-b px-6 print:hidden">
+                <header className="flex h-16 items-center justify-between border-b bg-sidebar px-6 text-sidebar-foreground print:hidden">
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => setSidebarOpen((v) => !v)}
@@ -346,37 +354,103 @@ export default function CustomAuthLayout({
                                 </button>
                             </DropdownMenuTrigger>
 
-                            <DropdownMenuContent align="end" className="w-36">
-                                {['light', 'dark', 'system'].map((mode) => (
-                                    <DropdownMenuItem key={mode} asChild>
-                                        <button
-                                            className={cn(
-                                                'flex w-full items-center gap-2',
-                                                appearance === mode
-                                                    ? 'font-semibold'
-                                                    : 'font-normal',
-                                            )}
-                                            onClick={() =>
-                                                updateAppearance(
-                                                    mode as Appearance,
-                                                )
-                                            }
-                                        >
-                                            {mode === 'light' && (
-                                                <Sun size={16} />
-                                            )}
-                                            {mode === 'dark' && (
-                                                <Moon size={16} />
-                                            )}
-                                            {mode === 'system' && (
-                                                <Monitor size={16} />
-                                            )}
-                                            <span className="capitalize">
-                                                {mode}
-                                            </span>
-                                        </button>
-                                    </DropdownMenuItem>
-                                ))}
+                            <DropdownMenuContent align="end" className="w-48">
+                                {/* ================= Mode ================= */}
+                                <DropdownMenuGroup>
+                                    <div className="px-2 py-1 text-xs text-muted-foreground">
+                                        Theme Mode
+                                    </div>
+
+                                    {[
+                                        {
+                                            value: 'light',
+                                            icon: Sun,
+                                            label: 'Light',
+                                        },
+                                        {
+                                            value: 'dark',
+                                            icon: Moon,
+                                            label: 'Dark',
+                                        },
+                                        {
+                                            value: 'system',
+                                            icon: Monitor,
+                                            label: 'System',
+                                        },
+                                    ].map(({ value, icon: Icon, label }) => (
+                                        <DropdownMenuItem key={value} asChild>
+                                            <button
+                                                onClick={() =>
+                                                    updateMode(value as any)
+                                                }
+                                                className={cn(
+                                                    'flex w-full items-center justify-between gap-2',
+                                                    mode === value &&
+                                                        'font-semibold',
+                                                )}
+                                            >
+                                                <span className="flex items-center gap-2">
+                                                    <Icon size={16} />
+                                                    {label}
+                                                </span>
+
+                                                {mode === value && (
+                                                    <span className="text-xs">
+                                                        ✓
+                                                    </span>
+                                                )}
+                                            </button>
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuGroup>
+
+                                <DropdownMenuSeparator />
+
+                                {/* ================= Color ================= */}
+                                <DropdownMenuGroup>
+                                    <div className="px-2 py-1 text-xs text-muted-foreground">
+                                        Theme Color
+                                    </div>
+
+                                    {THEME_COLORS.map(
+                                        ({ value, label, preview }) => (
+                                            <DropdownMenuItem
+                                                key={value}
+                                                asChild
+                                            >
+                                                <button
+                                                    onClick={() =>
+                                                        updateColor(
+                                                            value as any,
+                                                        )
+                                                    }
+                                                    className={cn(
+                                                        'flex w-full items-center justify-between',
+                                                        color === value &&
+                                                            'font-semibold',
+                                                    )}
+                                                >
+                                                    <span className="flex items-center gap-2">
+                                                        {/* 🎯 Color Preview */}
+                                                        <span
+                                                            className={cn(
+                                                                'h-3 w-3 rounded-full border',
+                                                                preview,
+                                                            )}
+                                                        />
+                                                        {label}
+                                                    </span>
+
+                                                    {color === value && (
+                                                        <span className="text-xs">
+                                                            ✓
+                                                        </span>
+                                                    )}
+                                                </button>
+                                            </DropdownMenuItem>
+                                        ),
+                                    )}
+                                </DropdownMenuGroup>
                             </DropdownMenuContent>
                         </DropdownMenu>
 

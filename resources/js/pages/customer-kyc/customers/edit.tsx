@@ -87,7 +87,7 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                     <button
                         type="button"
                         onClick={handleBack}
-                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground transition hover:bg-muted/90"
+                        className="hover:bg-muted/90 flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground transition"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         <span className="hidden sm:inline">Back</span>
@@ -95,7 +95,7 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
 
                     <Link
                         href="/customers"
-                        className="flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition hover:bg-secondary/90"
+                        className="hover:bg-secondary/90 flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition"
                     >
                         <ListFilter className="h-4 w-4" />
                         <span className="hidden sm:inline">Customers</span>
@@ -105,7 +105,7 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
 
             <form
                 onSubmit={handleSubmit}
-                className="w-full space-y-4 rounded-md border border-border bg-card p-4 sm:p-6 lg:w-5xl"
+                className="lg:w-5xl w-full space-y-4 rounded-md border bg-card p-4 sm:p-6"
             >
                 <div className="flex flex-col gap-4">
                     <div className="">
@@ -125,7 +125,7 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                             type="file"
                             accept="image/*"
                             onChange={handlePhotoChange}
-                            className="h-8 rounded-md border border-border px-2 py-1 text-sm"
+                            className="h-8 rounded-md border px-2 py-1 text-sm"
                         />
                         <InputError message={errors.photo} />
                     </div>
@@ -159,7 +159,7 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                                     setData('identification_number', '');
                                 }
                             }}
-                            className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                            className="focus:ring-primary/50 h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2"
                         >
                             <option>Individual</option>
                             <option>Organization</option>
@@ -213,7 +213,7 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                                 onChange={(e) =>
                                     setData('gender', e.target.value)
                                 }
-                                className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                                className="focus:ring-primary/50 h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2"
                             >
                                 <option value="">Select</option>
                                 <option>MALE</option>
@@ -228,7 +228,7 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                                 onChange={(e) =>
                                     setData('religion', e.target.value)
                                 }
-                                className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                                className="focus:ring-primary/50 h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2"
                             >
                                 <option value="">Select</option>
                                 <option>ISLAM</option>
@@ -250,7 +250,7 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                             onChange={(e) =>
                                 setData('identification_type', e.target.value)
                             }
-                            className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                            className="focus:ring-primary/50 h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2"
                         >
                             {isOrganization ? (
                                 <option value="REGISTRATION_NO">
@@ -293,7 +293,7 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                             onChange={(e) =>
                                 setData('kyc_status', e.target.value)
                             }
-                            className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                            className="focus:ring-primary/50 h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2"
                         >
                             <option>PENDING</option>
                             <option>VERIFIED</option>
@@ -307,7 +307,7 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                     <Button
                         type="submit"
                         disabled={processing}
-                        className="flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
+                        className="hover:bg-primary/90 flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground transition-all duration-200 hover:shadow-md"
                     >
                         {processing ? (
                             <>

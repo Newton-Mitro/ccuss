@@ -225,8 +225,8 @@ export default function JournalVoucherEntryPage({
                     <div className="md:col-span-8">
                         {/* Voucher Lines */}
                         <div className="space-y-1">
-                            <div className="space-y-2 rounded-md border border-border bg-muted/30 p-3">
-                                <h2 className="border-b border-border pb-3 text-sm font-medium text-primary">
+                            <div className="bg-muted/30 space-y-2 rounded-md border p-3">
+                                <h2 className="border-b pb-3 text-sm font-medium text-primary">
                                     Voucher Details/Lines
                                 </h2>
                                 <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-2 md:grid-cols-3">
@@ -310,17 +310,17 @@ export default function JournalVoucherEntryPage({
                                         <table className="w-full table-fixed border-collapse">
                                             <thead className="sticky top-0">
                                                 <tr className="">
-                                                    <th className="w-8/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                                    <th className="w-8/12 border-b p-2 text-left text-sm font-medium text-muted-foreground">
                                                         Ledger, Subledger and
                                                         Particulars
                                                     </th>
-                                                    <th className="w-3/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                                    <th className="w-3/12 border-b p-2 text-left text-sm font-medium text-muted-foreground">
                                                         Debit
                                                     </th>
-                                                    <th className="w-3/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                                    <th className="w-3/12 border-b p-2 text-left text-sm font-medium text-muted-foreground">
                                                         Credit
                                                     </th>
-                                                    <th className="w-1/12 border-b border-border p-2 text-center text-sm font-medium text-muted-foreground">
+                                                    <th className="w-1/12 border-b p-2 text-center text-sm font-medium text-muted-foreground">
                                                         Action
                                                     </th>
                                                 </tr>
@@ -329,18 +329,18 @@ export default function JournalVoucherEntryPage({
                                     </div>
 
                                     {/* Scrollable body */}
-                                    <div className="h-[calc(100vh/2-86px)] overflow-y-auto bg-muted/40 p-2">
+                                    <div className="bg-muted/40 h-[calc(100vh/2-86px)] overflow-y-auto p-2">
                                         <table className="w-full table-fixed border-separate border-spacing-y-2">
                                             <tbody>
                                                 {data.lines.map(
                                                     (line, index) => (
                                                         <tr
                                                             key={line.id}
-                                                            className="rounded-md odd:bg-secondary/50 even:bg-primary/20"
+                                                            className="odd:bg-secondary/50 even:bg-primary/20 rounded-md"
                                                         >
                                                             {/* Ledger info */}
                                                             <td className="w-8/12 border border-destructive align-middle">
-                                                                <div className="-mt-1 flex items-center justify-end border-x border-border px-2 py-1">
+                                                                <div className="-mt-1 flex items-center justify-end border-x px-2 py-1">
                                                                     <div className="flex gap-2">
                                                                         <span className="text-xs text-muted-foreground underline">
                                                                             Ledger
@@ -362,7 +362,7 @@ export default function JournalVoucherEntryPage({
                                                                     </div>
                                                                 </div>
                                                                 {line.particulars && (
-                                                                    <div className="-mt-1 flex items-center justify-end border-x border-border px-2">
+                                                                    <div className="-mt-1 flex items-center justify-end border-x px-2">
                                                                         <span className="text-xs text-muted-foreground underline">
                                                                             {
                                                                                 line.particulars
@@ -473,7 +473,7 @@ export default function JournalVoucherEntryPage({
                                     <Button
                                         type="submit"
                                         disabled={processing || !isBalanced}
-                                        className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2 font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="hover:bg-primary/90 flex items-center gap-2 rounded-lg bg-primary px-6 py-2 font-medium text-primary-foreground shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         {processing ? (
                                             <Loader2 className="h-5 w-5 animate-spin" />
@@ -488,8 +488,8 @@ export default function JournalVoucherEntryPage({
                     </div>
                     <div className="flex flex-col gap-6 md:col-span-4">
                         {/* Voucher Header */}
-                        <div className="space-y-2 rounded-md border border-border bg-muted/30 p-3">
-                            <h2 className="border-b border-border pb-3 text-sm font-medium text-primary">
+                        <div className="bg-muted/30 space-y-2 rounded-md border p-3">
+                            <h2 className="border-b pb-3 text-sm font-medium text-primary">
                                 Voucher Header
                             </h2>
                             <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-2 md:grid-cols-2">

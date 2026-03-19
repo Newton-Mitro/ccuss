@@ -140,7 +140,7 @@ export default function CashFlowStatementPage() {
 
                         <button
                             onClick={() => window.print()}
-                            className="rounded-md bg-primary px-3 py-1 text-sm font-medium text-primary-foreground hover:bg-primary/80"
+                            className="hover:bg-primary/80 rounded-md bg-primary px-3 py-1 text-sm font-medium text-primary-foreground"
                         >
                             Print
                         </button>
@@ -159,7 +159,7 @@ export default function CashFlowStatementPage() {
                     <p className="text-sm">
                         Summary of Cash Inflows and Outflows
                     </p>
-                    <hr className="my-2 border-t border-border" />
+                    <hr className="my-2 border-t" />
                 </div>
 
                 {/* Table */}

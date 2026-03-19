@@ -87,7 +87,7 @@ export default function Show({ customer, backUrl }: ShowProps) {
                             {customer.name}
                         </h1>
 
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted/70 text-xs">
                             {customer.customer_no} | {customer.type}
                         </p>
 
@@ -125,7 +125,7 @@ export default function Show({ customer, backUrl }: ShowProps) {
                 actions={
                     <Link
                         href={`/customers/${customer.id}/edit`}
-                        className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs"
+                        className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground"
                     >
                         <Edit2 size={14} /> Edit
                     </Link>
@@ -174,7 +174,7 @@ export default function Show({ customer, backUrl }: ShowProps) {
                     actions={
                         <Link
                             href={`/customers/${customer.id}/kyc-profile/edit`}
-                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs"
+                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground"
                         >
                             <Edit2 size={14} /> Edit
                         </Link>
@@ -213,7 +213,7 @@ export default function Show({ customer, backUrl }: ShowProps) {
                     actions={
                         <Link
                             href={`/customers/${customer.id}/edit`}
-                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs"
+                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground"
                         >
                             <Plus size={14} /> Add
                         </Link>
@@ -252,7 +252,7 @@ export default function Show({ customer, backUrl }: ShowProps) {
                     actions={
                         <Link
                             href={`/customers/${customer.id}/edit`}
-                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs"
+                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground"
                         >
                             <Plus size={14} /> Add
                         </Link>
@@ -319,7 +319,7 @@ export default function Show({ customer, backUrl }: ShowProps) {
                     actions={
                         <Link
                             href={`/customers/${customer.id}/edit`}
-                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs"
+                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground"
                         >
                             <Plus size={14} /> Add
                         </Link>
@@ -367,7 +367,7 @@ export default function Show({ customer, backUrl }: ShowProps) {
                     actions={
                         <Link
                             href={`/customers/${customer.id}/edit`}
-                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs"
+                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground"
                         >
                             <Plus size={14} /> Add
                         </Link>
@@ -421,23 +421,17 @@ export default function Show({ customer, backUrl }: ShowProps) {
 
 /* ================= UI Components ================= */
 
-const ActionButton = ({
-    children,
-    icon,
-    color = 'muted',
-    as = 'button',
-    ...props
-}: any) =>
+const ActionButton = ({ children, icon, as = 'button', ...props }: any) =>
     as === 'button' ? (
         <button
-            className={`flex items-center gap-1 rounded px-2 py-1 ${themeColors[color]}`}
+            className={`flex items-center gap-1 rounded bg-primary px-2 py-1 text-primary-foreground`}
             {...props}
         >
             {icon} {children}
         </button>
     ) : (
         <Link
-            className={`flex items-center gap-1 rounded px-2 py-1 ${themeColors[color]}`}
+            className={`flex items-center gap-1 rounded bg-primary px-2 py-1 text-primary-foreground`}
             {...props}
         >
             {icon} {children}
@@ -446,9 +440,7 @@ const ActionButton = ({
 
 const InfoItem = ({ label, value }: any) => (
     <div className="flex flex-col">
-        <span className="text-[10px] text-muted-foreground uppercase">
-            {label}
-        </span>
+        <span className="text-muted/80 text-[10px] uppercase">{label}</span>
         <span className="text-sm">{value || '—'}</span>
     </div>
 );
@@ -462,14 +454,14 @@ const DataCard = ({
     onEdit?: () => void;
     onDelete?: () => void;
 }) => (
-    <div className="group relative rounded-md border border-border bg-card p-3 shadow-sm transition hover:shadow-md">
+    <div className="group relative rounded-md border bg-card p-3 shadow-sm transition hover:shadow-md">
         {/* Edit/Delete buttons */}
         {(onEdit || onDelete) && (
-            <div className="absolute top-1 right-1 flex gap-1 opacity-0 transition group-hover:opacity-100">
+            <div className="absolute right-1 top-1 flex gap-1 opacity-0 transition group-hover:opacity-100">
                 {onEdit && (
                     <button
                         onClick={onEdit}
-                        className="rounded bg-secondary p-1 text-secondary-foreground hover:bg-secondary/80"
+                        className="hover:bg-secondary/80 rounded bg-secondary p-1 text-secondary-foreground"
                     >
                         <Edit2 size={14} />
                     </button>
@@ -477,7 +469,7 @@ const DataCard = ({
                 {onDelete && (
                     <button
                         onClick={onDelete}
-                        className="rounded bg-destructive p-1 text-destructive-foreground hover:bg-destructive/80"
+                        className="hover:bg-destructive/80 rounded bg-destructive p-1 text-destructive-foreground"
                     >
                         <X size={14} />
                     </button>
@@ -488,9 +480,9 @@ const DataCard = ({
     </div>
 );
 
-const Badge = ({ text, color = 'accent' }: any) => (
+const Badge = ({ text }: any) => (
     <span
-        className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${badgeColors[color]}`}
+        className={`rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-secondary-foreground`}
     >
         {text}
     </span>

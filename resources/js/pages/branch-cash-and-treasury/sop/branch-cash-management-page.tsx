@@ -251,13 +251,13 @@ export default function BranchCashManagement() {
                 {/* Filters */}
                 <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                     <div className="relative w-full max-w-sm">
-                        <Search className="absolute top-2.5 left-2 h-4 w-4 text-muted-foreground" />
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                         <input
                             type="text"
                             placeholder="Search use cases..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="h-9 w-full rounded-md border border-border bg-background pr-3 pl-8 text-sm focus:ring-2 focus:ring-ring"
+                            className="h-9 w-full rounded-md border bg-background pl-8 pr-3 text-sm focus:ring-2 focus:ring-ring"
                         />
                     </div>
 
@@ -267,7 +267,7 @@ export default function BranchCashManagement() {
                         <select
                             value={actorFilter}
                             onChange={(e) => setActorFilter(e.target.value)}
-                            className="h-9 rounded-md border border-border bg-background px-3 text-sm"
+                            className="h-9 rounded-md border bg-background px-3 text-sm"
                         >
                             {actors.map((a) => (
                                 <option key={a}>{a}</option>
@@ -277,7 +277,7 @@ export default function BranchCashManagement() {
                 </div>
 
                 {/* Use Cases */}
-                <div className="rounded-md border border-border">
+                <div className="rounded-md border">
                     {filtered.length === 0 && (
                         <div className="p-6 text-center text-muted-foreground">
                             No use cases found.
@@ -290,14 +290,14 @@ export default function BranchCashManagement() {
                         return (
                             <div
                                 key={uc.id}
-                                className="border-b border-border last:border-none"
+                                className="border-b last:border-none"
                             >
                                 {/* Header */}
                                 <button
                                     onClick={() =>
                                         setExpanded(isOpen ? null : i)
                                     }
-                                    className="flex w-full items-center justify-between p-3 hover:bg-muted/40"
+                                    className="hover:bg-muted/40 flex w-full items-center justify-between p-3"
                                 >
                                     <div className="flex items-center gap-3">
                                         {isOpen ? (
@@ -314,7 +314,7 @@ export default function BranchCashManagement() {
                                             {uc.title}
                                         </span>
 
-                                        <span className="rounded bg-primary/10 px-2 py-0.5 text-xs text-primary">
+                                        <span className="bg-primary/10 rounded px-2 py-0.5 text-xs text-primary">
                                             {uc.actor}
                                         </span>
                                     </div>

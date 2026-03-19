@@ -83,7 +83,7 @@ export default function Index() {
                     <div className="flex gap-2">
                         <Link
                             href="/addresses/customer"
-                            className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition hover:bg-primary/90"
+                            className="hover:bg-primary/90 flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition"
                         >
                             <MapPin className="h-4 w-4" />
                             <span className="hidden sm:inline">
@@ -103,7 +103,7 @@ export default function Index() {
                             setData('search', e.target.value);
                             setData('page', 1);
                         }}
-                        className="h-9 w-full max-w-sm rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
+                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                     />
 
                     <select
@@ -112,7 +112,7 @@ export default function Index() {
                             setData('verification_status', e.target.value);
                             setData('page', 1);
                         }}
-                        className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-ring focus:outline-none sm:max-w-xs"
+                        className="h-9 w-full rounded-md border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring sm:max-w-xs"
                     >
                         <option value="all">All Statuses</option>
                         <option value="PENDING">Pending</option>
@@ -124,7 +124,7 @@ export default function Index() {
                 {/* ===================== */}
                 {/* Desktop Table */}
                 {/* ===================== */}
-                <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border border-border md:block">
+                <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border md:block">
                     <table className="w-full border-collapse">
                         <thead className="sticky top-0 bg-muted">
                             <tr>
@@ -138,7 +138,7 @@ export default function Index() {
                                 ].map((h) => (
                                     <th
                                         key={h}
-                                        className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground"
+                                        className="border-b p-2 text-left text-sm font-medium text-muted-foreground"
                                     >
                                         {h}
                                     </th>
@@ -149,7 +149,7 @@ export default function Index() {
                             {addresses.data.map((a: CustomerAddress) => (
                                 <tr
                                     key={a.id}
-                                    className="border-b border-border even:bg-muted/30"
+                                    className="even:bg-muted/30 border-b"
                                 >
                                     <td className="px-2 py-1">{a.id}</td>
                                     <td className="px-2 py-1">
@@ -162,7 +162,7 @@ export default function Index() {
                                     <td className="px-2 py-1">
                                         {a.verification_status}
                                     </td>
-                                    <td className="px-2 py-1 whitespace-nowrap">
+                                    <td className="whitespace-nowrap px-2 py-1">
                                         <TooltipProvider>
                                             <div className="flex gap-2">
                                                 <Tooltip>
@@ -212,7 +212,7 @@ export default function Index() {
                     {addresses.data.map((a: CustomerAddress) => (
                         <div
                             key={a.id}
-                            className="space-y-2 rounded-md border border-border bg-card p-3"
+                            className="space-y-2 rounded-md border bg-card p-3"
                         >
                             <div className="flex items-start justify-between">
                                 <div>
@@ -262,7 +262,7 @@ export default function Index() {
                                 setData('per_page', Number(e.target.value));
                                 setData('page', 1);
                             }}
-                            className="h-9 rounded-md border border-border bg-background px-3 text-sm"
+                            className="h-9 rounded-md border bg-background px-3 text-sm"
                         >
                             {[5, 10, 20, 50].map((n) => (
                                 <option key={n} value={n}>

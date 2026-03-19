@@ -73,7 +73,7 @@ function WithdrawalLedgerSection({
     const accountDetails = accounts.find((a) => a.value === selectedAccount);
 
     return (
-        <div className="flex flex-col gap-5 rounded-xl border border-border bg-destructive/5 p-4">
+        <div className="bg-destructive/5 flex flex-col gap-5 rounded-xl border p-4">
             {/* Header */}
             <div className="space-y-3">
                 <h2 className="text-base font-semibold text-muted-foreground">
@@ -85,7 +85,7 @@ function WithdrawalLedgerSection({
             {/* Main Grid */}
             <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
                 {/* Left Card */}
-                <div className="space-y-2 rounded-lg border border-border bg-card p-4 md:col-span-4">
+                <div className="space-y-2 rounded-lg border bg-card p-4 md:col-span-4">
                     {/* Withdrawable Accounts */}
                     <div className="space-y-2">
                         <Label className="text-xs font-medium">
@@ -103,7 +103,7 @@ function WithdrawalLedgerSection({
 
                     {/* Account Details */}
                     {selectedAccount && accountDetails ? (
-                        <div className="mt-3 flex flex-col gap-2 rounded-md border bg-muted/5 px-2 py-2 text-xs">
+                        <div className="bg-muted/5 mt-3 flex flex-col gap-2 rounded-md border px-2 py-2 text-xs">
                             <div className="flex justify-between">
                                 <span className="font-medium">
                                     Account Name:
@@ -136,12 +136,12 @@ function WithdrawalLedgerSection({
                             </div>
                         </div>
                     ) : (
-                        <div className="mt-3 flex flex-col gap-2 rounded-md border bg-muted/5 px-2 py-2 text-xs">
+                        <div className="bg-muted/5 mt-3 flex flex-col gap-2 rounded-md border px-2 py-2 text-xs">
                             {/* Skeleton placeholders */}
                             {[...Array(4)].map((_, idx) => (
                                 <div
                                     key={idx}
-                                    className="h-4 w-full animate-pulse rounded bg-muted/30"
+                                    className="bg-muted/30 h-4 w-full animate-pulse rounded"
                                 />
                             ))}
                         </div>
@@ -199,7 +199,7 @@ function WithdrawalLedgerSection({
                             />
                         </div>
 
-                        <div className="mt-2 rounded-md bg-muted/30 p-2">
+                        <div className="bg-muted/30 mt-2 rounded-md p-2">
                             <div className="flex items-center justify-between text-sm">
                                 <span className="text-muted-foreground">
                                     In Words:
@@ -214,14 +214,14 @@ function WithdrawalLedgerSection({
 
                 {/* Right Card */}
                 <div className="flex flex-col gap-4 md:col-span-8">
-                    <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4">
+                    <div className="flex flex-col gap-4 rounded-lg border bg-card p-4">
                         {/* Account Holders Scrollable */}
                         <div className="space-y-1">
                             <Label className="text-xs font-medium">
                                 Account Holders
                             </Label>
 
-                            <div className="grid max-h-[110px] grid-cols-2 gap-2 overflow-y-auto rounded-md border border-border bg-accent/10 p-2">
+                            <div className="bg-accent/10 grid max-h-[110px] grid-cols-2 gap-2 overflow-y-auto rounded-md border p-2">
                                 {[
                                     {
                                         id: 1,
@@ -250,7 +250,7 @@ function WithdrawalLedgerSection({
                                 ].map((holder, index) => (
                                     <div
                                         key={holder.id}
-                                        className={`flex cursor-pointer items-center justify-between rounded-md border bg-background px-2 py-1.5 text-xs transition hover:bg-muted/30`}
+                                        className={`hover:bg-muted/30 flex cursor-pointer items-center justify-between rounded-md border bg-background px-2 py-1.5 text-xs transition`}
                                     >
                                         <div className="flex items-center gap-2">
                                             <div className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-[10px] font-semibold text-muted-foreground">

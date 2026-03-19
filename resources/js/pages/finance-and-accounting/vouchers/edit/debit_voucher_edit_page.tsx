@@ -241,7 +241,7 @@ export default function EditDebitVoucherEntry({
                 <button
                     type="button"
                     onClick={handleBack}
-                    className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
+                    className="hover:bg-muted/90 flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground"
                 >
                     <ArrowLeft className="h-4 w-4" /> Back
                 </button>
@@ -250,13 +250,13 @@ export default function EditDebitVoucherEntry({
             {/* Form */}
             <form
                 onSubmit={handleSubmit}
-                className="mt-4 space-y-6 rounded-md border border-border bg-card p-4 sm:p-6"
+                className="mt-4 space-y-6 rounded-md border bg-card p-4 sm:p-6"
             >
                 {/* ---------------- Voucher Details & Cash Ledger ---------------- */}
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
                     {/* Voucher Details */}
-                    <div className="space-y-4 rounded-md border border-border bg-muted/30 p-3 md:col-span-8">
-                        <h2 className="border-b border-border pb-1 text-sm font-medium text-primary">
+                    <div className="bg-muted/30 space-y-4 rounded-md border p-3 md:col-span-8">
+                        <h2 className="border-b pb-1 text-sm font-medium text-primary">
                             Voucher Details
                         </h2>
                         <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-2 md:grid-cols-5">
@@ -438,8 +438,8 @@ export default function EditDebitVoucherEntry({
                     </div>
 
                     {/* Cash Ledger */}
-                    <div className="space-y-4 rounded-md border border-border bg-muted/30 p-3 md:col-span-4">
-                        <h2 className="border-b border-border pb-1 text-sm font-medium text-primary">
+                    <div className="bg-muted/30 space-y-4 rounded-md border p-3 md:col-span-4">
+                        <h2 className="border-b pb-1 text-sm font-medium text-primary">
                             Cash Ledger
                         </h2>
                         <div className="grid grid-cols-1 gap-x-3 md:grid-cols-2">
@@ -498,26 +498,26 @@ export default function EditDebitVoucherEntry({
                     </div>
 
                     {/* Table */}
-                    <div className="hidden min-h-96 rounded-md border border-border md:block">
+                    <div className="hidden min-h-96 rounded-md border md:block">
                         <table className="w-full table-fixed border-collapse">
                             <thead className="sticky top-0 bg-muted">
                                 <tr>
-                                    <th className="w-7/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                    <th className="w-7/12 border-b p-2 text-left text-sm font-medium text-muted-foreground">
                                         Ledger, Subledger and Particulars
                                     </th>
-                                    <th className="w-2/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                    <th className="w-2/12 border-b p-2 text-left text-sm font-medium text-muted-foreground">
                                         Instrument Type
                                     </th>
-                                    <th className="w-2/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                    <th className="w-2/12 border-b p-2 text-left text-sm font-medium text-muted-foreground">
                                         Instrument Number
                                     </th>
-                                    <th className="w-2/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                    <th className="w-2/12 border-b p-2 text-left text-sm font-medium text-muted-foreground">
                                         Debit
                                     </th>
-                                    <th className="w-2/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                    <th className="w-2/12 border-b p-2 text-left text-sm font-medium text-muted-foreground">
                                         Credit
                                     </th>
-                                    <th className="w-1/12 border-b border-border p-2 text-center text-sm font-medium text-muted-foreground">
+                                    <th className="w-1/12 border-b p-2 text-center text-sm font-medium text-muted-foreground">
                                         Actions
                                     </th>
                                 </tr>
@@ -526,7 +526,7 @@ export default function EditDebitVoucherEntry({
                                 {data.lines.map((line, index) => (
                                     <tr
                                         key={line.id}
-                                        className="border-b border-border even:bg-muted/30"
+                                        className="even:bg-muted/30 border-b"
                                     >
                                         <td className="px-2 py-1">
                                             <div className="flex flex-col gap-1">
@@ -661,7 +661,7 @@ export default function EditDebitVoucherEntry({
                                                 onClick={() =>
                                                     handleDeleteLine(index)
                                                 }
-                                                className="text-destructive hover:text-destructive/80"
+                                                className="hover:text-destructive/80 text-destructive"
                                             >
                                                 <Trash2 className="h-5 w-5" />
                                             </button>
@@ -685,7 +685,7 @@ export default function EditDebitVoucherEntry({
                         </table>
 
                         {!isBalanced && data.lines.length > 0 && (
-                            <div className="rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
+                            <div className="bg-destructive/10 rounded-md border border-destructive p-3 text-sm text-destructive">
                                 Debit and Credit totals must be equal.
                             </div>
                         )}
@@ -696,7 +696,7 @@ export default function EditDebitVoucherEntry({
                         {data.lines.map((line, index) => (
                             <div
                                 key={line.id}
-                                className="space-y-3 rounded-md border border-border bg-card p-3"
+                                className="space-y-3 rounded-md border bg-card p-3"
                             >
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs font-medium text-muted-foreground">

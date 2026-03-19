@@ -28,14 +28,14 @@ function ShowOrganization() {
                     <div className="flex gap-2">
                         <Link
                             href={`/organizations/${organization.id}/edit`}
-                            className="rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground hover:bg-primary/90"
+                            className="hover:bg-primary/90 rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground"
                         >
                             Edit
                         </Link>
 
                         <Link
                             href="/organizations"
-                            className="rounded-md bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/80"
+                            className="hover:bg-muted/80 rounded-md bg-muted px-3 py-1.5 text-sm text-muted-foreground"
                         >
                             Back
                         </Link>
@@ -43,7 +43,7 @@ function ShowOrganization() {
                 </div>
 
                 {/* Basic Info */}
-                <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+                <div className="rounded-xl border bg-card p-6 shadow-sm">
                     <h3 className="mb-4 text-lg font-semibold text-primary">
                         Basic Information
                     </h3>
@@ -64,7 +64,7 @@ function ShowOrganization() {
                 </div>
 
                 {/* Contact Info */}
-                <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+                <div className="rounded-xl border bg-card p-6 shadow-sm">
                     <h3 className="mb-4 text-lg font-semibold text-primary">
                         Contact Information
                     </h3>
@@ -80,7 +80,7 @@ function ShowOrganization() {
                 </div>
 
                 {/* Address */}
-                <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+                <div className="rounded-xl border bg-card p-6 shadow-sm">
                     <h3 className="mb-4 text-lg font-semibold text-primary">
                         Address
                     </h3>
@@ -108,7 +108,7 @@ function ShowOrganization() {
                 </div>
 
                 {/* Report Settings */}
-                <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+                <div className="rounded-xl border bg-card p-6 shadow-sm">
                     <h3 className="mb-4 text-lg font-semibold text-primary">
                         Report Configuration
                     </h3>

@@ -65,7 +65,7 @@ export default function View({ familyRelation }: ViewFamilyRelationProps) {
                 <div className="flex gap-2">
                     <Link
                         href={`/family-relations/${familyRelation.id}/edit`}
-                        className="flex items-center gap-1 rounded bg-accent px-3 py-1 text-accent-foreground transition hover:bg-accent/90"
+                        className="hover:bg-accent/90 flex items-center gap-1 rounded bg-accent px-3 py-1 text-accent-foreground transition"
                     >
                         <Edit2 size={16} />
                         <span className="hidden sm:inline">Edit</span>
@@ -73,7 +73,7 @@ export default function View({ familyRelation }: ViewFamilyRelationProps) {
 
                     <button
                         type="button"
-                        className="flex items-center gap-1 rounded bg-destructive px-3 py-1 text-destructive-foreground transition hover:bg-destructive/90"
+                        className="hover:bg-destructive/90 flex items-center gap-1 rounded bg-destructive px-3 py-1 text-destructive-foreground transition"
                     >
                         <EyeClosed size={16} />
                         <span className="hidden sm:inline">Suspend</span>
@@ -81,7 +81,7 @@ export default function View({ familyRelation }: ViewFamilyRelationProps) {
 
                     <button
                         type="button"
-                        className="flex items-center gap-1 rounded bg-destructive px-3 py-1 text-destructive-foreground transition hover:bg-destructive/90"
+                        className="hover:bg-destructive/90 flex items-center gap-1 rounded bg-destructive px-3 py-1 text-destructive-foreground transition"
                     >
                         <X size={16} />
                         <span className="hidden sm:inline">Close Account</span>
@@ -89,7 +89,7 @@ export default function View({ familyRelation }: ViewFamilyRelationProps) {
 
                     <Link
                         href={`/family-relations`}
-                        className="flex items-center gap-1 rounded bg-secondary px-3 py-1 text-secondary-foreground transition hover:bg-secondary/90"
+                        className="hover:bg-secondary/90 flex items-center gap-1 rounded bg-secondary px-3 py-1 text-secondary-foreground transition"
                     >
                         <ListFilter size={16} />
                         <span className="hidden sm:inline">
@@ -100,7 +100,7 @@ export default function View({ familyRelation }: ViewFamilyRelationProps) {
             </div>
 
             {/* Relation & Relative Info */}
-            <Card className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
+            <Card className="overflow-x-auto rounded-xl border bg-card shadow-sm">
                 <CardContent className="">
                     <div className="">
                         <div className="flex items-center justify-between gap-6">

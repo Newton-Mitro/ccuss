@@ -218,7 +218,7 @@ export default function GlAccountsIndex({
                     return (
                         <li key={acc.id}>
                             <div
-                                className="flex items-center justify-between rounded-lg px-3 py-1 hover:bg-accent/10"
+                                className="hover:bg-accent/10 flex items-center justify-between rounded-lg px-3 py-1"
                                 style={{ marginLeft: `${level * 1.5}rem` }}
                                 onClick={() =>
                                     acc.is_control_account &&
@@ -376,7 +376,7 @@ export default function GlAccountsIndex({
                         <Button
                             size="sm"
                             variant="ghost"
-                            className="absolute top-3 right-3"
+                            className="absolute right-3 top-3"
                             onClick={closeModal}
                         >
                             <XIcon className="h-4 w-4" />
@@ -469,7 +469,7 @@ export default function GlAccountsIndex({
                             </div>
 
                             {/* Opening Balance */}
-                            <div className="mt-4 space-y-2 border-t border-border pt-4">
+                            <div className="mt-4 space-y-2 border-t pt-4">
                                 <h3 className="text-sm font-medium text-muted-foreground">
                                     Opening Balance
                                 </h3>

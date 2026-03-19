@@ -83,7 +83,7 @@ export default function Index() {
                     <select
                         value={data.event}
                         onChange={(e) => setData('event', e.target.value)}
-                        className="h-9 rounded-md border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
+                        className="h-9 rounded-md border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                     >
                         <option value="">All Events</option>
                         <option value="CREATED">CREATED</option>
@@ -93,7 +93,7 @@ export default function Index() {
                 </div>
 
                 {/* Desktop Table */}
-                <div className="hidden h-[calc(100vh-360px)] overflow-auto rounded-md border border-border md:block md:h-[calc(100vh-300px)]">
+                <div className="hidden h-[calc(100vh-360px)] overflow-auto rounded-md border md:block md:h-[calc(100vh-300px)]">
                     <table className="w-full min-w-[600px] border-collapse text-sm">
                         <thead className="sticky top-0 bg-muted">
                             <tr>
@@ -108,7 +108,7 @@ export default function Index() {
                                 ].map((h) => (
                                     <th
                                         key={h}
-                                        className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground"
+                                        className="border-b p-2 text-left text-sm font-medium text-muted-foreground"
                                     >
                                         {h}
                                     </th>
@@ -120,7 +120,7 @@ export default function Index() {
                                 audits.data.map((a) => (
                                     <tr
                                         key={a.id}
-                                        className="border-b border-border even:bg-muted/30"
+                                        className="even:bg-muted/30 border-b"
                                     >
                                         <td className="px-2 py-2">
                                             {formatDateTime(a.created_at)}
@@ -153,7 +153,7 @@ export default function Index() {
                                                                         a.auditable_id,
                                                                     )
                                                                 }
-                                                                className="text-primary hover:text-primary/80"
+                                                                className="hover:text-primary/80 text-primary"
                                                             >
                                                                 <ListChecks className="h-5 w-5" />
                                                             </button>
@@ -254,7 +254,7 @@ export default function Index() {
                                                             a.auditable_id,
                                                         )
                                                     }
-                                                    className="text-primary hover:text-primary/80"
+                                                    className="hover:text-primary/80 text-primary"
                                                 >
                                                     <ListChecks className="h-5 w-5" />
                                                 </button>
@@ -304,7 +304,7 @@ export default function Index() {
                                 setData('per_page', Number(e.target.value));
                                 setData('page', 1);
                             }}
-                            className="h-9 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+                            className="h-9 rounded-md border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                         >
                             {[5, 10, 20, 50, 100, 500].map((n) => (
                                 <option key={n} value={n}>
@@ -332,7 +332,7 @@ export default function Index() {
                                 className={`rounded-full px-3 py-1 text-sm transition-colors ${
                                     link.active
                                         ? 'bg-primary text-primary-foreground'
-                                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                                        : 'hover:bg-muted/80 bg-muted text-muted-foreground'
                                 }`}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                             />

@@ -41,7 +41,7 @@ export default function ModelHistory({
                         batches.map((batch) => (
                             <div
                                 key={batch.batch_id}
-                                className="rounded-md border border-border bg-background p-4"
+                                className="rounded-md border bg-background p-4"
                             >
                                 <div className="mb-2 flex items-center justify-between">
                                     <div className="text-sm">
@@ -79,7 +79,7 @@ export default function ModelHistory({
                             </div>
                         ))
                     ) : (
-                        <div className="rounded-md border border-border bg-background p-4 text-center text-muted-foreground">
+                        <div className="rounded-md border bg-background p-4 text-center text-muted-foreground">
                             No audit history found for this entity.
                         </div>
                     )}

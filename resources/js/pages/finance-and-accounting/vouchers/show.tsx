@@ -62,7 +62,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                     <button
                         type="button"
                         onClick={handleBack}
-                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
+                        className="hover:bg-muted/90 flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         Back
@@ -94,7 +94,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
             {/* Print-only Header */}
             <div className="mb-6 hidden print:block">
                 <div className="mb-2 text-center">
-                    <h1 className="text-2xl font-bold tracking-wide uppercase">
+                    <h1 className="text-2xl font-bold uppercase tracking-wide">
                         PAYMENT VOUCHER
                     </h1>
                     <p className="text-sm text-muted-foreground">
@@ -128,7 +128,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                     </div>
                 </div>
 
-                <hr className="my-4 border-t border-border" />
+                <hr className="my-4 border-t" />
             </div>
 
             {/* Voucher Details & Lines */}
@@ -203,7 +203,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                 </div>
 
                 {/* Voucher Lines Table */}
-                <div className="mt-4 overflow-auto rounded-md border border-border">
+                <div className="mt-4 overflow-auto rounded-md border">
                     <table className="w-full border-collapse">
                         <thead className="sticky top-0 bg-muted">
                             <tr>
@@ -216,7 +216,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                                 ].map((h) => (
                                     <th
                                         key={h}
-                                        className={`border-b border-border px-2 py-4 text-sm font-medium text-muted-foreground ${
+                                        className={`border-b px-2 py-4 text-sm font-medium text-muted-foreground ${
                                             h === 'Debit' || h === 'Credit'
                                                 ? 'text-right'
                                                 : 'text-left'
@@ -232,7 +232,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                                 voucher.lines.map((line) => (
                                     <tr
                                         key={line.id}
-                                        className="border-b border-border even:bg-muted/30"
+                                        className="even:bg-muted/30 border-b"
                                     >
                                         <td className="px-2 py-1">
                                             <div className="">
@@ -276,7 +276,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                             )}
                         </tbody>
                         <tfoot>
-                            <tr className="border-t border-border font-medium">
+                            <tr className="border-t font-medium">
                                 <td colSpan={2}></td>
 
                                 <td className="px-2 py-1 text-right">
@@ -290,7 +290,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                                 </td>
                                 <td></td>
                             </tr>
-                            <tr className="border-t border-border text-right font-medium">
+                            <tr className="border-t text-right font-medium">
                                 <td colSpan={5} className="p-3">
                                     {`in word: ${takaToText(totals.totalCredit)} only.`}
                                 </td>

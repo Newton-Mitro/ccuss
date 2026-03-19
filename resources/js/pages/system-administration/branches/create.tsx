@@ -44,7 +44,7 @@ function Create() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Branch" />
 
-            <div className="animate-in space-y-8 text-foreground fade-in">
+            <div className="animate-in fade-in space-y-8 text-foreground">
                 <HeadingSmall
                     title="Create Branch"
                     description="Fill in the branch details below to register a new branch."
@@ -52,7 +52,7 @@ function Create() {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="space-y-5 rounded-xl border border-border bg-card/80 p-8 shadow-sm backdrop-blur-sm transition-all duration-300"
+                    className="bg-card/80 space-y-5 rounded-xl border p-8 shadow-sm backdrop-blur-sm transition-all duration-300"
                 >
                     {/* 🧱 Section: Basic Details */}
                     <div>
@@ -195,7 +195,7 @@ function Create() {
                         <Button
                             type="submit"
                             disabled={processing}
-                            className="w-40 bg-primary text-primary-foreground transition-all duration-300 hover:bg-primary/90 hover:shadow-md"
+                            className="hover:bg-primary/90 w-40 bg-primary text-primary-foreground transition-all duration-300 hover:shadow-md"
                         >
                             {processing ? 'Saving...' : 'Create Branch'}
                         </Button>

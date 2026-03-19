@@ -1,5 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Chewy&family=Fascinate&family=Fascinate+Inline&family=Meow+Script&family=Pacifico&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+/* ================= Fonts ================= */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Pacifico&family=Meow+Script&family=Fascinate&family=Chewy&display=swap');
 
+/* ================= Core ================= */
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
@@ -8,63 +10,34 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ================= Design Tokens ================= */
 @theme {
-    --font-sans:
-        'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
-        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-        'Noto Color Emoji';
+    /* Fonts */
+    --font-sans: 'Roboto', ui-sans-serif, system-ui, sans-serif;
     --font-pacifico: 'Pacifico', cursive;
-    --font-roboto: 'Roboto', sans-serif;
     --font-meow-script: 'Meow Script', cursive;
     --font-fascinate: 'Fascinate', system-ui;
     --font-chewy: 'Chewy', system-ui;
 
+    /* Radius */
+    --radius: 0.625rem;
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
     --radius-sm: calc(var(--radius) - 4px);
 
-    /* Global Colors */
-    --color-background: var(--background);
-    --color-foreground: var(--foreground);
-    --color-card: var(--card);
-    --color-card-foreground: var(--card-foreground);
-    --color-popover: var(--popover);
-    --color-popover-foreground: var(--popover-foreground);
-    --color-primary: var(--primary);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-secondary: var(--secondary);
-    --color-secondary-foreground: var(--secondary-foreground);
-    --color-muted: var(--muted);
-    --color-muted-foreground: var(--muted-foreground);
-    --color-accent: var(--accent);
-    --color-accent-foreground: var(--accent-foreground);
-    --color-destructive: var(--destructive);
-    --color-destructive-foreground: var(--destructive-foreground);
-    --color-border: var(--border);
-    --color-input: var(--input);
-    --color-ring: var(--ring);
+    /* Container */
+    --container-sm: 640px;
+    --container-md: 768px;
+    --container-lg: 1024px;
+    --container-xl: 1280px;
 
-    /* Sidebar */
-    --color-sidebar: var(--sidebar);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-ring: var(--sidebar-ring);
-
-    /* Charts */
-    --color-chart-1: var(--chart-1);
-    --color-chart-2: var(--chart-2);
-    --color-chart-3: var(--chart-3);
-    --color-chart-4: var(--chart-4);
-    --color-chart-5: var(--chart-5);
+    /* Animation */
+    --animate-wiggle: wiggle 1s ease-in-out infinite;
 }
 
-/* Light Theme */
+/* ================= Base Theme (Light) ================= */
 :root {
-    --background: oklch(0.99 0.015 250); /* near white with subtle blue tint */
+    --background: oklch(0.99 0.015 250);
     --foreground: oklch(0.15 0.03 250);
 
     --card: oklch(1 0.01 250);
@@ -73,323 +46,150 @@
     --popover: oklch(1 0.01 250);
     --popover-foreground: oklch(0.15 0.03 250);
 
-    /* 🎯 PRIMARY — Deep Indigo / Electric Violet */
     --primary: oklch(0.68 0.16 250);
     --primary-foreground: oklch(0.14 0.03 250);
 
-    /* 🌿 SECONDARY — Soft Lavender / Lilac */
     --secondary: oklch(0.92 0.05 280);
     --secondary-foreground: oklch(0.25 0.03 280);
 
-    /* 💫 ACCENT — Vibrant Coral / Soft Red-Orange */
     --accent: oklch(0.85 0.18 25);
     --accent-foreground: oklch(0.16 0.03 25);
 
     --muted: oklch(0.95 0.02 250);
     --muted-foreground: oklch(0.45 0.03 250);
 
-    --destructive: oklch(0.58 0.22 25);
-    --destructive-foreground: oklch(0.98 0.01 25);
-
     --border: oklch(0.9 0.01 250);
     --input: oklch(0.9 0.01 250);
     --ring: oklch(0.65 0.12 280);
 
-    --chart-1: oklch(0.6 0.22 280);
-    --chart-2: oklch(0.65 0.16 200);
-    --chart-3: oklch(0.75 0.18 90);
-    --chart-4: oklch(0.7 0.2 40);
-    --chart-5: oklch(0.55 0.18 10);
-
-    --radius: 0.625rem;
-
     --sidebar: oklch(0.98 0.01 250);
     --sidebar-foreground: oklch(0.18 0.03 250);
-    --sidebar-primary: var(--primary);
-    --sidebar-primary-foreground: var(--primary-foreground);
-    --sidebar-accent: var(--accent);
-    --sidebar-accent-foreground: var(--accent-foreground);
-    --sidebar-border: var(--border);
-    --sidebar-ring: var(--ring);
 }
 
+/* ================= Dark Mode (Default) ================= */
 .dark {
-    /* 🌌 Base Background & Foreground */
-    --background: oklch(0.05 0.03 260); /* almost pure black */
-    --foreground: oklch(0.98 0.01 260); /* bright text for contrast */
+    --background: oklch(0.05 0.03 260);
+    --foreground: oklch(0.98 0.01 260);
 
-    /* 🪄 Surfaces */
-    --card: oklch(0.08 0.03 260); /* very dark card */
+    --card: oklch(0.08 0.03 260);
     --card-foreground: oklch(0.98 0.01 260);
 
-    --popover: oklch(0.1 0.03 260);
-    --popover-foreground: oklch(0.98 0.01 260);
-
-    /* 🎯 Primary — Electric Indigo Glow */
     --primary: oklch(0.68 0.16 250);
-    --primary-foreground: oklch(0.14 0.03 250);
-
-    /* 🌿 Secondary — Muted Lilac / Soft Neutral */
     --secondary: oklch(0.35 0.04 280);
-    --secondary-foreground: oklch(0.95 0.02 280);
-
-    /* 💫 Accent — Coral Glow for Highlights */
     --accent: oklch(0.67 0.18 25);
-    --accent-foreground: oklch(0.98 0.01 25);
 
-    /* 🧊 Muted & Supporting */
-    --muted: oklch(0.12 0.02 260); /* darker muted for true black background */
-    --muted-foreground: oklch(0.75 0.03 260);
-
-    /* ⚠️ Destructive — Coral Red */
-    --destructive: oklch(0.5 0.18 25);
-    --destructive-foreground: oklch(0.98 0.01 25);
-
-    /* 🔲 Borders & Input Fields */
-    --border: oklch(23.27% 0.03468 266.625); /* subtle dark border */
+    --muted: oklch(0.12 0.02 260);
+    --border: oklch(0.23 0.03 266);
     --input: oklch(0.12 0.02 260);
     --ring: oklch(0.62 0.15 280);
 
-    /* 📊 Charts */
-    --chart-1: oklch(0.7 0.2 280);
-    --chart-2: oklch(0.68 0.16 200);
-    --chart-3: oklch(0.8 0.18 90);
-    --chart-4: oklch(0.7 0.2 40);
-    --chart-5: oklch(0.6 0.15 10);
-
-    /* 🧭 Sidebar */
-    --sidebar: oklch(0.08 0.03 260); /* dark sidebar */
-    --sidebar-foreground: oklch(0.98 0.02 260);
-    --sidebar-primary: var(--primary);
-    --sidebar-primary-foreground: var(--primary-foreground);
-    --sidebar-accent: var(--accent);
-    --sidebar-accent-foreground: var(--accent-foreground);
-    --sidebar-border: var(--border);
-    --sidebar-ring: var(--ring);
+    --sidebar: oklch(0.08 0.03 260);
 }
 
-/* 🌙 Dark Theme */
-.dark2 {
-    /* 🌌 Base Background & Foreground */
-    --background: oklch(0.18 0.03 260); /* slightly lighter than before */
-    --foreground: oklch(0.95 0.01 260);
-
-    /* 🪄 Surfaces */
-    --card: oklch(0.2 0.03 260);
-    --card-foreground: oklch(0.96 0.01 260);
-
-    --popover: oklch(0.22 0.03 260);
-    --popover-foreground: oklch(0.96 0.01 260);
-
-    /* 🎯 Primary — Electric Indigo Glow */
-    --primary: oklch(0.68 0.16 250);
-    --primary-foreground: oklch(0.14 0.03 250);
-
-    /* 🌿 Secondary — Muted Lilac / Soft Neutral */
-    --secondary: oklch(0.35 0.04 280);
-    --secondary-foreground: oklch(0.95 0.02 280);
-
-    /* 💫 Accent — Coral Glow for Highlights */
-    --accent: oklch(0.67 0.18 25);
-    --accent-foreground: oklch(0.98 0.01 25);
-
-    /* 🧊 Muted & Supporting */
-    --muted: oklch(0.28 0.02 260);
-    --muted-foreground: oklch(0.75 0.03 260);
-
-    /* ⚠️ Destructive — Coral Red */
-    --destructive: oklch(0.5 0.18 25);
-    --destructive-foreground: oklch(0.98 0.01 25);
-
-    /* 🔲 Borders & Input Fields */
-    --border: oklch(0.3 0.02 260);
-    --input: oklch(0.3 0.02 260);
-    --ring: oklch(0.62 0.15 280);
-
-    /* 📊 Charts */
-    --chart-1: oklch(0.7 0.2 280);
-    --chart-2: oklch(0.68 0.16 200);
-    --chart-3: oklch(0.8 0.18 90);
-    --chart-4: oklch(0.7 0.2 40);
-    --chart-5: oklch(0.6 0.15 10);
-
-    /* 🧭 Sidebar */
-    --sidebar: oklch(0.2 0.03 260);
-    --sidebar-foreground: oklch(0.96 0.02 260);
-    --sidebar-primary: var(--primary);
-    --sidebar-primary-foreground: var(--primary-foreground);
-    --sidebar-accent: var(--accent);
-    --sidebar-accent-foreground: var(--accent-foreground);
-    --sidebar-border: var(--border);
-    --sidebar-ring: var(--ring);
+/* ================= Theme Variants ================= */
+:root.theme-blue {
+    --primary: oklch(0.65 0.18 250);
+}
+:root.theme-green {
+    --primary: oklch(0.65 0.18 140);
+}
+:root.theme-brown {
+    --primary: oklch(0.55 0.12 40);
+}
+:root.theme-violet {
+    --primary: oklch(0.68 0.2 280);
 }
 
-* {
-    @apply border-border font-roboto;
+/* Dark variants (only override what matters) */
+.dark.theme-blue {
+    --primary: oklch(0.7 0.2 250);
+}
+.dark.theme-green {
+    --primary: oklch(0.7 0.18 140);
+}
+.dark.theme-brown {
+    --primary: oklch(0.65 0.14 40);
+}
+.dark.theme-violet {
+    --primary: oklch(0.72 0.22 280);
 }
 
-::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--background);
-}
-
-::-webkit-scrollbar-thumb {
-    border-radius: 5px;
-    background: var(--accent);
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--ring);
-}
-
+/* ================= Base Styles ================= */
 @layer base {
     * {
-        @apply border-border font-roboto;
+        @apply font-sans;
     }
 
     body {
         @apply bg-background text-foreground;
     }
 
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--accent);
+        border-radius: 5px;
+    }
+
+    /* CK Editor */
     .ck-content h1,
     .ck-content h2,
-    .ck-content h3,
-    .ck-content h4,
-    .ck-content h5,
-    .ck-content h6 {
-        color: var(--color-foreground);
+    .ck-content h3 {
+        color: var(--foreground);
         font-weight: 600;
     }
 
-    .ck-content a {
-        color: var(--color-accent);
-    }
-
-    .ck-content p {
-        color: var(--color-muted-foreground);
-    }
-
-    strong {
-        color: var(--color-muted-foreground) !important;
-    }
-
+    .ck-content p,
     .ck-content ul,
     .ck-content ol {
-        color: var(--color-muted-foreground);
-        list-style: disc;
-        padding-left: 1.5rem;
+        color: var(--muted-foreground);
     }
 
-    .ck-sticky-panel__content {
-        border-color: var(--border) !important;
-        border-radius: 10px 10px 0 0 !important;
-    }
-
-    .ck-button {
-        color: var(--foreground) !important;
-    }
-
-    .ck-button:hover {
-        color: var(--background) !important;
-    }
-
-    .ck-on {
-        color: var(--background) !important;
-    }
-
-    .ck-toolbar {
-        background-color: var(--background) !important;
-        border-color: var(--border) !important;
-        color: var(--foreground) !important;
-        border-radius: 10px 10px 0 0 !important;
-    }
-
+    .ck-toolbar,
     .ck-editor__main > .ck-content {
-        min-height: 100px;
-        background-color: var(--background) !important;
-        border-color: var(--border) !important;
-        color: var(--foreground) !important;
-        border-radius: 0 0 10px 10px !important;
-
-        transition:
-            color 0.2s,
-            box-shadow 0.2s,
-            border-color 0.2s;
+        background: var(--background);
+        border-color: var(--border);
+        color: var(--foreground);
     }
 
-    /* Focus state */
     .ck.ck-focused {
         border-color: var(--ring) !important;
         box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent);
-        outline: none !important;
     }
 
-    /* Hide native datepicker icon in most browsers */
+    /* Remove date input UI */
     input[type='date']::-webkit-calendar-picker-indicator {
         display: none;
-        -webkit-appearance: none;
-    }
-    input[type='date']::-webkit-inner-spin-button,
-    input[type='date']::-webkit-clear-button {
-        display: none;
     }
 }
 
-@theme {
-    --animate-wiggle: wiggle 1s ease-in-out infinite;
-    @keyframes wiggle {
-        0%,
-        100% {
-            transform: rotate(-3deg);
-        }
-        50% {
-            transform: rotate(3deg);
-        }
-    }
+/* ================= Container ================= */
+.container-custom {
+    width: 100%;
+    padding-inline: 1rem;
 }
 
-@theme {
-    --container: 100%;
-    --container-sm: 640px;
-    --container-md: 768px;
-    --container-lg: 1024px;
-    --container-xl: 1280px;
-    --container-2xl: 1280px;
-}
-
-@layer base {
+@media (min-width: 640px) {
     .container-custom {
-        width: 100%;
-        padding-inline: 1rem;
+        max-width: var(--container-sm);
     }
-
-    @media (min-width: 640px) {
-        .container-custom {
-            max-width: var(--container-sm);
-        }
+}
+@media (min-width: 768px) {
+    .container-custom {
+        max-width: var(--container-md);
     }
-    @media (min-width: 768px) {
-        .container-custom {
-            max-width: var(--container-md);
-        }
+}
+@media (min-width: 1024px) {
+    .container-custom {
+        max-width: var(--container-lg);
     }
-    @media (min-width: 1024px) {
-        .container-custom {
-            max-width: var(--container-lg);
-        }
-    }
-    @media (min-width: 1280px) {
-        .container-custom {
-            max-width: var(--container-xl);
-        }
-    }
-    @media (min-width: 1536px) {
-        .container-custom {
-            max-width: var(--container-2xl);
-        }
+}
+@media (min-width: 1280px) {
+    .container-custom {
+        max-width: var(--container-xl);
     }
 }

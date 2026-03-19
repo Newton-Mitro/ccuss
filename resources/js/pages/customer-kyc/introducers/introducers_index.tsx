@@ -85,7 +85,7 @@ export default function IntroducersIndex() {
                     />
                     <Link
                         href="/introducers/customer"
-                        className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition hover:bg-primary/90"
+                        className="hover:bg-primary/90 flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition"
                     >
                         <Users className="h-4 w-4" />
                         <span className="hidden sm:inline">
@@ -104,7 +104,7 @@ export default function IntroducersIndex() {
                             setData('search', e.target.value);
                             setData('page', 1);
                         }}
-                        className="h-9 w-full max-w-sm rounded-md border border-border bg-background px-3 text-sm"
+                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm"
                     />
 
                     <select
@@ -113,7 +113,7 @@ export default function IntroducersIndex() {
                             setData('verification_status', e.target.value);
                             setData('page', 1);
                         }}
-                        className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm sm:max-w-xs"
+                        className="h-9 w-full rounded-md border bg-background px-3 text-sm sm:max-w-xs"
                     >
                         <option value="all">All Statuses</option>
                         <option value="PENDING">Pending</option>
@@ -148,7 +148,7 @@ export default function IntroducersIndex() {
                             {introducers.data.map((i) => (
                                 <tr
                                     key={i.id}
-                                    className="border-b even:bg-muted/30"
+                                    className="even:bg-muted/30 border-b"
                                 >
                                     <td className="px-2 py-1">{i.id}</td>
                                     <td className="px-2 py-1">

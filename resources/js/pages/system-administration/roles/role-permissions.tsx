@@ -89,7 +89,7 @@ const RolePermissionForm = ({
 
             <form
                 onSubmit={handleSubmit}
-                className="w-full space-y-4 rounded-md border border-border bg-card p-4 sm:p-6 lg:w-5xl"
+                className="lg:w-5xl w-full space-y-4 rounded-md border bg-card p-4 sm:p-6"
             >
                 {/* Role Selector */}
                 <div>
@@ -124,11 +124,11 @@ const RolePermissionForm = ({
                                 {selectAll ? 'Deselect All' : 'Select All'}
                             </Button>
                         </div>
-                        <div className="scrollbar-thin scrollbar-thumb-muted scrollbar-track-muted/20 grid max-h-96 grid-cols-3 gap-2 overflow-y-scroll rounded-md border border-border p-2">
+                        <div className="scrollbar-thin scrollbar-thumb-muted scrollbar-track-muted/20 grid max-h-96 grid-cols-3 gap-2 overflow-y-scroll rounded-md border p-2">
                             {permissions.map((perm) => (
                                 <div
                                     key={perm.id}
-                                    className="inline-flex items-center gap-4 rounded-md p-2 transition hover:bg-muted/80"
+                                    className="hover:bg-muted/80 inline-flex items-center gap-4 rounded-md p-2 transition"
                                 >
                                     <input
                                         type="checkbox"
@@ -152,7 +152,7 @@ const RolePermissionForm = ({
                                                 );
                                             }
                                         }}
-                                        className="h-4 w-4 rounded border border-border bg-background text-primary focus:ring-2 focus:ring-ring focus:outline-none"
+                                        className="h-4 w-4 rounded border bg-background text-primary focus:outline-none focus:ring-2 focus:ring-ring"
                                     />
                                     <div className="flex flex-col">
                                         <span className="text-sm font-medium">
@@ -175,7 +175,7 @@ const RolePermissionForm = ({
                     <Button
                         type="submit"
                         disabled={processing || !selectedRole}
-                        className="flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
+                        className="hover:bg-primary/90 flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground transition-all duration-200 hover:shadow-md"
                     >
                         {processing ? (
                             <>

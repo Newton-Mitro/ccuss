@@ -30,7 +30,7 @@ export default function Show({ branch }: ShowProps) {
                     />
                     <Link
                         href="/branches"
-                        className="flex items-center gap-1 rounded border border-border bg-background px-2 py-0.5 hover:bg-muted/20"
+                        className="hover:bg-muted/20 flex items-center gap-1 rounded border bg-background px-2 py-0.5"
                     >
                         <ArrowLeft className="h-3 w-3" />
                         Back
@@ -38,7 +38,7 @@ export default function Show({ branch }: ShowProps) {
                 </div>
 
                 {/* Overview Card */}
-                <div className="rounded-md border border-border bg-card/50 p-2 shadow-sm backdrop-blur-sm">
+                <div className="bg-card/50 rounded-md border p-2 shadow-sm backdrop-blur-sm">
                     <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h2 className="text-lg font-semibold text-primary">
@@ -68,31 +68,31 @@ export default function Show({ branch }: ShowProps) {
 
                 {/* Info Grid */}
                 <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
-                    <div className="rounded-md border border-border bg-card p-2 shadow-sm md:col-span-2 lg:col-span-3">
+                    <div className="rounded-md border bg-card p-2 shadow-sm md:col-span-2 lg:col-span-3">
                         <div className="flex items-start gap-1">
                             <MapPin className="mt-0.5 h-3 w-3 text-primary" />
                             <p>{branch.address}</p>
                         </div>
                     </div>
 
-                    <div className="rounded-md border border-border bg-card p-2 shadow-sm">
+                    <div className="rounded-md border bg-card p-2 shadow-sm">
                         <p>Latitude: {branch.latitude ?? '-'}</p>
                     </div>
-                    <div className="rounded-md border border-border bg-card p-2 shadow-sm">
+                    <div className="rounded-md border bg-card p-2 shadow-sm">
                         <p>Longitude: {branch.longitude ?? '-'}</p>
                     </div>
-                    <div className="rounded-md border border-border bg-card p-2 shadow-sm">
+                    <div className="rounded-md border bg-card p-2 shadow-sm">
                         <p>Manager: {branch?.manager?.name ?? '-'}</p>
                     </div>
                 </div>
 
                 {/* Optional Map */}
                 {hasCoordinates && (
-                    <div className="shadow-sm-inner rounded-md border border-border bg-card/40 p-2">
+                    <div className="shadow-sm-inner bg-card/40 rounded-md border p-2">
                         <iframe
                             title="Branch Map"
                             src={`https://maps.google.com/maps?q=${branch.latitude},${branch.longitude}&z=15&output=embed`}
-                            className="h-96 w-full rounded-sm border border-border"
+                            className="h-96 w-full rounded-sm border"
                             loading="lazy"
                         />
                     </div>

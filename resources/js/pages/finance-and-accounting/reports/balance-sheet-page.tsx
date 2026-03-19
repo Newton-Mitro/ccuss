@@ -88,7 +88,7 @@ export default function BalanceSheetPage() {
                         />
                         <button
                             onClick={() => window.print()}
-                            className="ml-2 rounded-md bg-primary px-3 py-1 text-sm font-medium text-primary-foreground hover:bg-primary/80"
+                            className="hover:bg-primary/80 ml-2 rounded-md bg-primary px-3 py-1 text-sm font-medium text-primary-foreground"
                         >
                             Print
                         </button>
@@ -102,11 +102,11 @@ export default function BalanceSheetPage() {
                         <p className="text-sm">Fiscal Year: {fiscalYearCode}</p>
                     )}
                     <p className="text-sm">Assets = Liabilities + Equity</p>
-                    <hr className="my-2 border-t border-border" />
+                    <hr className="my-2 border-t" />
                 </div>
 
                 {/* Table & Totals */}
-                <div className="print-area rounded-md border border-border p-2 print:rounded-none print:border-none">
+                <div className="print-area rounded-md border p-2 print:rounded-none print:border-none">
                     <table className="w-full border-collapse text-sm print:text-base">
                         <thead className="sticky top-0 bg-muted print:bg-transparent">
                             <tr>
@@ -114,7 +114,7 @@ export default function BalanceSheetPage() {
                                     (h) => (
                                         <th
                                             key={h}
-                                            className="border-b border-border px-2 py-1 text-left font-medium text-muted-foreground print:text-black"
+                                            className="border-b px-2 py-1 text-left font-medium text-muted-foreground print:text-black"
                                         >
                                             {h}
                                         </th>

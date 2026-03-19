@@ -99,7 +99,7 @@ export default function Index() {
                     />
                     <Link
                         href="/tellers/create"
-                        className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                        className="hover:bg-primary/90 flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors"
                     >
                         <Plus className="h-4 w-4" /> Add Teller
                     </Link>
@@ -115,12 +115,12 @@ export default function Index() {
                             setData('search', e.target.value);
                             setData('page', 1);
                         }}
-                        className="h-9 w-full max-w-sm rounded-md border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                 </div>
 
                 {/* Table */}
-                <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border border-border md:h-[calc(100vh-300px)]">
+                <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border md:h-[calc(100vh-300px)]">
                     <table className="w-full border-collapse">
                         <thead className="sticky top-0 bg-muted">
                             <tr>
@@ -135,7 +135,7 @@ export default function Index() {
                                 ].map((header) => (
                                     <th
                                         key={header}
-                                        className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground"
+                                        className="border-b p-2 text-left text-sm font-medium text-muted-foreground"
                                     >
                                         {header}
                                     </th>
@@ -147,7 +147,7 @@ export default function Index() {
                                 tellers.data.map((t) => (
                                     <tr
                                         key={t.id}
-                                        className="border-b border-border even:bg-muted/30"
+                                        className="even:bg-muted/30 border-b"
                                     >
                                         <td className="px-2 py-1">{t.code}</td>
                                         <td className="px-2 py-1">{t.name}</td>
@@ -206,7 +206,7 @@ export default function Index() {
                                                                         t.name,
                                                                     )
                                                                 }
-                                                                className="text-destructive hover:text-destructive/80 disabled:opacity-50"
+                                                                className="hover:text-destructive/80 text-destructive disabled:opacity-50"
                                                             >
                                                                 <Trash2 className="h-5 w-5" />
                                                             </button>
@@ -246,7 +246,7 @@ export default function Index() {
                                 setData('per_page', Number(e.target.value));
                                 setData('page', 1);
                             }}
-                            className="h-9 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+                            className="h-9 rounded-md border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                         >
                             {[5, 10, 20, 50, 100, 500].map((n) => (
                                 <option key={n} value={n}>
@@ -267,7 +267,7 @@ export default function Index() {
                                 className={`rounded-full px-3 py-1 text-sm transition-colors ${
                                     link.active
                                         ? 'bg-primary text-primary-foreground'
-                                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                                        : 'hover:bg-muted/80 bg-muted text-muted-foreground'
                                 }`}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                             />

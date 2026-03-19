@@ -30,7 +30,7 @@ export default function Login({
         <div className="flex min-h-screen items-center justify-center bg-background p-6 font-mono transition-colors duration-300">
             <Head title="Log in" />
 
-            <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-sm transition-colors duration-300 md:p-10 dark:shadow-black/30">
+            <div className="w-full max-w-md rounded-lg border bg-card p-6 shadow-sm transition-colors duration-300 dark:shadow-black/30 md:p-10">
                 {/* Logo + Intro */}
                 <div className="mb-6 flex flex-col items-center text-center">
                     <AppLogoIcon className="mb-3 h-20 w-20 fill-current text-primary transition-colors duration-300" />
@@ -149,7 +149,7 @@ export default function Login({
 
                 {/* Status Message */}
                 {status && (
-                    <div className="mt-4 rounded border border-border bg-muted p-2 text-center text-sm font-medium text-primary transition-colors duration-300">
+                    <div className="mt-4 rounded border bg-muted p-2 text-center text-sm font-medium text-primary transition-colors duration-300">
                         {status}
                     </div>
                 )}

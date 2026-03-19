@@ -83,7 +83,7 @@ export default function BranchDayHistoryPage({
             </div>
 
             {/* Filters */}
-            <div className="mb-4 flex flex-wrap items-end gap-3 rounded-md border border-border bg-card p-4 sm:p-6">
+            <div className="mb-4 flex flex-wrap items-end gap-3 rounded-md border bg-card p-4 sm:p-6">
                 <div className="flex flex-col">
                     <label className="text-xs text-gray-500">From Date</label>
                     <AppDatePicker
@@ -100,7 +100,7 @@ export default function BranchDayHistoryPage({
                 </div>
                 <Button
                     onClick={fetchHistory}
-                    className="bg-primary hover:bg-primary/90"
+                    className="hover:bg-primary/90 bg-primary"
                 >
                     Apply Filter
                 </Button>
@@ -109,7 +109,7 @@ export default function BranchDayHistoryPage({
             {/* ===================== */}
             {/* Desktop Table */}
             {/* ===================== */}
-            <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border border-border md:block">
+            <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border md:block">
                 <table className="w-full border-collapse">
                     <thead className="sticky top-0 bg-muted">
                         <tr>
@@ -121,7 +121,7 @@ export default function BranchDayHistoryPage({
                             ].map((h) => (
                                 <th
                                     key={h}
-                                    className="border-b border-border p-2 text-left text-sm font-medium text-muted-foreground"
+                                    className="border-b p-2 text-left text-sm font-medium text-muted-foreground"
                                 >
                                     {h}
                                 </th>
@@ -132,7 +132,7 @@ export default function BranchDayHistoryPage({
                         {history.map((bd) => (
                             <tr
                                 key={bd.id}
-                                className="border-b border-border even:bg-muted/30 hover:opacity-80"
+                                className="even:bg-muted/30 border-b hover:opacity-80"
                             >
                                 <td className="px-2 py-1">
                                     {formatDateTime(bd.business_date)}
@@ -163,7 +163,7 @@ export default function BranchDayHistoryPage({
                 {history.map((bd) => (
                     <div
                         key={bd.id}
-                        className="space-y-2 rounded-md border border-border bg-card p-3"
+                        className="space-y-2 rounded-md border bg-card p-3"
                     >
                         <div className="flex items-start justify-between">
                             <div>

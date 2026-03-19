@@ -66,7 +66,7 @@ export default function BranchDayStatusPage({ branch_day, branch_id }: Props) {
                 />
             </div>
 
-            <div className="w-full space-y-6 rounded-md border border-border bg-card p-6 sm:p-8 lg:w-5xl">
+            <div className="lg:w-5xl w-full space-y-6 rounded-md border bg-card p-6 sm:p-8">
                 {!branch_day ? (
                     <div className="space-y-4 text-center">
                         <p className="text-gray-600">

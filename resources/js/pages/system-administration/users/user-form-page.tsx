@@ -91,14 +91,14 @@ const UserForm = ({
                     <button
                         type="button"
                         onClick={handleBack}
-                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground transition hover:bg-muted/90"
+                        className="hover:bg-muted/90 flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground transition"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         <span className="hidden sm:inline">Back</span>
                     </button>
                     <Link
                         href="/users"
-                        className="flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition hover:bg-secondary/90"
+                        className="hover:bg-secondary/90 flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition"
                     >
                         <Key className="h-4 w-4" />
                         <span className="hidden sm:inline">Users</span>
@@ -108,7 +108,7 @@ const UserForm = ({
 
             <form
                 onSubmit={handleSubmit}
-                className="w-full space-y-4 rounded-md border border-border bg-card p-4 sm:p-6 lg:w-5xl"
+                className="lg:w-5xl w-full space-y-4 rounded-md border bg-card p-4 sm:p-6"
             >
                 {/* BASIC INFO */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -189,11 +189,11 @@ const UserForm = ({
                 {/* ROLES */}
                 <div>
                     <Label className="text-xs">Roles</Label>
-                    <div className="mt-1 grid max-h-60 grid-cols-3 gap-2 overflow-y-auto rounded-md border border-border p-2">
+                    <div className="mt-1 grid max-h-60 grid-cols-3 gap-2 overflow-y-auto rounded-md border p-2">
                         {roles.map((role) => (
                             <label
                                 key={role.id}
-                                className="rounded-md px-2 py-1.5 transition hover:bg-muted/80"
+                                className="hover:bg-muted/80 rounded-md px-2 py-1.5 transition"
                             >
                                 <div className="inline-flex items-center gap-4">
                                     <input
@@ -216,7 +216,7 @@ const UserForm = ({
                                                 );
                                             }
                                         }}
-                                        className="h-4 w-4 rounded border border-border bg-background text-primary focus:ring-2 focus:ring-ring focus:outline-none"
+                                        className="h-4 w-4 rounded border bg-background text-primary focus:outline-none focus:ring-2 focus:ring-ring"
                                     />
 
                                     <div className="flex flex-col">
@@ -241,7 +241,7 @@ const UserForm = ({
                     <Button
                         type="submit"
                         disabled={processing}
-                        className="flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
+                        className="hover:bg-primary/90 flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground transition-all duration-200 hover:shadow-md"
                     >
                         {processing ? (
                             <>

@@ -43,7 +43,7 @@ function DepositLedgersSection({
         creditLines.length > 0 && creditLines.every((line) => line.is_selected);
 
     return (
-        <div className="flex flex-col gap-4 rounded-md border border-border bg-muted/30 p-4">
+        <div className="bg-muted/30 flex flex-col gap-4 rounded-md border p-4">
             {/* Header */}
             <div className="space-y-4">
                 <h2 className="text-sm font-medium text-primary">
@@ -53,22 +53,22 @@ function DepositLedgersSection({
                 <CustomerSearchBox onSelect={onCustomerSelect} />
 
                 {/* Table Wrapper */}
-                <div className="rounded-md border border-border md:block">
+                <div className="rounded-md border md:block">
                     {/* Table Header */}
                     <div className="bg-muted/30 px-2">
                         <table className="w-full table-fixed border-collapse">
                             <thead>
                                 <tr>
-                                    <th className="w-1/12 border-b border-border p-2 text-center text-sm font-medium text-muted-foreground">
+                                    <th className="w-1/12 border-b p-2 text-center text-sm font-medium text-muted-foreground">
                                         <Checkbox
                                             checked={allSelected}
                                             onCheckedChange={toggleSelectAll}
                                         />
                                     </th>
-                                    <th className="w-8/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                    <th className="w-8/12 border-b p-2 text-left text-sm font-medium text-muted-foreground">
                                         Ledger, Subledger and Particulars
                                     </th>
-                                    <th className="w-3/12 border-b border-border p-2 text-left text-sm font-medium text-muted-foreground">
+                                    <th className="w-3/12 border-b p-2 text-left text-sm font-medium text-muted-foreground">
                                         Amount
                                     </th>
                                 </tr>
@@ -105,7 +105,7 @@ function DepositLedgersSection({
 
                                         {/* Ledger Info */}
                                         <td className="w-8/12 border border-destructive align-middle">
-                                            <div className="-mt-1 flex items-center justify-end border-x border-border px-2 py-1">
+                                            <div className="-mt-1 flex items-center justify-end border-x px-2 py-1">
                                                 <div className="flex gap-2">
                                                     <span className="text-xs text-muted-foreground underline">
                                                         {`${
@@ -116,7 +116,7 @@ function DepositLedgersSection({
                                                 </div>
                                             </div>
                                             {line.particulars && (
-                                                <div className="-mt-1 flex items-center justify-end border-x border-border px-2">
+                                                <div className="-mt-1 flex items-center justify-end border-x px-2">
                                                     <span className="text-xs text-muted-foreground">
                                                         {line.particulars}
                                                     </span>

@@ -36,9 +36,9 @@ function VoucherQueueSection({
 
     return (
         <div className="flex flex-col gap-4 bg-card">
-            <div className="flex h-[calc(100vh/3+18px)] flex-col overflow-hidden rounded-md border border-border">
+            <div className="flex h-[calc(100vh/3+18px)] flex-col overflow-hidden rounded-md border">
                 {/* Header */}
-                <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-destructive/5 px-4 py-3">
+                <div className="bg-destructive/5 sticky top-0 z-10 flex items-center justify-between border-b px-4 py-3">
                     <h2 className="text-sm font-medium">Voucher Queue</h2>
                     <span className="text-xs text-muted-foreground">
                         {vouchers.length} vouchers
@@ -57,7 +57,7 @@ function VoucherQueueSection({
                         return (
                             <div
                                 key={voucher.id}
-                                className="grid grid-cols-[2fr_1fr_1fr_auto] items-center gap-3 bg-background px-3 py-1 transition odd:bg-primary/10 even:bg-accent/10 hover:bg-muted/40"
+                                className="odd:bg-primary/10 even:bg-accent/10 hover:bg-muted/40 grid grid-cols-[2fr_1fr_1fr_auto] items-center gap-3 bg-background px-3 py-1 transition"
                             >
                                 {/* Info */}
                                 <div className="min-w-0">
@@ -132,7 +132,7 @@ function VoucherQueueSection({
                 </div>
 
                 {/* Footer */}
-                <div className="sticky bottom-0 flex flex-wrap items-center justify-center gap-4 border-t bg-muted/30 px-4 py-3 text-sm">
+                <div className="bg-muted/30 sticky bottom-0 flex flex-wrap items-center justify-center gap-4 border-t px-4 py-3 text-sm">
                     <div className="flex items-center gap-2">
                         <span className="text-muted-foreground">
                             {`Total pending amount ${formatBDTCurrency(pendingAmount)} ,and posted ${formatBDTCurrency(

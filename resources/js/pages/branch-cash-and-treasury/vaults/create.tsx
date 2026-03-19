@@ -88,7 +88,7 @@ const VaultForm = ({ backUrl, vault, branches }: VaultFormPageProps) => {
                     <button
                         type="button"
                         onClick={handleBack}
-                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
+                        className="hover:bg-muted/90 flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         <span className="hidden sm:inline">Back</span>
@@ -98,7 +98,7 @@ const VaultForm = ({ backUrl, vault, branches }: VaultFormPageProps) => {
 
             <form
                 onSubmit={handleSubmit}
-                className="w-full space-y-4 rounded-md border border-border bg-card p-4 sm:p-6 lg:w-3xl"
+                className="lg:w-3xl w-full space-y-4 rounded-md border bg-card p-4 sm:p-6"
             >
                 {/* Vault Info */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2">
@@ -168,7 +168,7 @@ const VaultForm = ({ backUrl, vault, branches }: VaultFormPageProps) => {
                     <Button
                         type="submit"
                         disabled={processing}
-                        className="flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground hover:bg-primary/90"
+                        className="hover:bg-primary/90 flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground"
                     >
                         {processing ? (
                             <>

@@ -53,7 +53,7 @@ function EditOrganization() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Edit Organization" />
 
-            <div className="animate-in space-y-8 text-foreground fade-in">
+            <div className="animate-in fade-in space-y-8 text-foreground">
                 <HeadingSmall
                     title="Edit Organization"
                     description="Update organization details and keep your system aligned."
@@ -61,7 +61,7 @@ function EditOrganization() {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="space-y-5 rounded-xl border border-border bg-card/80 p-8 shadow-sm backdrop-blur-sm transition-all duration-300"
+                    className="bg-card/80 space-y-5 rounded-xl border p-8 shadow-sm backdrop-blur-sm transition-all duration-300"
                 >
                     {/* Basic Details */}
                     <div>
@@ -308,7 +308,7 @@ function EditOrganization() {
                         <Button
                             type="submit"
                             disabled={processing}
-                            className="w-40 bg-primary text-primary-foreground hover:bg-primary/90"
+                            className="hover:bg-primary/90 w-40 bg-primary text-primary-foreground"
                         >
                             {processing ? 'Updating...' : 'Update Organization'}
                         </Button>

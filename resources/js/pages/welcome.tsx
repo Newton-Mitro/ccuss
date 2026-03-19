@@ -19,7 +19,7 @@ export default function HomePage() {
                             <img
                                 src="/logo.png"
                                 alt="Logo"
-                                className="relative h-32 w-32 rounded-full border border-border bg-background object-contain p-4 md:h-48 md:w-48"
+                                className="relative h-32 w-32 rounded-full border bg-background object-contain p-4 md:h-48 md:w-48"
                             />
                         </div>
                     </div>
@@ -34,7 +34,7 @@ export default function HomePage() {
                         <span className="text-accent"> Unity </span>
                         Banking
                     </h1>
-                    <p className="text-sm text-muted-foreground/50">
+                    <p className="text-muted-foreground/50 text-sm">
                         Core banking & credit solution for co-operative credit
                         unions.
                     </p>
