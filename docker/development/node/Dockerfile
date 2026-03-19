@@ -1,6 +1,6 @@
 FROM node:20-alpine
 
-WORKDIR /var/www/unity_banking
+WORKDIR /var/www/union_banking
 
 # Copy package files
 COPY package*.json ./

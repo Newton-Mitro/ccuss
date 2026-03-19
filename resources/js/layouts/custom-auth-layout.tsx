@@ -203,10 +203,10 @@ export default function CustomAuthLayout({
                     >
                         <div className="">
                             <h1 className="-mb-1 text-lg font-semibold">
-                                <span className="text-accent"> Unity </span>{' '}
+                                <span className="text-accent"> Union </span>{' '}
                                 Banking
                             </h1>
-                            <p className="text-muted/70 text-xs">
+                            <p className="text-xs text-sidebar-foreground/70">
                                 Core banking & credit solution.
                             </p>
                         </div>
@@ -268,7 +268,7 @@ export default function CustomAuthLayout({
                 {/* Footer */}
                 <div
                     className={cn(
-                        'bg-sidebar-footer border-muted/20 mt-auto flex flex-col border-t px-4 py-3 transition-colors',
+                        'bg-sidebar-footer mt-auto flex flex-col border-t border-muted/20 px-4 py-3 transition-colors',
                         !sidebarOpen && 'items-center',
                     )}
                 >
@@ -276,7 +276,7 @@ export default function CustomAuthLayout({
                     <Link
                         href={'/settings/profile'}
                         className={cn(
-                            'hover:bg-muted/20 group flex w-full items-center gap-3 rounded p-2 transition-colors',
+                            'group flex w-full items-center gap-3 rounded p-2 transition-colors hover:bg-muted/20',
                             !sidebarOpen && 'justify-center',
                         )}
                     >
@@ -294,7 +294,7 @@ export default function CustomAuthLayout({
                                 <span className="text-sm font-medium group-hover:underline">
                                     {auth?.user?.name}
                                 </span>
-                                <span className="text-muted/70 text-xs">
+                                <span className="text-xs text-sidebar-foreground/70">
                                     {auth?.user?.email}
                                 </span>
                             </div>
@@ -303,7 +303,7 @@ export default function CustomAuthLayout({
 
                     {/* Organization & Branch Info */}
                     {sidebarOpen && (
-                        <div className="text-muted/70 flex flex-col gap-0.5 px-2 text-xs">
+                        <div className="flex flex-col gap-0.5 px-2 text-xs text-sidebar-foreground/70">
                             <span>
                                 Organization:{' '}
                                 {auth?.user?.organization?.name || 'N/A'}
@@ -319,7 +319,7 @@ export default function CustomAuthLayout({
                         <button
                             onClick={handleLogout}
                             className={cn(
-                                'hover:bg-destructive/10 flex items-center gap-2 rounded p-2 text-destructive transition-colors',
+                                'flex items-center gap-2 rounded p-2 text-destructive transition-colors hover:bg-destructive/10',
                                 !sidebarOpen && 'justify-center',
                             )}
                             title="Logout"

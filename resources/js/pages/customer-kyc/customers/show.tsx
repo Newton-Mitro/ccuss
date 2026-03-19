@@ -87,7 +87,7 @@ export default function Show({ customer, backUrl }: ShowProps) {
                             {customer.name}
                         </h1>
 
-                        <p className="text-muted/70 text-xs">
+                        <p className="text-xs text-foreground/70">
                             {customer.customer_no} | {customer.type}
                         </p>
 
@@ -440,7 +440,7 @@ const ActionButton = ({ children, icon, as = 'button', ...props }: any) =>
 
 const InfoItem = ({ label, value }: any) => (
     <div className="flex flex-col">
-        <span className="text-muted/80 text-[10px] uppercase">{label}</span>
+        <span className="text-[10px] text-foreground uppercase">{label}</span>
         <span className="text-sm">{value || '—'}</span>
     </div>
 );
@@ -457,11 +457,11 @@ const DataCard = ({
     <div className="group relative rounded-md border bg-card p-3 shadow-sm transition hover:shadow-md">
         {/* Edit/Delete buttons */}
         {(onEdit || onDelete) && (
-            <div className="absolute right-1 top-1 flex gap-1 opacity-0 transition group-hover:opacity-100">
+            <div className="absolute top-1 right-1 flex gap-1 opacity-0 transition group-hover:opacity-100">
                 {onEdit && (
                     <button
                         onClick={onEdit}
-                        className="hover:bg-secondary/80 rounded bg-secondary p-1 text-secondary-foreground"
+                        className="rounded bg-secondary p-1 text-secondary-foreground hover:bg-secondary/80"
                     >
                         <Edit2 size={14} />
                     </button>
@@ -469,7 +469,7 @@ const DataCard = ({
                 {onDelete && (
                     <button
                         onClick={onDelete}
-                        className="hover:bg-destructive/80 rounded bg-destructive p-1 text-destructive-foreground"
+                        className="rounded bg-destructive p-1 text-destructive-foreground hover:bg-destructive/80"
                     >
                         <X size={14} />
                     </button>

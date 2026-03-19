@@ -31,10 +31,10 @@ export default function HomePage() {
                         <span className="text-muted-foreground">
                             Welcome to
                         </span>
-                        <span className="text-accent"> Unity </span>
+                        <span className="text-accent"> Union </span>
                         Banking
                     </h1>
-                    <p className="text-muted-foreground/50 text-sm">
+                    <p className="text-muted-foreground/80 text-sm">
                         Core banking & credit solution for co-operative credit
                         unions.
                     </p>

@@ -5,132 +5,132 @@ services:
     build:
       context: .
       dockerfile: docker/development/php/Dockerfile
-    container_name: unity_banking_app
+    container_name: union_banking_app
     restart: unless-stopped
-    working_dir: /var/www/unity_banking
+    working_dir: /var/www/union_banking
     volumes:
-      - ./:/var/www/unity_banking
-      - ./storage:/var/www/unity_banking/storage
-      - ./bootstrap/cache:/var/www/unity_banking/bootstrap/cache
+      - ./:/var/www/union_banking
+      - ./storage:/var/www/union_banking/storage
+      - ./bootstrap/cache:/var/www/union_banking/bootstrap/cache
     environment:
       APP_ENV: local
       DB_HOST: mysql
       DB_PORT: 3306
-      DB_DATABASE: unity_banking
-      DB_USERNAME: unity_banking_user
+      DB_DATABASE: union_banking
+      DB_USERNAME: union_banking_user
       DB_PASSWORD: secret
       REDIS_HOST: redis
     depends_on:
       - mysql
       - redis
     networks:
-      - unity_banking_network
+      - union_banking_network
 
   # node:
   #   build:
   #     context: .
   #     dockerfile: docker/development/node/Dockerfile
-  #   container_name: unity_banking_node
+  #   container_name: union_banking_node
   #   restart: unless-stopped
-  #   working_dir: /var/www/unity_banking
+  #   working_dir: /var/www/union_banking
   #   volumes:
-  #     - ./:/var/www/unity_banking
-  #     - node_modules:/var/www/unity_banking/node_modules
+  #     - ./:/var/www/union_banking
+  #     - node_modules:/var/www/union_banking/node_modules
   #   ports:
   #     - '5173:5173'
   #   networks:
-  #     - unity_banking_network
+  #     - union_banking_network
   #   command: sh -c "npm install && npm run build && npm run dev"
 
   nginx:
     image: nginx:alpine
-    container_name: unity_banking_nginx
+    container_name: union_banking_nginx
     restart: unless-stopped
     ports:
       - '8000:80'
     volumes:
-      - ./:/var/www/unity_banking
+      - ./:/var/www/union_banking
       - ./docker/development/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - app
     networks:
-      - unity_banking_network
+      - union_banking_network
 
   mysql:
     image: mysql:8.1
-    container_name: unity_banking_mysql
+    container_name: union_banking_mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: unity_banking
-      MYSQL_USER: unity_banking_user
+      MYSQL_DATABASE: union_banking
+      MYSQL_USER: union_banking_user
       MYSQL_PASSWORD: secret
     ports:
       - '3307:3306'
     volumes:
       - db_data:/var/lib/mysql
     networks:
-      - unity_banking_network
+      - union_banking_network
 
   redis:
     image: redis:alpine
-    container_name: unity_banking_redis
+    container_name: union_banking_redis
     restart: unless-stopped
     ports:
       - '6379:6379'
     networks:
-      - unity_banking_network
+      - union_banking_network
 
   scheduler:
     build:
       context: .
       dockerfile: docker/development/php/Dockerfile
-    container_name: unity_banking_scheduler
+    container_name: union_banking_scheduler
     restart: unless-stopped
-    working_dir: /var/www/unity_banking
+    working_dir: /var/www/union_banking
     volumes:
-      - ./:/var/www/unity_banking
+      - ./:/var/www/union_banking
     command: php artisan schedule:work
     depends_on:
       - mysql
       - redis
     networks:
-      - unity_banking_network
+      - union_banking_network
 
   queue:
     build:
       context: .
       dockerfile: docker/development/php/Dockerfile
-    container_name: unity_banking_queue
+    container_name: union_banking_queue
     restart: unless-stopped
-    working_dir: /var/www/unity_banking
+    working_dir: /var/www/union_banking
     volumes:
-      - ./:/var/www/unity_banking
+      - ./:/var/www/union_banking
     command: php artisan queue:work redis --sleep=3 --tries=3 --timeout=90
     depends_on:
       - mysql
       - redis
     networks:
-      - unity_banking_network
+      - union_banking_network
 
   horizon:
     build:
       context: .
       dockerfile: docker/development/php/Dockerfile
-    container_name: unity_banking_horizon
+    container_name: union_banking_horizon
     restart: unless-stopped
-    working_dir: /var/www/unity_banking
+    working_dir: /var/www/union_banking
     volumes:
-      - ./:/var/www/unity_banking
+      - ./:/var/www/union_banking
     command: php artisan horizon
     depends_on:
       - redis
       - mysql
     networks:
-      - unity_banking_network
+      - union_banking_network
 
 networks:
-  unity_banking_network:
+  union_banking_network:
     driver: bridge
 
 volumes:

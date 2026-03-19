@@ -2,7 +2,7 @@
 
 namespace App\SystemAdministration\Traits;
 
-use App\Audit\Models\AuditLog;
+use App\SystemAdministration\Models\AuditLog;
 use Illuminate\Support\Str;
 
 trait Auditable
