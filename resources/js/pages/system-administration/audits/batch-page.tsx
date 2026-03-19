@@ -1,9 +1,9 @@
 import { Head } from '@inertiajs/react';
-import HeadingSmall from '../../components/heading-small';
-import CustomAuthLayout from '../../layouts/custom-auth-layout';
-import { formatDateTime } from '../../lib/date_util';
-import { BreadcrumbItem } from '../../types';
-import { AuditBatch } from '../../types/audit_models';
+import HeadingSmall from '../../../components/heading-small';
+import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { formatDateTime } from '../../../lib/date_util';
+import { BreadcrumbItem } from '../../../types';
+import { AuditBatch } from '../../../types/audit_models';
 
 interface BatchPageProps {
     batch: AuditBatch;

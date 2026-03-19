@@ -1,6 +1,7 @@
 <?php
 
-use App\Audit\Controllers\AuditLogController;
+use App\SystemAdministration\Controllers\AuditLogController;
+use App\SystemAdministration\Controllers\DatabaseBackupController;
 use App\SystemAdministration\Controllers\OrganizationController;
 use App\SystemAdministration\Controllers\RolePermissionController;
 use App\SystemAdministration\Controllers\UserController;
@@ -28,4 +29,10 @@ Route::prefix('audits')->middleware(['auth'])->group(function () {
     Route::get('/', [AuditLogController::class, 'index'])->name('audits.index');
     Route::get('/model', [AuditLogController::class, 'model'])->name('audits.model');
     Route::get('/batch/{batchId}', [AuditLogController::class, 'batch'])->name('audits.batch');
+});
+
+Route::middleware(['auth',])->group(function () {
+    Route::get('database/backups', [DatabaseBackupController::class, 'history'])->name('backup.history');
+    Route::post('/database/backups', [DatabaseBackupController::class, 'backup'])->name('backup.run');
+    Route::delete('/database/backups/{id}', [DatabaseBackupController::class, 'destroy'])->name('backup.destroy');
 });

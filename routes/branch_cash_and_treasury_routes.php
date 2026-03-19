@@ -29,7 +29,7 @@ Route::prefix('branch-cash')->group(function () {
     Route::get('branch-day/status', [BranchDayController::class, 'index'])->name('branch-day.index');
     Route::get('branch-day/open', [BranchDayController::class, 'create'])->name('branch-day.open.page');
     Route::post('branch-day/open', [BranchDayController::class, 'open'])->name('branch-day.open');
-    Route::post('branch-day/close', [BranchDayController::class, 'branch-day.close'])->name('branch-day.close');
+    Route::post('branch-day/close', [BranchDayController::class, 'close'])->name('branch-day.close');
     Route::get('branch-day/history', [BranchDayController::class, 'history'])->name('branch-day.history');
 
     Route::get('vault-transfer/teller', [VaultTransferController::class, 'createVaultToTeller'])->name('vault.transfer.teller.page');

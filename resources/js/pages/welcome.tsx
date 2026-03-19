@@ -4,7 +4,9 @@ import CustomAuthLayout from '../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../types';
 
 export default function HomePage() {
-    const breadcrumbs: BreadcrumbItem[] = [{ title: 'Home', href: '/home' }];
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Home', href: '/dashboard' },
+    ];
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Home" />
@@ -26,11 +28,15 @@ export default function HomePage() {
                 {/* Footer Hint */}
                 <div className="flex flex-col items-center justify-center">
                     <h1 className="text-3xl font-semibold">
-                        <span className="text-accent">Welcome to</span> Unity
+                        <span className="text-muted-foreground">
+                            Welcome to
+                        </span>
+                        <span className="text-accent"> Unity </span>
                         Banking
                     </h1>
                     <p className="text-sm text-muted-foreground/50">
-                        Core banking and credit solution for credit unions.
+                        Core banking & credit solution for co-operative credit
+                        unions.
                     </p>
                 </div>
             </div>

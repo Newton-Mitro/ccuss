@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Audit\Models\DatabaseBackupLog;
+use App\SystemAdministration\Models\DatabaseBackupLog;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;

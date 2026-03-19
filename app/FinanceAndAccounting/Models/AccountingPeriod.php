@@ -2,7 +2,7 @@
 
 namespace App\FinanceAndAccounting\Models;
 
-use App\Audit\Traits\Auditable;
+use App\SystemAdministration\Traits\Auditable;
 use App\SystemAdministration\Models\Organization;
 use Database\Factories\AccountingPeriodFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

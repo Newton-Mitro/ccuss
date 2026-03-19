@@ -2,7 +2,7 @@
 
 namespace App\FinanceAndAccounting\Models;
 
-use App\Audit\Traits\Auditable;
+use App\SystemAdministration\Traits\Auditable;
 use Database\Factories\VoucherLineFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

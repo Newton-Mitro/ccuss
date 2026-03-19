@@ -10,10 +10,10 @@ import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import { route } from 'ziggy-js';
-import HeadingSmall from '../../components/heading-small';
-import CustomAuthLayout from '../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../types';
-import { Branch } from '../../types/branch';
+import HeadingSmall from '../../../components/heading-small';
+import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { BreadcrumbItem } from '../../../types';
+import { Branch } from '../../../types/branch';
 
 interface BranchPageProps {
     branches: {

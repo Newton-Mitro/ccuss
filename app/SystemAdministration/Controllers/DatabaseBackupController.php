@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\SystemAdministration\Controllers;
 
-use App\Audit\Models\DatabaseBackupLog;
+use App\Http\Controllers\Controller;
 use App\Jobs\RunDatabaseBackup;
+use App\SystemAdministration\Models\DatabaseBackupLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Inertia\Inertia;
@@ -26,7 +27,7 @@ class DatabaseBackupController extends Controller
         $logs = $query->latest()->paginate($perPage)->withQueryString();
 
         // Return Inertia response with filters included
-        return Inertia::render('database-backup/history', [
+        return Inertia::render('system-administration/database-backup/history', [
             'logs' => $logs,
             'filters' => [
                 'search' => $search,

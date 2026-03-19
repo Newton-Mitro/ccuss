@@ -2,10 +2,10 @@
 
 namespace App\CustomerModule\Models;
 
-use App\Audit\Traits\Auditable;
 use App\SystemAdministration\Models\User;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Branch;
+use App\SystemAdministration\Traits\Auditable;
 use Database\Factories\CustomerFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

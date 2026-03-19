@@ -2,14 +2,17 @@ import { SidebarItem } from '../../types';
 
 export const savingDepositMenu: SidebarItem[] = [
     {
-        name: 'Saving Deposit',
-        icon: <i className="fa-solid fa-piggy-bank" />, // overall deposit
+        name: 'Saving Deposit Management',
+        icon: <i className="fa-solid fa-piggy-bank" />,
         children_expanded: false,
         permission: ['account.view'],
         children: [
+            // ===============================
+            // Deposit Product Config
+            // ===============================
             {
                 name: 'Deposit Product Config',
-                icon: <i className="fa-solid fa-cogs" />, // configuration
+                icon: <i className="fa-solid fa-cogs" />,
                 children_expanded: false,
                 permission: ['deposit.product.view'],
                 children: [
@@ -50,6 +53,10 @@ export const savingDepositMenu: SidebarItem[] = [
                     },
                 ],
             },
+
+            // ===============================
+            // Deposit Accounts
+            // ===============================
             {
                 name: 'Deposit Accounts',
                 icon: <i className="fa-solid fa-wallet" />,
@@ -79,6 +86,10 @@ export const savingDepositMenu: SidebarItem[] = [
                     },
                 ],
             },
+
+            // ===============================
+            // Member Management
+            // ===============================
             {
                 name: 'Member Management',
                 icon: <i className="fa-solid fa-users" />,
@@ -108,6 +119,10 @@ export const savingDepositMenu: SidebarItem[] = [
                     },
                 ],
             },
+
+            // ===============================
+            // Recurring & Term Deposits
+            // ===============================
             {
                 name: 'Recurring Deposit',
                 icon: <i className="fa-solid fa-calendar-plus" />,
@@ -120,13 +135,6 @@ export const savingDepositMenu: SidebarItem[] = [
                         path: '/rd-accounts',
                         match_path: 'rd-accounts',
                         permission: ['recurring.deposit.view'],
-                    },
-                    {
-                        name: 'Interest Posting',
-                        icon: <i className="fa-solid fa-percent" />,
-                        path: '/rd-interest-posting',
-                        match_path: 'rd-interest-posting',
-                        permission: ['recurring.deposit.interest.view'],
                     },
                 ],
             },
@@ -143,41 +151,34 @@ export const savingDepositMenu: SidebarItem[] = [
                         match_path: 'td-accounts',
                         permission: ['term.deposit.view'],
                     },
+                ],
+            },
+
+            // ===============================
+            // Deposit Servicing (merged interest posting)
+            // ===============================
+            {
+                name: 'Deposit Servicing',
+                icon: <i className="fa-solid fa-hand-holding-dollar" />,
+                children_expanded: false,
+                permission: ['deposit.servicing.view'],
+                children: [
+                    {
+                        name: 'Active Deposit Accounts',
+                        icon: <i className="fa-solid fa-wallet" />,
+                        path: '/deposit-active-accounts',
+                        match_path: 'deposit-active-accounts',
+                        permission: ['deposit.account.view'],
+                    },
                     {
                         name: 'Interest Posting',
                         icon: <i className="fa-solid fa-percent" />,
-                        path: '/td-interest-posting',
-                        match_path: 'td-interest-posting',
-                        permission: ['term.deposit.interest.view'],
-                    },
-                ],
-            },
-            {
-                name: 'Transactions',
-                icon: <i className="fa-solid fa-exchange-alt" />,
-                children_expanded: false,
-                permission: ['deposit.transaction.view'],
-                children: [
-                    {
-                        name: 'Deposit Transactions',
-                        icon: <i className="fa-solid fa-arrow-down" />,
-                        path: '/deposit-transactions',
-                        match_path: 'deposit-transactions',
-                        permission: ['deposit.transaction.create'],
-                    },
-                    {
-                        name: 'Withdrawal Transactions',
-                        icon: <i className="fa-solid fa-arrow-up" />,
-                        path: '/withdrawal-transactions',
-                        match_path: 'withdrawal-transactions',
-                        permission: ['withdrawal.transaction.create'],
-                    },
-                    {
-                        name: 'Transfer Transactions',
-                        icon: <i className="fa-solid fa-exchange-alt" />,
-                        path: '/transfer-transactions',
-                        match_path: 'transfer-transactions',
-                        permission: ['transfer.transaction.create'],
+                        path: '/deposit-interest-penalty-posting',
+                        match_path: 'deposit-interest-penalty-posting',
+                        permission: [
+                            'deposit.interest.posting',
+                            'deposit.penalty.posting',
+                        ],
                     },
                     {
                         name: 'Late Payment Penalty',
@@ -187,14 +188,47 @@ export const savingDepositMenu: SidebarItem[] = [
                         permission: ['deposit.penalty.view'],
                     },
                     {
-                        name: 'Fees and Charges',
+                        name: 'Fees and Charge Posting',
                         icon: <i className="fa-solid fa-coins" />,
                         path: '/transaction-fees',
                         match_path: 'transaction-fees',
                         permission: ['deposit.fees.view'],
                     },
+                    {
+                        name: 'Deposits / Withdrawals',
+                        icon: <i className="fa-solid fa-arrow-up-right-dots" />,
+                        path: '/deposit-transactions',
+                        match_path: 'deposit-transactions',
+                        permission: ['deposit.transaction.view'],
+                    },
+                    {
+                        name: 'Transfers',
+                        icon: <i className="fa-solid fa-exchange-alt" />,
+                        path: '/deposit-transfers',
+                        match_path: 'deposit-transfers',
+                        permission: ['deposit.transfer.view'],
+                    },
+
+                    {
+                        name: 'Account Closures',
+                        icon: <i className="fa-solid fa-door-closed" />,
+                        path: '/deposit-closures',
+                        match_path: 'deposit-closures',
+                        permission: ['deposit.closure.view'],
+                    },
+                    {
+                        name: 'Account Statements',
+                        icon: <i className="fa-solid fa-file-invoice" />,
+                        path: '/deposit-statements',
+                        match_path: 'deposit-statements',
+                        permission: ['deposit.statement.view'],
+                    },
                 ],
             },
+
+            // ===============================
+            // Cheque Management
+            // ===============================
             {
                 name: 'Cheque Management',
                 icon: <i className="fa-solid fa-file-invoice" />,
@@ -245,6 +279,10 @@ export const savingDepositMenu: SidebarItem[] = [
                     },
                 ],
             },
+
+            // ===============================
+            // Deposit Reports
+            // ===============================
             {
                 name: 'Deposit Reports',
                 icon: <i className="fa-solid fa-chart-line" />,

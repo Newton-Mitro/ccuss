@@ -56,7 +56,7 @@ export default function History() {
     useEffect(() => {
         const interval = setInterval(() => {
             get(route('backup.history'), { preserveState: true });
-        }, 60000);
+        }, 5000);
         return () => clearInterval(interval);
     }, []);
 

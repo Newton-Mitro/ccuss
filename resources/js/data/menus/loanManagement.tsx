@@ -7,9 +7,12 @@ export const loanManagementMenu: SidebarItem[] = [
         children_expanded: false,
         permission: ['loan.view'],
         children: [
+            // ===============================
+            // Loan Product Config
+            // ===============================
             {
                 name: 'Loan Product Config',
-                icon: <i className="fa-solid fa-cogs" />,
+                icon: <i className="fa-solid fa-cogs" />, // configuration
                 children_expanded: false,
                 permission: ['loan.product.view'],
                 children: [
@@ -20,8 +23,56 @@ export const loanManagementMenu: SidebarItem[] = [
                         match_path: 'loan-products',
                         permission: ['loan.product.create'],
                     },
+                    {
+                        name: 'Product Interest Rules',
+                        icon: <i className="fa-solid fa-percent" />,
+                        path: '/loan-interest-rules',
+                        match_path: 'loan-interest-rules',
+                        permission: ['loan.interest.view'],
+                    },
+                    {
+                        name: 'Product Fees',
+                        icon: <i className="fa-solid fa-coins" />,
+                        path: '/loan-fees',
+                        match_path: 'loan-fees',
+                        permission: ['loan.fees.view'],
+                    },
+                    {
+                        name: 'Product Charges',
+                        icon: <i className="fa-solid fa-file-invoice-dollar" />,
+                        path: '/loan-charges',
+                        match_path: 'loan-charges',
+                        permission: ['loan.charges.view'],
+                    },
+                    {
+                        name: 'Product Eligibility',
+                        icon: <i className="fa-solid fa-user-check" />,
+                        path: '/loan-eligibility',
+                        match_path: 'loan-eligibility',
+                        permission: ['loan.eligibility.view'],
+                    },
+                    {
+                        name: 'Prepayment / Early Closure Rules',
+                        icon: (
+                            <i className="fa-solid fa-arrow-right-from-bracket" />
+                        ),
+                        path: '/loan-prepayment-rules',
+                        match_path: 'loan-prepayment-rules',
+                        permission: ['loan.prepayment.view'],
+                    },
+                    {
+                        name: 'Penalties / Fine Rules',
+                        icon: <i className="fa-solid fa-gavel" />,
+                        path: '/loan-fine-rules',
+                        match_path: 'loan-fine-rules',
+                        permission: ['loan.fine.view'],
+                    },
                 ],
             },
+
+            // ===============================
+            // Loan Processing
+            // ===============================
             {
                 name: 'Loan Processing',
                 icon: <i className="fa-solid fa-file-invoice-dollar" />,
@@ -51,6 +102,10 @@ export const loanManagementMenu: SidebarItem[] = [
                     },
                 ],
             },
+
+            // ===============================
+            // Loan Servicing
+            // ===============================
             {
                 name: 'Loan Servicing',
                 icon: <i className="fa-solid fa-user-clock" />,
@@ -92,8 +147,42 @@ export const loanManagementMenu: SidebarItem[] = [
                         match_path: 'loan-recoveries',
                         permission: ['loan.recovery.view'],
                     },
+                    {
+                        name: 'Interest / Fine Posting',
+                        icon: <i className="fa-solid fa-file-invoice" />,
+                        path: '/loan-interest-fine',
+                        match_path: 'loan-interest-fine',
+                        permission: ['loan.interest-fine.view'],
+                    },
+                    {
+                        name: 'Prepayments / Early Repayments',
+                        icon: (
+                            <i className="fa-solid fa-arrow-right-from-bracket" />
+                        ),
+                        path: '/loan-prepayments',
+                        match_path: 'loan-prepayments',
+                        permission: ['loan.prepayment.view'],
+                    },
+                    {
+                        name: 'Loan Write-Offs',
+                        icon: <i className="fa-solid fa-trash-can" />,
+                        path: '/loan-write-offs',
+                        match_path: 'loan-write-offs',
+                        permission: ['loan.writeoff.view'],
+                    },
+                    {
+                        name: 'Loan Statements',
+                        icon: <i className="fa-solid fa-file-invoice" />,
+                        path: '/loan-statements',
+                        match_path: 'loan-statements',
+                        permission: ['loan.statement.view'],
+                    },
                 ],
             },
+
+            // ===============================
+            // Loan Reports
+            // ===============================
             {
                 name: 'Loan Reports',
                 icon: <i className="fa-solid fa-chart-pie" />,
@@ -114,6 +203,13 @@ export const loanManagementMenu: SidebarItem[] = [
                         ),
                         path: '/loan-delinquency',
                         match_path: 'loan-delinquency',
+                        permission: ['loan.report.view'],
+                    },
+                    {
+                        name: 'Recovery / Collection Reports',
+                        icon: <i className="fa-solid fa-hand-holding-hand" />,
+                        path: '/loan-recovery-reports',
+                        match_path: 'loan-recovery-reports',
                         permission: ['loan.report.view'],
                     },
                 ],

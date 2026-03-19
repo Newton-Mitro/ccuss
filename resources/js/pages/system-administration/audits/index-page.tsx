@@ -8,11 +8,11 @@ import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { Archive, ListChecks } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-import HeadingSmall from '../../components/heading-small';
-import CustomAuthLayout from '../../layouts/custom-auth-layout';
-import { formatDateTime } from '../../lib/date_util';
-import { BreadcrumbItem } from '../../types';
-import { Audit } from '../../types/audit_models';
+import HeadingSmall from '../../../components/heading-small';
+import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { formatDateTime } from '../../../lib/date_util';
+import { BreadcrumbItem } from '../../../types';
+import { Audit } from '../../../types/audit_models';
 
 interface AuditsPageProps {
     audits: {

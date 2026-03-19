@@ -26,7 +26,7 @@ return new class extends Migration {
         // -----------------------
         // Transactions Table (with morph)
         // -----------------------
-        Schema::create('transactions', function (Blueprint $table) {
+        Schema::create('transaction_lines', function (Blueprint $table) {
             $table->id();
             $table->foreignId('organization_id')->constrained();
             $table->foreignId('branch_id')->constrained();
@@ -35,12 +35,8 @@ return new class extends Migration {
             // Polymorphic relation to any module (loan, deposit, cash, vendor, etc.)
             $table->morphs('transactionable'); // creates `transactionable_id` + `transactionable_type`
 
-            $table->enum('transaction_type', ['credit', 'debit']);
-            $table->decimal('amount', 18, 2);
-
-            // Accounts involved in double-entry
-            $table->nullableMorphs('account_from');
-            $table->nullableMorphs('account_to');
+            $table->decimal('debit', 18, 2)->default(0);
+            $table->decimal('credit', 18, 2)->default(0);
 
             $table->string('description')->nullable();
             $table->dateTime('transaction_date')->default(DB::raw('CURRENT_TIMESTAMP'));
@@ -52,7 +48,7 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('transactions');
+        Schema::dropIfExists('transaction_lines');
         Schema::dropIfExists('transaction_batches');
     }
 };

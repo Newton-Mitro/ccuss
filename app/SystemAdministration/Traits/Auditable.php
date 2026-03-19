@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Audit\Traits;
+namespace App\SystemAdministration\Traits;
 
 use App\Audit\Models\AuditLog;
 use Illuminate\Support\Str;

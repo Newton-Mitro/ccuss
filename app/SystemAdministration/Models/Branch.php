@@ -2,7 +2,7 @@
 
 namespace App\SystemAdministration\Models;
 
-use App\Audit\Traits\Auditable;
+use App\SystemAdministration\Traits\Auditable;
 use App\CustomerModule\Models\Customer;
 use Database\Factories\BranchFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

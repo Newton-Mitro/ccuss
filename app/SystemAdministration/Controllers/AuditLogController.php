@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Audit\Controllers;
+namespace App\SystemAdministration\Controllers;
 
-use App\Audit\Models\AuditLog;
 use App\Http\Controllers\Controller;
+use App\SystemAdministration\Models\AuditLog;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -20,13 +20,16 @@ class AuditLogController extends Controller
             ->with('creator')
             ->when($request->event, fn($q) => $q->where('event', $request->event))
             ->when($request->user_id, fn($q) => $q->where('user_id', $request->user_id))
-            ->select('audits.*')
+            ->whereIn('id', function ($query) {
+                $query->selectRaw('MAX(id)')
+                    ->from('audit_logs')
+                    ->groupBy('batch_id');
+            })
             ->orderBy('created_at', 'desc')
-            ->distinct('batch_id')
             ->paginate($perPage)
             ->withQueryString();
 
-        return Inertia::render('audits/index-page', [
+        return Inertia::render('system-administration/audits/index-page', [
             'audits' => $audits,
             'filters' => $request->only(['event', 'user_id', 'page', 'per_page']),
         ]);
@@ -46,8 +49,8 @@ class AuditLogController extends Controller
 
         $batches = AuditLog::query()
             ->select('a.*')
-            ->from('audits as a')
-            ->join('audits as b', 'b.batch_id', '=', 'a.batch_id')
+            ->from('audit_logs as a')
+            ->join('audit_logs as b', 'b.batch_id', '=', 'a.batch_id')
             ->where('b.auditable_type', $validated['type'])
             ->where('b.auditable_id', $validated['id'])
             ->with('creator')
@@ -57,7 +60,7 @@ class AuditLogController extends Controller
             ->map(fn($items) => $this->formatBatch($items))
             ->values();
 
-        return Inertia::render('audits/model-history-page', [
+        return Inertia::render('system-administration/audits/model-history-page', [
             'auditableType' => class_basename($validated['type']),
             'auditableId' => $validated['id'],
             'batches' => $batches,
@@ -76,7 +79,7 @@ class AuditLogController extends Controller
 
         abort_if($audits->isEmpty(), 404);
 
-        return Inertia::render('audits/batch-page', [
+        return Inertia::render('system-administration/audits/batch-page', [
             'batch' => [
                 'batch_id' => $batchId,
                 'event_at' => $audits->first()->created_at,

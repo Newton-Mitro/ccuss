@@ -67,8 +67,8 @@ export const systemAdministrationMenu: SidebarItem[] = [
                     {
                         name: 'Activity Logs',
                         icon: <i className="fa-solid fa-file-alt" />,
-                        path: '/audit-logs',
-                        match_path: 'audit-logs',
+                        path: '/audits',
+                        match_path: 'audits',
                         permission: ['audit.logs.view'],
                     },
                     {
@@ -83,6 +83,13 @@ export const systemAdministrationMenu: SidebarItem[] = [
                         icon: <i className="fa-solid fa-envelope-open-text" />,
                         path: '/email-logs',
                         match_path: 'email-logs',
+                        permission: ['email.logs.view'],
+                    },
+                    {
+                        name: 'Queue Logs',
+                        icon: <i className="fa-solid fa-envelope-open-text" />,
+                        path: '/horizon/dashboard',
+                        match_path: 'horizon/dashboard',
                         permission: ['email.logs.view'],
                     },
                     {

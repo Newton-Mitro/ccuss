@@ -2,7 +2,7 @@
 
 namespace App\FinanceAndAccounting\Models;
 
-use App\Audit\Traits\Auditable;
+use App\SystemAdministration\Traits\Auditable;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\User;

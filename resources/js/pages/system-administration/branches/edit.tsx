@@ -1,16 +1,16 @@
 import { Head, useForm } from '@inertiajs/react';
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
-import HeadingSmall from '../../components/heading-small';
-import InputError from '../../components/input-error';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Label } from '../../components/ui/label';
-import CustomAuthLayout from '../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../types';
-import { Branch } from '../../types/branch';
-import { Customer } from '../../types/customer';
-import { CustomerSearchInput } from '../customer-module/customers/customer-search-input';
+import HeadingSmall from '../../../components/heading-small';
+import InputError from '../../../components/input-error';
+import { Button } from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label';
+import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { BreadcrumbItem } from '../../../types';
+import { Branch } from '../../../types/branch';
+import { Customer } from '../../../types/customer_kyc_module';
+import { CustomerSearchInput } from '../../customer-module/customers/customer-search-input';
 
 interface EditBranchProps {
     branch: Branch;

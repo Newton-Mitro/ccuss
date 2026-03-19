@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Audit\Middleware;
+namespace App\SystemAdministration\Middleware;
 
 use Closure;
 use Illuminate\Support\Str;

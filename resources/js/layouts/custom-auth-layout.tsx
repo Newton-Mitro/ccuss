@@ -6,7 +6,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { UserInfo } from '@/components/user-info';
+import { useInitials } from '@/hooks/use-initials';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { cn } from '@/lib/utils';
 import { logout } from '@/routes';
@@ -16,15 +16,20 @@ import {
     ChevronsUp,
     LogOut,
     Menu,
+    Monitor,
+    Moon,
     Search,
+    Sun,
     UserCircle,
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { Breadcrumbs } from '../components/breadcrumbs';
 import { SidebarMenuItem } from '../components/sidebar-menu-item';
+import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { sidebarMenu } from '../data/menus';
 import { sidebarMenuPermissions } from '../data/permissions';
+import { Appearance, useAppearance } from '../hooks/use-appearance';
 import { filterMenuByPermission } from '../lib/filter_menu_by_permission';
 import { edit } from '../routes/profile';
 import { BreadcrumbItem, SharedData, SidebarItem } from '../types';
@@ -76,6 +81,8 @@ export default function CustomAuthLayout({
      * Sidebar scroll preservation
      * ------------------------------------------------------------------ */
     const sidebarScrollRef = useRef<HTMLDivElement | null>(null);
+    const getInitials = useInitials();
+    const { appearance, updateAppearance } = useAppearance();
 
     // Save scroll position
     useEffect(() => {
@@ -170,20 +177,31 @@ export default function CustomAuthLayout({
             {/* Sidebar */}
             <aside
                 className={cn(
-                    'flex-shrink-0 border-r transition-all duration-300 print:hidden',
+                    'flex flex-col border-r transition-all duration-300 print:hidden', // flex-col for vertical layout
                     sidebarOpen ? 'w-72' : 'w-16',
                 )}
             >
                 {/* Logo */}
-                <div className="flex h-16 items-center gap-2 border-b px-4">
-                    <img src="/logo.png" className="h-8 w-8" />
+                <div className="flex h-16 items-center gap-2 border-b pl-4">
+                    <img
+                        src="/logo.png"
+                        className="h-10 w-10 rounded-full p-1"
+                    />
                     <span
                         className={cn(
                             'font-semibold transition-opacity',
                             sidebarOpen ? 'inline-block' : 'hidden w-0',
                         )}
                     >
-                        {import.meta.env.VITE_APP_NAME}
+                        <div className="">
+                            <h1 className="-mb-1 text-lg font-semibold">
+                                <span className="text-accent"> Unity </span>{' '}
+                                Banking
+                            </h1>
+                            <p className="text-xs text-muted-foreground/50">
+                                Core banking & credit solution.
+                            </p>
+                        </div>
                     </span>
                 </div>
 
@@ -225,7 +243,7 @@ export default function CustomAuthLayout({
                 {/* Menu */}
                 <nav
                     ref={sidebarScrollRef}
-                    className="h-[calc(100%-8rem)] overflow-y-auto px-2 pb-4"
+                    className="flex-1 overflow-y-auto px-2 pb-4" // flex-1 takes remaining space
                 >
                     <ul className="space-y-0">
                         {filteredMenu.map((item, index) => (
@@ -238,6 +256,71 @@ export default function CustomAuthLayout({
                         ))}
                     </ul>
                 </nav>
+
+                {/* Footer */}
+                <div
+                    className={cn(
+                        'bg-sidebar-footer mt-auto flex flex-col border-t border-muted/20 px-4 py-3 transition-colors',
+                        !sidebarOpen && 'items-center',
+                    )}
+                >
+                    {/* User Info */}
+                    <Link
+                        href={'/settings/profile'}
+                        className={cn(
+                            'group flex w-full items-center gap-3 rounded p-2 transition-colors hover:bg-muted/20',
+                            !sidebarOpen && 'justify-center',
+                        )}
+                    >
+                        <Avatar className="h-8 w-8 overflow-hidden rounded-full">
+                            <AvatarImage
+                                src={auth?.user?.avatar}
+                                alt={auth?.user?.name}
+                            />
+                            <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                                {getInitials(auth?.user?.name)}
+                            </AvatarFallback>
+                        </Avatar>
+                        {sidebarOpen && (
+                            <div className="flex flex-col text-left">
+                                <span className="text-sm font-medium group-hover:underline">
+                                    {auth?.user?.name}
+                                </span>
+                                <span className="text-xs text-muted-foreground/70">
+                                    {auth?.user?.email}
+                                </span>
+                            </div>
+                        )}
+                    </Link>
+
+                    {/* Organization & Branch Info */}
+                    {sidebarOpen && (
+                        <div className="flex flex-col gap-0.5 px-2 text-xs text-muted-foreground/60">
+                            <span>
+                                Organization:{' '}
+                                {auth?.user?.organization?.name || 'N/A'}
+                            </span>
+                            <span>
+                                Branch: {auth?.user?.branch?.name || 'N/A'}
+                            </span>
+                        </div>
+                    )}
+
+                    {/* Settings & Logout */}
+                    <div className="mt-1 flex flex-col">
+                        <button
+                            onClick={handleLogout}
+                            className={cn(
+                                'flex items-center gap-2 rounded p-2 text-destructive transition-colors hover:bg-destructive/10',
+                                !sidebarOpen && 'justify-center',
+                            )}
+                            title="Logout"
+                        >
+                            <LogOut size={16} />
+                            {sidebarOpen && <span>Log out</span>}
+                        </button>
+                    </div>
+                </div>
             </aside>
 
             {/* Main */}
@@ -255,38 +338,89 @@ export default function CustomAuthLayout({
                         )}
                     </div>
 
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <button className="flex items-center gap-2 rounded px-2 py-1">
-                                <UserInfo user={auth?.user} showEmail />
-                            </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-52">
-                            <DropdownMenuGroup>
-                                <DropdownMenuItem asChild>
-                                    <Link
-                                        href={edit()}
-                                        preserveScroll
-                                        onClick={cleanup}
-                                        className="flex gap-2"
-                                    >
-                                        <UserCircle size={16} />
-                                        Profile
-                                    </Link>
-                                </DropdownMenuItem>
-                            </DropdownMenuGroup>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem asChild>
-                                <button
-                                    onClick={handleLogout}
-                                    className="flex w-full gap-2 text-destructive"
-                                >
-                                    <LogOut size={16} />
-                                    Log out
+                    <div className="flex gap-2">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button className="flex items-center gap-2 rounded px-2 py-1 transition-colors hover:bg-muted">
+                                    <Monitor size={18} />
                                 </button>
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                            </DropdownMenuTrigger>
+
+                            <DropdownMenuContent align="end" className="w-36">
+                                {['light', 'dark', 'system'].map((mode) => (
+                                    <DropdownMenuItem key={mode} asChild>
+                                        <button
+                                            className={cn(
+                                                'flex w-full items-center gap-2',
+                                                appearance === mode
+                                                    ? 'font-semibold'
+                                                    : 'font-normal',
+                                            )}
+                                            onClick={() =>
+                                                updateAppearance(
+                                                    mode as Appearance,
+                                                )
+                                            }
+                                        >
+                                            {mode === 'light' && (
+                                                <Sun size={16} />
+                                            )}
+                                            {mode === 'dark' && (
+                                                <Moon size={16} />
+                                            )}
+                                            {mode === 'system' && (
+                                                <Monitor size={16} />
+                                            )}
+                                            <span className="capitalize">
+                                                {mode}
+                                            </span>
+                                        </button>
+                                    </DropdownMenuItem>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button className="flex items-center gap-2 rounded px-2 py-1">
+                                    <Avatar className="h-8 w-8 overflow-hidden rounded-full">
+                                        <AvatarImage
+                                            src={auth?.user?.avatar}
+                                            alt={auth?.user.name}
+                                        />
+                                        <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                                            {getInitials(auth?.user.name)}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-52">
+                                <DropdownMenuGroup>
+                                    <DropdownMenuItem asChild>
+                                        <Link
+                                            href={edit()}
+                                            preserveScroll
+                                            onClick={cleanup}
+                                            className="flex gap-2"
+                                        >
+                                            <UserCircle size={16} />
+                                            Profile
+                                        </Link>
+                                    </DropdownMenuItem>
+                                </DropdownMenuGroup>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem asChild>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="flex w-full gap-2 text-destructive"
+                                    >
+                                        <LogOut size={16} />
+                                        Log out
+                                    </button>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                 </header>
 
                 <main className="flex-1 overflow-y-auto p-6">

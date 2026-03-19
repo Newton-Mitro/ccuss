@@ -1,9 +1,9 @@
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, Clock, Hash, MapPin } from 'lucide-react';
-import HeadingSmall from '../../components/heading-small';
-import CustomAuthLayout from '../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../types';
-import { Branch } from '../../types/branch';
+import HeadingSmall from '../../../components/heading-small';
+import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { BreadcrumbItem } from '../../../types';
+import { Branch } from '../../../types/branch';
 
 interface ShowProps {
     branch: Branch;
