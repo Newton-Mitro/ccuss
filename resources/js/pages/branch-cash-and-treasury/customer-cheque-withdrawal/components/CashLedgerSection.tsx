@@ -25,8 +25,8 @@ function CashLedgerSection({
 }: CashLedgerSectionProps) {
     console.log(data);
     return (
-        <div className="rounded-md border bg-card md:col-span-6">
-            <div className="bg-destructive/5 sticky top-0 z-10 flex items-center justify-between border-b px-4 py-3">
+        <div className="rounded-md border bg-card">
+            <div className="flex items-center justify-between border-b bg-destructive/5 px-4 py-3">
                 <h2 className="text-sm font-medium">Cash Ledger</h2>
             </div>
 

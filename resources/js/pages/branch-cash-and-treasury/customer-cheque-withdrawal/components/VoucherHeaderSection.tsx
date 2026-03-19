@@ -23,8 +23,8 @@ function VoucherHeaderSection({
     branches,
 }: VoucherHeaderSectionProps) {
     return (
-        <div className="rounded-md border bg-card md:col-span-6">
-            <div className="bg-destructive/5 sticky top-0 z-10 flex items-center justify-between border-b px-4 py-3">
+        <div className="rounded-md border bg-card">
+            <div className="flex items-center justify-between border-b bg-destructive/5 px-4 py-3">
                 <h2 className="text-sm font-medium">Voucher Header</h2>
                 <span className="text-xs text-muted-foreground">
                     {data.voucher_date && formatDate(data.voucher_date)}

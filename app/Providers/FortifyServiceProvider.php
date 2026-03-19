@@ -46,9 +46,6 @@ class FortifyServiceProvider extends ServiceProvider
             $user = User::where('email', $request->email)->first();
 
             if ($user && Hash::check($request->password, $user->password)) {
-                // Store branch_id in session
-                session(['branch_id' => $user->branch_id]);
-
                 return $user;
             }
         });

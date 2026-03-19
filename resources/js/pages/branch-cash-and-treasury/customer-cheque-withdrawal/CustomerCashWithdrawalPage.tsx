@@ -193,7 +193,7 @@ export default function CustomerCashWithdrawalPage() {
                     />
                 </div>
 
-                <div className="flex flex-col gap-6 md:col-span-4">
+                <div className="flex flex-col gap-4 md:col-span-4">
                     {/* Voucher Header Section */}
                     <VoucherHeaderSection
                         data={data}

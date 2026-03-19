@@ -58,100 +58,40 @@ export const savingDepositMenu: SidebarItem[] = [
             // Deposit Accounts
             // ===============================
             {
-                name: 'Deposit Accounts',
+                name: 'Saving Accounts',
                 icon: <i className="fa-solid fa-wallet" />,
-                children_expanded: false,
-                permission: ['deposit.account.view'],
-                children: [
-                    {
-                        name: 'Deposit Accounts',
-                        icon: <i className="fa-solid fa-piggy-bank" />,
-                        path: '/deposit-accounts',
-                        match_path: 'deposit-accounts',
-                        permission: ['deposit.account.view'],
-                    },
-                    {
-                        name: 'Account Nominees',
-                        icon: <i className="fa-solid fa-user-tag" />,
-                        path: '/account-nominees',
-                        match_path: 'account-nominees',
-                        permission: ['deposit.nominee.view'],
-                    },
-                    {
-                        name: 'Account Holders',
-                        icon: <i className="fa-solid fa-users" />,
-                        path: '/account-holders',
-                        match_path: 'account-holders',
-                        permission: ['deposit.holder.view'],
-                    },
-                ],
+                path: '/saving-accounts',
+                match_path: 'saving-account',
+                permission: ['saving-account.view'],
             },
 
             // ===============================
             // Member Management
             // ===============================
             {
-                name: 'Member Management',
+                name: 'Member Accounts',
                 icon: <i className="fa-solid fa-users" />,
-                children_expanded: false,
-                permission: ['member.view'],
-                children: [
-                    {
-                        name: 'Member Registration',
-                        icon: <i className="fa-solid fa-user-plus" />,
-                        path: '/member-registration',
-                        match_path: 'member-registration',
-                        permission: ['member.registration.create'],
-                    },
-                    {
-                        name: 'Member List',
-                        icon: <i className="fa-solid fa-list" />,
-                        path: '/member-list',
-                        match_path: 'member-list',
-                        permission: ['member.list.view'],
-                    },
-                    {
-                        name: 'Dividends',
-                        icon: <i className="fa-solid fa-hand-holding-dollar" />,
-                        path: '/member-dividends',
-                        match_path: 'member-dividends',
-                        permission: ['member.dividend.view'],
-                    },
-                ],
+                path: '/member-list',
+                match_path: 'member-list',
+                permission: ['member.list.view'],
             },
 
             // ===============================
             // Recurring & Term Deposits
             // ===============================
             {
-                name: 'Recurring Deposit',
-                icon: <i className="fa-solid fa-calendar-plus" />,
-                children_expanded: false,
+                name: 'RD Accounts',
+                icon: <i className="fa-solid fa-wallet" />,
+                path: '/rd-accounts',
+                match_path: 'rd-accounts',
                 permission: ['recurring.deposit.view'],
-                children: [
-                    {
-                        name: 'RD Accounts',
-                        icon: <i className="fa-solid fa-wallet" />,
-                        path: '/rd-accounts',
-                        match_path: 'rd-accounts',
-                        permission: ['recurring.deposit.view'],
-                    },
-                ],
             },
             {
-                name: 'Term Deposit',
-                icon: <i className="fa-solid fa-hourglass-end" />,
-                children_expanded: false,
+                name: 'TD Accounts',
+                icon: <i className="fa-solid fa-wallet" />,
+                path: '/td-accounts',
+                match_path: 'td-accounts',
                 permission: ['term.deposit.view'],
-                children: [
-                    {
-                        name: 'TD Accounts',
-                        icon: <i className="fa-solid fa-wallet" />,
-                        path: '/td-accounts',
-                        match_path: 'td-accounts',
-                        permission: ['term.deposit.view'],
-                    },
-                ],
             },
 
             // ===============================

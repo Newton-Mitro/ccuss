@@ -50,6 +50,8 @@ export default function CustomAuthLayout({
     const page = usePage<SharedData>();
     const auth = page.props?.auth;
 
+    console.log(auth);
+
     const cleanup = useMobileNavigation();
 
     /* ------------------------------------------------------------------
@@ -497,7 +499,7 @@ export default function CustomAuthLayout({
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-y-auto p-6">
+                <main className="flex-1 overflow-auto p-6">
                     {children}
                     <Toaster position="top-center" />
                 </main>

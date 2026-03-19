@@ -73,17 +73,17 @@ function WithdrawalLedgerSection({
     const accountDetails = accounts.find((a) => a.value === selectedAccount);
 
     return (
-        <div className="bg-destructive/5 flex flex-col gap-5 rounded-xl border p-4">
+        <div className="flex flex-col gap-3 rounded-xl border bg-destructive/5 px-4">
             {/* Header */}
-            <div className="space-y-3">
-                <h2 className="text-base font-semibold text-muted-foreground">
+            <div className="">
+                <h2 className="pt-3 pb-2 text-base font-semibold text-muted-foreground">
                     Cash Payment
                 </h2>
                 <CustomerSearchBox onSelect={onCustomerSelect} />
             </div>
 
             {/* Main Grid */}
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
                 {/* Left Card */}
                 <div className="space-y-2 rounded-lg border bg-card p-4 md:col-span-4">
                     {/* Withdrawable Accounts */}
@@ -103,7 +103,7 @@ function WithdrawalLedgerSection({
 
                     {/* Account Details */}
                     {selectedAccount && accountDetails ? (
-                        <div className="bg-muted/5 mt-3 flex flex-col gap-2 rounded-md border px-2 py-2 text-xs">
+                        <div className="mt-3 flex flex-col gap-2 rounded-md border bg-muted/5 px-2 py-2 text-xs">
                             <div className="flex justify-between">
                                 <span className="font-medium">
                                     Account Name:
@@ -136,12 +136,12 @@ function WithdrawalLedgerSection({
                             </div>
                         </div>
                     ) : (
-                        <div className="bg-muted/5 mt-3 flex flex-col gap-2 rounded-md border px-2 py-2 text-xs">
+                        <div className="mt-3 flex flex-col gap-2 rounded-md border bg-muted/5 px-2 py-2 text-xs">
                             {/* Skeleton placeholders */}
                             {[...Array(4)].map((_, idx) => (
                                 <div
                                     key={idx}
-                                    className="bg-muted/30 h-4 w-full animate-pulse rounded"
+                                    className="h-4 w-full animate-pulse rounded bg-muted/30"
                                 />
                             ))}
                         </div>
@@ -199,7 +199,7 @@ function WithdrawalLedgerSection({
                             />
                         </div>
 
-                        <div className="bg-muted/30 mt-2 rounded-md p-2">
+                        <div className="mt-2 rounded-md bg-muted/30 p-2">
                             <div className="flex items-center justify-between text-sm">
                                 <span className="text-muted-foreground">
                                     In Words:
@@ -221,7 +221,7 @@ function WithdrawalLedgerSection({
                                 Account Holders
                             </Label>
 
-                            <div className="bg-accent/10 grid max-h-[110px] grid-cols-2 gap-2 overflow-y-auto rounded-md border p-2">
+                            <div className="grid max-h-[110px] grid-cols-2 gap-2 overflow-y-auto rounded-md border bg-accent/10 p-2">
                                 {[
                                     {
                                         id: 1,
@@ -250,7 +250,7 @@ function WithdrawalLedgerSection({
                                 ].map((holder, index) => (
                                     <div
                                         key={holder.id}
-                                        className={`hover:bg-muted/30 flex cursor-pointer items-center justify-between rounded-md border bg-background px-2 py-1.5 text-xs transition`}
+                                        className={`flex cursor-pointer items-center justify-between rounded-md border bg-background px-2 py-1.5 text-xs transition hover:bg-muted/30`}
                                     >
                                         <div className="flex items-center gap-2">
                                             <div className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-[10px] font-semibold text-muted-foreground">
@@ -300,12 +300,12 @@ function WithdrawalLedgerSection({
             </div>
 
             {/* Action Section */}
-            <div className="flex flex-col-reverse items-center justify-end gap-4 sm:flex-row">
+            <div className="mb-4 flex items-center justify-end">
                 <Button
                     type="button"
                     disabled={processing}
                     onClick={onSubmit}
-                    className="min-w-40"
+                    className="min-w-40 bg-primary py-2"
                 >
                     {processing ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
