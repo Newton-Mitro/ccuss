@@ -8,9 +8,9 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Trash2, UserPlus } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
-import Swal from 'sweetalert2';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { User } from '../../../types/user';
 
@@ -38,29 +38,28 @@ export default function Index() {
     }, [data.search, data.per_page, data.page]);
 
     const handleDelete = (id: number, name: string) => {
-        const isDark = document.documentElement.classList.contains('dark');
-
-        Swal.fire({
-            title: 'Are you sure?',
-            text: `User "${name}" will be permanently deleted!`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: isDark ? '#ef4444' : '#d33',
-            cancelButtonColor: isDark ? '#3b82f6' : '#3085d6',
-            background: isDark ? '#1f2937' : '#fff',
-            color: isDark ? '#f9fafb' : '#111827',
-            confirmButtonText: 'Yes, delete it!',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                router.delete(`/users/${id}`, {
-                    preserveScroll: true,
-                    preserveState: true,
-                    onSuccess: () =>
-                        toast.success(`User "${name}" deleted successfully!`),
-                    onError: () => toast.error('Failed to delete the user.'),
-                });
-            }
-        });
+        appSwal
+            .fire({
+                title: 'Are you sure?',
+                text: `User "${name}" will be permanently deleted!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    router.delete(`/users/${id}`, {
+                        preserveScroll: true,
+                        preserveState: true,
+                        onSuccess: () =>
+                            toast.success(
+                                `User "${name}" deleted successfully!`,
+                            ),
+                        onError: () =>
+                            toast.error('Failed to delete the user.'),
+                    });
+                }
+            });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [{ title: 'Users', href: '/users' }];
@@ -79,7 +78,7 @@ export default function Index() {
                     <div className="flex gap-2">
                         <Link
                             href="/users/create"
-                            className="hover:bg-primary/90 flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition"
+                            className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition hover:bg-primary/90"
                         >
                             <UserPlus className="h-4 w-4" />
                             <span className="hidden sm:inline">
@@ -99,7 +98,7 @@ export default function Index() {
                             setData('search', e.target.value);
                             setData('page', 1);
                         }}
-                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
                     />
                 </div>
 
@@ -131,7 +130,7 @@ export default function Index() {
                                 users.data.map((u: User) => (
                                     <tr
                                         key={u.id}
-                                        className="even:bg-muted/30 border-b"
+                                        className="border-b even:bg-muted/30"
                                     >
                                         <td className="px-2 py-1">{u.name}</td>
                                         <td className="px-2 py-1">{u.email}</td>
@@ -141,7 +140,7 @@ export default function Index() {
                                         <td className="px-2 py-1">
                                             {u.branch?.name}
                                         </td>
-                                        <td className="whitespace-nowrap px-2 py-1">
+                                        <td className="px-2 py-1 whitespace-nowrap">
                                             <TooltipProvider>
                                                 <div className="flex gap-2">
                                                     <Tooltip>

@@ -18,9 +18,9 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import Swal from 'sweetalert2';
 import { route } from 'ziggy-js';
 import { Select } from '../../../components/ui/select';
+import { appSwal } from '../../../lib/appSwal';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 
 /* ---------------------------------------------
@@ -187,21 +187,22 @@ export default function GlAccountsIndex({
      | Delete
      --------------------------------------------- */
     const handleDelete = (id: number, name: string) => {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: `"${name}" will be permanently deleted`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ef4444',
-        }).then((res) => {
-            if (!res.isConfirmed) return;
+        appSwal
+            .fire({
+                title: 'Are you sure?',
+                text: `"${name}" will be permanently deleted`,
+                icon: 'warning',
+                showCancelButton: true,
+            })
+            .then((res) => {
+                if (!res.isConfirmed) return;
 
-            router.delete(route('ledger_accounts.destroy', id), {
-                preserveScroll: true,
-                onSuccess: () => toast.success('Account deleted'),
-                onError: () => toast.error('Delete failed'),
+                router.delete(route('ledger_accounts.destroy', id), {
+                    preserveScroll: true,
+                    onSuccess: () => toast.success('Account deleted'),
+                    onError: () => toast.error('Delete failed'),
+                });
             });
-        });
     };
 
     /* ---------------------------------------------
@@ -218,7 +219,7 @@ export default function GlAccountsIndex({
                     return (
                         <li key={acc.id}>
                             <div
-                                className="hover:bg-accent/10 flex items-center justify-between rounded-lg px-3 py-1"
+                                className="flex items-center justify-between rounded-lg px-3 py-1 hover:bg-accent/10"
                                 style={{ marginLeft: `${level * 1.5}rem` }}
                                 onClick={() =>
                                     acc.is_control_account &&
@@ -376,7 +377,7 @@ export default function GlAccountsIndex({
                         <Button
                             size="sm"
                             variant="ghost"
-                            className="absolute right-3 top-3"
+                            className="absolute top-3 right-3"
                             onClick={closeModal}
                         >
                             <XIcon className="h-4 w-4" />

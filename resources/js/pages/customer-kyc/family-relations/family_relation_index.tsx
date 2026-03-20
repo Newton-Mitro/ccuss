@@ -8,9 +8,9 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Trash2, UserCheck2 } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
-import Swal from 'sweetalert2';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { CustomerFamilyRelation } from '../../../types/customer_kyc_module';
 
@@ -45,28 +45,26 @@ export default function FamilyRelationIndex() {
     }, [data.search, data.per_page, data.page]);
 
     const handleDelete = (id: number, customerName: string) => {
-        const isDark = document.documentElement.classList.contains('dark');
-        Swal.fire({
-            title: 'Are you sure?',
-            text: `Relation of "${customerName}" will be permanently deleted!`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: isDark ? '#ef4444' : '#d33',
-            cancelButtonColor: isDark ? '#3b82f6' : '#3085d6',
-            background: isDark ? '#1f2937' : '#fff',
-            color: isDark ? '#f9fafb' : '#111827',
-            confirmButtonText: 'Yes, delete it!',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                router.delete(`/family-relations/${id}`, {
-                    preserveScroll: true,
-                    preserveState: true,
-                    onSuccess: () =>
-                        toast.success('Relation deleted successfully!'),
-                    onError: () => toast.error('Failed to delete relation.'),
-                });
-            }
-        });
+        appSwal
+            .fire({
+                title: 'Are you sure?',
+                text: `Relation of "${customerName}" will be permanently deleted!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    router.delete(`/family-relations/${id}`, {
+                        preserveScroll: true,
+                        preserveState: true,
+                        onSuccess: () =>
+                            toast.success('Relation deleted successfully!'),
+                        onError: () =>
+                            toast.error('Failed to delete relation.'),
+                    });
+                }
+            });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -86,7 +84,7 @@ export default function FamilyRelationIndex() {
                     />
                     <Link
                         href="/family-relations/customer"
-                        className="hover:bg-primary/90 flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition"
+                        className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition hover:bg-primary/90"
                     >
                         <UserCheck2 className="h-4 w-4" />
                         <span className="hidden sm:inline">
@@ -105,7 +103,7 @@ export default function FamilyRelationIndex() {
                             setData('search', e.target.value);
                             setData('page', 1);
                         }}
-                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                     />
                 </div>
 
@@ -139,7 +137,7 @@ export default function FamilyRelationIndex() {
                                 familyRelations.data.map((f) => (
                                     <tr
                                         key={f.id}
-                                        className="even:bg-muted/30 border-b"
+                                        className="border-b even:bg-muted/30"
                                     >
                                         <td className="px-2 py-1">{f.id}</td>
                                         <td className="px-2 py-1">
@@ -164,7 +162,7 @@ export default function FamilyRelationIndex() {
                                                         <TooltipTrigger asChild>
                                                             <Link
                                                                 href={`/family-relations/${f.id}`}
-                                                                className="hover:text-primary/80 text-primary"
+                                                                className="text-primary hover:text-primary/80"
                                                             >
                                                                 <Eye className="h-5 w-5" />
                                                             </Link>
@@ -186,7 +184,7 @@ export default function FamilyRelationIndex() {
                                                                             '',
                                                                     )
                                                                 }
-                                                                className="hover:text-destructive/80 text-destructive"
+                                                                className="text-destructive hover:text-destructive/80"
                                                             >
                                                                 <Trash2 className="h-5 w-5" />
                                                             </button>
@@ -262,7 +260,7 @@ export default function FamilyRelationIndex() {
                                             f.customer?.name || '',
                                         )
                                     }
-                                    className="hover:text-destructive/80 text-destructive"
+                                    className="text-destructive hover:text-destructive/80"
                                 >
                                     <Trash2 className="h-5 w-5" />
                                 </button>
@@ -283,7 +281,7 @@ export default function FamilyRelationIndex() {
                                 setData('per_page', Number(e.target.value));
                                 setData('page', 1);
                             }}
-                            className="h-9 rounded-md border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                            className="h-9 rounded-md border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                         >
                             {[5, 10, 20, 50].map((n) => (
                                 <option key={n} value={n}>
@@ -304,7 +302,7 @@ export default function FamilyRelationIndex() {
                                 className={`rounded-full px-3 py-1 text-sm transition-colors ${
                                     link.active
                                         ? 'bg-primary text-primary-foreground'
-                                        : 'hover:bg-muted/80 bg-muted text-muted-foreground'
+                                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                 }`}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                             />

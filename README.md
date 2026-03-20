@@ -108,6 +108,8 @@ docker exec -it union_banking_app sh
 docker exec -it union_banking_app php artisan migrate:fresh
 docker exec -it union_banking_app php artisan db:seed
 docker exec -it union_banking_app php artisan storage:link
+docker exec -it union_banking_app php artisan backup:delete-all
+docker exec -it union_banking_app php artisan backup:run
 ```
 
 ```

@@ -8,12 +8,12 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, MapPin, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
-import Swal from 'sweetalert2';
 
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem, SharedData } from '../../../types';
-import { CustomerAddress } from '../../../types/customer';
+import { CustomerAddress } from '../../../types/customer_kyc_module';
 
 export default function Index() {
     const { props } = usePage<
@@ -41,29 +41,27 @@ export default function Index() {
     }, [data.search, data.verification_status, data.per_page, data.page]);
 
     const handleDelete = (id: number) => {
-        const isDark = document.documentElement.classList.contains('dark');
+        appSwal
+            .fire({
+                title: 'Delete address?',
+                text: 'This address will be permanently deleted.',
+                icon: 'warning',
+                showCancelButton: true,
 
-        Swal.fire({
-            title: 'Delete address?',
-            text: 'This address will be permanently deleted.',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: isDark ? '#ef4444' : '#d33',
-            cancelButtonColor: isDark ? '#3b82f6' : '#3085d6',
-            background: isDark ? '#1f2937' : '#fff',
-            color: isDark ? '#f9fafb' : '#111827',
-            confirmButtonText: 'Yes, delete it!',
-        }).then((res) => {
-            if (res.isConfirmed) {
-                router.delete(`/addresses/${id}`, {
-                    preserveScroll: true,
-                    preserveState: true,
-                    onSuccess: () =>
-                        toast.success('Address deleted successfully'),
-                    onError: () => toast.error('Failed to delete the address'),
-                });
-            }
-        });
+                confirmButtonText: 'Yes, delete it!',
+            })
+            .then((res) => {
+                if (res.isConfirmed) {
+                    router.delete(`/addresses/${id}`, {
+                        preserveScroll: true,
+                        preserveState: true,
+                        onSuccess: () =>
+                            toast.success('Address deleted successfully'),
+                        onError: () =>
+                            toast.error('Failed to delete the address'),
+                    });
+                }
+            });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -83,7 +81,7 @@ export default function Index() {
                     <div className="flex gap-2">
                         <Link
                             href="/addresses/customer"
-                            className="hover:bg-primary/90 flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition"
+                            className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition hover:bg-primary/90"
                         >
                             <MapPin className="h-4 w-4" />
                             <span className="hidden sm:inline">
@@ -103,7 +101,7 @@ export default function Index() {
                             setData('search', e.target.value);
                             setData('page', 1);
                         }}
-                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
                     />
 
                     <select
@@ -112,7 +110,7 @@ export default function Index() {
                             setData('verification_status', e.target.value);
                             setData('page', 1);
                         }}
-                        className="h-9 w-full rounded-md border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring sm:max-w-xs"
+                        className="h-9 w-full rounded-md border bg-background px-3 text-sm focus:ring-2 focus:ring-ring focus:outline-none sm:max-w-xs"
                     >
                         <option value="all">All Statuses</option>
                         <option value="PENDING">Pending</option>
@@ -149,7 +147,7 @@ export default function Index() {
                             {addresses.data.map((a: CustomerAddress) => (
                                 <tr
                                     key={a.id}
-                                    className="even:bg-muted/30 border-b"
+                                    className="border-b even:bg-muted/30"
                                 >
                                     <td className="px-2 py-1">{a.id}</td>
                                     <td className="px-2 py-1">
@@ -162,7 +160,7 @@ export default function Index() {
                                     <td className="px-2 py-1">
                                         {a.verification_status}
                                     </td>
-                                    <td className="whitespace-nowrap px-2 py-1">
+                                    <td className="px-2 py-1 whitespace-nowrap">
                                         <TooltipProvider>
                                             <div className="flex gap-2">
                                                 <Tooltip>

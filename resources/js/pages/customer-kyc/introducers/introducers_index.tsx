@@ -8,12 +8,12 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, Trash2, Users } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
-import Swal from 'sweetalert2';
 
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem, SharedData } from '../../../types';
-import { CustomerIntroducer } from '../../../types/customer';
+import { CustomerIntroducer } from '../../../types/customer_kyc_module';
 
 export default function IntroducersIndex() {
     const { props } = usePage<
@@ -44,28 +44,25 @@ export default function IntroducersIndex() {
     }, [data.search, data.verification_status, data.per_page, data.page]);
 
     const handleDelete = (id: number) => {
-        const isDark = document.documentElement.classList.contains('dark');
-
-        Swal.fire({
-            title: 'Delete introducer?',
-            text: 'This introducer will be permanently removed.',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: isDark ? '#ef4444' : '#d33',
-            cancelButtonColor: isDark ? '#3b82f6' : '#3085d6',
-            background: isDark ? '#1f2937' : '#fff',
-            color: isDark ? '#f9fafb' : '#111827',
-            confirmButtonText: 'Yes, delete it!',
-        }).then((res) => {
-            if (res.isConfirmed) {
-                router.delete(`/introducers/${id}`, {
-                    preserveScroll: true,
-                    onSuccess: () =>
-                        toast.success('Introducer deleted successfully'),
-                    onError: () => toast.error('Failed to delete introducer'),
-                });
-            }
-        });
+        appSwal
+            .fire({
+                title: 'Delete introducer?',
+                text: 'This introducer will be permanently removed.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+            })
+            .then((res) => {
+                if (res.isConfirmed) {
+                    router.delete(`/introducers/${id}`, {
+                        preserveScroll: true,
+                        onSuccess: () =>
+                            toast.success('Introducer deleted successfully'),
+                        onError: () =>
+                            toast.error('Failed to delete introducer'),
+                    });
+                }
+            });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -85,7 +82,7 @@ export default function IntroducersIndex() {
                     />
                     <Link
                         href="/introducers/customer"
-                        className="hover:bg-primary/90 flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition"
+                        className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition hover:bg-primary/90"
                     >
                         <Users className="h-4 w-4" />
                         <span className="hidden sm:inline">
@@ -148,7 +145,7 @@ export default function IntroducersIndex() {
                             {introducers.data.map((i) => (
                                 <tr
                                     key={i.id}
-                                    className="even:bg-muted/30 border-b"
+                                    className="border-b even:bg-muted/30"
                                 >
                                     <td className="px-2 py-1">{i.id}</td>
                                     <td className="px-2 py-1">

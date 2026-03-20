@@ -2,7 +2,6 @@ import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
-import Swal from 'sweetalert2';
 
 import HeadingSmall from '../../../../components/heading-small';
 import { SubLedgerSearchInput } from '../../../../components/sub-ledger-search-input';
@@ -12,6 +11,7 @@ import { Input } from '../../../../components/ui/input';
 import { Label } from '../../../../components/ui/label';
 import { Select } from '../../../../components/ui/select';
 import CustomAuthLayout from '../../../../layouts/custom-auth-layout';
+import { appSwal } from '../../../../lib/appSwal';
 import { BreadcrumbItem } from '../../../../types';
 import { VoucherLine } from '../../../../types/accounting';
 import { LedgerSearchInput } from '../../components/ledger-search-input';
@@ -165,24 +165,22 @@ export default function EditDebitVoucherEntry({
 
     const handleDeleteLine = (index: number) => {
         if (disabled) return;
-        const isDark = document.documentElement.classList.contains('dark');
-        Swal.fire({
-            title: 'Are you sure?',
-            text: `This voucher line will be permanently deleted!`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: isDark ? '#ef4444' : '#d33',
-            cancelButtonColor: isDark ? '#3b82f6' : '#3085d6',
-            background: isDark ? '#1f2937' : '#fff',
-            color: isDark ? '#f9fafb' : '#111827',
-            confirmButtonText: 'Yes, delete it!',
-            cancelButtonText: 'Cancel',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                removeLine(index);
-                toast.success('Voucher line deleted successfully!');
-            }
-        });
+
+        appSwal
+            .fire({
+                title: 'Are you sure?',
+                text: `This voucher line will be permanently deleted!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    removeLine(index);
+                    toast.success('Voucher line deleted successfully!');
+                }
+            });
     };
 
     const handleCashLedgerChange = (
@@ -241,7 +239,7 @@ export default function EditDebitVoucherEntry({
                 <button
                     type="button"
                     onClick={handleBack}
-                    className="hover:bg-muted/90 flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground"
+                    className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
                 >
                     <ArrowLeft className="h-4 w-4" /> Back
                 </button>
@@ -255,7 +253,7 @@ export default function EditDebitVoucherEntry({
                 {/* ---------------- Voucher Details & Cash Ledger ---------------- */}
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
                     {/* Voucher Details */}
-                    <div className="bg-muted/30 space-y-4 rounded-md border p-3 md:col-span-8">
+                    <div className="space-y-4 rounded-md border bg-muted/30 p-3 md:col-span-8">
                         <h2 className="border-b pb-1 text-sm font-medium text-primary">
                             Voucher Details
                         </h2>
@@ -438,7 +436,7 @@ export default function EditDebitVoucherEntry({
                     </div>
 
                     {/* Cash Ledger */}
-                    <div className="bg-muted/30 space-y-4 rounded-md border p-3 md:col-span-4">
+                    <div className="space-y-4 rounded-md border bg-muted/30 p-3 md:col-span-4">
                         <h2 className="border-b pb-1 text-sm font-medium text-primary">
                             Cash Ledger
                         </h2>
@@ -526,7 +524,7 @@ export default function EditDebitVoucherEntry({
                                 {data.lines.map((line, index) => (
                                     <tr
                                         key={line.id}
-                                        className="even:bg-muted/30 border-b"
+                                        className="border-b even:bg-muted/30"
                                     >
                                         <td className="px-2 py-1">
                                             <div className="flex flex-col gap-1">
@@ -661,7 +659,7 @@ export default function EditDebitVoucherEntry({
                                                 onClick={() =>
                                                     handleDeleteLine(index)
                                                 }
-                                                className="hover:text-destructive/80 text-destructive"
+                                                className="text-destructive hover:text-destructive/80"
                                             >
                                                 <Trash2 className="h-5 w-5" />
                                             </button>
@@ -685,7 +683,7 @@ export default function EditDebitVoucherEntry({
                         </table>
 
                         {!isBalanced && data.lines.length > 0 && (
-                            <div className="bg-destructive/10 rounded-md border border-destructive p-3 text-sm text-destructive">
+                            <div className="rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
                                 Debit and Credit totals must be equal.
                             </div>
                         )}

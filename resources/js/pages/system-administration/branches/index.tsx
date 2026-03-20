@@ -8,10 +8,10 @@ import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
-import Swal from 'sweetalert2';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem } from '../../../types';
 import { Branch } from '../../../types/branch';
 
@@ -50,35 +50,33 @@ export default function Index() {
 
     // Delete logic
     const handleDelete = (id: number, name: string) => {
-        const isDark = document.documentElement.classList.contains('dark');
-
-        Swal.fire({
-            title: 'Are you sure?',
-            text: `Branch "${name}" will be permanently deleted!`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: isDark ? '#ef4444' : '#d33',
-            cancelButtonColor: isDark ? '#3b82f6' : '#3085d6',
-            background: isDark ? '#1f2937' : '#fff',
-            color: isDark ? '#f9fafb' : '#111827',
-            confirmButtonText: 'Yes, delete it!',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                destroy(route('branches.destroy', id), {
-                    preserveScroll: true,
-                    preserveState: true,
-                    onSuccess: () => {
-                        toast.success(`Branch "${name}" deleted successfully!`);
-                    },
-                    onError: (errors) => {
-                        toast.error(
-                            'Failed to delete the branch. Please try again.',
-                        );
-                        console.error(errors);
-                    },
-                });
-            }
-        });
+        appSwal
+            .fire({
+                title: 'Are you sure?',
+                text: `Branch "${name}" will be permanently deleted!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    destroy(route('branches.destroy', id), {
+                        preserveScroll: true,
+                        preserveState: true,
+                        onSuccess: () => {
+                            toast.success(
+                                `Branch "${name}" deleted successfully!`,
+                            );
+                        },
+                        onError: (errors) => {
+                            toast.error(
+                                'Failed to delete the branch. Please try again.',
+                            );
+                            console.error(errors);
+                        },
+                    });
+                }
+            });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -97,7 +95,7 @@ export default function Index() {
                     />
                     <Link
                         href="/branches/create"
-                        className="hover:bg-primary/90 flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors"
+                        className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                     >
                         <Plus className="h-4 w-4" /> Add Branch
                     </Link>
@@ -113,7 +111,7 @@ export default function Index() {
                             setData('search', e.target.value);
                             setData('page', 1);
                         }}
-                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                     />
                 </div>
 
@@ -144,7 +142,7 @@ export default function Index() {
                                 branches.data.map((b) => (
                                     <tr
                                         key={b.id}
-                                        className="even:bg-muted/30 border-b"
+                                        className="border-b even:bg-muted/30"
                                     >
                                         <td className="px-2 py-1">{b.code}</td>
                                         <td className="px-2 py-1">{b.name}</td>
@@ -168,7 +166,7 @@ export default function Index() {
                                                                     'branches.show',
                                                                     b.id,
                                                                 )}
-                                                                className="hover:text-primary/80 text-primary"
+                                                                className="text-primary hover:text-primary/80"
                                                             >
                                                                 <Eye className="h-5 w-5" />
                                                             </Link>
@@ -210,7 +208,7 @@ export default function Index() {
                                                                         b.name,
                                                                     )
                                                                 }
-                                                                className="hover:text-destructive/80 text-destructive disabled:opacity-50"
+                                                                className="text-destructive hover:text-destructive/80 disabled:opacity-50"
                                                             >
                                                                 <Trash2 className="h-5 w-5" />
                                                             </button>
@@ -250,7 +248,7 @@ export default function Index() {
                                 setData('per_page', Number(e.target.value));
                                 setData('page', 1);
                             }}
-                            className="h-9 rounded-md border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                            className="h-9 rounded-md border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                         >
                             {[5, 10, 20, 50, 100, 500].map((n) => (
                                 <option key={n} value={n}>
@@ -271,7 +269,7 @@ export default function Index() {
                                 className={`rounded-full px-3 py-1 text-sm transition-colors ${
                                     link.active
                                         ? 'bg-primary text-primary-foreground'
-                                        : 'hover:bg-muted/80 bg-muted text-muted-foreground'
+                                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                 }`}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                             />

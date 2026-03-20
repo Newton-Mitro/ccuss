@@ -2,7 +2,6 @@ import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { CheckCheck, Loader2, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
-import Swal from 'sweetalert2';
 
 import InputError from '../../../../components/input-error';
 import { SubLedgerSearchInput } from '../../../../components/sub-ledger-search-input';
@@ -12,6 +11,7 @@ import { Input } from '../../../../components/ui/input';
 import { Label } from '../../../../components/ui/label';
 import { Select } from '../../../../components/ui/select';
 import CustomAuthLayout from '../../../../layouts/custom-auth-layout';
+import { appSwal } from '../../../../lib/appSwal';
 import { formatBDTCurrency } from '../../../../lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '../../../../types';
 import { VoucherLine } from '../../../../types/accounting';
@@ -155,24 +155,21 @@ export default function DebitVoucherEntryPage({
     };
 
     const handleDeleteLine = (index: number) => {
-        const isDark = document.documentElement.classList.contains('dark');
-        Swal.fire({
-            title: 'Are you sure?',
-            text: `This voucher line will be permanently deleted!`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: isDark ? '#ef4444' : '#d33',
-            cancelButtonColor: isDark ? '#3b82f6' : '#3085d6',
-            background: isDark ? '#1f2937' : '#fff',
-            color: isDark ? '#f9fafb' : '#111827',
-            confirmButtonText: 'Yes, delete it!',
-            cancelButtonText: 'Cancel',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                removeLine(index);
-                toast.success('Voucher line deleted successfully!');
-            }
-        });
+        appSwal
+            .fire({
+                title: 'Are you sure?',
+                text: `This voucher line will be permanently deleted!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    removeLine(index);
+                    toast.success('Voucher line deleted successfully!');
+                }
+            });
     };
 
     const handleCashLedgerChange = (
@@ -230,7 +227,7 @@ export default function DebitVoucherEntryPage({
                     <div className="md:col-span-8">
                         {/* Voucher Lines */}
                         <div className="space-y-1">
-                            <div className="bg-muted/30 space-y-2 rounded-md border p-3">
+                            <div className="space-y-2 rounded-md border bg-muted/30 p-3">
                                 <h2 className="border-b pb-3 text-sm font-medium text-primary">
                                     Voucher Details/Lines
                                 </h2>
@@ -374,14 +371,14 @@ export default function DebitVoucherEntryPage({
                                     </div>
 
                                     {/* Scrollable body */}
-                                    <div className="bg-muted/40 h-[calc(100vh/2-86px)] overflow-y-auto p-2">
+                                    <div className="h-[calc(100vh/2-86px)] overflow-y-auto bg-muted/40 p-2">
                                         <table className="w-full table-fixed border-separate border-spacing-y-2">
                                             <tbody>
                                                 {data.lines.map(
                                                     (line, index) => (
                                                         <tr
                                                             key={line.id}
-                                                            className="odd:bg-secondary/50 even:bg-primary/20 rounded-md"
+                                                            className="rounded-md odd:bg-secondary/50 even:bg-primary/20"
                                                         >
                                                             {/* Ledger info */}
                                                             <td className="w-8/12 border border-destructive align-middle">
@@ -495,7 +492,7 @@ export default function DebitVoucherEntryPage({
                                     <Button
                                         type="submit"
                                         disabled={processing || !isBalanced}
-                                        className="hover:bg-primary/90 flex items-center gap-2 rounded-lg bg-primary px-6 py-2 font-medium text-primary-foreground shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2 font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         {processing ? (
                                             <Loader2 className="h-5 w-5 animate-spin" />
@@ -510,7 +507,7 @@ export default function DebitVoucherEntryPage({
                     </div>
                     <div className="flex flex-col gap-6 md:col-span-4">
                         {/* Voucher Header */}
-                        <div className="bg-muted/30 space-y-2 rounded-md border p-3">
+                        <div className="space-y-2 rounded-md border bg-muted/30 p-3">
                             <h2 className="border-b pb-3 text-sm font-medium text-primary">
                                 Voucher Header
                             </h2>
@@ -703,7 +700,7 @@ export default function DebitVoucherEntryPage({
                         </div>
 
                         {/* Cash Ledger */}
-                        <div className="bg-muted/30 space-y-2 rounded-md border p-3">
+                        <div className="space-y-2 rounded-md border bg-muted/30 p-3">
                             <h2 className="border-b pb-3 text-sm font-medium text-primary">
                                 Cash Ledger
                             </h2>

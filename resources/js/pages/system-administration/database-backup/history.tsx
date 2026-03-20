@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
-import Swal from 'sweetalert2';
 import { route } from 'ziggy-js';
 
 import HeadingSmall from '@/components/heading-small';
@@ -19,6 +18,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '../../../lib/appSwal';
 
 interface BackupLog {
     id: number;
@@ -84,24 +84,21 @@ export default function History() {
 
     // Delete backup
     const handleDelete = (log: BackupLog) => {
-        const isDark = document.documentElement.classList.contains('dark');
-        Swal.fire({
-            title: 'Are you sure?',
-            text: `Backup "${log.file_name}" will be permanently deleted!`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: isDark ? '#ef4444' : '#d33',
-            cancelButtonColor: isDark ? '#3b82f6' : '#3085d6',
-            background: isDark ? '#1f2937' : '#fff',
-            color: isDark ? '#f9fafb' : '#111827',
-            confirmButtonText: 'Yes, delete it!',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                router.delete(route('backup.destroy', log.id), {
-                    preserveState: true,
-                });
-            }
-        });
+        appSwal
+            .fire({
+                title: 'Are you sure?',
+                text: `Backup "${log.file_name}" will be permanently deleted!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    router.delete(route('backup.destroy', log.id), {
+                        preserveState: true,
+                    });
+                }
+            });
     };
 
     return (
@@ -120,7 +117,7 @@ export default function History() {
                 />
                 <button
                     onClick={createBackup}
-                    className="hover:bg-primary/90 flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors"
+                    className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                 >
                     <DatabaseBackup className="h-4 w-4" /> Create Backup Now
                 </button>
@@ -137,7 +134,7 @@ export default function History() {
                             setData('search', e.target.value);
                             setData('page', 1);
                         }}
-                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                     />
                 </div>
 
@@ -169,7 +166,7 @@ export default function History() {
                                 logs.data.map((log) => (
                                     <tr
                                         key={log.id}
-                                        className="even:bg-muted/30 border-b"
+                                        className="border-b even:bg-muted/30"
                                     >
                                         <td className="flex items-center gap-2 px-2 py-1">
                                             <DatabaseBackup size={16} />
@@ -224,7 +221,7 @@ export default function History() {
                                                                         log,
                                                                     )
                                                                 }
-                                                                className="hover:text-destructive/80 text-destructive"
+                                                                className="text-destructive hover:text-destructive/80"
                                                             >
                                                                 <Trash2 className="h-5 w-5" />
                                                             </button>

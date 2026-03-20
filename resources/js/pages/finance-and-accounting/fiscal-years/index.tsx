@@ -2,10 +2,10 @@ import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
-import Swal from 'sweetalert2';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem } from '../../../types';
 import { FiscalYear } from '../../../types/accounting';
 
@@ -44,30 +44,28 @@ export default function FiscalYearIndex() {
     }, [data.search, data.per_page, data.page]);
 
     const handleDelete = (id: number, code: string) => {
-        const isDark = document.documentElement.classList.contains('dark');
-        Swal.fire({
-            title: 'Are you sure?',
-            text: `Fiscal Year "${code}" will be permanently deleted!`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: isDark ? '#ef4444' : '#d33',
-            cancelButtonColor: isDark ? '#3b82f6' : '#3085d6',
-            background: isDark ? '#1f2937' : '#fff',
-            color: isDark ? '#f9fafb' : '#111827',
-            confirmButtonText: 'Yes, delete it!',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                destroy(route('fiscal-years.destroy', id), {
-                    preserveScroll: true,
-                    preserveState: true,
-                    onSuccess: () =>
-                        toast.success(
-                            `Fiscal Year "${code}" deleted successfully!`,
-                        ),
-                    onError: () => toast.error('Failed to delete fiscal year.'),
-                });
-            }
-        });
+        appSwal
+            .fire({
+                title: 'Are you sure?',
+                text: `Fiscal Year "${code}" will be permanently deleted!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    destroy(route('fiscal-years.destroy', id), {
+                        preserveScroll: true,
+                        preserveState: true,
+                        onSuccess: () =>
+                            toast.success(
+                                `Fiscal Year "${code}" deleted successfully!`,
+                            ),
+                        onError: () =>
+                            toast.error('Failed to delete fiscal year.'),
+                    });
+                }
+            });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -86,7 +84,7 @@ export default function FiscalYearIndex() {
                     />
                     <Link
                         href={route('fiscal-years.create')}
-                        className="hover:bg-primary/90 flex items-center gap-1 rounded bg-primary px-3 py-1.5 text-sm text-primary-foreground"
+                        className="flex items-center gap-1 rounded bg-primary px-3 py-1.5 text-sm text-primary-foreground hover:bg-primary/90"
                     >
                         <Plus className="h-4 w-4" />
                         Create Fiscal Year
@@ -103,7 +101,7 @@ export default function FiscalYearIndex() {
                             setData('search', e.target.value);
                             setData('page', 1);
                         }}
-                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                     />
                 </div>
 
@@ -134,7 +132,7 @@ export default function FiscalYearIndex() {
                                 fiscalYears.data.map((fy) => (
                                     <tr
                                         key={fy.id}
-                                        className="even:bg-muted/30 border-b"
+                                        className="border-b even:bg-muted/30"
                                     >
                                         <td className="px-2 py-1">{fy.code}</td>
                                         <td className="px-2 py-1">
@@ -169,7 +167,7 @@ export default function FiscalYearIndex() {
                                                 onClick={() =>
                                                     handleDelete(fy.id, fy.code)
                                                 }
-                                                className="hover:text-destructive/80 text-destructive disabled:opacity-50"
+                                                className="text-destructive hover:text-destructive/80 disabled:opacity-50"
                                             >
                                                 <Trash2 className="h-5 w-5" />
                                             </button>
@@ -202,7 +200,7 @@ export default function FiscalYearIndex() {
                                 setData('per_page', Number(e.target.value));
                                 setData('page', 1);
                             }}
-                            className="h-9 rounded-md border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                            className="h-9 rounded-md border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                         >
                             {[5, 10, 20, 50, 100, 500].map((n) => (
                                 <option key={n} value={n}>
@@ -226,7 +224,7 @@ export default function FiscalYearIndex() {
                                 className={`rounded-full px-3 py-1 text-sm transition-colors ${
                                     link.active
                                         ? 'bg-primary text-primary-foreground'
-                                        : 'hover:bg-muted/80 bg-muted text-muted-foreground'
+                                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                 }`}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                             />

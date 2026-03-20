@@ -81,7 +81,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
                     <button
                         type="button"
                         onClick={handleBack}
-                        className="hover:bg-muted/90 flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground transition"
+                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground transition hover:bg-muted/90"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         <span className="hidden sm:inline">Back</span>
@@ -89,7 +89,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
 
                     <Link
                         href="/customers"
-                        className="hover:bg-secondary/90 flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition"
+                        className="flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition hover:bg-secondary/90"
                     >
                         <ListFilter className="h-4 w-4" />
                         <span className="hidden sm:inline">Customers</span>
@@ -98,7 +98,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
             </div>
             <form
                 onSubmit={handleSubmit}
-                className="lg:w-5xl w-full space-y-4 rounded-md border bg-card p-4 sm:p-6"
+                className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6 lg:w-5xl"
             >
                 <div className="flex flex-col gap-4">
                     <div className="">
@@ -156,7 +156,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
                                     setData('identification_number', '');
                                 }
                             }}
-                            className="focus:ring-primary/50 h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2"
+                            className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                         >
                             <option value={''}>Select Customer Type</option>
                             <option value="Individual">Individual</option>
@@ -212,7 +212,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
                                 onChange={(e) =>
                                     setData('gender', e.target.value)
                                 }
-                                className="focus:ring-primary/50 h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2"
+                                className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                             >
                                 <option value="">Select</option>
                                 <option>MALE</option>
@@ -228,7 +228,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
                                 onChange={(e) =>
                                     setData('religion', e.target.value)
                                 }
-                                className="focus:ring-primary/50 h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2"
+                                className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                             >
                                 <option value="">Select</option>
                                 <option>ISLAM</option>
@@ -251,7 +251,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
                             onChange={(e) =>
                                 setData('identification_type', e.target.value)
                             }
-                            className="focus:ring-primary/50 h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2"
+                            className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                         >
                             {data.type === 'ORGANIZATION' ? (
                                 <option value="REGISTRATION_NO">
@@ -294,7 +294,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
                             onChange={(e) =>
                                 setData('kyc_status', e.target.value)
                             }
-                            className="focus:ring-primary/50 h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2"
+                            className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                         >
                             <option>PENDING</option>
                             <option>VERIFIED</option>
@@ -309,7 +309,7 @@ const Create = ({ backUrl }: { backUrl: string }) => {
                     <Button
                         type="submit"
                         disabled={processing}
-                        className="hover:bg-primary/90 flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground transition-all duration-200 hover:shadow-md"
+                        className="flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
                     >
                         {processing ? (
                             <>

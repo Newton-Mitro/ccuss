@@ -8,10 +8,10 @@ import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
-import Swal from 'sweetalert2';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem } from '../../../types';
 import { Voucher } from '../../../types/accounting';
 
@@ -52,30 +52,27 @@ export default function Index() {
     }, [data.search, data.status, data.per_page, data.page]);
 
     const handleDelete = (id: number, voucherNo: string) => {
-        const isDark = document.documentElement.classList.contains('dark');
-        Swal.fire({
-            title: 'Are you sure?',
-            text: `Voucher "${voucherNo}" will be permanently deleted!`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: isDark ? '#ef4444' : '#d33',
-            cancelButtonColor: isDark ? '#3b82f6' : '#3085d6',
-            background: isDark ? '#1f2937' : '#fff',
-            color: isDark ? '#f9fafb' : '#111827',
-            confirmButtonText: 'Yes, delete it!',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                destroy(route('vouchers.destroy', id), {
-                    preserveScroll: true,
-                    preserveState: true,
-                    onSuccess: () =>
-                        toast.success(
-                            `Voucher "${voucherNo}" deleted successfully!`,
-                        ),
-                    onError: () => toast.error('Failed to delete voucher.'),
-                });
-            }
-        });
+        appSwal
+            .fire({
+                title: 'Are you sure?',
+                text: `Voucher "${voucherNo}" will be permanently deleted!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    destroy(route('vouchers.destroy', id), {
+                        preserveScroll: true,
+                        preserveState: true,
+                        onSuccess: () =>
+                            toast.success(
+                                `Voucher "${voucherNo}" deleted successfully!`,
+                            ),
+                        onError: () => toast.error('Failed to delete voucher.'),
+                    });
+                }
+            });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -154,7 +151,7 @@ export default function Index() {
                             setData('search', e.target.value);
                             setData('page', 1);
                         }}
-                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                     />
 
                     <select
@@ -163,7 +160,7 @@ export default function Index() {
                             setData('status', e.target.value);
                             setData('page', 1);
                         }}
-                        className="h-9 rounded-md border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring sm:max-w-xs"
+                        className="h-9 rounded-md border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none sm:max-w-xs"
                     >
                         <option value="all">All Statuses</option>
                         <option value="DRAFT">Draft</option>
@@ -215,7 +212,7 @@ export default function Index() {
                                     return (
                                         <tr
                                             key={v.id}
-                                            className="even:bg-muted/30 border-b"
+                                            className="border-b even:bg-muted/30"
                                         >
                                             <td className="px-2 py-1">
                                                 {new Date(
@@ -260,7 +257,7 @@ export default function Index() {
                                                                         'vouchers.show',
                                                                         v.id,
                                                                     )}
-                                                                    className="hover:text-primary/80 text-primary"
+                                                                    className="text-primary hover:text-primary/80"
                                                                 >
                                                                     <Eye className="h-5 w-5" />
                                                                 </Link>
@@ -317,7 +314,7 @@ export default function Index() {
                                                                             v.voucher_no,
                                                                         )
                                                                     }
-                                                                    className="hover:text-destructive/80 text-destructive disabled:opacity-50"
+                                                                    className="text-destructive hover:text-destructive/80 disabled:opacity-50"
                                                                 >
                                                                     <Trash2 className="h-5 w-5" />
                                                                 </button>
@@ -358,7 +355,7 @@ export default function Index() {
                                 setData('per_page', Number(e.target.value));
                                 setData('page', 1);
                             }}
-                            className="h-9 rounded-md border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                            className="h-9 rounded-md border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                         >
                             {[5, 10, 20, 50, 100, 500].map((n) => (
                                 <option key={n} value={n}>
@@ -379,7 +376,7 @@ export default function Index() {
                                 className={`rounded-full px-3 py-1 text-sm transition-colors ${
                                     link.active
                                         ? 'bg-primary text-primary-foreground'
-                                        : 'hover:bg-muted/80 bg-muted text-muted-foreground'
+                                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                 }`}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                             />

@@ -4,13 +4,13 @@ import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import ReactPanZoom from 'react-image-pan-zoom-rotate';
-import Swal from 'sweetalert2';
 
 import HeadingSmall from '../../../components/heading-small';
 import { Button } from '../../../components/ui/button';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem } from '../../../types';
-import { Customer } from '../../../types/customer';
+import { Customer } from '../../../types/customer_kyc_module';
 import { CustomerSearchBox } from '../customers/customer-search-box';
 import { useCustomerSignature } from './hooks/useCustomerSignature';
 import UploadSignatureModal from './signature_modal';
@@ -42,17 +42,11 @@ export default function CustomerSignatureIndex() {
 
     /* ================= Delete ================= */
     const handleDelete = async (id: number) => {
-        const isDark = document.documentElement.classList.contains('dark');
-
-        const result = await Swal.fire({
+        const result = await appSwal.fire({
             title: 'Are you sure?',
             text: 'This signature will be permanently deleted!',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: isDark ? '#ef4444' : '#d33',
-            cancelButtonColor: isDark ? '#3b82f6' : '#3085d6',
-            background: isDark ? '#1f2937' : '#ffffff',
-            color: isDark ? '#f9fafb' : '#111827',
             confirmButtonText: 'Yes, delete it!',
         });
 
