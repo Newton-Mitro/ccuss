@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
+import statusConfig, { Status } from '../../../lib/statusConfig';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Customer } from '../../../types/customer_kyc_module';
 
@@ -163,7 +164,7 @@ export default function Index() {
                                     <td className="px-2 py-1">{c.phone}</td>
                                     <td className="px-2 py-1">{c.email}</td>
                                     <td className="px-2 py-1">
-                                        {c.kyc_status}
+                                        <Badge text={c.kyc_status} />
                                     </td>
                                     <td className="px-2 py-1 whitespace-nowrap">
                                         <TooltipProvider>
@@ -172,7 +173,7 @@ export default function Index() {
                                                     <TooltipTrigger asChild>
                                                         <Link
                                                             href={`/customers/${c.id}`}
-                                                            className="text-primary"
+                                                            className="text-gray-500"
                                                         >
                                                             <Eye className="h-5 w-5" />
                                                         </Link>
@@ -186,7 +187,7 @@ export default function Index() {
                                                     <TooltipTrigger asChild>
                                                         <Link
                                                             href={`/customers/${c.id}/edit`}
-                                                            className="text-green-600 dark:text-green-400"
+                                                            className="text-yellow-500"
                                                         >
                                                             <Pencil className="h-5 w-5" />
                                                         </Link>
@@ -240,7 +241,7 @@ export default function Index() {
                                     </p>
                                 </div>
                                 <span className="rounded-full bg-muted px-2 py-0.5 text-xs">
-                                    {c.kyc_status}
+                                    <Badge text={c.kyc_status} />
                                 </span>
                             </div>
 
@@ -316,3 +317,18 @@ export default function Index() {
         </CustomAuthLayout>
     );
 }
+
+const Badge = ({ text }: { text: Status }) => {
+    const config = statusConfig[text];
+
+    return (
+        <span
+            className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                config?.class ??
+                'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+            }`}
+        >
+            {config?.label ?? text}
+        </span>
+    );
+};

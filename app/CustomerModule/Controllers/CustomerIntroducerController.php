@@ -12,9 +12,6 @@ use Inertia\Response;
 
 class CustomerIntroducerController extends Controller
 {
-    /**
-     * 📄 All introducers (search + filter)
-     */
     public function index(Request $request): Response
     {
         $query = CustomerIntroducer::query()
@@ -54,7 +51,7 @@ class CustomerIntroducerController extends Controller
             ->withQueryString();
 
         return Inertia::render(
-            'customer-kyc/introducers/introducers_index',
+            'customer-kyc/introducers/list_introducer_page',
             [
                 'introducers' => $introducers,
                 'filters' => $request->only([
@@ -67,47 +64,6 @@ class CustomerIntroducerController extends Controller
         );
     }
 
-    /**
-     * 📄 Customer-wise introducer page
-     */
-    public function customerIntroducers(Request $request): Response
-    {
-        return Inertia::render(
-            'customer-kyc/introducers/customer_introducers'
-        );
-    }
-
-    /**
-     * 🔄 Get introducers by customer (AJAX)
-     */
-    public function getCustomerIntroducers(Request $request): JsonResponse
-    {
-        $customerId = $request->input('customer_id');
-
-        if (!$customerId) {
-            return response()->json(
-                ['error' => 'customer_id is required'],
-                400
-            );
-        }
-
-        $introducers = CustomerIntroducer::where(
-            'introduced_customer_id',
-            $customerId
-        )
-            ->with([
-                'introducerCustomer:id,name,customer_no',
-                'verifier:id,name',
-            ])
-            ->latest()
-            ->get();
-
-        return response()->json($introducers);
-    }
-
-    /**
-     * 👁 View introducer
-     */
     public function show(CustomerIntroducer $customerIntroducer): Response
     {
         $customerIntroducer->load([
@@ -119,17 +75,29 @@ class CustomerIntroducerController extends Controller
         ]);
 
         return Inertia::render(
-            'customer-kyc/introducers/view_introducer_page',
+            'customer-kyc/introducers/show_introducer_page',
             [
                 'introducer' => $customerIntroducer,
             ]
         );
     }
 
-    /**
-     * ➕ Store introducer
-     */
-    public function store(Request $request): JsonResponse
+    public function create(): Response
+    {
+        return Inertia::render('customer-kyc/introducers/create_introducer_page');
+    }
+
+    public function edit(CustomerIntroducer $customerIntroducer): Response
+    {
+        return Inertia::render(
+            'customer-kyc/introducers/edit_introducer_page',
+            [
+                'introducer' => $customerIntroducer,
+            ]
+        );
+    }
+
+    public function store(Request $request)
     {
         $data = $request->validate([
             'introduced_customer_id' => ['required', 'exists:customers,id'],
@@ -168,19 +136,15 @@ class CustomerIntroducerController extends Controller
             'created_by' => auth()->id(),
         ]);
 
-        return response()->json([
-            'message' => 'Introducer added successfully.',
-            'introducer' => $introducer,
-        ]);
+        return redirect()
+            ->route('customers.show', $data['introduced_customer_id'])
+            ->with('success', 'Introducer added successfully.');
     }
 
-    /**
-     * ✏️ Update introducer
-     */
     public function update(
         Request $request,
         CustomerIntroducer $customerIntroducer
-    ): JsonResponse {
+    ) {
         $data = $request->validate([
             'relationship_type' => [
                 'required',
@@ -194,15 +158,11 @@ class CustomerIntroducerController extends Controller
             'updated_by' => auth()->id(),
         ]);
 
-        return response()->json([
-            'message' => 'Introducer updated successfully.',
-            'introducer' => $customerIntroducer,
-        ]);
+        return redirect()
+            ->route('customers.show', $customerIntroducer->introduced_customer_id)
+            ->with('success', 'Introducer updated successfully.');
     }
 
-    /**
-     * ✅ Verify / Reject
-     */
     public function verify(
         Request $request,
         CustomerIntroducer $customerIntroducer
@@ -227,9 +187,6 @@ class CustomerIntroducerController extends Controller
         ]);
     }
 
-    /**
-     * 🗑 Delete introducer
-     */
     public function destroy(
         CustomerIntroducer $customerIntroducer
     ): JsonResponse {

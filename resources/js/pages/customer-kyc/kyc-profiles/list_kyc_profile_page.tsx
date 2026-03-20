@@ -5,25 +5,27 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Eye, MapPin, Trash2 } from 'lucide-react';
+import { Eye, Trash2, Users } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
-
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem, SharedData } from '../../../types';
-import { CustomerAddress } from '../../../types/customer_kyc_module';
+import { KycProfile } from '../../../types/customer_kyc_module';
 
-export default function Index() {
+export default function KycProfilesIndex() {
     const { props } = usePage<
         SharedData & {
-            addresses: any;
+            profiles: {
+                data: KycProfile[];
+                links: any[];
+            };
             filters: Record<string, string>;
         }
     >();
 
-    const { addresses, filters } = props;
+    const { profiles, filters } = props;
 
     const { data, setData, get } = useForm({
         search: filters.search || '',
@@ -32,76 +34,73 @@ export default function Index() {
         page: Number(filters.page) || 1,
     });
 
+    // Fetch filtered data on input change
     useEffect(() => {
         const delay = setTimeout(() => {
-            get('/addresses', { preserveState: true });
+            get('/kyc-profiles', { preserveState: true });
         }, 400);
-
         return () => clearTimeout(delay);
     }, [data.search, data.verification_status, data.per_page, data.page]);
 
     const handleDelete = (id: number) => {
         appSwal
             .fire({
-                title: 'Delete address?',
-                text: 'This address will be permanently deleted.',
+                title: 'Delete KYC profile?',
+                text: 'This KYC profile will be permanently removed.',
                 icon: 'warning',
                 showCancelButton: true,
-
                 confirmButtonText: 'Yes, delete it!',
             })
             .then((res) => {
                 if (res.isConfirmed) {
-                    router.delete(`/addresses/${id}`, {
+                    router.delete(`/kyc-profiles/${id}`, {
                         preserveScroll: true,
-                        preserveState: true,
                         onSuccess: () =>
-                            toast.success('Address deleted successfully'),
+                            toast.success('KYC profile deleted successfully'),
                         onError: () =>
-                            toast.error('Failed to delete the address'),
+                            toast.error('Failed to delete KYC profile'),
                     });
                 }
             });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Addresses', href: '/addresses' },
+        { title: 'KYC Profiles', href: '/kyc-profiles' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Addresses" />
+            <Head title="KYC Profiles" />
 
             <div className="space-y-4 p-2">
+                {/* Header */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <HeadingSmall
-                        title="Addresses"
-                        description="Manage addresses."
+                        title="KYC Profiles"
+                        description="Manage customer KYC profiles."
                     />
-                    <div className="flex gap-2">
-                        <Link
-                            href="/addresses/customer"
-                            className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition hover:bg-primary/90"
-                        >
-                            <MapPin className="h-4 w-4" />
-                            <span className="hidden sm:inline">
-                                Customer Addresses
-                            </span>
-                        </Link>
-                    </div>
+                    <Link
+                        href="/kyc-profiles/create"
+                        className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition hover:bg-primary/90"
+                    >
+                        <Users className="h-4 w-4" />
+                        <span className="hidden sm:inline">
+                            New KYC Profile
+                        </span>
+                    </Link>
                 </div>
 
-                {/* Search & Filters */}
+                {/* Filters */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <input
                         type="text"
-                        placeholder="Search addresses..."
+                        placeholder="Search customer…"
                         value={data.search}
                         onChange={(e) => {
                             setData('search', e.target.value);
                             setData('page', 1);
                         }}
-                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
+                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm"
                     />
 
                     <select
@@ -110,33 +109,31 @@ export default function Index() {
                             setData('verification_status', e.target.value);
                             setData('page', 1);
                         }}
-                        className="h-9 w-full rounded-md border bg-background px-3 text-sm focus:ring-2 focus:ring-ring focus:outline-none sm:max-w-xs"
+                        className="h-9 w-full rounded-md border bg-background px-3 text-sm sm:max-w-xs"
                     >
                         <option value="all">All Statuses</option>
                         <option value="PENDING">Pending</option>
-                        <option value="VERIFIED">Verified</option>
+                        <option value="APPROVED">Approved</option>
                         <option value="REJECTED">Rejected</option>
                     </select>
                 </div>
 
-                {/* ===================== */}
-                {/* Desktop Table */}
-                {/* ===================== */}
+                {/* ================= Desktop Table ================= */}
                 <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border md:block">
-                    <table className="w-full border-collapse">
+                    <table className="w-full">
                         <thead className="sticky top-0 bg-muted">
                             <tr>
                                 {[
                                     'ID',
                                     'Customer',
-                                    'Address',
-                                    'Type',
+                                    'KYC Level',
+                                    'Risk Level',
                                     'Status',
                                     'Actions',
                                 ].map((h) => (
                                     <th
                                         key={h}
-                                        className="border-b p-2 text-left text-sm font-medium text-muted-foreground"
+                                        className="border-b p-2 text-left text-sm text-muted-foreground"
                                     >
                                         {h}
                                     </th>
@@ -144,29 +141,30 @@ export default function Index() {
                             </tr>
                         </thead>
                         <tbody>
-                            {addresses.data.map((a: CustomerAddress) => (
+                            {profiles.data.map((i) => (
                                 <tr
-                                    key={a.id}
+                                    key={i.id}
                                     className="border-b even:bg-muted/30"
                                 >
-                                    <td className="px-2 py-1">{a.id}</td>
+                                    <td className="px-2 py-1">{i.id}</td>
                                     <td className="px-2 py-1">
-                                        {a.customer?.name || '—'}
+                                        {i.customer?.name ?? '—'}
                                     </td>
-                                    <td className="px-2 py-1 text-sm">
-                                        {a.line1}, {a.district}
-                                    </td>
-                                    <td className="px-2 py-1">{a.type}</td>
+                                    <td className="px-2 py-1">{i.kyc_level}</td>
                                     <td className="px-2 py-1">
-                                        {a.verification_status}
+                                        {i.risk_level}
                                     </td>
-                                    <td className="px-2 py-1 whitespace-nowrap">
+                                    <td className="px-2 py-1">
+                                        {i.verification_status}
+                                    </td>
+                                    <td className="px-2 py-1">
                                         <TooltipProvider>
                                             <div className="flex gap-2">
+                                                {/* View */}
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
                                                         <Link
-                                                            href={`/addresses/${a.id}`}
+                                                            href={`/kyc-profiles/${i.id}`}
                                                             className="text-primary"
                                                         >
                                                             <Eye className="h-5 w-5" />
@@ -177,12 +175,28 @@ export default function Index() {
                                                     </TooltipContent>
                                                 </Tooltip>
 
+                                                {/* Edit */}
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Link
+                                                            href={`/kyc-profiles/${i.id}/edit`}
+                                                            className="text-accent"
+                                                        >
+                                                            ✏️
+                                                        </Link>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        Edit
+                                                    </TooltipContent>
+                                                </Tooltip>
+
+                                                {/* Delete */}
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
                                                         <button
                                                             onClick={() =>
                                                                 handleDelete(
-                                                                    a.id,
+                                                                    i.id,
                                                                 )
                                                             }
                                                             className="text-destructive"
@@ -203,42 +217,45 @@ export default function Index() {
                     </table>
                 </div>
 
-                {/* ===================== */}
-                {/* Mobile Cards */}
-                {/* ===================== */}
+                {/* ================= Mobile Cards ================= */}
                 <div className="space-y-3 md:hidden">
-                    {addresses.data.map((a: CustomerAddress) => (
+                    {profiles.data.map((i) => (
                         <div
-                            key={a.id}
+                            key={i.id}
                             className="space-y-2 rounded-md border bg-card p-3"
                         >
-                            <div className="flex items-start justify-between">
+                            <div className="flex justify-between">
                                 <div>
                                     <p className="font-medium">
-                                        {a.customer?.name || '—'}
+                                        {i.customer?.name}
                                     </p>
                                     <p className="text-xs text-muted-foreground">
-                                        {a.line1}, {a.district}
+                                        KYC Level: {i.kyc_level}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Risk Level: {i.risk_level}
                                     </p>
                                 </div>
                                 <span className="rounded-full bg-muted px-2 py-0.5 text-xs">
-                                    {a.verification_status}
+                                    {i.verification_status}
                                 </span>
                             </div>
 
-                            <p className="text-xs text-muted-foreground">
-                                {a.type}
-                            </p>
-
-                            <div className="flex justify-end gap-4 pt-2">
+                            <div className="flex justify-end gap-4">
                                 <Link
-                                    href={`/addresses/get/${a.id}`}
+                                    href={`/kyc-profiles/${i.id}`}
                                     className="text-primary"
                                 >
                                     <Eye className="h-5 w-5" />
                                 </Link>
+                                <Link
+                                    href={`/kyc-profiles/${i.id}/edit`}
+                                    className="text-accent"
+                                >
+                                    ✏️
+                                </Link>
                                 <button
-                                    onClick={() => handleDelete(a.id)}
+                                    onClick={() => handleDelete(i.id)}
                                     className="text-destructive"
                                 >
                                     <Trash2 className="h-5 w-5" />
@@ -249,43 +266,19 @@ export default function Index() {
                 </div>
 
                 {/* Pagination */}
-                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">
-                            Show
-                        </span>
-                        <select
-                            value={data.per_page}
-                            onChange={(e) => {
-                                setData('per_page', Number(e.target.value));
-                                setData('page', 1);
-                            }}
-                            className="h-9 rounded-md border bg-background px-3 text-sm"
-                        >
-                            {[5, 10, 20, 50].map((n) => (
-                                <option key={n} value={n}>
-                                    {n}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="flex gap-1 overflow-x-auto">
-                        {addresses.links.map((link: any, i: number) => (
-                            <a
-                                key={i}
-                                href={link.url || '#'}
-                                className={`rounded-full px-3 py-1 text-sm ${
-                                    link.active
-                                        ? 'bg-primary text-primary-foreground'
-                                        : 'bg-muted text-muted-foreground'
-                                }`}
-                                dangerouslySetInnerHTML={{
-                                    __html: link.label,
-                                }}
-                            />
-                        ))}
-                    </div>
+                <div className="flex justify-end gap-1">
+                    {profiles.links.map((link, i) => (
+                        <a
+                            key={i}
+                            href={link.url || '#'}
+                            className={`rounded-full px-3 py-1 text-sm ${
+                                link.active
+                                    ? 'bg-primary text-primary-foreground'
+                                    : 'bg-muted text-muted-foreground'
+                            }`}
+                            dangerouslySetInnerHTML={{ __html: link.label }}
+                        />
+                    ))}
                 </div>
             </div>
         </CustomAuthLayout>

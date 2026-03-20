@@ -1,7 +1,7 @@
-import { CustomerFamilyRelation } from '@/types/customer';
 import axios from 'axios';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { CustomerFamilyRelation } from '../../../../types/customer_kyc_module';
 
 export function useCustomerFamilyRelations() {
     const [relations, setRelations] = useState<CustomerFamilyRelation[]>([]);

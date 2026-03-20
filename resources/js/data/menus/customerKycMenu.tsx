@@ -31,7 +31,7 @@ export const customerKycMenu: SidebarItem[] = [
             {
                 name: 'KYC Profiles',
                 icon: <i className="fa-solid fa-address-card" />,
-                path: '/customer/kyc-profiles',
+                path: '/kyc-profiles',
                 match_path: 'kyc-profiles',
                 permission: ['customer.kyc-profiles.view'],
             },

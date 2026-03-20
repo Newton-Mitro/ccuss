@@ -1,7 +1,7 @@
-import { CustomerAddress } from '@/types/customer';
 import axios from 'axios';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { CustomerAddress } from '../../../../types/customer_kyc_module';
 
 export function useCustomerAddresses() {
     const [addresses, setAddresses] = useState<CustomerAddress[]>([]);

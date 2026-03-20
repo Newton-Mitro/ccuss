@@ -5,7 +5,7 @@ import { ChevronDown } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { SidebarItem } from '../types';
 
-const STORAGE_KEY = 'app_sidebar_open_menus_v1';
+const STORAGE_KEY = 'app_sidebar_open_menus_v2';
 
 interface Props {
     item: SidebarItem;
@@ -41,6 +41,8 @@ export function SidebarMenuItem({
         [item.children, url],
     );
 
+    const isActive = isSelfActive || hasActiveChild;
+
     const storageKey = `${STORAGE_KEY}:${item.name}`;
 
     const [open, setOpen] = useState<boolean>(() => {
@@ -52,14 +54,14 @@ export function SidebarMenuItem({
         }
     });
 
-    /** Auto-expand if child active */
+    /** Auto-expand active children */
     useEffect(() => {
         if (hasActiveChild && hasChildren) {
             Promise.resolve().then(() => setOpen(true));
         }
     }, [hasActiveChild, hasChildren]);
 
-    /** Handle expand/collapse all */
+    /** Handle expand/collapse all from parent menu */
     useEffect(() => {
         if (!menuAction || !hasChildren) return;
         const next = menuAction === 'expand-all';
@@ -76,28 +78,33 @@ export function SidebarMenuItem({
         }
     }, [open, storageKey]);
 
-    /** Indentation for child items */
     const indentStyle = sidebarOpen
         ? { paddingLeft: `${12 + level * 16}px` }
         : undefined;
 
+    /** Tailwind classes for container */
     const containerClasses = cn(
-        'block w-full rounded-md text-sm transition-colors',
-        'hover:bg-muted',
-        isSelfActive && 'bg-muted font-medium text-primary',
-        hasActiveChild &&
-            !isSelfActive &&
-            'border-l-2 border-primary/60 bg-muted/50 text-primary',
+        'block w-full rounded-lg text-sm transition-colors duration-200',
+        sidebarOpen ? 'px-0' : '',
+        isActive
+            ? isSelfActive
+                ? 'bg-sidebar-active font-medium text-sidebar-active-foreground'
+                : 'border-l-2 border-accent bg-sidebar text-sidebar-active-foreground'
+            : 'text-sidebar-foreground hover:bg-sidebar-hover',
     );
 
-    const contentClasses = 'flex w-full h-full items-center gap-2 px-3 py-2';
+    const contentClasses = 'flex w-full items-center gap-2 px-3 py-2';
+    const iconClasses = cn(
+        'shrink-0 text-base transition-colors',
+        isActive ? 'text-sidebar-active-foreground' : 'text-muted-foreground',
+    );
 
     return (
         <li className="w-full">
             {item.path ? (
                 <Link href={item.path} className={containerClasses}>
                     <div className={contentClasses} style={indentStyle}>
-                        <span className="shrink-0 text-base">{item.icon}</span>
+                        <span className={iconClasses}>{item.icon}</span>
                         {sidebarOpen && <span>{item.name}</span>}
                     </div>
                 </Link>
@@ -108,22 +115,20 @@ export function SidebarMenuItem({
                     className={containerClasses}
                 >
                     <div className={contentClasses} style={indentStyle}>
-                        <span className="shrink-0 text-base">{item.icon}</span>
+                        <span className={iconClasses}>{item.icon}</span>
                         {sidebarOpen && (
                             <>
                                 <span className="flex-1 text-left">
                                     {item.name}
                                 </span>
                                 {hasChildren && (
-                                    <span className="flex h-4 w-4 flex-shrink-0 items-center justify-center">
-                                        <ChevronDown
-                                            size={16}
-                                            className={cn(
-                                                'transition-transform duration-200',
-                                                open && 'rotate-180',
-                                            )}
-                                        />
-                                    </span>
+                                    <ChevronDown
+                                        size={16}
+                                        className={cn(
+                                            'text-muted-foreground transition-transform duration-200',
+                                            open && 'rotate-180',
+                                        )}
+                                    />
                                 )}
                             </>
                         )}
@@ -131,16 +136,15 @@ export function SidebarMenuItem({
                 </button>
             )}
 
+            {/* Children */}
             <AnimatePresence initial={false}>
                 {hasChildren && open && sidebarOpen && (
                     <motion.ul
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.35, ease: 'easeInOut' }}
-                        className={cn(
-                            'mt-1 space-y-1 bg-secondary/10 hover:bg-secondary/20',
-                        )}
+                        transition={{ duration: 0.25 }}
+                        className="mt-1 space-y-1 rounded-md bg-sidebar/50"
                     >
                         {item.children!.map((child, idx) => (
                             <SidebarMenuItem

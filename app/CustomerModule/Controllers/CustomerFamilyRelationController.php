@@ -36,7 +36,7 @@ class CustomerFamilyRelationController extends Controller
             ->paginate($request->integer('per_page', 10))
             ->withQueryString();
 
-        return Inertia::render('customer-kyc/family-relations/family_relation_index', [
+        return Inertia::render('customer-kyc/family-relations/list_family_relation_page', [
             'familyRelations' => $relations,
             'filters' => $request->only([
                 'search',
@@ -46,46 +46,28 @@ class CustomerFamilyRelationController extends Controller
         ]);
     }
 
-    public function customerRelations(Request $request): Response
-    {
-        return Inertia::render('customer-kyc/family-relations/customer_family_relations');
-    }
-
-    public function getCustomerRelations(Request $request): JsonResponse
-    {
-        $customerId = $request->input('customer_id');
-
-        if (!$customerId) {
-            return response()->json(
-                ['error' => 'customer_id is required'],
-                400
-            );
-        }
-
-        $relations = CustomerFamilyRelation::where(function ($q) use ($customerId) {
-            $q->where('customer_id', $customerId)
-                ->orWhere('relative_id', $customerId);
-        })
-            ->with([
-                'customer:id,name,customer_no',
-                'relative:id,name,customer_no',
-            ])
-            ->latest()
-            ->get();
-
-        return response()->json($relations);
-    }
-
     public function show(CustomerFamilyRelation $familyRelation): Response
     {
         $familyRelation->load(['customer', 'relative', 'customer.photo', 'relative.photo']);
 
-        return Inertia::render('customer-kyc/family-relations/view_family_relation', [
+        return Inertia::render('customer-kyc/family-relations/show_family_relation_page', [
             'familyRelation' => $familyRelation,
         ]);
     }
 
-    public function store(StoreFamilyRelationRequest $request): JsonResponse
+    public function create(): Response
+    {
+        return Inertia::render('customer-kyc/family-relations/create_family_relation_page');
+    }
+
+    public function edit(CustomerFamilyRelation $familyRelation): Response
+    {
+        return Inertia::render('customer-kyc/family-relations/edit_family_relation_page', [
+            'familyRelation' => $familyRelation,
+        ]);
+    }
+
+    public function store(StoreFamilyRelationRequest $request)
     {
         $data = $request->validated();
 
@@ -106,16 +88,15 @@ class CustomerFamilyRelationController extends Controller
 
         $relation = CustomerFamilyRelation::create($data);
 
-        return response()->json([
-            'message' => 'Family relation created successfully.',
-            'familyRelation' => $relation,
-        ]);
+        return redirect()
+            ->route('customers.show', $data['customer_id'])
+            ->with('success', 'Family relation created successfully.');
     }
 
     public function update(
         UpdateFamilyRelationRequest $request,
         CustomerFamilyRelation $familyRelation
-    ): JsonResponse {
+    ) {
         $data = $request->validated();
 
         $exists = CustomerFamilyRelation::where(function ($q) use ($data) {
@@ -133,10 +114,9 @@ class CustomerFamilyRelationController extends Controller
 
         $familyRelation->update($data);
 
-        return response()->json([
-            'message' => 'Family relation updated successfully.',
-            'familyRelation' => $familyRelation,
-        ]);
+        return redirect()
+            ->route('customers.show', $data['customer_id'])
+            ->with('success', 'Family relation updated successfully.');
     }
 
     public function destroy(CustomerFamilyRelation $familyRelation): JsonResponse

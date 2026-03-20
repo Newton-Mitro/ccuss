@@ -39,7 +39,7 @@ class CustomerAddressController extends Controller
             ->paginate($request->integer('per_page', 10))
             ->withQueryString();
 
-        return Inertia::render('customer-kyc/addresses/addresses_index', [
+        return Inertia::render('customer-kyc/addresses/list_address_page', [
             'addresses' => $addresses,
             'filters' => $request->only([
                 'search',
@@ -48,27 +48,6 @@ class CustomerAddressController extends Controller
                 'page',
             ]),
         ]);
-    }
-
-    public function customerAddresses(Request $request): Response
-    {
-        return Inertia::render('customer-kyc/addresses/customer_addresses');
-    }
-
-    public function getCustomerAddresses(Request $request): JsonResponse
-    {
-        $customer_id = $request->input('customer_id');
-
-        if (!$customer_id) {
-            return response()->json(['error' => 'customer_id is required'], 400);
-        }
-
-        $addresses = CustomerAddress::where('customer_id', $customer_id)
-            ->with('customer:id,name')
-            ->latest()
-            ->get();
-
-        return response()->json($addresses);
     }
 
     public function show(CustomerAddress $address): Response
@@ -81,8 +60,19 @@ class CustomerAddressController extends Controller
         ]);
     }
 
+    public function create(): Response
+    {
+        return Inertia::render('customer-kyc/addresses/create_address_page');
+    }
 
-    public function store(StoreAddressRequest $request): JsonResponse
+    public function edit(CustomerAddress $address): Response
+    {
+        return Inertia::render('customer-kyc/addresses/edit_address_page', [
+            'address' => $address,
+        ]);
+    }
+
+    public function store(StoreAddressRequest $request)
     {
         $data = $request->validated();
 
@@ -98,13 +88,12 @@ class CustomerAddressController extends Controller
 
         $address = CustomerAddress::create($data);
 
-        return response()->json([
-            'message' => 'Address created successfully.',
-            'address' => $address,
-        ]);
+        return redirect()
+            ->route('customers.show', $data['customer_id'])
+            ->with('success', 'Address created successfully.');
     }
 
-    public function update(UpdateAddressRequest $request, CustomerAddress $address): JsonResponse
+    public function update(UpdateAddressRequest $request, CustomerAddress $address)
     {
         $data = $request->validated();
 
@@ -121,10 +110,9 @@ class CustomerAddressController extends Controller
 
         $address->update($data);
 
-        return response()->json([
-            'message' => 'Address updated successfully.',
-            'address' => $address,
-        ]);
+        return redirect()
+            ->route('customers.show', $data['customer_id'])
+            ->with('success', 'Address updated successfully.');
     }
 
     public function destroy(CustomerAddress $address): JsonResponse

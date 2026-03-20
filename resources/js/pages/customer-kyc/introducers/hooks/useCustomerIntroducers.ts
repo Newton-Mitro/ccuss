@@ -1,7 +1,7 @@
-import { CustomerIntroducer } from '@/types/customer';
 import axios from 'axios';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { CustomerIntroducer } from '../../../../types/customer_kyc_module';
 
 export function useCustomerIntroducers() {
     const [introducers, setIntroducers] = useState<CustomerIntroducer[]>([]);

@@ -101,7 +101,7 @@ export default function Show({ customer }: ShowProps) {
                 title="Basic Information"
                 actions={
                     <Link
-                        href={`/customers/${customer.id}/edit`}
+                        href={route('customers.edit', customer.id)}
                         className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
                     >
                         <Edit2 size={14} /> Edit
@@ -150,7 +150,9 @@ export default function Show({ customer }: ShowProps) {
                     title="KYC Profile"
                     actions={
                         <Link
-                            href={`/customers/${customer.id}/kyc-profile/edit`}
+                            href={route('kyc-profiles.edit', {
+                                id: customer.id,
+                            })}
                             className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
                         >
                             <Edit2 size={14} /> Edit
@@ -189,7 +191,7 @@ export default function Show({ customer }: ShowProps) {
                     title="Addresses"
                     actions={
                         <Link
-                            href={`/customers/${customer.id}/edit`}
+                            href={route('addresses.create')}
                             className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
                         >
                             <Plus size={14} /> Add
@@ -228,7 +230,7 @@ export default function Show({ customer }: ShowProps) {
                     title="Family & Relatives"
                     actions={
                         <Link
-                            href={`/customers/${customer.id}/edit`}
+                            href={route('family-relations.create')}
                             className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
                         >
                             <Plus size={14} /> Add
@@ -256,20 +258,18 @@ export default function Show({ customer }: ShowProps) {
 
                                     <div className="flex flex-col text-xs">
                                         <div className="text-sm font-medium">
-                                            <a
+                                            <Link
                                                 href={route(
                                                     'customers.show',
                                                     rel.relative?.id,
                                                 )}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
                                                 className="cursor-pointer text-sm font-semibold hover:underline"
                                                 onClick={(e) =>
                                                     e.stopPropagation()
                                                 }
                                             >
                                                 {`${rel.relative?.name} • ${rel.relative?.customer_no}`}
-                                            </a>
+                                            </Link>
                                         </div>
 
                                         <div className="flex gap-2">
@@ -295,7 +295,7 @@ export default function Show({ customer }: ShowProps) {
                     title="Introducers"
                     actions={
                         <Link
-                            href={`/customers/${customer.id}/edit`}
+                            href={route('introducers.create')}
                             className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
                         >
                             <Plus size={14} /> Add
@@ -327,21 +327,19 @@ export default function Show({ customer }: ShowProps) {
                                     )}
                                     <div className="">
                                         <div className="text-sm font-medium">
-                                            <a
+                                            <Link
                                                 href={route(
                                                     'customers.show',
                                                     intro.introducer_customer
                                                         ?.id,
                                                 )}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
                                                 className="cursor-pointer text-sm font-semibold hover:underline"
                                                 onClick={(e) =>
                                                     e.stopPropagation()
                                                 }
                                             >
                                                 {`${intro.introducer_customer?.name} • ${intro.introducer_customer?.customer_no}`}
-                                            </a>
+                                            </Link>
                                         </div>
 
                                         <div className="flex gap-2 text-xs">
@@ -369,7 +367,7 @@ export default function Show({ customer }: ShowProps) {
                     title="KYC Documents"
                     actions={
                         <Link
-                            href={`/customers/${customer.id}/edit`}
+                            href={route('kyc-documents.create')}
                             className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
                         >
                             <Plus size={14} /> Add
@@ -384,15 +382,13 @@ export default function Show({ customer }: ShowProps) {
                                         status={doc.verification_status}
                                     />
                                     <div className="text-sm font-semibold">
-                                        <a
+                                        <Link
                                             href={doc.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
                                             className="cursor-pointer text-sm font-semibold hover:underline"
                                             onClick={(e) => e.stopPropagation()}
                                         >
                                             {doc.document_type}
-                                        </a>
+                                        </Link>
                                     </div>
                                 </div>
                             </DataCard>

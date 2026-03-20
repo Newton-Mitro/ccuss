@@ -112,7 +112,7 @@ return new class extends Migration {
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->enum('kyc_level', ['BASIC', 'FULL', 'ENHANCED'])->default('BASIC');
             $table->enum('risk_level', ['LOW', 'MEDIUM', 'HIGH'])->default('LOW');
-            $table->enum('verification_status', ['PENDING', 'APPROVED', 'REJECTED'])->default('pending');
+            $table->enum('verification_status', ['PENDING', 'APPROVED', 'REJECTED'])->default('PENDING');
             $table->foreignId('verified_by')->nullable()->constrained('users');
             $table->timestamp('verified_at')->nullable();
             $table->text('remarks')->nullable();
