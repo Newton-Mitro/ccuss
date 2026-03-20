@@ -103,7 +103,7 @@ export default function KycProfilesShow() {
                                     <a
                                         href={doc.url}
                                         target="_blank"
-                                        className="text-primary underline"
+                                        className="underline"
                                     >
                                         {doc.document_type} ({doc.file_name})
                                     </a>

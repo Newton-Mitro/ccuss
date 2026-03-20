@@ -88,15 +88,19 @@ export function SidebarMenuItem({
         sidebarOpen ? 'px-0' : '',
         isActive
             ? isSelfActive
-                ? 'bg-sidebar-active font-medium text-sidebar-active-foreground'
-                : 'border-l-2 border-accent bg-sidebar text-sidebar-active-foreground'
+                ? 'bg-sidebar-active font-medium'
+                : 'border-l-2 border-accent bg-sidebar font-medium'
             : 'text-sidebar-foreground hover:bg-sidebar-hover',
     );
 
     const contentClasses = 'flex w-full items-center gap-2 px-3 py-2';
     const iconClasses = cn(
         'shrink-0 text-base transition-colors',
-        isActive ? 'text-sidebar-active-foreground' : 'text-muted-foreground',
+        isActive
+            ? isSelfActive
+                ? 'text-accent-foreground'
+                : 'text-muted-foreground'
+            : 'text-muted-foreground',
     );
 
     return (
