@@ -5,7 +5,7 @@ import { Input } from '../../../../components/ui/input';
 import { formatBDTCurrency } from '../../../../lib/bdtCurrencyFormatter';
 import { VoucherLine } from '../../../../types/accounting';
 import { Customer } from '../../../../types/customer';
-import { CustomerSearchBox } from '../../../customer-kyc/customers/customer-search-box';
+import { CustomerSearchBox } from '../../../customer-kyc/customers/components/customer-search-box';
 
 interface CollectionLedgersSectionProps {
     errors: any;
@@ -43,7 +43,7 @@ function DepositLedgersSection({
         creditLines.length > 0 && creditLines.every((line) => line.is_selected);
 
     return (
-        <div className="bg-muted/30 flex flex-col gap-4 rounded-md border p-4">
+        <div className="flex flex-col gap-4 rounded-md border bg-muted/30 p-4">
             {/* Header */}
             <div className="space-y-4">
                 <h2 className="text-sm font-medium text-primary">

@@ -1,4 +1,4 @@
-import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
 import React, { useEffect } from 'react';
 import toast from 'react-hot-toast';
@@ -38,9 +38,7 @@ const OpenBranchDay = ({
         if (flash?.success) toast.success(flash.success);
     }, [flash]);
 
-    const handleBack = () => {
-        router.visit(backUrl, { preserveState: true, preserveScroll: true });
-    };
+    const handleBack = () => window.history.back();
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -68,7 +66,7 @@ const OpenBranchDay = ({
                     <button
                         type="button"
                         onClick={handleBack}
-                        className="hover:bg-muted/90 flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground transition"
+                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground transition hover:bg-muted/90"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         <span className="hidden sm:inline">Back</span>
@@ -86,7 +84,7 @@ const OpenBranchDay = ({
                     <select
                         value={data.branch_id}
                         onChange={(e) => setData('branch_id', e.target.value)}
-                        className="focus:ring-primary/50 h-10 w-full rounded-md border bg-background px-2 text-sm focus:outline-none focus:ring-2"
+                        className="h-10 w-full rounded-md border bg-background px-2 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
                     >
                         <option value="">Select Branch</option>
                         {branches.map((branch) => (
@@ -114,7 +112,7 @@ const OpenBranchDay = ({
                     <Button
                         type="submit"
                         disabled={processing}
-                        className="hover:bg-primary/90 flex items-center gap-2 rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground transition-all duration-200 hover:shadow-md"
+                        className="flex items-center gap-2 rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
                     >
                         {processing ? (
                             <>

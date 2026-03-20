@@ -1,4 +1,4 @@
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Key, Loader2 } from 'lucide-react';
 import React, { useEffect } from 'react';
 import toast from 'react-hot-toast';
@@ -36,9 +36,7 @@ const UserForm = ({
         if (flash?.success) toast.success(flash.success);
     }, [flash]);
 
-    const handleBack = () => {
-        router.visit(backUrl, { preserveState: true, preserveScroll: true });
-    };
+    const handleBack = () => window.history.back();
 
     const isEdit = !!user;
 
@@ -91,14 +89,14 @@ const UserForm = ({
                     <button
                         type="button"
                         onClick={handleBack}
-                        className="hover:bg-muted/90 flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground transition"
+                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground transition hover:bg-muted/90"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         <span className="hidden sm:inline">Back</span>
                     </button>
                     <Link
                         href="/users"
-                        className="hover:bg-secondary/90 flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition"
+                        className="flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition hover:bg-secondary/90"
                     >
                         <Key className="h-4 w-4" />
                         <span className="hidden sm:inline">Users</span>
@@ -108,7 +106,7 @@ const UserForm = ({
 
             <form
                 onSubmit={handleSubmit}
-                className="lg:w-5xl w-full space-y-4 rounded-md border bg-card p-4 sm:p-6"
+                className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6 lg:w-5xl"
             >
                 {/* BASIC INFO */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -193,7 +191,7 @@ const UserForm = ({
                         {roles.map((role) => (
                             <label
                                 key={role.id}
-                                className="hover:bg-muted/80 rounded-md px-2 py-1.5 transition"
+                                className="rounded-md px-2 py-1.5 transition hover:bg-muted/80"
                             >
                                 <div className="inline-flex items-center gap-4">
                                     <input
@@ -216,7 +214,7 @@ const UserForm = ({
                                                 );
                                             }
                                         }}
-                                        className="h-4 w-4 rounded border bg-background text-primary focus:outline-none focus:ring-2 focus:ring-ring"
+                                        className="h-4 w-4 rounded border bg-background text-primary focus:ring-2 focus:ring-ring focus:outline-none"
                                     />
 
                                     <div className="flex flex-col">
@@ -241,7 +239,7 @@ const UserForm = ({
                     <Button
                         type="submit"
                         disabled={processing}
-                        className="hover:bg-primary/90 flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground transition-all duration-200 hover:shadow-md"
+                        className="flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
                     >
                         {processing ? (
                             <>

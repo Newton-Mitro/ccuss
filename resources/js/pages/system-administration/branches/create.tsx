@@ -9,7 +9,7 @@ import { Label } from '../../../components/ui/label';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 import { Customer } from '../../../types/customer_kyc_module';
-import { CustomerSearchInput } from '../../customer-kyc/customers/customer-search-input';
+import { CustomerSearchInput } from '../../customer-kyc/customers/components/customer-search-input';
 
 function Create() {
     const { data, setData, post, processing, errors } = useForm({
@@ -44,7 +44,7 @@ function Create() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Branch" />
 
-            <div className="animate-in fade-in space-y-8 text-foreground">
+            <div className="animate-in space-y-8 text-foreground fade-in">
                 <HeadingSmall
                     title="Create Branch"
                     description="Fill in the branch details below to register a new branch."
@@ -52,7 +52,7 @@ function Create() {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="bg-card/80 space-y-5 rounded-xl border p-8 shadow-sm backdrop-blur-sm transition-all duration-300"
+                    className="space-y-5 rounded-xl border bg-card/80 p-8 shadow-sm backdrop-blur-sm transition-all duration-300"
                 >
                     {/* 🧱 Section: Basic Details */}
                     <div>
@@ -195,7 +195,7 @@ function Create() {
                         <Button
                             type="submit"
                             disabled={processing}
-                            className="hover:bg-primary/90 w-40 bg-primary text-primary-foreground transition-all duration-300 hover:shadow-md"
+                            className="w-40 bg-primary text-primary-foreground transition-all duration-300 hover:bg-primary/90 hover:shadow-md"
                         >
                             {processing ? 'Saving...' : 'Create Branch'}
                         </Button>

@@ -12,7 +12,7 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { ModalMode } from '../../../types/base_types';
 import { Customer, CustomerIntroducer } from '../../../types/customer';
-import { CustomerSearchInput } from '../customers/customer-search-input';
+import { CustomerSearchInput } from '../customers/components/customer-search-input';
 
 interface Props {
     open: boolean;

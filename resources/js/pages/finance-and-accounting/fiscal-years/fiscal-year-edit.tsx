@@ -1,4 +1,4 @@
-import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
 import React, { useEffect } from 'react';
 import toast from 'react-hot-toast';
@@ -33,9 +33,7 @@ export default function FiscalYearForm({ backUrl }: { backUrl: string }) {
         if (flash?.error) toast.error(flash.error);
     }, [flash]);
 
-    const handleBack = () => {
-        router.visit(backUrl, { preserveState: true, preserveScroll: true });
-    };
+    const handleBack = () => window.history.back();
 
     const { data, setData, post, put, processing } = useForm({
         code: fiscalYear?.code || '',
@@ -78,7 +76,7 @@ export default function FiscalYearForm({ backUrl }: { backUrl: string }) {
                 <button
                     type="button"
                     onClick={handleBack}
-                    className="hover:bg-muted/90 flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground"
+                    className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
                 >
                     <ArrowLeft className="h-4 w-4" />
                     Back

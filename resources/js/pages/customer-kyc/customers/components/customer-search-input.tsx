@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { Search } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
-import { Label } from '../../../components/ui/label';
-import { Customer } from '../../../types/customer_kyc_module';
+import { Label } from '../../../../components/ui/label';
+import { Customer } from '../../../../types/customer_kyc_module';
 
 interface CustomerSearchInputProps {
     onSelect: (customer: Customer) => void;
@@ -77,13 +77,13 @@ export const CustomerSearchInput: React.FC<CustomerSearchInputProps> = ({
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={placeholder} // <-- set placeholder
-                    className="focus:ring-primary/50 h-8 w-full rounded-md border bg-background px-3 pr-10 text-sm focus:outline-none focus:ring-2"
+                    className="h-8 w-full rounded-md border bg-background px-3 pr-10 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
                 />
 
                 <button
                     type="button"
                     onClick={searchCustomers}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-primary"
+                    className="absolute top-1/2 right-2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-primary"
                     title="Search"
                 >
                     {loading ? (

@@ -19,7 +19,7 @@ export default function HomePage() {
                             <img
                                 src="/logo.png"
                                 alt="Logo"
-                                className="h-28 w-28 animate-pulse rounded-full border bg-background object-contain p-4 md:h-32 md:w-32"
+                                className="h-28 w-28 rounded-full border bg-background object-contain p-2 md:h-56 md:w-56"
                             />
                         </div>
                     </div>

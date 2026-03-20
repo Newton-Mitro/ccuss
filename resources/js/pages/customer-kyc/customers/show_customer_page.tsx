@@ -1,8 +1,6 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import {
     ArrowLeft,
-    CheckCircle2,
-    Clock,
     Edit2,
     FileText,
     HomeIcon,
@@ -13,44 +11,23 @@ import {
     Users,
     UsersIcon,
     X,
-    XCircle,
 } from 'lucide-react';
-import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { formatDate } from '../../../lib/date_util';
-import { BreadcrumbItem } from '../../../types';
-
 import { route } from 'ziggy-js';
 import { UserInfo } from '../../../components/user-info';
-
-/* ================= Theme ================= */
-
-const themeColors = {
-    primary: 'bg-primary text-primary-foreground',
-    secondary: 'bg-secondary text-secondary-foreground',
-    accent: 'bg-accent text-accent-foreground',
-    muted: 'bg-muted text-muted-foreground',
-    destructive: 'bg-destructive text-destructive-foreground',
-};
-
-const badgeColors = {
-    accent: 'bg-accent/20 text-accent-foreground',
-    secondary: 'bg-secondary/20 text-secondary-foreground',
-    destructive: 'bg-destructive/20 text-destructive-foreground',
-};
-
-/* ================= Props ================= */
+import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { formatDate } from '../../../lib/date_util';
+import kycDocumentStatusConfig from '../../../lib/kycDocumentStatusConfig';
+import statusConfig, { Status } from '../../../lib/statusConfig';
+import { BreadcrumbItem } from '../../../types';
+import { Customer } from '../../../types/customer_kyc_module';
 
 interface ShowProps {
-    customer: any;
-    backUrl: string;
+    customer: Customer;
 }
 
-/* ================= Page ================= */
-
-export default function Show({ customer, backUrl }: ShowProps) {
+export default function Show({ customer }: ShowProps) {
     console.log(customer);
-    const handleBack = () =>
-        router.visit(backUrl, { preserveState: true, preserveScroll: true });
+    const handleBack = () => window.history.back();
 
     console.log(customer);
 
@@ -125,7 +102,7 @@ export default function Show({ customer, backUrl }: ShowProps) {
                 actions={
                     <Link
                         href={`/customers/${customer.id}/edit`}
-                        className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground"
+                        className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
                     >
                         <Edit2 size={14} /> Edit
                     </Link>
@@ -174,7 +151,7 @@ export default function Show({ customer, backUrl }: ShowProps) {
                     actions={
                         <Link
                             href={`/customers/${customer.id}/kyc-profile/edit`}
-                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground"
+                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
                         >
                             <Edit2 size={14} /> Edit
                         </Link>
@@ -213,7 +190,7 @@ export default function Show({ customer, backUrl }: ShowProps) {
                     actions={
                         <Link
                             href={`/customers/${customer.id}/edit`}
-                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground"
+                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
                         >
                             <Plus size={14} /> Add
                         </Link>
@@ -252,7 +229,7 @@ export default function Show({ customer, backUrl }: ShowProps) {
                     actions={
                         <Link
                             href={`/customers/${customer.id}/edit`}
-                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground"
+                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
                         >
                             <Plus size={14} /> Add
                         </Link>
@@ -319,7 +296,7 @@ export default function Show({ customer, backUrl }: ShowProps) {
                     actions={
                         <Link
                             href={`/customers/${customer.id}/edit`}
-                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground"
+                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
                         >
                             <Plus size={14} /> Add
                         </Link>
@@ -332,25 +309,51 @@ export default function Show({ customer, backUrl }: ShowProps) {
                                 onEdit={() => {}}
                                 onDelete={() => {}}
                             >
-                                <div className="text-sm font-medium">
-                                    <a
-                                        href={route(
-                                            'customers.show',
-                                            intro.introducer_customer?.id,
-                                        )}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="cursor-pointer text-sm font-semibold hover:underline"
-                                        onClick={(e) => e.stopPropagation()}
-                                    >
-                                        {`${intro.introducer_customer?.name} • ${intro.introducer_customer?.customer_no}`}
-                                    </a>
-                                </div>
+                                <div className="flex items-center gap-2">
+                                    {intro.introducer_customer?.photo?.url ? (
+                                        <img
+                                            src={
+                                                intro.introducer_customer.photo
+                                                    .url
+                                            }
+                                            className="h-10 w-10 rounded-full"
+                                        />
+                                    ) : (
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-xs">
+                                            {intro.introducer_customer?.name?.charAt(
+                                                0,
+                                            )}
+                                        </div>
+                                    )}
+                                    <div className="">
+                                        <div className="text-sm font-medium">
+                                            <a
+                                                href={route(
+                                                    'customers.show',
+                                                    intro.introducer_customer
+                                                        ?.id,
+                                                )}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="cursor-pointer text-sm font-semibold hover:underline"
+                                                onClick={(e) =>
+                                                    e.stopPropagation()
+                                                }
+                                            >
+                                                {`${intro.introducer_customer?.name} • ${intro.introducer_customer?.customer_no}`}
+                                            </a>
+                                        </div>
 
-                                <div className="flex gap-2 text-xs">
-                                    <span>{intro.relationship_type}</span>
+                                        <div className="flex gap-2 text-xs">
+                                            <span>
+                                                {intro.relationship_type}
+                                            </span>
 
-                                    <Badge text={intro.verification_status} />
+                                            <Badge
+                                                text={intro.verification_status}
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             </DataCard>
                         ))}
@@ -367,7 +370,7 @@ export default function Show({ customer, backUrl }: ShowProps) {
                     actions={
                         <Link
                             href={`/customers/${customer.id}/edit`}
-                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground"
+                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
                         >
                             <Plus size={14} /> Add
                         </Link>
@@ -424,14 +427,14 @@ export default function Show({ customer, backUrl }: ShowProps) {
 const ActionButton = ({ children, icon, as = 'button', ...props }: any) =>
     as === 'button' ? (
         <button
-            className={`flex items-center gap-1 rounded bg-primary px-2 py-1 text-primary-foreground`}
+            className={`flex items-center gap-1 rounded bg-primary px-2 py-1 text-primary-foreground hover:bg-primary/80`}
             {...props}
         >
             {icon} {children}
         </button>
     ) : (
         <Link
-            className={`flex items-center gap-1 rounded bg-primary px-2 py-1 text-primary-foreground`}
+            className={`flex items-center gap-1 rounded bg-primary px-2 py-1 text-primary-foreground hover:bg-primary/80`}
             {...props}
         >
             {icon} {children}
@@ -480,13 +483,20 @@ const DataCard = ({
     </div>
 );
 
-const Badge = ({ text }: any) => (
-    <span
-        className={`rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-secondary-foreground`}
-    >
-        {text}
-    </span>
-);
+const Badge = ({ text }: { text: Status }) => {
+    const config = statusConfig[text];
+
+    return (
+        <span
+            className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                config?.class ??
+                'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+            }`}
+        >
+            {config?.label ?? text}
+        </span>
+    );
+};
 
 const SectionHeader = ({
     title,
@@ -512,31 +522,16 @@ const SectionHeader = ({
     </section>
 );
 
-const VerificationStatus = ({
-    status,
-}: {
-    status: 'PENDING' | 'VERIFIED' | 'REJECTED';
-}) => {
-    switch (status) {
-        case 'VERIFIED':
-            return (
-                <span className="flex items-center gap-1 text-xs text-green-600">
-                    <CheckCircle2 size={18} />
-                </span>
-            );
+const VerificationStatus = ({ status }: { status: Status }) => {
+    const config = kycDocumentStatusConfig[status];
 
-        case 'REJECTED':
-            return (
-                <span className="flex items-center gap-1 text-xs text-red-600">
-                    <XCircle size={18} />
-                </span>
-            );
+    if (!config) return null;
 
-        default:
-            return (
-                <span className="flex items-center gap-1 text-xs text-yellow-600">
-                    <Clock size={18} />
-                </span>
-            );
-    }
+    const Icon = config.icon;
+
+    return (
+        <span className={`flex items-center gap-1 text-xs ${config.iconClass}`}>
+            <Icon size={18} />
+        </span>
+    );
 };

@@ -1,4 +1,4 @@
-import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
 import React, { useEffect } from 'react';
 import toast from 'react-hot-toast';
@@ -59,9 +59,7 @@ const TellerForm = ({
         is_active: teller?.is_active ?? true,
     });
 
-    const handleBack = () => {
-        router.visit(backUrl, { preserveState: true, preserveScroll: true });
-    };
+    const handleBack = () => window.history.back();
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -109,7 +107,7 @@ const TellerForm = ({
                     <button
                         type="button"
                         onClick={handleBack}
-                        className="hover:bg-muted/90 flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground"
+                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         <span className="hidden sm:inline">Back</span>
@@ -119,7 +117,7 @@ const TellerForm = ({
 
             <form
                 onSubmit={handleSubmit}
-                className="lg:w-3xl w-full space-y-4 rounded-md border bg-card p-4 sm:p-6"
+                className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6 lg:w-3xl"
             >
                 {/* Basic Info */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2">
@@ -230,7 +228,7 @@ const TellerForm = ({
                     <Button
                         type="submit"
                         disabled={processing}
-                        className="hover:bg-primary/90 flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground"
+                        className="flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground hover:bg-primary/90"
                     >
                         {processing ? (
                             <>

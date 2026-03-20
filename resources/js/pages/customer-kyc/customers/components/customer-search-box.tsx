@@ -2,9 +2,8 @@ import axios from 'axios';
 import { Search } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { route } from 'ziggy-js';
-import { Label } from '../../../components/ui/label';
-import { Customer } from '../../../types/customer_kyc_module';
-import CustomerViewModal from './customer_view_modal';
+import { Label } from '../../../../components/ui/label';
+import { Customer } from '../../../../types/customer_kyc_module';
 
 interface CustomerSearchBoxProps {
     onSelect: (customer: Customer) => void;
@@ -22,7 +21,6 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
     const [showDropdown, setShowDropdown] = useState(false);
     const [loading, setLoading] = useState(false);
     const [query, setQuery] = useState('');
-    const [open, setOpen] = useState(false);
 
     console.log(customers);
 
@@ -86,7 +84,7 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={placeholder}
-                    className="focus:ring-primary/50 h-8 w-full rounded-md border bg-background px-3 pr-10 text-sm focus:outline-none focus:ring-2"
+                    className="h-8 w-full rounded-md border bg-background px-3 pr-10 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
                 />
                 <button
                     type="button"
@@ -158,7 +156,7 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
             {/* CUSTOMER DETAILS / SKELETON */}
             {customer?.id ? (
                 // Loaded customer
-                <div className="bg-background/60 mt-3 flex flex-col gap-4 rounded-md border p-3 md:flex-row">
+                <div className="mt-3 flex flex-col gap-4 rounded-md border bg-background/60 p-3 md:flex-row">
                     <div className="flex items-center justify-center">
                         {/* Avatar */}
                         <div className="h-20 w-20 overflow-hidden rounded-full border bg-muted">
@@ -209,7 +207,7 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
                 </div>
             ) : (
                 // Skeleton with exact same height
-                <div className="bg-background/60 mt-3 flex flex-col gap-4 rounded-md border p-3 md:flex-row">
+                <div className="mt-3 flex flex-col gap-4 rounded-md border bg-background/60 p-3 md:flex-row">
                     <div className="flex items-center justify-center">
                         {/* Avatar */}
                         <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-full bg-muted" />
@@ -235,12 +233,6 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
                     </div>
                 </div>
             )}
-
-            <CustomerViewModal
-                open={open}
-                onOpenChange={setOpen}
-                customer={customer}
-            />
         </div>
     );
 };

@@ -1,4 +1,4 @@
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, ListFilter, Loader2 } from 'lucide-react';
 import React, { useEffect } from 'react';
 import toast from 'react-hot-toast';
@@ -34,9 +34,7 @@ export default function FiscalPeriodForm({ backUrl }: { backUrl: string }) {
         if (flash?.error) toast.error(flash.error);
     }, [flash]);
 
-    const handleBack = () => {
-        router.visit(backUrl, { preserveState: true, preserveScroll: true });
-    };
+    const handleBack = () => window.history.back();
 
     const { data, setData, post, put, processing } = useForm({
         period_name: fiscalPeriod?.period_name || '',
@@ -82,7 +80,7 @@ export default function FiscalPeriodForm({ backUrl }: { backUrl: string }) {
                     <button
                         type="button"
                         onClick={handleBack}
-                        className="hover:bg-muted/90 flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground"
+                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         <span className="hidden sm:inline">Back</span>
@@ -90,7 +88,7 @@ export default function FiscalPeriodForm({ backUrl }: { backUrl: string }) {
 
                     <Link
                         href="/fiscal-periods"
-                        className="hover:bg-secondary/90 flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground"
+                        className="flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground hover:bg-secondary/90"
                     >
                         <ListFilter className="h-4 w-4" />
                         <span className="hidden sm:inline">Fiscal Periods</span>

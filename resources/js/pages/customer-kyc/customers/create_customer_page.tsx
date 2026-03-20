@@ -1,4 +1,4 @@
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, ListFilter, Loader2 } from 'lucide-react';
 
 import React, { useEffect, useState } from 'react';
@@ -12,7 +12,7 @@ import { Label } from '../../../components/ui/label';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 
-const Create = ({ backUrl }: { backUrl: string }) => {
+const Create = () => {
     const { flash } = usePage().props;
 
     useEffect(() => {
@@ -20,12 +20,8 @@ const Create = ({ backUrl }: { backUrl: string }) => {
         if (flash?.success) toast.success(flash.success);
     }, [flash]);
 
-    const handleBack = () => {
-        router.visit(backUrl, {
-            preserveState: true,
-            preserveScroll: true,
-        });
-    };
+    const handleBack = () => window.history.back();
+
     const { data, setData, post, processing, errors } = useForm({
         customer_no: '',
         type: '',

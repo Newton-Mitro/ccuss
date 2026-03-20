@@ -15,7 +15,7 @@ import { BreadcrumbItem } from '../../../types';
 import { Customer, CustomerFamilyRelation } from '../../../types/customer';
 
 import { ModalMode } from '../../../types/base_types';
-import { CustomerSearchBox } from '../customers/customer-search-box';
+import { CustomerSearchBox } from '../customers/components/customer-search-box';
 import FamilyRelationModal from './family_relation_modal';
 import { useCustomerFamilyRelations } from './hooks/useCustomerFamilyRelations';
 import { confirmDelete } from './utils/confirmDelete';

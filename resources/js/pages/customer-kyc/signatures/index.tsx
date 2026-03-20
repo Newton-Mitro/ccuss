@@ -11,7 +11,7 @@ import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem } from '../../../types';
 import { Customer } from '../../../types/customer_kyc_module';
-import { CustomerSearchBox } from '../customers/customer-search-box';
+import { CustomerSearchBox } from '../customers/components/customer-search-box';
 import { useCustomerSignature } from './hooks/useCustomerSignature';
 import UploadSignatureModal from './signature_modal';
 

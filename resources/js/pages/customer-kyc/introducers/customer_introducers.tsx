@@ -15,7 +15,7 @@ import { BreadcrumbItem } from '../../../types';
 import { CustomerIntroducer } from '../../../types/customer';
 
 import { ModalMode } from '../../../types/base_types';
-import { CustomerSearchBox } from '../customers/customer-search-box';
+import { CustomerSearchBox } from '../customers/components/customer-search-box';
 import { useCustomerIntroducers } from './hooks/useCustomerIntroducers';
 import IntroducerModal from './introducer_modal';
 import { confirmDelete } from './utils/confirmDelete';

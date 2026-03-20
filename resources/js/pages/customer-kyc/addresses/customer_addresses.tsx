@@ -15,7 +15,7 @@ import { BreadcrumbItem } from '../../../types';
 import { Customer, CustomerAddress } from '../../../types/customer';
 
 import { ModalMode } from '../../../types/base_types';
-import { CustomerSearchBox } from '../customers/customer-search-box';
+import { CustomerSearchBox } from '../customers/components/customer-search-box';
 import CustomerAddressModal from './address_modal';
 import { useCustomerAddresses } from './hooks/useCustomerAddresses';
 import { confirmDelete } from './utils/confirmDelete';

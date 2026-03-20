@@ -1,4 +1,4 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowLeft, Edit2, Printer } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
@@ -34,9 +34,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
         return { totalDebit, totalCredit };
     };
 
-    const handleBack = () => {
-        router.visit(backUrl, { preserveState: true, preserveScroll: true });
-    };
+    const handleBack = () => window.history.back();
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Vouchers', href: '/vouchers' },
@@ -62,7 +60,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                     <button
                         type="button"
                         onClick={handleBack}
-                        className="hover:bg-muted/90 flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground"
+                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         Back
@@ -94,7 +92,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
             {/* Print-only Header */}
             <div className="mb-6 hidden print:block">
                 <div className="mb-2 text-center">
-                    <h1 className="text-2xl font-bold uppercase tracking-wide">
+                    <h1 className="text-2xl font-bold tracking-wide uppercase">
                         PAYMENT VOUCHER
                     </h1>
                     <p className="text-sm text-muted-foreground">
@@ -232,7 +230,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                                 voucher.lines.map((line) => (
                                     <tr
                                         key={line.id}
-                                        className="even:bg-muted/30 border-b"
+                                        className="border-b even:bg-muted/30"
                                     >
                                         <td className="px-2 py-1">
                                             <div className="">

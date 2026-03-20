@@ -24,6 +24,8 @@ export default function Index() {
 
     const { customers, filters } = props;
 
+    console.log(customers);
+
     const { data, setData, get } = useForm({
         search: filters.search || '',
         status: filters.status || 'all',

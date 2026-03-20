@@ -1,4 +1,4 @@
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, ListFilter, SpaceIcon } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -14,21 +14,19 @@ import { Customer } from '../../../types/customer_kyc_module';
 
 interface EditProps {
     customer: Customer;
-    backUrl: string;
     flash?: {
         error?: string;
         success?: string;
     };
 }
 
-const Edit = ({ customer, backUrl, flash }: EditProps) => {
+const Edit = ({ customer, flash }: EditProps) => {
     useEffect(() => {
         if (flash?.error) toast.error(flash.error);
         if (flash?.success) toast.success(flash.success);
     }, [flash]);
 
-    const handleBack = () =>
-        router.visit(backUrl, { preserveState: true, preserveScroll: true });
+    const handleBack = () => window.history.back();
 
     const { data, setData, put, processing, errors } = useForm({
         customer_no: customer.customer_no || '',
@@ -87,7 +85,7 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                     <button
                         type="button"
                         onClick={handleBack}
-                        className="hover:bg-muted/90 flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground transition"
+                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground transition hover:bg-muted/90"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         <span className="hidden sm:inline">Back</span>
@@ -95,7 +93,7 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
 
                     <Link
                         href="/customers"
-                        className="hover:bg-secondary/90 flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition"
+                        className="flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition hover:bg-secondary/90"
                     >
                         <ListFilter className="h-4 w-4" />
                         <span className="hidden sm:inline">Customers</span>
@@ -105,7 +103,7 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
 
             <form
                 onSubmit={handleSubmit}
-                className="lg:w-5xl w-full space-y-4 rounded-md border bg-card p-4 sm:p-6"
+                className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6 lg:w-5xl"
             >
                 <div className="flex flex-col gap-4">
                     <div className="">
@@ -159,7 +157,7 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                                     setData('identification_number', '');
                                 }
                             }}
-                            className="focus:ring-primary/50 h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2"
+                            className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                         >
                             <option>Individual</option>
                             <option>Organization</option>
@@ -213,7 +211,7 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                                 onChange={(e) =>
                                     setData('gender', e.target.value)
                                 }
-                                className="focus:ring-primary/50 h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2"
+                                className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                             >
                                 <option value="">Select</option>
                                 <option>MALE</option>
@@ -228,7 +226,7 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                                 onChange={(e) =>
                                     setData('religion', e.target.value)
                                 }
-                                className="focus:ring-primary/50 h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2"
+                                className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                             >
                                 <option value="">Select</option>
                                 <option>ISLAM</option>
@@ -250,7 +248,7 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                             onChange={(e) =>
                                 setData('identification_type', e.target.value)
                             }
-                            className="focus:ring-primary/50 h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2"
+                            className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                         >
                             {isOrganization ? (
                                 <option value="REGISTRATION_NO">
@@ -293,7 +291,7 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                             onChange={(e) =>
                                 setData('kyc_status', e.target.value)
                             }
-                            className="focus:ring-primary/50 h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2"
+                            className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                         >
                             <option>PENDING</option>
                             <option>VERIFIED</option>
@@ -307,7 +305,7 @@ const Edit = ({ customer, backUrl, flash }: EditProps) => {
                     <Button
                         type="submit"
                         disabled={processing}
-                        className="hover:bg-primary/90 flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground transition-all duration-200 hover:shadow-md"
+                        className="flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
                     >
                         {processing ? (
                             <>

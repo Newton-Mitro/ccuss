@@ -10,7 +10,7 @@ import { formatBDTCurrency } from '../../../../lib/bdtCurrencyFormatter';
 import { takaToText } from '../../../../lib/taka_to_text';
 import { VoucherLine } from '../../../../types/accounting';
 import { Customer } from '../../../../types/customer_kyc_module';
-import { CustomerSearchBox } from '../../../customer-kyc/customers/customer-search-box';
+import { CustomerSearchBox } from '../../../customer-kyc/customers/components/customer-search-box';
 
 interface WithdrawalLedgersSectionProps {
     errors: any;

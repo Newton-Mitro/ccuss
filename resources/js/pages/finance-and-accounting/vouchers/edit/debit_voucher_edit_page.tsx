@@ -112,9 +112,7 @@ export default function EditDebitVoucherEntry({
         if (flash?.error) toast.error(flash.error);
     }, [flash]);
 
-    const handleBack = () => {
-        router.visit(backUrl, { preserveState: true, preserveScroll: true });
-    };
+    const handleBack = () => window.history.back();
 
     const addLine = () => {
         if (disabled) return;

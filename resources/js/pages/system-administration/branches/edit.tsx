@@ -10,7 +10,7 @@ import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 import { Branch } from '../../../types/branch';
 import { Customer } from '../../../types/customer_kyc_module';
-import { CustomerSearchInput } from '../../customer-kyc/customers/customer-search-input';
+import { CustomerSearchInput } from '../../customer-kyc/customers/components/customer-search-input';
 
 interface EditBranchProps {
     branch: Branch;
@@ -50,7 +50,7 @@ function Edit({ branch }: EditBranchProps) {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Edit Branch" />
 
-            <div className="animate-in fade-in space-y-8 text-foreground">
+            <div className="animate-in space-y-8 text-foreground fade-in">
                 <HeadingSmall
                     title="Edit Branch"
                     description="Update the branch details below."
@@ -58,7 +58,7 @@ function Edit({ branch }: EditBranchProps) {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="bg-card/80 space-y-5 rounded-xl border p-8 shadow-sm backdrop-blur-sm transition-all duration-300"
+                    className="space-y-5 rounded-xl border bg-card/80 p-8 shadow-sm backdrop-blur-sm transition-all duration-300"
                 >
                     {/* Basic Details */}
                     <div>
@@ -187,7 +187,7 @@ function Edit({ branch }: EditBranchProps) {
                         <Button
                             type="submit"
                             disabled={processing}
-                            className="hover:bg-primary/90 w-40 bg-primary text-primary-foreground hover:shadow-md"
+                            className="w-40 bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-md"
                         >
                             {processing ? 'Updating...' : 'Update Branch'}
                         </Button>

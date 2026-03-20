@@ -1,4 +1,4 @@
-import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
 import React, { useEffect } from 'react';
 import toast from 'react-hot-toast';
@@ -36,9 +36,7 @@ const VaultForm = ({ backUrl, vault, branches }: VaultFormPageProps) => {
         if (flash?.success) toast.success(flash.success);
     }, [flash]);
 
-    const handleBack = () => {
-        router.visit(backUrl, { preserveState: true, preserveScroll: true });
-    };
+    const handleBack = () => window.history.back();
 
     const isEdit = !!vault;
 
@@ -88,7 +86,7 @@ const VaultForm = ({ backUrl, vault, branches }: VaultFormPageProps) => {
                     <button
                         type="button"
                         onClick={handleBack}
-                        className="hover:bg-muted/90 flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground"
+                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         <span className="hidden sm:inline">Back</span>
@@ -98,7 +96,7 @@ const VaultForm = ({ backUrl, vault, branches }: VaultFormPageProps) => {
 
             <form
                 onSubmit={handleSubmit}
-                className="lg:w-3xl w-full space-y-4 rounded-md border bg-card p-4 sm:p-6"
+                className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6 lg:w-3xl"
             >
                 {/* Vault Info */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2">
@@ -168,7 +166,7 @@ const VaultForm = ({ backUrl, vault, branches }: VaultFormPageProps) => {
                     <Button
                         type="submit"
                         disabled={processing}
-                        className="hover:bg-primary/90 flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground"
+                        className="flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground hover:bg-primary/90"
                     >
                         {processing ? (
                             <>
