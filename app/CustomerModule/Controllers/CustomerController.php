@@ -3,6 +3,7 @@
 namespace App\CustomerModule\Controllers;
 
 use App\CustomerModule\Models\Customer;
+use App\CustomerModule\Models\KycProfile;
 use App\CustomerModule\Requests\StoreCustomerRequest;
 use App\CustomerModule\Requests\UpdateCustomerRequest;
 use App\Http\Controllers\Controller;
@@ -56,7 +57,7 @@ class CustomerController extends Controller
             'familyRelations',
             'familyRelations.relative',
             'familyRelations.relative.photo',
-            'introducers.introducerCustomer',
+            'introducers.introducer',
             'introducers.introducedCustomer',
             'kycProfile',
             'kycDocuments'
@@ -132,7 +133,10 @@ class CustomerController extends Controller
             $nextNumber = str_pad($lastId + 1, 5, '0', STR_PAD_LEFT);
             $data['customer_no'] = "{$typePrefix}-{$nextNumber}";
 
-            Customer::create($data);
+            $customer = Customer::create($data);
+            $kycProfile = KycProfile::create([
+                'customer_id' => $customer->id
+            ]);
         });
 
         return redirect()->route('customers.index')->with('success', 'Customer created successfully.');
@@ -154,8 +158,8 @@ class CustomerController extends Controller
             'familyRelations',
             'familyRelations.relative',
             'familyRelations.relative.photo',
-            'introducers.introducerCustomer',
-            'introducers.introducerCustomer.photo',
+            'introducers.introducer',
+            'introducers.introducer.photo',
             'kycProfile',
             'kycDocuments',
             'onlineServiceClient',

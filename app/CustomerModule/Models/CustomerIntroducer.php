@@ -46,16 +46,11 @@ class CustomerIntroducer extends Model
     }
 
     // The customer who introduced someone
-    public function introducerCustomer(): BelongsTo
+    public function introducer(): BelongsTo
     {
         return $this->belongsTo(Customer::class, 'introducer_customer_id');
     }
 
-    // Optional account used for introducer
-    public function introducerAccount(): BelongsTo
-    {
-        return $this->belongsTo(OnlineServiceClient::class, 'introducer_account_id');
-    }
 
     /* ========================
      * Verification

@@ -17,7 +17,7 @@ class CustomerIntroducerController extends Controller
         $query = CustomerIntroducer::query()
             ->with([
                 'introducedCustomer:id,name,customer_no',
-                'introducerCustomer:id,name,customer_no',
+                'introducer:id,name,customer_no',
                 'verifier:id,name',
             ]);
 
@@ -27,7 +27,7 @@ class CustomerIntroducerController extends Controller
                 $q->whereHas('introducedCustomer', function ($qc) use ($search) {
                     $qc->where('name', 'like', "%{$search}%")
                         ->orWhere('customer_no', 'like', "%{$search}%");
-                })->orWhereHas('introducerCustomer', function ($qi) use ($search) {
+                })->orWhereHas('introducer', function ($qi) use ($search) {
                     $qi->where('name', 'like', "%{$search}%")
                         ->orWhere('customer_no', 'like', "%{$search}%");
                 });
@@ -64,20 +64,20 @@ class CustomerIntroducerController extends Controller
         );
     }
 
-    public function show(CustomerIntroducer $customerIntroducer): Response
+    public function show(CustomerIntroducer $introducer): Response
     {
-        $customerIntroducer->load([
+        $introducer->load([
             'introducedCustomer',
             'introducedCustomer.photo',
-            'introducerCustomer',
-            'introducerCustomer.photo',
+            'introducer',
+            'introducer.photo',
             'verifier',
         ]);
 
         return Inertia::render(
             'customer-kyc/introducers/show_introducer_page',
             [
-                'introducer' => $customerIntroducer,
+                'introducer_request' => $introducer,
             ]
         );
     }
@@ -87,12 +87,12 @@ class CustomerIntroducerController extends Controller
         return Inertia::render('customer-kyc/introducers/create_introducer_page');
     }
 
-    public function edit(CustomerIntroducer $customerIntroducer): Response
+    public function edit(CustomerIntroducer $introducer): Response
     {
         return Inertia::render(
             'customer-kyc/introducers/edit_introducer_page',
             [
-                'introducer' => $customerIntroducer,
+                'introducer' => $introducer,
             ]
         );
     }
@@ -143,7 +143,7 @@ class CustomerIntroducerController extends Controller
 
     public function update(
         Request $request,
-        CustomerIntroducer $customerIntroducer
+        CustomerIntroducer $introducer
     ) {
         $data = $request->validate([
             'relationship_type' => [
@@ -153,19 +153,19 @@ class CustomerIntroducerController extends Controller
             'remarks' => ['nullable', 'string'],
         ]);
 
-        $customerIntroducer->update([
+        $introducer->update([
             ...$data,
             'updated_by' => auth()->id(),
         ]);
 
         return redirect()
-            ->route('customers.show', $customerIntroducer->introduced_customer_id)
+            ->route('customers.show', $introducer->introduced_customer_id)
             ->with('success', 'Introducer updated successfully.');
     }
 
     public function verify(
         Request $request,
-        CustomerIntroducer $customerIntroducer
+        CustomerIntroducer $introducer
     ): JsonResponse {
         $data = $request->validate([
             'verification_status' => [
@@ -175,7 +175,7 @@ class CustomerIntroducerController extends Controller
             'remarks' => ['nullable', 'string'],
         ]);
 
-        $customerIntroducer->update([
+        $introducer->update([
             'verification_status' => $data['verification_status'],
             'remarks' => $data['remarks'],
             'verified_by' => auth()->id(),
@@ -188,9 +188,9 @@ class CustomerIntroducerController extends Controller
     }
 
     public function destroy(
-        CustomerIntroducer $customerIntroducer
+        CustomerIntroducer $introducer
     ): JsonResponse {
-        $customerIntroducer->delete();
+        $introducer->delete();
 
         return response()->json([
             'message' => 'Introducer deleted successfully.',

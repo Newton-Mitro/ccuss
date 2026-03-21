@@ -17,7 +17,7 @@ export default function Register() {
             <div className="w-full max-w-md rounded-lg border bg-card p-6 shadow-sm md:p-10">
                 {/* Logo + Intro */}
                 <div className="mb-6 flex flex-col items-center text-center">
-                    <AppLogoIcon className="mb-3 h-20 w-20 fill-current text-primary" />
+                    <AppLogoIcon className="h-32 w-32 fill-current text-primary" />
                     <div className="text-sm font-medium text-primary">
                         Join{' '}
                         <span className="text-foreground">

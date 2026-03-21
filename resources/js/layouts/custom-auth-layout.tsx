@@ -49,9 +49,6 @@ export default function CustomAuthLayout({
 }: CustomAuthLayoutProps) {
     const page = usePage<SharedData>();
     const auth = page.props?.auth;
-
-    console.log(auth);
-
     const cleanup = useMobileNavigation();
 
     /* ------------------------------------------------------------------

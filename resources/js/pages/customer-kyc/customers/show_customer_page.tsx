@@ -148,37 +148,20 @@ export default function Show({ customer }: ShowProps) {
                 <SectionHeader
                     icon={<UserCheckIcon size={18} />}
                     title="KYC Profile"
-                    actions={
-                        <Link
-                            href={route('kyc-profiles.edit', {
-                                id: customer.id,
-                            })}
-                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
-                        >
-                            <Edit2 size={14} /> Edit
-                        </Link>
-                    }
                 >
                     <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
-                        <InfoItem
-                            label="KYC Level"
-                            value={customer.kyc_profile.kyc_level}
-                        />
-
-                        <InfoItem
-                            label="Risk Level"
-                            value={customer.kyc_profile.risk_level}
-                        />
-
-                        <InfoItem
-                            label="Verification Status"
-                            value={customer.kyc_profile.verification_status}
-                        />
-
-                        <InfoItem
-                            label="Remarks"
-                            value={customer.kyc_profile.remarks}
-                        />
+                        <div className="rounded-md border bg-card p-4 shadow-sm hover:shadow-md">
+                            <InfoItem
+                                label="KYC Level"
+                                value={customer.kyc_profile.kyc_level}
+                            />
+                        </div>
+                        <div className="rounded-md border bg-card p-4 shadow-sm hover:shadow-md">
+                            <InfoItem
+                                label="Risk Level"
+                                value={customer.kyc_profile.risk_level}
+                            />
+                        </div>
                     </div>
                 </SectionHeader>
             )}
@@ -310,19 +293,14 @@ export default function Show({ customer }: ShowProps) {
                                 onDelete={() => {}}
                             >
                                 <div className="flex items-center gap-2">
-                                    {intro.introducer_customer?.photo?.url ? (
+                                    {intro.introducer?.photo?.url ? (
                                         <img
-                                            src={
-                                                intro.introducer_customer.photo
-                                                    .url
-                                            }
+                                            src={intro.introducer.photo.url}
                                             className="h-10 w-10 rounded-full"
                                         />
                                     ) : (
                                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-xs">
-                                            {intro.introducer_customer?.name?.charAt(
-                                                0,
-                                            )}
+                                            {intro.introducer?.name?.charAt(0)}
                                         </div>
                                     )}
                                     <div className="">
@@ -330,15 +308,14 @@ export default function Show({ customer }: ShowProps) {
                                             <Link
                                                 href={route(
                                                     'customers.show',
-                                                    intro.introducer_customer
-                                                        ?.id,
+                                                    intro.introducer?.id,
                                                 )}
                                                 className="cursor-pointer text-sm font-semibold hover:underline"
                                                 onClick={(e) =>
                                                     e.stopPropagation()
                                                 }
                                             >
-                                                {`${intro.introducer_customer?.name} • ${intro.introducer_customer?.customer_no}`}
+                                                {`${intro.introducer?.name} • ${intro.introducer?.customer_no}`}
                                             </Link>
                                         </div>
 
@@ -405,7 +382,7 @@ export default function Show({ customer }: ShowProps) {
                     title="Online Service Account"
                 >
                     <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 rounded-md border bg-card p-4 shadow-sm hover:shadow-md">
                             <UserInfo
                                 user={customer.online_service_client}
                                 showEmail

@@ -1,275 +1,267 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
-    CheckCircle,
-    Clock,
-    Edit2,
-    EyeClosed,
-    ListFilter,
+    ArrowLeft,
+    CheckCheck,
     ShieldCheck,
     UserIcon,
-    X,
     XCircle,
 } from 'lucide-react';
+import { useEffect } from 'react';
+import toast from 'react-hot-toast';
+
 import HeadingSmall from '../../../components/heading-small';
 import { Badge } from '../../../components/ui/badge';
+import { Button } from '../../../components/ui/button';
 import { Card, CardContent } from '../../../components/ui/card';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 import { CustomerFamilyRelation } from '../../../types/customer_kyc_module';
 
-interface ViewFamilyRelationProps {
-    familyRelation: CustomerFamilyRelation;
-}
+export default function ShowFamilyRelation() {
+    const { props } = usePage<
+        SharedData & { familyRelation: CustomerFamilyRelation; flash?: any }
+    >();
 
-export default function View({ familyRelation }: ViewFamilyRelationProps) {
+    const { familyRelation, flash } = props;
+
+    useEffect(() => {
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) toast.success(flash.success);
+    }, [flash]);
+
+    const handleBack = () => window.history.back();
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Family Relations', href: '/family-relations' },
-        { title: 'View Relation', href: '' },
+        { title: `Relation #${familyRelation.id}`, href: '' },
     ];
 
+    // 🎯 Status badge mapping
     const STATUS_MAP = {
         VERIFIED: {
             label: 'Verified',
-            icon: CheckCircle,
-            class: 'bg-green-100 text-green-700',
+            class: 'bg-success text-success-foreground',
         },
         PENDING: {
             label: 'Pending',
-            icon: Clock,
-            class: 'bg-yellow-100 text-yellow-700',
+            class: 'bg-warning text-warning-foreground',
         },
         REJECTED: {
             label: 'Rejected',
-            icon: XCircle,
-            class: 'bg-red-100 text-red-700',
+            class: 'bg-destructive text-destructive-foreground',
         },
     } as const;
 
-    const statusConfig = STATUS_MAP[
-        familyRelation.verification_status as keyof typeof STATUS_MAP
-    ] ?? { label: 'Unknown', icon: Clock, class: 'bg-gray-100 text-gray-700' };
+    const statusClass =
+        STATUS_MAP[
+            familyRelation.verification_status as keyof typeof STATUS_MAP
+        ]?.class ?? 'bg-muted text-muted-foreground';
 
-    const StatusIcon = statusConfig.icon;
+    const statusLabel =
+        STATUS_MAP[
+            familyRelation.verification_status as keyof typeof STATUS_MAP
+        ]?.label ?? 'Unknown';
+
+    // ✅ Actions for pending verification
+    const handleApprove = () => {
+        router.post(
+            `/family-relations/${familyRelation.id}/approve`,
+            {},
+            {
+                onSuccess: () => toast.success('Relation approved'),
+            },
+        );
+    };
+
+    const handleReject = () => {
+        router.post(
+            `/family-relations/${familyRelation.id}/reject`,
+            {},
+            {
+                onSuccess: () => toast.success('Relation rejected'),
+            },
+        );
+    };
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="View Family Relation" />
+            <Head title={`Family Relation #${familyRelation.id}`} />
 
-            {/* Customer Header */}
-            <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            {/* HEADER */}
+            <div className="flex flex-col gap-3 pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <HeadingSmall
-                    title="Relation Information"
-                    description="Customer family relation information."
+                    title={`Family Relation #${familyRelation.id}`}
+                    description="View and verify customer family relation."
                 />
 
-                <div className="flex gap-2">
-                    <Link
-                        href={`/family-relations/${familyRelation.id}/edit`}
-                        className="hover:bg-accent/90 flex items-center gap-1 rounded bg-accent px-3 py-1 text-accent-foreground transition"
+                <div className="flex flex-wrap gap-2">
+                    <button
+                        onClick={handleBack}
+                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
                     >
-                        <Edit2 size={16} />
-                        <span className="hidden sm:inline">Edit</span>
+                        <ArrowLeft className="h-4 w-4" />
+                        <span className="hidden sm:inline">Back</span>
+                    </button>
+
+                    <Link
+                        href="/family-relations"
+                        className="flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground hover:bg-secondary/90"
+                    >
+                        Relations
                     </Link>
 
-                    <button
-                        type="button"
-                        className="hover:bg-destructive/90 flex items-center gap-1 rounded bg-destructive px-3 py-1 text-destructive-foreground transition"
-                    >
-                        <EyeClosed size={16} />
-                        <span className="hidden sm:inline">Suspend</span>
-                    </button>
-
-                    <button
-                        type="button"
-                        className="hover:bg-destructive/90 flex items-center gap-1 rounded bg-destructive px-3 py-1 text-destructive-foreground transition"
-                    >
-                        <X size={16} />
-                        <span className="hidden sm:inline">Close Account</span>
-                    </button>
-
                     <Link
-                        href={`/family-relations`}
-                        className="hover:bg-secondary/90 flex items-center gap-1 rounded bg-secondary px-3 py-1 text-secondary-foreground transition"
+                        href={`/family-relations/${familyRelation.id}/edit`}
+                        className="flex items-center gap-1 rounded bg-accent px-3 py-1.5 text-sm text-accent-foreground hover:bg-accent/90"
                     >
-                        <ListFilter size={16} />
-                        <span className="hidden sm:inline">
-                            Family Relations
-                        </span>
+                        <CheckCheck className="h-4 w-4" />
+                        Edit
                     </Link>
                 </div>
             </div>
 
-            {/* Relation & Relative Info */}
-            <Card className="overflow-x-auto rounded-xl border bg-card shadow-sm">
-                <CardContent className="">
-                    <div className="">
-                        <div className="flex items-center justify-between gap-6">
-                            <div className="">
-                                <div className="mb-4 flex items-center gap-2 text-sm font-semibold">
-                                    <UserIcon size={16} />
-                                    <span>Customer Info</span>
-                                </div>
-                                <div className="mt-3 flex items-center gap-4">
-                                    <div className="h-20 w-20 overflow-hidden rounded-full border bg-muted">
-                                        {familyRelation.customer?.photo?.url ? (
-                                            <img
-                                                src={
-                                                    familyRelation.customer
-                                                        ?.photo.url
-                                                }
-                                                alt={
-                                                    familyRelation.customer
-                                                        ?.name
-                                                }
-                                                className="h-full w-full object-cover"
-                                            />
-                                        ) : (
-                                            <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
-                                                {familyRelation.customer?.name.charAt(
-                                                    0,
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
+            {/* MAIN CONTENT */}
+            <div className="grid gap-4 lg:grid-cols-3">
+                {/* LEFT COLUMN: Customer + Relative Info */}
+                <div className="col-span-2 space-y-4">
+                    {/* Customer Info */}
+                    <Card className="rounded-md border bg-card p-4">
+                        <CardContent className="space-y-3">
+                            <p className="flex items-center gap-1 text-sm font-medium">
+                                <UserIcon className="h-4 w-4" /> Customer Info
+                            </p>
 
-                                    <div className="flex-1 space-y-2">
-                                        <div>
-                                            <div className="flex items-center gap-2">
-                                                {familyRelation.customer ? (
-                                                    <Link
-                                                        href={`/customers/${familyRelation.customer.id}`}
-                                                        className="text-primary underline"
-                                                    >
-                                                        {
-                                                            familyRelation
-                                                                .customer.name
-                                                        }
-                                                    </Link>
-                                                ) : (
-                                                    '—'
-                                                )}
-                                            </div>
-                                            <p className="text-xs text-muted-foreground">
-                                                {familyRelation.customer?.type}{' '}
-                                                •{' '}
-                                                {
-                                                    familyRelation.customer
-                                                        ?.kyc_status
-                                                }
-                                            </p>
-                                            <div className="text-xs text-muted-foreground">
-                                                {
-                                                    familyRelation.customer
-                                                        ?.customer_no
-                                                }{' '}
-                                                •{' '}
-                                                {familyRelation.customer?.email}{' '}
-                                                •{' '}
-                                                {familyRelation.customer?.phone}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="">
-                                <div className="mb-4 flex items-center justify-end gap-2 text-sm font-semibold">
-                                    <UserIcon size={16} />
-                                    <span>Relative Info</span>
-                                </div>
-                                <div className="mt-3 flex items-center gap-4">
-                                    <div className="flex-1 space-y-2 text-right">
-                                        <div>
-                                            <div className="flex items-center justify-end gap-2">
-                                                {familyRelation.relative ? (
-                                                    <Link
-                                                        href={`/customers/${familyRelation.relative.id}`}
-                                                        className="text-primary underline"
-                                                    >
-                                                        {
-                                                            familyRelation
-                                                                .relative.name
-                                                        }
-                                                    </Link>
-                                                ) : (
-                                                    '—'
-                                                )}
-                                            </div>
-                                            <p className="text-xs text-muted-foreground">
-                                                {familyRelation.relative?.type}{' '}
-                                                •{' '}
-                                                {
-                                                    familyRelation.relative
-                                                        ?.kyc_status
-                                                }
-                                            </p>
-                                            <div className="text-xs text-muted-foreground">
-                                                {
-                                                    familyRelation.relative
-                                                        ?.customer_no
-                                                }{' '}
-                                                •{' '}
-                                                {familyRelation.relative?.email}{' '}
-                                                •{' '}
-                                                {familyRelation.relative?.phone}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="h-20 w-20 overflow-hidden rounded-full border bg-muted">
-                                        {familyRelation.relative?.photo?.url ? (
-                                            <img
-                                                src={
-                                                    familyRelation.relative
-                                                        ?.photo.url
-                                                }
-                                                alt={
-                                                    familyRelation.relative
-                                                        ?.name
-                                                }
-                                                className="h-full w-full object-cover"
-                                            />
-                                        ) : (
-                                            <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
-                                                {familyRelation.relative?.name.charAt(
-                                                    0,
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Relation Info */}
-                        <div className="my-6 space-y-4 pt-4">
-                            <h3 className="flex items-center gap-1 text-sm font-semibold text-muted-foreground">
-                                <ShieldCheck className="h-4 w-4" /> Relation
-                            </h3>
-
-                            <div className="flex flex-col gap-1">
-                                <Info
-                                    label="Relation Type"
-                                    value={familyRelation.relation_type.replaceAll(
-                                        '_',
-                                        ' ',
-                                    )}
+                            <div className="flex items-center gap-4">
+                                <Avatar
+                                    name={familyRelation.customer?.name}
+                                    photo={familyRelation.customer?.photo?.url}
                                 />
-
-                                <Badge
-                                    className={`flex items-center gap-1 text-xs ${statusConfig.class}`}
-                                >
-                                    <StatusIcon className="h-3 w-3" />{' '}
-                                    {statusConfig.label}
-                                </Badge>
+                                <CustomerDetails
+                                    customer={familyRelation.customer}
+                                />
                             </div>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+                        </CardContent>
+                    </Card>
+
+                    {/* Relative Info */}
+                    <Card className="rounded-md border bg-card p-4">
+                        <CardContent className="space-y-3">
+                            <p className="flex items-center gap-1 text-sm font-medium">
+                                <UserIcon className="h-4 w-4" /> Relative Info
+                            </p>
+
+                            <div className="flex items-center gap-4">
+                                <Avatar
+                                    name={familyRelation.relative?.name}
+                                    photo={familyRelation.relative?.photo?.url}
+                                />
+                                <CustomerDetails
+                                    customer={familyRelation.relative}
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Relation Info */}
+                    <Card className="rounded-md border bg-card p-4">
+                        <CardContent className="space-y-2">
+                            <p className="flex items-center gap-1 text-sm font-medium">
+                                <ShieldCheck className="h-4 w-4" /> Relation
+                                Info
+                            </p>
+                            <Info
+                                label="Relation Type"
+                                value={familyRelation.relation_type.replaceAll(
+                                    '_',
+                                    ' ',
+                                )}
+                            />
+                            <Badge
+                                className={`rounded px-2 py-1 text-xs ${statusClass}`}
+                            >
+                                {statusLabel}
+                            </Badge>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* RIGHT COLUMN: Actions */}
+                <div className="space-y-4">
+                    <Card className="rounded-md border bg-card p-4">
+                        <CardContent>
+                            <p className="text-sm font-medium">
+                                Verification Actions
+                            </p>
+                            <div className="mt-3 flex flex-col gap-2">
+                                {familyRelation.verification_status ===
+                                    'PENDING' && (
+                                    <>
+                                        <Button
+                                            onClick={handleApprove}
+                                            className="bg-success text-success-foreground hover:bg-success/90"
+                                        >
+                                            <CheckCheck className="mr-1 h-4 w-4" />{' '}
+                                            Approve
+                                        </Button>
+                                        <Button
+                                            onClick={handleReject}
+                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                        >
+                                            <XCircle className="mr-1 h-4 w-4" />{' '}
+                                            Reject
+                                        </Button>
+                                    </>
+                                )}
+                                {familyRelation.verification_status !==
+                                    'PENDING' && (
+                                    <Badge
+                                        className={`rounded px-2 py-1 text-xs ${statusClass}`}
+                                    >
+                                        {statusLabel}
+                                    </Badge>
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
         </CustomAuthLayout>
     );
 }
 
-/* ---------------- Helper Component ---------------- */
+/* ---------------- Helper Components ---------------- */
+function Avatar({ name, photo }: { name?: string; photo?: string }) {
+    return (
+        <div className="h-20 w-20 overflow-hidden rounded-full border bg-muted">
+            {photo ? (
+                <img
+                    src={photo}
+                    alt={name}
+                    className="h-full w-full object-cover"
+                />
+            ) : (
+                <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
+                    {name?.charAt(0)}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function CustomerDetails({ customer }: { customer?: any }) {
+    return (
+        <div className="flex-1 space-y-1">
+            <p className="text-sm font-medium">{customer?.name || '—'}</p>
+            <p className="text-xs text-muted-foreground">
+                {customer?.type} • {customer?.kyc_status}
+            </p>
+            <p className="text-xs text-muted-foreground">
+                {customer?.customer_no} • {customer?.email} • {customer?.phone}
+            </p>
+        </div>
+    );
+}
+
 function Info({ label, value }: { label: string; value?: string | null }) {
     return (
         <div className="flex flex-col gap-0.5">

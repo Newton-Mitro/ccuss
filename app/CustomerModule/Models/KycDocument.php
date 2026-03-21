@@ -4,8 +4,6 @@ namespace App\CustomerModule\Models;
 
 use App\SystemAdministration\Traits\Auditable;
 use App\SystemAdministration\Models\User;
-use App\SystemAdministration\Models\Organization;
-use App\SystemAdministration\Models\Branch;
 use Database\Factories\KycDocumentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

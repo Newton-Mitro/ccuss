@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
+import { Badge } from '../../../lib/statusConfig';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { CustomerFamilyRelation } from '../../../types/customer_kyc_module';
 
@@ -153,7 +154,9 @@ export default function FamilyRelationIndex() {
                                             {f.relation_type.replace(/_/g, ' ')}
                                         </td>
                                         <td className="px-2 py-1">
-                                            {f.verification_status || '—'}
+                                            <Badge
+                                                text={f.verification_status}
+                                            />
                                         </td>
                                         <td className="px-2 py-1">
                                             <TooltipProvider>
@@ -162,7 +165,7 @@ export default function FamilyRelationIndex() {
                                                         <TooltipTrigger asChild>
                                                             <Link
                                                                 href={`/family-relations/${f.id}`}
-                                                                className="text-primary hover:text-primary/80"
+                                                                className="text-gray-500"
                                                             >
                                                                 <Eye className="h-5 w-5" />
                                                             </Link>
@@ -237,13 +240,15 @@ export default function FamilyRelationIndex() {
 
                             <div className="mt-2 space-y-1 text-xs text-muted-foreground">
                                 <p> {f.relative?.phone || '—'}</p>
-                                <p> {f.verification_status || '—'}</p>
+                                <p>
+                                    <Badge text={f.verification_status} />
+                                </p>
                             </div>
 
                             <div className="mt-2 flex justify-end gap-3">
                                 <Link
                                     href={`/family-relations/${f.id}`}
-                                    className="text-primary"
+                                    className="text-gray-500"
                                 >
                                     <Eye className="h-5 w-5" />
                                 </Link>

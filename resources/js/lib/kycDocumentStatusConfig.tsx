@@ -3,27 +3,27 @@ import { CheckCircle2, Clock, XCircle } from 'lucide-react';
 const kycDocumentStatusConfig = {
     PENDING: {
         label: 'Pending',
-        class: 'bg-yellow-100 text-yellow-800',
+        class: 'bg-warning text-warning-foreground',
         icon: Clock,
-        iconClass: 'text-yellow-600',
+        iconClass: 'text-warning',
     },
     VERIFIED: {
         label: 'Verified',
-        class: 'bg-blue-100 text-blue-800',
+        class: 'bg-success text-success-foreground',
         icon: CheckCircle2,
-        iconClass: 'text-green-600',
+        iconClass: 'text-success',
     },
     APPROVED: {
         label: 'Approved',
-        class: 'bg-green-100 text-green-800',
+        class: 'bg-info text-info-foreground',
         icon: CheckCircle2,
-        iconClass: 'text-green-600',
+        iconClass: 'text-info',
     },
     REJECTED: {
         label: 'Rejected',
-        class: 'bg-red-100 text-red-800',
+        class: 'bg-destructive text-destructive-foreground',
         icon: XCircle,
-        iconClass: 'text-red-600',
+        iconClass: 'text-destructive',
     },
 };
 

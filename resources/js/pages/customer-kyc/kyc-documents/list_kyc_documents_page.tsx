@@ -5,87 +5,88 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Eye, Trash2, Users } from 'lucide-react';
+import { Eye, FileText, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
+import { Badge } from '../../../lib/statusConfig';
 import { BreadcrumbItem, SharedData } from '../../../types';
-import { KycProfile } from '../../../types/customer_kyc_module';
+import { KycDocument } from '../../../types/customer_kyc_module';
 
-export default function KycProfilesIndex() {
+export default function KycDocumentsIndex() {
     const { props } = usePage<
         SharedData & {
-            profiles: {
-                data: KycProfile[];
+            documents: {
+                data: KycDocument[];
                 links: any[];
             };
             filters: Record<string, string>;
         }
     >();
 
-    const { profiles, filters } = props;
+    const { documents, filters } = props;
 
     const { data, setData, get } = useForm({
         search: filters.search || '',
+        document_type: filters.document_type || 'all',
         verification_status: filters.verification_status || 'all',
         per_page: Number(filters.per_page) || 10,
         page: Number(filters.page) || 1,
     });
 
-    // Fetch filtered data on input change
     useEffect(() => {
         const delay = setTimeout(() => {
-            get('/kyc-profiles', { preserveState: true });
+            get('/kyc-documents', { preserveState: true });
         }, 400);
         return () => clearTimeout(delay);
-    }, [data.search, data.verification_status, data.per_page, data.page]);
+    }, [data.search, data.document_type, data.verification_status, data.page]);
 
     const handleDelete = (id: number) => {
         appSwal
             .fire({
-                title: 'Delete KYC profile?',
-                text: 'This KYC profile will be permanently removed.',
+                title: 'Delete document?',
+                text: 'This document will be permanently removed.',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Yes, delete it!',
             })
             .then((res) => {
                 if (res.isConfirmed) {
-                    router.delete(`/kyc-profiles/${id}`, {
+                    router.delete(`/kyc-documents/${id}`, {
                         preserveScroll: true,
                         onSuccess: () =>
-                            toast.success('KYC profile deleted successfully'),
-                        onError: () =>
-                            toast.error('Failed to delete KYC profile'),
+                            toast.success('Document deleted successfully'),
+                        onError: () => toast.error('Failed to delete document'),
                     });
                 }
             });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'KYC Profiles', href: '/kyc-profiles' },
+        { title: 'KYC Documents', href: '/kyc-documents' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="KYC Profiles" />
+            <Head title="KYC Documents" />
 
             <div className="space-y-4 p-2">
                 {/* Header */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <HeadingSmall
-                        title="KYC Profiles"
-                        description="Manage customer KYC profiles."
+                        title="KYC Documents"
+                        description="Manage customer verification documents."
                     />
+
                     <Link
-                        href="/kyc-profiles/create"
+                        href="/kyc-documents/create"
                         className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition hover:bg-primary/90"
                     >
-                        <Users className="h-4 w-4" />
+                        <FileText className="h-4 w-4" />
                         <span className="hidden sm:inline">
-                            New KYC Profile
+                            Upload Document
                         </span>
                     </Link>
                 </div>
@@ -103,19 +104,37 @@ export default function KycProfilesIndex() {
                         className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm"
                     />
 
-                    <select
-                        value={data.verification_status}
-                        onChange={(e) => {
-                            setData('verification_status', e.target.value);
-                            setData('page', 1);
-                        }}
-                        className="h-9 w-full rounded-md border bg-background px-3 text-sm sm:max-w-xs"
-                    >
-                        <option value="all">All Statuses</option>
-                        <option value="PENDING">Pending</option>
-                        <option value="APPROVED">Approved</option>
-                        <option value="REJECTED">Rejected</option>
-                    </select>
+                    <div className="flex gap-2">
+                        <select
+                            value={data.document_type}
+                            onChange={(e) => {
+                                setData('document_type', e.target.value);
+                                setData('page', 1);
+                            }}
+                            className="h-9 rounded-md border bg-background px-3 text-sm"
+                        >
+                            <option value="all">All Types</option>
+                            <option>NID_FRONT</option>
+                            <option>NID_BACK</option>
+                            <option>PASSPORT</option>
+                            <option>DRIVING_LICENSE</option>
+                            <option>UTILITY_BILL</option>
+                        </select>
+
+                        <select
+                            value={data.verification_status}
+                            onChange={(e) => {
+                                setData('verification_status', e.target.value);
+                                setData('page', 1);
+                            }}
+                            className="h-9 rounded-md border bg-background px-3 text-sm"
+                        >
+                            <option value="all">All Statuses</option>
+                            <option>PENDING</option>
+                            <option>VERIFIED</option>
+                            <option>REJECTED</option>
+                        </select>
+                    </div>
                 </div>
 
                 {/* ================= Desktop Table ================= */}
@@ -126,8 +145,8 @@ export default function KycProfilesIndex() {
                                 {[
                                     'ID',
                                     'Customer',
-                                    'KYC Level',
-                                    'Risk Level',
+                                    'Document Type',
+                                    'File',
                                     'Status',
                                     'Actions',
                                 ].map((h) => (
@@ -141,7 +160,7 @@ export default function KycProfilesIndex() {
                             </tr>
                         </thead>
                         <tbody>
-                            {profiles.data.map((i) => (
+                            {documents.data.map((i) => (
                                 <tr
                                     key={i.id}
                                     className="border-b even:bg-muted/30"
@@ -150,22 +169,29 @@ export default function KycProfilesIndex() {
                                     <td className="px-2 py-1">
                                         {i.customer?.name ?? '—'}
                                     </td>
-                                    <td className="px-2 py-1">{i.kyc_level}</td>
                                     <td className="px-2 py-1">
-                                        {i.risk_level}
+                                        {i.document_type}
                                     </td>
                                     <td className="px-2 py-1">
-                                        {i.verification_status}
+                                        <a
+                                            href={i.url}
+                                            target="_blank"
+                                            className="text-info underline"
+                                        >
+                                            View File
+                                        </a>
+                                    </td>
+                                    <td className="px-2 py-1">
+                                        <Badge text={i.verification_status} />
                                     </td>
                                     <td className="px-2 py-1">
                                         <TooltipProvider>
                                             <div className="flex gap-2">
-                                                {/* View */}
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
                                                         <Link
-                                                            href={`/kyc-profiles/${i.id}`}
-                                                            className="text-primary"
+                                                            href={`/kyc-documents/${i.id}`}
+                                                            className="text-gray-500"
                                                         >
                                                             <Eye className="h-5 w-5" />
                                                         </Link>
@@ -175,22 +201,6 @@ export default function KycProfilesIndex() {
                                                     </TooltipContent>
                                                 </Tooltip>
 
-                                                {/* Edit */}
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <Link
-                                                            href={`/kyc-profiles/${i.id}/edit`}
-                                                            className="text-accent"
-                                                        >
-                                                            ✏️
-                                                        </Link>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>
-                                                        Edit
-                                                    </TooltipContent>
-                                                </Tooltip>
-
-                                                {/* Delete */}
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
                                                         <button
@@ -219,7 +229,7 @@ export default function KycProfilesIndex() {
 
                 {/* ================= Mobile Cards ================= */}
                 <div className="space-y-3 md:hidden">
-                    {profiles.data.map((i) => (
+                    {documents.data.map((i) => (
                         <div
                             key={i.id}
                             className="space-y-2 rounded-md border bg-card p-3"
@@ -230,55 +240,82 @@ export default function KycProfilesIndex() {
                                         {i.customer?.name}
                                     </p>
                                     <p className="text-xs text-muted-foreground">
-                                        KYC Level: {i.kyc_level}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">
-                                        Risk Level: {i.risk_level}
+                                        {i.document_type}
                                     </p>
                                 </div>
                                 <span className="rounded-full bg-muted px-2 py-0.5 text-xs">
-                                    {i.verification_status}
+                                    <Badge text={i.verification_status} />
                                 </span>
                             </div>
 
-                            <div className="flex justify-end gap-4">
-                                <Link
-                                    href={`/kyc-profiles/${i.id}`}
-                                    className="text-primary"
+                            <div className="flex items-center justify-between">
+                                <a
+                                    href={i.file_path}
+                                    target="_blank"
+                                    className="text-sm text-primary underline"
                                 >
-                                    <Eye className="h-5 w-5" />
-                                </Link>
-                                <Link
-                                    href={`/kyc-profiles/${i.id}/edit`}
-                                    className="text-accent"
-                                >
-                                    ✏️
-                                </Link>
-                                <button
-                                    onClick={() => handleDelete(i.id)}
-                                    className="text-destructive"
-                                >
-                                    <Trash2 className="h-5 w-5" />
-                                </button>
+                                    View File
+                                </a>
+
+                                <div className="flex gap-4">
+                                    <Link
+                                        href={`/kyc-documents/${i.id}`}
+                                        className="text-gray-500"
+                                    >
+                                        <Eye className="h-5 w-5" />
+                                    </Link>
+
+                                    <button
+                                        onClick={() => handleDelete(i.id)}
+                                        className="text-destructive"
+                                    >
+                                        <Trash2 className="h-5 w-5" />
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     ))}
                 </div>
 
                 {/* Pagination */}
-                <div className="flex justify-end gap-1">
-                    {profiles.links.map((link, i) => (
-                        <a
-                            key={i}
-                            href={link.url || '#'}
-                            className={`rounded-full px-3 py-1 text-sm ${
-                                link.active
-                                    ? 'bg-primary text-primary-foreground'
-                                    : 'bg-muted text-muted-foreground'
-                            }`}
-                            dangerouslySetInnerHTML={{ __html: link.label }}
-                        />
-                    ))}
+                <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">
+                            Show
+                        </span>
+                        <select
+                            value={data.per_page}
+                            onChange={(e) => {
+                                setData('per_page', Number(e.target.value));
+                                setData('page', 1);
+                            }}
+                            className="h-9 rounded-md border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+                        >
+                            {[5, 10, 20, 50].map((n) => (
+                                <option key={n} value={n}>
+                                    {n}
+                                </option>
+                            ))}
+                        </select>
+                        <span className="text-sm text-muted-foreground">
+                            records
+                        </span>
+                    </div>
+
+                    <div className="flex gap-1">
+                        {documents.links.map((link, i) => (
+                            <a
+                                key={i}
+                                href={link.url || '#'}
+                                className={`rounded-full px-3 py-1 text-sm transition-colors ${
+                                    link.active
+                                        ? 'bg-primary text-primary-foreground'
+                                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                                }`}
+                                dangerouslySetInnerHTML={{ __html: link.label }}
+                            />
+                        ))}
+                    </div>
                 </div>
             </div>
         </CustomAuthLayout>

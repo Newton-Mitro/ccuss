@@ -12,6 +12,7 @@ import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
+import { Badge } from '../../../lib/statusConfig';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { CustomerIntroducer } from '../../../types/customer_kyc_module';
 
@@ -152,13 +153,13 @@ export default function IntroducersIndex() {
                                         {i.introduced_customer?.name ?? '—'}
                                     </td>
                                     <td className="px-2 py-1">
-                                        {i.introducer_customer?.name ?? '—'}
+                                        {i.introducer?.name ?? '—'}
                                     </td>
                                     <td className="px-2 py-1">
                                         {i.relationship_type}
                                     </td>
                                     <td className="px-2 py-1">
-                                        {i.verification_status}
+                                        <Badge text={i.verification_status} />
                                     </td>
                                     <td className="px-2 py-1">
                                         <TooltipProvider>
@@ -167,7 +168,7 @@ export default function IntroducersIndex() {
                                                     <TooltipTrigger asChild>
                                                         <Link
                                                             href={`/introducers/${i.id}`}
-                                                            className="text-primary"
+                                                            className="text-gray-500"
                                                         >
                                                             <Eye className="h-5 w-5" />
                                                         </Link>
@@ -216,12 +217,11 @@ export default function IntroducersIndex() {
                                         {i.introduced_customer?.name}
                                     </p>
                                     <p className="text-xs text-muted-foreground">
-                                        Introducer:{' '}
-                                        {i.introducer_customer?.name}
+                                        Introducer: {i.introducer?.name}
                                     </p>
                                 </div>
                                 <span className="rounded-full bg-muted px-2 py-0.5 text-xs">
-                                    {i.verification_status}
+                                    <Badge text={i.verification_status} />
                                 </span>
                             </div>
 
@@ -232,7 +232,7 @@ export default function IntroducersIndex() {
                             <div className="flex justify-end gap-4">
                                 <Link
                                     href={`/introducers/${i.id}`}
-                                    className="text-primary"
+                                    className="text-gray-500"
                                 >
                                     <Eye className="h-5 w-5" />
                                 </Link>
@@ -248,21 +248,44 @@ export default function IntroducersIndex() {
                 </div>
 
                 {/* Pagination */}
-                <div className="flex justify-end gap-1">
-                    {introducers.links.map((link, i) => (
-                        <a
-                            key={i}
-                            href={link.url || '#'}
-                            className={`rounded-full px-3 py-1 text-sm ${
-                                link.active
-                                    ? 'bg-primary text-primary-foreground'
-                                    : 'bg-muted text-muted-foreground'
-                            }`}
-                            dangerouslySetInnerHTML={{
-                                __html: link.label,
+                <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">
+                            Show
+                        </span>
+                        <select
+                            value={data.per_page}
+                            onChange={(e) => {
+                                setData('per_page', Number(e.target.value));
+                                setData('page', 1);
                             }}
-                        />
-                    ))}
+                            className="h-9 rounded-md border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+                        >
+                            {[5, 10, 20, 50].map((n) => (
+                                <option key={n} value={n}>
+                                    {n}
+                                </option>
+                            ))}
+                        </select>
+                        <span className="text-sm text-muted-foreground">
+                            records
+                        </span>
+                    </div>
+
+                    <div className="flex gap-1">
+                        {introducers.links.map((link, i) => (
+                            <a
+                                key={i}
+                                href={link.url || '#'}
+                                className={`rounded-full px-3 py-1 text-sm transition-colors ${
+                                    link.active
+                                        ? 'bg-primary text-primary-foreground'
+                                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                                }`}
+                                dangerouslySetInnerHTML={{ __html: link.label }}
+                            />
+                        ))}
+                    </div>
                 </div>
             </div>
         </CustomAuthLayout>

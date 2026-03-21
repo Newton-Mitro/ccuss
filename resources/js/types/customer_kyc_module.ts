@@ -171,7 +171,7 @@ export interface CustomerIntroducer extends AuditFields {
     introduced_customer?: Customer | null;
 
     introducer_customer_id: ID;
-    introducer_customer?: Customer | null;
+    introducer?: Customer | null;
 
     introducer_account_id?: ID | null;
 

@@ -9,11 +9,45 @@ use Inertia\Inertia;
 
 class KycDocumentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $documents = KycDocument::with('customer', 'verifier')->latest()->paginate(10);
+        $query = KycDocument::with('customer', 'verifier');
+
+        // 🔍 Search (by customer name)
+        if ($search = $request->string('search')->toString()) {
+            $query->whereHas('customer', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            });
+        }
+
+        // 📄 Document type filter
+        if ($type = $request->input('document_type')) {
+            if ($type !== 'all') {
+                $query->where('document_type', $type);
+            }
+        }
+
+        // ✅ Verification status filter
+        if ($status = $request->input('verification_status')) {
+            if ($status !== 'all') {
+                $query->where('verification_status', $status);
+            }
+        }
+
+        $documents = $query
+            ->latest()
+            ->paginate($request->integer('per_page', 10))
+            ->withQueryString();
+
         return Inertia::render('customer-kyc/kyc-documents/list_kyc_documents_page', [
-            'documents' => $documents
+            'documents' => $documents,
+            'filters' => $request->only([
+                'search',
+                'document_type',
+                'verification_status',
+                'per_page',
+                'page',
+            ]),
         ]);
     }
 
@@ -51,6 +85,13 @@ class KycDocumentController extends Controller
     {
         return Inertia::render('customer-kyc/kyc-documents/edit_kyc_document_page', [
             'document' => $kycDocument,
+        ]);
+    }
+
+    public function show(KycDocument $kycDocument)
+    {
+        return Inertia::render('customer-kyc/kyc-documents/show_kyc_document_page', [
+            'document' => $kycDocument->load('customer', 'customer.photo', 'verifier'),
         ]);
     }
 
