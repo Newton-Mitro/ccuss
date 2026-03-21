@@ -18,9 +18,6 @@ return new class extends Migration {
             $table->string('name', 150);
             $table->string('phone', 50)->nullable();
             $table->string('email', 100)->nullable();
-            $table->date('dob')->nullable();
-            $table->enum('gender', ['MALE', 'FEMALE', 'OTHER'])->nullable();
-            $table->enum('religion', ['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER'])->nullable();
             $table->enum('identification_type', [
                 'NID',
                 'BRN',
@@ -29,8 +26,17 @@ return new class extends Migration {
                 'DRIVING_LICENSE'
             ]);
             $table->string('identification_number', 50);
-            $table->enum('kyc_status', ['PENDING', 'VERIFIED', 'REJECTED'])->default('PENDING');
 
+            $table->date('dob')->nullable();
+            $table->enum('gender', ['MALE', 'FEMALE', 'OTHER'])->nullable();
+            $table->enum('marital_status', ['SINGLE', 'MARRIED', 'WIDOWED', 'DIVORCED', 'OTHER'])->nullable();
+            $table->enum('blood_group', ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'])->nullable();
+            $table->string('nationality', 100)->nullable();
+            $table->string('occupation', 100)->nullable();
+            $table->string('education', 100)->nullable();
+            $table->enum('religion', ['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER'])->nullable();
+
+            $table->enum('kyc_status', ['PENDING', 'VERIFIED', 'REJECTED'])->default('PENDING');
             // Audit
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
@@ -49,13 +55,6 @@ return new class extends Migration {
             $table->string('postal_code', 20)->nullable();
             $table->string('country', 150)->default('Bangladesh');
             $table->enum('type', ['CURRENT', 'PERMANENT', 'MAILING', 'WORK', 'REGISTERED', 'OTHER']);
-
-            // Verification
-            $table->enum('verification_status', ['PENDING', 'VERIFIED', 'REJECTED'])->default('PENDING');
-            $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamp('verified_at')->nullable();
-            $table->text('remarks')->nullable();
-
             // Audit
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
@@ -112,10 +111,6 @@ return new class extends Migration {
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->enum('kyc_level', ['BASIC', 'FULL', 'ENHANCED'])->default('BASIC');
             $table->enum('risk_level', ['LOW', 'MEDIUM', 'HIGH'])->default('LOW');
-            $table->enum('verification_status', ['PENDING', 'APPROVED', 'REJECTED'])->default('PENDING');
-            $table->foreignId('verified_by')->nullable()->constrained('users');
-            $table->timestamp('verified_at')->nullable();
-            $table->text('remarks')->nullable();
             $table->timestamps();
         });
 

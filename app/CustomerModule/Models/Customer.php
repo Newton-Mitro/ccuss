@@ -25,12 +25,21 @@ class Customer extends Model
         'name',
         'phone',
         'email',
-        'dob',
-        'gender',
-        'religion',
+
         'identification_type',
         'identification_number',
+
+        'dob',
+        'gender',
+        'marital_status',
+        'blood_group',
+        'nationality',
+        'occupation',
+        'education',
+        'religion',
+
         'kyc_status',
+
         'created_by',
         'updated_by',
     ];

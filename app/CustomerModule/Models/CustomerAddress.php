@@ -4,8 +4,6 @@ namespace App\CustomerModule\Models;
 
 use App\SystemAdministration\Traits\Auditable;
 use App\SystemAdministration\Models\User;
-use App\SystemAdministration\Models\Organization;
-use App\SystemAdministration\Models\Branch;
 use Database\Factories\CustomerAddressFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -26,16 +24,8 @@ class CustomerAddress extends Model
         'postal_code',
         'country',
         'type',
-        'verification_status',
-        'verified_by',
-        'verified_at',
-        'remarks',
         'created_by',
         'updated_by',
-    ];
-
-    protected $casts = [
-        'verified_at' => 'datetime',
     ];
 
     /* ========================
@@ -45,15 +35,6 @@ class CustomerAddress extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
-    }
-
-    /* ========================
-     * Verification
-     * ======================== */
-
-    public function verifier(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'verified_by');
     }
 
     /* ========================

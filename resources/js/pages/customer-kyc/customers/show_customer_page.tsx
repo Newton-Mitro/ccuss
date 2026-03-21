@@ -110,18 +110,38 @@ export default function Show({ customer }: ShowProps) {
             >
                 <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
                     {isIndividual && (
-                        <InfoItem
-                            label="Date of Birth"
-                            value={formatDate(customer.dob)}
-                        />
-                    )}
+                        <>
+                            <InfoItem
+                                label="Date of Birth"
+                                value={formatDate(customer.dob)}
+                            />
 
-                    {isIndividual && (
-                        <InfoItem label="Gender" value={customer.gender} />
-                    )}
-
-                    {isIndividual && (
-                        <InfoItem label="Religion" value={customer.religion} />
+                            <InfoItem label="Gender" value={customer.gender} />
+                            <InfoItem
+                                label="Religion"
+                                value={customer.religion}
+                            />
+                            <InfoItem
+                                label="Marital Status"
+                                value={customer.marital_status}
+                            />
+                            <InfoItem
+                                label="Blood Group"
+                                value={customer.blood_group}
+                            />
+                            <InfoItem
+                                label="Nationality"
+                                value={customer.nationality}
+                            />
+                            <InfoItem
+                                label="Occupation"
+                                value={customer.occupation}
+                            />
+                            <InfoItem
+                                label="Education"
+                                value={customer.education}
+                            />
+                        </>
                     )}
 
                     {isOrganization && (
@@ -150,13 +170,13 @@ export default function Show({ customer }: ShowProps) {
                     title="KYC Profile"
                 >
                     <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
-                        <div className="rounded-md border bg-card p-4 shadow-sm hover:shadow-md">
+                        <div className="rounded-md border bg-card px-4 py-2 shadow-sm hover:shadow-md">
                             <InfoItem
                                 label="KYC Level"
                                 value={customer.kyc_profile.kyc_level}
                             />
                         </div>
-                        <div className="rounded-md border bg-card p-4 shadow-sm hover:shadow-md">
+                        <div className="rounded-md border bg-card px-4 py-2 shadow-sm hover:shadow-md">
                             <InfoItem
                                 label="Risk Level"
                                 value={customer.kyc_profile.risk_level}
@@ -168,211 +188,195 @@ export default function Show({ customer }: ShowProps) {
 
             {/* ================= Addresses ================= */}
 
-            {customer.addresses?.length > 0 && (
-                <SectionHeader
-                    icon={<HomeIcon size={18} />}
-                    title="Addresses"
-                    actions={
-                        <Link
-                            href={route('addresses.create', customer.id)}
-                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
+            <SectionHeader
+                icon={<HomeIcon size={18} />}
+                title="Addresses"
+                actions={
+                    <Link
+                        href={route('addresses.create', customer.id)}
+                        className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
+                    >
+                        <Plus size={14} /> Add
+                    </Link>
+                }
+            >
+                <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
+                    {customer.addresses.map((addr) => (
+                        <DataCard
+                            key={addr.id}
+                            onEdit={() => {}}
+                            onDelete={() => {}}
                         >
-                            <Plus size={14} /> Add
-                        </Link>
-                    }
-                >
-                    <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
-                        {customer.addresses.map((addr) => (
-                            <DataCard
-                                key={addr.id}
-                                onEdit={() => {}}
-                                onDelete={() => {}}
-                            >
-                                <div className="text-sm font-semibold">
-                                    {addr.type}
-                                </div>
+                            <div className="text-sm font-semibold">
+                                {addr.type}
+                            </div>
 
-                                <div className="text-xs opacity-80">
-                                    {addr.line1}, {addr.district}
-                                </div>
+                            <div className="text-xs opacity-80">
+                                {addr.line1}, {addr.district}
+                            </div>
 
-                                <div className="text-[10px] opacity-70">
-                                    {addr.division}, {addr.postal_code}
-                                </div>
-                            </DataCard>
-                        ))}
-                    </div>
-                </SectionHeader>
-            )}
+                            <div className="text-[10px] opacity-70">
+                                {addr.division}, {addr.postal_code}
+                            </div>
+                        </DataCard>
+                    ))}
+                </div>
+            </SectionHeader>
 
             {/* ================= Family ================= */}
 
-            {customer.family_relations?.length > 0 && (
-                <SectionHeader
-                    icon={<UsersIcon size={18} />}
-                    title="Family & Relatives"
-                    actions={
-                        <Link
-                            href={route('family-relations.create', customer.id)}
-                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
+            <SectionHeader
+                icon={<UsersIcon size={18} />}
+                title="Family & Relatives"
+                actions={
+                    <Link
+                        href={route('family-relations.create', customer.id)}
+                        className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
+                    >
+                        <Plus size={14} /> Add
+                    </Link>
+                }
+            >
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
+                    {customer.family_relations.map((rel) => (
+                        <DataCard
+                            key={rel.id}
+                            onEdit={() => {}}
+                            onDelete={() => {}}
                         >
-                            <Plus size={14} /> Add
-                        </Link>
-                    }
-                >
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
-                        {customer.family_relations.map((rel) => (
-                            <DataCard
-                                key={rel.id}
-                                onEdit={() => {}}
-                                onDelete={() => {}}
-                            >
-                                <div className="flex items-center gap-2">
-                                    {rel.relative?.photo?.url ? (
-                                        <img
-                                            src={rel.relative.photo.url}
-                                            className="h-10 w-10 rounded-full"
-                                        />
-                                    ) : (
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-xs">
-                                            {rel.relative?.name?.charAt(0)}
-                                        </div>
-                                    )}
-
-                                    <div className="flex flex-col text-xs">
-                                        <div className="text-sm font-medium">
-                                            <Link
-                                                href={route(
-                                                    'customers.show',
-                                                    rel.relative?.id,
-                                                )}
-                                                className="cursor-pointer text-sm font-semibold hover:underline"
-                                                onClick={(e) =>
-                                                    e.stopPropagation()
-                                                }
-                                            >
-                                                {`${rel.relative?.name} • ${rel.relative?.customer_no}`}
-                                            </Link>
-                                        </div>
-
-                                        <div className="flex gap-2">
-                                            <span>{rel.relation_type}</span>
-
-                                            <Badge
-                                                text={rel.verification_status}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </DataCard>
-                        ))}
-                    </div>
-                </SectionHeader>
-            )}
-
-            {/* ================= Introducers ================= */}
-
-            {customer.introducers?.length > 0 && (
-                <SectionHeader
-                    icon={<UserCheckIcon size={18} />}
-                    title="Introducers"
-                    actions={
-                        <Link
-                            href={route('introducers.create', customer.id)}
-                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
-                        >
-                            <Plus size={14} /> Add
-                        </Link>
-                    }
-                >
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
-                        {customer.introducers.map((intro) => (
-                            <DataCard
-                                key={intro.id}
-                                onEdit={() => {}}
-                                onDelete={() => {}}
-                            >
-                                <div className="flex items-center gap-2">
-                                    {intro.introducer?.photo?.url ? (
-                                        <img
-                                            src={intro.introducer.photo.url}
-                                            className="h-10 w-10 rounded-full"
-                                        />
-                                    ) : (
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-xs">
-                                            {intro.introducer?.name?.charAt(0)}
-                                        </div>
-                                    )}
-                                    <div className="">
-                                        <div className="text-sm font-medium">
-                                            <Link
-                                                href={route(
-                                                    'customers.show',
-                                                    intro.introducer?.id,
-                                                )}
-                                                className="cursor-pointer text-sm font-semibold hover:underline"
-                                                onClick={(e) =>
-                                                    e.stopPropagation()
-                                                }
-                                            >
-                                                {`${intro.introducer?.name} • ${intro.introducer?.customer_no}`}
-                                            </Link>
-                                        </div>
-
-                                        <div className="flex gap-2 text-xs">
-                                            <span>
-                                                {intro.relationship_type}
-                                            </span>
-
-                                            <Badge
-                                                text={intro.verification_status}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </DataCard>
-                        ))}
-                    </div>
-                </SectionHeader>
-            )}
-
-            {/* ================= KYC Documents ================= */}
-
-            {customer.kyc_documents?.length > 0 && (
-                <SectionHeader
-                    icon={<FileText size={18} />}
-                    title="KYC Documents"
-                    actions={
-                        <Link
-                            href={route('kyc-documents.create', customer.id)}
-                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
-                        >
-                            <Plus size={14} /> Add
-                        </Link>
-                    }
-                >
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
-                        {customer.kyc_documents.map((doc) => (
-                            <DataCard key={doc.id} onDelete={() => {}}>
-                                <div className="flex items-center gap-2">
-                                    <VerificationStatus
-                                        status={doc.verification_status}
+                            <div className="flex items-center gap-2">
+                                {rel.relative?.photo?.url ? (
+                                    <img
+                                        src={rel.relative.photo.url}
+                                        className="h-10 w-10 rounded-full"
                                     />
-                                    <div className="text-sm font-semibold">
+                                ) : (
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-xs">
+                                        {rel.relative?.name?.charAt(0)}
+                                    </div>
+                                )}
+
+                                <div className="flex flex-col text-xs">
+                                    <div className="text-sm font-medium">
                                         <Link
-                                            href={doc.url}
+                                            href={route(
+                                                'customers.show',
+                                                rel.relative?.id,
+                                            )}
                                             className="cursor-pointer text-sm font-semibold hover:underline"
                                             onClick={(e) => e.stopPropagation()}
                                         >
-                                            {doc.document_type}
+                                            {`${rel.relative?.name} • ${rel.relative?.customer_no}`}
                                         </Link>
                                     </div>
+
+                                    <div className="flex gap-2">
+                                        <span>{rel.relation_type}</span>
+
+                                        <Badge text={rel.verification_status} />
+                                    </div>
                                 </div>
-                            </DataCard>
-                        ))}
-                    </div>
-                </SectionHeader>
-            )}
+                            </div>
+                        </DataCard>
+                    ))}
+                </div>
+            </SectionHeader>
+
+            {/* ================= Introducers ================= */}
+
+            <SectionHeader
+                icon={<UserCheckIcon size={18} />}
+                title="Introducers"
+                actions={
+                    <Link
+                        href={route('introducers.create', customer.id)}
+                        className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
+                    >
+                        <Plus size={14} /> Add
+                    </Link>
+                }
+            >
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
+                    {customer.introducers.map((intro) => (
+                        <DataCard
+                            key={intro.id}
+                            onEdit={() => {}}
+                            onDelete={() => {}}
+                        >
+                            <div className="flex items-center gap-2">
+                                {intro.introducer?.photo?.url ? (
+                                    <img
+                                        src={intro.introducer.photo.url}
+                                        className="h-10 w-10 rounded-full"
+                                    />
+                                ) : (
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-xs">
+                                        {intro.introducer?.name?.charAt(0)}
+                                    </div>
+                                )}
+                                <div className="">
+                                    <div className="text-sm font-medium">
+                                        <Link
+                                            href={route(
+                                                'customers.show',
+                                                intro.introducer?.id,
+                                            )}
+                                            className="cursor-pointer text-sm font-semibold hover:underline"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            {`${intro.introducer?.name} • ${intro.introducer?.customer_no}`}
+                                        </Link>
+                                    </div>
+
+                                    <div className="flex gap-2 text-xs">
+                                        <span>{intro.relationship_type}</span>
+
+                                        <Badge
+                                            text={intro.verification_status}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </DataCard>
+                    ))}
+                </div>
+            </SectionHeader>
+
+            {/* ================= KYC Documents ================= */}
+
+            <SectionHeader
+                icon={<FileText size={18} />}
+                title="KYC Documents"
+                actions={
+                    <Link
+                        href={route('kyc-documents.create', customer.id)}
+                        className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
+                    >
+                        <Plus size={14} /> Add
+                    </Link>
+                }
+            >
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
+                    {customer.kyc_documents.map((doc) => (
+                        <DataCard key={doc.id} onDelete={() => {}}>
+                            <div className="flex items-center gap-2">
+                                <VerificationStatus
+                                    status={doc.verification_status}
+                                />
+                                <div className="text-sm font-semibold">
+                                    <Link
+                                        href={doc.url}
+                                        className="cursor-pointer text-sm font-semibold hover:underline"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        {doc.document_type}
+                                    </Link>
+                                </div>
+                            </div>
+                        </DataCard>
+                    ))}
+                </div>
+            </SectionHeader>
 
             {/* ================= Online Service ================= */}
 
@@ -416,7 +420,7 @@ const ActionButton = ({ children, icon, as = 'button', ...props }: any) =>
 
 const InfoItem = ({ label, value }: any) => (
     <div className="flex flex-col">
-        <span className="text-[10px] text-foreground uppercase">{label}</span>
+        <span className="text-[10px] text-foreground">{label}</span>
         <span className="text-sm">{value || '—'}</span>
     </div>
 );
@@ -483,7 +487,7 @@ const SectionHeader = ({
     children: React.ReactNode;
 }) => (
     <section className="mt-4">
-        <div className="mb-2 flex items-center justify-between text-sm font-semibold text-card-foreground">
+        <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-card-foreground">
             <div className="flex items-center gap-2">
                 {icon} <span>{title}</span>
             </div>

@@ -13,34 +13,11 @@ class KycProfileFactory extends Factory
     {
         $kycLevels = ['BASIC', 'FULL', 'ENHANCED'];
         $riskLevels = ['LOW', 'MEDIUM', 'HIGH'];
-        $verificationStatuses = ['PENDING', 'APPROVED', 'REJECTED'];
 
         return [
             'kyc_level' => fake()->randomElement($kycLevels),
             'risk_level' => fake()->randomElement($riskLevels),
-            'verification_status' => fake()->randomElement($verificationStatuses),
-            'verified_by' => null, // can be a user ID if needed
-            'verified_at' => null,
-            'remarks' => fake()->optional()->sentence(),
         ];
-    }
-
-    /** Mark profile as approved */
-    public function approved(): self
-    {
-        return $this->state(fn(array $attributes) => [
-            'verification_status' => 'APPROVED',
-            'verified_at' => now(),
-        ]);
-    }
-
-    /** Mark profile as rejected */
-    public function rejected(): self
-    {
-        return $this->state(fn(array $attributes) => [
-            'verification_status' => 'REJECTED',
-            'verified_at' => now(),
-        ]);
     }
 
     protected static function newFactory()

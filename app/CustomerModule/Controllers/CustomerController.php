@@ -23,11 +23,11 @@ class CustomerController extends Controller
     {
         $search = $request->query('search');
 
-        if (empty($search)) {
+        if (!$search) {
             return response()->json(['data' => []]);
         }
 
-        $query = Customer::query()->with(['photo', 'kycProfile', 'kycDocuments']);
+        $query = Customer::with(['photo', 'kycProfile']);
 
         $query->where(function ($q) use ($search) {
             $q->where('name', 'like', "%{$search}%")
@@ -36,14 +36,15 @@ class CustomerController extends Controller
                 ->orWhere('phone', 'like', "%{$search}%");
         });
 
-        $status = $request->input('status');
-        if ($status && $status !== 'all') {
-            $query->where('status', $status);
+        if ($kycStatus = $request->input('kyc_status')) {
+            if ($kycStatus !== 'all') {
+                $query->where('kyc_status', $kycStatus);
+            }
         }
 
-        $customers = $query->latest()->get();
-
-        return response()->json($customers);
+        return response()->json(
+            $query->latest()->limit(20)->get()
+        );
     }
 
     /* ==========================
@@ -54,8 +55,6 @@ class CustomerController extends Controller
         $customer = Customer::with([
             'photo',
             'addresses',
-            'familyRelations',
-            'familyRelations.relative',
             'familyRelations.relative.photo',
             'introducers.introducer',
             'introducers.introducedCustomer',
@@ -74,17 +73,18 @@ class CustomerController extends Controller
         $query = Customer::with(['photo', 'kycProfile']);
 
         if ($search = $request->input('search')) {
-            $query->where(function ($q) use ($search) {
+            $query->where(
+                fn($q) =>
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('customer_no', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%");
-            });
+                    ->orWhere('phone', 'like', "%{$search}%")
+            );
         }
 
-        if ($status = $request->input('status')) {
-            if ($status !== 'all') {
-                $query->where('status', $status);
+        if ($kycStatus = $request->input('kyc_status')) {
+            if ($kycStatus !== 'all') {
+                $query->where('kyc_status', $kycStatus);
             }
         }
 
@@ -94,7 +94,7 @@ class CustomerController extends Controller
 
         return Inertia::render('customer-kyc/customers/list_customer_page', [
             'customers' => $customers,
-            'filters' => $request->only(['search', 'status', 'per_page', 'page']),
+            'filters' => $request->only(['search', 'kyc_status', 'per_page', 'page']),
         ]);
     }
 
@@ -103,8 +103,7 @@ class CustomerController extends Controller
      * ========================== */
     public function create(): Response
     {
-        return Inertia::render('customer-kyc/customers/create_customer_page', [
-        ]);
+        return Inertia::render('customer-kyc/customers/create_customer_page');
     }
 
     /* ==========================
@@ -113,33 +112,74 @@ class CustomerController extends Controller
     public function store(StoreCustomerRequest $request): RedirectResponse
     {
         $data = $request->validated();
+        $data['organization_id'] = auth()->user()->organization_id;
+        $data['branch_id'] = auth()->user()->branch_id;
 
         if (empty($data['phone']) && empty($data['email'])) {
-            return back()->withInput()->with('error', 'Please provide at least a phone number or an email address.');
+            return back()->withInput()->with('error', 'Phone or email is required.');
         }
 
-        $exists = Customer::where('identification_number', $data['identification_number'])
-            ->when(!empty($data['email']), fn($q) => $q->orWhere('email', $data['email']))
-            ->when(!empty($data['phone']), fn($q) => $q->orWhere('phone', $data['phone']))
-            ->exists();
+        $exists = Customer::where(function ($q) use ($data) {
+            $q->where('identification_number', $data['identification_number']);
+
+            if (!empty($data['email'])) {
+                $q->orWhere('email', $data['email']);
+            }
+
+            if (!empty($data['phone'])) {
+                $q->orWhere('phone', $data['phone']);
+            }
+        })->exists();
 
         if ($exists) {
-            return back()->withInput()->with('error', 'A customer with the same identification number, email, or phone already exists.');
+            return back()->withInput()->with('error', 'Duplicate customer detected.');
         }
 
-        DB::transaction(function () use (&$data) {
+        DB::transaction(function () use ($request, $data) {
+
             $typePrefix = $data['type'] === 'INDIVIDUAL' ? 'IND' : 'ORG';
+
             $lastId = Customer::lockForUpdate()->max('id') ?? 0;
             $nextNumber = str_pad($lastId + 1, 5, '0', STR_PAD_LEFT);
+
             $data['customer_no'] = "{$typePrefix}-{$nextNumber}";
 
+            /** =========================
+             * Create Customer
+             * ========================= */
             $customer = Customer::create($data);
-            $kycProfile = KycProfile::create([
-                'customer_id' => $customer->id
+
+            /** =========================
+             * Create KYC Profile
+             * ========================= */
+            KycProfile::create([
+                'customer_id' => $customer->id,
+                'kyc_level' => KycProfile::LEVEL_BASIC,
+                'risk_level' => KycProfile::RISK_HIGH
             ]);
+
+            /** =========================
+             * Handle Photo Upload
+             * ========================= */
+            if ($request->hasFile('photo')) {
+
+                $file = $request->file('photo');
+
+                $path = $file->store('customers/' . $customer->id, 'public');
+
+                $customer->kycDocuments()->create([
+                    'document_type' => 'PHOTO',
+                    'file_name' => $file->getClientOriginalName(),
+                    'file_path' => $path,
+                    'mime' => $file->getClientMimeType(),
+                    'url' => asset('storage/' . $path),
+                    'verification_status' => 'PENDING',
+                ]);
+            }
         });
 
-        return redirect()->route('customers.index')->with('success', 'Customer created successfully.');
+        return redirect()->route('customers.index')
+            ->with('success', 'Customer created successfully.');
     }
 
     /* ==========================
@@ -150,19 +190,11 @@ class CustomerController extends Controller
         $customer->load([
             'photo',
             'addresses',
-
-            'relatedToMe',
-            'relatedToMe.customer',
             'relatedToMe.customer.photo',
-
-            'familyRelations',
-            'familyRelations.relative',
             'familyRelations.relative.photo',
-            'introducers.introducer',
             'introducers.introducer.photo',
             'kycProfile',
             'kycDocuments',
-            'onlineServiceClient',
             'onlineServiceClient.organization',
             'onlineServiceClient.branch',
         ]);
@@ -190,32 +222,82 @@ class CustomerController extends Controller
     public function update(UpdateCustomerRequest $request, Customer $customer): RedirectResponse
     {
         $data = $request->validated();
+        $data['organization_id'] = auth()->user()->organization_id;
+        $data['branch_id'] = auth()->user()->branch_id;
 
         if (empty($data['phone']) && empty($data['email'])) {
-            return redirect()->back()->withInput()->with('error', 'Please provide at least a phone number or an email address.');
+            return back()->withInput()->with('error', 'Phone or email is required.');
         }
 
         $exists = Customer::where(function ($q) use ($data) {
             $q->where('identification_number', $data['identification_number']);
-            if (!empty($data['email']))
+
+            if (!empty($data['email'])) {
                 $q->orWhere('email', $data['email']);
-            if (!empty($data['phone']))
+            }
+
+            if (!empty($data['phone'])) {
                 $q->orWhere('phone', $data['phone']);
+            }
         })->where('id', '!=', $customer->id)->exists();
 
         if ($exists) {
-            return redirect()->back()->withInput()->with('error', 'Another customer with the same identification number, email, or phone already exists.');
+            return back()->withInput()->with('error', 'Duplicate customer detected.');
         }
 
-        // Regenerate customer_no if type or identification type changed
-        if ($data['type'] !== $customer->type || $data['identification_type'] !== $customer->identification_type) {
-            $typePrefix = $data['type'] === 'INDIVIDUAL' ? 'IND' : 'ORG';
-            $data['customer_no'] = "{$typePrefix}-" . str_pad($customer->id, 5, '0', STR_PAD_LEFT);
-        }
+        DB::transaction(function () use ($request, $customer, $data) {
 
-        $customer->update($data);
+            /** =========================
+             * Regenerate Customer No
+             * ========================= */
+            if (
+                $data['type'] !== $customer->type ||
+                $data['identification_type'] !== $customer->identification_type
+            ) {
+                $prefix = $data['type'] === 'INDIVIDUAL' ? 'IND' : 'ORG';
+                $data['customer_no'] = "{$prefix}-" . str_pad($customer->id, 5, '0', STR_PAD_LEFT);
+            }
 
-        return redirect()->back()->with('success', 'Customer updated successfully.');
+            /** =========================
+             * Update Customer
+             * ========================= */
+            $customer->update($data);
+
+            /** =========================
+             * Handle Photo Update
+             * ========================= */
+            if ($request->hasFile('photo')) {
+
+                // Delete old photo (DB + file)
+                $oldPhoto = $customer->photo;
+
+                if ($oldPhoto) {
+                    // delete file from storage
+                    if (\Storage::disk('public')->exists($oldPhoto->file_path)) {
+                        \Storage::disk('public')->delete($oldPhoto->file_path);
+                    }
+
+                    // delete DB record
+                    $oldPhoto->delete();
+                }
+
+                // Store new photo
+                $file = $request->file('photo');
+                $path = $file->store('customers/' . $customer->id, 'public');
+
+                $customer->kycDocuments()->create([
+                    'document_type' => 'PHOTO',
+                    'file_name' => $file->getClientOriginalName(),
+                    'file_path' => $path,
+                    'mime' => $file->getClientMimeType(),
+                    'url' => asset('storage/' . $path),
+                    'verification_status' => 'PENDING',
+                ]);
+            }
+        });
+
+        return redirect()->route('customers.show', $customer->id)
+            ->with('success', 'Customer updated successfully.');
     }
 
     /* ==========================
@@ -225,6 +307,7 @@ class CustomerController extends Controller
     {
         $customer->delete();
 
-        return redirect()->route('customers.index')->with('success', 'Customer deleted successfully.');
+        return redirect()->route('customers.index')
+            ->with('success', 'Customer deleted successfully.');
     }
 }

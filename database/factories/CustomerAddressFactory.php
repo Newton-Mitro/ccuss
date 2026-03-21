@@ -26,7 +26,6 @@ class CustomerAddressFactory extends Factory
                 'WORK',
                 'MAILING'
             ]),
-            'verification_status' => 'PENDING',
         ];
     }
 }

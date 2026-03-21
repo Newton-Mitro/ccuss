@@ -1,6 +1,5 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, ListFilter, Loader2 } from 'lucide-react';
-
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
@@ -25,13 +24,18 @@ const Create = () => {
 
     const { data, setData, post, processing, errors } = useForm({
         customer_no: '',
-        type: '',
+        type: '', // INDIVIDUAL or ORGANIZATION
         name: '',
         phone: '',
         email: '',
         dob: '',
         gender: '',
         religion: '',
+        marital_status: '',
+        blood_group: '',
+        nationality: '',
+        occupation: '',
+        education: '',
         identification_type: '',
         identification_number: '',
         photo: null as File | null,
@@ -57,6 +61,7 @@ const Create = () => {
         post(route('customers.store'), {
             data: formData,
             preserveScroll: true,
+            forceFormData: true,
             onError: (e) => toast.error(JSON.stringify(e)),
         });
     };
@@ -65,6 +70,28 @@ const Create = () => {
         { title: 'Customers', href: route('customers.index') },
         { title: 'Add Customer', href: '' },
     ];
+
+    // Handle Customer Type change
+    const handleTypeChange = (value: string) => {
+        setData('type', value);
+
+        if (value === 'ORGANIZATION') {
+            setData('identification_type', 'REGISTRATION_NO');
+            setData('identification_number', '');
+            // Clear individual-only fields
+            setData('dob', '');
+            setData('gender', '');
+            setData('religion', '');
+            setData('marital_status', '');
+            setData('blood_group', '');
+            setData('nationality', '');
+            setData('occupation', '');
+            setData('education', '');
+        } else {
+            setData('identification_type', '');
+            setData('identification_number', '');
+        }
+    };
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
@@ -78,7 +105,7 @@ const Create = () => {
                     <button
                         type="button"
                         onClick={handleBack}
-                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground transition hover:bg-muted/90"
+                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         <span className="hidden sm:inline">Back</span>
@@ -86,29 +113,27 @@ const Create = () => {
 
                     <Link
                         href={route('customers.index')}
-                        className="flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition hover:bg-secondary/90"
+                        className="flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground hover:bg-secondary/90"
                     >
                         <ListFilter className="h-4 w-4" />
                         <span className="hidden sm:inline">Customers</span>
                     </Link>
                 </div>
             </div>
+
             <form
                 onSubmit={handleSubmit}
                 className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6 lg:w-5xl"
             >
+                {/* PHOTO */}
                 <div className="flex flex-col gap-4">
-                    <div className="">
-                        {photoPreview && (
-                            <img
-                                src={photoPreview}
-                                alt="Preview"
-                                className="h-20 w-20 rounded-md border object-cover sm:h-24 sm:w-24"
-                            />
-                        )}
-                    </div>
-                    {/* PHOTO */}
-
+                    {photoPreview && (
+                        <img
+                            src={photoPreview}
+                            alt="Preview"
+                            className="h-20 w-20 rounded-md border object-cover sm:h-24 sm:w-24"
+                        />
+                    )}
                     <div className="flex items-center gap-1">
                         <Label className="text-xs">Photo</Label>
                         <input
@@ -124,43 +149,19 @@ const Create = () => {
                 {/* BASIC INFO */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div>
-                        <Label className="text-xs">Customer No</Label>
-                        <Input
-                            value={data.customer_no}
-                            disabled
-                            onChange={(e) =>
-                                setData('customer_no', e.target.value)
-                            }
-                            className="h-8 text-sm"
-                        />
-                        <InputError message={errors.customer_no} />
-                    </div>
-                    <div>
                         <Label className="text-xs">Customer Type</Label>
                         <select
                             value={data.type}
-                            onChange={(e) => {
-                                const newType = e.target.value;
-                                setData('type', newType);
-                                if (newType === 'ORGANIZATION') {
-                                    setData(
-                                        'identification_type',
-                                        'REGISTRATION_NO',
-                                    );
-                                    setData('identification_number', '');
-                                } else {
-                                    setData('identification_type', '');
-                                    setData('identification_number', '');
-                                }
-                            }}
+                            onChange={(e) => handleTypeChange(e.target.value)}
                             className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                         >
-                            <option value={''}>Select Customer Type</option>
-                            <option value="Individual">Individual</option>
-                            <option value="Organization">Organization</option>
+                            <option value="">Select Customer Type</option>
+                            <option value="INDIVIDUAL">Individual</option>
+                            <option value="ORGANIZATION">Organization</option>
                         </select>
                         <InputError message={errors.type} />
                     </div>
+
                     <div>
                         <Label className="text-xs">Name</Label>
                         <Input
@@ -170,6 +171,7 @@ const Create = () => {
                         />
                         <InputError message={errors.name} />
                     </div>
+
                     <div>
                         <Label className="text-xs">Phone</Label>
                         <Input
@@ -179,6 +181,7 @@ const Create = () => {
                         />
                         <InputError message={errors.phone} />
                     </div>
+
                     <div>
                         <Label className="text-xs">Email</Label>
                         <Input
@@ -190,13 +193,12 @@ const Create = () => {
                     </div>
                 </div>
 
-                {/* PERSONAL DETAILS */}
+                {/* INDIVIDUAL ONLY FIELDS */}
                 {data.type === 'INDIVIDUAL' && (
-                    <div className="grid grid-cols-1 gap-x-4 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         <div>
                             <Label className="text-xs">DOB</Label>
                             <AppDatePicker
-                                label=""
                                 value={data.dob}
                                 onChange={(val) => setData('dob', val)}
                             />
@@ -236,11 +238,83 @@ const Create = () => {
                             </select>
                             <InputError message={errors.religion} />
                         </div>
+                        <div>
+                            <Label className="text-xs">Marital Status</Label>
+                            <select
+                                value={data.marital_status}
+                                onChange={(e) =>
+                                    setData('marital_status', e.target.value)
+                                }
+                                className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                            >
+                                <option value="">Select</option>
+                                <option>SINGLE</option>
+                                <option>MARRIED</option>
+                                <option>WIDOWED</option>
+                                <option>DIVORCED</option>
+                                <option>OTHER</option>
+                            </select>
+                            <InputError message={errors.marital_status} />
+                        </div>
+                        <div>
+                            <Label className="text-xs">Blood Group</Label>
+                            <select
+                                value={data.blood_group}
+                                onChange={(e) =>
+                                    setData('blood_group', e.target.value)
+                                }
+                                className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                            >
+                                <option value="">Select</option>
+                                <option>A+</option>
+                                <option>A-</option>
+                                <option>B+</option>
+                                <option>B-</option>
+                                <option>AB+</option>
+                                <option>AB-</option>
+                                <option>O+</option>
+                                <option>O-</option>
+                            </select>
+                            <InputError message={errors.blood_group} />
+                        </div>
+                        <div>
+                            <Label className="text-xs">Nationality</Label>
+                            <Input
+                                value={data.nationality}
+                                onChange={(e) =>
+                                    setData('nationality', e.target.value)
+                                }
+                                className="h-8 text-sm"
+                            />
+                            <InputError message={errors.nationality} />
+                        </div>
+                        <div>
+                            <Label className="text-xs">Occupation</Label>
+                            <Input
+                                value={data.occupation}
+                                onChange={(e) =>
+                                    setData('occupation', e.target.value)
+                                }
+                                className="h-8 text-sm"
+                            />
+                            <InputError message={errors.occupation} />
+                        </div>
+                        <div>
+                            <Label className="text-xs">Education</Label>
+                            <Input
+                                value={data.education}
+                                onChange={(e) =>
+                                    setData('education', e.target.value)
+                                }
+                                className="h-8 text-sm"
+                            />
+                            <InputError message={errors.education} />
+                        </div>
                     </div>
                 )}
 
                 {/* IDENTIFICATION */}
-                <div className="grid grid-cols-1 gap-x-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div>
                         <Label className="text-xs">Identification Type</Label>
                         <select
@@ -281,17 +355,14 @@ const Create = () => {
                     </div>
                 </div>
 
-                {/* KYC & STATUS */}
-                <div className="grid grid-cols-1 gap-x-4 md:grid-cols-2 lg:grid-cols-3">
+                {/* KYC STATUS */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div>
                         <Label className="text-xs">KYC Status</Label>
                         <select
                             value={data.kyc_status}
                             disabled
-                            onChange={(e) =>
-                                setData('kyc_status', e.target.value)
-                            }
-                            className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                            className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground"
                         >
                             <option>PENDING</option>
                             <option>VERIFIED</option>
@@ -306,18 +377,16 @@ const Create = () => {
                     <Button
                         type="submit"
                         disabled={processing}
-                        className="flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
+                        className="flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground hover:bg-primary/90"
                     >
                         {processing ? (
                             <>
-                                {/* spinning loader icon */}
-                                <Loader2 className="" />
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />{' '}
                                 Saving...
                             </>
                         ) : (
                             <>
-                                {/* check / save icon */}
-                                <CheckCheck className="" />
+                                <CheckCheck className="mr-2 h-4 w-4" />{' '}
                                 Store/Submit
                             </>
                         )}

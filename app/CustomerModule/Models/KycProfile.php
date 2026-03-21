@@ -3,9 +3,6 @@
 namespace App\CustomerModule\Models;
 
 use App\SystemAdministration\Traits\Auditable;
-use App\SystemAdministration\Models\User;
-use App\SystemAdministration\Models\Organization;
-use App\SystemAdministration\Models\Branch;
 use Database\Factories\KycProfileFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,68 +16,62 @@ class KycProfile extends Model
         'customer_id',
         'kyc_level',
         'risk_level',
-        'verification_status',
-        'verified_by',
-        'verified_at',
-        'remarks',
-    ];
-
-    protected $casts = [
-        'verified_at' => 'datetime',
     ];
 
     /* ========================
-     * Core Relationships
+     * Constants (Enums)
      * ======================== */
+    public const LEVEL_BASIC = 'BASIC';
+    public const LEVEL_FULL = 'FULL';
+    public const LEVEL_ENHANCED = 'ENHANCED';
 
+    public const RISK_LOW = 'LOW';
+    public const RISK_MEDIUM = 'MEDIUM';
+    public const RISK_HIGH = 'HIGH';
+
+    /* ========================
+     * Relationships
+     * ======================== */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
     /* ========================
-     * Verification
+     * Helpers - Level
      * ======================== */
-
-    public function verifier(): BelongsTo
+    public function isBasic(): bool
     {
-        return $this->belongsTo(User::class, 'verified_by');
+        return $this->kyc_level === self::LEVEL_BASIC;
+    }
+
+    public function isFull(): bool
+    {
+        return $this->kyc_level === self::LEVEL_FULL;
+    }
+
+    public function isEnhanced(): bool
+    {
+        return $this->kyc_level === self::LEVEL_ENHANCED;
     }
 
     /* ========================
-     * Helper Methods
+     * Helpers - Risk
      * ======================== */
-
-    public function isApproved(): bool
+    public function isLowRisk(): bool
     {
-        return $this->verification_status === 'APPROVED';
-    }
-
-    public function isRejected(): bool
-    {
-        return $this->verification_status === 'REJECTED';
-    }
-
-    public function isPending(): bool
-    {
-        return $this->verification_status === 'PENDING';
-    }
-
-    public function isHighRisk(): bool
-    {
-        return $this->risk_level === 'HIGH';
+        return $this->risk_level === self::RISK_LOW;
     }
 
     public function isMediumRisk(): bool
     {
-        return $this->risk_level === 'MEDIUM';
+        return $this->risk_level === self::RISK_MEDIUM;
     }
 
-    public function isLowRisk(): bool
+    public function isHighRisk(): bool
     {
-        return $this->risk_level === 'LOW';
+        return $this->risk_level === self::RISK_HIGH;
     }
-
     protected static function newFactory()
     {
         return KycProfileFactory::new();

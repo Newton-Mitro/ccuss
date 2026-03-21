@@ -27,6 +27,8 @@ export type AddressType =
     | 'REGISTERED'
     | 'OTHER';
 export type VerificationStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
+export type KycLevel = 'BASIC' | 'FULL' | 'ENHANCED';
+export type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH';
 
 /* ===========================
  * Customer
@@ -36,25 +38,36 @@ export interface Customer extends AuditFields {
     customer_no: string;
     type: CustomerType;
 
+    // Common fields
     name: string;
     phone?: string | null;
     email?: string | null;
-    dob?: string | null;
 
+    // Individual-only fields
+    dob?: string | null;
     gender?: Gender | null;
     religion?: Religion | null;
+    marital_status?: string | null;
+    blood_group?: string | null;
+    nationality?: string | null;
+    occupation?: string | null;
+    education?: string | null;
 
+    // Identification
     identification_type: IdentificationType;
     identification_number: string;
 
+    // KYC
     kyc_status: KycStatus;
     kyc_verified_by?: ID | null;
     kyc_verified_by_user?: User | null;
     kyc_verified_at?: Timestamp | null;
 
+    // Files
     photo?: KycDocument | null;
     signature?: KycDocument | null;
 
+    // Relations
     addresses?: CustomerAddress[];
     family_relations?: CustomerFamilyRelation[];
     introducers?: CustomerIntroducer[];
@@ -187,9 +200,6 @@ export interface CustomerIntroducer extends AuditFields {
 /* ===========================
  * KYC Profile
  * =========================== */
-export type KycLevel = 'BASIC' | 'FULL' | 'ENHANCED';
-export type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH';
-
 export interface KycProfile extends AuditFields {
     id: ID;
     customer_id: ID;

@@ -123,14 +123,8 @@ class CustomerSeeder extends Seeder
             }
 
             // KYC Profile
-            $states = ['approved', 'rejected', null];
-            $state = collect($states)->random();
-            $factory = KycProfile::factory()->for($customer);
-            match ($state) {
-                'approved' => $factory->approved()->create(),
-                'rejected' => $factory->rejected()->create(),
-                default => $factory->create(),
-            };
+            $factory = KycProfile::factory()->for($customer)->create();
+
         }
 
         // Introducers
@@ -141,7 +135,6 @@ class CustomerSeeder extends Seeder
                 'introducer_customer_id' => $introducer->id,
                 'introducer_account_id' => null,
                 'relationship_type' => collect(['FAMILY', 'FRIEND', 'BUSINESS', 'COLLEAGUE', 'OTHER'])->random(),
-                'verification_status' => 'VERIFIED',
                 'verified_at' => now(),
             ]);
         }

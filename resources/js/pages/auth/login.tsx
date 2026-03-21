@@ -33,8 +33,8 @@ export default function Login({
             <div className="w-full max-w-md rounded-lg border bg-card p-6 shadow-sm transition-colors duration-300 md:p-10 dark:shadow-black/30">
                 {/* Logo + Intro */}
                 <div className="mb-6 flex flex-col items-center text-center">
-                    <AppLogoIcon className="h-32 w-32 fill-current text-primary transition-colors duration-300" />
-                    <div className="text-sm font-medium text-primary transition-colors duration-300">
+                    <AppLogoIcon className="h-32 w-32 fill-current text-accent transition-colors duration-300" />
+                    <div className="text-sm font-medium text-accent transition-colors duration-300">
                         Welcome back to{' '}
                         <span className="text-foreground">
                             {import.meta.env.VITE_APP_NAME}
@@ -89,7 +89,7 @@ export default function Login({
                                     {canResetPassword && (
                                         <TextLink
                                             href={request()}
-                                            className="text-xs text-primary transition-colors duration-300 hover:underline"
+                                            className="text-xs text-accent transition-colors duration-300 hover:underline"
                                         >
                                             Forgot password?
                                         </TextLink>
@@ -137,7 +137,7 @@ export default function Login({
                                     Don’t have an account?{' '}
                                     <TextLink
                                         href={register()}
-                                        className="text-primary transition-colors duration-300 hover:underline"
+                                        className="text-accent transition-colors duration-300 hover:underline"
                                     >
                                         Register
                                     </TextLink>
@@ -149,7 +149,7 @@ export default function Login({
 
                 {/* Status Message */}
                 {status && (
-                    <div className="mt-4 rounded border bg-muted p-2 text-center text-sm font-medium text-primary transition-colors duration-300">
+                    <div className="mt-4 rounded border bg-muted p-2 text-center text-sm font-medium text-accent transition-colors duration-300">
                         {status}
                     </div>
                 )}

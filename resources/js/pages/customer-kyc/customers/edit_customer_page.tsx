@@ -1,5 +1,5 @@
-import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, CheckCheck, ListFilter, SpaceIcon } from 'lucide-react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import { ArrowLeft, CheckCheck, ListFilter, Loader2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
@@ -31,18 +31,25 @@ const Edit = ({ customer, flash }: EditProps) => {
 
     const { data, setData, put, processing, errors } = useForm({
         customer_no: customer.customer_no || '',
-        type: (customer.type as string) || '',
+        type: customer.type || '',
         name: customer.name || '',
         phone: customer.phone || '',
         email: customer.email || '',
         dob: customer.dob || '',
-        gender: (customer.gender as string) || '',
+        gender: customer.gender || '',
         religion: customer.religion || '',
+        marital_status: customer.marital_status || '',
+        blood_group: customer.blood_group || '',
+        nationality: customer.nationality || '',
+        occupation: customer.occupation || '',
+        education: customer.education || '',
         identification_type: customer.identification_type || '',
         identification_number: customer.identification_number || '',
         photo: null as File | null,
-        kyc_status: (customer.kyc_status as string) || 'PENDING',
+        kyc_status: customer.kyc_status || 'PENDING',
     });
+
+    console.log(data);
 
     const [photoPreview, setPhotoPreview] = useState<string | null>(
         customer.photo?.url || null,
@@ -58,11 +65,39 @@ const Edit = ({ customer, flash }: EditProps) => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        router.post(
+            route('customers.update', customer.id),
+            {
+                ...data,
+                _method: 'put', // 👈 Laravel expects this
+            },
+            {
+                forceFormData: true,
+                preserveScroll: true,
+                onError: (e) => toast.error(JSON.stringify(e)),
+            },
+        );
+    };
 
-        put(route('customers.update', customer.id), {
-            preserveScroll: true,
-            onError: () => toast.error('Please fix errors in the form.'),
-        });
+    const handleTypeChange = (value: string) => {
+        setData('type', value);
+
+        if (value === 'ORGANIZATION') {
+            setData('identification_type', 'REGISTRATION_NO');
+            setData('identification_number', '');
+            // Clear individual-only fields
+            setData('dob', '');
+            setData('gender', '');
+            setData('religion', '');
+            setData('marital_status', '');
+            setData('blood_group', '');
+            setData('nationality', '');
+            setData('occupation', '');
+            setData('education', '');
+        } else {
+            setData('identification_type', '');
+            setData('identification_number', '');
+        }
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -76,17 +111,17 @@ const Edit = ({ customer, flash }: EditProps) => {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Edit Customer - ${customer.name}`} />
+
             <div className="flex flex-col gap-3 pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <HeadingSmall
                     title="Edit Customer"
                     description="Update customer information."
                 />
-
                 <div className="flex flex-wrap gap-2">
                     <button
                         type="button"
                         onClick={handleBack}
-                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground transition hover:bg-muted/90"
+                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         <span className="hidden sm:inline">Back</span>
@@ -94,7 +129,7 @@ const Edit = ({ customer, flash }: EditProps) => {
 
                     <Link
                         href={route('customers.index')}
-                        className="flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition hover:bg-secondary/90"
+                        className="flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground hover:bg-secondary/90"
                     >
                         <ListFilter className="h-4 w-4" />
                         <span className="hidden sm:inline">Customers</span>
@@ -106,18 +141,15 @@ const Edit = ({ customer, flash }: EditProps) => {
                 onSubmit={handleSubmit}
                 className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6 lg:w-5xl"
             >
+                {/* PHOTO */}
                 <div className="flex flex-col gap-4">
-                    <div className="">
-                        {photoPreview && (
-                            <img
-                                src={photoPreview}
-                                alt="Preview"
-                                className="h-20 w-20 rounded-md border object-cover sm:h-24 sm:w-24"
-                            />
-                        )}
-                    </div>
-                    {/* PHOTO */}
-
+                    {photoPreview && (
+                        <img
+                            src={photoPreview}
+                            alt="Preview"
+                            className="h-20 w-20 rounded-md border object-cover sm:h-24 sm:w-24"
+                        />
+                    )}
                     <div className="flex items-center gap-1">
                         <Label className="text-xs">Photo</Label>
                         <input
@@ -129,6 +161,7 @@ const Edit = ({ customer, flash }: EditProps) => {
                         <InputError message={errors.photo} />
                     </div>
                 </div>
+
                 {/* BASIC INFO */}
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
                     <div>
@@ -139,32 +172,21 @@ const Edit = ({ customer, flash }: EditProps) => {
                             className="h-8 text-sm"
                         />
                     </div>
+
                     <div>
-                        <Label className="text-xs">Type</Label>
+                        <Label className="text-xs">Customer Type</Label>
                         <select
                             value={data.type}
-                            disabled
-                            onChange={(e) => {
-                                const newType = e.target.value;
-                                setData('type', newType);
-                                if (newType === 'ORGANIZATION') {
-                                    setData(
-                                        'identification_type',
-                                        'REGISTRATION_NO',
-                                    );
-                                    setData('identification_number', '');
-                                } else {
-                                    setData('identification_type', '');
-                                    setData('identification_number', '');
-                                }
-                            }}
+                            onChange={(e) => handleTypeChange(e.target.value)}
                             className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                         >
-                            <option>Individual</option>
-                            <option>Organization</option>
+                            <option value="">Select Type</option>
+                            <option value="INDIVIDUAL">Individual</option>
+                            <option value="ORGANIZATION">Organization</option>
                         </select>
                         <InputError message={errors.type} />
                     </div>
+
                     <div>
                         <Label className="text-xs">Name</Label>
                         <Input
@@ -174,6 +196,7 @@ const Edit = ({ customer, flash }: EditProps) => {
                         />
                         <InputError message={errors.name} />
                     </div>
+
                     <div>
                         <Label className="text-xs">Phone</Label>
                         <Input
@@ -183,6 +206,7 @@ const Edit = ({ customer, flash }: EditProps) => {
                         />
                         <InputError message={errors.phone} />
                     </div>
+
                     <div>
                         <Label className="text-xs">Email</Label>
                         <Input
@@ -194,17 +218,18 @@ const Edit = ({ customer, flash }: EditProps) => {
                     </div>
                 </div>
 
-                {/* PERSONAL DETAILS */}
+                {/* INDIVIDUAL ONLY FIELDS */}
                 {isIndividual && (
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
                         <div>
                             <Label className="text-xs">Date of Birth</Label>
                             <AppDatePicker
-                                label=""
                                 value={data.dob}
                                 onChange={(val) => setData('dob', val)}
                             />
+                            <InputError message={errors.dob} />
                         </div>
+
                         <div>
                             <Label className="text-xs">Gender</Label>
                             <select
@@ -219,7 +244,9 @@ const Edit = ({ customer, flash }: EditProps) => {
                                 <option>FEMALE</option>
                                 <option>OTHER</option>
                             </select>
+                            <InputError message={errors.gender} />
                         </div>
+
                         <div>
                             <Label className="text-xs">Religion</Label>
                             <select
@@ -236,6 +263,83 @@ const Edit = ({ customer, flash }: EditProps) => {
                                 <option>BUDDHISM</option>
                                 <option>OTHER</option>
                             </select>
+                            <InputError message={errors.religion} />
+                        </div>
+
+                        <div>
+                            <Label className="text-xs">Marital Status</Label>
+                            <select
+                                value={data.marital_status}
+                                onChange={(e) =>
+                                    setData('marital_status', e.target.value)
+                                }
+                                className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                            >
+                                <option value="">Select</option>
+                                <option>SINGLE</option>
+                                <option>MARRIED</option>
+                                <option>DIVORCED</option>
+                                <option>WIDOWED</option>
+                            </select>
+                            <InputError message={errors.marital_status} />
+                        </div>
+
+                        <div>
+                            <Label className="text-xs">Blood Group</Label>
+                            <select
+                                value={data.blood_group}
+                                onChange={(e) =>
+                                    setData('blood_group', e.target.value)
+                                }
+                                className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                            >
+                                <option value="">Select</option>
+                                <option>A+</option>
+                                <option>A-</option>
+                                <option>B+</option>
+                                <option>B-</option>
+                                <option>O+</option>
+                                <option>O-</option>
+                                <option>AB+</option>
+                                <option>AB-</option>
+                            </select>
+                            <InputError message={errors.blood_group} />
+                        </div>
+
+                        <div>
+                            <Label className="text-xs">Nationality</Label>
+                            <Input
+                                value={data.nationality}
+                                onChange={(e) =>
+                                    setData('nationality', e.target.value)
+                                }
+                                className="h-8 text-sm"
+                            />
+                            <InputError message={errors.nationality} />
+                        </div>
+
+                        <div>
+                            <Label className="text-xs">Occupation</Label>
+                            <Input
+                                value={data.occupation}
+                                onChange={(e) =>
+                                    setData('occupation', e.target.value)
+                                }
+                                className="h-8 text-sm"
+                            />
+                            <InputError message={errors.occupation} />
+                        </div>
+
+                        <div>
+                            <Label className="text-xs">Education</Label>
+                            <Input
+                                value={data.education}
+                                onChange={(e) =>
+                                    setData('education', e.target.value)
+                                }
+                                className="h-8 text-sm"
+                            />
+                            <InputError message={errors.education} />
                         </div>
                     </div>
                 )}
@@ -282,17 +386,14 @@ const Edit = ({ customer, flash }: EditProps) => {
                     </div>
                 </div>
 
-                {/* KYC & STATUS */}
+                {/* KYC STATUS */}
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
                     <div>
                         <Label className="text-xs">KYC Status</Label>
                         <select
                             value={data.kyc_status}
                             disabled
-                            onChange={(e) =>
-                                setData('kyc_status', e.target.value)
-                            }
-                            className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                            className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground"
                         >
                             <option>PENDING</option>
                             <option>VERIFIED</option>
@@ -306,19 +407,16 @@ const Edit = ({ customer, flash }: EditProps) => {
                     <Button
                         type="submit"
                         disabled={processing}
-                        className="flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
+                        className="flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground hover:bg-primary/90"
                     >
                         {processing ? (
                             <>
-                                {/* spinning loader icon */}
-                                <SpaceIcon className="" />
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />{' '}
                                 Saving...
                             </>
                         ) : (
                             <>
-                                {/* check / save icon */}
-                                <CheckCheck className="" />
-                                Update
+                                <CheckCheck className="mr-2 h-4 w-4" /> Update
                             </>
                         )}
                     </Button>
