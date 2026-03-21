@@ -9,11 +9,13 @@ import {
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
 import { Card, CardContent } from '../../../components/ui/card';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { formatDateTime } from '../../../lib/date_util';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { CustomerIntroducer } from '../../../types/customer_kyc_module';
 
@@ -32,7 +34,7 @@ export default function ShowIntroducer() {
     const handleBack = () => window.history.back();
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Introducers', href: '/introducers' },
+        { title: 'Introducers', href: route('introducers.index') },
         { title: `Introducer #${introducer_request?.id}`, href: '' },
     ];
 
@@ -65,7 +67,7 @@ export default function ShowIntroducer() {
     // ✅ Actions for pending verification
     const handleApprove = () => {
         router.post(
-            `/introducers/${introducer_request.id}/approve`,
+            route('introducers.approve', introducer_request.id),
             {},
             {
                 onSuccess: () => toast.success('Introducer approved'),
@@ -75,7 +77,7 @@ export default function ShowIntroducer() {
 
     const handleReject = () => {
         router.post(
-            `/introducers/${introducer_request.id}/reject`,
+            route('introducers.reject', introducer_request.id),
             {},
             {
                 onSuccess: () => toast.success('Introducer rejected'),
@@ -104,14 +106,14 @@ export default function ShowIntroducer() {
                     </button>
 
                     <Link
-                        href="/introducers"
+                        href={route('introducers.index')}
                         className="flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground hover:bg-secondary/90"
                     >
                         Introducers
                     </Link>
 
                     <Link
-                        href={`/introducers/${introducer_request.id}/edit`}
+                        href={route('introducers.edit', introducer_request.id)}
                         className="flex items-center gap-1 rounded bg-accent px-3 py-1.5 text-sm text-accent-foreground hover:bg-accent/90"
                     >
                         <CheckCheck className="h-4 w-4" />
@@ -194,44 +196,74 @@ export default function ShowIntroducer() {
                     </Card>
                 </div>
 
-                {/* RIGHT COLUMN: Actions */}
+                {/* RIGHT: DETAILS */}
                 <div className="space-y-4">
-                    <Card className="rounded-md border bg-card p-4">
-                        <CardContent>
-                            <p className="text-sm font-medium">
-                                Verification Actions
+                    {/* VERIFICATION */}
+                    <div className="space-y-2 rounded-md border bg-card p-4">
+                        <p className="text-sm font-medium">Audit</p>
+
+                        <div>
+                            <p className="text-xs text-muted-foreground">
+                                Uploaded At
                             </p>
-                            <div className="mt-3 flex flex-col gap-2">
-                                {introducer_request.verification_status ===
-                                    'PENDING' && (
-                                    <>
-                                        <Button
-                                            onClick={handleApprove}
-                                            className="bg-success text-success-foreground hover:bg-success/90"
-                                        >
-                                            <CheckCheck className="mr-1 h-4 w-4" />{' '}
-                                            Approve
-                                        </Button>
-                                        <Button
-                                            onClick={handleReject}
-                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                        >
-                                            <XCircle className="mr-1 h-4 w-4" />{' '}
-                                            Reject
-                                        </Button>
-                                    </>
-                                )}
-                                {introducer_request.verification_status !==
-                                    'PENDING' && (
-                                    <Badge
-                                        className={`rounded px-2 py-1 text-xs ${statusClass}`}
-                                    >
-                                        {statusLabel}
-                                    </Badge>
-                                )}
+                            <p className="text-sm">
+                                {formatDateTime(introducer_request.created_at)}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="text-xs text-muted-foreground">
+                                Verified By
+                            </p>
+                            <p className="text-sm">
+                                {introducer_request.verified_by_user?.name ??
+                                    '—'}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="text-xs text-muted-foreground">
+                                Verified At
+                            </p>
+                            <p className="text-sm">
+                                {formatDateTime(
+                                    introducer_request.verified_at,
+                                ) ?? '—'}
+                            </p>
+                        </div>
+
+                        {introducer_request.remarks && (
+                            <div>
+                                <p className="text-xs text-muted-foreground">
+                                    Remarks
+                                </p>
+                                <p className="text-sm">
+                                    {introducer_request.remarks}
+                                </p>
                             </div>
-                        </CardContent>
-                    </Card>
+                        )}
+                    </div>
+
+                    {/* ACTIONS */}
+                    {introducer_request.verification_status === 'PENDING' && (
+                        <div className="flex gap-2 rounded-md border bg-card p-4">
+                            <Button
+                                onClick={handleApprove}
+                                className="bg-success text-success-foreground hover:bg-success/90"
+                            >
+                                <CheckCheck className="mr-1 h-4 w-4" />
+                                Approve
+                            </Button>
+
+                            <Button
+                                onClick={handleReject}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                                <XCircle className="mr-1 h-4 w-4" />
+                                Reject
+                            </Button>
+                        </div>
+                    )}
                 </div>
             </div>
         </CustomAuthLayout>

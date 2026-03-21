@@ -2,6 +2,7 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, ListFilter, SpaceIcon } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import AppDatePicker from '../../../components/ui/app_date_picker';
@@ -58,14 +59,14 @@ const Edit = ({ customer, flash }: EditProps) => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        put(`/customers/${customer.id}`, {
+        put(route('customers.update', customer.id), {
             preserveScroll: true,
             onError: () => toast.error('Please fix errors in the form.'),
         });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Customers', href: '/customers' },
+        { title: 'Customers', href: route('customers.index') },
         { title: `Edit ${customer.name}`, href: '' },
     ];
 
@@ -92,7 +93,7 @@ const Edit = ({ customer, flash }: EditProps) => {
                     </button>
 
                     <Link
-                        href="/customers"
+                        href={route('customers.index')}
                         className="flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition hover:bg-secondary/90"
                     >
                         <ListFilter className="h-4 w-4" />

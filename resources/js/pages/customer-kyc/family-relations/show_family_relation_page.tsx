@@ -9,11 +9,13 @@ import {
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
 import { Card, CardContent } from '../../../components/ui/card';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { formatDateTime } from '../../../lib/date_util';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { CustomerFamilyRelation } from '../../../types/customer_kyc_module';
 
@@ -32,7 +34,7 @@ export default function ShowFamilyRelation() {
     const handleBack = () => window.history.back();
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Family Relations', href: '/family-relations' },
+        { title: 'Family Relations', href: route('family-relations.index') },
         { title: `Relation #${familyRelation.id}`, href: '' },
     ];
 
@@ -65,7 +67,7 @@ export default function ShowFamilyRelation() {
     // ✅ Actions for pending verification
     const handleApprove = () => {
         router.post(
-            `/family-relations/${familyRelation.id}/approve`,
+            route('family-relations.approve', familyRelation.id),
             {},
             {
                 onSuccess: () => toast.success('Relation approved'),
@@ -75,7 +77,7 @@ export default function ShowFamilyRelation() {
 
     const handleReject = () => {
         router.post(
-            `/family-relations/${familyRelation.id}/reject`,
+            route('family-relations.reject', familyRelation.id),
             {},
             {
                 onSuccess: () => toast.success('Relation rejected'),
@@ -104,14 +106,14 @@ export default function ShowFamilyRelation() {
                     </button>
 
                     <Link
-                        href="/family-relations"
+                        href={route('family-relations.index')}
                         className="flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground hover:bg-secondary/90"
                     >
                         Relations
                     </Link>
 
                     <Link
-                        href={`/family-relations/${familyRelation.id}/edit`}
+                        href={route('family-relations.edit', familyRelation.id)}
                         className="flex items-center gap-1 rounded bg-accent px-3 py-1.5 text-sm text-accent-foreground hover:bg-accent/90"
                     >
                         <CheckCheck className="h-4 w-4" />
@@ -187,6 +189,48 @@ export default function ShowFamilyRelation() {
 
                 {/* RIGHT COLUMN: Actions */}
                 <div className="space-y-4">
+                    <div className="space-y-2 rounded-md border bg-card p-4">
+                        <p className="text-sm font-medium">Audit</p>
+
+                        <div>
+                            <p className="text-xs text-muted-foreground">
+                                Uploaded At
+                            </p>
+                            <p className="text-sm">
+                                {formatDateTime(familyRelation.created_at)}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="text-xs text-muted-foreground">
+                                Verified By
+                            </p>
+                            <p className="text-sm">
+                                {familyRelation.verified_by_user?.name ?? '—'}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="text-xs text-muted-foreground">
+                                Verified At
+                            </p>
+                            <p className="text-sm">
+                                {formatDateTime(familyRelation.verified_at) ??
+                                    '—'}
+                            </p>
+                        </div>
+
+                        {familyRelation.remarks && (
+                            <div>
+                                <p className="text-xs text-muted-foreground">
+                                    Remarks
+                                </p>
+                                <p className="text-sm">
+                                    {familyRelation.remarks}
+                                </p>
+                            </div>
+                        )}
+                    </div>
                     <Card className="rounded-md border bg-card p-4">
                         <CardContent>
                             <p className="text-sm font-medium">

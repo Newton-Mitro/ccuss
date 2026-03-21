@@ -3,6 +3,7 @@ import { ArrowLeft, CheckCheck, ListFilter, Loader2 } from 'lucide-react';
 
 import React, { useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
@@ -12,7 +13,7 @@ import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 
 const Create = () => {
-    const { flash } = usePage().props as any;
+    const { customer, flash } = usePage().props as any;
 
     useEffect(() => {
         if (flash?.error) toast.error(flash.error);
@@ -22,18 +23,18 @@ const Create = () => {
     const handleBack = () => window.history.back();
 
     const { data, setData, post, processing, errors } = useForm({
-        customer_id: '',
+        customer_id: customer.id,
         relative_id: '',
         relation_type: '',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/customer-family-relations');
+        post(route('family-relations.store'));
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Family Relations', href: '/customer-family-relations' },
+        { title: 'Family Relations', href: route('family-relations.index') },
         { title: 'Add Relation', href: '' },
     ];
 
@@ -52,7 +53,7 @@ const Create = () => {
                         <ArrowLeft className="h-4 w-4" />
                     </button>
                     <Link
-                        href="/customer-family-relations"
+                        href={route('family-relations.index')}
                         className="btn-secondary"
                     >
                         <ListFilter className="h-4 w-4" />
@@ -68,6 +69,7 @@ const Create = () => {
                     <div>
                         <Label className="text-xs">Customer</Label>
                         <Input
+                            value={data.customer_id}
                             onChange={(e) =>
                                 setData('customer_id', e.target.value)
                             }
@@ -78,6 +80,7 @@ const Create = () => {
                     <div>
                         <Label className="text-xs">Relative</Label>
                         <Input
+                            value={data.relative_id}
                             onChange={(e) =>
                                 setData('relative_id', e.target.value)
                             }
@@ -88,6 +91,7 @@ const Create = () => {
                     <div>
                         <Label className="text-xs">Relation Type</Label>
                         <select
+                            value={data.relation_type}
                             onChange={(e) =>
                                 setData('relation_type', e.target.value)
                             }

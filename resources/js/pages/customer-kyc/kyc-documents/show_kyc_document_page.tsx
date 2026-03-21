@@ -3,6 +3,7 @@ import { ArrowLeft, CheckCheck, XCircle } from 'lucide-react';
 
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import { Button } from '../../../components/ui/button';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
@@ -27,7 +28,7 @@ const Show = () => {
     const handleBack = () => window.history.back();
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'KYC Documents', href: '/kyc-documents' },
+        { title: 'KYC Documents', href: route('kyc-documents.index') },
         { title: `Document #${document.id}`, href: '' },
     ];
 
@@ -41,7 +42,7 @@ const Show = () => {
     // 🚀 Actions (optional endpoints)
     const handleApprove = () => {
         router.post(
-            `/kyc-documents/${document.id}/approve`,
+            route('kyc-documents.approve', document.id),
             {},
             {
                 onSuccess: () => toast.success('Document approved'),
@@ -51,7 +52,7 @@ const Show = () => {
 
     const handleReject = () => {
         router.post(
-            `/kyc-documents/${document.id}/reject`,
+            route('kyc-documents.reject', document.id),
             {},
             {
                 onSuccess: () => toast.success('Document rejected'),
@@ -80,7 +81,7 @@ const Show = () => {
                     </button>
 
                     <Link
-                        href="/kyc-documents"
+                        href={route('kyc-documents.index')}
                         className="flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground hover:bg-secondary/90"
                     >
                         Documents
@@ -156,7 +157,10 @@ const Show = () => {
                                     <div className="flex items-center gap-2">
                                         {document.customer ? (
                                             <Link
-                                                href={`/customers/${document.customer.id}`}
+                                                href={route(
+                                                    'customers.show',
+                                                    document.customer.id,
+                                                )}
                                                 className="text-info underline"
                                             >
                                                 {document.customer.name}

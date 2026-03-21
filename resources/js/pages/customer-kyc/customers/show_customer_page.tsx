@@ -32,7 +32,7 @@ export default function Show({ customer }: ShowProps) {
     console.log(customer);
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Customers', href: '/customers' },
+        { title: 'Customers', href: route('customers.index') },
         { title: customer.name, href: '' },
     ];
 
@@ -174,7 +174,7 @@ export default function Show({ customer }: ShowProps) {
                     title="Addresses"
                     actions={
                         <Link
-                            href={route('addresses.create')}
+                            href={route('addresses.create', customer.id)}
                             className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
                         >
                             <Plus size={14} /> Add
@@ -213,7 +213,7 @@ export default function Show({ customer }: ShowProps) {
                     title="Family & Relatives"
                     actions={
                         <Link
-                            href={route('family-relations.create')}
+                            href={route('family-relations.create', customer.id)}
                             className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
                         >
                             <Plus size={14} /> Add
@@ -278,7 +278,7 @@ export default function Show({ customer }: ShowProps) {
                     title="Introducers"
                     actions={
                         <Link
-                            href={route('introducers.create')}
+                            href={route('introducers.create', customer.id)}
                             className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
                         >
                             <Plus size={14} /> Add
@@ -344,7 +344,7 @@ export default function Show({ customer }: ShowProps) {
                     title="KYC Documents"
                     actions={
                         <Link
-                            href={route('kyc-documents.create')}
+                            href={route('kyc-documents.create', customer.id)}
                             className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
                         >
                             <Plus size={14} /> Add

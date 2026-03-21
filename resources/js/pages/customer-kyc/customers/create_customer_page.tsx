@@ -3,6 +3,7 @@ import { ArrowLeft, CheckCheck, ListFilter, Loader2 } from 'lucide-react';
 
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import AppDatePicker from '../../../components/ui/app_date_picker';
@@ -53,7 +54,7 @@ const Create = () => {
         Object.entries(data).forEach(([key, value]) => {
             if (value !== null) formData.append(key, value as any);
         });
-        post('/customers', {
+        post(route('customers.store'), {
             data: formData,
             preserveScroll: true,
             onError: (e) => toast.error(JSON.stringify(e)),
@@ -61,7 +62,7 @@ const Create = () => {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Customers', href: '/customers' },
+        { title: 'Customers', href: route('customers.index') },
         { title: 'Add Customer', href: '' },
     ];
 
@@ -84,7 +85,7 @@ const Create = () => {
                     </button>
 
                     <Link
-                        href="/customers"
+                        href={route('customers.index')}
                         className="flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition hover:bg-secondary/90"
                     >
                         <ListFilter className="h-4 w-4" />

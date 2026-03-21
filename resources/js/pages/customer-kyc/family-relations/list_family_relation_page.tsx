@@ -5,9 +5,10 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Eye, Pencil, Trash2, UserCheck2 } from 'lucide-react';
+import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
@@ -32,18 +33,19 @@ export default function FamilyRelationIndex() {
         search: filters.search || '',
         per_page: Number(filters.per_page) || 10,
         page: Number(filters.page) || 1,
+        verification_status: filters.verification_status || '',
     });
 
-    // Debounced search
     useEffect(() => {
         const delay = setTimeout(() => {
-            get('/family-relations', {
+            get(route('family-relations.index'), {
                 preserveState: true,
                 replace: true,
             });
         }, 400);
+
         return () => clearTimeout(delay);
-    }, [data.search, data.per_page, data.page]);
+    }, [data.search, data.per_page, data.page, data.verification_status]);
 
     const handleDelete = (id: number, customerName: string) => {
         appSwal
@@ -56,7 +58,7 @@ export default function FamilyRelationIndex() {
             })
             .then((result) => {
                 if (result.isConfirmed) {
-                    router.delete(`/family-relations/${id}`, {
+                    router.delete(route('family-relations.destroy', id), {
                         preserveScroll: true,
                         preserveState: true,
                         onSuccess: () =>
@@ -69,7 +71,7 @@ export default function FamilyRelationIndex() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Family Relations', href: '/family-relations' },
+        { title: 'Family Relations', href: '#' },
     ];
 
     return (
@@ -83,19 +85,11 @@ export default function FamilyRelationIndex() {
                         title="Family Relations"
                         description="Manage family and relative relationships."
                     />
-                    <Link
-                        href="/family-relations/customer"
-                        className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition hover:bg-primary/90"
-                    >
-                        <UserCheck2 className="h-4 w-4" />
-                        <span className="hidden sm:inline">
-                            Customer Family Relations
-                        </span>
-                    </Link>
                 </div>
 
                 {/* Search & Per Page */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    {/* Search */}
                     <input
                         type="text"
                         placeholder="Search by customer or relative name..."
@@ -106,6 +100,21 @@ export default function FamilyRelationIndex() {
                         }}
                         className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                     />
+
+                    {/* Status Filter */}
+                    <select
+                        value={data.verification_status}
+                        onChange={(e) => {
+                            setData('verification_status', e.target.value);
+                            setData('page', 1);
+                        }}
+                        className="h-9 rounded-md border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+                    >
+                        <option value="">All Status</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="VERIFIED">Verified</option>
+                        <option value="REJECTED">Rejected</option>
+                    </select>
                 </div>
 
                 {/* ===================== */}
@@ -164,7 +173,10 @@ export default function FamilyRelationIndex() {
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link
-                                                                href={`/family-relations/${f.id}`}
+                                                                href={route(
+                                                                    'family-relations.show',
+                                                                    f.id,
+                                                                )}
                                                                 className="text-gray-500"
                                                             >
                                                                 <Eye className="h-5 w-5" />
@@ -247,13 +259,13 @@ export default function FamilyRelationIndex() {
 
                             <div className="mt-2 flex justify-end gap-3">
                                 <Link
-                                    href={`/family-relations/${f.id}`}
+                                    href={route('family-relations.show', f.id)}
                                     className="text-gray-500"
                                 >
                                     <Eye className="h-5 w-5" />
                                 </Link>
                                 <Link
-                                    href={`/family-relations/${f.id}/edit`}
+                                    href={route('family-relations.edit', f.id)}
                                     className="text-green-600 hover:text-green-500"
                                 >
                                     <Pencil className="h-5 w-5" />

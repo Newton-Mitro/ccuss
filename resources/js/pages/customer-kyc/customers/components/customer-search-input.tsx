@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { Search } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
+import { route } from 'ziggy-js';
 import { Label } from '../../../../components/ui/label';
 import { Customer } from '../../../../types/customer_kyc_module';
 
@@ -31,7 +32,7 @@ export const CustomerSearchInput: React.FC<CustomerSearchInputProps> = ({
 
         try {
             setLoading(true);
-            const res = await axios.get('/api/search-customers', {
+            const res = await axios.get(route('customers.search-customers'), {
                 params: { search: query },
             });
 

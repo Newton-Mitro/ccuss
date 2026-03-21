@@ -8,6 +8,7 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Trash2, UserPlus } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
@@ -36,7 +37,7 @@ export default function Index() {
 
     useEffect(() => {
         const delay = setTimeout(() => {
-            get('/customers', { preserveState: true });
+            get(route('customers.index'), { preserveState: true });
         }, 400);
         return () => clearTimeout(delay);
     }, [data.search, data.status, data.per_page, data.page]);
@@ -52,7 +53,7 @@ export default function Index() {
             })
             .then((result) => {
                 if (result.isConfirmed) {
-                    router.delete(`/customers/${id}`, {
+                    router.delete(route('customers.destroy', id), {
                         preserveScroll: true,
                         preserveState: true,
                         onSuccess: () =>
@@ -66,15 +67,13 @@ export default function Index() {
             });
     };
 
-    const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Customers', href: '/customers' },
-    ];
+    const breadcrumbs: BreadcrumbItem[] = [{ title: 'Customers', href: '#' }];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Customers" />
 
-            <div className="space-y-4 p-2">
+            <div className="space-y-4">
                 {/* Header */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <HeadingSmall
@@ -83,7 +82,7 @@ export default function Index() {
                     />
                     <div className="flex gap-2">
                         <Link
-                            href="/customers/create"
+                            href={route('customers.create')}
                             className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition hover:bg-primary/90"
                         >
                             <UserPlus className="h-4 w-4" />
@@ -172,7 +171,10 @@ export default function Index() {
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
                                                         <Link
-                                                            href={`/customers/${c.id}`}
+                                                            href={route(
+                                                                'customers.show',
+                                                                c.id,
+                                                            )}
                                                             className="text-gray-500"
                                                         >
                                                             <Eye className="h-5 w-5" />
@@ -186,7 +188,10 @@ export default function Index() {
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
                                                         <Link
-                                                            href={`/customers/${c.id}/edit`}
+                                                            href={route(
+                                                                'customers.edit',
+                                                                c.id,
+                                                            )}
                                                             className="text-yellow-500"
                                                         >
                                                             <Pencil className="h-5 w-5" />
@@ -252,13 +257,13 @@ export default function Index() {
 
                             <div className="flex justify-end gap-4 pt-2">
                                 <Link
-                                    href={`/customers/${c.id}`}
+                                    href={route('customers.show', c.id)}
                                     className="text-primary"
                                 >
                                     <Eye className="h-5 w-5" />
                                 </Link>
                                 <Link
-                                    href={`/customers/${c.id}/edit`}
+                                    href={route('customers.edit', c.id)}
                                     className="text-green-600 dark:text-green-400"
                                 >
                                     <Pencil className="h-5 w-5" />

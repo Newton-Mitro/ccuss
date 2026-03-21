@@ -5,9 +5,10 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Eye, FileText, Trash2 } from 'lucide-react';
+import { Eye, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
@@ -38,7 +39,7 @@ export default function KycDocumentsIndex() {
 
     useEffect(() => {
         const delay = setTimeout(() => {
-            get('/kyc-documents', { preserveState: true });
+            get(route('kyc-documents.index'), { preserveState: true });
         }, 400);
         return () => clearTimeout(delay);
     }, [data.search, data.document_type, data.verification_status, data.page]);
@@ -54,7 +55,7 @@ export default function KycDocumentsIndex() {
             })
             .then((res) => {
                 if (res.isConfirmed) {
-                    router.delete(`/kyc-documents/${id}`, {
+                    router.delete(route('kyc-documents.destroy', id), {
                         preserveScroll: true,
                         onSuccess: () =>
                             toast.success('Document deleted successfully'),
@@ -65,30 +66,20 @@ export default function KycDocumentsIndex() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'KYC Documents', href: '/kyc-documents' },
+        { title: 'KYC Documents', href: '' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="KYC Documents" />
 
-            <div className="space-y-4 p-2">
+            <div className="space-y-4">
                 {/* Header */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <HeadingSmall
                         title="KYC Documents"
                         description="Manage customer verification documents."
                     />
-
-                    <Link
-                        href="/kyc-documents/create"
-                        className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition hover:bg-primary/90"
-                    >
-                        <FileText className="h-4 w-4" />
-                        <span className="hidden sm:inline">
-                            Upload Document
-                        </span>
-                    </Link>
                 </div>
 
                 {/* Filters */}
@@ -190,7 +181,10 @@ export default function KycDocumentsIndex() {
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
                                                         <Link
-                                                            href={`/kyc-documents/${i.id}`}
+                                                            href={route(
+                                                                'kyc-documents.show',
+                                                                i.id,
+                                                            )}
                                                             className="text-gray-500"
                                                         >
                                                             <Eye className="h-5 w-5" />
@@ -259,7 +253,7 @@ export default function KycDocumentsIndex() {
 
                                 <div className="flex gap-4">
                                     <Link
-                                        href={`/kyc-documents/${i.id}`}
+                                        href={route('kyc-documents.show', i.id)}
                                         className="text-gray-500"
                                     >
                                         <Eye className="h-5 w-5" />

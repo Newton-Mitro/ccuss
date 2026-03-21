@@ -7,10 +7,11 @@ import {
     UserIcon,
     X,
 } from 'lucide-react';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-import { CustomerAddress } from '../../../types/customer';
+import { CustomerAddress } from '../../../types/customer_kyc_module';
 
 interface Props {
     address: CustomerAddress;
@@ -18,10 +19,10 @@ interface Props {
 
 export default function ViewAddress({ address }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Addresses', href: '/addresses' },
+        { title: 'Customers', href: route('customers.index') },
         {
             title: `Address #${address.id}`,
-            href: `/addresses/${address.id}`,
+            href: '#',
         },
     ];
 
@@ -40,7 +41,7 @@ export default function ViewAddress({ address }: Props) {
 
                     <div className="flex gap-2">
                         <Link
-                            href={`/addresses/${address.id}/edit`}
+                            href={route('addresses.edit', address.id)}
                             className="flex items-center gap-1 rounded bg-accent px-3 py-1 text-accent-foreground transition hover:bg-accent/90"
                         >
                             <Edit2 size={16} />
@@ -66,11 +67,11 @@ export default function ViewAddress({ address }: Props) {
                         </button>
 
                         <Link
-                            href={`/addresses`}
+                            href={route('customers.index')}
                             className="flex items-center gap-1 rounded bg-secondary px-3 py-1 text-secondary-foreground transition hover:bg-secondary/90"
                         >
                             <ListFilter size={16} />
-                            <span className="hidden sm:inline">Addresses</span>
+                            <span className="hidden sm:inline">Customers</span>
                         </Link>
                     </div>
                 </div>
@@ -103,7 +104,10 @@ export default function ViewAddress({ address }: Props) {
                                         value={
                                             address.customer ? (
                                                 <Link
-                                                    href={`/customers/${address.customer.id}`}
+                                                    href={route(
+                                                        'customers.show',
+                                                        address.customer.id,
+                                                    )}
                                                     className="text-primary underline"
                                                 >
                                                     {address.customer.name}
@@ -115,7 +119,7 @@ export default function ViewAddress({ address }: Props) {
                                     />
                                     <p className="text-xs text-muted-foreground">
                                         {address.customer?.type} •{' '}
-                                        {address.customer?.status}
+                                        {address.customer?.kyc_status}
                                     </p>
                                     <div className="text-xs text-muted-foreground">
                                         {address.customer?.id} •{' '}

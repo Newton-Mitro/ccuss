@@ -2,6 +2,7 @@
 
 namespace App\CustomerModule\Controllers;
 
+use App\CustomerModule\Models\Customer;
 use App\CustomerModule\Models\CustomerFamilyRelation;
 use App\CustomerModule\Requests\StoreFamilyRelationRequest;
 use App\CustomerModule\Requests\UpdateFamilyRelationRequest;
@@ -31,6 +32,11 @@ class CustomerFamilyRelationController extends Controller
             });
         }
 
+        // 🎯 Status filter
+        if ($status = $request->string('verification_status')->toString()) {
+            $query->where('verification_status', $status);
+        }
+
         $relations = $query
             ->latest()
             ->paginate($request->integer('per_page', 10))
@@ -40,6 +46,7 @@ class CustomerFamilyRelationController extends Controller
             'familyRelations' => $relations,
             'filters' => $request->only([
                 'search',
+                'verification_status', // ✅ added
                 'per_page',
                 'page',
             ]),
@@ -55,9 +62,11 @@ class CustomerFamilyRelationController extends Controller
         ]);
     }
 
-    public function create(): Response
+    public function create(Customer $customer): Response
     {
-        return Inertia::render('customer-kyc/family-relations/create_family_relation_page');
+        return Inertia::render('customer-kyc/family-relations/create_family_relation_page', [
+            'customer' => $customer->load('photo'),
+        ]);
     }
 
     public function edit(CustomerFamilyRelation $familyRelation): Response

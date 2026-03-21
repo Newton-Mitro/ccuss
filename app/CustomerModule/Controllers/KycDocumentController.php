@@ -1,6 +1,7 @@
 <?php
 namespace App\CustomerModule\Controllers;
 
+use App\CustomerModule\Models\Customer;
 use App\CustomerModule\Models\KycDocument;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -51,9 +52,10 @@ class KycDocumentController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(Customer $customer)
     {
         return Inertia::render('customer-kyc/kyc-documents/create_kyc_document_page', [
+            'customer' => $customer->load('photo'),
         ]);
     }
 

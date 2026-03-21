@@ -35,7 +35,7 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
         }
         try {
             setLoading(true);
-            const res = await axios.get('/api/search-customers', {
+            const res = await axios.get(route('customers.search-customers'), {
                 params: { search: query },
             });
             setCustomers(res.data || []);

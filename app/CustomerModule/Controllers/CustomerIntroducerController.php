@@ -2,6 +2,7 @@
 
 namespace App\CustomerModule\Controllers;
 
+use App\CustomerModule\Models\Customer;
 use App\CustomerModule\Models\CustomerIntroducer;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
@@ -82,9 +83,11 @@ class CustomerIntroducerController extends Controller
         );
     }
 
-    public function create(): Response
+    public function create(Customer $customer): Response
     {
-        return Inertia::render('customer-kyc/introducers/create_introducer_page');
+        return Inertia::render('customer-kyc/introducers/create_introducer_page', [
+            'customer' => $customer->load('photo'),
+        ]);
     }
 
     public function edit(CustomerIntroducer $introducer): Response

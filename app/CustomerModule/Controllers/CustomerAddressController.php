@@ -2,6 +2,7 @@
 
 namespace App\CustomerModule\Controllers;
 
+use App\CustomerModule\Models\Customer;
 use App\CustomerModule\Models\CustomerAddress;
 use App\CustomerModule\Requests\StoreAddressRequest;
 use App\CustomerModule\Requests\UpdateAddressRequest;
@@ -60,9 +61,11 @@ class CustomerAddressController extends Controller
         ]);
     }
 
-    public function create(): Response
+    public function create(Customer $customer): Response
     {
-        return Inertia::render('customer-kyc/addresses/create_address_page');
+        return Inertia::render('customer-kyc/addresses/create_address_page', [
+            'customer' => $customer->load('photo'),
+        ]);
     }
 
     public function edit(CustomerAddress $address): Response

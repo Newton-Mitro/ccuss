@@ -5,10 +5,11 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Eye, Trash2, Users } from 'lucide-react';
+import { Eye, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
@@ -38,7 +39,7 @@ export default function IntroducersIndex() {
 
     useEffect(() => {
         const delay = setTimeout(() => {
-            get('/introducers', { preserveState: true });
+            get(route('introducers.index'), { preserveState: true });
         }, 400);
 
         return () => clearTimeout(delay);
@@ -55,7 +56,7 @@ export default function IntroducersIndex() {
             })
             .then((res) => {
                 if (res.isConfirmed) {
-                    router.delete(`/introducers/${id}`, {
+                    router.delete(route('introducers.destroy', id), {
                         preserveScroll: true,
                         onSuccess: () =>
                             toast.success('Introducer deleted successfully'),
@@ -66,30 +67,19 @@ export default function IntroducersIndex() {
             });
     };
 
-    const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Introducers', href: '/introducers' },
-    ];
+    const breadcrumbs: BreadcrumbItem[] = [{ title: 'Introducers', href: '#' }];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Introducers" />
 
-            <div className="space-y-4 p-2">
+            <div className="space-y-4">
                 {/* Header */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <HeadingSmall
                         title="Introducers"
                         description="Manage customer introducers."
                     />
-                    <Link
-                        href="/introducers/customer"
-                        className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition hover:bg-primary/90"
-                    >
-                        <Users className="h-4 w-4" />
-                        <span className="hidden sm:inline">
-                            Customer Introducers
-                        </span>
-                    </Link>
                 </div>
 
                 {/* Filters */}
@@ -167,7 +157,10 @@ export default function IntroducersIndex() {
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
                                                         <Link
-                                                            href={`/introducers/${i.id}`}
+                                                            href={route(
+                                                                'introducers.show',
+                                                                i.id,
+                                                            )}
                                                             className="text-gray-500"
                                                         >
                                                             <Eye className="h-5 w-5" />
@@ -231,7 +224,7 @@ export default function IntroducersIndex() {
 
                             <div className="flex justify-end gap-4">
                                 <Link
-                                    href={`/introducers/${i.id}`}
+                                    href={route('introducers.show', i.id)}
                                     className="text-gray-500"
                                 >
                                     <Eye className="h-5 w-5" />

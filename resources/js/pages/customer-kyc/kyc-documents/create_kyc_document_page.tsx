@@ -1,12 +1,15 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import { CheckCheck, Loader2 } from 'lucide-react';
+import { route } from 'ziggy-js';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 
 export default function Create() {
+    const { customer, flash } = usePage().props as any;
+
     const { data, setData, post, processing } = useForm({
-        customer_id: '',
+        customer_id: customer.id,
         document_type: '',
         file: null as File | null,
     });
@@ -18,7 +21,7 @@ export default function Create() {
         formData.append('document_type', data.document_type);
         if (data.file) formData.append('file', data.file);
 
-        post('/kyc-documents', { data: formData });
+        post(route('kyc-documents.store'), { data: formData });
     };
 
     return (
@@ -30,11 +33,13 @@ export default function Create() {
                 className="space-y-4 rounded-md border bg-card p-6"
             >
                 <Input
+                    value={data.customer_id}
                     placeholder="Customer ID"
                     onChange={(e) => setData('customer_id', e.target.value)}
                 />
 
                 <select
+                    value={data.document_type}
                     onChange={(e) => setData('document_type', e.target.value)}
                 >
                     <option>NID_FRONT</option>

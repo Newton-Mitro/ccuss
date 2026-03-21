@@ -265,7 +265,7 @@
 .dark.theme-brown {
     --background: oklch(0.05 0.03 40);
     --foreground: oklch(0.98 0.01 40);
-    --primary: oklch(11.813% 0.03195 23.316);
+    --primary: oklch(14.825% 0.04522 24.506);
     --accent: oklch(36.077% 0.07316 21.331);
 
     --sidebar: oklch(0.08 0.03 40);
