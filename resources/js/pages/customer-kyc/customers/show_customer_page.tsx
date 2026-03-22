@@ -33,6 +33,8 @@ export default function Show({ customer }: ShowProps) {
         { title: customer.name, href: '' },
     ];
 
+    console.log(customer);
+
     const isIndividual = customer.type === 'INDIVIDUAL';
     const isOrganization = customer.type === 'ORGANIZATION';
 
@@ -338,7 +340,7 @@ export default function Show({ customer }: ShowProps) {
                 }
             >
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
-                    {customer.family_relations.map((rel) => (
+                    {customer.family_relations?.map((rel) => (
                         <DataCard
                             key={rel.id}
                             onShow={() => {
@@ -378,6 +380,43 @@ export default function Show({ customer }: ShowProps) {
                                             onClick={(e) => e.stopPropagation()}
                                         >
                                             {`${rel.relative?.name} • ${rel.relative?.customer_no}`}
+                                        </Link>
+                                    </div>
+
+                                    <div className="flex gap-2">
+                                        <span>{rel.relation_type}</span>
+
+                                        <Badge text={rel.verification_status} />
+                                    </div>
+                                </div>
+                            </div>
+                        </DataCard>
+                    ))}
+                    {customer.related_to_me?.map((rel) => (
+                        <DataCard key={rel.customer.id}>
+                            <div className="flex items-center gap-2">
+                                {rel.customer?.photo?.url ? (
+                                    <img
+                                        src={rel.customer.photo.url}
+                                        className="h-10 w-10 rounded-full"
+                                    />
+                                ) : (
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-xs">
+                                        {rel.customer?.name?.charAt(0)}
+                                    </div>
+                                )}
+
+                                <div className="flex flex-col text-xs">
+                                    <div className="text-sm font-medium">
+                                        <Link
+                                            href={route(
+                                                'customers.show',
+                                                rel.customer?.id,
+                                            )}
+                                            className="cursor-pointer text-sm font-semibold hover:underline"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            {`${rel.customer?.name} • ${rel.customer?.customer_no}`}
                                         </Link>
                                     </div>
 

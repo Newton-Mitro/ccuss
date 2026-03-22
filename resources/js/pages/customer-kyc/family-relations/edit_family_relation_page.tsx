@@ -98,13 +98,12 @@ const Edit = () => {
                         </div>
 
                         <div className="flex-1 space-y-1">
-                            <a
+                            <Link
                                 href={route('customers.show', customer.id)}
-                                target="_blank"
-                                className="text-sm font-semibold underline"
+                                className="text-sm font-semibold text-info underline"
                             >
                                 {customer.name} • {customer.customer_no}
-                            </a>
+                            </Link>
 
                             <p className="text-xs text-muted-foreground">
                                 {customer.kyc_status} • {customer.type}

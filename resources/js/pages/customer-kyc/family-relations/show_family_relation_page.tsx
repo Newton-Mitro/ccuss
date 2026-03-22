@@ -330,7 +330,11 @@ function Avatar({ name, photo }: { name?: string; photo?: string }) {
 function CustomerDetails({ customer }: { customer?: any }) {
     return (
         <div className="flex-1 space-y-1">
-            <p className="text-sm font-medium">{customer?.name || '—'}</p>
+            <p className="text-sm font-medium text-info underline">
+                <Link href={route('customers.show', customer?.id)}>
+                    {customer?.name || '—'}{' '}
+                </Link>
+            </p>
             <p className="text-xs text-muted-foreground">
                 {customer?.type} • {customer?.kyc_status}
             </p>

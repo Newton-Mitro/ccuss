@@ -70,6 +70,7 @@ export interface Customer extends AuditFields {
     // Relations
     addresses?: CustomerAddress[];
     family_relations?: CustomerFamilyRelation[];
+    related_to_me?: CustomerFamilyRelation[];
     introducers?: CustomerIntroducer[];
     introduced_customers?: CustomerIntroducer[];
     online_service_client?: User | null;

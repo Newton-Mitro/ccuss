@@ -98,15 +98,13 @@ const Create = () => {
                         {/* Info */}
                         <div className="flex-1 space-y-1">
                             <div>
-                                <a
+                                <Link
                                     href={route('customers.show', customer.id)}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="cursor-pointer text-sm font-semibold underline"
+                                    className="cursor-pointer text-sm font-semibold text-info underline"
                                     onClick={(e) => e.stopPropagation()}
                                 >
                                     {`${customer.name} • ${customer.customer_no}`}
-                                </a>
+                                </Link>
                                 <p className="text-xs text-muted-foreground">
                                     {customer.kyc_status} • {customer.type}
                                 </p>

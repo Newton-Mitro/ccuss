@@ -132,7 +132,7 @@ class CustomerController extends Controller
         })->exists();
 
         if ($exists) {
-            return back()->withInput()->with('error', 'Duplicate customer detected.');
+            return back()->withInput()->with('error', 'Duplicate customer detected. (ID, Email, Phone) already exists.');
         }
 
         $customer = null; // ✅ declare outside
