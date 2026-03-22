@@ -24,8 +24,8 @@ function VoucherHeaderSection({
 }: VoucherHeaderSectionProps) {
     return (
         <div className="rounded-md border bg-card md:col-span-6">
-            <div className="bg-muted/30 sticky top-0 z-10 flex items-center justify-between border-b px-4 py-3">
-                <h2 className="text-sm font-medium text-primary">
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-muted/30 px-4 py-3">
+                <h2 className="text-sm font-medium text-primary-foreground">
                     Voucher Header
                 </h2>
                 <span className="text-xs text-muted-foreground">

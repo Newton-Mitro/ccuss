@@ -76,7 +76,7 @@ function WithdrawalLedgerSection({
         <div className="flex flex-col gap-3 rounded-xl border bg-destructive/5 px-4">
             {/* Header */}
             <div className="">
-                <h2 className="pt-3 pb-2 text-base font-semibold text-muted-foreground">
+                <h2 className="pt-3 pb-2 text-base font-semibold text-primary-foreground">
                     Cash Payment
                 </h2>
                 <CustomerSearchBox onSelect={onCustomerSelect} />

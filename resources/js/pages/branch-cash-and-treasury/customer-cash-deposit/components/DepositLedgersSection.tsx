@@ -46,7 +46,7 @@ function DepositLedgersSection({
         <div className="flex flex-col gap-4 rounded-md border bg-muted/30 p-4">
             {/* Header */}
             <div className="space-y-4">
-                <h2 className="text-sm font-medium text-primary">
+                <h2 className="text-sm font-medium text-primary-foreground">
                     Cash Receipt
                 </h2>
 

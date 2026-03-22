@@ -53,8 +53,8 @@ function VoucherQueueSection({
         <div className="flex flex-col gap-4 bg-card">
             <div className="flex h-[calc(100vh/2-42px)] flex-col overflow-hidden rounded-md border">
                 {/* Header */}
-                <div className="bg-muted/30 sticky top-0 z-10 flex items-center justify-between border-b px-4 py-3">
-                    <h2 className="text-sm font-medium text-primary">
+                <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-muted/30 px-4 py-3">
+                    <h2 className="text-sm font-medium text-primary-foreground">
                         Voucher Queue
                     </h2>
                     <span className="text-xs text-muted-foreground">
@@ -75,7 +75,7 @@ function VoucherQueueSection({
                         return (
                             <div
                                 key={voucher.id}
-                                className="odd:bg-primary/10 even:bg-accent/10 hover:bg-muted/40 grid grid-cols-[2fr_1fr_1fr_auto] items-center gap-3 bg-background px-3 py-1 transition"
+                                className="grid grid-cols-[2fr_1fr_1fr_auto] items-center gap-3 bg-background px-3 py-1 transition odd:bg-primary/10 even:bg-accent/10 hover:bg-muted/40"
                             >
                                 {/* Info */}
                                 <div className="min-w-0">
@@ -157,20 +157,20 @@ function VoucherQueueSection({
                 </div>
 
                 {/* Footer */}
-                <div className="bg-background/95 supports-[backdrop-filter]:bg-background/80 sticky bottom-0 z-20 border-t backdrop-blur">
+                <div className="sticky bottom-0 z-20 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
                     <div className="flex items-center justify-between gap-4 px-4 py-2">
                         {/* 🔹 Left Section — Totals */}
                         <div className="flex flex-col items-center gap-1 text-sm">
                             {/* Pending */}
                             <div className="flex items-center gap-2 rounded-full bg-amber-100 px-3 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">
-                                <span className="text-xs font-medium uppercase tracking-wide">
+                                <span className="text-xs font-medium tracking-wide uppercase">
                                     {`Pending ${formatBDTCurrency(pendingAmount)}`}
                                 </span>
                             </div>
 
                             {/* Posted */}
                             <div className="flex items-center gap-2 rounded-full bg-emerald-100 px-3 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
-                                <span className="text-xs font-medium uppercase tracking-wide">
+                                <span className="text-xs font-medium tracking-wide uppercase">
                                     {`Posted ${formatBDTCurrency(postedAmount)}`}
                                 </span>
                             </div>

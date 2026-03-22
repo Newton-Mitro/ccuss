@@ -27,7 +27,9 @@ function CashLedgerSection({
     return (
         <div className="rounded-md border bg-card">
             <div className="flex items-center justify-between border-b bg-destructive/5 px-4 py-3">
-                <h2 className="text-sm font-medium">Cash Ledger</h2>
+                <h2 className="text-sm font-medium text-primary-foreground">
+                    Cash Ledger
+                </h2>
             </div>
 
             <div className="grid grid-cols-1 gap-x-3 p-3 md:grid-cols-2">
