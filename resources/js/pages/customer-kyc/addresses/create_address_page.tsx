@@ -37,7 +37,7 @@ const Create = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('addresses.create', customer.id), {
+        post(route('addresses.store'), {
             preserveScroll: true,
             onError: (e) => toast.error(JSON.stringify(e)),
         });

@@ -135,7 +135,9 @@ class CustomerController extends Controller
             return back()->withInput()->with('error', 'Duplicate customer detected.');
         }
 
-        DB::transaction(function () use ($request, $data) {
+        $customer = null; // ✅ declare outside
+
+        DB::transaction(function () use ($request, $data, &$customer) {
 
             $typePrefix = $data['type'] === 'INDIVIDUAL' ? 'IND' : 'ORG';
 
@@ -164,7 +166,6 @@ class CustomerController extends Controller
             if ($request->hasFile('photo')) {
 
                 $file = $request->file('photo');
-
                 $path = $file->store('customers/' . $customer->id, 'public');
 
                 $customer->kycDocuments()->create([
@@ -178,7 +179,7 @@ class CustomerController extends Controller
             }
         });
 
-        return redirect()->route('customers.index')
+        return redirect()->route('customers.show', $customer->id)
             ->with('success', 'Customer created successfully.');
     }
 

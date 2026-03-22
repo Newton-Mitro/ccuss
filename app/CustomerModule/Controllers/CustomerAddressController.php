@@ -34,7 +34,7 @@ class CustomerAddressController extends Controller
     public function edit(CustomerAddress $address): Response
     {
         return Inertia::render('customer-kyc/addresses/edit_address_page', [
-            'address' => $address,
+            'address' => $address->load('customer', 'customer.photo'),
         ]);
     }
 
@@ -81,12 +81,12 @@ class CustomerAddressController extends Controller
             ->with('success', 'Address updated successfully.');
     }
 
-    public function destroy(CustomerAddress $address): JsonResponse
+    public function destroy(CustomerAddress $address)
     {
         $address->delete();
 
-        return response()->json([
-            'message' => 'Address deleted successfully.',
+        return redirect()->back()->with([
+            'success' => 'Address deleted successfully.',
         ]);
     }
 }

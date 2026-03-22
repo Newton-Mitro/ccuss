@@ -55,7 +55,7 @@ class KycDocumentController extends Controller
     public function create(Customer $customer)
     {
         return Inertia::render('customer-kyc/kyc-documents/create_kyc_document_page', [
-            'customer' => $customer->load('photo'),
+            'customer' => $customer->load(['photo']),
         ]);
     }
 
@@ -69,7 +69,7 @@ class KycDocumentController extends Controller
         ]);
 
         $file = $request->file('file');
-        $path = $file->store('kyc_documents');
+        $path = $file->store('customers/' . $request->customer_id, 'public');
 
         KycDocument::create([
             'customer_id' => $request->customer_id,
@@ -80,7 +80,9 @@ class KycDocumentController extends Controller
             'alt_text' => $request->alt_text,
         ]);
 
-        return redirect()->route('kyc-documents.index')->with('success', 'KYC document uploaded successfully.');
+        return redirect()
+            ->route('customers.show', $request->customer_id)
+            ->with('success', 'KYC document added successfully.');
     }
 
     public function edit(KycDocument $kycDocument)
@@ -97,29 +99,13 @@ class KycDocumentController extends Controller
         ]);
     }
 
-    public function update(Request $request, KycDocument $kycDocument)
-    {
-        $request->validate([
-            'verification_status' => 'nullable|in:PENDING,VERIFIED,REJECTED',
-            'verified_by' => 'nullable|exists:users,id',
-            'remarks' => 'nullable|string',
-        ]);
-
-        $kycDocument->update($request->only(['verification_status', 'verified_by', 'remarks']));
-
-        if ($request->verification_status === 'VERIFIED') {
-            $kycDocument->verified_at = now();
-            $kycDocument->save();
-        }
-
-        return redirect()->route('kyc-documents.index')->with('success', 'KYC document updated.');
-    }
-
     public function destroy(KycDocument $kycDocument)
     {
         Storage::delete($kycDocument->file_path);
         $kycDocument->delete();
 
-        return redirect()->route('kyc-documents.index')->with('success', 'Document deleted successfully.');
+        return redirect()->back()->with([
+            'success' => 'KYC document deleted successfully.',
+        ]);
     }
 }

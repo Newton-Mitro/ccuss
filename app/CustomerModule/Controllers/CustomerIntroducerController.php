@@ -95,7 +95,12 @@ class CustomerIntroducerController extends Controller
         return Inertia::render(
             'customer-kyc/introducers/edit_introducer_page',
             [
-                'introducer' => $introducer,
+                'introducer' => $introducer->load([
+                    'introducedCustomer',
+                    'introducedCustomer.photo',
+                    'introducer',
+                    'introducer.photo',
+                ]),
             ]
         );
     }
@@ -104,15 +109,18 @@ class CustomerIntroducerController extends Controller
     {
         $data = $request->validate([
             'introduced_customer_id' => ['required', 'exists:customers,id'],
+
             'introducer_customer_id' => [
                 'required',
                 'exists:customers,id',
-                Rule::different('introduced_customer_id'),
+                'different:introduced_customer_id', // ✅ FIXED
             ],
+
             'relationship_type' => [
                 'required',
                 Rule::in(['FAMILY', 'FRIEND', 'BUSINESS', 'COLLEAGUE', 'OTHER']),
             ],
+
             'remarks' => ['nullable', 'string'],
         ]);
 
@@ -190,13 +198,11 @@ class CustomerIntroducerController extends Controller
         ]);
     }
 
-    public function destroy(
-        CustomerIntroducer $introducer
-    ): JsonResponse {
+    public function destroy(CustomerIntroducer $introducer)
+    {
         $introducer->delete();
-
-        return response()->json([
-            'message' => 'Introducer deleted successfully.',
+        return redirect()->back()->with([
+            'success' => 'Introducer deleted successfully.',
         ]);
     }
 }

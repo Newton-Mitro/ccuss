@@ -498,7 +498,29 @@ export default function CustomAuthLayout({
 
                 <main className="flex-1 overflow-auto p-6">
                     {children}
-                    <Toaster position="top-center" />
+                    <Toaster
+                        position="top-center"
+                        toastOptions={{
+                            style: {
+                                background: 'var(--accent)',
+                                color: 'var(--accent-foreground)',
+                            },
+                            className:
+                                'rounded-xl shadow-lg text-accent-foreground bg-accent',
+                            success: {
+                                style: {
+                                    background: 'var(--card)',
+                                    color: 'var(--card-foreground)',
+                                },
+                            },
+                            error: {
+                                style: {
+                                    background: 'var(--card)',
+                                    color: 'var(--card-foreground)',
+                                },
+                            },
+                        }}
+                    />
                 </main>
             </div>
         </div>

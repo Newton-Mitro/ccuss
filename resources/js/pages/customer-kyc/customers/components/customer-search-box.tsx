@@ -8,16 +8,18 @@ import { Customer } from '../../../../types/customer_kyc_module';
 interface CustomerSearchBoxProps {
     onSelect: (customer: Customer) => void;
     label?: string;
+    selectedCustomer?: Customer;
     placeholder?: string;
 }
 
 export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
     onSelect,
     label,
+    selectedCustomer,
     placeholder = 'Search Customer',
 }) => {
     const [customers, setCustomers] = useState<Customer[]>([]);
-    const [customer, setCustomer] = useState<Customer | null>(null);
+    const [customer, setCustomer] = useState<Customer | null>(selectedCustomer);
     const [showDropdown, setShowDropdown] = useState(false);
     const [loading, setLoading] = useState(false);
     const [query, setQuery] = useState('');

@@ -1,6 +1,5 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import {
-    ArrowLeft,
     Edit2,
     FileText,
     HomeIcon,
@@ -12,9 +11,11 @@ import {
     UsersIcon,
     X,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import { UserInfo } from '../../../components/user-info';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { appSwal } from '../../../lib/appSwal';
 import { formatDate } from '../../../lib/date_util';
 import kycDocumentStatusConfig from '../../../lib/kycDocumentStatusConfig';
 import statusConfig, { Status } from '../../../lib/statusConfig';
@@ -26,11 +27,6 @@ interface ShowProps {
 }
 
 export default function Show({ customer }: ShowProps) {
-    console.log(customer);
-    const handleBack = () => window.history.back();
-
-    console.log(customer);
-
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customers', href: route('customers.index') },
         { title: customer.name, href: '' },
@@ -38,6 +34,114 @@ export default function Show({ customer }: ShowProps) {
 
     const isIndividual = customer.type === 'INDIVIDUAL';
     const isOrganization = customer.type === 'ORGANIZATION';
+
+    const handleDeleteCustomerAddress = (id: number) => {
+        appSwal
+            .fire({
+                title: 'Are you sure?',
+                text: `Customer address will be permanently deleted!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    router.delete(route('addresses.destroy', id), {
+                        preserveScroll: true,
+                        preserveState: true,
+                        onSuccess: () =>
+                            toast.success(
+                                `Customer address deleted successfully!`,
+                            ),
+                        onError: () =>
+                            toast.error(
+                                'Failed to delete the customer address.',
+                            ),
+                    });
+                }
+            });
+    };
+
+    const handleDeleteCustomerFamilyRelation = (id: number) => {
+        appSwal
+            .fire({
+                title: 'Are you sure?',
+                text: `Customer family relation will be permanently deleted!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    router.delete(route('family-relations.destroy', id), {
+                        preserveScroll: true,
+                        preserveState: true,
+                        onSuccess: () =>
+                            toast.success(
+                                `Customer family relation deleted successfully!`,
+                            ),
+                        onError: () =>
+                            toast.error(
+                                'Failed to delete the customer family relation.',
+                            ),
+                    });
+                }
+            });
+    };
+
+    const handleDeleteCustomerIntroducer = (id: number) => {
+        appSwal
+            .fire({
+                title: 'Are you sure?',
+                text: `Customer introducer will be permanently deleted!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    router.delete(route('introducers.destroy', id), {
+                        preserveScroll: true,
+                        preserveState: true,
+                        onSuccess: () =>
+                            toast.success(
+                                `Customer introducer deleted successfully!`,
+                            ),
+                        onError: () =>
+                            toast.error(
+                                'Failed to delete the customer introducer.',
+                            ),
+                    });
+                }
+            });
+    };
+
+    const handleDeleteCustomerKycDocument = (id: number) => {
+        appSwal
+            .fire({
+                title: 'Are you sure?',
+                text: `Customer kyc document will be permanently deleted!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    router.delete(route('kyc-documents.destroy', id), {
+                        preserveScroll: true,
+                        preserveState: true,
+                        onSuccess: () =>
+                            toast.success(
+                                `Customer kyc document deleted successfully!`,
+                            ),
+                        onError: () =>
+                            toast.error(
+                                'Failed to delete the customer kyc document.',
+                            ),
+                    });
+                }
+            });
+    };
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
@@ -54,7 +158,7 @@ export default function Show({ customer }: ShowProps) {
                             className="h-20 w-20 rounded-full border object-cover"
                         />
                     ) : (
-                        <div className="flex h-20 w-20 items-center justify-center rounded-full border bg-gray-100 text-lg font-semibold">
+                        <div className="flex h-20 w-20 items-center justify-center rounded-full border bg-card text-lg font-semibold text-card-foreground">
                             {customer.name.charAt(0)}
                         </div>
                     )}
@@ -75,14 +179,6 @@ export default function Show({ customer }: ShowProps) {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                    <ActionButton
-                        onClick={handleBack}
-                        color="muted"
-                        icon={<ArrowLeft />}
-                    >
-                        Back
-                    </ActionButton>
-
                     <ActionButton
                         as={Link}
                         href="/customers"
@@ -204,18 +300,21 @@ export default function Show({ customer }: ShowProps) {
                     {customer.addresses.map((addr) => (
                         <DataCard
                             key={addr.id}
-                            onEdit={() => {}}
-                            onDelete={() => {}}
+                            onEdit={() => {
+                                router.visit(
+                                    route('addresses.edit', [addr.id]),
+                                );
+                            }}
+                            onDelete={() => {
+                                handleDeleteCustomerAddress(addr.id);
+                            }}
                         >
                             <div className="text-sm font-semibold">
                                 {addr.type}
                             </div>
 
                             <div className="text-xs opacity-80">
-                                {addr.line1}, {addr.district}
-                            </div>
-
-                            <div className="text-[10px] opacity-70">
+                                {addr.line1}, {addr.line2}, {addr.district},{' '}
                                 {addr.division}, {addr.postal_code}
                             </div>
                         </DataCard>
@@ -241,8 +340,14 @@ export default function Show({ customer }: ShowProps) {
                     {customer.family_relations.map((rel) => (
                         <DataCard
                             key={rel.id}
-                            onEdit={() => {}}
-                            onDelete={() => {}}
+                            onEdit={() => {
+                                router.visit(
+                                    route('family-relations.edit', [rel.id]),
+                                );
+                            }}
+                            onDelete={() => {
+                                handleDeleteCustomerFamilyRelation(rel.id);
+                            }}
                         >
                             <div className="flex items-center gap-2">
                                 {rel.relative?.photo?.url ? (
@@ -300,8 +405,14 @@ export default function Show({ customer }: ShowProps) {
                     {customer.introducers.map((intro) => (
                         <DataCard
                             key={intro.id}
-                            onEdit={() => {}}
-                            onDelete={() => {}}
+                            onEdit={() => {
+                                router.visit(
+                                    route('introducers.edit', [intro.id]),
+                                );
+                            }}
+                            onDelete={() => {
+                                handleDeleteCustomerIntroducer(intro.id);
+                            }}
                         >
                             <div className="flex items-center gap-2">
                                 {intro.introducer?.photo?.url ? (
@@ -358,7 +469,12 @@ export default function Show({ customer }: ShowProps) {
             >
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
                     {customer.kyc_documents.map((doc) => (
-                        <DataCard key={doc.id} onDelete={() => {}}>
+                        <DataCard
+                            key={doc.id}
+                            onDelete={() => {
+                                handleDeleteCustomerKycDocument(doc.id);
+                            }}
+                        >
                             <div className="flex items-center gap-2">
                                 <VerificationStatus
                                     status={doc.verification_status}

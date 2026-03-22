@@ -270,29 +270,11 @@ export default function CustomAuthLayoutX({
                     {children}
                     <Toaster
                         position="top-center"
-                        reverseOrder={false}
-                        gutter={8}
-                        containerClassName=""
-                        containerStyle={{}}
-                        toasterId="default"
                         toastOptions={{
-                            // Define default options
-                            className: '',
-                            duration: 5000,
-                            removeDelay: 1000,
-                            style: {
-                                background: '#363636',
-                                color: '#fff',
-                            },
-
-                            // Default options for specific types
-                            success: {
-                                duration: 3000,
-                                iconTheme: {
-                                    primary: 'green',
-                                    secondary: 'black',
-                                },
-                            },
+                            className:
+                                'rounded-xl shadow-lg text-card-foreground bg-card',
+                            success: { className: 'bg-green-500 text-white' },
+                            error: { className: 'bg-red-500 text-white' },
                         }}
                     />
                 </main>

@@ -72,7 +72,7 @@ class CustomerFamilyRelationController extends Controller
     public function edit(CustomerFamilyRelation $familyRelation): Response
     {
         return Inertia::render('customer-kyc/family-relations/edit_family_relation_page', [
-            'familyRelation' => $familyRelation,
+            'family_relation' => $familyRelation->load('customer', 'customer.photo', 'relative', 'relative.photo'),
         ]);
     }
 
@@ -108,18 +108,18 @@ class CustomerFamilyRelationController extends Controller
     ) {
         $data = $request->validated();
 
-        $exists = CustomerFamilyRelation::where(function ($q) use ($data) {
-            $q->where('customer_id', $data['customer_id'])
-                ->where('relative_id', $data['relative_id']);
-        })
-            ->where('id', '!=', $familyRelation->id)
-            ->exists();
+        // $exists = CustomerFamilyRelation::where(function ($q) use ($data) {
+        //     $q->where('customer_id', $data['customer_id'])
+        //         ->where('relative_id', $data['relative_id']);
+        // })
+        //     ->where('id', '!=', $familyRelation->id)
+        //     ->exists();
 
-        if ($exists) {
-            return response()->json([
-                'error' => 'This family relation already exists.',
-            ], 422);
-        }
+        // if ($exists) {
+        //     return response()->json([
+        //         'error' => 'This family relation already exists.',
+        //     ], 422);
+        // }
 
         $familyRelation->update($data);
 
@@ -128,12 +128,12 @@ class CustomerFamilyRelationController extends Controller
             ->with('success', 'Family relation updated successfully.');
     }
 
-    public function destroy(CustomerFamilyRelation $familyRelation): JsonResponse
+    public function destroy(CustomerFamilyRelation $familyRelation)
     {
         $familyRelation->delete();
 
-        return response()->json([
-            'message' => 'Family relation deleted successfully.',
+        return redirect()->back()->with([
+            'success' => 'Family relation deleted successfully.',
         ]);
     }
 }

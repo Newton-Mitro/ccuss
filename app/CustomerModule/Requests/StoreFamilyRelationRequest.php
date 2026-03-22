@@ -3,12 +3,12 @@
 namespace App\CustomerModule\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreFamilyRelationRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Adjust if you have authorization logic
         return true;
     }
 
@@ -20,32 +20,37 @@ class StoreFamilyRelationRequest extends FormRequest
             'SON',
             'DAUGHTER',
             'BROTHER',
-            'COUSIN_BROTHER',
-            'COUSIN_SISTER',
             'SISTER',
             'HUSBAND',
             'WIFE',
             'GRANDFATHER',
             'GRANDMOTHER',
-            'GRANDSON',
-            'GRANDDAUGHTER',
             'UNCLE',
             'AUNT',
             'NEPHEW',
             'NIECE',
-            'FATHER-IN-LAW',
-            'MOTHER-IN-LAW',
-            'SON-IN-LAW',
-            'DAUGHTER-IN-LAW',
-            'BROTHER-IN-LAW',
-            'SISTER-IN-LAW',
+            'FATHER_IN_LAW',
+            'MOTHER_IN_LAW',
+            'SON_IN_LAW',
+            'DAUGHTER_IN_LAW',
+            'BROTHER_IN_LAW',
+            'SISTER_IN_LAW',
         ];
 
         return [
             'customer_id' => ['required', 'exists:customers,id'],
-            'relative_id' => ['required', 'exists:customers,id', 'different:customer_id'],
-            'relation_type' => ['required', 'in:' . implode(',', $relations)],
-            'reverse_relation_type' => ['required', 'in:' . implode(',', $relations)],
+
+            'relative_id' => [
+                'required',
+                'exists:customers,id',
+                'different:customer_id',
+
+                // ✅ Prevent duplicate (same as DB constraint)
+                Rule::unique('customer_family_relations')
+                    ->where(fn($q) => $q->where('customer_id', $this->customer_id))
+            ],
+
+            'relation_type' => ['required', Rule::in($relations)],
         ];
     }
 
@@ -53,6 +58,7 @@ class StoreFamilyRelationRequest extends FormRequest
     {
         return [
             'relative_id.different' => 'Customer and relative must be different.',
+            'relative_id.unique' => 'This relation already exists.',
         ];
     }
 }
