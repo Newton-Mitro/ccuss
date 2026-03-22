@@ -6,14 +6,16 @@ import {
     UserIcon,
     XCircle,
 } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
+import InputError from '../../../components/input-error';
 import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
 import { Card, CardContent } from '../../../components/ui/card';
+import { Input } from '../../../components/ui/input';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatDateTime } from '../../../lib/date_util';
 import { BreadcrumbItem, SharedData } from '../../../types';
@@ -24,7 +26,8 @@ export default function ShowIntroducer() {
         SharedData & { introducer_request: CustomerIntroducer; flash?: any }
     >();
 
-    const { introducer_request, flash } = props;
+    const { introducer_request, flash, errors } = props;
+    const [rejection_reason, setReasonForRejection] = useState('');
 
     useEffect(() => {
         if (flash?.error) toast.error(flash.error);
@@ -247,6 +250,19 @@ export default function ShowIntroducer() {
                     {/* ACTIONS */}
                     {introducer_request.verification_status === 'PENDING' && (
                         <div className="flex gap-2 rounded-md border bg-card p-4">
+                            <div className="">
+                                <Input
+                                    type="text"
+                                    placeholder="Action Reason"
+                                    value={rejection_reason}
+                                    onChange={(e) =>
+                                        setReasonForRejection(e.target.value)
+                                    }
+                                />
+                                <InputError
+                                    message={errors?.rejection_reason}
+                                />
+                            </div>
                             <Button
                                 onClick={handleApprove}
                                 className="bg-success text-success-foreground hover:bg-success/90"

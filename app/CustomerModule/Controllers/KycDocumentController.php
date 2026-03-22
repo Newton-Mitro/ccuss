@@ -108,4 +108,40 @@ class KycDocumentController extends Controller
             'success' => 'KYC document deleted successfully.',
         ]);
     }
+
+    public function approve(KycDocument $kycDocument)
+    {
+        if ($kycDocument->verification_status === 'VERIFIED') {
+            return redirect()->back()->with('info', 'Already verified.');
+        }
+
+        $kycDocument->update([
+            'verification_status' => 'VERIFIED',
+            'verified_at' => now(),
+            'verified_by' => auth()->id(),
+            'rejection_reason' => null, // reset if previously rejected
+        ]);
+
+        return redirect()->back()->with('success', 'Family relation verified successfully.');
+    }
+
+    public function reject(Request $request, KycDocument $kycDocument)
+    {
+        $request->validate([
+            'rejection_reason' => ['required', 'string', 'max:500'],
+        ]);
+
+        if ($kycDocument->verification_status === 'REJECTED') {
+            return redirect()->back()->with('info', 'Already rejected.');
+        }
+
+        $kycDocument->update([
+            'verification_status' => 'REJECTED',
+            'verified_at' => now(),
+            'verified_by' => auth()->id(),
+            'rejection_reason' => $request->rejection_reason,
+        ]);
+
+        return redirect()->back()->with('success', 'Family relation rejected successfully.');
+    }
 }

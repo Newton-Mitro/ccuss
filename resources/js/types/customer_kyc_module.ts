@@ -162,7 +162,7 @@ export interface CustomerFamilyRelation extends AuditFields {
 
     verification_status: VerificationStatus;
     verified_by?: ID | null;
-    verified_by_user?: User | null;
+    verifier?: User | null;
     verified_at?: Timestamp | null;
     remarks?: string | null;
 }

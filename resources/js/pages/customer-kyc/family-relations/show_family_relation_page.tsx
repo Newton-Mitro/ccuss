@@ -6,14 +6,16 @@ import {
     UserIcon,
     XCircle,
 } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
+import InputError from '../../../components/input-error';
 import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
 import { Card, CardContent } from '../../../components/ui/card';
+import { Input } from '../../../components/ui/input';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatDateTime } from '../../../lib/date_util';
 import { BreadcrumbItem, SharedData } from '../../../types';
@@ -24,7 +26,9 @@ export default function ShowFamilyRelation() {
         SharedData & { familyRelation: CustomerFamilyRelation; flash?: any }
     >();
 
-    const { familyRelation, flash } = props;
+    const { familyRelation, flash, errors } = props;
+
+    console.log(familyRelation);
 
     useEffect(() => {
         if (flash?.error) toast.error(flash.error);
@@ -32,6 +36,8 @@ export default function ShowFamilyRelation() {
     }, [flash]);
 
     const handleBack = () => window.history.back();
+
+    const [rejection_reason, setReasonForRejection] = useState('');
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Family Relations', href: route('family-relations.index') },
@@ -78,13 +84,24 @@ export default function ShowFamilyRelation() {
     const handleReject = () => {
         router.post(
             route('family-relations.reject', familyRelation.id),
-            {},
             {
-                onSuccess: () => toast.success('Relation rejected'),
+                rejection_reason,
+            },
+            {
+                onSuccess: () => {
+                    toast.success('Relation rejected');
+                    setReasonForRejection('');
+                },
+                onError: (errors) => {
+                    if (errors.rejection_reason) {
+                        toast.error(errors.rejection_reason);
+                    } else {
+                        toast.error('Validation failed');
+                    }
+                },
             },
         );
     };
-
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Family Relation #${familyRelation.id}`} />
@@ -206,7 +223,7 @@ export default function ShowFamilyRelation() {
                                 Verified By
                             </p>
                             <p className="text-sm">
-                                {familyRelation.verified_by_user?.name ?? '—'}
+                                {familyRelation.verifier?.name ?? '—'}
                             </p>
                         </div>
 
@@ -240,6 +257,23 @@ export default function ShowFamilyRelation() {
                                 {familyRelation.verification_status ===
                                     'PENDING' && (
                                     <>
+                                        <div className="">
+                                            <Input
+                                                type="text"
+                                                placeholder="Action Reason"
+                                                value={rejection_reason}
+                                                onChange={(e) =>
+                                                    setReasonForRejection(
+                                                        e.target.value,
+                                                    )
+                                                }
+                                            />
+                                            <InputError
+                                                message={
+                                                    errors?.rejection_reason
+                                                }
+                                            />
+                                        </div>
                                         <Button
                                             onClick={handleApprove}
                                             className="bg-success text-success-foreground hover:bg-success/90"
@@ -247,6 +281,7 @@ export default function ShowFamilyRelation() {
                                             <CheckCheck className="mr-1 h-4 w-4" />{' '}
                                             Approve
                                         </Button>
+
                                         <Button
                                             onClick={handleReject}
                                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"

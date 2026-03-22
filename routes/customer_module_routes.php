@@ -29,8 +29,8 @@ Route::prefix('family-relations')->name('family-relations.')->group(function () 
     Route::put('/{familyRelation}', [CustomerFamilyRelationController::class, 'update'])->name('update');
     Route::delete('/{familyRelation}', [CustomerFamilyRelationController::class, 'destroy'])->name('destroy');
 
-    Route::post('/family-relations/{familyRelation}/approve', [CustomerFamilyRelationController::class, 'approve'])->name('family-relations.approve');
-    Route::post('/family-relations/{familyRelation}/reject', [CustomerFamilyRelationController::class, 'reject'])->name('family-relations.reject');
+    Route::post('/family-relations/{familyRelation}/approve', [CustomerFamilyRelationController::class, 'approve'])->name('approve');
+    Route::post('/family-relations/{familyRelation}/reject', [CustomerFamilyRelationController::class, 'reject'])->name('reject');
 });
 
 Route::prefix('introducers')->name('introducers.')->group(function () {

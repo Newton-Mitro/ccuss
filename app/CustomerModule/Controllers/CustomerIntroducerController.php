@@ -205,4 +205,40 @@ class CustomerIntroducerController extends Controller
             'success' => 'Introducer deleted successfully.',
         ]);
     }
+
+    public function approve(CustomerIntroducer $introducer)
+    {
+        if ($introducer->verification_status === 'VERIFIED') {
+            return redirect()->back()->with('info', 'Already verified.');
+        }
+
+        $introducer->update([
+            'verification_status' => 'VERIFIED',
+            'verified_at' => now(),
+            'verified_by' => auth()->id(),
+            'rejection_reason' => null, // reset if previously rejected
+        ]);
+
+        return redirect()->back()->with('success', 'Family relation verified successfully.');
+    }
+
+    public function reject(Request $request, CustomerIntroducer $introducer)
+    {
+        $request->validate([
+            'rejection_reason' => ['required', 'string', 'max:500'],
+        ]);
+
+        if ($introducer->verification_status === 'REJECTED') {
+            return redirect()->back()->with('info', 'Already rejected.');
+        }
+
+        $introducer->update([
+            'verification_status' => 'REJECTED',
+            'verified_at' => now(),
+            'verified_by' => auth()->id(),
+            'rejection_reason' => $request->rejection_reason,
+        ]);
+
+        return redirect()->back()->with('success', 'Family relation rejected successfully.');
+    }
 }

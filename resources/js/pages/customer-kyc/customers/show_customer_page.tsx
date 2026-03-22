@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import {
     Edit2,
+    Eye,
     FileText,
     HomeIcon,
     ListFilter,
@@ -340,6 +341,11 @@ export default function Show({ customer }: ShowProps) {
                     {customer.family_relations.map((rel) => (
                         <DataCard
                             key={rel.id}
+                            onShow={() => {
+                                router.visit(
+                                    route('family-relations.show', [rel.id]),
+                                );
+                            }}
                             onEdit={() => {
                                 router.visit(
                                     route('family-relations.edit', [rel.id]),
@@ -405,6 +411,11 @@ export default function Show({ customer }: ShowProps) {
                     {customer.introducers.map((intro) => (
                         <DataCard
                             key={intro.id}
+                            onShow={() => {
+                                router.visit(
+                                    route('introducers.show', [intro.id]),
+                                );
+                            }}
                             onEdit={() => {
                                 router.visit(
                                     route('introducers.edit', [intro.id]),
@@ -471,6 +482,11 @@ export default function Show({ customer }: ShowProps) {
                     {customer.kyc_documents.map((doc) => (
                         <DataCard
                             key={doc.id}
+                            onShow={() => {
+                                router.visit(
+                                    route('kyc-documents.show', [doc.id]),
+                                );
+                            }}
                             onDelete={() => {
                                 handleDeleteCustomerKycDocument(doc.id);
                             }}
@@ -480,13 +496,7 @@ export default function Show({ customer }: ShowProps) {
                                     status={doc.verification_status}
                                 />
                                 <div className="text-sm font-semibold">
-                                    <Link
-                                        href={doc.url}
-                                        className="cursor-pointer text-sm font-semibold hover:underline"
-                                        onClick={(e) => e.stopPropagation()}
-                                    >
-                                        {doc.document_type}
-                                    </Link>
+                                    {doc.document_type}
                                 </div>
                             </div>
                         </DataCard>
@@ -543,17 +553,27 @@ const InfoItem = ({ label, value }: any) => (
 
 const DataCard = ({
     children,
+    onShow,
     onEdit,
     onDelete,
 }: {
     children: React.ReactNode;
+    onShow?: () => void;
     onEdit?: () => void;
     onDelete?: () => void;
 }) => (
     <div className="group relative rounded-md border bg-card p-3 shadow-sm transition hover:shadow-md">
         {/* Edit/Delete buttons */}
-        {(onEdit || onDelete) && (
+        {(onEdit || onDelete || onShow) && (
             <div className="absolute top-1 right-1 flex gap-1 opacity-0 transition group-hover:opacity-100">
+                {onShow && (
+                    <button
+                        onClick={onShow}
+                        className="rounded bg-secondary p-1 text-secondary-foreground hover:bg-secondary/80"
+                    >
+                        <Eye size={14} />
+                    </button>
+                )}
                 {onEdit && (
                     <button
                         onClick={onEdit}
