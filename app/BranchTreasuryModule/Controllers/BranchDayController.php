@@ -7,47 +7,69 @@ use App\BranchTreasuryModule\Models\BranchDay;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Auth;
 
 class BranchDayController extends Controller
 {
-    public function sop()
+    public function index(Request $request)
     {
-        return Inertia::render('branch-cash-and-treasury/sop/branch-cash-management-page');
-    }
+        $query = BranchDay::query()->with('branch');
 
-    public function index()
-    {
-        $branchDay = BranchDay::where('branch_id', auth()->user()->branch_id)
-            ->latest()
-            ->first();
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('business_date', 'like', "%{$search}%")
+                    ->orWhereHas('branch', function ($b) use ($search) {
+                        $b->where('name', 'like', "%{$search}%");
+                    });
+            });
+        }
 
-        return Inertia::render('branch-cash-and-treasury/branch-day/status', [
-            'branch_day' => $branchDay
+        if ($request->filled('branch_id')) {
+            $query->where('branch_id', $request->branch_id);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $branchDays = $query->latest('business_date')
+            ->paginate($request->per_page ?? 10)
+            ->withQueryString();
+
+        return Inertia::render('branch-cash-and-treasury/branch-days/list_branch_day_page', [
+            'branchDays' => $branchDays,
+            'filters' => $request->only([
+                'search',
+                'branch_id',
+                'status',
+                'per_page',
+                'page'
+            ]),
+            'branches' => Branch::select('id', 'name')->get(),
         ]);
     }
 
     public function create()
     {
-        return Inertia::render('branch-cash-and-treasury/branch-day/open', [
+        return Inertia::render('branch-cash-and-treasury/branch-days/open_branch_day_page', [
             'business_date' => now()->toDateString(),
             'branch_id' => auth()->user()->branch_id ?? 1,
             'branches' => Branch::all()
         ]);
     }
 
-    public function open(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'business_date' => 'required|date'
         ]);
 
         $exists = BranchDay::where('branch_id', auth()->user()->branch_id)
-            ->where('status', 'OPEN')
+            ->where('business_date', $request->business_date)
             ->exists();
 
         if ($exists) {
-            return back()->withErrors('Branch day already open');
+            return back()->withErrors('Branch day for this date already exists');
         }
 
         BranchDay::create([
@@ -58,15 +80,11 @@ class BranchDayController extends Controller
             'status' => 'OPEN'
         ]);
 
-        return redirect()->back()->with('success', 'Branch day opened');
+        return redirect()->route('branch-days.index')->with('success', 'Branch day opened');
     }
 
-    public function close()
+    public function closeBranchDay(BranchDay $branchDay)
     {
-        $branchDay = BranchDay::where('branch_id', auth()->user()->branch_id)
-            ->where('status', 'OPEN')
-            ->firstOrFail();
-
         $branchDay->update([
             'closed_at' => now(),
             'closed_by' => auth()->id(),
@@ -76,28 +94,10 @@ class BranchDayController extends Controller
         return back()->with('success', 'Branch day closed');
     }
 
-    public function history(Request $request)
+    public function show(BranchDay $branchDay)
     {
-        $branchId = $request->query('branch_id', Auth::user()->branch_id ?? 1);
-        $fromDate = $request->query('from_date');
-        $toDate = $request->query('to_date');
-
-        $query = BranchDay::where('branch_id', $branchId);
-
-        if ($fromDate) {
-            $query->whereDate('business_date', '>=', $fromDate);
-        }
-        if ($toDate) {
-            $query->whereDate('business_date', '<=', $toDate);
-        }
-
-        $history = $query->orderByDesc('business_date')->get();
-
-        return Inertia::render('branch-cash-and-treasury/branch-day/history', [
-            'history' => $history,
-            'branch_id' => $branchId,
-            'from_date' => $fromDate,
-            'to_date' => $toDate
+        return Inertia::render('branch-cash-and-treasury/branch-days/branch_day_status_page', [
+            'branch_day' => $branchDay
         ]);
     }
 }

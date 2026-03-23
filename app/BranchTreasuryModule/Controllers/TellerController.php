@@ -12,14 +12,31 @@ use Inertia\Response;
 
 class TellerController extends Controller
 {
-    // List page
-    public function index(Request $request): Response
+    public function index(Request $request)
     {
-        $query = Teller::with('branch', 'user');
+        $query = Teller::query()->with('branch');
 
-        if ($search = $request->input('search')) {
-            $query->where('name', 'like', "%{$search}%")
-                ->orWhere('code', 'like', "%{$search}%");
+        // 🔍 Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('code', 'like', "%{$search}%")
+                    ->orWhereHas('branch', function ($b) use ($search) {
+                        $b->where('name', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        // 🏢 Branch Filter
+        if ($request->filled('branch_id')) {
+            $query->where('branch_id', $request->branch_id);
+        }
+
+        // 📊 Status Filter
+        if ($request->filled('status')) {
+            $query->where('is_active', (bool) $request->status);
         }
 
         $tellers = $query->latest()
@@ -28,7 +45,14 @@ class TellerController extends Controller
 
         return Inertia::render('branch-cash-and-treasury/tellers/index', [
             'tellers' => $tellers,
-            'filters' => $request->only(['search', 'per_page', 'page']),
+            'filters' => $request->only([
+                'search',
+                'branch_id',
+                'status',
+                'per_page',
+                'page'
+            ]),
+            'branches' => Branch::select('id', 'name')->get(),
         ]);
     }
 
@@ -98,8 +122,9 @@ class TellerController extends Controller
     // Show
     public function show(Teller $teller)
     {
-        // Optional: redirect to edit or index
-        return redirect()->route('tellers.edit', $teller->id);
+        return Inertia::render('branch-cash-and-treasury/tellers/show_teller_page', [
+            'teller' => $teller->load(['branch', 'user']),
+        ]);
     }
 
     // Delete

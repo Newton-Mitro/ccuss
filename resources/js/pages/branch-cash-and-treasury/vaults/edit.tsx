@@ -22,13 +22,12 @@ interface VaultFormPageProps {
         id: number;
         name: string;
         branch_id: number;
-        total_balance: number;
         is_active: boolean;
     };
     branches: Branch[];
 }
 
-const VaultForm = ({ backUrl, vault, branches }: VaultFormPageProps) => {
+const VaultForm = ({ vault, branches }: VaultFormPageProps) => {
     const { flash } = usePage().props;
 
     useEffect(() => {
@@ -43,7 +42,6 @@ const VaultForm = ({ backUrl, vault, branches }: VaultFormPageProps) => {
     const { data, setData, post, put, processing, errors } = useForm({
         name: vault?.name || '',
         branch_id: vault?.branch_id || '',
-        total_balance: vault?.total_balance || 0,
         is_active: vault?.is_active ?? true,
     });
 
@@ -134,19 +132,6 @@ const VaultForm = ({ backUrl, vault, branches }: VaultFormPageProps) => {
                             placeholder="Select Branch"
                         />
                         <InputError message={errors.branch_id} />
-                    </div>
-
-                    <div>
-                        <Label className="text-xs">Total Balance</Label>
-                        <Input
-                            type="number"
-                            value={data.total_balance}
-                            onChange={(e) =>
-                                setData('total_balance', Number(e.target.value))
-                            }
-                            className="h-8 text-sm"
-                        />
-                        <InputError message={errors.total_balance} />
                     </div>
                 </div>
 

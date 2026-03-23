@@ -12,26 +12,45 @@ class VaultController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Vault::with('branch'); // Include branch relationship
+        $query = Vault::query()->with('branch');
 
-        // ✅ Optional search filter
-        if ($search = $request->input('search')) {
-            $query->where('name', 'like', "%{$search}%")
-                ->orWhereHas('branch', function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%");
-                });
+        // 🔍 Search (FIX: grouped condition to avoid OR breaking filters)
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhereHas('branch', function ($b) use ($search) {
+                        $b->where('name', 'like', "%{$search}%");
+                    });
+            });
         }
 
-        // ✅ Pagination
+        // 🏢 Branch Filter
+        if ($request->filled('branch_id')) {
+            $query->where('branch_id', $request->branch_id);
+        }
+
+        // 📊 Status Filter (Active / Inactive)
+        if ($request->filled('status')) {
+            $query->where('is_active', $request->status);
+        }
+
+        // 📦 Pagination
         $vaults = $query->latest()
-            ->paginate(
-                $request->input('per_page', 10)
-            )
+            ->paginate($request->input('per_page', 10))
             ->withQueryString();
 
         return Inertia::render('branch-cash-and-treasury/vaults/index', [
             'vaults' => $vaults,
-            'filters' => $request->only(['search', 'per_page', 'page']),
+            'filters' => $request->only([
+                'search',
+                'branch_id',
+                'status',
+                'per_page',
+                'page'
+            ]),
+            'branches' => Branch::select('id', 'name')->get(),
         ]);
     }
 
@@ -68,8 +87,9 @@ class VaultController extends Controller
 
     public function show(Vault $vault)
     {
-        // Optional: redirect to edit or index
-        return redirect()->route('vaults.edit', $vault->id);
+        return Inertia::render('branch-cash-and-treasury/vaults/show_vault_page', [
+            'vault' => $vault->load('branch'),
+        ]);
     }
 
     public function update(Request $request, Vault $vault)
@@ -77,7 +97,6 @@ class VaultController extends Controller
         $validated = $request->validate([
             'branch_id' => 'required|exists:branches,id',
             'name' => 'required|string|max:255',
-            'total_balance' => 'required|numeric|min:0',
             'is_active' => 'boolean',
         ]);
 

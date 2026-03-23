@@ -5,7 +5,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
@@ -39,6 +39,8 @@ export default function Index() {
         processing,
     } = useForm({
         search: filters.search || '',
+        branch_id: filters.branch_id || '',
+        status: filters.status || '',
         per_page: Number(filters.per_page) || 10,
         page: Number(filters.page) || 1,
     });
@@ -50,7 +52,7 @@ export default function Index() {
     useEffect(() => {
         const delay = setTimeout(handleSearch, 400);
         return () => clearTimeout(delay);
-    }, [data.search, data.per_page, data.page]);
+    }, [data.search, data.per_page, data.page, data.branch_id, data.status]);
 
     const handleDelete = (id: number, name: string) => {
         appSwal
@@ -113,6 +115,42 @@ export default function Index() {
                         }}
                         className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                     />
+
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                        {/* Branch Filter */}
+                        <select
+                            value={data.branch_id}
+                            onChange={(e) => {
+                                setData('branch_id', e.target.value);
+                                setData('page', 1);
+                            }}
+                            className="h-9 rounded-md border bg-background px-3 text-sm"
+                        >
+                            <option value="">All Branches</option>
+                            {/* You must pass branches from backend */}
+                            {(usePage().props as any).branches?.map(
+                                (b: any) => (
+                                    <option key={b.id} value={b.id}>
+                                        {b.name}
+                                    </option>
+                                ),
+                            )}
+                        </select>
+
+                        {/* Status Filter */}
+                        <select
+                            value={data.status}
+                            onChange={(e) => {
+                                setData('status', e.target.value);
+                                setData('page', 1);
+                            }}
+                            className="h-9 rounded-md border bg-background px-3 text-sm"
+                        >
+                            <option value="">All Status</option>
+                            <option value="1">Active</option>
+                            <option value="0">Inactive</option>
+                        </select>
+                    </div>
                 </div>
 
                 {/* Table */}
@@ -160,6 +198,22 @@ export default function Index() {
                                         <td className="px-2 py-1">
                                             <TooltipProvider>
                                                 <div className="flex space-x-2">
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Link
+                                                                href={route(
+                                                                    'vaults.show',
+                                                                    v.id,
+                                                                )}
+                                                                className="text-gray-500"
+                                                            >
+                                                                <Eye className="h-5 w-5" />
+                                                            </Link>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            View
+                                                        </TooltipContent>
+                                                    </Tooltip>
                                                     {/* Edit */}
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>

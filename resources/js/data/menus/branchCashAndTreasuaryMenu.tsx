@@ -15,10 +15,10 @@ export const branchCashAndTreasuryMenu: SidebarItem[] = [
                 permission: ['vault.list.view'],
             },
             {
-                name: 'Branch Day',
+                name: 'Branch Days',
                 icon: <i className="fa-solid fa-calendar-day" />,
-                path: '/branch-cash/branch-day/status',
-                match_path: 'branch-day/status',
+                path: '/branch-days',
+                match_path: 'branch-days',
                 permission: ['branch_day.view'],
             },
             {

@@ -1,10 +1,11 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import { Button } from '../../../components/ui/button';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { formatDateTime } from '../../../lib/date_util';
+import { formatDate, formatDateTime } from '../../../lib/date_util';
 import { BreadcrumbItem } from '../../../types';
 import { BranchDay } from '../../../types/cash_treasury_module';
 
@@ -24,7 +25,7 @@ export default function BranchDayStatusPage({ branch_day, branch_id }: Props) {
     const handleClose = () => {
         if (!branch_day) return;
         router.post(
-            '/branch-cash/branch-day/close',
+            route('branch-days.close'),
             { branch_day_id: branch_day.id },
             {
                 onSuccess: () =>
@@ -36,8 +37,8 @@ export default function BranchDayStatusPage({ branch_day, branch_id }: Props) {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Branch Day', href: '/branch-cash/branch-day/status' },
-        { title: 'Status', href: '' },
+        { title: 'Branch Days', href: route('branch-days.index') },
+        { title: 'Branch Daty Status', href: '' },
     ];
 
     const StatusBadge = ({ status }: { status: string }) => {
@@ -66,7 +67,7 @@ export default function BranchDayStatusPage({ branch_day, branch_id }: Props) {
                 />
             </div>
 
-            <div className="lg:w-5xl w-full space-y-6 rounded-md border bg-card p-6 sm:p-8">
+            <div className="w-full space-y-6 rounded-md border bg-card p-6 sm:p-8 lg:w-5xl">
                 {!branch_day ? (
                     <div className="space-y-4 text-center">
                         <p className="text-gray-600">
@@ -94,7 +95,7 @@ export default function BranchDayStatusPage({ branch_day, branch_id }: Props) {
                                     Business Date
                                 </p>
                                 <p className="font-medium">
-                                    {formatDateTime(branch_day.business_date)}
+                                    {formatDate(branch_day.business_date)}
                                 </p>
                             </div>
                             <div>

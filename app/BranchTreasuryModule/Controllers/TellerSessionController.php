@@ -2,10 +2,10 @@
 
 namespace App\BranchTreasuryModule\Controllers;
 
-use App\BranchTreasuryModule\Models\BranchDay;
-use App\BranchTreasuryModule\Models\Teller;
-use App\BranchTreasuryModule\Models\TellerSession;
 use App\Http\Controllers\Controller;
+use App\BranchTreasuryModule\Models\TellerSession;
+use App\BranchTreasuryModule\Models\Teller;
+use App\BranchTreasuryModule\Models\BranchDay;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -13,88 +13,128 @@ class TellerSessionController extends Controller
 {
     public function index(Request $request)
     {
-        // Get query params for search and pagination
-        $search = $request->input('search', '');
-        $perPage = $request->input('per_page', 20);
+        $query = TellerSession::query()
+            ->with(['teller', 'branchDay']);
 
-        // Fetch teller sessions for the current branch
-        $sessions = TellerSession::with(['teller', 'branchDay'])
-            ->whereHas('teller', function ($query) {
-                $query->where('branch_id', auth()->user()->branch_id);
-            })
-            ->when($search, function ($query, $search) {
-                // Filter by teller name or branch day
-                $query->whereHas('teller', fn($q) => $q->where('name', 'like', "%{$search}%"))
-                    ->orWhereHas('branchDay', fn($q) => $q->where('business_date', 'like', "%{$search}%"));
-            })
-            ->orderBy('opened_at', 'desc')
-            ->paginate($perPage)
-            ->withQueryString(); // preserve search & pagination query strings
+        // 🔍 Search
+        if ($request->filled('search')) {
+            $search = $request->search;
 
-        return Inertia::render('branch-cash-and-treasury/teller-session/index', [
+            $query->where(function ($q) use ($search) {
+                $q->where('opening_cash', 'like', "%{$search}%")
+                    ->orWhere('closing_cash', 'like', "%{$search}%")
+                    ->orWhere('status', 'like', "%{$search}%")
+
+                    // Search by teller name
+                    ->orWhereHas('teller', function ($t) use ($search) {
+                        $t->where('name', 'like', "%{$search}%");
+                    })
+
+                    // Search by business date
+                    ->orWhereHas('branchDay', function ($b) use ($search) {
+                        $b->where('business_date', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        // 🎯 Status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $sessions = $query
+            ->latest()
+            ->paginate($request->per_page ?? 10)
+            ->withQueryString();
+
+        return Inertia::render('branch-cash-and-treasury/teller-sessions/list_teller_session_page', [
             'sessions' => $sessions,
-            'filters' => [
-                'search' => $search,
-                'per_page' => $perPage,
-            ],
+            'filters' => $request->only([
+                'search',
+                'status',
+                'per_page',
+                'page'
+            ]),
         ]);
     }
 
-    public function create(Request $request)
+    public function create()
     {
-        return Inertia::render('branch-cash-and-treasury/teller-session/open-session', [
+        $user = auth()->user();
+
+        $userTeller = Teller::where('user_id', $user->id)->first();
+
+        return Inertia::render('branch-cash-and-treasury/teller-sessions/open_teller_session_page', [
+            // ✅ Only user's teller (not all)
+            'tellers' => $userTeller ? [$userTeller] : [],
+            'user_teller' => $userTeller ?? null,
+
+            // ✅ Only OPEN branch days (and optionally filter by branch)
+            'branch_days' => BranchDay::where('status', 'OPEN')
+                ->where('branch_id', $user->branch_id) // 🔥 important
+                ->get(['id', 'business_date']),
         ]);
     }
 
-    /**
-     * Open a teller session
-     */
-    public function openSession(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
-            'opening_cash' => 'required|numeric|min:0'
+            'teller_id' => 'required|exists:tellers,id',
+            'branch_day_id' => 'required|exists:branch_days,id',
+            'opening_cash' => 'required|numeric|min:0',
         ]);
 
-        $branchDay = BranchDay::where('branch_id', auth()->user()->branch_id)
+        // 🚫 Prevent multiple OPEN sessions for same teller
+        $exists = TellerSession::where('teller_id', $request->teller_id)
             ->where('status', 'OPEN')
-            ->firstOrFail();
+            ->exists();
 
-        $teller = Teller::where('user_id', auth()->id())->firstOrFail();
+        if ($exists) {
+            return back()->withErrors('Teller already has an open session');
+        }
 
-        $session = TellerSession::create([
-            'teller_id' => $teller->id,
-            'branch_day_id' => $branchDay->id,
+        // 🚫 Ensure branch day is OPEN
+        $branchDay = BranchDay::find($request->branch_day_id);
+        if (!$branchDay || $branchDay->status !== 'OPEN') {
+            return back()->withErrors('Invalid or closed branch day');
+        }
+
+        TellerSession::create([
+            'teller_id' => $request->teller_id,
+            'branch_day_id' => $request->branch_day_id,
             'opening_cash' => $request->opening_cash,
             'opened_at' => now(),
-            'status' => 'OPEN'
+            'status' => 'OPEN',
         ]);
 
-        return Inertia::render('branch-cash-and-treasury/teller-session/index', [
-            'session' => $session,
-            'message' => 'Session opened successfully'
+        return redirect()
+            ->route('teller-sessions.index')
+            ->with('success', 'Teller session opened successfully');
+    }
+
+    public function show(TellerSession $tellerSession)
+    {
+        return Inertia::render('branch-cash-and-treasury/teller-sessions/show_teller_session_page', [
+            'session' => $tellerSession->load(['teller', 'branchDay']),
         ]);
     }
 
-    /**
-     * Close a teller session
-     */
-    public function closeSession(Request $request, $id)
+    public function close(Request $request, TellerSession $tellerSession)
     {
-        $session = TellerSession::findOrFail($id);
+        if ($tellerSession->status === 'CLOSED') {
+            return back()->withErrors('Session already closed');
+        }
 
         $request->validate([
-            'closing_cash' => 'required|numeric|min:0'
+            'closing_cash' => 'required|numeric|min:0',
         ]);
 
-        $session->update([
+        $tellerSession->update([
             'closing_cash' => $request->closing_cash,
             'closed_at' => now(),
-            'status' => 'CLOSED'
+            'status' => 'CLOSED',
         ]);
 
-        return Inertia::render('branch-cash-and-treasury/teller-session/index', [
-            'session' => $session,
-            'message' => 'Session closed successfully'
-        ]);
+        return back()->with('success', 'Teller session closed successfully');
     }
 }

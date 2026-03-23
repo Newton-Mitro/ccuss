@@ -1,14 +1,12 @@
-// resources/js/Pages/BranchTreasury/TellerSessions/Index.jsx
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Eye, Plus } from 'lucide-react';
 import { useEffect } from 'react';
-import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
@@ -18,13 +16,13 @@ interface TellerSessionPageProps {
     sessions: {
         data: {
             id: number;
-            teller: { id: number; name: string };
-            branch_day: { id: number; business_date: string };
             opening_cash: number;
             closing_cash: number | null;
             status: 'OPEN' | 'CLOSED';
             opened_at: string;
             closed_at: string | null;
+            teller: { id: number; name: string };
+            branch_day: { id: number; business_date: string };
         }[];
         links: { url: string | null; label: string; active: boolean }[];
     };
@@ -35,13 +33,13 @@ export default function Index() {
     const { sessions, filters } = usePage()
         .props as unknown as TellerSessionPageProps;
 
-    const { data, setData, get, processing } = useForm({
+    const { data, setData, get } = useForm({
         search: filters.search || '',
+        status: filters.status || '',
         per_page: Number(filters.per_page) || 10,
         page: Number(filters.page) || 1,
     });
 
-    // Auto-search on filter changes
     const handleSearch = () => {
         get(route('teller-sessions.index'), { preserveState: true });
     };
@@ -49,25 +47,10 @@ export default function Index() {
     useEffect(() => {
         const delay = setTimeout(handleSearch, 400);
         return () => clearTimeout(delay);
-    }, [data.search, data.per_page, data.page]);
-
-    const handleCloseSession = (id: number, tellerName: string) => {
-        const closingCash = prompt(`Enter closing cash for ${tellerName}:`);
-        if (closingCash !== null) {
-            router.post(
-                route('teller-sessions.close', id),
-                { closing_cash: closingCash },
-                {
-                    onSuccess: () =>
-                        toast.success(`Session for ${tellerName} closed!`),
-                    onError: () => toast.error('Failed to close session'),
-                },
-            );
-        }
-    };
+    }, [data.search, data.status, data.per_page, data.page]);
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Teller Sessions', href: '/teller-sessions' },
+        { title: 'Teller Sessions', href: '#' },
     ];
 
     return (
@@ -79,28 +62,41 @@ export default function Index() {
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
                         title="Teller Sessions"
-                        description="Manage branch teller sessions"
+                        description="Manage teller daily cash sessions"
                     />
                     <Link
                         href={route('teller-sessions.create')}
-                        className="hover:bg-primary/90 flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground"
+                        className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                     >
                         <Plus className="h-4 w-4" /> Open Session
                     </Link>
                 </div>
 
-                {/* Search */}
+                {/* Filters */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <input
                         type="text"
-                        placeholder="Search sessions..."
+                        placeholder="Search tellers..."
                         value={data.search}
                         onChange={(e) => {
                             setData('search', e.target.value);
                             setData('page', 1);
                         }}
-                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                     />
+
+                    <select
+                        value={data.status}
+                        onChange={(e) => {
+                            setData('status', e.target.value);
+                            setData('page', 1);
+                        }}
+                        className="h-9 max-w-xs rounded-md border bg-background px-3 text-sm"
+                    >
+                        <option value="">All Status</option>
+                        <option value="OPEN">Open</option>
+                        <option value="CLOSED">Closed</option>
+                    </select>
                 </div>
 
                 {/* Table */}
@@ -110,10 +106,11 @@ export default function Index() {
                             <tr>
                                 {[
                                     'Teller',
-                                    'Branch Date',
+                                    'Business Date',
                                     'Opening Cash',
                                     'Closing Cash',
                                     'Status',
+                                    'Opened At',
                                     'Actions',
                                 ].map((header) => (
                                     <th
@@ -130,27 +127,36 @@ export default function Index() {
                                 sessions.data.map((s) => (
                                     <tr
                                         key={s.id}
-                                        className="even:bg-muted/30 border-b"
+                                        className="border-b even:bg-muted/30"
                                     >
                                         <td className="px-2 py-1">
-                                            {s.teller.name}
+                                            {s.teller?.name}
                                         </td>
                                         <td className="px-2 py-1">
-                                            {s.branch_day.business_date}
+                                            {s.branch_day?.business_date}
                                         </td>
                                         <td className="px-2 py-1">
-                                            {s.opening_cash.toFixed(2)}
+                                            {Number(s.opening_cash).toFixed(2)}
                                         </td>
                                         <td className="px-2 py-1">
-                                            {s.closing_cash?.toFixed(2) ?? '-'}
+                                            {s.closing_cash
+                                                ? Number(
+                                                      s.closing_cash,
+                                                  ).toFixed(2)
+                                                : '—'}
                                         </td>
                                         <td className="px-2 py-1">
                                             {s.status}
                                         </td>
                                         <td className="px-2 py-1">
+                                            {new Date(
+                                                s.opened_at,
+                                            ).toLocaleString()}
+                                        </td>
+
+                                        <td className="px-2 py-1">
                                             <TooltipProvider>
                                                 <div className="flex space-x-2">
-                                                    {/* View */}
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link
@@ -158,44 +164,15 @@ export default function Index() {
                                                                     'teller-sessions.show',
                                                                     s.id,
                                                                 )}
-                                                                className="text-blue-600 hover:text-blue-500"
+                                                                className="text-gray-500"
                                                             >
-                                                                <Pencil className="h-5 w-5" />
+                                                                <Eye className="h-5 w-5" />
                                                             </Link>
                                                         </TooltipTrigger>
                                                         <TooltipContent>
-                                                            View / Edit
+                                                            View
                                                         </TooltipContent>
                                                     </Tooltip>
-
-                                                    {/* Close */}
-                                                    {s.status === 'OPEN' && (
-                                                        <Tooltip>
-                                                            <TooltipTrigger
-                                                                asChild
-                                                            >
-                                                                <button
-                                                                    disabled={
-                                                                        processing
-                                                                    }
-                                                                    onClick={() =>
-                                                                        handleCloseSession(
-                                                                            s.id,
-                                                                            s
-                                                                                .teller
-                                                                                .name,
-                                                                        )
-                                                                    }
-                                                                    className="text-red-600 hover:text-red-500 disabled:opacity-50"
-                                                                >
-                                                                    <Trash2 className="h-5 w-5" />
-                                                                </button>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent>
-                                                                Close Session
-                                                            </TooltipContent>
-                                                        </Tooltip>
-                                                    )}
                                                 </div>
                                             </TooltipProvider>
                                         </td>
@@ -204,7 +181,7 @@ export default function Index() {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={6}
+                                        colSpan={7}
                                         className="px-4 py-6 text-center text-muted-foreground"
                                     >
                                         No sessions found.
@@ -227,7 +204,7 @@ export default function Index() {
                                 setData('per_page', Number(e.target.value));
                                 setData('page', 1);
                             }}
-                            className="h-9 rounded-md border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                            className="h-9 rounded-md border bg-background px-3 text-sm"
                         >
                             {[5, 10, 20, 50, 100].map((n) => (
                                 <option key={n} value={n}>
@@ -245,7 +222,11 @@ export default function Index() {
                             <Link
                                 key={i}
                                 href={link.url || '#'}
-                                className={`rounded-full px-3 py-1 text-sm transition-colors ${link.active ? 'bg-primary text-primary-foreground' : 'hover:bg-muted/80 bg-muted text-muted-foreground'}`}
+                                className={`rounded-full px-3 py-1 text-sm ${
+                                    link.active
+                                        ? 'bg-primary text-primary-foreground'
+                                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                                }`}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                             />
                         ))}

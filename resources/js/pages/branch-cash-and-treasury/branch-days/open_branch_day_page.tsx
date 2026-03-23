@@ -2,6 +2,7 @@ import { Head, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
 import React, { useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import AppDatePicker from '../../../components/ui/app_date_picker';
@@ -42,7 +43,7 @@ const OpenBranchDay = ({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/branch-cash/branch-day/open', {
+        post(route('branch-days.store'), {
             preserveScroll: true,
             onError: (e) => toast.error('Error: ' + JSON.stringify(e)),
             onSuccess: () => toast.success('Branch day opened successfully!'),
@@ -50,7 +51,7 @@ const OpenBranchDay = ({
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Branch Day', href: '/branch-cash/branch-day/status' },
+        { title: 'Branch Days', href: route('branch-days.index') },
         { title: 'Open Branch Day', href: '' },
     ];
 

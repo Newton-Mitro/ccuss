@@ -11,27 +11,25 @@ use App\BranchTreasuryModule\Controllers\VaultController;
 use App\BranchTreasuryModule\Controllers\VaultTransferController;
 use Illuminate\Support\Facades\Route;
 
-
-Route::get('sop', [BranchDayController::class, 'sop'])->name('branch-treasury.sop');
-
 Route::resource('vaults', VaultController::class);
 Route::resource('tellers', TellerController::class);
 
-Route::prefix('teller-sessions')->name('teller-sessions.')->middleware(['auth'])->group(function () {
+Route::prefix('teller-sessions')->name('teller-sessions.')->group(function () {
     Route::get('/', [TellerSessionController::class, 'index'])->name('index');
-    // Route::get('/{id}', [TellerSessionController::class, 'show'])->name('show');
     Route::get('/create', [TellerSessionController::class, 'create'])->name('create');
-    Route::post('/open', [TellerSessionController::class, 'openSession'])->name('open');
-    Route::post('/{id}/close', [TellerSessionController::class, 'closeSession'])->name('close');
+    Route::post('/', [TellerSessionController::class, 'store'])->name('store');
+    Route::get('/{tellerSession}', [TellerSessionController::class, 'show'])->name('show');
+    Route::post('/{tellerSession}/close', [TellerSessionController::class, 'close'])->name('close');
+});
+Route::prefix('branch-days')->name('branch-days.')->group(function () {
+    Route::get('/', [BranchDayController::class, 'index'])->name('index');
+    Route::get('/create', [BranchDayController::class, 'create'])->name('create'); // Move this up
+    Route::get('/{branchDay}', [BranchDayController::class, 'show'])->name('show');
+    Route::post('/', [BranchDayController::class, 'store'])->name('store');
+    Route::put('/{branchDay}/close', [BranchDayController::class, 'closeBranchDay'])->name('close');
 });
 
 Route::prefix('branch-cash')->group(function () {
-    Route::get('branch-day/status', [BranchDayController::class, 'index'])->name('branch-day.index');
-    Route::get('branch-day/open', [BranchDayController::class, 'create'])->name('branch-day.open.page');
-    Route::post('branch-day/open', [BranchDayController::class, 'open'])->name('branch-day.open');
-    Route::post('branch-day/close', [BranchDayController::class, 'close'])->name('branch-day.close');
-    Route::get('branch-day/history', [BranchDayController::class, 'history'])->name('branch-day.history');
-
     Route::get('vault-transfer/teller', [VaultTransferController::class, 'createVaultToTeller'])->name('vault.transfer.teller.page');
     Route::post('vault-transfer/teller', [VaultTransferController::class, 'vaultToTeller'])->name('vault.transfer.teller');
     Route::post('vault-transfer/return', [VaultTransferController::class, 'tellerToVault'])->name('vault.transfer.return');
