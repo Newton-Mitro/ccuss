@@ -137,7 +137,6 @@ export default function KycDocumentsIndex() {
                                     'ID',
                                     'Customer',
                                     'Document Type',
-                                    'File',
                                     'Status',
                                     'Actions',
                                 ].map((h) => (
@@ -162,15 +161,6 @@ export default function KycDocumentsIndex() {
                                     </td>
                                     <td className="px-2 py-1">
                                         {i.document_type}
-                                    </td>
-                                    <td className="px-2 py-1">
-                                        <a
-                                            href={i.url}
-                                            target="_blank"
-                                            className="text-info underline"
-                                        >
-                                            View File
-                                        </a>
                                     </td>
                                     <td className="px-2 py-1">
                                         <Badge text={i.verification_status} />

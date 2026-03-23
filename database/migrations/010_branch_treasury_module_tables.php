@@ -6,9 +6,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        // -----------------------
         // Branch Days
-        // -----------------------
         Schema::create('branch_days', function (Blueprint $table) {
             $table->id();
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
@@ -22,9 +20,7 @@ return new class extends Migration {
             $table->unique(['branch_id', 'business_date']);
         });
 
-        // -----------------------
         // Denominations
-        // -----------------------
         Schema::create('denominations', function (Blueprint $table) {
             $table->id();
             $table->integer('value');
@@ -32,9 +28,7 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        // -----------------------
         // Vaults
-        // -----------------------
         Schema::create('vaults', function (Blueprint $table) {
             $table->id();
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
@@ -44,9 +38,7 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        // -----------------------
         // Tellers
-        // -----------------------
         Schema::create('tellers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
@@ -59,9 +51,7 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        // -----------------------
         // Vault Denominations
-        // -----------------------
         Schema::create('vault_denominations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('vault_id')->constrained()->cascadeOnDelete();
@@ -70,9 +60,7 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        // -----------------------
         // Teller Sessions
-        // -----------------------
         Schema::create('teller_sessions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('teller_id')->constrained()->cascadeOnDelete();
@@ -85,30 +73,14 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        // -----------------------
-        // Vault Transactions
-        // -----------------------
-        Schema::create('vault_transactions', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('vault_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('teller_id')->nullable()->constrained()->nullOnDelete();
-            $table->decimal('amount', 18, 2);
-            $table->enum('type', ['IN', 'OUT']);
-            $table->string('reference')->nullable();
-            $table->timestamp('transaction_date');
-            $table->text('remarks')->nullable();
-            $table->timestamps();
-        });
-
-        // -----------------------
-        // Cash Transactions (linked to teller_sessions)
-        // -----------------------
+        // Cash Transactions
         Schema::create('cash_transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('teller_session_id')->constrained()->cascadeOnDelete();
+            $table->morphs('source'); // source_type & source_id
+            $table->morphs('destination'); // destination_type & destination_id
             $table->decimal('amount', 18, 2);
-            $table->enum('type', ['CASH_IN', 'CASH_OUT']);
-            $table->morphs('source');
+            $table->enum('type', ['DEPOSIT', 'WITHDRAWAL', 'TRANSFER']);
             $table->string('reference')->nullable();
             $table->timestamp('transaction_date');
             $table->text('remarks')->nullable();
@@ -116,78 +88,32 @@ return new class extends Migration {
             $table->index('transaction_date');
         });
 
-        // -----------------------
-        // Teller Vault Transfers
-        // -----------------------
-        Schema::create('teller_vault_transfers', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('vault_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('teller_session_id')->constrained()->cascadeOnDelete();
-            $table->decimal('amount', 18, 2);
-            $table->enum('type', ['CASH_TO_TELLER', 'CASH_TO_VAULT']);
-            $table->timestamp('transfer_date');
-            $table->timestamps();
-        });
-
-        // -----------------------
-        // Vault to Vault Transfers
-        // -----------------------
-        Schema::create('vault_transfers', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('from_vault_id')->constrained('vaults')->cascadeOnDelete();
-            $table->foreignId('to_vault_id')->constrained('vaults')->cascadeOnDelete();
-            $table->decimal('amount', 18, 2);
-            $table->timestamp('transfer_date');
-            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->text('remarks')->nullable();
-            $table->timestamps();
-        });
-
-        Schema::create('vault_bank_transfers', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('vault_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('bank_account_id')->constrained()->cascadeOnDelete();
-            $table->decimal('amount', 18, 2);
-            $table->enum('type', ['TO_BANK', 'FROM_BANK']); // TO_BANK = deposit, FROM_BANK = withdrawal
-            $table->enum('payment_method', ['CASH', 'CHEQUE']);
-            $table->string('cheque_number')->nullable();
-            $table->timestamp('transfer_date');
-            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->text('remarks')->nullable();
-            $table->timestamps();
-        });
-
-        // -----------------------
-        // Cash Balancing
-        // -----------------------
-        Schema::create('cash_balancings', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('teller_session_id')->constrained()->cascadeOnDelete();
-            $table->decimal('expected_balance', 18, 2);
-            $table->decimal('actual_balance', 18, 2);
-            $table->decimal('difference', 18, 2);
-            $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamp('balanced_at');
-            $table->text('remarks')->nullable();
-            $table->timestamps();
-        });
-
-        // -----------------------
         // Cash Adjustments
-        // -----------------------
         Schema::create('cash_adjustments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('teller_session_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->decimal('amount', 18, 2);
-            $table->enum('type', ['SHORTAGE', 'EXCESS']);
+            $table->enum('type', ['SHORTAGE', 'EXCESS', 'OTHER']);
             $table->text('reason')->nullable();
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
 
-        // -----------------------
+        // Vault Transfers
+        Schema::create('vault_transfers', function (Blueprint $table) {
+            $table->id();
+            $table->morphs('source');
+            $table->morphs('destination');
+            $table->decimal('amount', 18, 2);
+            $table->timestamp('transfer_date');
+            $table->foreignId('initiated_by')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->text('remarks')->nullable();
+            $table->timestamps();
+        });
+
         // Cash Audit Logs
-        // -----------------------
         Schema::create('cash_audit_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('teller_session_id')->nullable()->constrained()->nullOnDelete();
@@ -197,22 +123,31 @@ return new class extends Migration {
             $table->timestamp('action_time');
             $table->timestamps();
         });
+
+        // Branch Alerts
+        Schema::create('branch_alerts', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
+            $table->string('title');
+            $table->text('message');
+            $table->enum('severity', ['INFO', 'WARNING', 'CRITICAL'])->default('INFO');
+            $table->boolean('read')->default(false);
+            $table->timestamps();
+        });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('branch_alerts');
         Schema::dropIfExists('cash_audit_logs');
-        Schema::dropIfExists('cash_adjustments');
-        Schema::dropIfExists('cash_balancings');
         Schema::dropIfExists('vault_transfers');
-        Schema::dropIfExists('teller_vault_transfers');
+        Schema::dropIfExists('cash_adjustments');
         Schema::dropIfExists('cash_transactions');
-        Schema::dropIfExists('vault_transactions');
         Schema::dropIfExists('vault_denominations');
-        Schema::dropIfExists('denominations');
-        Schema::dropIfExists('vaults');
-        Schema::dropIfExists('teller_sessions');
         Schema::dropIfExists('tellers');
+        Schema::dropIfExists('teller_sessions');
+        Schema::dropIfExists('vaults');
+        Schema::dropIfExists('denominations');
         Schema::dropIfExists('branch_days');
     }
 };

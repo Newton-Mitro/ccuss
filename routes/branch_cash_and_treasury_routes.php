@@ -19,8 +19,9 @@ Route::prefix('teller-sessions')->name('teller-sessions.')->group(function () {
     Route::get('/create', [TellerSessionController::class, 'create'])->name('create');
     Route::post('/', [TellerSessionController::class, 'store'])->name('store');
     Route::get('/{tellerSession}', [TellerSessionController::class, 'show'])->name('show');
-    Route::post('/{tellerSession}/close', [TellerSessionController::class, 'close'])->name('close');
+    Route::post('/close/{tellerSession}', [TellerSessionController::class, 'close'])->name('close');
 });
+
 Route::prefix('branch-days')->name('branch-days.')->group(function () {
     Route::get('/', [BranchDayController::class, 'index'])->name('index');
     Route::get('/create', [BranchDayController::class, 'create'])->name('create'); // Move this up

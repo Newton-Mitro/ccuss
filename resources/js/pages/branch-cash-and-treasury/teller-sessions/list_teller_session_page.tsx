@@ -4,12 +4,14 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { Eye, Plus } from 'lucide-react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { Eye, Plus, StopCircle } from 'lucide-react';
 import { useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem } from '../../../types';
 
 interface TellerSessionPageProps {
@@ -29,7 +31,7 @@ interface TellerSessionPageProps {
     filters: Record<string, string>;
 }
 
-export default function Index() {
+export default function TellerSessionsIndexPage() {
     const { sessions, filters } = usePage()
         .props as unknown as TellerSessionPageProps;
 
@@ -40,6 +42,7 @@ export default function Index() {
         page: Number(filters.page) || 1,
     });
 
+    // 🔹 Fetch sessions on filters/search change
     const handleSearch = () => {
         get(route('teller-sessions.index'), { preserveState: true });
     };
@@ -48,6 +51,45 @@ export default function Index() {
         const delay = setTimeout(handleSearch, 400);
         return () => clearTimeout(delay);
     }, [data.search, data.status, data.per_page, data.page]);
+
+    const handleCloseSession = (id: number, tellerName: string) => {
+        appSwal
+            .fire({
+                title: 'Are you sure?',
+                text: `Close the teller session for "${tellerName}"?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, close it!',
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    const closingCash = prompt(
+                        'Enter closing cash amount:',
+                        '0',
+                    );
+                    if (closingCash === null) return;
+
+                    router.post(
+                        route('teller-sessions.close', id),
+                        { closing_cash: closingCash },
+                        {
+                            preserveScroll: true,
+                            preserveState: true,
+                            onSuccess: () => {
+                                toast.success(
+                                    `Session for "${tellerName}" closed successfully!`,
+                                );
+                            },
+                            onError: () => {
+                                toast.error(
+                                    `Failed to close session for "${tellerName}".`,
+                                );
+                            },
+                        },
+                    );
+                }
+            });
+    };
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Teller Sessions', href: '#' },
@@ -76,7 +118,7 @@ export default function Index() {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <input
                         type="text"
-                        placeholder="Search tellers..."
+                        placeholder="Search teller sessions..."
                         value={data.search}
                         onChange={(e) => {
                             setData('search', e.target.value);
@@ -130,16 +172,16 @@ export default function Index() {
                                         className="border-b even:bg-muted/30"
                                     >
                                         <td className="px-2 py-1">
-                                            {s.teller?.name}
+                                            {s.teller.name}
                                         </td>
                                         <td className="px-2 py-1">
-                                            {s.branch_day?.business_date}
+                                            {s.branch_day.business_date}
                                         </td>
                                         <td className="px-2 py-1">
                                             {Number(s.opening_cash).toFixed(2)}
                                         </td>
                                         <td className="px-2 py-1">
-                                            {s.closing_cash
+                                            {s.closing_cash !== null
                                                 ? Number(
                                                       s.closing_cash,
                                                   ).toFixed(2)
@@ -157,6 +199,7 @@ export default function Index() {
                                         <td className="px-2 py-1">
                                             <TooltipProvider>
                                                 <div className="flex space-x-2">
+                                                    {/* View */}
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link
@@ -173,6 +216,33 @@ export default function Index() {
                                                             View
                                                         </TooltipContent>
                                                     </Tooltip>
+
+                                                    {/* Close Session */}
+                                                    {s.status === 'OPEN' && (
+                                                        <Tooltip>
+                                                            <TooltipTrigger
+                                                                asChild
+                                                            >
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                        handleCloseSession(
+                                                                            s.id,
+                                                                            s
+                                                                                .teller
+                                                                                .name,
+                                                                        )
+                                                                    }
+                                                                    className="text-red-500 hover:text-red-600"
+                                                                >
+                                                                    <StopCircle className="h-5 w-5" />
+                                                                </button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                Close Session
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    )}
                                                 </div>
                                             </TooltipProvider>
                                         </td>
