@@ -630,7 +630,7 @@ export default function JournalVoucherEntryPage({
                                                 label: 'Posted',
                                             },
                                             {
-                                                value: 'CANCELLED',
+                                                value: 'cancelled',
                                                 label: 'Cancelled',
                                             },
                                         ]}

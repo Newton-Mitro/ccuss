@@ -1,6 +1,6 @@
 import { AuditFields } from './base_types';
 
-export type AuditEvent = 'CREATED' | 'UPDATED' | 'DELETED';
+export type AuditEvent = 'created' | 'updated' | 'deleted';
 
 export interface Audit extends AuditFields {
     id: number;

@@ -29,7 +29,7 @@ class VoucherFactory extends Factory
             'CONTRA',
         ];
 
-        $statuses = ['pending', 'APPROVED', 'POSTED', 'CANCELLED'];
+        $statuses = ['pending', 'approved', 'POSTED', 'cancelled'];
         $status = fake()->randomElement($statuses);
 
         // Create organization
@@ -46,8 +46,8 @@ class VoucherFactory extends Factory
         // Users for audit fields
         $creator = User::factory()->create();
         $poster = $status === 'POSTED' ? User::factory()->create() : null;
-        $approver = $status === 'APPROVED' ? User::factory()->create() : null;
-        $rejector = $status === 'CANCELLED' ? User::factory()->create() : null;
+        $approver = $status === 'approved' ? User::factory()->create() : null;
+        $rejector = $status === 'cancelled' ? User::factory()->create() : null;
 
         return [
             'organization_id' => $organization->id,
@@ -69,8 +69,8 @@ class VoucherFactory extends Factory
             'rejected_by' => $rejector?->id,
 
             'posted_at' => $status === 'POSTED' ? now() : null,
-            'approved_at' => $status === 'APPROVED' ? now() : null,
-            'rejected_at' => $status === 'CANCELLED' ? now() : null,
+            'approved_at' => $status === 'approved' ? now() : null,
+            'rejected_at' => $status === 'cancelled' ? now() : null,
 
             'created_at' => now(),
             'updated_at' => now(),

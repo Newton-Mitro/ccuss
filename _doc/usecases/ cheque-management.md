@@ -57,7 +57,7 @@ Insert into:
 
 Each generated cheque:
 
-- status = `UNUSED`
+- status = `unused`
 
 ---
 
@@ -76,7 +76,7 @@ Customer writes a cheque to pay another party.
 ### Preconditions
 
 - Cheque exists
-- Cheque status = `UNUSED`
+- Cheque status = `unused`
 
 ### Trigger
 
@@ -95,7 +95,7 @@ Customer writes cheque and gives it to payee.
 
 Optional update:
 
-`cheques.status = ISSUED`
+`cheques.status = issued`
 
 (No financial transaction yet.)
 
@@ -148,7 +148,7 @@ Fields updated:
 - `cheque_date`
 - `payee_name`
 - `amount`
-- `status = PRESENTED`
+- `status = presented`
 
 ---
 
@@ -166,7 +166,7 @@ Process cheque payment if funds are available.
 
 ### Preconditions
 
-- Cheque status = `PRESENTED`
+- Cheque status = `presented`
 - Account balance sufficient
 
 ### Trigger
@@ -188,7 +188,7 @@ Update:
 
 `cheques`
 
-- `status = CLEARED`
+- `status = cleared`
 - `deposit_transaction_id = transaction id`
 
 Insert:
@@ -231,7 +231,7 @@ Handle cheque rejection when payment conditions fail.
 
 Update:
 
-`cheques.status = BOUNCED`
+`cheques.status = bounced`
 
 Optional:
 
@@ -288,7 +288,7 @@ Fields:
 
 Update:
 
-`cheques.status = CANCELLED`
+`cheques.status = cancelled`
 
 ---
 
@@ -326,7 +326,7 @@ Update multiple records in:
 
 Set:
 
-`status = CANCELLED`
+`status = cancelled`
 
 ---
 
@@ -368,25 +368,25 @@ No changes.
 # Cheque Lifecycle
 
 ```
-UNUSED
+unused
 ↓
-ISSUED
+issued
 ↓
-PRESENTED
+presented
 ↓
-CLEARED
+cleared
 ```
 
 Alternative paths:
 
 ```
-PRESENTED → BOUNCED
+presented → bounced
 ```
 
 Stop payment path:
 
 ```
-UNUSED / ISSUED → CANCELLED
+unused / issued → cancelled
 ```
 
 ---

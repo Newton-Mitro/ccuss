@@ -77,7 +77,7 @@ class BranchDayController extends Controller
             'business_date' => $request->business_date,
             'opened_at' => now(),
             'opened_by' => auth()->id(),
-            'status' => 'OPEN'
+            'status' => 'open'
         ]);
 
         return redirect()->route('branch-days.index')->with('success', 'Branch day opened');

@@ -88,7 +88,7 @@ return new class extends Migration {
             $table->decimal('minimum_balance', 15, 2)->default(0);
             $table->date('opened_at');
             $table->date('closed_at')->nullable();
-            $table->enum('status', ['pending', 'active', 'dorment', 'frozen', 'closed'])->default('pending');
+            $table->enum('status', ['pending', 'active', 'dormant', 'frozen', 'closed'])->default('pending');
             $table->text('remarks')->nullable();
             $table->timestamps();
         });
@@ -181,14 +181,14 @@ return new class extends Migration {
             $table->string('transaction_no')->unique();
             $table->foreignId('deposit_account_id')->constrained()->cascadeOnDelete();
             $table->enum('transaction_type', [
-                'DEPOSIT',
-                'WITHDRAW',
-                'TRANSFER',
-                'INTEREST',
-                'PENALTY',
-                'CHEQUE_WITHDRAWAL',
-                'CHEQUE_DEPOSIT',
-                'REVERSAL'
+                'deposit',
+                'withdraw',
+                'transfer',
+                'interest',
+                'penalty',
+                'cheque_withdrawal',
+                'cheque_deposit',
+                'reversal'
             ]);
             $table->decimal('amount', 18, 2);
             $table->decimal('balance_after', 18, 2)->nullable();
@@ -245,7 +245,7 @@ return new class extends Migration {
             $table->foreignId('deposit_account_id')->constrained()->cascadeOnDelete();
             $table->date('penalty_date');
             $table->decimal('penalty_amount', 18, 2);
-            $table->enum('penalty_type', ['LATE_PAYMENT', 'PREMATURE_WITHDRAWAL', 'OVERDUE', 'other']);
+            $table->enum('penalty_type', ['late_payment', 'premature_withdrawal', 'overdue', 'other']);
             $table->boolean('is_posted')->default(false);
             $table->foreignId('deposit_transaction_id')->nullable()->constrained('deposit_transactions')->nullOnDelete();
             $table->text('remarks')->nullable();
@@ -261,7 +261,7 @@ return new class extends Migration {
             $table->foreignId('deposit_account_id')->constrained()->cascadeOnDelete();
             $table->string('fee_type');
             $table->decimal('amount', 15, 2);
-            $table->enum('frequency', ['ONE_TIME', 'monthly', 'quarterly', 'YEARLY'])->default('ONE_TIME');
+            $table->enum('frequency', ['one_time', 'monthly', 'quarterly', 'yearly'])->default('one_time');
             $table->date('applied_on')->nullable();
             $table->boolean('is_paid')->default(false);
             $table->foreignId('paid_transaction_id')->nullable()->constrained('deposit_transactions')->nullOnDelete();
@@ -292,7 +292,7 @@ return new class extends Migration {
             $table->decimal('amount', 18, 2);
             $table->string('payee_name')->nullable();
             $table->text('remarks')->nullable();
-            $table->enum('status', ['UNUSED', 'ISSUED', 'PRESENTED', 'CLEARED', 'BOUNCED', 'CANCELLED'])->default('UNUSED');
+            $table->enum('status', ['unused', 'issued', 'presented', 'cleared', 'bounced', 'cancelled'])->default('unused');
             $table->foreignId('deposit_transaction_id')->nullable()->constrained('deposit_transactions')->nullOnDelete();
             $table->timestamps();
             $table->unique(['cheque_book_id', 'cheque_number']);

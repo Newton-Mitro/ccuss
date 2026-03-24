@@ -217,10 +217,10 @@ type TransactionCategory =
     | 'INTERNAL_MOVEMENT'
     | 'CASH_MANAGEMENT'
     | 'ADJUSTMENT'
-    | 'DEPOSIT'
+    | 'deposit'
     | 'LOAN'
     | 'FEE'
-    | 'INTEREST'
+    | 'interest'
     | 'DIGITAL'
     | 'SYSTEM';
 ```

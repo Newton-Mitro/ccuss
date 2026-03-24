@@ -278,8 +278,8 @@ Approve and record discrepancy adjustment.
 
 ### Adjustment Types
 
-- SHORTAGE
-- EXCESS
+- shortage
+- excess
 
 ### Postconditions
 

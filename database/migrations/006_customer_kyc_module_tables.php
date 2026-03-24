@@ -29,7 +29,7 @@ return new class extends Migration {
 
             $table->date('dob')->nullable();
             $table->enum('gender', ['male', 'female', 'other'])->nullable();
-            $table->enum('marital_status', ['single', 'merried', 'widowed', 'devorced', 'other'])->nullable();
+            $table->enum('marital_status', ['single', 'married', 'widowed', 'divorced', 'other'])->nullable();
             $table->enum('blood_group', ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'])->nullable();
             $table->string('nationality', 100)->nullable();
             $table->string('occupation', 100)->nullable();

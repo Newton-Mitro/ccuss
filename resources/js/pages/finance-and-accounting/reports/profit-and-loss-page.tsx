@@ -7,7 +7,7 @@ import { BreadcrumbItem } from '../../../types';
 
 interface PLRow {
     ledger_account_id: number;
-    category: 'INCOME' | 'EXPENSE';
+    category: 'income' | 'expense';
     account_name: string;
     amount: number;
     fiscal_year_id?: number;
@@ -73,11 +73,11 @@ export default function ProfitAndLossPage() {
     };
 
     const totalIncome = profitAndLoss
-        .filter((row) => row.category === 'INCOME')
+        .filter((row) => row.category === 'income')
         .reduce((sum, row) => sum + Number(row.amount), 0);
 
     const totalExpense = profitAndLoss
-        .filter((row) => row.category === 'EXPENSE')
+        .filter((row) => row.category === 'expense')
         .reduce((sum, row) => sum + Number(row.amount), 0);
 
     const netProfit = totalIncome - totalExpense;
@@ -123,7 +123,7 @@ export default function ProfitAndLossPage() {
                         <button
                             type="button"
                             onClick={() => window.print()}
-                            className="hover:bg-primary/80 ml-2 rounded-md bg-primary px-3 py-1 text-sm font-medium text-primary-foreground"
+                            className="ml-2 rounded-md bg-primary px-3 py-1 text-sm font-medium text-primary-foreground hover:bg-primary/80"
                         >
                             Print
                         </button>

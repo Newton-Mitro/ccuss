@@ -37,7 +37,7 @@ class UpdateCustomerRequest extends FormRequest
             ],
             'marital_status' => [
                 'nullable',
-                Rule::in(['single', 'merried', 'widowed', 'devorced', 'other']),
+                Rule::in(['single', 'married', 'widowed', 'divorced', 'other']),
             ],
             'blood_group' => [
                 'nullable',

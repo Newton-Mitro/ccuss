@@ -43,7 +43,7 @@ export default function BranchDayStatusPage({ branch_day, branch_id }: Props) {
 
     const StatusBadge = ({ status }: { status: string }) => {
         const bgClass =
-            status === 'OPEN'
+            status === 'open'
                 ? 'bg-green-100 text-green-800'
                 : status === 'closed'
                   ? 'bg-red-100 text-red-800'
@@ -121,7 +121,7 @@ export default function BranchDayStatusPage({ branch_day, branch_id }: Props) {
                         </div>
 
                         <div className="mt-4 flex gap-3">
-                            {branch_day.status === 'OPEN' && (
+                            {branch_day.status === 'open' && (
                                 <Button
                                     onClick={handleClose}
                                     className="bg-red-500 hover:bg-red-600"

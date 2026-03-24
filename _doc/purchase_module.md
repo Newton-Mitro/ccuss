@@ -27,10 +27,10 @@ A purchase order (PO) is created to request goods or services from a vendor.
 ### Status
 
 - DRAFT
-- APPROVED
+- approved
 - PARTIALLY_RECEIVED
 - RECEIVED
-- CANCELLED
+- cancelled
 
 ---
 
@@ -46,7 +46,7 @@ Before procurement begins, the purchase order must be approved.
 
 ### Result
 
-PO becomes **APPROVED** and vendor can deliver goods.
+PO becomes **approved** and vendor can deliver goods.
 
 ---
 
@@ -83,7 +83,7 @@ The vendor sends an invoice for the delivered goods.
 - pending
 - PARTIALLY_PAID
 - paid
-- CANCELLED
+- cancelled
 
 ---
 

@@ -116,7 +116,7 @@ class LedgerAccountController extends Controller
         $data = $request->validate([
             'code' => 'required|string|max:50|unique:ledger_accounts,code',
             'name' => 'required|string|max:100',
-            'type' => 'required|in:ASSET,LIABILITY,EQUITY,INCOME,EXPENSE',
+            'type' => 'required|in:ASSET,liability,equity,income,expense',
             'is_control_account' => 'boolean',
             'parent_id' => 'nullable|exists:ledger_accounts,id',
             'opening_balance' => 'nullable|numeric|min:0',
@@ -160,8 +160,8 @@ class LedgerAccountController extends Controller
                 VoucherLine::create([
                     'voucher_id' => $openingVoucher->id,
                     'ledger_account_id' => $account->id,
-                    'debit' => in_array($account->type, ['ASSET', 'EXPENSE']) ? $data['opening_balance'] : 0,
-                    'credit' => in_array($account->type, ['LIABILITY', 'EQUITY', 'INCOME']) ? $data['opening_balance'] : 0,
+                    'debit' => in_array($account->type, ['asset', 'expense']) ? $data['opening_balance'] : 0,
+                    'credit' => in_array($account->type, ['liability', 'equity', 'income']) ? $data['opening_balance'] : 0,
                 ]);
 
                 // Counterbalance entry
@@ -169,8 +169,8 @@ class LedgerAccountController extends Controller
                 VoucherLine::create([
                     'voucher_id' => $openingVoucher->id,
                     'ledger_account_id' => $openingEquity->id,
-                    'debit' => in_array($account->type, ['LIABILITY', 'EQUITY', 'INCOME']) ? $data['opening_balance'] : 0,
-                    'credit' => in_array($account->type, ['ASSET', 'EXPENSE']) ? $data['opening_balance'] : 0,
+                    'debit' => in_array($account->type, ['liability', 'equity', 'income']) ? $data['opening_balance'] : 0,
+                    'credit' => in_array($account->type, ['asset', 'expense']) ? $data['opening_balance'] : 0,
                 ]);
             }
         });
@@ -185,7 +185,7 @@ class LedgerAccountController extends Controller
     {
         $rules = [
             'name' => 'required|string|max:100',
-            'type' => 'required|in:ASSET,LIABILITY,EQUITY,INCOME,EXPENSE',
+            'type' => 'required|in:ASSET,liability,equity,income,expense',
             'is_control_account' => 'boolean',
             'parent_id' => [
                 'nullable',
@@ -251,8 +251,8 @@ class LedgerAccountController extends Controller
                 $line = $openingVoucher->lines()->firstOrNew([
                     'ledger_account_id' => $ledgerAccount->id,
                 ]);
-                $line->debit = in_array($ledgerAccount->type, ['ASSET', 'EXPENSE']) ? $data['opening_balance'] ?? 0 : 0;
-                $line->credit = in_array($ledgerAccount->type, ['LIABILITY', 'EQUITY', 'INCOME']) ? $data['opening_balance'] ?? 0 : 0;
+                $line->debit = in_array($ledgerAccount->type, ['asset', 'expense']) ? $data['opening_balance'] ?? 0 : 0;
+                $line->credit = in_array($ledgerAccount->type, ['liability', 'equity', 'income']) ? $data['opening_balance'] ?? 0 : 0;
                 $line->save();
 
                 // Counterbalance entry
@@ -260,8 +260,8 @@ class LedgerAccountController extends Controller
                 $counter = $openingVoucher->lines()->firstOrNew([
                     'ledger_account_id' => $openingEquity->id,
                 ]);
-                $counter->debit = in_array($ledgerAccount->type, ['LIABILITY', 'EQUITY', 'INCOME']) ? $data['opening_balance'] ?? 0 : 0;
-                $counter->credit = in_array($ledgerAccount->type, ['ASSET', 'EXPENSE']) ? $data['opening_balance'] ?? 0 : 0;
+                $counter->debit = in_array($ledgerAccount->type, ['liability', 'equity', 'income']) ? $data['opening_balance'] ?? 0 : 0;
+                $counter->credit = in_array($ledgerAccount->type, ['asset', 'expense']) ? $data['opening_balance'] ?? 0 : 0;
                 $counter->save();
             }
         });

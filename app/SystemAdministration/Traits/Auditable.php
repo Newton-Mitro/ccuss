@@ -10,19 +10,19 @@ trait Auditable
     public static function bootAuditable()
     {
         static::created(function ($model) {
-            $model->writeAudit('CREATED', null, $model->getAttributes());
+            $model->writeAudit('created', null, $model->getAttributes());
         });
 
         static::updated(function ($model) {
             $model->writeAudit(
-                'UPDATED',
+                'updated',
                 $model->getOriginal(),
                 $model->getChanges()
             );
         });
 
         static::deleted(function ($model) {
-            $model->writeAudit('DELETED', $model->getOriginal(), null);
+            $model->writeAudit('deleted', $model->getOriginal(), null);
         });
     }
 

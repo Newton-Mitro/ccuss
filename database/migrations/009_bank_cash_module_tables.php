@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->string('short_name')->nullable();
             $table->string('swift_code')->nullable();
             $table->string('routing_number')->nullable();
-            $table->enum('status', ['active', 'INACTIVE'])->default('active');
+            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -47,7 +47,7 @@ return new class extends Migration {
             $table->string('iban')->nullable();
             $table->decimal('opening_balance', 18, 2)->default(0);
             $table->string('currency', 10)->default('BDT');
-            $table->enum('status', ['active', 'INACTIVE', 'closed'])->default('active');
+            $table->enum('status', ['active', 'inactive', 'closed'])->default('active');
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
@@ -62,10 +62,10 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('bank_account_id')->constrained()->cascadeOnDelete();
             $table->enum('type', [
-                'DEPOSIT',
-                'WITHDRAW',
-                'TRANSFER',
-                'CHEQUE_DEPOSIT',
+                'deposit',
+                'withdraw',
+                'transfer',
+                'cheque_deposit',
                 'CHEQUE_ISSUE'
             ]);
             $table->decimal('debit', 18, 2)->default(0);
@@ -91,7 +91,7 @@ return new class extends Migration {
             $table->decimal('amount', 18, 2);
             $table->string('payee')->nullable();
             $table->date('cheque_date');
-            $table->enum('status', ['ISSUED', 'CLEARED', 'BOUNCED', 'CANCELLED'])->default('ISSUED');
+            $table->enum('status', ['issued', 'cleared', 'bounced', 'cancelled'])->default('issued');
             $table->text('remarks')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();

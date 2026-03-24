@@ -43,7 +43,7 @@ export interface DepositAccount {
     minimum_balance: number;
     opened_at: string;
     closed_at?: string;
-    status: 'pending' | 'active' | 'dorment' | 'frozen' | 'closed';
+    status: 'pending' | 'active' | 'dormant' | 'frozen' | 'closed';
     remarks?: string;
     created_by?: number;
     updated_by?: number;
@@ -155,14 +155,14 @@ export interface DepositTransaction {
     transaction_no: string;
     deposit_account_id: number;
     transaction_type:
-        | 'DEPOSIT'
-        | 'WITHDRAW'
-        | 'TRANSFER'
-        | 'INTEREST'
-        | 'PENALTY'
-        | 'CHEQUE_WITHDRAWAL'
-        | 'CHEQUE_DEPOSIT'
-        | 'REVERSAL';
+        | 'deposit'
+        | 'withdraw'
+        | 'transfer'
+        | 'interest'
+        | 'penalty'
+        | 'cheque_withdrawal'
+        | 'cheque_deposit'
+        | 'reversal';
     amount: number;
     balance_after?: number;
     transaction_date: string;
@@ -225,7 +225,7 @@ export interface DepositPenalty {
     deposit_account_id: number;
     penalty_date: string;
     penalty_amount: number;
-    penalty_type: 'LATE_PAYMENT' | 'PREMATURE_WITHDRAWAL' | 'OVERDUE' | 'other';
+    penalty_type: 'late_payment' | 'premature_withdrawal' | 'overdue' | 'other';
     is_posted: boolean;
     deposit_transaction_id?: number;
     remarks?: string;
@@ -241,7 +241,7 @@ export interface DepositAccountFee {
     deposit_account_id: number;
     fee_type: string;
     amount: number;
-    frequency: 'ONE_TIME' | 'monthly' | 'quarterly' | 'YEARLY';
+    frequency: 'one_time' | 'monthly' | 'quarterly' | 'yearly';
     applied_on?: string;
     is_paid: boolean;
     paid_transaction_id?: number;
@@ -278,12 +278,12 @@ export interface Cheque {
     payee_name?: string;
     remarks?: string;
     status:
-        | 'UNUSED'
-        | 'ISSUED'
-        | 'PRESENTED'
-        | 'CLEARED'
-        | 'BOUNCED'
-        | 'CANCELLED';
+        | 'unused'
+        | 'issued'
+        | 'presented'
+        | 'cleared'
+        | 'bounced'
+        | 'cancelled';
     deposit_transaction_id?: number;
     created_at: string;
     updated_at: string;

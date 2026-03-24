@@ -7,7 +7,7 @@ const statusConfig = {
         label: 'Verified',
         class: 'bg-info text-info-foreground',
     },
-    APPROVED: {
+    approved: {
         label: 'Approved',
         class: 'bg-success text-success-foreground',
     },

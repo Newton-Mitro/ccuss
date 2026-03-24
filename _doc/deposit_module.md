@@ -23,7 +23,7 @@ The Deposit Module handles all deposit products (savings, recurring, term deposi
 
 4. **Deposit / Withdrawal / Transaction**
     - **Purpose:** Record account transactions such as deposits, withdrawals, transfers, interest, penalties, and cheque activities.
-    - **Transaction Types:** `DEPOSIT`, `WITHDRAW`, `TRANSFER`, `INTEREST`, `PENALTY`, `CHEQUE_WITHDRAWAL`, `CHEQUE_DEPOSIT`, `REVERSAL`.
+    - **Transaction Types:** `deposit`, `withdraw`, `transfer`, `interest`, `penalty`, `cheque_withdrawal`, `cheque_deposit`, `reversal`.
     - **Outcome:** Account balances are updated and transaction history is recorded.
 
 5. **Recurring Deposit Installments**
@@ -34,7 +34,7 @@ The Deposit Module handles all deposit products (savings, recurring, term deposi
 6. **Cheque Management**
     - **Purpose:** Manage cheque books and individual cheques.
     - **Key Fields:** `cheque_book_id`, `cheque_number`, `amount`, `payee_name`, `status`.
-    - **Cheque Statuses:** `UNUSED`, `ISSUED`, `PRESENTED`, `CLEARED`, `BOUNCED`, `CANCELLED`.
+    - **Cheque Statuses:** `unused`, `issued`, `presented`, `cleared`, `bounced`, `cancelled`.
     - **Outcome:** Cheque usage and stop-payments are tracked and linked to transactions.
 
 7. **Interest Accrual**

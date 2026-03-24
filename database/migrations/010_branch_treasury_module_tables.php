@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->timestamp('closed_at')->nullable();
             $table->foreignId('opened_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('closed_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->enum('status', ['OPEN', 'closed'])->default('OPEN');
+            $table->enum('status', ['open', 'closed'])->default('open');
             $table->timestamps();
             $table->unique(['branch_id', 'business_date']);
         });
@@ -69,24 +69,10 @@ return new class extends Migration {
             $table->decimal('closing_cash', 18, 2)->nullable();
             $table->timestamp('opened_at');
             $table->timestamp('closed_at')->nullable();
-            $table->enum('status', ['OPEN', 'closed'])->default('OPEN');
+            $table->enum('status', ['open', 'closed'])->default('open');
             $table->timestamps();
         });
 
-        // Cash Transactions
-        Schema::create('cash_transactions', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('teller_session_id')->constrained()->cascadeOnDelete();
-            $table->morphs('source'); // source_type & source_id
-            $table->morphs('destination'); // destination_type & destination_id
-            $table->decimal('amount', 18, 2);
-            $table->enum('type', ['DEPOSIT', 'WITHDRAWAL', 'TRANSFER']);
-            $table->string('reference')->nullable();
-            $table->timestamp('transaction_date');
-            $table->text('remarks')->nullable();
-            $table->timestamps();
-            $table->index('transaction_date');
-        });
 
         // Cash Adjustments
         Schema::create('cash_adjustments', function (Blueprint $table) {
@@ -94,7 +80,7 @@ return new class extends Migration {
             $table->foreignId('teller_session_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->decimal('amount', 18, 2);
-            $table->enum('type', ['SHORTAGE', 'EXCESS', 'other']);
+            $table->enum('type', ['shortage', 'excess', 'other']);
             $table->text('reason')->nullable();
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
@@ -107,8 +93,8 @@ return new class extends Migration {
             $table->morphs('destination');
             $table->decimal('amount', 18, 2);
             $table->timestamp('transfer_date');
-            $table->enum('type', ['INTERNAL', 'EXTERNAL']);
-            $table->enum('status', ['pending', 'APPROVED', 'rejected'])->default('pending');
+            $table->enum('type', ['internal', 'external']);
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->foreignId('initiated_by')->constrained('users')->cascadeOnDelete();
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->text('remarks')->nullable();
@@ -132,7 +118,7 @@ return new class extends Migration {
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             $table->string('title');
             $table->text('message');
-            $table->enum('severity', ['INFO', 'WARNING', 'CRITICAL'])->default('INFO');
+            $table->enum('severity', ['info', 'warning', 'critical'])->default('info');
             $table->boolean('read')->default(false);
             $table->timestamps();
         });

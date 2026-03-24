@@ -83,12 +83,12 @@ export default function Index() {
                     <select
                         value={data.event}
                         onChange={(e) => setData('event', e.target.value)}
-                        className="h-9 rounded-md border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                        className="h-9 rounded-md border bg-background px-3 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
                     >
                         <option value="">All Events</option>
-                        <option value="CREATED">CREATED</option>
-                        <option value="UPDATED">UPDATED</option>
-                        <option value="DELETED">DELETED</option>
+                        <option value="created">created</option>
+                        <option value="updated">updated</option>
+                        <option value="deleted">deleted</option>
                     </select>
                 </div>
 
@@ -120,7 +120,7 @@ export default function Index() {
                                 audits.data.map((a) => (
                                     <tr
                                         key={a.id}
-                                        className="even:bg-muted/30 border-b"
+                                        className="border-b even:bg-muted/30"
                                     >
                                         <td className="px-2 py-2">
                                             {formatDateTime(a.created_at)}
@@ -153,7 +153,7 @@ export default function Index() {
                                                                         a.auditable_id,
                                                                     )
                                                                 }
-                                                                className="hover:text-primary/80 text-primary"
+                                                                className="text-primary hover:text-primary/80"
                                                             >
                                                                 <ListChecks className="h-5 w-5" />
                                                             </button>
@@ -254,7 +254,7 @@ export default function Index() {
                                                             a.auditable_id,
                                                         )
                                                     }
-                                                    className="hover:text-primary/80 text-primary"
+                                                    className="text-primary hover:text-primary/80"
                                                 >
                                                     <ListChecks className="h-5 w-5" />
                                                 </button>
@@ -304,7 +304,7 @@ export default function Index() {
                                 setData('per_page', Number(e.target.value));
                                 setData('page', 1);
                             }}
-                            className="h-9 rounded-md border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                            className="h-9 rounded-md border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                         >
                             {[5, 10, 20, 50, 100, 500].map((n) => (
                                 <option key={n} value={n}>
@@ -332,7 +332,7 @@ export default function Index() {
                                 className={`rounded-full px-3 py-1 text-sm transition-colors ${
                                     link.active
                                         ? 'bg-primary text-primary-foreground'
-                                        : 'hover:bg-muted/80 bg-muted text-muted-foreground'
+                                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                 }`}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                             />

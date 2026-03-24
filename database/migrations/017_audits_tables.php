@@ -21,7 +21,7 @@ return new class extends Migration {
             // Actor & context
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
 
-            $table->enum('event', ['CREATED', 'UPDATED', 'DELETED',]);
+            $table->enum('event', ['created', 'updated', 'deleted',]);
 
             // Change snapshots
             $table->json('old_values')->nullable();
@@ -78,15 +78,15 @@ return new class extends Migration {
 
             $table->enum('backup_type', [
                 'full',
-                'DATABASE_ONLY',
-                'FILES_ONLY'
+                'database_only',
+                'files_only'
             ])->default('full');
 
             $table->enum('status', [
-                'RUNNING',
-                'SUCCESS',
-                'FAILED'
-            ])->default('RUNNING');
+                'running',
+                'success',
+                'failed'
+            ])->default('running');
 
             $table->string('checksum')->nullable();
             $table->integer('duration_seconds')->nullable();

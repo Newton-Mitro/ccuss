@@ -23,9 +23,9 @@ class Voucher extends Model
     */
 
     public const STATUS_PENDING = 'pending';
-    public const STATUS_APPROVED = 'APPROVED';
+    public const STATUS_APPROVED = 'approved';
     public const STATUS_POSTED = 'POSTED';
-    public const STATUS_CANCELLED = 'CANCELLED';
+    public const STATUS_CANCELLED = 'cancelled';
 
     public const STATUSES = [
         self::STATUS_PENDING,

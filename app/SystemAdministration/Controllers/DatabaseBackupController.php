@@ -67,7 +67,7 @@ class DatabaseBackupController extends Controller
     public function backup()
     {
         $log = DatabaseBackupLog::create([
-            'status' => 'RUNNING',
+            'status' => 'running',
             'backup_type' => 'full',
             'created_by' => auth()->id(),
             'started_at' => now()

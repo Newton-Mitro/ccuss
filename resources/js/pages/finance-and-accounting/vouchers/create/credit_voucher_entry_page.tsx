@@ -596,7 +596,7 @@ export default function CreditVoucherEntryPage({
                                                 label: 'Posted',
                                             },
                                             {
-                                                value: 'CANCELLED',
+                                                value: 'cancelled',
                                                 label: 'Cancelled',
                                             },
                                         ]}

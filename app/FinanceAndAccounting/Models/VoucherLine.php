@@ -21,9 +21,9 @@ class VoucherLine extends Model
 
     public const COMPONENTS = [
         'PRINCIPAL',
-        'INTEREST',
-        'PENALTY',
-        'DEPOSIT',
+        'interest',
+        'penalty',
+        'deposit',
         'WITHDRAWAL',
         'CASH_IN',
         'CASH_OUT',

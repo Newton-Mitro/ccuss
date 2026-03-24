@@ -655,7 +655,7 @@ export default function DebitVoucherEntryPage({
                                                 label: 'Posted',
                                             },
                                             {
-                                                value: 'CANCELLED',
+                                                value: 'cancelled',
                                                 label: 'Cancelled',
                                             },
                                         ]}

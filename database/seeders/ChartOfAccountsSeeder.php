@@ -22,7 +22,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '1000',
                 'name' => 'Assets',
-                'type' => 'ASSET',
+                'type' => 'asset',
                 'is_control_account' => true,
             ]);
 
@@ -30,7 +30,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '1100',
                 'name' => 'Current Assets',
-                'type' => 'ASSET',
+                'type' => 'asset',
                 'parent_id' => $assets->id,
                 'is_control_account' => true,
             ]);
@@ -39,7 +39,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '1200',
                 'name' => 'Fixed Assets',
-                'type' => 'ASSET',
+                'type' => 'asset',
                 'parent_id' => $assets->id,
                 'is_control_account' => true,
             ]);
@@ -49,7 +49,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '1110',
                 'name' => 'Cash & Bank',
-                'type' => 'ASSET',
+                'type' => 'asset',
                 'parent_id' => $currentAssets->id,
                 'is_control_account' => true,
             ]);
@@ -58,7 +58,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '1112',
                 'name' => 'Cash In Bank',
-                'type' => 'ASSET',
+                'type' => 'asset',
                 'parent_id' => $cash->id,
             ]);
 
@@ -66,7 +66,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '1113',
                 'name' => 'Petty Cash',
-                'type' => 'ASSET',
+                'type' => 'asset',
                 'parent_id' => $cash->id,
             ]);
 
@@ -74,7 +74,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '1114',
                 'name' => 'Cash in Vault',
-                'type' => 'ASSET',
+                'type' => 'asset',
                 'parent_id' => $cash->id,
             ]);
 
@@ -82,7 +82,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '1115',
                 'name' => 'Teller Cash',
-                'type' => 'ASSET',
+                'type' => 'asset',
                 'parent_id' => $cash->id,
             ]);
 
@@ -91,7 +91,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '1130',
                 'name' => 'Receivables',
-                'type' => 'ASSET',
+                'type' => 'asset',
                 'parent_id' => $currentAssets->id,
                 'is_control_account' => true,
             ]);
@@ -100,7 +100,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '1131',
                 'name' => 'Interest Receivable',
-                'type' => 'ASSET',
+                'type' => 'asset',
                 'parent_id' => $receivables->id,
             ]);
 
@@ -108,7 +108,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '1132',
                 'name' => 'Fee Receivable',
-                'type' => 'ASSET',
+                'type' => 'asset',
                 'parent_id' => $receivables->id,
             ]);
 
@@ -117,7 +117,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '1140',
                 'name' => 'Loan Portfolio',
-                'type' => 'ASSET',
+                'type' => 'asset',
                 'parent_id' => $currentAssets->id,
                 'is_control_account' => true,
             ]);
@@ -126,7 +126,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '1141',
                 'name' => 'General Loan',
-                'type' => 'ASSET',
+                'type' => 'asset',
                 'parent_id' => $loanPortfolio->id,
             ]);
 
@@ -134,7 +134,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '1142',
                 'name' => 'Education Loan',
-                'type' => 'ASSET',
+                'type' => 'asset',
                 'parent_id' => $loanPortfolio->id,
             ]);
 
@@ -142,15 +142,15 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '1143',
                 'name' => 'Housing Loan',
-                'type' => 'ASSET',
+                'type' => 'asset',
                 'parent_id' => $loanPortfolio->id,
             ]);
 
             LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '1144',
-                'name' => 'SME Loan',
-                'type' => 'ASSET',
+                'name' => 'sme Loan',
+                'type' => 'asset',
                 'parent_id' => $loanPortfolio->id,
             ]);
 
@@ -159,7 +159,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '1201',
                 'name' => 'Land',
-                'type' => 'ASSET',
+                'type' => 'asset',
                 'parent_id' => $fixedAssets->id,
             ]);
 
@@ -167,7 +167,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '1202',
                 'name' => 'Building',
-                'type' => 'ASSET',
+                'type' => 'asset',
                 'parent_id' => $fixedAssets->id,
             ]);
 
@@ -175,7 +175,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '1203',
                 'name' => 'Office Equipment',
-                'type' => 'ASSET',
+                'type' => 'asset',
                 'parent_id' => $fixedAssets->id,
             ]);
 
@@ -186,7 +186,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '2000',
                 'name' => 'Liabilities',
-                'type' => 'LIABILITY',
+                'type' => 'liability',
                 'is_control_account' => true,
             ]);
 
@@ -194,7 +194,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '2100',
                 'name' => 'Current Liabilities',
-                'type' => 'LIABILITY',
+                'type' => 'liability',
                 'parent_id' => $liabilities->id,
                 'is_control_account' => true,
             ]);
@@ -204,7 +204,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '2010',
                 'name' => 'Member Deposits',
-                'type' => 'LIABILITY',
+                'type' => 'liability',
                 'parent_id' => $currentLiabilities->id,
                 'is_control_account' => true,
             ]);
@@ -213,7 +213,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '2011',
                 'name' => 'Savings Deposit',
-                'type' => 'LIABILITY',
+                'type' => 'liability',
                 'parent_id' => $memberDeposits->id,
             ]);
 
@@ -221,7 +221,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '2012',
                 'name' => 'Fixed Deposit',
-                'type' => 'LIABILITY',
+                'type' => 'liability',
                 'parent_id' => $memberDeposits->id,
             ]);
 
@@ -229,7 +229,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '2013',
                 'name' => 'Term Deposit',
-                'type' => 'LIABILITY',
+                'type' => 'liability',
                 'parent_id' => $memberDeposits->id,
             ]);
 
@@ -238,7 +238,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '2110',
                 'name' => 'Payables',
-                'type' => 'LIABILITY',
+                'type' => 'liability',
                 'parent_id' => $currentLiabilities->id,
                 'is_control_account' => true,
             ]);
@@ -247,7 +247,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '2111',
                 'name' => 'Vendor Payables',
-                'type' => 'LIABILITY',
+                'type' => 'liability',
                 'parent_id' => $payables->id,
             ]);
 
@@ -256,7 +256,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '2200',
                 'name' => 'Suspense Accounts',
-                'type' => 'LIABILITY',
+                'type' => 'liability',
                 'parent_id' => $liabilities->id,
                 'is_control_account' => true,
             ]);
@@ -265,18 +265,18 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '2201',
                 'name' => 'General Suspense',
-                'type' => 'LIABILITY',
+                'type' => 'liability',
                 'parent_id' => $suspense->id,
             ]);
 
             // ----------------------------
-            // EQUITY (3000)
+            // equity (3000)
             // ----------------------------
             $equity = LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '3000',
                 'name' => 'Equity',
-                'type' => 'EQUITY',
+                'type' => 'equity',
                 'is_control_account' => true,
             ]);
 
@@ -284,7 +284,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '3010',
                 'name' => 'Share Capital',
-                'type' => 'EQUITY',
+                'type' => 'equity',
                 'parent_id' => $equity->id,
             ]);
 
@@ -292,18 +292,18 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '3020',
                 'name' => 'Retained Earnings',
-                'type' => 'EQUITY',
+                'type' => 'equity',
                 'parent_id' => $equity->id,
             ]);
 
             // ----------------------------
-            // INCOME (4000)
+            // income (4000)
             // ----------------------------
             $income = LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '4000',
                 'name' => 'Income',
-                'type' => 'INCOME',
+                'type' => 'income',
                 'is_control_account' => true,
             ]);
 
@@ -311,7 +311,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '4101',
                 'name' => 'Loan Interest Income',
-                'type' => 'INCOME',
+                'type' => 'income',
                 'parent_id' => $income->id,
             ]);
 
@@ -319,7 +319,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '4102',
                 'name' => 'Late Payment Fine',
-                'type' => 'INCOME',
+                'type' => 'income',
                 'parent_id' => $income->id,
             ]);
 
@@ -327,7 +327,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '4103',
                 'name' => 'Loan Insurance Fee',
-                'type' => 'INCOME',
+                'type' => 'income',
                 'parent_id' => $income->id,
             ]);
 
@@ -335,7 +335,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '4104',
                 'name' => 'Insurance Renewal Fee',
-                'type' => 'INCOME',
+                'type' => 'income',
                 'parent_id' => $income->id,
             ]);
 
@@ -346,7 +346,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '5000',
                 'name' => 'Expenses',
-                'type' => 'EXPENSE',
+                'type' => 'expense',
                 'is_control_account' => true,
             ]);
 
@@ -354,7 +354,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '5101',
                 'name' => 'Salaries & Wages',
-                'type' => 'EXPENSE',
+                'type' => 'expense',
                 'parent_id' => $expenses->id,
             ]);
 
@@ -362,7 +362,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '5102',
                 'name' => 'Office Expenses',
-                'type' => 'EXPENSE',
+                'type' => 'expense',
                 'parent_id' => $expenses->id,
             ]);
 
@@ -370,7 +370,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '5103',
                 'name' => 'Utilities',
-                'type' => 'EXPENSE',
+                'type' => 'expense',
                 'parent_id' => $expenses->id,
             ]);
 
@@ -378,7 +378,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '5201',
                 'name' => 'Savings Interest Expense',
-                'type' => 'EXPENSE',
+                'type' => 'expense',
                 'parent_id' => $expenses->id,
             ]);
 
@@ -386,7 +386,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '5202',
                 'name' => 'Fixed Deposit Interest Expense',
-                'type' => 'EXPENSE',
+                'type' => 'expense',
                 'parent_id' => $expenses->id,
             ]);
 
@@ -394,7 +394,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '5203',
                 'name' => 'Term Deposit Interest Expense',
-                'type' => 'EXPENSE',
+                'type' => 'expense',
                 'parent_id' => $expenses->id,
             ]);
 
@@ -402,7 +402,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'code' => '5300',
                 'name' => 'Provision For Loan Losses',
-                'type' => 'EXPENSE',
+                'type' => 'expense',
                 'parent_id' => $expenses->id,
             ]);
 

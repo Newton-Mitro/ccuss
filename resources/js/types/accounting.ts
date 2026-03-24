@@ -27,7 +27,7 @@ export interface LedgerAccount extends AuditFields {
     id: number;
     code: string;
     name: string;
-    type: 'ASSET' | 'LIABILITY' | 'EQUITY' | 'INCOME' | 'EXPENSE';
+    type: 'asset' | 'liability' | 'equity' | 'income' | 'expense';
     is_control_account: boolean;
     is_active: boolean;
     is_leaf: boolean;
@@ -91,7 +91,7 @@ export interface Voucher extends AuditFields {
     rejected_by?: number | null;
     rejected_at?: string | null;
 
-    status: 'pending' | 'APPROVED' | 'POSTED' | 'CANCELLED';
+    status: 'pending' | 'approved' | 'POSTED' | 'cancelled';
 
     poster?: User;
     approver?: User;

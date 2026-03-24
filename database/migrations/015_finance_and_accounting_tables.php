@@ -58,7 +58,7 @@ return new class extends Migration {
             $table->foreignId('organization_id')->constrained();
             $table->string('code', 50)->unique()->comment('Unique GL code');
             $table->string('name', 100)->comment('Account name');
-            $table->enum('type', ['ASSET', 'LIABILITY', 'EQUITY', 'INCOME', 'EXPENSE']);
+            $table->enum('type', ['asset', 'liability', 'equity', 'income', 'expense']);
             $table->boolean('is_control_account')->default(false);
             $table->boolean('requires_subledger')->default(false);
             $table->boolean('is_active')->default(true);
@@ -90,8 +90,8 @@ return new class extends Migration {
         //     $table->string('branch_name', 100)->nullable();
 
         //     $table->string('payee_name', 150)->nullable();
-        //     $table->enum('status', ['ISSUED', 'CLEARED', 'BOUNCED'])
-        //         ->default('ISSUED');
+        //     $table->enum('status', ['issued', 'cleared', 'bounced'])
+        //         ->default('issued');
 
         //     $table->timestamps();
         // });
@@ -169,7 +169,7 @@ return new class extends Migration {
             $table->foreignId('rejected_by')->nullable()->constrained('users');
             $table->timestamp('rejected_at')->nullable();
             $table->text('narration')->comment('Description or remarks');
-            $table->enum('status', ['pending', 'APPROVED', 'POSTED', 'CANCELLED'])->default('pending');
+            $table->enum('status', ['pending', 'approved', 'POSTED', 'cancelled'])->default('pending');
             $table->timestamps();
         });
 
@@ -187,9 +187,9 @@ return new class extends Migration {
             $table->unsignedBigInteger('instrument_id')->nullable();
             $table->enum('component', [
                 'PRINCIPAL',
-                'INTEREST',
-                'PENALTY',
-                'DEPOSIT',
+                'interest',
+                'penalty',
+                'deposit',
                 'WITHDRAWAL',
                 'CASH_IN',
                 'CASH_OUT'
@@ -253,7 +253,7 @@ return new class extends Migration {
             SUM(ve.debit)  AS total_debit,
             SUM(ve.credit) AS total_credit,
             CASE
-                WHEN a.type IN ('ASSET','EXPENSE')
+                WHEN a.type IN ('asset','expense')
                     THEN SUM(ve.debit) - SUM(ve.credit)
                 ELSE
                     SUM(ve.credit) - SUM(ve.debit)
@@ -279,8 +279,8 @@ return new class extends Migration {
         CREATE VIEW view_profit_and_loss AS
         SELECT
             CASE
-                WHEN a.type = 'INCOME'  THEN 'INCOME'
-                WHEN a.type = 'EXPENSE' THEN 'EXPENSE'
+                WHEN a.type = 'income'  THEN 'income'
+                WHEN a.type = 'expense' THEN 'expense'
             END AS category,
             a.id AS ledger_account_id,
             a.code AS account_code,
@@ -291,8 +291,8 @@ return new class extends Migration {
             fp.period_name,
             COALESCE(SUM(
                 CASE 
-                    WHEN a.type = 'INCOME' THEN ve.credit - ve.debit
-                    WHEN a.type = 'EXPENSE' THEN ve.debit - ve.credit
+                    WHEN a.type = 'income' THEN ve.credit - ve.debit
+                    WHEN a.type = 'expense' THEN ve.debit - ve.credit
                 END
             ),0) AS amount
         FROM ledger_accounts a
@@ -300,7 +300,7 @@ return new class extends Migration {
         LEFT JOIN vouchers v ON v.id = ve.voucher_id AND v.status = 'POSTED'
         LEFT JOIN fiscal_years fy ON fy.id = v.fiscal_year_id
         LEFT JOIN accounting_periods fp ON fp.id = v.accounting_period_id
-        WHERE a.type IN ('INCOME','EXPENSE')
+        WHERE a.type IN ('income','expense')
           AND a.is_active = TRUE
           AND a.is_control_account = FALSE
         GROUP BY a.id, a.code, a.name, category,
@@ -327,7 +327,7 @@ return new class extends Migration {
             fp.period_name,
             SUM(
                 CASE
-                    WHEN a.type = 'ASSET'
+                    WHEN a.type = 'asset'
                         THEN vl.debit - vl.credit
                     ELSE
                         vl.credit - vl.debit
@@ -338,7 +338,7 @@ return new class extends Migration {
         JOIN vouchers v ON v.id = vl.voucher_id AND v.status = 'POSTED'
         JOIN fiscal_years fy ON fy.id = v.fiscal_year_id
         JOIN accounting_periods fp ON fp.id = v.accounting_period_id
-        WHERE a.type IN ('ASSET','LIABILITY','EQUITY')
+        WHERE a.type IN ('asset','liability','equity')
           AND a.is_active = TRUE
         GROUP BY a.id, a.code, a.name, a.type,
                  v.fiscal_year_id, fy.code,
@@ -369,7 +369,7 @@ return new class extends Migration {
             END AS cash_category,
             SUM(
                 CASE 
-                    WHEN la.type IN ('ASSET','EXPENSE') THEN vl.debit - vl.credit
+                    WHEN la.type IN ('asset','expense') THEN vl.debit - vl.credit
                     ELSE vl.credit - vl.debit
                 END
             ) AS net_cash
@@ -395,7 +395,7 @@ return new class extends Migration {
         WITH equity_accounts AS (
             SELECT id, code, name
             FROM ledger_accounts
-            WHERE type = 'EQUITY'
+            WHERE type = 'equity'
         ),
         net_profit AS (
             SELECT
@@ -403,15 +403,15 @@ return new class extends Migration {
                 v.accounting_period_id,
                 COALESCE(SUM(
                     CASE 
-                        WHEN la.type = 'INCOME' THEN vl.credit - vl.debit
-                        WHEN la.type = 'EXPENSE' THEN vl.debit - vl.credit
+                        WHEN la.type = 'income' THEN vl.credit - vl.debit
+                        WHEN la.type = 'expense' THEN vl.debit - vl.credit
                         ELSE 0
                     END
                 ),0) AS net_profit
             FROM voucher_lines vl
             JOIN vouchers v ON v.id = vl.voucher_id AND v.status = 'POSTED'
             JOIN ledger_accounts la ON la.id = vl.ledger_account_id
-            WHERE la.type IN ('INCOME','EXPENSE')
+            WHERE la.type IN ('income','expense')
             GROUP BY v.fiscal_year_id, v.accounting_period_id
         ),
         equity_balances AS (

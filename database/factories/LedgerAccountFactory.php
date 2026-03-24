@@ -12,7 +12,7 @@ class LedgerAccountFactory extends Factory
 
     public function definition(): array
     {
-        $types = ['ASSET', 'LIABILITY', 'EQUITY', 'INCOME', 'EXPENSE'];
+        $types = ['asset', 'liability', 'equity', 'income', 'expense'];
 
         $isControl = fake()->boolean(30); // 30% chance to be control account
 

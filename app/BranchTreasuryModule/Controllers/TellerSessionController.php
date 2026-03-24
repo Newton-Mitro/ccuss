@@ -70,7 +70,7 @@ class TellerSessionController extends Controller
             'user_teller' => $userTeller ?? null,
 
             // ✅ Only OPEN branch days (and optionally filter by branch)
-            'branch_days' => BranchDay::where('status', 'OPEN')
+            'branch_days' => BranchDay::where('status', 'open')
                 ->where('branch_id', $user->branch_id) // 🔥 important
                 ->get(['id', 'business_date']),
         ]);
@@ -86,7 +86,7 @@ class TellerSessionController extends Controller
 
         // 🚫 Prevent multiple OPEN sessions for same teller
         $exists = TellerSession::where('teller_id', $request->teller_id)
-            ->where('status', 'OPEN')
+            ->where('status', 'open')
             ->exists();
 
         if ($exists) {
@@ -95,7 +95,7 @@ class TellerSessionController extends Controller
 
         // 🚫 Ensure branch day is OPEN
         $branchDay = BranchDay::find($request->branch_day_id);
-        if (!$branchDay || $branchDay->status !== 'OPEN') {
+        if (!$branchDay || $branchDay->status !== 'open') {
             return back()->withErrors('Invalid or closed branch day');
         }
 
@@ -104,7 +104,7 @@ class TellerSessionController extends Controller
             'branch_day_id' => $request->branch_day_id,
             'opening_cash' => $request->opening_cash,
             'opened_at' => now(),
-            'status' => 'OPEN',
+            'status' => 'open',
         ]);
 
         return redirect()

@@ -24,8 +24,8 @@ interface BackupLog {
     id: number;
     file_name: string;
     file_size: number;
-    backup_type: 'full' | 'DATABASE_ONLY' | 'FILES_ONLY';
-    status: 'RUNNING' | 'SUCCESS' | 'FAILED';
+    backup_type: 'full' | 'database_only' | 'files_only';
+    status: 'running' | 'success' | 'failed';
     started_at: string;
     completed_at?: string;
     duration_seconds?: number;
@@ -179,18 +179,18 @@ export default function History() {
                                             {log.backup_type}
                                         </td>
                                         <td className="px-2 py-1">
-                                            {log.status === 'SUCCESS' && (
+                                            {log.status === 'success' && (
                                                 <span className="flex items-center gap-1 text-green-600">
                                                     <CheckCircle size={16} />{' '}
                                                     Success
                                                 </span>
                                             )}
-                                            {log.status === 'FAILED' && (
+                                            {log.status === 'failed' && (
                                                 <span className="flex items-center gap-1 text-red-600">
                                                     <XCircle size={16} /> Failed
                                                 </span>
                                             )}
-                                            {log.status === 'RUNNING' && (
+                                            {log.status === 'running' && (
                                                 <span className="flex items-center gap-1 text-yellow-600">
                                                     <Hourglass size={16} />{' '}
                                                     Running

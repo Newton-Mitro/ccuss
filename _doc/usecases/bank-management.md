@@ -24,7 +24,7 @@
     - Short Name
     - SWIFT Code
     - Routing Number
-    - Status (active/INACTIVE)
+    - Status (active/inactive)
 4. Submit form.
 5. System validates input.
 6. System creates record in `banks`.
@@ -74,7 +74,7 @@
     - IBAN
     - Opening Balance
     - Currency
-    - Status (active/INACTIVE/closed)
+    - Status (active/inactive/closed)
     - Created By / Approved By
 4. Submit form.
 5. System validates uniqueness of account number.
@@ -96,7 +96,7 @@
 2. Select Bank Account.
 3. Click Add Transaction.
 4. Enter:
-    - Transaction Type (DEPOSIT, WITHDRAW, TRANSFER, CHEQUE_DEPOSIT, CHEQUE_ISSUE)
+    - Transaction Type (deposit, withdraw, transfer, cheque_deposit, CHEQUE_ISSUE)
     - Amount (Debit/Credit)
     - Transaction Date
     - Reference Number
@@ -123,11 +123,11 @@
 3. Enter:
     - Bank Account
     - Cheque Number
-    - Type (ISSUED/RECEIVED)
+    - Type (issued/RECEIVED)
     - Amount
     - Payee
     - Cheque Date
-    - Status (pending/CLEARED/BOUNCED/CANCELLED)
+    - Status (pending/cleared/bounced/cancelled)
     - Remarks
     - Created By / Approved By
 4. Submit form.
@@ -220,9 +220,9 @@ Create Bank Account
 ▼
 Record Transactions
 │
-├─> DEPOSIT / WITHDRAW / TRANSFER
+├─> deposit / withdraw / transfer
 │
-├─> CHEQUE ISSUE / CHEQUE DEPOSIT
+├─> CHEQUE ISSUE / CHEQUE deposit
 │
 ▼
 Update Balance

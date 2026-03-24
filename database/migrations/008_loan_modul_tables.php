@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->string('code', 20)->unique();
             $table->string('name');
             $table->string('short_name')->nullable();
-            $table->enum('type', ['PERSONAL', 'SME', 'EDUCATION', 'HOUSING']);
+            $table->enum('type', ['personal', 'sme', 'education', 'housing']);
             // Financial parameters
             $table->decimal('interest_rate', 5, 2)->nullable();
             $table->enum('interest_type', ['fixed', 'floating'])->default('fixed');
@@ -74,7 +74,7 @@ return new class extends Migration {
                 "notes": ""                                 // Free-form internal notes
             }
             */
-            $table->enum('status', ['active', 'INACTIVE'])->default('active');
+            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
@@ -91,7 +91,7 @@ return new class extends Migration {
             $table->decimal('applied_amount', 15, 2);
             $table->integer('applied_tenure');
             $table->text('purpose')->nullable();
-            $table->enum('status', ['pending', 'APPROVED', 'rejected'])->default('pending');
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->timestamps();
         });
 
@@ -116,7 +116,7 @@ return new class extends Migration {
             $table->decimal('approved_amount', 15, 2);
             $table->integer('approved_tenure')->nullable();
             $table->text('approval_notes')->nullable();
-            $table->enum('status', ['pending', 'APPROVED', 'rejected'])->default('pending');
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->dateTime('approved_at')->nullable();
             $table->timestamps();
             $table->unique(['loan_application_id'], 'loan_approval_unique');
@@ -134,7 +134,7 @@ return new class extends Migration {
             $table->decimal('principal_amount', 15, 2);
             $table->decimal('interest_rate', 5, 2);
             $table->integer('tenure_months');
-            $table->enum('repayment_frequency', ['DAILY', 'WEEKLY', 'monthly'])->default('monthly');
+            $table->enum('repayment_frequency', ['daily', 'weekly', 'monthly'])->default('monthly');
             $table->decimal('installment_amount', 15, 2)->nullable();
             $table->date('disbursement_date')->nullable();
             $table->date('first_installment_date')->nullable();
@@ -142,7 +142,7 @@ return new class extends Migration {
             $table->decimal('principal_outstanding', 15, 2)->default(0);
             $table->decimal('interest_outstanding', 15, 2)->default(0);
             $table->decimal('penalty_outstanding', 15, 2)->default(0);
-            $table->enum('status', ['pending', 'APPROVED', 'active', 'closed', 'DEFAULTED', 'WRITTEN_OFF'])->default('pending');
+            $table->enum('status', ['pending', 'approved', 'active', 'closed', 'defaulted', 'written_off'])->default('pending');
             $table->text('remarks')->nullable();
             $table->timestamps();
         });
@@ -153,7 +153,7 @@ return new class extends Migration {
         Schema::create('loan_collaterals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('loan_account_id')->constrained()->cascadeOnDelete();
-            $table->enum('type', ['LAND', 'GOLD', 'VEHICLE', 'other']);
+            $table->enum('type', ['land', 'gold', 'vehicle', 'other']);
             $table->text('description')->nullable();
             $table->decimal('estimated_value', 15, 2)->default(0);
             $table->timestamps();
@@ -173,7 +173,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('loan_account_id')->constrained()->cascadeOnDelete();
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
-            $table->enum('role', ['primary', 'CO_BORROWER'])->default('primary');
+            $table->enum('role', ['primary', 'co_borrower'])->default('primary');
             $table->decimal('liability_percentage', 5, 2)->default(100);
             $table->timestamps();
             $table->unique(['loan_account_id', 'customer_id']);
@@ -191,7 +191,7 @@ return new class extends Migration {
             $table->decimal('interest', 15, 2);
             $table->decimal('penalty', 15, 2)->default(0);
             $table->decimal('total_due', 15, 2);
-            $table->enum('status', ['pending', 'paid', 'LATE'])->default('pending');
+            $table->enum('status', ['pending', 'paid', 'late'])->default('pending');
             $table->timestamps();
         });
 
@@ -222,7 +222,7 @@ return new class extends Migration {
             $table->id();
             $table->string('transaction_no')->unique();
             $table->foreignId('loan_account_id')->constrained()->cascadeOnDelete();
-            $table->enum('transaction_type', ['DISBURSEMENT', 'REPAYMENT', 'INTEREST', 'PENALTY', 'WRITE_OFF', 'REVERSAL']);
+            $table->enum('transaction_type', ['disbursement', 'repayment', 'interest', 'penalty', 'write_off', 'reversal']);
             $table->decimal('amount', 18, 2);
             $table->decimal('balance_after', 18, 2)->nullable();
             $table->dateTime('transaction_date');
@@ -288,7 +288,7 @@ return new class extends Migration {
             $table->foreignId('loan_account_id')->constrained('loan_accounts')->cascadeOnDelete();
             $table->date('penalty_date');
             $table->decimal('penalty_amount', 18, 2);
-            $table->enum('penalty_type', ['LATE_PAYMENT', 'PREMATURE_WITHDRAWAL', 'OVERDUE', 'other']);
+            $table->enum('penalty_type', ['late_payment', 'premature_withdrawal', 'overdue', 'other']);
             $table->boolean('is_posted')->default(false);
             $table->foreignId('loan_transaction_id')->nullable()->constrained('loan_transactions')->nullOnDelete()->comment('Linked transaction when posted');
             $table->text('remarks')->nullable();
@@ -301,7 +301,7 @@ return new class extends Migration {
             $table->foreignId('loan_product_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->decimal('amount', 15, 2)->default(0);
-            $table->enum('charge_type', ['PROCESSING', 'INSURANCE', 'DOCUMENTATION', 'other'])->default('other');
+            $table->enum('charge_type', ['processing', 'insurance', 'documentation', 'other'])->default('other');
             $table->timestamps();
         });
 
@@ -322,7 +322,7 @@ return new class extends Migration {
             $table->text('message'); // Template message with placeholders e.g., "Your installment of {{amount}} is due on {{due_date}}"
 
             // Recurrence configuration
-            $table->enum('recurrence', ['ONCE', 'DAILY', 'WEEKLY', 'monthly'])->default('ONCE');
+            $table->enum('recurrence', ['once', 'daily', 'weekly', 'monthly'])->default('once');
             $table->integer('days_before_due')->nullable(); // e.g., 3 days before due date
             $table->time('send_time')->nullable(); // Time of day to send
 
@@ -345,7 +345,7 @@ return new class extends Migration {
             $table->foreignId('template_id')->constrained('loan_notification_templates')->cascadeOnDelete();
 
             $table->text('message'); // Final message after placeholder replacement
-            $table->enum('status', ['pending', 'SENT', 'FAILED'])->default('pending');
+            $table->enum('status', ['pending', 'sent', 'failed'])->default('pending');
             $table->dateTime('scheduled_at'); // When this notification should go out
             $table->dateTime('sent_at')->nullable(); // Actual send time
 

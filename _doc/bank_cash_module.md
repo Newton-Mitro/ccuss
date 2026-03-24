@@ -98,7 +98,7 @@
 5. **Bank Cheques**
     - **Actor:** Teller / Finance Officer / Approver
     - **Table:** `bank_cheques`
-    - Description: Manage ISSUED or RECEIVED cheques, track status (Pending/Cleared/Bounced/Cancelled).
+    - Description: Manage issued or RECEIVED cheques, track status (Pending/Cleared/Bounced/Cancelled).
 
 6. **Bank Reconciliation**
     - **Actor:** Finance Officer / Accountant / Auditor
@@ -152,7 +152,7 @@ flowchart TD
     %% Bank Flow
     L[Admin] --> M[Create Bank] --> N[Create Bank Branch] --> O[Create Bank Account]
     O --> P[Bank Transactions: Deposit/Withdraw/Transfer/Cheque]
-    P --> Q[Bank Cheques ISSUED / RECEIVED]
+    P --> Q[Bank Cheques issued / RECEIVED]
     Q --> R[Bank Reconciliation]
 
     %% Vault Cash Received from Bank

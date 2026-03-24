@@ -20,7 +20,7 @@ class BranchDayFactory extends Factory
             'closed_at' => null,
             'opened_by' => User::factory(),
             'closed_by' => null,
-            'status' => 'OPEN',
+            'status' => 'open',
         ];
     }
 }

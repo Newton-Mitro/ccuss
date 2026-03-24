@@ -16,7 +16,7 @@ class CashAdjustmentFactory extends Factory
         return [
             'teller_session_id' => TellerSession::factory(),
             'amount' => $this->faker->randomFloat(2, 100, 1000),
-            'type' => $this->faker->randomElement(['SHORTAGE', 'EXCESS']),
+            'type' => $this->faker->randomElement(['shortage', 'excess']),
             'reason' => $this->faker->sentence(),
             'approved_by' => User::factory(),
         ];

@@ -277,8 +277,8 @@ const Edit = ({ customer, flash }: EditProps) => {
                             >
                                 <option value="">Select</option>
                                 <option>single</option>
-                                <option>merried</option>
-                                <option>devorced</option>
+                                <option>married</option>
+                                <option>divorced</option>
                                 <option>widowed</option>
                             </select>
                             <InputError message={errors.marital_status} />

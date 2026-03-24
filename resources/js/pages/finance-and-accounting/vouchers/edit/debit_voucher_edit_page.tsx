@@ -387,7 +387,7 @@ export default function EditDebitVoucherEntry({
                                         { value: 'DRAFT', label: 'Draft' },
                                         { value: 'POSTED', label: 'Posted' },
                                         {
-                                            value: 'CANCELLED',
+                                            value: 'cancelled',
                                             label: 'Cancelled',
                                         },
                                     ]}

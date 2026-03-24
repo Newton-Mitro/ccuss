@@ -209,7 +209,7 @@ export interface KycProfile extends AuditFields {
     kyc_level: KycLevel;
     risk_level: RiskLevel;
 
-    verification_status: 'pending' | 'APPROVED' | 'rejected';
+    verification_status: 'pending' | 'approved' | 'rejected';
     verified_by?: ID | null;
     verified_by_user?: User | null;
     verified_at?: Timestamp | null;

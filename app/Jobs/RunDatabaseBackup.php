@@ -58,7 +58,7 @@ class RunDatabaseBackup implements ShouldQueue
             // ❌ Failure
             if ($result !== 0) {
                 $log->update([
-                    'status' => 'FAILED',
+                    'status' => 'failed',
                     'error' => implode("\n", $output),
                     'completed_at' => now(),
                 ]);
@@ -74,7 +74,7 @@ class RunDatabaseBackup implements ShouldQueue
 
             // ✅ Success log
             $log->update([
-                'status' => 'SUCCESS',
+                'status' => 'success',
                 'file_name' => $fileName,
                 'file_path' => "backups/{$year}/{$month}/{$fileName}", // relative path (better)
                 'file_size' => $fileSize,
@@ -86,7 +86,7 @@ class RunDatabaseBackup implements ShouldQueue
 
         } catch (\Throwable $e) {
             $log->update([
-                'status' => 'FAILED',
+                'status' => 'failed',
                 'error' => $e->getMessage(),
                 'completed_at' => now(),
             ]);

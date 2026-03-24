@@ -6,7 +6,7 @@ export interface Bank {
     short_name?: string;
     swift_code?: string;
     routing_number?: string;
-    status: 'active' | 'INACTIVE';
+    status: 'active' | 'inactive';
     created_at: string;
     updated_at: string;
     deleted_at?: string;
@@ -38,7 +38,7 @@ export interface BankAccount {
     iban?: string;
     opening_balance: number;
     currency: string;
-    status: 'active' | 'INACTIVE' | 'closed';
+    status: 'active' | 'inactive' | 'closed';
     created_by?: number;
     approved_by?: number;
     created_at: string;
@@ -58,10 +58,10 @@ export interface BankTransaction {
     id: number;
     bank_account_id: number;
     type:
-        | 'DEPOSIT'
-        | 'WITHDRAW'
-        | 'TRANSFER'
-        | 'CHEQUE_DEPOSIT'
+        | 'deposit'
+        | 'withdraw'
+        | 'transfer'
+        | 'cheque_deposit'
         | 'CHEQUE_ISSUE';
     debit: number;
     credit: number;
@@ -85,11 +85,11 @@ export interface BankCheque {
     id: number;
     bank_account_id: number;
     cheque_no: string;
-    type: 'ISSUED' | 'RECEIVED';
+    type: 'issued' | 'RECEIVED';
     amount: number;
     payee?: string;
     cheque_date: string;
-    status: 'pending' | 'CLEARED' | 'BOUNCED' | 'CANCELLED';
+    status: 'pending' | 'cleared' | 'bounced' | 'cancelled';
     remarks?: string;
     created_by?: number;
     approved_by?: number;

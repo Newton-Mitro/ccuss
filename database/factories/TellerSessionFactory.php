@@ -19,7 +19,7 @@ class TellerSessionFactory extends Factory
             'closing_cash' => null,
             'opened_at' => now(),
             'closed_at' => null,
-            'status' => 'OPEN',
+            'status' => 'open',
         ];
     }
 }

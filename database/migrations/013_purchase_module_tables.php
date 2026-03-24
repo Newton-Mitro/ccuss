@@ -37,12 +37,12 @@ return new class extends Migration {
             $table->decimal('total_amount', 18, 2)->default(0);
 
             $table->enum('status', [
-                'DRAFT',
-                'APPROVED',
-                'PARTIALLY_RECEIVED',
-                'RECEIVED',
-                'CANCELLED'
-            ])->default('DRAFT');
+                'draft',
+                'approved',
+                'partially_received',
+                'received',
+                'cancelled'
+            ])->default('draft');
 
             $table->text('notes')->nullable();
 
@@ -180,9 +180,9 @@ return new class extends Migration {
 
             $table->enum('status', [
                 'pending',
-                'PARTIALLY_PAID',
+                'partially_paid',
                 'paid',
-                'CANCELLED'
+                'cancelled'
             ])->default('pending');
 
             $table->text('notes')->nullable();
@@ -243,9 +243,9 @@ return new class extends Migration {
             $table->decimal('amount', 18, 2);
 
             $table->enum('payment_method', [
-                'BANK',
-                'CASH',
-                'CHEQUE'
+                'bank',
+                'cash',
+                'cheque',
             ]);
 
             $table->date('payment_date');

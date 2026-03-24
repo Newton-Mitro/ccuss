@@ -164,9 +164,9 @@ export default function Index() {
                     >
                         <option value="all">All Statuses</option>
                         <option value="DRAFT">Draft</option>
-                        <option value="APPROVED">Approved</option>
+                        <option value="approved">Approved</option>
                         <option value="POSTED">Posted</option>
-                        <option value="CANCELLED">Cancelled</option>
+                        <option value="cancelled">Cancelled</option>
                     </select>
                 </div>
 

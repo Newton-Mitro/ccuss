@@ -249,9 +249,9 @@ const Create = () => {
                             >
                                 <option value="">Select</option>
                                 <option>single</option>
-                                <option>merried</option>
+                                <option>married</option>
                                 <option>widowed</option>
-                                <option>devorced</option>
+                                <option>divorced</option>
                                 <option>other</option>
                             </select>
                             <InputError message={errors.marital_status} />

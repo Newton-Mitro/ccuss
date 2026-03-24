@@ -9,7 +9,7 @@ export default function AdjustmentApproval({ drawer_id }: Props) {
     const { data, setData, post } = useForm({
         cash_drawer_id: drawer_id,
         amount: '',
-        type: 'SHORTAGE',
+        type: 'shortage',
         reason: '',
     });
 
@@ -27,8 +27,8 @@ export default function AdjustmentApproval({ drawer_id }: Props) {
                     className="w-full border p-2"
                     onChange={(e) => setData('type', e.target.value)}
                 >
-                    <option value="SHORTAGE">Shortage</option>
-                    <option value="EXCESS">Excess</option>
+                    <option value="shortage">Shortage</option>
+                    <option value="excess">Excess</option>
                 </select>
 
                 <input

@@ -22,7 +22,7 @@ interface BranchDayPageProps {
             business_date: string;
             opened_at: string | null;
             closed_at: string | null;
-            status: 'OPEN' | 'closed';
+            status: 'open' | 'closed';
             branch: { id: number; name: string };
         }[];
         links: { url: string | null; label: string; active: boolean }[];
@@ -141,7 +141,7 @@ export default function Index() {
                             className="h-9 rounded-md border bg-card px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                         >
                             <option value="">All Status</option>
-                            <option value="OPEN">Open</option>
+                            <option value="open">Open</option>
                             <option value="closed">Closed</option>
                         </select>
                     </div>
@@ -195,7 +195,7 @@ export default function Index() {
                                         <td className="px-2 py-1">
                                             <span
                                                 className={`rounded px-2 py-0.5 text-xs ${
-                                                    bd.status === 'OPEN'
+                                                    bd.status === 'open'
                                                         ? 'bg-green-100 text-green-700'
                                                         : 'bg-gray-200 text-gray-700'
                                                 }`}
@@ -223,7 +223,7 @@ export default function Index() {
                                                         </TooltipContent>
                                                     </Tooltip>
 
-                                                    {bd.status === 'OPEN' && (
+                                                    {bd.status === 'open' && (
                                                         <Tooltip>
                                                             <TooltipTrigger
                                                                 asChild
@@ -284,7 +284,7 @@ export default function Index() {
                                 </div>
                                 <span
                                     className={`rounded-full px-2 py-0.5 text-xs ${
-                                        bd.status === 'OPEN'
+                                        bd.status === 'open'
                                             ? 'bg-green-100 text-green-700'
                                             : 'bg-gray-200 text-gray-700'
                                     }`}
@@ -299,7 +299,7 @@ export default function Index() {
                                 >
                                     <Eye className="h-5 w-5" />
                                 </Link>
-                                {bd.status === 'OPEN' && (
+                                {bd.status === 'open' && (
                                     <button
                                         onClick={() =>
                                             handleClose(bd.id, bd.branch.name)

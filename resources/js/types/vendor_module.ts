@@ -8,7 +8,7 @@ export interface Vendor {
     email?: string;
     phone?: string;
     website?: string;
-    status: 'active' | 'INACTIVE';
+    status: 'active' | 'inactive';
     created_by?: number;
     updated_by?: number;
     created_at: string;

@@ -343,7 +343,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                     </div>
                     <div className="">
                         <span className="text-xs text-primary">
-                            Rejected/Canceled By
+                            Rejected/Cancelled By
                         </span>
                         <div className="text-sm">
                             <div className="">

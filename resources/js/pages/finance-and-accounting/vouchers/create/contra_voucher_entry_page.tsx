@@ -633,7 +633,7 @@ export default function ContraVoucherEntryPage({
                                                 label: 'Posted',
                                             },
                                             {
-                                                value: 'CANCELLED',
+                                                value: 'cancelled',
                                                 label: 'Cancelled',
                                             },
                                         ]}

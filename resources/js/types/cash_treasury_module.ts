@@ -9,7 +9,7 @@ export interface BranchDay {
     closed_at?: string; // ISO datetime
     opened_by?: number;
     closed_by?: number;
-    status: 'OPEN' | 'closed';
+    status: 'open' | 'closed';
     created_at: string;
     updated_at: string;
 
@@ -96,7 +96,7 @@ export interface TellerSession {
     closing_cash?: number;
     opened_at: string;
     closed_at?: string;
-    status: 'OPEN' | 'closed';
+    status: 'open' | 'closed';
     created_at: string;
     updated_at: string;
 
@@ -170,7 +170,7 @@ export interface CashAdjustment {
     id: number;
     cash_drawer_id: number;
     amount: number;
-    type: 'SHORTAGE' | 'EXCESS';
+    type: 'shortage' | 'excess';
     reason?: string;
     approved_by?: number;
     created_at: string;

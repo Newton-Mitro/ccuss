@@ -20,7 +20,7 @@ interface TellerSessionPageProps {
             id: number;
             opening_cash: number;
             closing_cash: number | null;
-            status: 'OPEN' | 'closed';
+            status: 'open' | 'closed';
             opened_at: string;
             closed_at: string | null;
             teller: { id: number; name: string };
@@ -136,7 +136,7 @@ export default function TellerSessionsIndexPage() {
                         className="h-9 max-w-xs rounded-md border bg-background px-3 text-sm"
                     >
                         <option value="">All Status</option>
-                        <option value="OPEN">Open</option>
+                        <option value="open">Open</option>
                         <option value="closed">Closed</option>
                     </select>
                 </div>
@@ -218,7 +218,7 @@ export default function TellerSessionsIndexPage() {
                                                     </Tooltip>
 
                                                     {/* Close Session */}
-                                                    {s.status === 'OPEN' && (
+                                                    {s.status === 'open' && (
                                                         <Tooltip>
                                                             <TooltipTrigger
                                                                 asChild

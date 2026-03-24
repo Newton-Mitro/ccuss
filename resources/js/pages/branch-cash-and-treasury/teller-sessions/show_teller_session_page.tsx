@@ -23,7 +23,7 @@ export default function ShowTellerSessionPage({ session }: Props) {
 
     // Inline badge classes
     const getStatusClasses = (status: string) => {
-        return status === 'OPEN'
+        return status === 'open'
             ? 'bg-green-100 text-green-800'
             : status === 'closed'
               ? 'bg-red-100 text-red-800'

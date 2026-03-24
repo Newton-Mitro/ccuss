@@ -16,7 +16,7 @@ class CashAuditLogFactory extends Factory
         return [
             'teller_session_id' => TellerSession::factory(),
             'user_id' => User::factory(),
-            'action' => $this->faker->randomElement(['OPEN_SESSION', 'CLOSE_SESSION', 'TRANSFER']),
+            'action' => $this->faker->randomElement(['OPEN_SESSION', 'CLOSE_SESSION', 'transfer']),
             'details' => $this->faker->sentence(),
             'action_time' => now(),
         ];

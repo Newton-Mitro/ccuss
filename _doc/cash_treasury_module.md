@@ -240,8 +240,8 @@ Cash variance recorded for reconciliation.
 
 1. Supervisor reviews balancing report
 2. Select adjustment type:
-    - `SHORTAGE`
-    - `EXCESS`
+    - `shortage`
+    - `excess`
 
 3. Enter adjustment `reason`
 4. Approve adjustment
@@ -479,7 +479,7 @@ This document outlines all possible cash-related transactions in the system and 
 
 - **Action:** Adjust discrepancies after balancing.
 - **Affected Tables:**
-    - `cash_adjustments` → `amount`, `type` (`SHORTAGE` / `EXCESS`), `reason`, `approved_by`
+    - `cash_adjustments` → `amount`, `type` (`shortage` / `excess`), `reason`, `approved_by`
     - `cash_drawers` → balance update
     - `cash_audit_logs` → `"CASH_ADJUSTED"` with reason
 

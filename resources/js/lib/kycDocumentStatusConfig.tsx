@@ -13,7 +13,7 @@ const kycDocumentStatusConfig = {
         icon: CheckCircle2,
         iconClass: 'text-success',
     },
-    APPROVED: {
+    approved: {
         label: 'Approved',
         class: 'bg-info text-info-foreground',
         icon: CheckCircle2,

@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
             $table->string('website')->nullable();
-            $table->enum('status', ['active', 'INACTIVE'])->default('active');
+            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
@@ -32,7 +32,7 @@ return new class extends Migration {
         Schema::create('vendor_addresses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('vendor_id')->constrained()->cascadeOnDelete();
-            $table->enum('address_type', ['HEAD_OFFICE', 'BRANCH', 'WAREHOUSE'])->default('HEAD_OFFICE');
+            $table->enum('address_type', ['head_office', 'branch', 'warehouse'])->default('head_office');
             $table->string('line_1');
             $table->string('line_2')->nullable();
             $table->string('city')->nullable();
@@ -52,7 +52,7 @@ return new class extends Migration {
             $table->string('designation')->nullable();
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
-            $table->enum('contact_type', ['primary', 'SECONDARY', 'ACCOUNTING', 'LOGISTICS'])->default('primary');
+            $table->enum('contact_type', ['primary', 'secondary', 'accounting', 'logistics'])->default('primary');
             $table->timestamps();
         });
 
@@ -85,7 +85,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('vendor_id')->constrained()->cascadeOnDelete();
             $table->string('transaction_no')->unique();
-            $table->enum('type', ['INVOICE', 'PAYMENT', 'CREDIT_NOTE']);
+            $table->enum('type', ['invoice', 'payment', 'credit_note'])->default('invoice');
             $table->decimal('debit', 18, 2)->default(0);
             $table->decimal('credit', 18, 2)->default(0);
             $table->decimal('balance_after', 18, 2)->nullable();
