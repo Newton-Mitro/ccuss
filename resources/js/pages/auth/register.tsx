@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { login } from '@/routes';
-import { store } from '@/routes/register';
+// import { store } from '@/routes/register';
 import { Form, Head } from '@inertiajs/react';
 
 export default function Register() {
@@ -32,7 +32,7 @@ export default function Register() {
 
                 {/* Form */}
                 <Form
-                    {...store.form()}
+                    // {...store.form()}
                     resetOnSuccess={['password', 'password_confirmation']}
                     disableWhileProcessing
                     className="space-y-4"

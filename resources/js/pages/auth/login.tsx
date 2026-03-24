@@ -6,7 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { register } from '@/routes';
+// import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 import { Form, Head } from '@inertiajs/react';
@@ -136,7 +136,7 @@ export default function Login({
                                 <div className="pt-3 text-center text-xs text-muted-foreground transition-colors duration-300">
                                     Don’t have an account?{' '}
                                     <TextLink
-                                        href={register()}
+                                        // href={register()}
                                         className="text-accent transition-colors duration-300 hover:underline"
                                     >
                                         Register
