@@ -46,7 +46,7 @@ const Edit = ({ customer, flash }: EditProps) => {
         identification_type: customer.identification_type || '',
         identification_number: customer.identification_number || '',
         photo: null as File | null,
-        kyc_status: customer.kyc_status || 'PENDING',
+        kyc_status: customer.kyc_status || 'pending',
     });
 
     console.log(data);
@@ -82,7 +82,7 @@ const Edit = ({ customer, flash }: EditProps) => {
     const handleTypeChange = (value: string) => {
         setData('type', value);
 
-        if (value === 'ORGANIZATION') {
+        if (value === 'organization') {
             setData('identification_type', 'REGISTRATION_NO');
             setData('identification_number', '');
             // Clear individual-only fields
@@ -105,8 +105,8 @@ const Edit = ({ customer, flash }: EditProps) => {
         { title: `Edit ${customer.name}`, href: '' },
     ];
 
-    const isIndividual = data.type === 'INDIVIDUAL';
-    const isOrganization = data.type === 'ORGANIZATION';
+    const isIndividual = data.type === 'individual';
+    const isOrganization = data.type === 'organization';
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
@@ -141,7 +141,7 @@ const Edit = ({ customer, flash }: EditProps) => {
                 onSubmit={handleSubmit}
                 className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6 lg:w-5xl"
             >
-                {/* PHOTO */}
+                {/* photo */}
                 <div className="flex flex-col gap-4">
                     {photoPreview && (
                         <img
@@ -162,7 +162,7 @@ const Edit = ({ customer, flash }: EditProps) => {
                     </div>
                 </div>
 
-                {/* BASIC INFO */}
+                {/* basic INFO */}
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
                     <div>
                         <Label className="text-xs">Customer No</Label>
@@ -181,8 +181,8 @@ const Edit = ({ customer, flash }: EditProps) => {
                             className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                         >
                             <option value="">Select Type</option>
-                            <option value="INDIVIDUAL">Individual</option>
-                            <option value="ORGANIZATION">Organization</option>
+                            <option value="individual">Individual</option>
+                            <option value="organization">Organization</option>
                         </select>
                         <InputError message={errors.type} />
                     </div>
@@ -218,7 +218,7 @@ const Edit = ({ customer, flash }: EditProps) => {
                     </div>
                 </div>
 
-                {/* INDIVIDUAL ONLY FIELDS */}
+                {/* individual ONLY FIELDS */}
                 {isIndividual && (
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
                         <div>
@@ -240,9 +240,9 @@ const Edit = ({ customer, flash }: EditProps) => {
                                 className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                             >
                                 <option value="">Select</option>
-                                <option>MALE</option>
-                                <option>FEMALE</option>
-                                <option>OTHER</option>
+                                <option>male</option>
+                                <option>female</option>
+                                <option>other</option>
                             </select>
                             <InputError message={errors.gender} />
                         </div>
@@ -257,11 +257,11 @@ const Edit = ({ customer, flash }: EditProps) => {
                                 className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                             >
                                 <option value="">Select</option>
-                                <option>ISLAM</option>
-                                <option>HINDUISM</option>
-                                <option>CHRISTIANITY</option>
-                                <option>BUDDHISM</option>
-                                <option>OTHER</option>
+                                <option>islam</option>
+                                <option>hinduism</option>
+                                <option>christianity</option>
+                                <option>buddhism</option>
+                                <option>other</option>
                             </select>
                             <InputError message={errors.religion} />
                         </div>
@@ -276,10 +276,10 @@ const Edit = ({ customer, flash }: EditProps) => {
                                 className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                             >
                                 <option value="">Select</option>
-                                <option>SINGLE</option>
-                                <option>MARRIED</option>
-                                <option>DIVORCED</option>
-                                <option>WIDOWED</option>
+                                <option>single</option>
+                                <option>merried</option>
+                                <option>devorced</option>
+                                <option>widowed</option>
                             </select>
                             <InputError message={errors.marital_status} />
                         </div>
@@ -364,8 +364,8 @@ const Edit = ({ customer, flash }: EditProps) => {
                                     <option value="">Select</option>
                                     <option value="NID">NID</option>
                                     <option value="BRN">BRN</option>
-                                    <option value="PASSPORT">PASSPORT</option>
-                                    <option value="DRIVING_LICENSE">
+                                    <option value="passport">passport</option>
+                                    <option value="driving_license">
                                         DRIVING LICENSE
                                     </option>
                                 </>
@@ -395,9 +395,9 @@ const Edit = ({ customer, flash }: EditProps) => {
                             disabled
                             className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground"
                         >
-                            <option>PENDING</option>
-                            <option>VERIFIED</option>
-                            <option>REJECTED</option>
+                            <option>pending</option>
+                            <option>verified</option>
+                            <option>rejected</option>
                         </select>
                     </div>
                 </div>

@@ -35,6 +35,9 @@ export default function HomePage() {
                         Core banking & credit solution for co-operative credit
                         unions.
                     </p>
+                    <div className="mt-1 rounded-full bg-warning px-3 py-0.5 text-xs text-warning-foreground">
+                        Version 1.0
+                    </div>
                 </div>
             </div>
         </CustomAuthLayout>

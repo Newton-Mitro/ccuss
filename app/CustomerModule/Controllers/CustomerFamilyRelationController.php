@@ -139,12 +139,12 @@ class CustomerFamilyRelationController extends Controller
 
     public function approve(CustomerFamilyRelation $familyRelation)
     {
-        if ($familyRelation->verification_status === 'VERIFIED') {
+        if ($familyRelation->verification_status === 'verified') {
             return redirect()->back()->with('info', 'Already verified.');
         }
 
         $familyRelation->update([
-            'verification_status' => 'VERIFIED',
+            'verification_status' => 'verified',
             'verified_at' => now(),
             'verified_by' => auth()->id(),
             'rejection_reason' => null, // reset if previously rejected
@@ -159,12 +159,12 @@ class CustomerFamilyRelationController extends Controller
             'rejection_reason' => ['required', 'string', 'max:500'],
         ]);
 
-        if ($familyRelation->verification_status === 'REJECTED') {
+        if ($familyRelation->verification_status === 'rejected') {
             return redirect()->back()->with('info', 'Already rejected.');
         }
 
         $familyRelation->update([
-            'verification_status' => 'REJECTED',
+            'verification_status' => 'rejected',
             'verified_at' => now(),
             'verified_by' => auth()->id(),
             'rejection_reason' => $request->rejection_reason,

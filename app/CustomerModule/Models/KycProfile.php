@@ -21,13 +21,13 @@ class KycProfile extends Model
     /* ========================
      * Constants (Enums)
      * ======================== */
-    public const LEVEL_BASIC = 'BASIC';
-    public const LEVEL_FULL = 'FULL';
-    public const LEVEL_ENHANCED = 'ENHANCED';
+    public const LEVEL_BASIC = 'basic';
+    public const LEVEL_FULL = 'full';
+    public const LEVEL_ENHANCED = 'enhanced';
 
-    public const RISK_LOW = 'LOW';
-    public const RISK_MEDIUM = 'MEDIUM';
-    public const RISK_HIGH = 'HIGH';
+    public const RISK_LOW = 'low';
+    public const RISK_MEDIUM = 'medium';
+    public const RISK_HIGH = 'high';
 
     /* ========================
      * Relationships

@@ -14,11 +14,11 @@ import { Customer } from '../../../types/customer_kyc_module';
 import { CustomerSearchBox } from '../customers/components/customer-search-box';
 
 const RELATIONSHIP_TYPES = [
-    'FAMILY',
-    'FRIEND',
-    'BUSINESS',
-    'COLLEAGUE',
-    'OTHER',
+    'family',
+    'friend',
+    'business',
+    'colleague',
+    'other',
 ];
 
 const Create = () => {

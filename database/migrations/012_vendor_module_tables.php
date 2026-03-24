@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
             $table->string('website')->nullable();
-            $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
+            $table->enum('status', ['active', 'INACTIVE'])->default('active');
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
@@ -52,7 +52,7 @@ return new class extends Migration {
             $table->string('designation')->nullable();
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
-            $table->enum('contact_type', ['PRIMARY', 'SECONDARY', 'ACCOUNTING', 'LOGISTICS'])->default('PRIMARY');
+            $table->enum('contact_type', ['primary', 'SECONDARY', 'ACCOUNTING', 'LOGISTICS'])->default('primary');
             $table->timestamps();
         });
 

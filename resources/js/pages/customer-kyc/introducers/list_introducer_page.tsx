@@ -104,9 +104,9 @@ export default function IntroducersIndex() {
                         className="h-9 w-full rounded-md border bg-background px-3 text-sm sm:max-w-xs"
                     >
                         <option value="all">All Statuses</option>
-                        <option value="PENDING">Pending</option>
-                        <option value="VERIFIED">Verified</option>
-                        <option value="REJECTED">Rejected</option>
+                        <option value="pending">Pending</option>
+                        <option value="verified">Verified</option>
+                        <option value="rejected">Rejected</option>
                     </select>
                 </div>
 

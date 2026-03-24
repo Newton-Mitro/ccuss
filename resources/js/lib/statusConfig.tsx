@@ -1,9 +1,9 @@
 const statusConfig = {
-    PENDING: {
+    pending: {
         label: 'Pending',
         class: 'bg-warning text-warning-foreground',
     },
-    VERIFIED: {
+    verified: {
         label: 'Verified',
         class: 'bg-info text-info-foreground',
     },
@@ -11,7 +11,7 @@ const statusConfig = {
         label: 'Approved',
         class: 'bg-success text-success-foreground',
     },
-    REJECTED: {
+    rejected: {
         label: 'Rejected',
         class: 'bg-destructive text-destructive-foreground',
     },

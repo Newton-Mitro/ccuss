@@ -139,7 +139,7 @@ class CustomerController extends Controller
 
         DB::transaction(function () use ($request, $data, &$customer) {
 
-            $typePrefix = $data['type'] === 'INDIVIDUAL' ? 'IND' : 'ORG';
+            $typePrefix = $data['type'] === 'individual' ? 'IND' : 'ORG';
 
             $lastId = Customer::lockForUpdate()->max('id') ?? 0;
             $nextNumber = str_pad($lastId + 1, 5, '0', STR_PAD_LEFT);
@@ -169,12 +169,12 @@ class CustomerController extends Controller
                 $path = $file->store('customers/' . $customer->id, 'public');
 
                 $customer->kycDocuments()->create([
-                    'document_type' => 'PHOTO',
+                    'document_type' => 'photo',
                     'file_name' => $file->getClientOriginalName(),
                     'file_path' => $path,
                     'mime' => $file->getClientMimeType(),
                     'url' => asset('storage/' . $path),
-                    'verification_status' => 'PENDING',
+                    'verification_status' => 'pending',
                 ]);
             }
         });
@@ -255,7 +255,7 @@ class CustomerController extends Controller
                 $data['type'] !== $customer->type ||
                 $data['identification_type'] !== $customer->identification_type
             ) {
-                $prefix = $data['type'] === 'INDIVIDUAL' ? 'IND' : 'ORG';
+                $prefix = $data['type'] === 'individual' ? 'IND' : 'ORG';
                 $data['customer_no'] = "{$prefix}-" . str_pad($customer->id, 5, '0', STR_PAD_LEFT);
             }
 
@@ -287,12 +287,12 @@ class CustomerController extends Controller
                 $path = $file->store('customers/' . $customer->id, 'public');
 
                 $customer->kycDocuments()->create([
-                    'document_type' => 'PHOTO',
+                    'document_type' => 'photo',
                     'file_name' => $file->getClientOriginalName(),
                     'file_path' => $path,
                     'mime' => $file->getClientMimeType(),
                     'url' => asset('storage/' . $path),
-                    'verification_status' => 'PENDING',
+                    'verification_status' => 'pending',
                 ]);
             }
         });

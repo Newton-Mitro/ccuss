@@ -24,7 +24,7 @@ const Create = () => {
 
     const { data, setData, post, processing, errors } = useForm({
         customer_no: '',
-        type: '', // INDIVIDUAL or ORGANIZATION
+        type: '', // individual or organization
         name: '',
         phone: '',
         email: '',
@@ -39,7 +39,7 @@ const Create = () => {
         identification_type: '',
         identification_number: '',
         photo: null as File | null,
-        kyc_status: 'PENDING',
+        kyc_status: 'pending',
     });
 
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -75,7 +75,7 @@ const Create = () => {
     const handleTypeChange = (value: string) => {
         setData('type', value);
 
-        if (value === 'ORGANIZATION') {
+        if (value === 'organization') {
             setData('identification_type', 'REGISTRATION_NO');
             setData('identification_number', '');
             // Clear individual-only fields
@@ -125,7 +125,7 @@ const Create = () => {
                 onSubmit={handleSubmit}
                 className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6 lg:w-5xl"
             >
-                {/* PHOTO */}
+                {/* photo */}
                 <div className="flex flex-col gap-4">
                     {photoPreview && (
                         <img
@@ -146,7 +146,7 @@ const Create = () => {
                     </div>
                 </div>
 
-                {/* BASIC INFO */}
+                {/* basic INFO */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div>
                         <Label className="text-xs">Customer Type</Label>
@@ -156,8 +156,8 @@ const Create = () => {
                             className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                         >
                             <option value="">Select Customer Type</option>
-                            <option value="INDIVIDUAL">Individual</option>
-                            <option value="ORGANIZATION">Organization</option>
+                            <option value="individual">Individual</option>
+                            <option value="organization">Organization</option>
                         </select>
                         <InputError message={errors.type} />
                     </div>
@@ -193,8 +193,8 @@ const Create = () => {
                     </div>
                 </div>
 
-                {/* INDIVIDUAL ONLY FIELDS */}
-                {data.type === 'INDIVIDUAL' && (
+                {/* individual ONLY FIELDS */}
+                {data.type === 'individual' && (
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         <div>
                             <Label className="text-xs">DOB</Label>
@@ -214,9 +214,9 @@ const Create = () => {
                                 className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                             >
                                 <option value="">Select</option>
-                                <option>MALE</option>
-                                <option>FEMALE</option>
-                                <option>OTHER</option>
+                                <option>male</option>
+                                <option>female</option>
+                                <option>other</option>
                             </select>
                             <InputError message={errors.gender} />
                         </div>
@@ -230,11 +230,11 @@ const Create = () => {
                                 className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                             >
                                 <option value="">Select</option>
-                                <option>ISLAM</option>
-                                <option>HINDUISM</option>
-                                <option>CHRISTIANITY</option>
-                                <option>BUDDHISM</option>
-                                <option>OTHER</option>
+                                <option>islam</option>
+                                <option>hinduism</option>
+                                <option>christianity</option>
+                                <option>buddhism</option>
+                                <option>other</option>
                             </select>
                             <InputError message={errors.religion} />
                         </div>
@@ -248,11 +248,11 @@ const Create = () => {
                                 className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                             >
                                 <option value="">Select</option>
-                                <option>SINGLE</option>
-                                <option>MARRIED</option>
-                                <option>WIDOWED</option>
-                                <option>DIVORCED</option>
-                                <option>OTHER</option>
+                                <option>single</option>
+                                <option>merried</option>
+                                <option>widowed</option>
+                                <option>devorced</option>
+                                <option>other</option>
                             </select>
                             <InputError message={errors.marital_status} />
                         </div>
@@ -324,7 +324,7 @@ const Create = () => {
                             }
                             className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                         >
-                            {data.type === 'ORGANIZATION' ? (
+                            {data.type === 'organization' ? (
                                 <option value="REGISTRATION_NO">
                                     Registration No
                                 </option>
@@ -333,8 +333,8 @@ const Create = () => {
                                     <option value="">Select</option>
                                     <option value="NID">NID</option>
                                     <option value="BRN">BRN</option>
-                                    <option value="PASSPORT">PASSPORT</option>
-                                    <option value="DRIVING_LICENSE">
+                                    <option value="passport">passport</option>
+                                    <option value="driving_license">
                                         DRIVING LICENSE
                                     </option>
                                 </>
@@ -364,9 +364,9 @@ const Create = () => {
                             disabled
                             className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground"
                         >
-                            <option>PENDING</option>
-                            <option>VERIFIED</option>
-                            <option>REJECTED</option>
+                            <option>pending</option>
+                            <option>verified</option>
+                            <option>rejected</option>
                         </select>
                         <InputError message={errors.kyc_status} />
                     </div>

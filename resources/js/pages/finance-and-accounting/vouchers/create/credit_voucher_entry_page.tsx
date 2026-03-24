@@ -702,7 +702,7 @@ export default function CreditVoucherEntryPage({
                                                 label: 'Mobile Banking',
                                             },
                                             { value: 'CARD', label: 'Card' },
-                                            { value: 'OTHER', label: 'Other' },
+                                            { value: 'other', label: 'Other' },
                                         ]}
                                         onChange={(e) =>
                                             setData(

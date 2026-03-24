@@ -28,7 +28,7 @@ class UpdateAddressRequest extends FormRequest
 
             'country_code' => ['sometimes', 'required', 'string', 'max:150'],
 
-            'type' => ['sometimes', 'required', 'in:CURRENT,PERMANENT,MAILING,WORK,REGISTERED,OTHER'],
+            'type' => ['sometimes', 'required', 'in:current,permanent,mailing,work,registered,other'],
         ];
     }
 

@@ -63,7 +63,7 @@ class KycDocumentController extends Controller
     {
         $request->validate([
             'customer_id' => 'required|exists:customers,id',
-            'document_type' => 'required|in:NID_FRONT,NID_BACK,SMART_NID,PASSPORT,DRIVING_LICENSE,BIRTH_CERTIFICATE,UTILITY_BILL,ELECTRICITY_BILL,WATER_BILL,GAS_BILL,BANK_STATEMENT,RENTAL_AGREEMENT,TIN_CERTIFICATE,TAX_RETURN,SALARY_SLIP,INCOME_CERTIFICATE,TRADE_LICENSE,CERTIFICATE_OF_INCORPORATION,MEMORANDUM_OF_ASSOCIATION,ARTICLES_OF_ASSOCIATION,PARTNERSHIP_DEED,PHOTO,SIGNATURE,LIVE_SELFIE,PEP_DECLARATION,FATCA_FORM',
+            'document_type' => 'required|in:nid,nid,smart_nid,passport,driving_license,birth_certificate,utility_bill,electricity_bill,water_bill,gas_bill,bank_statement,rental_agreement,tin_certificate,tax_return,salary_slip,income_certificate,trade_license,certificate_of_incorporation,memorandum_of_association,articles_of_association,partnership_deed,photo,signature,live_selfie,pep_declaration,fatca_form',
             'file' => 'required|file|max:10240', // 10MB
             'alt_text' => 'nullable|string|max:255',
         ]);
@@ -111,12 +111,12 @@ class KycDocumentController extends Controller
 
     public function approve(KycDocument $kycDocument)
     {
-        if ($kycDocument->verification_status === 'VERIFIED') {
+        if ($kycDocument->verification_status === 'verified') {
             return redirect()->back()->with('info', 'Already verified.');
         }
 
         $kycDocument->update([
-            'verification_status' => 'VERIFIED',
+            'verification_status' => 'verified',
             'verified_at' => now(),
             'verified_by' => auth()->id(),
             'rejection_reason' => null, // reset if previously rejected
@@ -131,12 +131,12 @@ class KycDocumentController extends Controller
             'rejection_reason' => ['required', 'string', 'max:500'],
         ]);
 
-        if ($kycDocument->verification_status === 'REJECTED') {
+        if ($kycDocument->verification_status === 'rejected') {
             return redirect()->back()->with('info', 'Already rejected.');
         }
 
         $kycDocument->update([
-            'verification_status' => 'REJECTED',
+            'verification_status' => 'rejected',
             'verified_at' => now(),
             'verified_by' => auth()->id(),
             'rejection_reason' => $request->rejection_reason,

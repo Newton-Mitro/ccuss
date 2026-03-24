@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->string('code', 20)->unique();
             $table->string('name');
             $table->string('short_name')->nullable();
-            $table->enum('type', ['Deposit', 'Loan', 'Share']);
+            $table->enum('type', ['deposit', 'loan', 'share']);
             $table->string('subtype');
             $table->decimal('interest_rate', 5, 2)->nullable();
             $table->enum('interest_compounding', ['daily', 'monthly', 'quarterly', 'yearly'])->default('monthly');
@@ -88,7 +88,7 @@ return new class extends Migration {
             $table->decimal('minimum_balance', 15, 2)->default(0);
             $table->date('opened_at');
             $table->date('closed_at')->nullable();
-            $table->enum('status', ['PENDING', 'ACTIVE', 'DORMANT', 'FROZEN', 'CLOSED'])->default('PENDING');
+            $table->enum('status', ['pending', 'active', 'dorment', 'frozen', 'closed'])->default('pending');
             $table->text('remarks')->nullable();
             $table->timestamps();
         });
@@ -100,7 +100,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('deposit_account_id')->constrained()->cascadeOnDelete();
             $table->foreignId('customer_id')->constrained();
-            $table->string('holder_type')->default('PRIMARY'); // PRIMARY, JOINT, AUTHORIZED
+            $table->string('holder_type')->default('primary'); // primary, JOINT, AUTHORIZED
             $table->decimal('ownership_percent', 5, 2)->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
@@ -143,7 +143,7 @@ return new class extends Migration {
             $table->integer('tenure_months');
             $table->decimal('maturity_amount', 15, 2);
             $table->decimal('premature_penalty_rate', 5, 2)->default(0);
-            $table->enum('payout_mode', ['MATURITY', 'MONTHLY'])->default('MATURITY');
+            $table->enum('payout_mode', ['maturity', 'monthly'])->default('maturity');
         });
 
         // =========================
@@ -152,7 +152,7 @@ return new class extends Migration {
         Schema::create('recurring_deposit_details', function (Blueprint $table) {
             $table->foreignId('deposit_account_id')->primary()->constrained('deposit_accounts');
             $table->decimal('installment_amount', 15, 2);
-            $table->enum('installment_frequency', ['MONTHLY', 'QUARTERLY', 'ANNUAL'])->default('MONTHLY');
+            $table->enum('installment_frequency', ['monthly', 'quarterly', 'annual'])->default('monthly');
             $table->integer('total_installments');
             $table->integer('paid_installments')->default(0);
             $table->date('next_due_date')->nullable();
@@ -169,7 +169,7 @@ return new class extends Migration {
             $table->decimal('amount_due', 15, 2);
             $table->decimal('amount_paid', 15, 2)->default(0);
             $table->date('paid_on')->nullable();
-            $table->enum('status', ['DUE', 'PAID', 'MISSED'])->default('DUE');
+            $table->enum('status', ['due', 'paid', 'missed'])->default('due');
             $table->decimal('penalty_amount', 15, 2)->default(0);
         });
 
@@ -245,7 +245,7 @@ return new class extends Migration {
             $table->foreignId('deposit_account_id')->constrained()->cascadeOnDelete();
             $table->date('penalty_date');
             $table->decimal('penalty_amount', 18, 2);
-            $table->enum('penalty_type', ['LATE_PAYMENT', 'PREMATURE_WITHDRAWAL', 'OVERDUE', 'OTHER']);
+            $table->enum('penalty_type', ['LATE_PAYMENT', 'PREMATURE_WITHDRAWAL', 'OVERDUE', 'other']);
             $table->boolean('is_posted')->default(false);
             $table->foreignId('deposit_transaction_id')->nullable()->constrained('deposit_transactions')->nullOnDelete();
             $table->text('remarks')->nullable();
@@ -261,7 +261,7 @@ return new class extends Migration {
             $table->foreignId('deposit_account_id')->constrained()->cascadeOnDelete();
             $table->string('fee_type');
             $table->decimal('amount', 15, 2);
-            $table->enum('frequency', ['ONE_TIME', 'MONTHLY', 'QUARTERLY', 'YEARLY'])->default('ONE_TIME');
+            $table->enum('frequency', ['ONE_TIME', 'monthly', 'quarterly', 'YEARLY'])->default('ONE_TIME');
             $table->date('applied_on')->nullable();
             $table->boolean('is_paid')->default(false);
             $table->foreignId('paid_transaction_id')->nullable()->constrained('deposit_transactions')->nullOnDelete();

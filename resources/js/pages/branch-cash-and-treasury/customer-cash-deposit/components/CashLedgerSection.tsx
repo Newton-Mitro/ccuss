@@ -38,7 +38,7 @@ function CashLedgerSection({
                     <Select
                         disabled
                         error={errors?.ledger_account_id}
-                        value={data[0].ledger_account_id?.toString() || ''}
+                        value={data[0]?.ledger_account_id?.toString() || ''}
                         options={cash_ledgers.map((ledger) => ({
                             value: ledger.id.toString(),
                             label: `${ledger.code} - ${ledger.name}`,
@@ -59,7 +59,7 @@ function CashLedgerSection({
                     <Select
                         disabled
                         error={errors?.subledger_id}
-                        value={data[0].subledger_id?.toString() || ''}
+                        value={data[0]?.subledger_id?.toString() || ''}
                         options={cash_subledgers.map((ledger) => ({
                             value: ledger.id.toString(),
                             label: `${ledger.code} - ${ledger.name}`,

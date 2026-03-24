@@ -20,7 +20,7 @@ function VoucherQueueSection({
             (acc, voucher) => {
                 const amount = Number(voucher.total_amount) || 0;
 
-                if (voucher.status === 'PENDING') {
+                if (voucher.status === 'pending') {
                     acc.pendingAmount += amount;
                 }
 
@@ -95,7 +95,7 @@ function VoucherQueueSection({
                             <div>
                                 <span
                                     className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                                        voucher.status === 'PENDING'
+                                        voucher.status === 'pending'
                                             ? 'bg-yellow-100 text-yellow-700'
                                             : voucher.status === 'POSTED'
                                               ? 'bg-green-100 text-green-700'

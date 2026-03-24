@@ -11,8 +11,8 @@ class KycProfileFactory extends Factory
 
     public function definition(): array
     {
-        $kycLevels = ['BASIC', 'FULL', 'ENHANCED'];
-        $riskLevels = ['LOW', 'MEDIUM', 'HIGH'];
+        $kycLevels = ['basic', 'full', 'enhanced'];
+        $riskLevels = ['low', 'medium', 'high'];
 
         return [
             'kyc_level' => fake()->randomElement($kycLevels),

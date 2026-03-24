@@ -121,7 +121,7 @@ class TellerSessionController extends Controller
 
     public function close(Request $request, TellerSession $tellerSession)
     {
-        if ($tellerSession->status === 'CLOSED') {
+        if ($tellerSession->status === 'closed') {
             return back()->withErrors('Session already closed');
         }
 
@@ -132,7 +132,7 @@ class TellerSessionController extends Controller
         $tellerSession->update([
             'closing_cash' => $request->closing_cash,
             'closed_at' => now(),
-            'status' => 'CLOSED',
+            'status' => 'closed',
         ]);
 
         return back()->with('success', 'Teller session closed successfully');

@@ -143,12 +143,12 @@ const Create = () => {
                         className="h-8 w-full rounded-md border bg-background px-2 text-sm"
                     >
                         <option value="">Select</option>
-                        <option>FATHER</option>
-                        <option>MOTHER</option>
-                        <option>SON</option>
-                        <option>DAUGHTER</option>
-                        <option>HUSBAND</option>
-                        <option>WIFE</option>
+                        <option>father</option>
+                        <option>mother</option>
+                        <option>son</option>
+                        <option>daughter</option>
+                        <option>husband</option>
+                        <option>wife</option>
                     </select>
                     <InputError message={errors.relation_type} />
                 </div>

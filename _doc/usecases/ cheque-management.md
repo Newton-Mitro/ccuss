@@ -25,7 +25,7 @@ Provide a new cheque book to a customer for a deposit account.
 ### Preconditions
 
 - Deposit account exists
-- Account status is **ACTIVE**
+- Account status is **active**
 - Cheque facility is allowed for the product
 - Customer identity verified
 

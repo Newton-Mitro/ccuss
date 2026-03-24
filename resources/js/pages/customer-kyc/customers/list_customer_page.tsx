@@ -115,10 +115,10 @@ export default function Index() {
                         className="h-9 w-full rounded-md border bg-background px-3 text-sm focus:ring-2 focus:ring-ring focus:outline-none sm:max-w-xs"
                     >
                         <option value="all">All Statuses</option>
-                        <option value="ACTIVE">Active</option>
-                        <option value="PENDING">Pending</option>
+                        <option value="active">Active</option>
+                        <option value="pending">Pending</option>
                         <option value="SUSPENDED">Suspended</option>
-                        <option value="CLOSED">Closed</option>
+                        <option value="closed">Closed</option>
                     </select>
                 </div>
 

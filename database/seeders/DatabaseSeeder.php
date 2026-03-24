@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
             FiscalYearSeeder::class,
 
             ChartOfAccountsSeeder::class,
-            RealVoucherEntrySeeder::class
+            // RealVoucherEntrySeeder::class
         ]);
 
     }

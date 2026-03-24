@@ -111,9 +111,9 @@ export default function FamilyRelationIndex() {
                         className="h-9 rounded-md border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                     >
                         <option value="">All Status</option>
-                        <option value="PENDING">Pending</option>
-                        <option value="VERIFIED">Verified</option>
-                        <option value="REJECTED">Rejected</option>
+                        <option value="pending">Pending</option>
+                        <option value="verified">Verified</option>
+                        <option value="rejected">Rejected</option>
                     </select>
                 </div>
 

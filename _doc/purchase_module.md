@@ -80,9 +80,9 @@ The vendor sends an invoice for the delivered goods.
 
 ### Status
 
-- PENDING
+- pending
 - PARTIALLY_PAID
-- PAID
+- paid
 - CANCELLED
 
 ---

@@ -25,7 +25,7 @@ function VoucherQueueSection({
             (acc, voucher) => {
                 const amount = Number(voucher.total_amount) || 0;
 
-                if (voucher.status === 'PENDING') {
+                if (voucher.status === 'pending') {
                     acc.pendingAmount += amount;
                 }
 
@@ -112,7 +112,7 @@ function VoucherQueueSection({
                                 <div>
                                     <span
                                         className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                                            voucher.status === 'PENDING'
+                                            voucher.status === 'pending'
                                                 ? 'bg-yellow-100 text-yellow-700'
                                                 : voucher.status === 'POSTED'
                                                   ? 'bg-green-100 text-green-700'
@@ -132,7 +132,7 @@ function VoucherQueueSection({
                                         <Eye className="h-4 w-4 text-primary-foreground" />
                                     </button>
                                     <button
-                                        disabled={voucher.status !== 'PENDING'}
+                                        disabled={voucher.status !== 'pending'}
                                         onClick={() =>
                                             voucherCollectNowHandler(voucher.id)
                                         }

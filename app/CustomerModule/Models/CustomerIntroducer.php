@@ -81,16 +81,16 @@ class CustomerIntroducer extends Model
 
     public function isVerified(): bool
     {
-        return $this->verification_status === 'VERIFIED';
+        return $this->verification_status === 'verified';
     }
 
     public function isRejected(): bool
     {
-        return $this->verification_status === 'REJECTED';
+        return $this->verification_status === 'rejected';
     }
 
     public function isPending(): bool
     {
-        return $this->verification_status === 'PENDING';
+        return $this->verification_status === 'pending';
     }
 }

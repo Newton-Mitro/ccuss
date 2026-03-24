@@ -35,8 +35,8 @@ export default function Show({ customer }: ShowProps) {
 
     console.log(customer);
 
-    const isIndividual = customer.type === 'INDIVIDUAL';
-    const isOrganization = customer.type === 'ORGANIZATION';
+    const isIndividual = customer.type === 'individual';
+    const isOrganization = customer.type === 'organization';
 
     const handleDeleteCustomerAddress = (id: number) => {
         appSwal

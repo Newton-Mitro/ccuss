@@ -1,13 +1,13 @@
 import { CheckCircle2, Clock, XCircle } from 'lucide-react';
 
 const kycDocumentStatusConfig = {
-    PENDING: {
+    pending: {
         label: 'Pending',
         class: 'bg-warning text-warning-foreground',
         icon: Clock,
         iconClass: 'text-warning',
     },
-    VERIFIED: {
+    verified: {
         label: 'Verified',
         class: 'bg-success text-success-foreground',
         icon: CheckCircle2,
@@ -19,7 +19,7 @@ const kycDocumentStatusConfig = {
         icon: CheckCircle2,
         iconClass: 'text-info',
     },
-    REJECTED: {
+    rejected: {
         label: 'Rejected',
         class: 'bg-destructive text-destructive-foreground',
         icon: XCircle,

@@ -91,7 +91,7 @@ export interface Voucher extends AuditFields {
     rejected_by?: number | null;
     rejected_at?: string | null;
 
-    status: 'PENDING' | 'APPROVED' | 'POSTED' | 'CANCELLED';
+    status: 'pending' | 'APPROVED' | 'POSTED' | 'CANCELLED';
 
     poster?: User;
     approver?: User;

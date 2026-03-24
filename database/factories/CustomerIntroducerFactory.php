@@ -16,11 +16,11 @@ class CustomerIntroducerFactory extends Factory
             'introduced_customer_id' => Customer::factory(),
             'introducer_customer_id' => Customer::factory(),
             'relationship_type' => fake()->randomElement([
-                'FRIEND',
+                'friend',
                 'RELATIVE',
-                'BUSINESS'
+                'business'
             ]),
-            'verification_status' => 'PENDING',
+            'verification_status' => 'pending',
             'remarks' => fake()->sentence(),
         ];
     }

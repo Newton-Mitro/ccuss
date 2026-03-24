@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->timestamp('closed_at')->nullable();
             $table->foreignId('opened_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('closed_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->enum('status', ['OPEN', 'CLOSED'])->default('OPEN');
+            $table->enum('status', ['OPEN', 'closed'])->default('OPEN');
             $table->timestamps();
             $table->unique(['branch_id', 'business_date']);
         });
@@ -69,7 +69,7 @@ return new class extends Migration {
             $table->decimal('closing_cash', 18, 2)->nullable();
             $table->timestamp('opened_at');
             $table->timestamp('closed_at')->nullable();
-            $table->enum('status', ['OPEN', 'CLOSED'])->default('OPEN');
+            $table->enum('status', ['OPEN', 'closed'])->default('OPEN');
             $table->timestamps();
         });
 
@@ -94,19 +94,21 @@ return new class extends Migration {
             $table->foreignId('teller_session_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->decimal('amount', 18, 2);
-            $table->enum('type', ['SHORTAGE', 'EXCESS', 'OTHER']);
+            $table->enum('type', ['SHORTAGE', 'EXCESS', 'other']);
             $table->text('reason')->nullable();
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
 
         // Vault Transfers
-        Schema::create('vault_transfers', function (Blueprint $table) {
+        Schema::create('cash_movements', function (Blueprint $table) {
             $table->id();
             $table->morphs('source');
             $table->morphs('destination');
             $table->decimal('amount', 18, 2);
             $table->timestamp('transfer_date');
+            $table->enum('type', ['INTERNAL', 'EXTERNAL']);
+            $table->enum('status', ['pending', 'APPROVED', 'rejected'])->default('pending');
             $table->foreignId('initiated_by')->constrained('users')->cascadeOnDelete();
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->text('remarks')->nullable();

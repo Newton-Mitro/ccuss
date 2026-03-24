@@ -46,15 +46,15 @@ export default function ShowFamilyRelation() {
 
     // 🎯 Status badge mapping
     const STATUS_MAP = {
-        VERIFIED: {
+        verified: {
             label: 'Verified',
             class: 'bg-success text-success-foreground',
         },
-        PENDING: {
+        pending: {
             label: 'Pending',
             class: 'bg-warning text-warning-foreground',
         },
-        REJECTED: {
+        rejected: {
             label: 'Rejected',
             class: 'bg-destructive text-destructive-foreground',
         },
@@ -255,7 +255,7 @@ export default function ShowFamilyRelation() {
                             </p>
                             <div className="mt-3 flex flex-col gap-2">
                                 {familyRelation.verification_status ===
-                                    'PENDING' && (
+                                    'pending' && (
                                     <>
                                         <div className="">
                                             <Input
@@ -292,7 +292,7 @@ export default function ShowFamilyRelation() {
                                     </>
                                 )}
                                 {familyRelation.verification_status !==
-                                    'PENDING' && (
+                                    'pending' && (
                                     <Badge
                                         className={`rounded px-2 py-1 text-xs ${statusClass}`}
                                     >

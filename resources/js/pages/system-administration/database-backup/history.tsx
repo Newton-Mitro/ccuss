@@ -24,7 +24,7 @@ interface BackupLog {
     id: number;
     file_name: string;
     file_size: number;
-    backup_type: 'FULL' | 'DATABASE_ONLY' | 'FILES_ONLY';
+    backup_type: 'full' | 'DATABASE_ONLY' | 'FILES_ONLY';
     status: 'RUNNING' | 'SUCCESS' | 'FAILED';
     started_at: string;
     completed_at?: string;

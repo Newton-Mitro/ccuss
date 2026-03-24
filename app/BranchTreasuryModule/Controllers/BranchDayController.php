@@ -88,7 +88,7 @@ class BranchDayController extends Controller
         $branchDay->update([
             'closed_at' => now(),
             'closed_by' => auth()->id(),
-            'status' => 'CLOSED'
+            'status' => 'closed'
         ]);
 
         return back()->with('success', 'Branch day closed');

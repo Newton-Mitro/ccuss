@@ -37,9 +37,9 @@ const Show = () => {
 
     // 🎯 Status Color
     const statusClass = {
-        VERIFIED: 'bg-success text-success-foreground',
-        REJECTED: 'bg-destructive text-destructive-foreground',
-        PENDING: 'bg-warning text-warning-foreground',
+        verified: 'bg-success text-success-foreground',
+        rejected: 'bg-destructive text-destructive-foreground',
+        pending: 'bg-warning text-warning-foreground',
     }[document.verification_status];
 
     // 🚀 Actions (optional endpoints)
@@ -136,7 +136,7 @@ const Show = () => {
                         </span>
                     </div>
 
-                    {/* BASIC INFO */}
+                    {/* basic INFO */}
                     <div className="space-y-2 rounded-md border bg-card p-4">
                         <p className="text-sm font-medium">Details</p>
 
@@ -235,7 +235,7 @@ const Show = () => {
                     </div>
 
                     {/* ACTIONS */}
-                    {document.verification_status === 'PENDING' && (
+                    {document.verification_status === 'pending' && (
                         <div className="flex gap-2 rounded-md border bg-card p-4">
                             <div className="">
                                 <Input

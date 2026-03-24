@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->string('short_name')->nullable();
             $table->string('swift_code')->nullable();
             $table->string('routing_number')->nullable();
-            $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
+            $table->enum('status', ['active', 'INACTIVE'])->default('active');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -47,7 +47,7 @@ return new class extends Migration {
             $table->string('iban')->nullable();
             $table->decimal('opening_balance', 18, 2)->default(0);
             $table->string('currency', 10)->default('BDT');
-            $table->enum('status', ['ACTIVE', 'INACTIVE', 'CLOSED'])->default('ACTIVE');
+            $table->enum('status', ['active', 'INACTIVE', 'closed'])->default('active');
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();

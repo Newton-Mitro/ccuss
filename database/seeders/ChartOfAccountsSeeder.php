@@ -12,6 +12,7 @@ class ChartOfAccountsSeeder extends Seeder
     public function run()
     {
         DB::transaction(function () {
+
             $organization = Organization::first() ?? Organization::factory()->create();
 
             // ----------------------------
@@ -47,18 +48,10 @@ class ChartOfAccountsSeeder extends Seeder
             $cash = LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '1110',
-                'name' => 'Cash',
+                'name' => 'Cash & Bank',
                 'type' => 'ASSET',
                 'parent_id' => $currentAssets->id,
                 'is_control_account' => true,
-            ]);
-
-            LedgerAccount::create([
-                'organization_id' => $organization->id,
-                'code' => '1111',
-                'name' => 'Cash In Hand',
-                'type' => 'ASSET',
-                'parent_id' => $cash->id,
             ]);
 
             LedgerAccount::create([
@@ -77,6 +70,48 @@ class ChartOfAccountsSeeder extends Seeder
                 'parent_id' => $cash->id,
             ]);
 
+            LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '1114',
+                'name' => 'Cash in Vault',
+                'type' => 'ASSET',
+                'parent_id' => $cash->id,
+            ]);
+
+            LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '1115',
+                'name' => 'Teller Cash',
+                'type' => 'ASSET',
+                'parent_id' => $cash->id,
+            ]);
+
+            // RECEIVABLES
+            $receivables = LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '1130',
+                'name' => 'Receivables',
+                'type' => 'ASSET',
+                'parent_id' => $currentAssets->id,
+                'is_control_account' => true,
+            ]);
+
+            LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '1131',
+                'name' => 'Interest Receivable',
+                'type' => 'ASSET',
+                'parent_id' => $receivables->id,
+            ]);
+
+            LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '1132',
+                'name' => 'Fee Receivable',
+                'type' => 'ASSET',
+                'parent_id' => $receivables->id,
+            ]);
+
             // LOAN PORTFOLIO
             $loanPortfolio = LedgerAccount::create([
                 'organization_id' => $organization->id,
@@ -90,7 +125,7 @@ class ChartOfAccountsSeeder extends Seeder
             LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '1141',
-                'name' => 'General / Member Loan',
+                'name' => 'General Loan',
                 'type' => 'ASSET',
                 'parent_id' => $loanPortfolio->id,
             ]);
@@ -145,7 +180,7 @@ class ChartOfAccountsSeeder extends Seeder
             ]);
 
             // ----------------------------
-            // LIABILITIES
+            // LIABILITIES (2000)
             // ----------------------------
             $liabilities = LedgerAccount::create([
                 'organization_id' => $organization->id,
@@ -164,6 +199,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'is_control_account' => true,
             ]);
 
+            // MEMBER DEPOSITS
             $memberDeposits = LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '2010',
@@ -197,8 +233,44 @@ class ChartOfAccountsSeeder extends Seeder
                 'parent_id' => $memberDeposits->id,
             ]);
 
+            // PAYABLES (VENDORS)
+            $payables = LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '2110',
+                'name' => 'Payables',
+                'type' => 'LIABILITY',
+                'parent_id' => $currentLiabilities->id,
+                'is_control_account' => true,
+            ]);
+
+            LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '2111',
+                'name' => 'Vendor Payables',
+                'type' => 'LIABILITY',
+                'parent_id' => $payables->id,
+            ]);
+
+            // SUSPENSE
+            $suspense = LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '2200',
+                'name' => 'Suspense Accounts',
+                'type' => 'LIABILITY',
+                'parent_id' => $liabilities->id,
+                'is_control_account' => true,
+            ]);
+
+            LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '2201',
+                'name' => 'General Suspense',
+                'type' => 'LIABILITY',
+                'parent_id' => $suspense->id,
+            ]);
+
             // ----------------------------
-            // EQUITY
+            // EQUITY (3000)
             // ----------------------------
             $equity = LedgerAccount::create([
                 'organization_id' => $organization->id,
@@ -208,21 +280,12 @@ class ChartOfAccountsSeeder extends Seeder
                 'is_control_account' => true,
             ]);
 
-            $capital = LedgerAccount::create([
-                'organization_id' => $organization->id,
-                'code' => '3100',
-                'name' => 'Capital',
-                'type' => 'EQUITY',
-                'parent_id' => $equity->id,
-                'is_control_account' => true,
-            ]);
-
             LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '3010',
-                'name' => 'Share Deposit',
+                'name' => 'Share Capital',
                 'type' => 'EQUITY',
-                'parent_id' => $capital->id,
+                'parent_id' => $equity->id,
             ]);
 
             LedgerAccount::create([
@@ -230,19 +293,11 @@ class ChartOfAccountsSeeder extends Seeder
                 'code' => '3020',
                 'name' => 'Retained Earnings',
                 'type' => 'EQUITY',
-                'parent_id' => $capital->id,
-            ]);
-
-            LedgerAccount::create([
-                'organization_id' => $organization->id,
-                'code' => '3030',
-                'name' => 'Reserves',
-                'type' => 'EQUITY',
                 'parent_id' => $equity->id,
             ]);
 
             // ----------------------------
-            // INCOME
+            // INCOME (4000)
             // ----------------------------
             $income = LedgerAccount::create([
                 'organization_id' => $organization->id,
@@ -252,21 +307,12 @@ class ChartOfAccountsSeeder extends Seeder
                 'is_control_account' => true,
             ]);
 
-            $interestIncome = LedgerAccount::create([
-                'organization_id' => $organization->id,
-                'code' => '4100',
-                'name' => 'Interest Income',
-                'type' => 'INCOME',
-                'parent_id' => $income->id,
-                'is_control_account' => true,
-            ]);
-
             LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '4101',
                 'name' => 'Loan Interest Income',
                 'type' => 'INCOME',
-                'parent_id' => $interestIncome->id,
+                'parent_id' => $income->id,
             ]);
 
             LedgerAccount::create([
@@ -294,7 +340,7 @@ class ChartOfAccountsSeeder extends Seeder
             ]);
 
             // ----------------------------
-            // EXPENSES
+            // EXPENSES (5000)
             // ----------------------------
             $expenses = LedgerAccount::create([
                 'organization_id' => $organization->id,
@@ -304,21 +350,12 @@ class ChartOfAccountsSeeder extends Seeder
                 'is_control_account' => true,
             ]);
 
-            $operatingExpenses = LedgerAccount::create([
-                'organization_id' => $organization->id,
-                'code' => '5100',
-                'name' => 'Operating Expenses',
-                'type' => 'EXPENSE',
-                'parent_id' => $expenses->id,
-                'is_control_account' => true,
-            ]);
-
             LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '5101',
                 'name' => 'Salaries & Wages',
                 'type' => 'EXPENSE',
-                'parent_id' => $operatingExpenses->id,
+                'parent_id' => $expenses->id,
             ]);
 
             LedgerAccount::create([
@@ -326,7 +363,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'code' => '5102',
                 'name' => 'Office Expenses',
                 'type' => 'EXPENSE',
-                'parent_id' => $operatingExpenses->id,
+                'parent_id' => $expenses->id,
             ]);
 
             LedgerAccount::create([
@@ -334,16 +371,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'code' => '5103',
                 'name' => 'Utilities',
                 'type' => 'EXPENSE',
-                'parent_id' => $operatingExpenses->id,
-            ]);
-
-            $financialExpenses = LedgerAccount::create([
-                'organization_id' => $organization->id,
-                'code' => '5200',
-                'name' => 'Financial Expenses',
-                'type' => 'EXPENSE',
                 'parent_id' => $expenses->id,
-                'is_control_account' => true,
             ]);
 
             LedgerAccount::create([
@@ -351,7 +379,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'code' => '5201',
                 'name' => 'Savings Interest Expense',
                 'type' => 'EXPENSE',
-                'parent_id' => $financialExpenses->id,
+                'parent_id' => $expenses->id,
             ]);
 
             LedgerAccount::create([
@@ -359,7 +387,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'code' => '5202',
                 'name' => 'Fixed Deposit Interest Expense',
                 'type' => 'EXPENSE',
-                'parent_id' => $financialExpenses->id,
+                'parent_id' => $expenses->id,
             ]);
 
             LedgerAccount::create([
@@ -367,7 +395,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'code' => '5203',
                 'name' => 'Term Deposit Interest Expense',
                 'type' => 'EXPENSE',
-                'parent_id' => $financialExpenses->id,
+                'parent_id' => $expenses->id,
             ]);
 
             LedgerAccount::create([
@@ -378,7 +406,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'parent_id' => $expenses->id,
             ]);
 
-            $this->command->info('✅ Cooperative Credit Union Chart of Accounts Seeded Successfully!');
+            $this->command->info('✅ full Banking-Grade COA Seeded Successfully!');
         });
     }
 }

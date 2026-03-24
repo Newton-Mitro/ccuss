@@ -21,10 +21,10 @@ class CustomerAddressFactory extends Factory
             'postal_code' => fake()->postcode(),
             'country' => 'Bangladesh',
             'type' => fake()->randomElement([
-                'CURRENT',
-                'PERMANENT',
-                'WORK',
-                'MAILING'
+                'current',
+                'permanent',
+                'work',
+                'mailing'
             ]),
         ];
     }

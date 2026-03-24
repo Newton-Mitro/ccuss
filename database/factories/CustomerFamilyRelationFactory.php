@@ -12,33 +12,33 @@ class CustomerFamilyRelationFactory extends Factory
     public function definition(): array
     {
         $relationTypes = [
-            'FATHER',
-            'MOTHER',
-            'SON',
-            'DAUGHTER',
-            'BROTHER',
-            'SISTER',
-            'HUSBAND',
-            'WIFE',
-            'GRANDFATHER',
-            'GRANDMOTHER',
-            'UNCLE',
-            'AUNT',
-            'NEPHEW',
-            'NIECE',
-            'FATHER_IN_LAW',
-            'MOTHER_IN_LAW',
-            'SON_IN_LAW',
-            'DAUGHTER_IN_LAW',
-            'BROTHER_IN_LAW',
-            'SISTER_IN_LAW'
+            'father',
+            'mother',
+            'son',
+            'daughter',
+            'brother',
+            'sister',
+            'husband',
+            'wife',
+            'grandfather',
+            'grandmother',
+            'uncle',
+            'aunt',
+            'nephew',
+            'niece',
+            'father_in_law',
+            'mother_in_law',
+            'son_in_law',
+            'daughter_in_law',
+            'brother_in_law',
+            'sister_in_law'
         ];
 
         return [
             'relation_type' => fake()->randomElement($relationTypes),
 
             // Verification
-            'verification_status' => 'PENDING',
+            'verification_status' => 'pending',
             'verified_by' => null,
             'verified_at' => null,
             'remarks' => fake()->optional()->sentence(),

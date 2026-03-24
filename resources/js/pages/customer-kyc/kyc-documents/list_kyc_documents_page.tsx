@@ -105,11 +105,11 @@ export default function KycDocumentsIndex() {
                             className="h-9 rounded-md border bg-background px-3 text-sm"
                         >
                             <option value="all">All Types</option>
-                            <option>NID_FRONT</option>
-                            <option>NID_BACK</option>
-                            <option>PASSPORT</option>
-                            <option>DRIVING_LICENSE</option>
-                            <option>UTILITY_BILL</option>
+                            <option>nid</option>
+                            <option>nid</option>
+                            <option>passport</option>
+                            <option>driving_license</option>
+                            <option>utility_bill</option>
                         </select>
 
                         <select
@@ -121,9 +121,9 @@ export default function KycDocumentsIndex() {
                             className="h-9 rounded-md border bg-background px-3 text-sm"
                         >
                             <option value="all">All Statuses</option>
-                            <option>PENDING</option>
-                            <option>VERIFIED</option>
-                            <option>REJECTED</option>
+                            <option>pending</option>
+                            <option>verified</option>
+                            <option>rejected</option>
                         </select>
                     </div>
                 </div>

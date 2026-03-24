@@ -22,7 +22,7 @@ interface BranchDayPageProps {
             business_date: string;
             opened_at: string | null;
             closed_at: string | null;
-            status: 'OPEN' | 'CLOSED';
+            status: 'OPEN' | 'closed';
             branch: { id: number; name: string };
         }[];
         links: { url: string | null; label: string; active: boolean }[];
@@ -142,7 +142,7 @@ export default function Index() {
                         >
                             <option value="">All Status</option>
                             <option value="OPEN">Open</option>
-                            <option value="CLOSED">Closed</option>
+                            <option value="closed">Closed</option>
                         </select>
                     </div>
                 </div>

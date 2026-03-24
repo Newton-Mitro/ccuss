@@ -211,7 +211,7 @@ export default function DebitVoucherEntryPage({
         { value: 'BANK_TRANSFER', label: 'Bank Transfer' },
         { value: 'MOBILE_BANKING', label: 'Mobile Banking' },
         { value: 'CARD', label: 'Card' },
-        { value: 'OTHER', label: 'Other' },
+        { value: 'other', label: 'Other' },
     ];
 
     return (
@@ -276,7 +276,7 @@ export default function DebitVoucherEntryPage({
                                                     label: 'Card',
                                                 },
                                                 {
-                                                    value: 'OTHER',
+                                                    value: 'other',
                                                     label: 'Other',
                                                 },
                                             ]}
@@ -760,7 +760,7 @@ export default function DebitVoucherEntryPage({
                                                 label: 'Mobile Banking',
                                             },
                                             { value: 'CARD', label: 'Card' },
-                                            { value: 'OTHER', label: 'Other' },
+                                            { value: 'other', label: 'Other' },
                                         ]}
                                         onChange={(e) =>
                                             setData(

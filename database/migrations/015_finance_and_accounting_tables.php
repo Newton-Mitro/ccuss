@@ -169,7 +169,7 @@ return new class extends Migration {
             $table->foreignId('rejected_by')->nullable()->constrained('users');
             $table->timestamp('rejected_at')->nullable();
             $table->text('narration')->comment('Description or remarks');
-            $table->enum('status', ['PENDING', 'APPROVED', 'POSTED', 'CANCELLED'])->default('PENDING');
+            $table->enum('status', ['pending', 'APPROVED', 'POSTED', 'CANCELLED'])->default('pending');
             $table->timestamps();
         });
 

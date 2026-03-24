@@ -29,7 +29,7 @@ class VoucherFactory extends Factory
             'CONTRA',
         ];
 
-        $statuses = ['PENDING', 'APPROVED', 'POSTED', 'CANCELLED'];
+        $statuses = ['pending', 'APPROVED', 'POSTED', 'CANCELLED'];
         $status = fake()->randomElement($statuses);
 
         // Create organization

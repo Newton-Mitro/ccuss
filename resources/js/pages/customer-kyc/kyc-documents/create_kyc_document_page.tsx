@@ -11,37 +11,37 @@ import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 
 const DOCUMENT_TYPES = [
-    'NID_FRONT',
-    'NID_BACK',
-    'SMART_NID',
-    'PASSPORT',
-    'DRIVING_LICENSE',
-    'BIRTH_CERTIFICATE',
+    'nid',
+    'nid',
+    'smart_nid',
+    'passport',
+    'driving_license',
+    'birth_certificate',
 
-    'UTILITY_BILL',
-    'ELECTRICITY_BILL',
-    'WATER_BILL',
-    'GAS_BILL',
-    'BANK_STATEMENT',
-    'RENTAL_AGREEMENT',
+    'utility_bill',
+    'electricity_bill',
+    'water_bill',
+    'gas_bill',
+    'bank_statement',
+    'rental_agreement',
 
-    'TIN_CERTIFICATE',
-    'TAX_RETURN',
-    'SALARY_SLIP',
-    'INCOME_CERTIFICATE',
+    'tin_certificate',
+    'tax_return',
+    'salary_slip',
+    'income_certificate',
 
-    'TRADE_LICENSE',
-    'CERTIFICATE_OF_INCORPORATION',
-    'MEMORANDUM_OF_ASSOCIATION',
-    'ARTICLES_OF_ASSOCIATION',
-    'PARTNERSHIP_DEED',
+    'trade_license',
+    'certificate_of_incorporation',
+    'memorandum_of_association',
+    'articles_of_association',
+    'partnership_deed',
 
-    'PHOTO',
-    'SIGNATURE',
-    'LIVE_SELFIE',
+    'photo',
+    'signature',
+    'live_selfie',
 
-    'PEP_DECLARATION',
-    'FATCA_FORM',
+    'pep_declaration',
+    'fatca_form',
 ];
 
 const CreateKycDocument = () => {

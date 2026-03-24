@@ -98,13 +98,13 @@ class Customer extends Model
     public function photo(): HasOne
     {
         return $this->hasOne(KycDocument::class)
-            ->where('document_type', 'PHOTO');
+            ->where('document_type', 'photo');
     }
 
     public function signature(): HasOne
     {
         return $this->hasOne(KycDocument::class)
-            ->where('document_type', 'SIGNATURE');
+            ->where('document_type', 'signature');
     }
 
     /* ========================

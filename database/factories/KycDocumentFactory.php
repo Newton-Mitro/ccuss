@@ -13,39 +13,39 @@ class KycDocumentFactory extends Factory
     public function definition(): array
     {
         $documentTypes = [
-            'NID_FRONT',
-            'NID_BACK',
-            'SMART_NID',
-            'PASSPORT',
-            'DRIVING_LICENSE',
-            'BIRTH_CERTIFICATE',
-            'UTILITY_BILL',
-            'ELECTRICITY_BILL',
-            'WATER_BILL',
-            'GAS_BILL',
-            'BANK_STATEMENT',
-            'RENTAL_AGREEMENT',
-            'TIN_CERTIFICATE',
-            'TAX_RETURN',
-            'SALARY_SLIP',
-            'INCOME_CERTIFICATE',
-            'TRADE_LICENSE',
-            'CERTIFICATE_OF_INCORPORATION',
-            'MEMORANDUM_OF_ASSOCIATION',
-            'ARTICLES_OF_ASSOCIATION',
-            'PARTNERSHIP_DEED',
-            'PHOTO',
-            'SIGNATURE',
-            'LIVE_SELFIE',
-            'PEP_DECLARATION',
-            'FATCA_FORM'
+            'nid',
+            'nid',
+            'smart_nid',
+            'passport',
+            'driving_license',
+            'birth_certificate',
+            'utility_bill',
+            'electricity_bill',
+            'water_bill',
+            'gas_bill',
+            'bank_statement',
+            'rental_agreement',
+            'tin_certificate',
+            'tax_return',
+            'salary_slip',
+            'income_certificate',
+            'trade_license',
+            'certificate_of_incorporation',
+            'memorandum_of_association',
+            'articles_of_association',
+            'partnership_deed',
+            'photo',
+            'signature',
+            'live_selfie',
+            'pep_declaration',
+            'fatca_form'
         ];
 
         $docType = fake()->randomElement($documentTypes);
         $fileName = strtolower($docType) . '_' . Str::random(6) . '.jpg';
         $filePath = 'kyc/' . $fileName;
 
-        $verificationStatuses = ['PENDING', 'VERIFIED', 'REJECTED'];
+        $verificationStatuses = ['pending', 'verified', 'rejected'];
 
         return [
             'document_type' => $docType,
@@ -64,7 +64,7 @@ class KycDocumentFactory extends Factory
     public function verified(): self
     {
         return $this->state(fn(array $attributes) => [
-            'verification_status' => 'VERIFIED',
+            'verification_status' => 'verified',
             'verified_at' => now(),
         ]);
     }
@@ -73,12 +73,12 @@ class KycDocumentFactory extends Factory
     public function rejected(): self
     {
         return $this->state(fn(array $attributes) => [
-            'verification_status' => 'REJECTED',
+            'verification_status' => 'rejected',
             'verified_at' => now(),
         ]);
     }
 
-    /** For specific document type, e.g., PHOTO or SIGNATURE */
+    /** For specific document type, e.g., photo or signature */
     public function type(string $type): self
     {
         return $this->state(fn(array $attributes) => [

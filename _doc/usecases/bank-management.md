@@ -24,7 +24,7 @@
     - Short Name
     - SWIFT Code
     - Routing Number
-    - Status (ACTIVE/INACTIVE)
+    - Status (active/INACTIVE)
 4. Submit form.
 5. System validates input.
 6. System creates record in `banks`.
@@ -74,7 +74,7 @@
     - IBAN
     - Opening Balance
     - Currency
-    - Status (ACTIVE/INACTIVE/CLOSED)
+    - Status (active/INACTIVE/closed)
     - Created By / Approved By
 4. Submit form.
 5. System validates uniqueness of account number.
@@ -127,7 +127,7 @@
     - Amount
     - Payee
     - Cheque Date
-    - Status (PENDING/CLEARED/BOUNCED/CANCELLED)
+    - Status (pending/CLEARED/BOUNCED/CANCELLED)
     - Remarks
     - Created By / Approved By
 4. Submit form.

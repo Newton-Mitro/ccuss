@@ -43,15 +43,15 @@ export default function ShowIntroducer() {
 
     // 🎯 Status badge mapping
     const STATUS_MAP = {
-        VERIFIED: {
+        verified: {
             label: 'Verified',
             class: 'bg-success text-success-foreground',
         },
-        PENDING: {
+        pending: {
             label: 'Pending',
             class: 'bg-warning text-warning-foreground',
         },
-        REJECTED: {
+        rejected: {
             label: 'Rejected',
             class: 'bg-destructive text-destructive-foreground',
         },
@@ -248,7 +248,7 @@ export default function ShowIntroducer() {
                     </div>
 
                     {/* ACTIONS */}
-                    {introducer_request.verification_status === 'PENDING' && (
+                    {introducer_request.verification_status === 'pending' && (
                         <div className="flex gap-2 rounded-md border bg-card p-4">
                             <div className="">
                                 <Input

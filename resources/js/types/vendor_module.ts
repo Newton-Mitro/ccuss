@@ -8,7 +8,7 @@ export interface Vendor {
     email?: string;
     phone?: string;
     website?: string;
-    status: 'ACTIVE' | 'INACTIVE';
+    status: 'active' | 'INACTIVE';
     created_by?: number;
     updated_by?: number;
     created_at: string;
@@ -46,7 +46,7 @@ export interface VendorContact {
     designation?: string;
     email?: string;
     phone?: string;
-    contact_type: 'PRIMARY' | 'SECONDARY' | 'ACCOUNTING' | 'LOGISTICS';
+    contact_type: 'primary' | 'SECONDARY' | 'ACCOUNTING' | 'LOGISTICS';
     created_at: string;
     updated_at: string;
 

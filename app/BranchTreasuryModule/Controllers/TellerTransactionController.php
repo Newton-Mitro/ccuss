@@ -19,12 +19,12 @@ class TellerTransactionController extends Controller
     {
 
         $cashLedger = LedgerAccount::where([
-            ['name', 'Cash In Hand'],
+            ['name', 'Cash & Bank'],
             ['is_active', true],
         ])->first();
 
         $cashControl = LedgerAccount::where([
-            ['name', 'Cash'],
+            ['name', 'Cash in Vault'],
             ['is_control_account', true],
             ['is_active', true],
         ])->first();

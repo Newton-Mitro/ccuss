@@ -48,27 +48,27 @@ class CustomerSeeder extends Seeder
         }
 
         $customersData = array_merge(
-            array_fill(0, 7, 'MALE'),
-            array_fill(0, 10, 'FEMALE'),
-            array_fill(0, 3, 'ORGANIZATION')
+            array_fill(0, 7, 'male'),
+            array_fill(0, 10, 'female'),
+            array_fill(0, 3, 'organization')
         );
 
         $customers = collect();
 
         foreach ($customersData as $index => $type) {
             $customerFactory = match ($type) {
-                'MALE' => Customer::factory()->individualMale(),
-                'FEMALE' => Customer::factory()->individualFemale(),
-                'ORGANIZATION' => Customer::factory()->organization(),
+                'male' => Customer::factory()->individualMale(),
+                'female' => Customer::factory()->individualFemale(),
+                'organization' => Customer::factory()->organization(),
             };
 
             $customer = $customerFactory->create();
             $customers->push($customer);
 
             $photoFile = match ($type) {
-                'MALE' => $malePhotos[$index],
-                'FEMALE' => $femalePhotos[$index - 7],
-                'ORGANIZATION' => $organizationPhotos[$index - 17],
+                'male' => $malePhotos[$index],
+                'female' => $femalePhotos[$index - 7],
+                'organization' => $organizationPhotos[$index - 17],
             };
 
             $photoExt = pathinfo($photoFile, PATHINFO_EXTENSION);
@@ -80,14 +80,14 @@ class CustomerSeeder extends Seeder
             $nidFileName = 'nid_front_' . Str::slug($customer->customer_no) . '.' . $nidExt;
             $disk->putFileAs('customers/nid', $nidFile, $nidFileName);
 
-            if ($type === 'ORGANIZATION') {
-                KycDocument::factory()->for($customer)->type('PHOTO')->verified()->create([
+            if ($type === 'organization') {
+                KycDocument::factory()->for($customer)->type('photo')->verified()->create([
                     'file_name' => $photoFileName,
                     'file_path' => "customers/photos/{$photoFileName}",
                     'mime' => 'image/' . $photoExt,
                 ]);
 
-                KycDocument::factory()->for($customer)->type('TRADE_LICENSE')->create([
+                KycDocument::factory()->for($customer)->type('trade_license')->create([
                     'file_name' => $photoFileName,
                     'file_path' => "customers/photos/{$photoFileName}",
                     'mime' => 'image/' . $photoExt,
@@ -98,19 +98,19 @@ class CustomerSeeder extends Seeder
                 $signatureFileName = 'signature_' . Str::slug($customer->customer_no) . '.' . $signatureExt;
                 $disk->putFileAs('customers/signatures', $signatureFile, $signatureFileName);
 
-                KycDocument::factory()->for($customer)->type('PHOTO')->verified()->create([
+                KycDocument::factory()->for($customer)->type('photo')->verified()->create([
                     'file_name' => $photoFileName,
                     'file_path' => "customers/photos/{$photoFileName}",
                     'mime' => 'image/' . $photoExt,
                 ]);
 
-                KycDocument::factory()->for($customer)->type('SIGNATURE')->verified()->create([
+                KycDocument::factory()->for($customer)->type('signature')->verified()->create([
                     'file_name' => $signatureFileName,
                     'file_path' => "customers/signatures/{$signatureFileName}",
                     'mime' => 'image/' . $signatureExt,
                 ]);
 
-                KycDocument::factory()->for($customer)->type('NID_FRONT')->create([
+                KycDocument::factory()->for($customer)->type('nid')->create([
                     'file_name' => $nidFileName,
                     'file_path' => "customers/nid/{$nidFileName}",
                     'mime' => 'image/' . $nidExt,
@@ -118,7 +118,7 @@ class CustomerSeeder extends Seeder
             }
 
             // Addresses
-            foreach (['CURRENT', 'PERMANENT', 'MAILING'] as $addrType) {
+            foreach (['current', 'permanent', 'mailing'] as $addrType) {
                 CustomerAddress::factory()->for($customer)->create(['type' => $addrType]);
             }
 
@@ -134,33 +134,33 @@ class CustomerSeeder extends Seeder
                 'introduced_customer_id' => $customer->id,
                 'introducer_customer_id' => $introducer->id,
                 'introducer_account_id' => null,
-                'relationship_type' => collect(['FAMILY', 'FRIEND', 'BUSINESS', 'COLLEAGUE', 'OTHER'])->random(),
+                'relationship_type' => collect(['family', 'friend', 'business', 'colleague', 'other'])->random(),
                 'verified_at' => now(),
             ]);
         }
 
         // Family relations
         foreach ($customers as $customer) {
-            if ($customer->type === 'ORGANIZATION')
+            if ($customer->type === 'organization')
                 continue;
 
             $relatives = $customers
                 ->where('id', '!=', $customer->id)
-                ->where('type', 'INDIVIDUAL')
+                ->where('type', 'individual')
                 ->shuffle()
                 ->take(rand(2, 4));
 
             foreach ($relatives as $relative) {
                 $relationshipOptions = [];
 
-                if ($customer->gender === 'MALE') {
-                    $relationshipOptions = $relative->gender === 'MALE'
-                        ? ['FATHER', 'BROTHER', 'SON', 'GRANDFATHER', 'UNCLE', 'NEPHEW', 'FATHER_IN_LAW', 'SON_IN_LAW', 'BROTHER_IN_LAW']
-                        : ['MOTHER', 'SISTER', 'DAUGHTER', 'WIFE', 'GRANDMOTHER', 'AUNT', 'NIECE', 'MOTHER_IN_LAW', 'DAUGHTER_IN_LAW', 'SISTER_IN_LAW'];
-                } elseif ($customer->gender === 'FEMALE') {
-                    $relationshipOptions = $relative->gender === 'MALE'
-                        ? ['FATHER', 'BROTHER', 'SON', 'HUSBAND', 'GRANDFATHER', 'UNCLE', 'NEPHEW', 'FATHER_IN_LAW', 'SON_IN_LAW', 'BROTHER_IN_LAW']
-                        : ['MOTHER', 'SISTER', 'DAUGHTER', 'WIFE', 'GRANDMOTHER', 'AUNT', 'NIECE', 'MOTHER_IN_LAW', 'DAUGHTER_IN_LAW', 'SISTER_IN_LAW'];
+                if ($customer->gender === 'male') {
+                    $relationshipOptions = $relative->gender === 'male'
+                        ? ['father', 'brother', 'son', 'grandfather', 'uncle', 'nephew', 'father_in_law', 'son_in_law', 'brother_in_law']
+                        : ['mother', 'sister', 'daughter', 'wife', 'grandmother', 'aunt', 'niece', 'mother_in_law', 'daughter_in_law', 'sister_in_law'];
+                } elseif ($customer->gender === 'female') {
+                    $relationshipOptions = $relative->gender === 'male'
+                        ? ['father', 'brother', 'son', 'husband', 'grandfather', 'uncle', 'nephew', 'father_in_law', 'son_in_law', 'brother_in_law']
+                        : ['mother', 'sister', 'daughter', 'wife', 'grandmother', 'aunt', 'niece', 'mother_in_law', 'daughter_in_law', 'sister_in_law'];
                 }
 
                 CustomerFamilyRelation::firstOrCreate([

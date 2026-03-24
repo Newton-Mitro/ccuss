@@ -179,11 +179,11 @@ return new class extends Migration {
             $table->decimal('total_amount', 18, 2);
 
             $table->enum('status', [
-                'PENDING',
+                'pending',
                 'PARTIALLY_PAID',
-                'PAID',
+                'paid',
                 'CANCELLED'
-            ])->default('PENDING');
+            ])->default('pending');
 
             $table->text('notes')->nullable();
 

@@ -127,12 +127,12 @@ const Edit = () => {
                             className="h-8 w-full rounded-md border bg-background px-2 text-sm"
                         >
                             <option value="">Select</option>
-                            <option>CURRENT</option>
-                            <option>PERMANENT</option>
-                            <option>MAILING</option>
-                            <option>WORK</option>
-                            <option>REGISTERED</option>
-                            <option>OTHER</option>
+                            <option>current</option>
+                            <option>permanent</option>
+                            <option>mailing</option>
+                            <option>work</option>
+                            <option>registered</option>
+                            <option>other</option>
                         </select>
                         <InputError message={errors.type} />
                     </div>

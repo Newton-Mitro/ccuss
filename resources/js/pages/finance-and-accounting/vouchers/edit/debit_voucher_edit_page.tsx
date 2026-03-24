@@ -592,7 +592,7 @@ export default function EditDebitVoucherEntry({
                                                         label: 'Cheque',
                                                     },
                                                     {
-                                                        value: 'OTHER',
+                                                        value: 'other',
                                                         label: 'Other',
                                                     },
                                                 ]}

@@ -311,7 +311,7 @@ End teller work session.
 
 ### Postconditions
 
-- Teller session becomes `CLOSED`
+- Teller session becomes `closed`
 
 ---
 
@@ -368,7 +368,7 @@ End branch financial operations.
 
 ### Postconditions
 
-- Branch day status becomes `CLOSED`
+- Branch day status becomes `closed`
 
 ---
 

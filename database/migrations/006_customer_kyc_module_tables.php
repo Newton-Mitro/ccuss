@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->foreignId('branch_id')->constrained();
 
             $table->string('customer_no', 50)->unique()->comment('Unique customer number');
-            $table->enum('type', ['INDIVIDUAL', 'ORGANIZATION'])->comment('Customer type');
+            $table->enum('type', ['individual', 'organization'])->comment('Customer type');
             $table->string('name', 150);
             $table->string('phone', 50)->nullable();
             $table->string('email', 100)->nullable();
@@ -22,21 +22,21 @@ return new class extends Migration {
                 'NID',
                 'BRN',
                 'REGISTRATION_NO',
-                'PASSPORT',
-                'DRIVING_LICENSE'
+                'passport',
+                'driving_license'
             ]);
             $table->string('identification_number', 50);
 
             $table->date('dob')->nullable();
-            $table->enum('gender', ['MALE', 'FEMALE', 'OTHER'])->nullable();
-            $table->enum('marital_status', ['SINGLE', 'MARRIED', 'WIDOWED', 'DIVORCED', 'OTHER'])->nullable();
+            $table->enum('gender', ['male', 'female', 'other'])->nullable();
+            $table->enum('marital_status', ['single', 'merried', 'widowed', 'devorced', 'other'])->nullable();
             $table->enum('blood_group', ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'])->nullable();
             $table->string('nationality', 100)->nullable();
             $table->string('occupation', 100)->nullable();
             $table->string('education', 100)->nullable();
-            $table->enum('religion', ['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER'])->nullable();
+            $table->enum('religion', ['christianity', 'islam', 'hinduism', 'buddhism', 'other'])->nullable();
 
-            $table->enum('kyc_status', ['PENDING', 'VERIFIED', 'REJECTED'])->default('PENDING');
+            $table->enum('kyc_status', ['pending', 'verified', 'rejected'])->default('pending');
             // Audit
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
@@ -54,7 +54,7 @@ return new class extends Migration {
             $table->string('union_ward', 100)->nullable();
             $table->string('postal_code', 20)->nullable();
             $table->string('country', 150)->default('Bangladesh');
-            $table->enum('type', ['CURRENT', 'PERMANENT', 'MAILING', 'WORK', 'REGISTERED', 'OTHER']);
+            $table->enum('type', ['current', 'permanent', 'mailing', 'work', 'registered', 'other']);
             // Audit
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
@@ -69,33 +69,33 @@ return new class extends Migration {
             $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
             $table->foreignId('relative_id')->constrained('customers');
             $table->enum('relation_type', [
-                'FATHER',
-                'MOTHER',
-                'SON',
-                'DAUGHTER',
-                'BROTHER',
-                'SISTER',
-                'HUSBAND',
-                'WIFE',
-                'GRANDFATHER',
-                'GRANDMOTHER',
-                'UNCLE',
-                'AUNT',
-                'NEPHEW',
-                'NIECE',
-                'FATHER_IN_LAW',
-                'MOTHER_IN_LAW',
-                'SON_IN_LAW',
-                'DAUGHTER_IN_LAW',
-                'BROTHER_IN_LAW',
-                'SISTER_IN_LAW'
+                'father',
+                'mother',
+                'son',
+                'daughter',
+                'brother',
+                'sister',
+                'husband',
+                'wife',
+                'grandfather',
+                'grandmother',
+                'uncle',
+                'aunt',
+                'nephew',
+                'niece',
+                'father_in_law',
+                'mother_in_law',
+                'son_in_law',
+                'daughter_in_law',
+                'brother_in_law',
+                'sister_in_law'
             ]);
 
             // Prevent duplicate linkage
             $table->unique(['customer_id', 'relative_id'], 'uq_customer_relative');
 
             // Verification
-            $table->enum('verification_status', ['PENDING', 'VERIFIED', 'REJECTED'])->default('PENDING');
+            $table->enum('verification_status', ['pending', 'verified', 'rejected'])->default('pending');
             $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('verified_at')->nullable();
             $table->text('remarks')->nullable();
@@ -109,8 +109,8 @@ return new class extends Migration {
         Schema::create('kyc_profiles', function (Blueprint $table) {
             $table->id();
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
-            $table->enum('kyc_level', ['BASIC', 'FULL', 'ENHANCED'])->default('BASIC');
-            $table->enum('risk_level', ['LOW', 'MEDIUM', 'HIGH'])->default('LOW');
+            $table->enum('kyc_level', ['basic', 'full', 'enhanced'])->default('basic');
+            $table->enum('risk_level', ['low', 'medium', 'high'])->default('low');
             $table->timestamps();
         });
 
@@ -118,44 +118,43 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('customer_id')->constrained();
             $table->enum('document_type', [
-                'NID_FRONT',
-                'NID_BACK',
-                'SMART_NID',
-                'PASSPORT',
-                'DRIVING_LICENSE',
-                'BIRTH_CERTIFICATE',
+                'nid',
+                'smart_nid',
+                'passport',
+                'driving_license',
+                'birth_certificate',
 
-                'UTILITY_BILL',
-                'ELECTRICITY_BILL',
-                'WATER_BILL',
-                'GAS_BILL',
-                'BANK_STATEMENT',
-                'RENTAL_AGREEMENT',
+                'utility_bill',
+                'electricity_bill',
+                'water_bill',
+                'gas_bill',
+                'bank_statement',
+                'rental_agreement',
 
-                'TIN_CERTIFICATE',
-                'TAX_RETURN',
-                'SALARY_SLIP',
-                'INCOME_CERTIFICATE',
+                'tin_certificate',
+                'tax_return',
+                'salary_slip',
+                'income_certificate',
 
-                'TRADE_LICENSE',
-                'CERTIFICATE_OF_INCORPORATION',
-                'MEMORANDUM_OF_ASSOCIATION',
-                'ARTICLES_OF_ASSOCIATION',
-                'PARTNERSHIP_DEED',
+                'trade_license',
+                'certificate_of_incorporation',
+                'memorandum_of_association',
+                'articles_of_association',
+                'partnership_deed',
 
-                'PHOTO',
-                'SIGNATURE',
-                'LIVE_SELFIE',
+                'photo',
+                'signature',
+                'live_selfie',
 
-                'PEP_DECLARATION',
-                'FATCA_FORM'
+                'pep_declaration',
+                'fatca_form'
             ]);
             $table->string('file_name');
             $table->string('file_path');
             $table->string('mime');
             $table->string('alt_text')->nullable();
             // Verification
-            $table->enum('verification_status', ['PENDING', 'VERIFIED', 'REJECTED'])->default('PENDING');
+            $table->enum('verification_status', ['pending', 'verified', 'rejected'])->default('pending');
             $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('verified_at')->nullable();
             $table->text('remarks')->nullable();
@@ -175,15 +174,15 @@ return new class extends Migration {
             $table->foreignId('introducer_account_id')->nullable();
 
             $table->enum('relationship_type', [
-                'FAMILY',
-                'FRIEND',
-                'BUSINESS',
-                'COLLEAGUE',
-                'OTHER'
-            ])->default('OTHER');
+                'family',
+                'friend',
+                'business',
+                'colleague',
+                'other'
+            ])->default('other');
 
             // Verification
-            $table->enum('verification_status', ['PENDING', 'VERIFIED', 'REJECTED'])->default('PENDING');
+            $table->enum('verification_status', ['pending', 'verified', 'rejected'])->default('pending');
             $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('verified_at')->nullable();
             $table->text('remarks')->nullable();

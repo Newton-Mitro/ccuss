@@ -288,7 +288,7 @@ Cash discrepancy formally recorded and approved.
 
 ## Result
 
-Session status updated to `CLOSED`.
+Session status updated to `closed`.
 
 ---
 
@@ -347,7 +347,7 @@ Balances of both vaults updated.
 
 ## Result
 
-Branch day status updated to `CLOSED`.
+Branch day status updated to `closed`.
 
 ---
 
@@ -417,7 +417,7 @@ This document outlines all possible cash-related transactions in the system and 
 
 - **Action:** Close branch at end of day.
 - **Affected Tables:**
-    - `branch_days` → status set to `CLOSED`, `closed_at`, `closed_by`
+    - `branch_days` → status set to `closed`, `closed_at`, `closed_by`
     - `cash_audit_logs` → log `"BRANCH_CLOSED"`
 
 ---
@@ -436,7 +436,7 @@ This document outlines all possible cash-related transactions in the system and 
 
 - **Action:** Teller ends shift, reports closing cash.
 - **Affected Tables:**
-    - `teller_sessions` → `status = CLOSED`, `closing_cash`, `closed_at`
+    - `teller_sessions` → `status = closed`, `closing_cash`, `closed_at`
     - `cash_drawers` → `closing_balance`
     - `cash_balancings` → record expected vs actual cash, difference
     - `cash_audit_logs` → `"TELLER_SESSION_CLOSED"`, `"CASH_BALANCED"`

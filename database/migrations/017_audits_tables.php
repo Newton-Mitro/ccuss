@@ -77,10 +77,10 @@ return new class extends Migration {
             $table->string('storage_disk')->default('local');
 
             $table->enum('backup_type', [
-                'FULL',
+                'full',
                 'DATABASE_ONLY',
                 'FILES_ONLY'
-            ])->default('FULL');
+            ])->default('full');
 
             $table->enum('status', [
                 'RUNNING',

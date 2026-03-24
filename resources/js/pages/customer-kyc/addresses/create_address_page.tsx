@@ -132,12 +132,12 @@ const Create = () => {
                             className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
                         >
                             <option value="">Select</option>
-                            <option>CURRENT</option>
-                            <option>PERMANENT</option>
-                            <option>MAILING</option>
-                            <option>WORK</option>
-                            <option>REGISTERED</option>
-                            <option>OTHER</option>
+                            <option>current</option>
+                            <option>permanent</option>
+                            <option>mailing</option>
+                            <option>work</option>
+                            <option>registered</option>
+                            <option>other</option>
                         </select>
                         <InputError message={errors.type} />
                     </div>

@@ -118,7 +118,7 @@ class CustomerIntroducerController extends Controller
 
             'relationship_type' => [
                 'required',
-                Rule::in(['FAMILY', 'FRIEND', 'BUSINESS', 'COLLEAGUE', 'OTHER']),
+                Rule::in(['family', 'friend', 'business', 'colleague', 'other']),
             ],
 
             'remarks' => ['nullable', 'string'],
@@ -143,7 +143,7 @@ class CustomerIntroducerController extends Controller
 
         $introducer = CustomerIntroducer::create([
             ...$data,
-            'verification_status' => 'PENDING',
+            'verification_status' => 'pending',
             'created_by' => auth()->id(),
         ]);
 
@@ -159,7 +159,7 @@ class CustomerIntroducerController extends Controller
         $data = $request->validate([
             'relationship_type' => [
                 'required',
-                Rule::in(['FAMILY', 'FRIEND', 'BUSINESS', 'COLLEAGUE', 'OTHER']),
+                Rule::in(['family', 'friend', 'business', 'colleague', 'other']),
             ],
             'remarks' => ['nullable', 'string'],
         ]);
@@ -181,7 +181,7 @@ class CustomerIntroducerController extends Controller
         $data = $request->validate([
             'verification_status' => [
                 'required',
-                Rule::in(['VERIFIED', 'REJECTED']),
+                Rule::in(['verified', 'rejected']),
             ],
             'remarks' => ['nullable', 'string'],
         ]);
@@ -208,12 +208,12 @@ class CustomerIntroducerController extends Controller
 
     public function approve(CustomerIntroducer $introducer)
     {
-        if ($introducer->verification_status === 'VERIFIED') {
+        if ($introducer->verification_status === 'verified') {
             return redirect()->back()->with('info', 'Already verified.');
         }
 
         $introducer->update([
-            'verification_status' => 'VERIFIED',
+            'verification_status' => 'verified',
             'verified_at' => now(),
             'verified_by' => auth()->id(),
             'rejection_reason' => null, // reset if previously rejected
@@ -228,12 +228,12 @@ class CustomerIntroducerController extends Controller
             'rejection_reason' => ['required', 'string', 'max:500'],
         ]);
 
-        if ($introducer->verification_status === 'REJECTED') {
+        if ($introducer->verification_status === 'rejected') {
             return redirect()->back()->with('info', 'Already rejected.');
         }
 
         $introducer->update([
-            'verification_status' => 'REJECTED',
+            'verification_status' => 'rejected',
             'verified_at' => now(),
             'verified_by' => auth()->id(),
             'rejection_reason' => $request->rejection_reason,

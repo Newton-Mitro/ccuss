@@ -20,7 +20,7 @@ interface TellerSessionPageProps {
             id: number;
             opening_cash: number;
             closing_cash: number | null;
-            status: 'OPEN' | 'CLOSED';
+            status: 'OPEN' | 'closed';
             opened_at: string;
             closed_at: string | null;
             teller: { id: number; name: string };
@@ -137,7 +137,7 @@ export default function TellerSessionsIndexPage() {
                     >
                         <option value="">All Status</option>
                         <option value="OPEN">Open</option>
-                        <option value="CLOSED">Closed</option>
+                        <option value="closed">Closed</option>
                     </select>
                 </div>
 

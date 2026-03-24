@@ -15,23 +15,23 @@ class CustomerFactory extends Factory
 
     public function definition(): array
     {
-        $type = fake()->randomElement(['INDIVIDUAL', 'ORGANIZATION']);
+        $type = fake()->randomElement(['individual', 'organization']);
 
-        $gender = $type === 'INDIVIDUAL'
-            ? fake()->randomElement(['MALE', 'FEMALE', 'OTHER', null])
+        $gender = $type === 'individual'
+            ? fake()->randomElement(['male', 'female', 'other', null])
             : null;
 
-        $name = $type === 'ORGANIZATION'
+        $name = $type === 'organization'
             ? fake()->company()
             : match ($gender) {
-                'MALE' => fake()->firstNameMale() . ' ' . fake()->lastName(),
-                'FEMALE' => fake()->firstNameFemale() . ' ' . fake()->lastName(),
+                'male' => fake()->firstNameMale() . ' ' . fake()->lastName(),
+                'female' => fake()->firstNameFemale() . ' ' . fake()->lastName(),
                 default => fake()->name(),
             };
 
-        $prefix = $type === 'INDIVIDUAL' ? 'IND' : 'ORG';
+        $prefix = $type === 'individual' ? 'IND' : 'ORG';
 
-        $individualIds = ['NID', 'BRN', 'PASSPORT', 'DRIVING_LICENSE'];
+        $individualIds = ['NID', 'BRN', 'passport', 'driving_license'];
         $organizationIds = ['REGISTRATION_NO'];
 
         // Pick a random organization and branch
@@ -48,18 +48,18 @@ class CustomerFactory extends Factory
             'name' => $name,
             'phone' => fake()->phoneNumber(),
             'email' => fake()->safeEmail(),
-            'dob' => $type === 'INDIVIDUAL'
+            'dob' => $type === 'individual'
                 ? fake()->dateTimeBetween('-65 years', '-18 years')->format('Y-m-d')
                 : null,
             'gender' => $gender,
-            'religion' => $type === 'INDIVIDUAL'
-                ? fake()->randomElement(['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER'])
+            'religion' => $type === 'individual'
+                ? fake()->randomElement(['christianity', 'islam', 'hinduism', 'buddhism', 'other'])
                 : null,
-            'identification_type' => $type === 'INDIVIDUAL'
+            'identification_type' => $type === 'individual'
                 ? fake()->randomElement($individualIds)
                 : fake()->randomElement($organizationIds),
             'identification_number' => strtoupper(Str::random(12)),
-            'kyc_status' => 'PENDING',
+            'kyc_status' => 'pending',
             'created_by' => $creator->id ?? null,
             'updated_by' => $creator->id ?? null,
         ];
@@ -68,33 +68,33 @@ class CustomerFactory extends Factory
     public function individualMale()
     {
         return $this->state(fn(array $attributes) => [
-            'type' => 'INDIVIDUAL',
-            'gender' => 'MALE',
+            'type' => 'individual',
+            'gender' => 'male',
             'name' => fake()->firstNameMale() . ' ' . fake()->lastName(),
             'customer_no' => 'IND-' . fake()->unique()->numberBetween(1, 99999),
             'dob' => fake()->dateTimeBetween('-65 years', '-18 years')->format('Y-m-d'),
-            'religion' => fake()->randomElement(['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER']),
-            'identification_type' => fake()->randomElement(['NID', 'BRN', 'PASSPORT', 'DRIVING_LICENSE']),
+            'religion' => fake()->randomElement(['christianity', 'islam', 'hinduism', 'buddhism', 'other']),
+            'identification_type' => fake()->randomElement(['NID', 'BRN', 'passport', 'driving_license']),
         ]);
     }
 
     public function individualFemale()
     {
         return $this->state(fn(array $attributes) => [
-            'type' => 'INDIVIDUAL',
-            'gender' => 'FEMALE',
+            'type' => 'individual',
+            'gender' => 'female',
             'name' => fake()->firstNameFemale() . ' ' . fake()->lastName(),
             'customer_no' => 'IND-' . fake()->unique()->numberBetween(1, 99999),
             'dob' => fake()->dateTimeBetween('-65 years', '-18 years')->format('Y-m-d'),
-            'religion' => fake()->randomElement(['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER']),
-            'identification_type' => fake()->randomElement(['NID', 'BRN', 'PASSPORT', 'DRIVING_LICENSE']),
+            'religion' => fake()->randomElement(['christianity', 'islam', 'hinduism', 'buddhism', 'other']),
+            'identification_type' => fake()->randomElement(['NID', 'BRN', 'passport', 'driving_license']),
         ]);
     }
 
     public function organization()
     {
         return $this->state(fn(array $attributes) => [
-            'type' => 'ORGANIZATION',
+            'type' => 'organization',
             'gender' => null,
             'name' => fake()->company(),
             'customer_no' => 'ORG-' . fake()->unique()->numberBetween(1, 99999),
