@@ -1,4 +1,5 @@
 import { AuditFields } from './base_types';
+import { User } from './user';
 
 export type AuditEvent = 'created' | 'updated' | 'deleted';
 
@@ -14,6 +15,7 @@ export interface Audit extends AuditFields {
 
     // Actor & context
     user_id: number | null;
+    user?: User | null;
 
     // Action type
     event: AuditEvent;
@@ -42,6 +44,6 @@ export type AuditChange = {
 export type AuditBatch = {
     batch_id: string;
     event_at: string;
-    creator: { id: number; name: string };
+    user?: User;
     changes: AuditChange[];
 };

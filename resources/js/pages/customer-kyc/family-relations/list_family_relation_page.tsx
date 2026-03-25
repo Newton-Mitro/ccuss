@@ -177,7 +177,7 @@ export default function FamilyRelationIndex() {
                                                                     'family-relations.show',
                                                                     f.id,
                                                                 )}
-                                                                className="text-gray-500"
+                                                                className="text-info"
                                                             >
                                                                 <Eye className="h-5 w-5" />
                                                             </Link>
@@ -260,7 +260,7 @@ export default function FamilyRelationIndex() {
                             <div className="mt-2 flex justify-end gap-3">
                                 <Link
                                     href={route('family-relations.show', f.id)}
-                                    className="text-gray-500"
+                                    className="text-info"
                                 >
                                     <Eye className="h-5 w-5" />
                                 </Link>

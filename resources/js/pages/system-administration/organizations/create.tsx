@@ -1,5 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
-import React from 'react';
+import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
@@ -29,7 +29,29 @@ function CreateOrganization() {
         report_header_line1: '',
         report_header_line2: '',
         report_footer: '',
+        logo: null as File | null,
     });
+
+    const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+
+    const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            if (!file) return;
+            // Validate type
+            if (!file.type.startsWith('image/')) {
+                alert('Only image files are allowed');
+                return;
+            }
+            // Optional: limit size (e.g., 3MB)
+            if (file.size > 3 * 1024 * 1024) {
+                alert('Image must be less than 2MB');
+                return;
+            }
+            setData('logo', file);
+            setPhotoPreview(URL.createObjectURL(file));
+        }
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -50,7 +72,7 @@ function CreateOrganization() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Organization" />
 
-            <div className="animate-in fade-in space-y-8 text-foreground">
+            <div className="text-foreground">
                 <HeadingSmall
                     title="Create Organization"
                     description="Fill in the organization details below to register a new organization."
@@ -58,14 +80,39 @@ function CreateOrganization() {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="bg-card/80 space-y-5 rounded-xl border p-8 shadow-sm backdrop-blur-sm transition-all duration-300"
+                    className="mt-4 space-y-3 rounded-xl border bg-card p-8 shadow-sm backdrop-blur-sm transition-all duration-300"
                 >
                     {/* Basic Details */}
                     <div>
-                        <h3 className="text-lg font-semibold text-primary">
+                        <div className="mb-4 flex flex-col gap-4">
+                            {photoPreview ? (
+                                <img
+                                    src={photoPreview}
+                                    alt="Preview"
+                                    className="h-32 w-32 rounded-md border object-cover sm:h-36 sm:w-36"
+                                />
+                            ) : (
+                                <div className="h-32 w-32 rounded-md border bg-muted sm:h-36 sm:w-36">
+                                    <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
+                                        No Photo
+                                    </div>
+                                </div>
+                            )}
+                            <div>
+                                <Label className="text-xs">Upload Photo</Label>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handlePhotoChange}
+                                    className="block w-full text-sm text-muted-foreground"
+                                />
+                                <InputError message={errors.logo} />
+                            </div>
+                        </div>
+                        <h3 className="text-lg font-semibold text-info">
                             Basic Details
                         </h3>
-                        <div className="grid grid-cols-1 gap-5 md:grid-cols-4">
+                        <div className="grid grid-cols-1 gap-x-5 md:grid-cols-4">
                             <div>
                                 <Label>Organization Code</Label>
                                 <Input
@@ -138,10 +185,10 @@ function CreateOrganization() {
 
                     {/* Contact & Address */}
                     <div>
-                        <h3 className="text-lg font-semibold text-primary">
+                        <h3 className="text-lg font-semibold text-info">
                             Contact & Address
                         </h3>
-                        <div className="grid grid-cols-1 gap-5 md:grid-cols-4">
+                        <div className="grid grid-cols-1 gap-x-5 md:grid-cols-4">
                             <div>
                                 <Label>Phone</Label>
                                 <Input
@@ -181,7 +228,7 @@ function CreateOrganization() {
                                 <InputError message={errors.website} />
                             </div>
 
-                            <div className="md:col-span-2">
+                            <div className="">
                                 <Label>Address Line 1</Label>
                                 <Input
                                     value={data.address_line1}
@@ -194,7 +241,7 @@ function CreateOrganization() {
                                 <InputError message={errors.address_line1} />
                             </div>
 
-                            <div className="md:col-span-2">
+                            <div className="">
                                 <Label>Address Line 2</Label>
                                 <Input
                                     value={data.address_line2}
@@ -263,10 +310,10 @@ function CreateOrganization() {
 
                     {/* Report Header/Footer */}
                     <div>
-                        <h3 className="text-lg font-semibold text-primary">
+                        <h3 className="text-lg font-semibold text-info">
                             Report Header/Footer
                         </h3>
-                        <div className="grid grid-cols-1 gap-5 md:grid-cols-4">
+                        <div className="grid grid-cols-1 gap-x-5 md:grid-cols-4">
                             <div>
                                 <Label>Report Header Line 1</Label>
                                 <Input
@@ -322,7 +369,7 @@ function CreateOrganization() {
                         <Button
                             type="submit"
                             disabled={processing}
-                            className="hover:bg-primary/90 w-40 bg-primary text-primary-foreground transition-all duration-300 hover:shadow-md"
+                            className="w-40 bg-primary text-info-foreground transition-all duration-300 hover:bg-primary/90 hover:shadow-md"
                         >
                             {processing ? 'Saving...' : 'Create Organization'}
                         </Button>

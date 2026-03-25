@@ -17,7 +17,7 @@ class AuditLogController extends Controller
         $perPage = $request->input('per_page', 10);
 
         $audits = AuditLog::query()
-            ->with('creator')
+            ->with('user')
             ->when($request->event, fn($q) => $q->where('event', $request->event))
             ->when($request->user_id, fn($q) => $q->where('user_id', $request->user_id))
             ->whereIn('id', function ($query) {
@@ -53,7 +53,7 @@ class AuditLogController extends Controller
             ->join('audit_logs as b', 'b.batch_id', '=', 'a.batch_id')
             ->where('b.auditable_type', $validated['type'])
             ->where('b.auditable_id', $validated['id'])
-            ->with('creator')
+            ->with('user')
             ->orderBy('a.created_at')
             ->get()
             ->groupBy('batch_id')
@@ -73,7 +73,7 @@ class AuditLogController extends Controller
     public function batch(string $batchId)
     {
         $audits = AuditLog::where('batch_id', $batchId)
-            ->with('creator')
+            ->with('user')
             ->orderBy('created_at')
             ->get();
 

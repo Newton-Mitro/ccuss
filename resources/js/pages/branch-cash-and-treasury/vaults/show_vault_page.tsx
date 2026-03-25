@@ -65,33 +65,33 @@ export default function ShowVaultPage({ vault }: Props) {
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div>
-                        <p className="text-sm text-gray-500">Vault Name</p>
+                        <p className="text-sm text-info">Vault Name</p>
                         <p className="font-medium">{vault.name}</p>
                     </div>
 
                     <div>
-                        <p className="text-sm text-gray-500">Branch</p>
+                        <p className="text-sm text-info">Branch</p>
                         <p className="font-medium">
                             {vault.branch?.name ?? '—'}
                         </p>
                     </div>
 
                     <div>
-                        <p className="text-sm text-gray-500">Total Balance</p>
+                        <p className="text-sm text-info">Total Balance</p>
                         <p className="font-medium">
                             {Number(vault.total_balance).toLocaleString()}
                         </p>
                     </div>
 
                     <div>
-                        <p className="text-sm text-gray-500">Created At</p>
+                        <p className="text-sm text-info">Created At</p>
                         <p className="font-medium">
                             {new Date(vault.created_at).toLocaleString()}
                         </p>
                     </div>
 
                     <div>
-                        <p className="text-sm text-gray-500">Last Updated</p>
+                        <p className="text-sm text-info">Last Updated</p>
                         <p className="font-medium">
                             {new Date(vault.updated_at).toLocaleString()}
                         </p>

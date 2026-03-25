@@ -94,7 +94,7 @@ export default function Index() {
 
                 {/* Desktop Table */}
                 <div className="hidden h-[calc(100vh-360px)] overflow-auto rounded-md border md:block md:h-[calc(100vh-300px)]">
-                    <table className="w-full min-w-[600px] border-collapse text-sm">
+                    <table className="w-full min-w-150 border-collapse text-sm">
                         <thead className="sticky top-0 bg-muted">
                             <tr>
                                 {[
@@ -139,7 +139,7 @@ export default function Index() {
                                             #{a.auditable_id}
                                         </td>
                                         <td className="px-2 py-2">
-                                            {a.creator?.name ?? '-'}
+                                            {a.user?.name ?? '-'}
                                         </td>
                                         <td className="px-2 py-2">
                                             <TooltipProvider>
@@ -153,7 +153,7 @@ export default function Index() {
                                                                         a.auditable_id,
                                                                     )
                                                                 }
-                                                                className="text-primary hover:text-primary/80"
+                                                                className="text-info"
                                                             >
                                                                 <ListChecks className="h-5 w-5" />
                                                             </button>
@@ -211,7 +211,7 @@ export default function Index() {
                                     <div className="text-sm font-medium">
                                         {a.event}
                                     </div>
-                                    <div className="text-xs text-gray-500">
+                                    <div className="text-xs text-info">
                                         {formatDateTime(a.created_at)}
                                     </div>
                                 </div>

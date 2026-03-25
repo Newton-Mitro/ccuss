@@ -24,7 +24,7 @@ export default function Batch({ batch }: BatchPageProps) {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <HeadingSmall
                         title={`Audit Batch ${batch.batch_id}`}
-                        description={`Performed by ${batch.creator?.name ?? '-'} · ${formatDateTime(batch.event_at)}`}
+                        description={`Performed by ${batch.user?.name ?? '-'} · ${formatDateTime(batch.event_at)}`}
                     />
                 </div>
 
@@ -46,7 +46,7 @@ export default function Batch({ batch }: BatchPageProps) {
                                     <div className="mb-1 font-semibold text-muted-foreground">
                                         Old
                                     </div>
-                                    <pre className="bg-muted/20 max-h-40 overflow-auto rounded-md border p-2 text-xs">
+                                    <pre className="max-h-40 overflow-auto rounded-md border bg-muted/20 p-2 text-xs">
                                         {JSON.stringify(c.old, null, 2)}
                                     </pre>
                                 </div>
@@ -56,7 +56,7 @@ export default function Batch({ batch }: BatchPageProps) {
                                     <div className="mb-1 font-semibold text-muted-foreground">
                                         New
                                     </div>
-                                    <pre className="bg-muted/20 max-h-40 overflow-auto rounded-md border p-2 text-xs">
+                                    <pre className="max-h-40 overflow-auto rounded-md border bg-muted/20 p-2 text-xs">
                                         {JSON.stringify(c.new, null, 2)}
                                     </pre>
                                 </div>

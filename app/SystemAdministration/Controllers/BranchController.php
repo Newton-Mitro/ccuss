@@ -56,7 +56,7 @@ class BranchController extends Controller
 
     public function edit(Branch $branch): Response
     {
-        return Inertia::render('branches/edit', [
+        return Inertia::render('system-administration/branches/edit', [
             'branch' => $branch->load('manager'),
         ]);
     }

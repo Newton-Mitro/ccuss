@@ -2,7 +2,7 @@ import { SidebarItem } from '../../types';
 
 export const branchCashAndTreasuryMenu: SidebarItem[] = [
     {
-        name: 'Branch Cash / Treasury',
+        name: 'Branch Treasury & Cash',
         icon: <i className="fa-solid fa-money-bill-transfer" />,
         children_expanded: false,
         permission: ['cash.branch.view'],

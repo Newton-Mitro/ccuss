@@ -96,7 +96,7 @@ export const LedgerSearch: React.FC<LedgerSearchProps> = ({
                             }}
                         >
                             {ledger.code && (
-                                <span className="font-mono text-xs text-gray-500">
+                                <span className="font-mono text-xs text-info">
                                     {ledger.name}
                                 </span>
                             )}
@@ -106,7 +106,7 @@ export const LedgerSearch: React.FC<LedgerSearchProps> = ({
             )}
 
             {showDropdown && query && results.length === 0 && (
-                <div className="absolute z-10 mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm text-gray-500">
+                <div className="absolute z-10 mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm text-info">
                     No ledger matches found.
                 </div>
             )}

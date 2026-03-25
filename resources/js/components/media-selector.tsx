@@ -4,7 +4,12 @@ import { Media } from '@/types/media';
 import { FolderOpen, Trash2 } from 'lucide-react';
 import * as React from 'react';
 import InputError from './input-error';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from './ui/tooltip';
 
 interface MediaSelectorProps {
     media?: Media | null;
@@ -15,12 +20,21 @@ interface MediaSelectorProps {
     error?: string;
 }
 
-const MediaSelector: React.FC<MediaSelectorProps> = ({ media, onSelect, onRemove, label = 'Media', className = 'grid gap-2 w-48', error }) => {
+const MediaSelector: React.FC<MediaSelectorProps> = ({
+    media,
+    onSelect,
+    onRemove,
+    label = 'Media',
+    className = 'grid gap-2 w-48',
+    error,
+}) => {
     const renderPreview = () => {
         if (!media) {
             return (
                 <div className="flex w-48 items-center justify-center rounded border border-dashed border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800">
-                    <p className="p-4 text-sm text-gray-400 dark:text-gray-300">No media selected</p>
+                    <p className="p-4 text-sm text-gray-400 dark:text-gray-300">
+                        No media selected
+                    </p>
                 </div>
             );
         }
@@ -34,7 +48,12 @@ const MediaSelector: React.FC<MediaSelectorProps> = ({ media, onSelect, onRemove
             return (
                 <div className="flex w-48 flex-col items-center justify-center rounded border bg-gray-50 dark:bg-gray-800">
                     <p className="text-xs text-gray-400">Unknown file type</p>
-                    <a href={media.url} target="_blank" rel="noopener noreferrer" className="mt-1 text-xs text-blue-600 underline dark:text-blue-400">
+                    <a
+                        href={media.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-1 text-xs text-blue-600 underline dark:text-blue-400"
+                    >
                         View File
                     </a>
                 </div>
@@ -42,7 +61,13 @@ const MediaSelector: React.FC<MediaSelectorProps> = ({ media, onSelect, onRemove
         }
 
         if (mainType === 'image') {
-            return <img src={media.url} alt={media.alt_text || 'Selected image'} className="w-48 rounded object-cover" />;
+            return (
+                <img
+                    src={media.url}
+                    alt={media.alt_text || 'Selected image'}
+                    className="w-48 rounded object-cover"
+                />
+            );
         }
 
         if (mainType === 'video') {
@@ -67,7 +92,9 @@ const MediaSelector: React.FC<MediaSelectorProps> = ({ media, onSelect, onRemove
 
         return (
             <div className="flex w-48 flex-col items-center justify-center rounded border bg-gray-50 dark:bg-gray-800">
-                <span className="text-sm text-gray-500 dark:text-gray-300">{fileType}</span>
+                <span className="text-sm text-info dark:text-gray-300">
+                    {fileType}
+                </span>
                 <a
                     href={media.url}
                     target="_blank"

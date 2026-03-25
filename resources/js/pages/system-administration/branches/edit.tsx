@@ -1,5 +1,5 @@
-import { Head, useForm } from '@inertiajs/react';
-import React, { useState } from 'react';
+import { Head, useForm, usePage } from '@inertiajs/react';
+import React from 'react';
 import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
@@ -10,28 +10,26 @@ import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 import { Branch } from '../../../types/branch';
 import { Customer } from '../../../types/customer_kyc_module';
-import { CustomerSearchInput } from '../../customer-kyc/customers/components/customer-search-input';
+import { CustomerSearchBox } from '../../customer-kyc/customers/components/customer-search-box';
 
-interface EditBranchProps {
-    branch: Branch;
-}
+function Edit() {
+    const { branch } = usePage<{ branch: Branch }>().props;
+    const manager = branch?.manager as Customer;
 
-function Edit({ branch }: EditBranchProps) {
-    console.log('Branch:', branch);
+    console.log(branch);
+
     const { data, setData, put, processing, errors } = useForm({
-        code: branch.code,
-        name: branch.name,
+        code: branch.code || '',
+        name: branch.name || '',
         address: branch.address || '',
         latitude: branch.latitude || '',
         longitude: branch.longitude || '',
         manager_id: branch.manager_id || null,
-        manager_name: branch.manager.name || '',
     });
-
-    const [query, setQuery] = useState(branch?.manager?.name || '');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
         put(`/branches/${branch.id}`, {
             preserveScroll: true,
             preserveState: true,
@@ -50,22 +48,23 @@ function Edit({ branch }: EditBranchProps) {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Edit Branch" />
 
-            <div className="animate-in space-y-8 text-foreground fade-in">
+            <div className="text-foreground">
                 <HeadingSmall
                     title="Edit Branch"
-                    description="Update the branch details below."
+                    description="Update branch details to keep operations aligned."
                 />
 
                 <form
                     onSubmit={handleSubmit}
-                    className="space-y-5 rounded-xl border bg-card/80 p-8 shadow-sm backdrop-blur-sm transition-all duration-300"
+                    className="mt-4 space-y-3 rounded-xl border bg-card p-8 shadow-sm backdrop-blur-sm transition-all duration-300"
                 >
-                    {/* Basic Details */}
+                    {/* 🔹 Basic Details */}
                     <div>
-                        <h3 className="text-lg font-semibold text-primary">
+                        <h3 className="text-lg font-semibold text-info">
                             Basic Details
                         </h3>
-                        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+
+                        <div className="grid grid-cols-1 gap-x-5 md:grid-cols-4">
                             <div>
                                 <Label>Branch Code</Label>
                                 <Input
@@ -92,13 +91,14 @@ function Edit({ branch }: EditBranchProps) {
                         </div>
                     </div>
 
-                    {/* Address & Location */}
+                    {/* 🔹 Address & Location */}
                     <div>
-                        <h3 className="text-lg font-semibold text-primary">
+                        <h3 className="text-lg font-semibold text-info">
                             Address & Location
                         </h3>
-                        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                            <div className="md:col-span-2">
+
+                        <div className="grid grid-cols-1 gap-x-5 md:grid-cols-4">
+                            <div className="md:col-span-4">
                                 <Label>Address</Label>
                                 <Input
                                     value={data.address}
@@ -140,54 +140,31 @@ function Edit({ branch }: EditBranchProps) {
                         </div>
                     </div>
 
-                    {/* Management */}
-                    <h3 className="text-lg font-semibold text-primary">
-                        Branch Manager
-                    </h3>
+                    {/* 🔹 Management */}
+                    <div>
+                        <h3 className="text-lg font-semibold text-info">
+                            Management
+                        </h3>
 
-                    <div className="flex flex-col gap-5">
-                        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                            <div>
-                                <Label>Search Manager</Label>
-                                <CustomerSearchInput
-                                    query={query}
-                                    onQueryChange={setQuery}
+                        <div className="grid grid-cols-1 gap-x-5 md:grid-cols-3">
+                            <div className="md:col-span-2">
+                                <Label>Search Branch Manager</Label>
+                                <CustomerSearchBox
+                                    selectedCustomer={manager}
                                     onSelect={(customer: Customer) => {
                                         setData('manager_id', customer.id);
-                                        setData('manager_name', customer.name);
-                                        setQuery(customer.name);
                                     }}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                            <div>
-                                <Label>Manager ID</Label>
-                                <Input
-                                    type="number"
-                                    value={data.manager_id || ''}
-                                    disabled
-                                    className="h-8 text-sm"
-                                />
-                            </div>
-                            <div>
-                                <Label>Manager Name</Label>
-                                <Input
-                                    type="text"
-                                    value={data.manager_name || ''}
-                                    disabled
-                                    className="h-8 text-sm"
                                 />
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex justify-end pt-4">
+                    {/* 🔹 Action */}
+                    <div className="flex justify-end">
                         <Button
                             type="submit"
                             disabled={processing}
-                            className="w-40 bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-md"
+                            className="w-40 bg-primary text-info-foreground hover:bg-primary/90"
                         >
                             {processing ? 'Updating...' : 'Update Branch'}
                         </Button>

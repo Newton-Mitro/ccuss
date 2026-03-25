@@ -175,7 +175,7 @@ export default function Index() {
                                                                 'customers.show',
                                                                 c.id,
                                                             )}
-                                                            className="text-gray-500"
+                                                            className="text-info"
                                                         >
                                                             <Eye className="h-5 w-5" />
                                                         </Link>

@@ -31,7 +31,7 @@ class AuditLog extends Model
         return $this->morphTo();
     }
 
-    public function creator()
+    public function user()
     {
         return $this->belongsTo(User::class);
     }

@@ -205,7 +205,7 @@ export default function Index() {
                                                                     'vaults.show',
                                                                     v.id,
                                                                 )}
-                                                                className="text-gray-500"
+                                                                className="text-info"
                                                             >
                                                                 <Eye className="h-5 w-5" />
                                                             </Link>

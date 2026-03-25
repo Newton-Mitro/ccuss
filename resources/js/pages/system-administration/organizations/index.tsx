@@ -162,7 +162,7 @@ export default function Index() {
                                                         <TooltipTrigger asChild>
                                                             <Link
                                                                 href={`/organizations/${organization.id}`}
-                                                                className="text-primary hover:text-primary/80"
+                                                                className="text-info"
                                                             >
                                                                 <Eye className="h-5 w-5" />
                                                             </Link>

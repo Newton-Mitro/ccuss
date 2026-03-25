@@ -24,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
             'flash' => fn() => [
                 'success' => session('success'),
                 'error' => session('error'),
+                'warning' => session('warning'),
+                'message' => session('message'),
             ],
         ]);
     }

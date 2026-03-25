@@ -58,6 +58,17 @@ const Edit = ({ customer, flash }: EditProps) => {
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
+            if (!file) return;
+            // Validate type
+            if (!file.type.startsWith('image/')) {
+                alert('Only image files are allowed');
+                return;
+            }
+            // Optional: limit size (e.g., 3MB)
+            if (file.size > 3 * 1024 * 1024) {
+                alert('Image must be less than 2MB');
+                return;
+            }
             setData('photo', file);
             setPhotoPreview(URL.createObjectURL(file));
         }
@@ -114,7 +125,7 @@ const Edit = ({ customer, flash }: EditProps) => {
 
             <div className="flex flex-col gap-3 pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <HeadingSmall
-                    title="Edit Customer"
+                    title={`Edit Customer - ${customer.name} (${customer.customer_no})`}
                     description="Update customer information."
                 />
                 <div className="flex flex-wrap gap-2">
@@ -139,40 +150,38 @@ const Edit = ({ customer, flash }: EditProps) => {
 
             <form
                 onSubmit={handleSubmit}
-                className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6 lg:w-5xl"
+                className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6"
             >
                 {/* photo */}
                 <div className="flex flex-col gap-4">
-                    {photoPreview && (
+                    {photoPreview ? (
                         <img
                             src={photoPreview}
                             alt="Preview"
-                            className="h-20 w-20 rounded-md border object-cover sm:h-24 sm:w-24"
+                            className="h-32 w-32 rounded-md border object-cover sm:h-40 sm:w-40"
                         />
+                    ) : (
+                        <div className="h-32 w-32 rounded-md border bg-muted sm:h-40 sm:w-40">
+                            <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
+                                No Photo
+                            </div>
+                        </div>
                     )}
-                    <div className="flex items-center gap-1">
-                        <Label className="text-xs">Photo</Label>
+
+                    <div>
+                        <Label className="text-xs">Upload Photo</Label>
                         <input
                             type="file"
                             accept="image/*"
                             onChange={handlePhotoChange}
-                            className="h-8 rounded-md border px-2 py-1 text-sm"
+                            className="block w-full text-sm text-muted-foreground"
                         />
                         <InputError message={errors.photo} />
                     </div>
                 </div>
 
                 {/* basic INFO */}
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-                    <div>
-                        <Label className="text-xs">Customer No</Label>
-                        <Input
-                            value={data.customer_no}
-                            disabled
-                            className="h-8 text-sm"
-                        />
-                    </div>
-
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
                     <div>
                         <Label className="text-xs">Customer Type</Label>
                         <select
@@ -220,7 +229,7 @@ const Edit = ({ customer, flash }: EditProps) => {
 
                 {/* individual ONLY FIELDS */}
                 {isIndividual && (
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
                         <div>
                             <Label className="text-xs">Date of Birth</Label>
                             <AppDatePicker

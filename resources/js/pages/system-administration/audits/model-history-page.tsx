@@ -46,7 +46,7 @@ export default function ModelHistory({
                                 <div className="mb-2 flex items-center justify-between">
                                     <div className="text-sm">
                                         <div className="font-medium">
-                                            {batch.creator?.name ?? '-'}
+                                            {batch.user?.name ?? '-'}
                                         </div>
                                         <div className="text-xs text-muted-foreground">
                                             {formatDateTime(batch.event_at)}

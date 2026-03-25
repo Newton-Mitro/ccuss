@@ -166,7 +166,7 @@ export default function Index() {
                                                                     'branches.show',
                                                                     b.id,
                                                                 )}
-                                                                className="text-primary hover:text-primary/80"
+                                                                className="text-info"
                                                             >
                                                                 <Eye className="h-5 w-5" />
                                                             </Link>

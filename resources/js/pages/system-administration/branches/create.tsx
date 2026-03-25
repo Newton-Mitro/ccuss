@@ -9,7 +9,7 @@ import { Label } from '../../../components/ui/label';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 import { Customer } from '../../../types/customer_kyc_module';
-import { CustomerSearchInput } from '../../customer-kyc/customers/components/customer-search-input';
+import { CustomerSearchBox } from '../../customer-kyc/customers/components/customer-search-box';
 
 function Create() {
     const { data, setData, post, processing, errors } = useForm({
@@ -19,7 +19,7 @@ function Create() {
         latitude: '',
         longitude: '',
         manager_id: null as number | null,
-        manager_name: '', // optional: to show selected manager name
+        manager_name: '',
     });
 
     const [query, setQuery] = useState('');
@@ -44,7 +44,7 @@ function Create() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Branch" />
 
-            <div className="animate-in space-y-8 text-foreground fade-in">
+            <div className="text-foreground">
                 <HeadingSmall
                     title="Create Branch"
                     description="Fill in the branch details below to register a new branch."
@@ -52,14 +52,15 @@ function Create() {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="space-y-5 rounded-xl border bg-card/80 p-8 shadow-sm backdrop-blur-sm transition-all duration-300"
+                    className="mt-4 space-y-3 rounded-xl border bg-card p-8 shadow-sm backdrop-blur-sm transition-all duration-300"
                 >
-                    {/* 🧱 Section: Basic Details */}
+                    {/* 🔹 Basic Details */}
                     <div>
-                        <h3 className="text-lg font-semibold text-primary">
+                        <h3 className="text-lg font-semibold text-info">
                             Basic Details
                         </h3>
-                        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+
+                        <div className="grid grid-cols-1 gap-x-5 md:grid-cols-4">
                             <div>
                                 <Label>Branch Code</Label>
                                 <Input
@@ -81,20 +82,21 @@ function Create() {
                                         setData('name', e.target.value)
                                     }
                                     className="h-8 text-sm"
-                                    placeholder="Downtown Branch"
+                                    placeholder="Main Branch"
                                 />
                                 <InputError message={errors.name} />
                             </div>
                         </div>
                     </div>
 
-                    {/* 🧱 Section: Address & Location */}
+                    {/* 🔹 Address & Location */}
                     <div>
-                        <h3 className="text-lg font-semibold text-primary">
+                        <h3 className="text-lg font-semibold text-info">
                             Address & Location
                         </h3>
-                        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                            <div className="md:col-span-2">
+
+                        <div className="grid grid-cols-1 gap-x-5 md:grid-cols-4">
+                            <div className="md:col-span-4">
                                 <Label>Address</Label>
                                 <Input
                                     value={data.address}
@@ -102,7 +104,7 @@ function Create() {
                                         setData('address', e.target.value)
                                     }
                                     className="h-8 text-sm"
-                                    placeholder="123 Main Street, City"
+                                    placeholder="Full branch address"
                                 />
                                 <InputError message={errors.address} />
                             </div>
@@ -117,7 +119,7 @@ function Create() {
                                         setData('latitude', e.target.value)
                                     }
                                     className="h-8 text-sm"
-                                    placeholder="e.g. 23.7808875"
+                                    placeholder="23.7808875"
                                 />
                                 <InputError message={errors.latitude} />
                             </div>
@@ -132,70 +134,39 @@ function Create() {
                                         setData('longitude', e.target.value)
                                     }
                                     className="h-8 text-sm"
-                                    placeholder="e.g. 90.2792371"
+                                    placeholder="90.2792371"
                                 />
                                 <InputError message={errors.longitude} />
                             </div>
                         </div>
                     </div>
 
-                    {/* 🧱 Section: Management */}
-
-                    <div className="">
-                        <h3 className="text-lg font-semibold text-primary">
+                    {/* 🔹 Management */}
+                    <div>
+                        <h3 className="text-lg font-semibold text-info">
                             Management
                         </h3>
-                        <div className="flex flex-col gap-5">
-                            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                                <div className="">
-                                    <Label>Search Branch Manager</Label>
-                                    <CustomerSearchInput
-                                        query={query}
-                                        onQueryChange={setQuery}
-                                        onSelect={(customer: Customer) => {
-                                            setData('manager_id', customer.id);
-                                            setData(
-                                                'manager_name',
-                                                customer.name,
-                                            );
-                                            setQuery(customer.name);
-                                        }}
-                                    />
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                                <div>
-                                    <Label>Manager ID</Label>
-                                    <Input
-                                        type="number"
-                                        disabled
-                                        value={data.manager_id}
-                                        className="h-8 text-sm"
-                                        placeholder="Enter manager user ID"
-                                    />
-                                    <InputError message={errors.manager_id} />
-                                </div>
 
-                                <div>
-                                    <Label>Manager Name</Label>
-                                    <Input
-                                        type="text"
-                                        disabled
-                                        value={data.manager_name}
-                                        className="h-8 text-sm"
-                                        placeholder="Enter manager user ID"
-                                    />
-                                    <InputError message={errors.manager_id} />
-                                </div>
+                        <div className="grid grid-cols-1 gap-x-5 md:grid-cols-3">
+                            <div className="md:col-span-2">
+                                <Label>Branch Manager</Label>
+                                <CustomerSearchBox
+                                    onSelect={(customer: Customer) => {
+                                        setData('manager_id', customer.id);
+                                        setData('manager_name', customer.name);
+                                        setQuery(customer.name);
+                                    }}
+                                />
                             </div>
                         </div>
                     </div>
 
+                    {/* 🔹 Action */}
                     <div className="flex justify-end">
                         <Button
                             type="submit"
                             disabled={processing}
-                            className="w-40 bg-primary text-primary-foreground transition-all duration-300 hover:bg-primary/90 hover:shadow-md"
+                            className="w-40 bg-primary text-info-foreground transition-all duration-300 hover:bg-primary/90 hover:shadow-md"
                         >
                             {processing ? 'Saving...' : 'Create Branch'}
                         </Button>

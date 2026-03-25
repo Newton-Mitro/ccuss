@@ -151,7 +151,7 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
 
             {/* EMPTY STATE */}
             {showDropdown && !loading && query && customers.length === 0 && (
-                <div className="absolute z-10 mt-1 w-full rounded-md border bg-background px-3 py-2 text-xs text-gray-500">
+                <div className="absolute z-10 mt-1 w-full rounded-md border bg-background px-3 py-2 text-xs text-info">
                     No customers found.
                 </div>
             )}

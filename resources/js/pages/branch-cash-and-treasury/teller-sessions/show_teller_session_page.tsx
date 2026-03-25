@@ -63,15 +63,13 @@ export default function ShowTellerSessionPage({ session }: Props) {
 
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             <div>
-                                <p className="text-sm text-gray-500">Teller</p>
+                                <p className="text-sm text-info">Teller</p>
                                 <p className="font-medium">
                                     {session.teller?.name}
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-500">
-                                    Branch Day
-                                </p>
+                                <p className="text-sm text-info">Branch Day</p>
                                 <p className="font-medium">
                                     {session.branch_day?.business_date
                                         ? formatDate(
@@ -81,7 +79,7 @@ export default function ShowTellerSessionPage({ session }: Props) {
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-info">
                                     Opening Cash
                                 </p>
                                 <p className="font-medium">
@@ -89,7 +87,7 @@ export default function ShowTellerSessionPage({ session }: Props) {
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-info">
                                     Closing Cash
                                 </p>
                                 <p className="font-medium">
@@ -101,17 +99,13 @@ export default function ShowTellerSessionPage({ session }: Props) {
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-500">
-                                    Opened At
-                                </p>
+                                <p className="text-sm text-info">Opened At</p>
                                 <p className="font-medium">
                                     {formatDateTime(session.opened_at)}
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-500">
-                                    Closed At
-                                </p>
+                                <p className="text-sm text-info">Closed At</p>
                                 <p className="font-medium">
                                     {session.closed_at
                                         ? formatDateTime(session.closed_at)

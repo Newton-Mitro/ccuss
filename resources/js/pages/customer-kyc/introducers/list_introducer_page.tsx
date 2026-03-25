@@ -161,7 +161,7 @@ export default function IntroducersIndex() {
                                                                 'introducers.show',
                                                                 i.id,
                                                             )}
-                                                            className="text-gray-500"
+                                                            className="text-info"
                                                         >
                                                             <Eye className="h-5 w-5" />
                                                         </Link>
@@ -225,7 +225,7 @@ export default function IntroducersIndex() {
                             <div className="flex justify-end gap-4">
                                 <Link
                                     href={route('introducers.show', i.id)}
-                                    className="text-gray-500"
+                                    className="text-info"
                                 >
                                     <Eye className="h-5 w-5" />
                                 </Link>

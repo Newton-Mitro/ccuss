@@ -62,13 +62,19 @@ const CreateKycDocument = () => {
     });
 
     const handleFileChange = (file: File | null) => {
-        setData('file', file);
-
-        if (file && file.type.startsWith('image/')) {
-            setPreviewUrl(URL.createObjectURL(file));
-        } else {
-            setPreviewUrl(null);
+        if (!file) return;
+        // Validate type
+        if (!file.type.startsWith('image/')) {
+            alert('Only image files are allowed');
+            return;
         }
+        // Optional: limit size (e.g., 3MB)
+        if (file.size > 3 * 1024 * 1024) {
+            alert('Image must be less than 2MB');
+            return;
+        }
+        setData('file', file);
+        setPreviewUrl(URL.createObjectURL(file));
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -192,6 +198,21 @@ const CreateKycDocument = () => {
                     <InputError message={errors.document_type} />
                 </div>
 
+                {/* FILE PREVIEW */}
+                {previewUrl ? (
+                    <img
+                        src={previewUrl}
+                        alt="Preview"
+                        className="h-32 w-32 rounded-md border object-cover sm:h-40 sm:w-40"
+                    />
+                ) : (
+                    <div className="h-32 w-32 rounded-md border bg-muted sm:h-40 sm:w-40">
+                        <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
+                            No Photo
+                        </div>
+                    </div>
+                )}
+
                 {/* FILE UPLOAD */}
                 <div>
                     <Label className="text-xs">Upload File</Label>
@@ -204,18 +225,6 @@ const CreateKycDocument = () => {
                     />
                     <InputError message={errors.file} />
                 </div>
-
-                {/* FILE PREVIEW */}
-                {previewUrl && (
-                    <div className="mt-2">
-                        <Label className="text-xs">Preview</Label>
-                        <img
-                            src={previewUrl}
-                            alt="Preview"
-                            className="max-h-60 w-auto rounded border"
-                        />
-                    </div>
-                )}
 
                 {/* SUBMIT */}
                 <div className="flex justify-end">

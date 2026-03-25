@@ -6,153 +6,164 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-// import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 import { Form, Head } from '@inertiajs/react';
+import { motion } from 'framer-motion';
 import { useEffect } from 'react';
 
-interface LoginProps {
-    status?: string;
-    canResetPassword: boolean;
-    canRegister: boolean;
-}
-
-export default function Login({
-    status,
-    canResetPassword,
-    canRegister,
-}: LoginProps) {
+export default function Login({ status, canResetPassword, canRegister }) {
     useEffect(() => {
         localStorage.clear();
     }, []);
+
     return (
-        <div className="flex min-h-screen items-center justify-center bg-background p-6 font-mono transition-colors duration-300">
+        <div className="flex min-h-screen bg-background">
             <Head title="Log in" />
 
-            <div className="w-full max-w-md rounded-lg border bg-card p-6 shadow-sm transition-colors duration-300 md:p-10 dark:shadow-black/30">
-                {/* Logo + Intro */}
-                <div className="mb-6 flex flex-col items-center text-center">
-                    <AppLogoIcon className="h-32 w-32 fill-current text-accent transition-colors duration-300" />
-                    <div className="text-sm font-medium text-accent transition-colors duration-300">
-                        Welcome back to{' '}
-                        <span className="text-foreground">
-                            {import.meta.env.VITE_APP_NAME}
-                        </span>
-                    </div>
-                    <div className="text-xs text-muted-foreground transition-colors duration-300">
-                        Authenticate to continue
+            {/* Left Branding Section */}
+            <div className="hidden w-7/12 flex-col items-center justify-center lg:flex">
+                <motion.img
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                    src="/logo.png"
+                    alt="Logo"
+                    className="h-48 w-48 rounded-full bg-background"
+                />
+
+                <div className="-mt-3 text-center">
+                    <h1 className="text-4xl font-bold tracking-tight">
+                        <span className="text-accent">Union</span> Banking
+                    </h1>
+                    <p className="max-w-sm text-sm text-muted-foreground">
+                        Smart core banking & credit solution designed for modern
+                        cooperative institutions.
+                    </p>
+                    <div className="mt-3 inline-block rounded-full bg-warning px-3 py-1 text-xs font-medium">
+                        Version 1.0
                     </div>
                 </div>
+            </div>
 
-                {/* Form */}
-                <Form
-                    {...store.form()}
-                    resetOnSuccess={['password']}
-                    className="space-y-4 transition-colors duration-300"
+            {/* Right Form Section */}
+            <div className="flex w-full items-center justify-center bg-card p-6 lg:w-5/12 lg:px-28">
+                <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 0.4 }}
+                    className="w-full max-w-md p-8"
                 >
-                    {({ processing, errors }) => (
-                        <>
-                            {/* Email */}
-                            <div className="grid gap-1.5">
-                                <Label
-                                    htmlFor="email"
-                                    className="text-xs text-muted-foreground transition-colors duration-300"
-                                >
-                                    Email
-                                </Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    name="email"
-                                    required
-                                    autoFocus
-                                    autoComplete="email"
-                                    placeholder="you@example.com"
-                                    className="transition-colors duration-300 focus-visible:ring-1 focus-visible:ring-primary"
-                                />
-                                <InputError
-                                    message={errors.email}
-                                    className="text-xs"
-                                />
-                            </div>
-
-                            {/* Password */}
-                            <div className="grid gap-1.5">
-                                <div className="flex items-center justify-between">
-                                    <Label
-                                        htmlFor="password"
-                                        className="text-xs text-muted-foreground transition-colors duration-300"
-                                    >
-                                        Password
-                                    </Label>
-                                    {canResetPassword && (
-                                        <TextLink
-                                            href={request()}
-                                            className="text-xs text-accent transition-colors duration-300 hover:underline"
-                                        >
-                                            Forgot password?
-                                        </TextLink>
-                                    )}
-                                </div>
-                                <Input
-                                    id="password"
-                                    type="password"
-                                    name="password"
-                                    required
-                                    autoComplete="current-password"
-                                    placeholder="••••••••"
-                                    className="transition-colors duration-300 focus-visible:ring-1 focus-visible:ring-primary"
-                                />
-                                <InputError
-                                    message={errors.password}
-                                    className="text-xs"
-                                />
-                            </div>
-
-                            {/* Remember me */}
-                            <div className="flex items-center space-x-2">
-                                <Checkbox id="remember" name="remember" />
-                                <Label
-                                    htmlFor="remember"
-                                    className="text-xs text-muted-foreground transition-colors duration-300"
-                                >
-                                    Remember me
-                                </Label>
-                            </div>
-
-                            {/* Submit */}
-                            <Button
-                                type="submit"
-                                className="inline-flex w-full items-center justify-center gap-2 transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
-                                disabled={processing}
-                            >
-                                {processing && <Spinner />}
-                                Log in
-                            </Button>
-
-                            {/* Register */}
-                            {canRegister && (
-                                <div className="pt-3 text-center text-xs text-muted-foreground transition-colors duration-300">
-                                    Don’t have an account?{' '}
-                                    <TextLink
-                                        // href={register()}
-                                        className="text-accent transition-colors duration-300 hover:underline"
-                                    >
-                                        Register
-                                    </TextLink>
-                                </div>
-                            )}
-                        </>
-                    )}
-                </Form>
-
-                {/* Status Message */}
-                {status && (
-                    <div className="mt-4 rounded border bg-muted p-2 text-center text-sm font-medium text-accent transition-colors duration-300">
-                        {status}
+                    {/* Header */}
+                    <div className="mb-6 text-center">
+                        <AppLogoIcon className="mx-auto h-20 w-20 text-accent" />
+                        <h2 className="mt-3 text-lg font-semibold">
+                            Welcome back
+                        </h2>
+                        <p className="text-xs text-muted-foreground">
+                            Login to your account to continue
+                        </p>
                     </div>
-                )}
+
+                    {/* Form */}
+                    <Form
+                        {...store.form()}
+                        resetOnSuccess={['password']}
+                        className="space-y-5"
+                    >
+                        {({ processing, errors }) => (
+                            <>
+                                {/* Email */}
+                                <div className="space-y-1">
+                                    <Label htmlFor="email" className="text-xs">
+                                        Email
+                                    </Label>
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        name="email"
+                                        required
+                                        autoFocus
+                                        placeholder="you@example.com"
+                                    />
+                                    <InputError
+                                        message={errors.email}
+                                        className="text-xs"
+                                    />
+                                </div>
+
+                                {/* Password */}
+                                <div className="space-y-1">
+                                    <div className="flex items-center justify-between">
+                                        <Label
+                                            htmlFor="password"
+                                            className="text-xs"
+                                        >
+                                            Password
+                                        </Label>
+                                        {canResetPassword && (
+                                            <TextLink
+                                                href={request()}
+                                                className="text-xs text-accent hover:underline"
+                                            >
+                                                Forgot?
+                                            </TextLink>
+                                        )}
+                                    </div>
+                                    <Input
+                                        id="password"
+                                        type="password"
+                                        name="password"
+                                        required
+                                        placeholder="••••••••"
+                                    />
+                                    <InputError
+                                        message={errors.password}
+                                        className="text-xs"
+                                    />
+                                </div>
+
+                                {/* Remember */}
+                                <div className="flex items-center gap-2">
+                                    <Checkbox id="remember" name="remember" />
+                                    <Label
+                                        htmlFor="remember"
+                                        className="text-xs"
+                                    >
+                                        Remember me
+                                    </Label>
+                                </div>
+
+                                {/* Submit */}
+                                <Button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="flex w-full items-center justify-center gap-2"
+                                >
+                                    {processing && <Spinner />}
+                                    Sign In
+                                </Button>
+
+                                {/* Register */}
+                                {canRegister && (
+                                    <p className="text-center text-xs text-muted-foreground">
+                                        No account?{' '}
+                                        <TextLink className="text-accent hover:underline">
+                                            Create one
+                                        </TextLink>
+                                    </p>
+                                )}
+                            </>
+                        )}
+                    </Form>
+
+                    {/* Status */}
+                    {status && (
+                        <div className="mt-4 rounded-lg bg-muted p-2 text-center text-sm text-accent">
+                            {status}
+                        </div>
+                    )}
+                </motion.div>
             </div>
         </div>
     );

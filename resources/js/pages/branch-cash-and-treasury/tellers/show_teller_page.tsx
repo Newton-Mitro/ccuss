@@ -72,38 +72,38 @@ export default function ShowTellerPage({ teller }: Props) {
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div>
-                        <p className="text-sm text-gray-500">Code</p>
+                        <p className="text-sm text-info">Code</p>
                         <p className="font-medium">{teller.code}</p>
                     </div>
 
                     <div>
-                        <p className="text-sm text-gray-500">Name</p>
+                        <p className="text-sm text-info">Name</p>
                         <p className="font-medium">{teller.name}</p>
                     </div>
 
                     <div>
-                        <p className="text-sm text-gray-500">User</p>
+                        <p className="text-sm text-info">User</p>
                         <p className="font-medium">
                             {teller.user?.name ?? '—'}
                         </p>
                     </div>
 
                     <div>
-                        <p className="text-sm text-gray-500">Branch</p>
+                        <p className="text-sm text-info">Branch</p>
                         <p className="font-medium">
                             {teller.branch?.name ?? '—'}
                         </p>
                     </div>
 
                     <div>
-                        <p className="text-sm text-gray-500">Max Cash Limit</p>
+                        <p className="text-sm text-info">Max Cash Limit</p>
                         <p className="font-medium">
                             {Number(teller.max_cash_limit).toLocaleString()}
                         </p>
                     </div>
 
                     <div>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-info">
                             Max Transaction Limit
                         </p>
                         <p className="font-medium">
@@ -114,14 +114,14 @@ export default function ShowTellerPage({ teller }: Props) {
                     </div>
 
                     <div>
-                        <p className="text-sm text-gray-500">Created At</p>
+                        <p className="text-sm text-info">Created At</p>
                         <p className="font-medium">
                             {new Date(teller.created_at).toLocaleString()}
                         </p>
                     </div>
 
                     <div>
-                        <p className="text-sm text-gray-500">Last Updated</p>
+                        <p className="text-sm text-info">Last Updated</p>
                         <p className="font-medium">
                             {new Date(teller.updated_at).toLocaleString()}
                         </p>

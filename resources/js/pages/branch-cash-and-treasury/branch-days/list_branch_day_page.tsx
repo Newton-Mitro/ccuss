@@ -213,7 +213,7 @@ export default function Index() {
                                                                     'branch-days.show',
                                                                     bd.id,
                                                                 )}
-                                                                className="text-gray-500"
+                                                                className="text-info"
                                                             >
                                                                 <Eye className="h-5 w-5" />
                                                             </Link>
@@ -295,7 +295,7 @@ export default function Index() {
                             <div className="mt-2 flex justify-end gap-2">
                                 <Link
                                     href={route('branch-days.show', bd.id)}
-                                    className="text-gray-500"
+                                    className="text-info"
                                 >
                                     <Eye className="h-5 w-5" />
                                 </Link>

@@ -175,7 +175,7 @@ export default function KycDocumentsIndex() {
                                                                 'kyc-documents.show',
                                                                 i.id,
                                                             )}
-                                                            className="text-gray-500"
+                                                            className="text-info"
                                                         >
                                                             <Eye className="h-5 w-5" />
                                                         </Link>
@@ -244,7 +244,7 @@ export default function KycDocumentsIndex() {
                                 <div className="flex gap-4">
                                     <Link
                                         href={route('kyc-documents.show', i.id)}
-                                        className="text-gray-500"
+                                        className="text-info"
                                     >
                                         <Eye className="h-5 w-5" />
                                     </Link>

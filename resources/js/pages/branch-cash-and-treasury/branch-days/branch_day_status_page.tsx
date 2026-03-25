@@ -91,7 +91,7 @@ export default function BranchDayStatusPage({ branch_day, branch_id }: Props) {
 
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             <div>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-info">
                                     Business Date
                                 </p>
                                 <p className="font-medium">
@@ -99,9 +99,7 @@ export default function BranchDayStatusPage({ branch_day, branch_id }: Props) {
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-500">
-                                    Opened At
-                                </p>
+                                <p className="text-sm text-info">Opened At</p>
                                 <p className="font-medium">
                                     {branch_day.opened_at
                                         ? formatDateTime(branch_day.opened_at)
@@ -109,9 +107,7 @@ export default function BranchDayStatusPage({ branch_day, branch_id }: Props) {
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-500">
-                                    Closed At
-                                </p>
+                                <p className="text-sm text-info">Closed At</p>
                                 <p className="font-medium">
                                     {branch_day.closed_at
                                         ? formatDateTime(branch_day.closed_at)
