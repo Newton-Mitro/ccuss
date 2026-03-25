@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\SystemAdministration\Models\Branch;
+use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -39,6 +40,7 @@ class BranchFactory extends Factory
         $name = fake()->unique()->randomElement($this->dhakaBranches);
 
         return [
+            'organization_id' => Organization::factory(),
             'code' => strtoupper(fake()->unique()->bothify('DHK###')),
             'name' => $name,
             'address' => fake()->streetAddress . ', ' . $name,
