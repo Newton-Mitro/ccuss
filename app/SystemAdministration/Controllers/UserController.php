@@ -83,8 +83,12 @@ class UserController extends Controller
     // -----------------------------
     public function show(User $user)
     {
-        $user->load(['organization', 'branch', 'roles', 'permissions']);
-        return Inertia::render('Users/Show', compact('user'));
+        $user->load([
+            'organization',
+            'branch',
+            'roles.permissions', // load permissions for each role
+        ]);
+        return Inertia::render('system-administration/users/show-user-page', compact('user'));
     }
 
     // -----------------------------
@@ -92,9 +96,12 @@ class UserController extends Controller
     // -----------------------------
     public function edit(User $user)
     {
+        $organizations = Organization::all();
+        $branches = Branch::all();
+
         $roles = Role::all();
         $user->load('roles');
-        return Inertia::render('Users/Edit', compact('user', 'roles'));
+        return Inertia::render('system-administration/users/user-form-page', compact('user', 'roles', 'organizations', 'branches'));
     }
 
     // -----------------------------

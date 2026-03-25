@@ -23,7 +23,7 @@ function Input({ className, type, error,showErrorText = false, ...props }: Input
           "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
 
           // validation
-          error ? "border-destructive focus-visible:ring-destructive/50" : "aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
+          error ? "border-destructive focus-visible:ring-destructive/50" : "aria-invalid:border-destructive aria-invalid:ring-destructive/20 ",
 
           // disabled
           "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",

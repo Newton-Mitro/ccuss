@@ -31,8 +31,8 @@ const MediaSelector: React.FC<MediaSelectorProps> = ({
     const renderPreview = () => {
         if (!media) {
             return (
-                <div className="flex w-48 items-center justify-center rounded border border-dashed border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800">
-                    <p className="p-4 text-sm text-gray-400 dark:text-gray-300">
+                <div className="flex w-48 items-center justify-center rounded border border-dashed border-gray-300 bg-gray-50">
+                    <p className="p-4 text-sm text-gray-400">
                         No media selected
                     </p>
                 </div>
@@ -46,13 +46,13 @@ const MediaSelector: React.FC<MediaSelectorProps> = ({
         // Default placeholder if no type is found
         if (!fileType) {
             return (
-                <div className="flex w-48 flex-col items-center justify-center rounded border bg-gray-50 dark:bg-gray-800">
+                <div className="flex w-48 flex-col items-center justify-center rounded border bg-gray-50">
                     <p className="text-xs text-gray-400">Unknown file type</p>
                     <a
                         href={media.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-1 text-xs text-blue-600 underline dark:text-blue-400"
+                        className="mt-1 text-xs text-blue-600 underline"
                     >
                         View File
                     </a>
@@ -81,7 +81,7 @@ const MediaSelector: React.FC<MediaSelectorProps> = ({
 
         if (mainType === 'audio') {
             return (
-                <div className="flex w-48 items-center justify-center rounded bg-gray-100 dark:bg-gray-700">
+                <div className="flex w-48 items-center justify-center rounded bg-gray-100">
                     <audio controls className="w-full">
                         <source src={media.url} type={fileType} />
                         Your browser does not support the audio element.
@@ -91,15 +91,13 @@ const MediaSelector: React.FC<MediaSelectorProps> = ({
         }
 
         return (
-            <div className="flex w-48 flex-col items-center justify-center rounded border bg-gray-50 dark:bg-gray-800">
-                <span className="text-sm text-info dark:text-gray-300">
-                    {fileType}
-                </span>
+            <div className="flex w-48 flex-col items-center justify-center rounded border bg-gray-50">
+                <span className="text-sm text-info">{fileType}</span>
                 <a
                     href={media.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-1 text-xs text-blue-600 underline sm:text-sm dark:text-blue-400"
+                    className="mt-1 text-xs text-blue-600 underline sm:text-sm"
                 >
                     View File
                 </a>
@@ -120,7 +118,7 @@ const MediaSelector: React.FC<MediaSelectorProps> = ({
                                 type="button"
                                 onClick={onSelect}
                                 variant="outline"
-                                className="p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
+                                className="p-2 text-blue-600 hover:text-blue-800"
                             >
                                 <FolderOpen className="h-5 w-5" />
                             </Button>
@@ -135,7 +133,7 @@ const MediaSelector: React.FC<MediaSelectorProps> = ({
                                     type="button"
                                     onClick={onRemove}
                                     variant="outline"
-                                    className="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200"
+                                    className="p-2 text-red-600 hover:text-red-800"
                                 >
                                     <Trash2 className="h-5 w-5" />
                                 </Button>

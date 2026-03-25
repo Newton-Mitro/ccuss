@@ -147,7 +147,7 @@ export default function Index() {
                                                         <TooltipTrigger asChild>
                                                             <Link
                                                                 href={`/users/${u.id}`}
-                                                                className="text-primary"
+                                                                className="text-info"
                                                             >
                                                                 <Eye className="h-5 w-5" />
                                                             </Link>
@@ -161,7 +161,7 @@ export default function Index() {
                                                         <TooltipTrigger asChild>
                                                             <Link
                                                                 href={`/users/${u.id}/edit`}
-                                                                className="text-green-600 dark:text-green-400"
+                                                                className="text-success"
                                                             >
                                                                 <Pencil className="h-5 w-5" />
                                                             </Link>
@@ -235,7 +235,7 @@ export default function Index() {
                                 </Link>
                                 <Link
                                     href={`/users/${u.id}/edit`}
-                                    className="text-green-600 dark:text-green-400"
+                                    className="text-success"
                                 >
                                     <Pencil className="h-5 w-5" />
                                 </Link>

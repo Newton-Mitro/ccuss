@@ -20,7 +20,7 @@ Route::prefix('users')->name('users.')->group(function () {
 
 Route::prefix('roles')->name('roles.')->group(function () {
     Route::get('permissions', [RolePermissionController::class, 'index'])->name('index');
-    Route::put('{role}/permissions', [RolePermissionController::class, 'update'])->name('update-permissions');
+    Route::put('{roleId}/permissions', [RolePermissionController::class, 'update'])->name('update-permissions');
 });
 
 Route::resource('organizations', OrganizationController::class);

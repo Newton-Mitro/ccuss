@@ -31,8 +31,7 @@ const Badge = ({ text }: { text: Status }) => {
     return (
         <span
             className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                config?.class ??
-                'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+                config?.class ?? 'bg-gray-100 text-gray-800'
             }`}
         >
             {config?.label ?? text}

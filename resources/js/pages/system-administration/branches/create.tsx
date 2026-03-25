@@ -1,5 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
-import React, { useState } from 'react';
+import React from 'react';
 import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
@@ -18,11 +18,9 @@ function Create() {
         address: '',
         latitude: '',
         longitude: '',
+        organization_id: 1,
         manager_id: null as number | null,
-        manager_name: '',
     });
-
-    const [query, setQuery] = useState('');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -153,8 +151,6 @@ function Create() {
                                 <CustomerSearchBox
                                     onSelect={(customer: Customer) => {
                                         setData('manager_id', customer.id);
-                                        setData('manager_name', customer.name);
-                                        setQuery(customer.name);
                                     }}
                                 />
                             </div>

@@ -2,6 +2,7 @@ import { Head, useForm, usePage } from '@inertiajs/react';
 import { CheckCheck, Loader2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
@@ -50,12 +51,12 @@ const RolePermissionForm = ({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedRole) return;
-        // put(`/roles/${selectedRole.id}/permissions`, {
-        //     data,
-        //     preserveScroll: true,
-        //     onSuccess: () => toast.success('Permissions updated successfully!'),
-        //     onError: (err) => toast.error(JSON.stringify(err)),
-        // });
+        put(route('roles.update-permissions', selectedRole.id), {
+            data,
+            preserveScroll: true,
+            onSuccess: () => toast.success('Permissions updated successfully!'),
+            onError: (err) => toast.error(JSON.stringify(err)),
+        });
     };
 
     const toggleSelectAll = () => {
@@ -89,7 +90,7 @@ const RolePermissionForm = ({
 
             <form
                 onSubmit={handleSubmit}
-                className="lg:w-5xl w-full space-y-4 rounded-md border bg-card p-4 sm:p-6"
+                className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6 lg:w-5xl"
             >
                 {/* Role Selector */}
                 <div>
@@ -119,6 +120,7 @@ const RolePermissionForm = ({
                                 type="button"
                                 onClick={toggleSelectAll}
                                 variant="outline"
+                                className="border-border text-card-foreground"
                                 size="sm"
                             >
                                 {selectAll ? 'Deselect All' : 'Select All'}
@@ -128,7 +130,7 @@ const RolePermissionForm = ({
                             {permissions.map((perm) => (
                                 <div
                                     key={perm.id}
-                                    className="hover:bg-muted/80 inline-flex items-center gap-4 rounded-md p-2 transition"
+                                    className="inline-flex items-center gap-4 rounded-md p-2 transition hover:bg-muted/80"
                                 >
                                     <input
                                         type="checkbox"
@@ -152,7 +154,7 @@ const RolePermissionForm = ({
                                                 );
                                             }
                                         }}
-                                        className="h-4 w-4 rounded border bg-background text-primary focus:outline-none focus:ring-2 focus:ring-ring"
+                                        className="h-4 w-4 rounded border bg-background text-primary focus:ring-2 focus:ring-ring focus:outline-none"
                                     />
                                     <div className="flex flex-col">
                                         <span className="text-sm font-medium">
@@ -175,7 +177,7 @@ const RolePermissionForm = ({
                     <Button
                         type="submit"
                         disabled={processing || !selectedRole}
-                        className="hover:bg-primary/90 flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground transition-all duration-200 hover:shadow-md"
+                        className="flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
                     >
                         {processing ? (
                             <>

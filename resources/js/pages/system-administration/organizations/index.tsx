@@ -176,7 +176,7 @@ export default function Index() {
                                                         <TooltipTrigger asChild>
                                                             <Link
                                                                 href={`/organizations/${organization.id}/edit`}
-                                                                className="text-green-600 hover:text-green-500"
+                                                                className="text-success"
                                                             >
                                                                 <Pencil className="h-5 w-5" />
                                                             </Link>

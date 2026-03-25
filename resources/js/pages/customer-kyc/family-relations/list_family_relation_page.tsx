@@ -159,7 +159,7 @@ export default function FamilyRelationIndex() {
                                         <td className="px-2 py-1">
                                             {f.relative?.phone || '—'}
                                         </td>
-                                        <td className="px-2 py-1 text-blue-600 dark:text-blue-400">
+                                        <td className="px-2 py-1 text-blue-600">
                                             {f.relation_type.replace(/_/g, ' ')}
                                         </td>
                                         <td className="px-2 py-1">
@@ -266,7 +266,7 @@ export default function FamilyRelationIndex() {
                                 </Link>
                                 <Link
                                     href={route('family-relations.edit', f.id)}
-                                    className="text-green-600 hover:text-green-500"
+                                    className="text-success"
                                 >
                                     <Pencil className="h-5 w-5" />
                                 </Link>

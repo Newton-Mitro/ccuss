@@ -184,7 +184,7 @@ export default function Index() {
                                                                     'branches.edit',
                                                                     b.id,
                                                                 )}
-                                                                className="text-green-600 hover:text-green-500 dark:text-green-400"
+                                                                className="text-succes"
                                                             >
                                                                 <Pencil className="h-5 w-5" />
                                                             </Link>

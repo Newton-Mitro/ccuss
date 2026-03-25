@@ -171,7 +171,7 @@ export default function Index() {
                                                                         a.batch_id,
                                                                     )
                                                                 }
-                                                                className="text-green-600 hover:text-green-500 dark:text-green-400"
+                                                                className="text-success"
                                                             >
                                                                 <Archive className="h-5 w-5" />
                                                             </button>
@@ -272,7 +272,7 @@ export default function Index() {
                                                             a.batch_id,
                                                         )
                                                     }
-                                                    className="text-green-600 hover:text-green-500 dark:text-green-400"
+                                                    className="text-success"
                                                 >
                                                     <Archive className="h-5 w-5" />
                                                 </button>

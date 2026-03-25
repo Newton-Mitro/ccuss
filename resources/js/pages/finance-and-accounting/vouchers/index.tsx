@@ -281,7 +281,7 @@ export default function Index() {
                                                                             ],
                                                                             v.id,
                                                                         )}
-                                                                        className="text-green-600 hover:text-green-500 dark:text-green-400"
+                                                                        className="text-success"
                                                                     >
                                                                         <Pencil className="h-5 w-5" />
                                                                     </Link>

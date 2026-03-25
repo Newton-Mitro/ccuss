@@ -42,7 +42,6 @@ class HandleInertiaRequests extends Middleware
             'organization',
             'branch',
             'roles.permissions',
-            'permissions',
         ]);
 
         return [
@@ -58,7 +57,7 @@ class HandleInertiaRequests extends Middleware
                     'branch' => $user->branch,
 
                     'roles' => $user->roles->pluck('name'),
-                    'permissions' => $user->permissions->pluck('name'),
+                    'permissions' => $user->permissions->pluck('slug'),
                 ] : null,
             ],
             'flash' => [

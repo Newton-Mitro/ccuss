@@ -264,7 +264,7 @@ export default function Index() {
                                 </Link>
                                 <Link
                                     href={route('customers.edit', c.id)}
-                                    className="text-green-600 dark:text-green-400"
+                                    className="text-success"
                                 >
                                     <Pencil className="h-5 w-5" />
                                 </Link>

@@ -51,6 +51,8 @@ export default function CustomAuthLayout({
     const auth = page.props?.auth;
     const cleanup = useMobileNavigation();
 
+    console.log(auth.user);
+
     /* ------------------------------------------------------------------
      * Sidebar state
      * ------------------------------------------------------------------ */
@@ -284,7 +286,7 @@ export default function CustomAuthLayout({
                                 src={auth?.user?.avatar}
                                 alt={auth?.user?.name}
                             />
-                            <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                            <AvatarFallback className="rounded-lg bg-muted text-sm text-muted-foreground">
                                 {getInitials(auth?.user?.name)}
                             </AvatarFallback>
                         </Avatar>
@@ -461,7 +463,7 @@ export default function CustomAuthLayout({
                                             src={auth?.user?.avatar}
                                             alt={auth?.user.name}
                                         />
-                                        <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                                        <AvatarFallback className="rounded-lg bg-muted text-sm text-muted-foreground">
                                             {getInitials(auth?.user.name)}
                                         </AvatarFallback>
                                     </Avatar>

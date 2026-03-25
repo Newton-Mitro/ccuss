@@ -162,14 +162,14 @@ function VoucherQueueSection({
                         {/* 🔹 Left Section — Totals */}
                         <div className="flex flex-col items-center gap-1 text-sm">
                             {/* Pending */}
-                            <div className="flex items-center gap-2 rounded-full bg-amber-100 px-3 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">
+                            <div className="flex items-center gap-2 rounded-full bg-amber-100 px-3 text-amber-700">
                                 <span className="text-xs font-medium tracking-wide uppercase">
                                     {`Pending ${formatBDTCurrency(pendingAmount)}`}
                                 </span>
                             </div>
 
                             {/* Posted */}
-                            <div className="flex items-center gap-2 rounded-full bg-emerald-100 px-3 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
+                            <div className="flex items-center gap-2 rounded-full bg-emerald-100 px-3 text-emerald-700">
                                 <span className="text-xs font-medium tracking-wide uppercase">
                                     {`Posted ${formatBDTCurrency(postedAmount)}`}
                                 </span>
@@ -195,8 +195,8 @@ function VoucherQueueSection({
                             <span
                                 className={`text-base font-semibold ${
                                     returnAmount < 0
-                                        ? 'text-red-600 dark:text-red-400'
-                                        : 'text-emerald-600 dark:text-emerald-400'
+                                        ? 'text-red-600'
+                                        : 'text-emerald-600'
                                 }`}
                             >
                                 {formatBDTCurrency(returnAmount)}

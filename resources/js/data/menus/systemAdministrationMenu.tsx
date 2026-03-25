@@ -49,13 +49,6 @@ export const systemAdministrationMenu: SidebarItem[] = [
                         match_path: 'role-permissions',
                         permission: ['organization.role-permissions.view'],
                     },
-                    {
-                        name: 'User Roles',
-                        icon: <i className="fa-solid fa-user" />,
-                        path: '/user-roles',
-                        match_path: 'user-roles',
-                        permission: ['organization.user-roles.view'],
-                    },
                 ],
             },
             {
@@ -70,27 +63,6 @@ export const systemAdministrationMenu: SidebarItem[] = [
                         path: '/audits',
                         match_path: 'audits',
                         permission: ['audit.logs.view'],
-                    },
-                    {
-                        name: 'SMS Logs',
-                        icon: <i className="fa-solid fa-sms" />,
-                        path: '/sms-logs',
-                        match_path: 'sms-logs',
-                        permission: ['sms.logs.view'],
-                    },
-                    {
-                        name: 'Email Logs',
-                        icon: <i className="fa-solid fa-envelope-open-text" />,
-                        path: '/email-logs',
-                        match_path: 'email-logs',
-                        permission: ['email.logs.view'],
-                    },
-                    {
-                        name: 'Queue Logs',
-                        icon: <i className="fa-solid fa-envelope-open-text" />,
-                        path: '/horizon/dashboard',
-                        match_path: 'horizon/dashboard',
-                        permission: ['email.logs.view'],
                     },
                     {
                         name: 'Database Backups',

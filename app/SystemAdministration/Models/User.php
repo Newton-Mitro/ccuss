@@ -40,6 +40,8 @@ class User extends Authenticatable
         ];
     }
 
+    protected $appends = ['permissions'];
+
     /*
     |--------------------------------------------------------------------------
     | Relationships
@@ -66,9 +68,12 @@ class User extends Authenticatable
         return $this->belongsToMany(Role::class);
     }
 
-    public function permissions(): BelongsToMany
+    public function getPermissionsAttribute()
     {
-        return $this->belongsToMany(Permission::class);
+        return $this->roles
+            ->flatMap(fn($role) => $role->permissions)
+            ->unique('id')
+            ->values();
     }
 
     /*
