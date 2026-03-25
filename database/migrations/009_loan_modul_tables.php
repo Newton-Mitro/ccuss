@@ -8,9 +8,6 @@ return new class extends Migration {
 
     public function up(): void
     {
-        // ========================
-        // 1. Loan Products
-        // ========================
         Schema::create('loan_products', function (Blueprint $table) {
             $table->id();
             $table->string('code', 20)->unique();
@@ -80,9 +77,6 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        // ========================
-        // 2. Loan Applications
-        // ========================
         Schema::create('loan_applications', function (Blueprint $table) {
             $table->id();
             $table->string('application_no', 50)->unique();
@@ -95,9 +89,6 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        // ========================
-        // 3. Loan Documents
-        // ========================
         Schema::create('loan_documents', function (Blueprint $table) {
             $table->id();
             $table->foreignId('loan_application_id')->constrained()->cascadeOnDelete();
@@ -106,9 +97,6 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        // ========================
-        // 4. Loan Approvals
-        // ========================
         Schema::create('loan_approvals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('loan_application_id')->constrained()->cascadeOnDelete();
@@ -122,9 +110,6 @@ return new class extends Migration {
             $table->unique(['loan_application_id'], 'loan_approval_unique');
         });
 
-        // ========================
-        // 5. Loan Accounts
-        // ========================
         Schema::create('loan_accounts', function (Blueprint $table) {
             $table->id();
             $table->string('account_no', 30)->unique();
@@ -147,9 +132,6 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        // ========================
-        // 6. Collateral & Guarantors
-        // ========================
         Schema::create('loan_collaterals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('loan_account_id')->constrained()->cascadeOnDelete();
@@ -179,9 +161,6 @@ return new class extends Migration {
             $table->unique(['loan_account_id', 'customer_id']);
         });
 
-        // ========================
-        // 7. Repayment Schedules
-        // ========================
         Schema::create('loan_repayment_schedules', function (Blueprint $table) {
             $table->id();
             $table->foreignId('loan_account_id')->constrained()->cascadeOnDelete();
@@ -204,9 +183,6 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        // ========================
-        // 8. Repayments & Transactions
-        // ========================
         Schema::create('loan_repayments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('loan_account_id')->constrained()->cascadeOnDelete();
@@ -218,48 +194,10 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        Schema::create('loan_transactions', function (Blueprint $table) {
-            $table->id();
-            $table->string('transaction_no')->unique();
-            $table->foreignId('loan_account_id')->constrained()->cascadeOnDelete();
-            $table->enum('transaction_type', ['disbursement', 'repayment', 'interest', 'penalty', 'write_off', 'reversal']);
-            $table->decimal('amount', 18, 2);
-            $table->decimal('balance_after', 18, 2)->nullable();
-            $table->dateTime('transaction_date');
-            $table->string('reference_no')->nullable();
-            $table->text('remarks')->nullable();
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamps();
-        });
-
-        Schema::create('loan_transaction_lines', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('loan_transaction_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('loan_account_id')->constrained();
-            $table->decimal('debit', 18, 2)->default(0);
-            $table->decimal('credit', 18, 2)->default(0);
-            $table->text('description')->nullable();
-            $table->timestamps();
-        });
-
-        Schema::create('loan_account_statements', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('loan_account_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('loan_transaction_id')->constrained()->cascadeOnDelete();
-            $table->decimal('debit', 18, 2)->default(0);
-            $table->decimal('credit', 18, 2)->default(0);
-            $table->decimal('balance', 18, 2);
-            $table->dateTime('posted_at');
-            $table->timestamps();
-        });
-
-        // ========================
-        // 9. Disbursement
-        // ========================
         Schema::create('loan_disbursements', function (Blueprint $table) {
             $table->id();
             $table->foreignId('loan_account_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('loan_transaction_id')->nullable()->constrained('loan_transactions')->nullOnDelete();
+            // $table->foreignId('loan_transaction_id')->nullable()->constrained('loan_transactions')->nullOnDelete();
             $table->decimal('disbursement_amount', 18, 2);
             $table->date('disbursement_date');
             $table->string('reference_no')->nullable();
@@ -269,16 +207,13 @@ return new class extends Migration {
             $table->unique(['loan_account_id', 'disbursement_date'], 'loan_disbursement_unique');
         });
 
-        // ========================
-        // 10. Interest, Penalties, Charges, Write-offs
-        // ========================
         Schema::create('loan_interest_accruals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('loan_account_id')->constrained('loan_accounts')->cascadeOnDelete();
             $table->date('accrual_date');
             $table->decimal('accrued_interest', 18, 2);
             $table->boolean('is_posted')->default(false);
-            $table->foreignId('loan_transaction_id')->nullable()->constrained('loan_transactions')->nullOnDelete()->comment('Linked transaction when posted');
+            // $table->foreignId('loan_transaction_id')->nullable()->constrained('loan_transactions')->nullOnDelete()->comment('Linked transaction when posted');
             $table->timestamps();
             $table->unique(['loan_account_id', 'accrual_date'], 'loan_interest_unique');
         });
@@ -290,7 +225,7 @@ return new class extends Migration {
             $table->decimal('penalty_amount', 18, 2);
             $table->enum('penalty_type', ['late_payment', 'premature_withdrawal', 'overdue', 'other']);
             $table->boolean('is_posted')->default(false);
-            $table->foreignId('loan_transaction_id')->nullable()->constrained('loan_transactions')->nullOnDelete()->comment('Linked transaction when posted');
+            // $table->foreignId('loan_transaction_id')->nullable()->constrained('loan_transactions')->nullOnDelete()->comment('Linked transaction when posted');
             $table->text('remarks')->nullable();
             $table->timestamps();
             $table->unique(['loan_account_id', 'penalty_date', 'penalty_type'], 'loan_penalty_unique');
@@ -367,9 +302,6 @@ return new class extends Migration {
         Schema::dropIfExists('loan_charges');
         Schema::dropIfExists('loan_penalties');
         Schema::dropIfExists('loan_interest_accruals');
-        Schema::dropIfExists('loan_account_statements');
-        Schema::dropIfExists('loan_transaction_lines');
-        Schema::dropIfExists('loan_transactions');
         Schema::dropIfExists('loan_repayments');
         Schema::dropIfExists('loan_reschedules');
         Schema::dropIfExists('loan_repayment_schedules');

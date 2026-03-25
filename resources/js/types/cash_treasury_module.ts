@@ -101,9 +101,9 @@ export interface TellerSession {
     updated_at: string;
 
     teller?: Teller;
-    branchDay?: BranchDay;
-    cashDrawers?: CashDrawer[];
-    vaultTransfers?: TellerVaultTransfer[];
+    branch_day?: BranchDay;
+    cash_drawers?: CashDrawer[];
+    vault_transfers?: TellerVaultTransfer[];
 }
 
 export interface CashDrawer {

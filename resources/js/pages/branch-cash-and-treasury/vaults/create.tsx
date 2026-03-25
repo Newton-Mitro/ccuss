@@ -28,7 +28,7 @@ interface VaultFormPageProps {
     branches: Branch[];
 }
 
-const VaultForm = ({ backUrl, vault, branches }: VaultFormPageProps) => {
+const VaultForm = ({ vault, branches }: VaultFormPageProps) => {
     const { flash } = usePage().props;
 
     useEffect(() => {
@@ -99,7 +99,7 @@ const VaultForm = ({ backUrl, vault, branches }: VaultFormPageProps) => {
                 className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6 lg:w-3xl"
             >
                 {/* Vault Info */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2 lg:grid-cols-2">
                     <div>
                         <Label className="text-xs">Vault Name</Label>
                         <Input
@@ -127,7 +127,7 @@ const VaultForm = ({ backUrl, vault, branches }: VaultFormPageProps) => {
                     </div>
 
                     <div>
-                        <Label className="text-xs">Total Balance</Label>
+                        <Label className="text-xs">Opening Balance</Label>
                         <Input
                             type="number"
                             value={data.total_balance}

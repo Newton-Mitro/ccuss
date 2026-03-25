@@ -3,6 +3,8 @@ import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import { Button } from '../../../components/ui/button';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
+import { formatDateTime } from '../../../lib/date_util';
 import { BreadcrumbItem } from '../../../types';
 
 interface Teller {
@@ -37,8 +39,8 @@ export default function ShowTellerPage({ teller }: Props) {
 
     const StatusBadge = ({ isActive }: { isActive: boolean }) => {
         const bgClass = isActive
-            ? 'bg-green-100 text-green-800'
-            : 'bg-red-100 text-red-800';
+            ? 'bg-success text-success-foreground'
+            : 'bg-destructive text-destructive-foreground';
 
         return (
             <span
@@ -72,58 +74,62 @@ export default function ShowTellerPage({ teller }: Props) {
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div>
-                        <p className="text-sm text-info">Code</p>
+                        <p className="text-sm text-card-foreground">Code</p>
                         <p className="font-medium">{teller.code}</p>
                     </div>
 
                     <div>
-                        <p className="text-sm text-info">Name</p>
+                        <p className="text-sm text-card-foreground">Name</p>
                         <p className="font-medium">{teller.name}</p>
                     </div>
 
                     <div>
-                        <p className="text-sm text-info">User</p>
+                        <p className="text-sm text-card-foreground">User</p>
                         <p className="font-medium">
                             {teller.user?.name ?? '—'}
                         </p>
                     </div>
 
                     <div>
-                        <p className="text-sm text-info">Branch</p>
+                        <p className="text-sm text-card-foreground">Branch</p>
                         <p className="font-medium">
                             {teller.branch?.name ?? '—'}
                         </p>
                     </div>
 
                     <div>
-                        <p className="text-sm text-info">Max Cash Limit</p>
+                        <p className="text-sm text-card-foreground">
+                            Max Cash Limit
+                        </p>
                         <p className="font-medium">
-                            {Number(teller.max_cash_limit).toLocaleString()}
+                            {formatBDTCurrency(teller.max_cash_limit)}
                         </p>
                     </div>
 
                     <div>
-                        <p className="text-sm text-info">
+                        <p className="text-sm text-card-foreground">
                             Max Transaction Limit
                         </p>
                         <p className="font-medium">
-                            {Number(
-                                teller.max_transaction_limit,
-                            ).toLocaleString()}
+                            {formatBDTCurrency(teller.max_transaction_limit)}
                         </p>
                     </div>
 
                     <div>
-                        <p className="text-sm text-info">Created At</p>
+                        <p className="text-sm text-card-foreground">
+                            Created At
+                        </p>
                         <p className="font-medium">
-                            {new Date(teller.created_at).toLocaleString()}
+                            {formatDateTime(teller.created_at)}
                         </p>
                     </div>
 
                     <div>
-                        <p className="text-sm text-info">Last Updated</p>
+                        <p className="text-sm text-card-foreground">
+                            Last Updated
+                        </p>
                         <p className="font-medium">
-                            {new Date(teller.updated_at).toLocaleString()}
+                            {formatDateTime(teller.updated_at)}
                         </p>
                     </div>
                 </div>

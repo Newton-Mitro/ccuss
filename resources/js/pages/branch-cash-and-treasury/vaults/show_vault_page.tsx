@@ -3,6 +3,8 @@ import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import { Button } from '../../../components/ui/button';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
+import { formatDateTime } from '../../../lib/date_util';
 import { BreadcrumbItem } from '../../../types';
 
 interface Vault {
@@ -30,8 +32,8 @@ export default function ShowVaultPage({ vault }: Props) {
 
     const StatusBadge = ({ isActive }: { isActive: boolean }) => {
         const bgClass = isActive
-            ? 'bg-green-100 text-green-800'
-            : 'bg-red-100 text-red-800';
+            ? 'bg-success text-success-foreground'
+            : 'bg-destructive text-destructive-foreground';
 
         return (
             <span
@@ -59,41 +61,51 @@ export default function ShowVaultPage({ vault }: Props) {
 
             <div className="w-full space-y-6 rounded-md border bg-card p-6 sm:p-8 lg:w-5xl">
                 <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">Vault Info</h3>
+                    <h3 className="text-lg font-semibold text-info">
+                        Vault Info
+                    </h3>
                     {StatusBadge({ isActive: vault.is_active })}
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div>
-                        <p className="text-sm text-info">Vault Name</p>
+                        <p className="text-sm text-card-foreground">
+                            Vault Name
+                        </p>
                         <p className="font-medium">{vault.name}</p>
                     </div>
 
                     <div>
-                        <p className="text-sm text-info">Branch</p>
+                        <p className="text-sm text-card-foreground">Branch</p>
                         <p className="font-medium">
                             {vault.branch?.name ?? '—'}
                         </p>
                     </div>
 
                     <div>
-                        <p className="text-sm text-info">Total Balance</p>
+                        <p className="text-sm text-card-foreground">
+                            Total Balance
+                        </p>
                         <p className="font-medium">
-                            {Number(vault.total_balance).toLocaleString()}
+                            {formatBDTCurrency(vault.total_balance)}
                         </p>
                     </div>
 
                     <div>
-                        <p className="text-sm text-info">Created At</p>
+                        <p className="text-sm text-card-foreground">
+                            Created At
+                        </p>
                         <p className="font-medium">
-                            {new Date(vault.created_at).toLocaleString()}
+                            {formatDateTime(vault.created_at)}
                         </p>
                     </div>
 
                     <div>
-                        <p className="text-sm text-info">Last Updated</p>
+                        <p className="text-sm text-card-foreground">
+                            Last Updated
+                        </p>
                         <p className="font-medium">
-                            {new Date(vault.updated_at).toLocaleString()}
+                            {formatDateTime(vault.updated_at)}
                         </p>
                     </div>
                 </div>

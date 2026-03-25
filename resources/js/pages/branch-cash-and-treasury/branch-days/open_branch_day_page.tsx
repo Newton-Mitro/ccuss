@@ -8,6 +8,7 @@ import InputError from '../../../components/input-error';
 import AppDatePicker from '../../../components/ui/app_date_picker';
 import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
+import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 
@@ -18,15 +19,11 @@ interface Branch {
 
 interface Props {
     branches: Branch[];
-    backUrl: string;
+    business_date: string;
+    branch_id: number;
 }
 
-const OpenBranchDay = ({
-    branches,
-    business_date,
-    branch_id,
-    backUrl,
-}: Props) => {
+const OpenBranchDay = ({ branches, business_date, branch_id }: Props) => {
     const { flash } = usePage().props;
 
     const { data, setData, post, processing, errors } = useForm({
@@ -77,23 +74,19 @@ const OpenBranchDay = ({
 
             <form
                 onSubmit={handleSubmit}
-                className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6 lg:w-4/12"
+                className="flex w-full flex-col rounded-md border bg-card p-4 sm:p-6 lg:w-4/12"
             >
                 {/* Branch Selection */}
                 <div>
                     <Label className="text-xs">Select Branch</Label>
-                    <select
-                        value={data.branch_id}
-                        onChange={(e) => setData('branch_id', e.target.value)}
-                        className="h-10 w-full rounded-md border bg-background px-2 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                    >
-                        <option value="">Select Branch</option>
-                        {branches.map((branch) => (
-                            <option key={branch.id} value={branch.id}>
-                                {branch.name}
-                            </option>
-                        ))}
-                    </select>
+                    <Select
+                        value={data.branch_id?.toString()}
+                        onChange={(value) => setData('branch_id', value)}
+                        options={branches.map((branch) => ({
+                            value: branch.id.toString(),
+                            label: branch.name,
+                        }))}
+                    ></Select>
                     <InputError message={errors.branch_id} />
                 </div>
 
@@ -109,7 +102,7 @@ const OpenBranchDay = ({
                 </div>
 
                 {/* Submit */}
-                <div className="flex justify-end">
+                <div className="mt-4 flex justify-end">
                     <Button
                         type="submit"
                         disabled={processing}

@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { formatDate, formatDateTime } from '../../../lib/date_util';
 import { BreadcrumbItem } from '../../../types';
 import { TellerSession } from '../../../types/cash_treasury_module';
@@ -24,9 +25,9 @@ export default function ShowTellerSessionPage({ session }: Props) {
     // Inline badge classes
     const getStatusClasses = (status: string) => {
         return status === 'open'
-            ? 'bg-green-100 text-green-800'
+            ? 'bg-success text-success-foreground'
             : status === 'closed'
-              ? 'bg-red-100 text-red-800'
+              ? 'bg-destructive text-destructive-foreground'
               : 'bg-gray-100 text-gray-800';
     };
 
@@ -63,13 +64,17 @@ export default function ShowTellerSessionPage({ session }: Props) {
 
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             <div>
-                                <p className="text-sm text-info">Teller</p>
+                                <p className="text-sm text-card-foreground">
+                                    Teller
+                                </p>
                                 <p className="font-medium">
                                     {session.teller?.name}
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-info">Branch Day</p>
+                                <p className="text-sm text-card-foreground">
+                                    Branch Day
+                                </p>
                                 <p className="font-medium">
                                     {session.branch_day?.business_date
                                         ? formatDate(
@@ -79,33 +84,37 @@ export default function ShowTellerSessionPage({ session }: Props) {
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-info">
+                                <p className="text-sm text-card-foreground">
                                     Opening Cash
                                 </p>
                                 <p className="font-medium">
-                                    {Number(session.opening_cash).toFixed(2)}
+                                    {formatBDTCurrency(session.opening_cash)}
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-info">
+                                <p className="text-sm text-card-foreground">
                                     Closing Cash
                                 </p>
                                 <p className="font-medium">
                                     {session.closing_cash !== null
-                                        ? Number(session.closing_cash).toFixed(
-                                              2,
+                                        ? formatBDTCurrency(
+                                              session.closing_cash,
                                           )
                                         : '—'}
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-info">Opened At</p>
+                                <p className="text-sm text-card-foreground">
+                                    Opened At
+                                </p>
                                 <p className="font-medium">
                                     {formatDateTime(session.opened_at)}
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-info">Closed At</p>
+                                <p className="text-sm text-card-foreground">
+                                    Closed At
+                                </p>
                                 <p className="font-medium">
                                     {session.closed_at
                                         ? formatDateTime(session.closed_at)

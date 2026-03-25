@@ -19,7 +19,6 @@ import { Branch } from '../../../types/branch';
 import { User } from '../../../types/user';
 
 interface TellerFormPageProps {
-    backUrl: string;
     teller?: {
         id: number;
         name: string;
@@ -34,12 +33,7 @@ interface TellerFormPageProps {
     branches: Branch[];
 }
 
-const TellerForm = ({
-    backUrl,
-    teller,
-    branches,
-    users,
-}: TellerFormPageProps) => {
+const TellerForm = ({ teller, branches, users }: TellerFormPageProps) => {
     const { flash } = usePage().props;
 
     useEffect(() => {
@@ -120,7 +114,7 @@ const TellerForm = ({
                 className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6 lg:w-3xl"
             >
                 {/* Basic Info */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2 lg:grid-cols-2">
                     <div>
                         <Label className="text-xs">Teller Name</Label>
                         <Input
@@ -202,7 +196,7 @@ const TellerForm = ({
                         <InputError message={errors.max_transaction_limit} />
                     </div>
 
-                    <div>
+                    <div className="mt-4">
                         <Label className="text-xs">Status</Label>
                         <ToggleGroup
                             type="single"
@@ -224,7 +218,7 @@ const TellerForm = ({
                 </div>
 
                 {/* Submit */}
-                <div className="flex justify-end">
+                <div className="mt-4 flex justify-end">
                     <Button
                         type="submit"
                         disabled={processing}

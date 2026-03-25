@@ -11,10 +11,9 @@ import { BranchDay } from '../../../types/cash_treasury_module';
 
 interface Props {
     branch_day: BranchDay | null;
-    branch_id: number;
 }
 
-export default function BranchDayStatusPage({ branch_day, branch_id }: Props) {
+export default function BranchDayStatusPage({ branch_day }: Props) {
     const { flash } = usePage().props;
 
     useEffect(() => {
@@ -83,7 +82,7 @@ export default function BranchDayStatusPage({ branch_day, branch_id }: Props) {
                 ) : (
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                            <h3 className="text-lg font-semibold">
+                            <h3 className="text-lg font-semibold text-info">
                                 Branch Day Info
                             </h3>
                             {StatusBadge({ status: branch_day.status })}
@@ -91,7 +90,7 @@ export default function BranchDayStatusPage({ branch_day, branch_id }: Props) {
 
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             <div>
-                                <p className="text-sm text-info">
+                                <p className="text-sm text-card-foreground">
                                     Business Date
                                 </p>
                                 <p className="font-medium">
@@ -99,7 +98,9 @@ export default function BranchDayStatusPage({ branch_day, branch_id }: Props) {
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-info">Opened At</p>
+                                <p className="text-sm text-card-foreground">
+                                    Opened At
+                                </p>
                                 <p className="font-medium">
                                     {branch_day.opened_at
                                         ? formatDateTime(branch_day.opened_at)
@@ -107,7 +108,9 @@ export default function BranchDayStatusPage({ branch_day, branch_id }: Props) {
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-info">Closed At</p>
+                                <p className="text-sm text-card-foreground">
+                                    Closed At
+                                </p>
                                 <p className="font-medium">
                                     {branch_day.closed_at
                                         ? formatDateTime(branch_day.closed_at)
@@ -120,7 +123,7 @@ export default function BranchDayStatusPage({ branch_day, branch_id }: Props) {
                             {branch_day.status === 'open' && (
                                 <Button
                                     onClick={handleClose}
-                                    className="bg-red-500 hover:bg-red-600"
+                                    className="bg-destructive hover:bg-destructive/80"
                                 >
                                     Close Branch Day
                                 </Button>

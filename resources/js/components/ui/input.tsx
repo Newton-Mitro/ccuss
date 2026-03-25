@@ -7,26 +7,45 @@ interface InputProps extends React.ComponentProps<"input"> {
   showErrorText?: boolean
 }
 
-function Input({ className, type, error,showErrorText = false, ...props }: InputProps) {
+function Input({
+  className,
+  type,
+  error,
+  showErrorText = false,
+  ...props
+}: InputProps) {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-1">
       <input
         type={type}
         data-slot="input"
+        aria-invalid={!!error}
         className={cn(
-          // base
-          "flex h-9 w-full min-w-0 rounded-md border bg-background px-3 py-1 text-base shadow-sm-xs outline-none transition-[color,box-shadow]",
-          "file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium",
-          "placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground md:text-sm",
+          // base (fully theme-driven)
+          "flex h-9 w-full min-w-0 rounded-md border border-border",
+          "bg-background text-foreground",
+          "px-3 py-1 text-sm shadow-sm outline-none",
+          "transition-[color,box-shadow,border-color,background-color]",
 
-          // focus
-          "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+          // file input
+          "file:inline-flex file:h-7 file:border-0 file:bg-transparent",
+          "file:text-sm file:font-medium file:text-foreground",
 
-          // validation
-          error ? "border-destructive focus-visible:ring-destructive/50" : "aria-invalid:border-destructive aria-invalid:ring-destructive/20 ",
+          // placeholder & selection
+          "placeholder:text-muted-foreground",
+          "selection:bg-primary selection:text-primary-foreground",
+
+          // focus (theme ring)
+          "focus-visible:border-ring",
+          "focus-visible:ring-2 focus-visible:ring-ring/40",
+
+          // error state (overrides everything)
+          error &&
+            "border-destructive text-destructive placeholder:text-destructive/70 focus-visible:ring-destructive/40",
 
           // disabled
-          "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+          "disabled:pointer-events-none disabled:cursor-not-allowed",
+          "disabled:bg-muted disabled:text-muted-foreground",
 
           className
         )}

@@ -9,12 +9,12 @@ interface AppDatePickerProps {
   value: string;
   onChange?: (value: string) => void;
   error?: string;
-  showErrorText?: boolean
+  showErrorText?: boolean;
   disabled?: boolean;
 }
 
 const AppDatePicker = forwardRef<HTMLInputElement, AppDatePickerProps>(
-  ({ label, value, onChange, error, disabled = false, showErrorText=false }, ref) => {
+  ({ label, value, onChange, error, disabled = false, showErrorText = false }, ref) => {
     const inputRef = useRef<HTMLInputElement>(null);
 
     const combinedRef = (node: HTMLInputElement) => {
@@ -31,23 +31,25 @@ const AppDatePicker = forwardRef<HTMLInputElement, AppDatePickerProps>(
     };
 
     return (
-      <div className="relative">
-        {label && <Label className="text-xs">{label}</Label>}
+      <div className="flex flex-col gap-1 w-full relative">
+        {label && <Label className="text-xs text-foreground">{label}</Label>}
+
         <div className="relative">
           <Input
-            aria-invalid={error ? true : false}
+            aria-invalid={!!error}
             type="date"
             value={value}
             ref={combinedRef}
             onChange={(e) => onChange?.(e.target.value)}
             disabled={disabled}
-            className="h-8 text-sm pr-8 cursor-pointer" // match Input size
+            className="h-9 text-sm pr-9 cursor-pointer"
           />
           <Calendar
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4 cursor-pointer"
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4 cursor-pointer transition-colors hover:text-accent-foreground"
             onClick={openDatePicker}
           />
         </div>
+
         {error && showErrorText && <InputError message={error} />}
       </div>
     );

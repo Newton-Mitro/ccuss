@@ -3,6 +3,8 @@ import React, { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
+import { Input } from '../../../components/ui/input';
+import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 
@@ -60,29 +62,23 @@ export default function OpenTellerSession() {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="w-full max-w-md space-y-4 rounded-md border bg-card p-6"
+                    className="w-full max-w-md space-y-2 rounded-md border bg-card p-6 md:p-10"
                 >
                     {/* Teller */}
                     <div>
                         <label className="mb-1 block text-sm font-medium">
                             Teller
                         </label>
-                        <select
-                            value={data.teller_id}
-                            onChange={(e) =>
-                                setData('teller_id', e.target.value)
-                            }
-                            className="w-full rounded-md border px-3 py-2"
-                        >
-                            <option value="">Select Teller</option>
-                            {tellers?.map((t) => (
-                                <option key={t.id} value={t.id}>
-                                    {t.name}
-                                </option>
-                            ))}
-                        </select>
+                        <Select
+                            value={data.teller_id?.toString() || ''}
+                            onChange={(value) => setData('teller_id', value)}
+                            options={tellers?.map((teller) => ({
+                                value: teller.id.toString(),
+                                label: teller.name,
+                            }))}
+                        ></Select>
                         {errors.teller_id && (
-                            <p className="text-sm text-red-600">
+                            <p className="text-sm text-destructive">
                                 {errors.teller_id}
                             </p>
                         )}
@@ -93,22 +89,18 @@ export default function OpenTellerSession() {
                         <label className="mb-1 block text-sm font-medium">
                             Branch Day
                         </label>
-                        <select
+                        <Select
                             value={data.branch_day_id}
-                            onChange={(e) =>
-                                setData('branch_day_id', e.target.value)
+                            onChange={(value) =>
+                                setData('branch_day_id', value)
                             }
-                            className="w-full rounded-md border px-3 py-2"
-                        >
-                            <option value="">Select Branch Day</option>
-                            {branch_days?.map((b) => (
-                                <option key={b.id} value={b.id}>
-                                    {b.business_date}
-                                </option>
-                            ))}
-                        </select>
+                            options={branch_days?.map((branch_day) => ({
+                                value: branch_day.id.toString(),
+                                label: branch_day.business_date,
+                            }))}
+                        ></Select>
                         {errors.branch_day_id && (
-                            <p className="text-sm text-red-600">
+                            <p className="text-sm text-destructive">
                                 {errors.branch_day_id}
                             </p>
                         )}
@@ -119,7 +111,7 @@ export default function OpenTellerSession() {
                         <label className="mb-1 block text-sm font-medium">
                             Opening Cash
                         </label>
-                        <input
+                        <Input
                             type="number"
                             value={data.opening_cash}
                             onChange={(e) =>
@@ -129,7 +121,7 @@ export default function OpenTellerSession() {
                             className="w-full rounded-md border px-3 py-2"
                         />
                         {errors.opening_cash && (
-                            <p className="text-sm text-red-600">
+                            <p className="text-sm text-destructive">
                                 {errors.opening_cash}
                             </p>
                         )}
@@ -139,7 +131,7 @@ export default function OpenTellerSession() {
                     <button
                         type="submit"
                         disabled={processing}
-                        className="w-full rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90 disabled:opacity-50"
+                        className="mt-4 w-full rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
                     >
                         Open Session
                     </button>
