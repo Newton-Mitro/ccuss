@@ -234,7 +234,7 @@
 /* ================= Dark Theme Variants ================= */
 .dark.theme-blue {
     --background: oklch(0.05 0.03 250);
-    --foreground: oklch(0.98 0.01 250);
+    --foreground: oklch(77.358% 0.01372 17.103);
     --primary: oklch(0.7 0.2 250);
     --accent: oklch(0.68 0.18 25);
 
@@ -249,7 +249,7 @@
 
 .dark.theme-green {
     --background: oklch(0.05 0.03 140);
-    --foreground: oklch(0.98 0.01 140);
+    --foreground: oklch(77.358% 0.01372 17.103);
     --primary: oklch(0.7 0.18 140);
     --accent: oklch(0.65 0.18 100);
 
@@ -264,7 +264,7 @@
 
 .dark.theme-brown {
     --background: oklch(0.05 0.03 40);
-    --foreground: oklch(0.98 0.01 40);
+    --foreground: oklch(77.358% 0.01372 17.103);
     --primary: oklch(14.825% 0.04522 24.506);
     --accent: oklch(36.077% 0.07316 21.331);
 
@@ -279,7 +279,7 @@
 
 .dark.theme-violet {
     --background: oklch(0.05 0.03 280);
-    --foreground: oklch(0.98 0.01 280);
+    --foreground: oklch(77.358% 0.01372 17.103);
     --primary: oklch(0.72 0.22 280);
     --accent: oklch(0.7 0.18 250);
 

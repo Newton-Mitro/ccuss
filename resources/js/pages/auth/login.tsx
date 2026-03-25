@@ -18,21 +18,23 @@ export default function Login({ status, canResetPassword, canRegister }) {
     }, []);
 
     return (
-        <div className="flex min-h-screen bg-background">
+        <div className="flex min-h-screen bg-card/50">
             <Head title="Log in" />
 
             {/* Left Branding Section */}
-            <div className="hidden w-7/12 flex-col items-center justify-center lg:flex">
-                <motion.img
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.5 }}
+            <motion.div
+                initial={{ scale: 0.2, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 1 }}
+                className="hidden w-7/12 flex-col items-center justify-center lg:flex"
+            >
+                <img
                     src="/logo.png"
                     alt="Logo"
-                    className="h-48 w-48 rounded-full bg-background"
+                    className="h-40 w-40 rounded-full"
                 />
 
-                <div className="-mt-3 text-center">
+                <div className="text-center">
                     <h1 className="text-4xl font-bold tracking-tight">
                         <span className="text-accent">Union</span> Banking
                     </h1>
@@ -40,23 +42,18 @@ export default function Login({ status, canResetPassword, canRegister }) {
                         Smart core banking & credit solution designed for modern
                         cooperative institutions.
                     </p>
-                    <div className="mt-3 inline-block rounded-full bg-warning px-3 py-1 text-xs font-medium">
+                    <div className="mt-3 inline-block rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">
                         Version 1.0
                     </div>
                 </div>
-            </div>
+            </motion.div>
 
             {/* Right Form Section */}
-            <div className="flex w-full items-center justify-center bg-card p-6 lg:w-5/12 lg:px-28">
-                <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ duration: 0.4 }}
-                    className="w-full max-w-md p-8"
-                >
+            <div className="mx-4 my-6 flex w-full items-center justify-center rounded border bg-card p-6 shadow-lg lg:w-4/12 lg:px-24">
+                <div className="w-full max-w-md p-8">
                     {/* Header */}
                     <div className="mb-6 text-center">
-                        <AppLogoIcon className="mx-auto h-20 w-20 text-accent" />
+                        <AppLogoIcon className="mx-auto h-28 w-28 text-accent" />
                         <h2 className="mt-3 text-lg font-semibold">
                             Welcome back
                         </h2>
@@ -163,7 +160,7 @@ export default function Login({ status, canResetPassword, canRegister }) {
                             {status}
                         </div>
                     )}
-                </motion.div>
+                </div>
             </div>
         </div>
     );

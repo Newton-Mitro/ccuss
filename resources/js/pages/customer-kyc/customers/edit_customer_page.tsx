@@ -150,269 +150,325 @@ const Edit = ({ customer, flash }: EditProps) => {
 
             <form
                 onSubmit={handleSubmit}
-                className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6"
+                className="w-full space-y-6 rounded-md border bg-card p-4 lg:px-10 lg:py-12"
             >
-                {/* photo */}
-                <div className="flex flex-col gap-4">
-                    {photoPreview ? (
-                        <img
-                            src={photoPreview}
-                            alt="Preview"
-                            className="h-32 w-32 rounded-md border object-cover sm:h-40 sm:w-40"
-                        />
-                    ) : (
-                        <div className="h-32 w-32 rounded-md border bg-muted sm:h-40 sm:w-40">
-                            <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
-                                No Photo
+                <div className="flex flex-col gap-6 lg:flex-row">
+                    <div className="w-full space-y-4 lg:w-11/12">
+                        {/* basic INFO */}
+                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+                            <div>
+                                <Label className="text-xs">Customer Type</Label>
+                                <select
+                                    value={data.type}
+                                    onChange={(e) =>
+                                        handleTypeChange(e.target.value)
+                                    }
+                                    className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                                >
+                                    <option value="">Select Type</option>
+                                    <option value="individual">
+                                        Individual
+                                    </option>
+                                    <option value="organization">
+                                        Organization
+                                    </option>
+                                </select>
+                                <InputError message={errors.type} />
+                            </div>
+
+                            <div>
+                                <Label className="text-xs">Name</Label>
+                                <Input
+                                    value={data.name}
+                                    onChange={(e) =>
+                                        setData('name', e.target.value)
+                                    }
+                                    className="h-8 text-sm"
+                                />
+                                <InputError message={errors.name} />
+                            </div>
+
+                            <div>
+                                <Label className="text-xs">Phone</Label>
+                                <Input
+                                    value={data.phone}
+                                    onChange={(e) =>
+                                        setData('phone', e.target.value)
+                                    }
+                                    className="h-8 text-sm"
+                                />
+                                <InputError message={errors.phone} />
+                            </div>
+
+                            <div>
+                                <Label className="text-xs">Email</Label>
+                                <Input
+                                    value={data.email}
+                                    onChange={(e) =>
+                                        setData('email', e.target.value)
+                                    }
+                                    className="h-8 text-sm"
+                                />
+                                <InputError message={errors.email} />
                             </div>
                         </div>
-                    )}
 
-                    <div>
-                        <Label className="text-xs">Upload Photo</Label>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handlePhotoChange}
-                            className="block w-full text-sm text-muted-foreground"
-                        />
-                        <InputError message={errors.photo} />
+                        {/* individual ONLY FIELDS */}
+                        {isIndividual && (
+                            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+                                <div>
+                                    <Label className="text-xs">
+                                        Date of Birth
+                                    </Label>
+                                    <AppDatePicker
+                                        value={data.dob}
+                                        onChange={(val) => setData('dob', val)}
+                                    />
+                                    <InputError message={errors.dob} />
+                                </div>
+
+                                <div>
+                                    <Label className="text-xs">Gender</Label>
+                                    <select
+                                        value={data.gender}
+                                        onChange={(e) =>
+                                            setData('gender', e.target.value)
+                                        }
+                                        className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                                    >
+                                        <option value="">Select</option>
+                                        <option>male</option>
+                                        <option>female</option>
+                                        <option>other</option>
+                                    </select>
+                                    <InputError message={errors.gender} />
+                                </div>
+
+                                <div>
+                                    <Label className="text-xs">Religion</Label>
+                                    <select
+                                        value={data.religion}
+                                        onChange={(e) =>
+                                            setData('religion', e.target.value)
+                                        }
+                                        className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                                    >
+                                        <option value="">Select</option>
+                                        <option>islam</option>
+                                        <option>hinduism</option>
+                                        <option>christianity</option>
+                                        <option>buddhism</option>
+                                        <option>other</option>
+                                    </select>
+                                    <InputError message={errors.religion} />
+                                </div>
+
+                                <div>
+                                    <Label className="text-xs">
+                                        Marital Status
+                                    </Label>
+                                    <select
+                                        value={data.marital_status}
+                                        onChange={(e) =>
+                                            setData(
+                                                'marital_status',
+                                                e.target.value,
+                                            )
+                                        }
+                                        className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                                    >
+                                        <option value="">Select</option>
+                                        <option>single</option>
+                                        <option>married</option>
+                                        <option>divorced</option>
+                                        <option>widowed</option>
+                                    </select>
+                                    <InputError
+                                        message={errors.marital_status}
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label className="text-xs">
+                                        Blood Group
+                                    </Label>
+                                    <select
+                                        value={data.blood_group}
+                                        onChange={(e) =>
+                                            setData(
+                                                'blood_group',
+                                                e.target.value,
+                                            )
+                                        }
+                                        className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                                    >
+                                        <option value="">Select</option>
+                                        <option>A+</option>
+                                        <option>A-</option>
+                                        <option>B+</option>
+                                        <option>B-</option>
+                                        <option>O+</option>
+                                        <option>O-</option>
+                                        <option>AB+</option>
+                                        <option>AB-</option>
+                                    </select>
+                                    <InputError message={errors.blood_group} />
+                                </div>
+
+                                <div>
+                                    <Label className="text-xs">
+                                        Nationality
+                                    </Label>
+                                    <Input
+                                        value={data.nationality}
+                                        onChange={(e) =>
+                                            setData(
+                                                'nationality',
+                                                e.target.value,
+                                            )
+                                        }
+                                        className="h-8 text-sm"
+                                    />
+                                    <InputError message={errors.nationality} />
+                                </div>
+
+                                <div>
+                                    <Label className="text-xs">
+                                        Occupation
+                                    </Label>
+                                    <Input
+                                        value={data.occupation}
+                                        onChange={(e) =>
+                                            setData(
+                                                'occupation',
+                                                e.target.value,
+                                            )
+                                        }
+                                        className="h-8 text-sm"
+                                    />
+                                    <InputError message={errors.occupation} />
+                                </div>
+
+                                <div>
+                                    <Label className="text-xs">Education</Label>
+                                    <Input
+                                        value={data.education}
+                                        onChange={(e) =>
+                                            setData('education', e.target.value)
+                                        }
+                                        className="h-8 text-sm"
+                                    />
+                                    <InputError message={errors.education} />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* IDENTIFICATION */}
+                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                            <div>
+                                <Label className="text-xs">
+                                    Identification Type
+                                </Label>
+                                <select
+                                    value={data.identification_type}
+                                    onChange={(e) =>
+                                        setData(
+                                            'identification_type',
+                                            e.target.value,
+                                        )
+                                    }
+                                    className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                                >
+                                    {isOrganization ? (
+                                        <option value="REGISTRATION_NO">
+                                            Registration No
+                                        </option>
+                                    ) : (
+                                        <>
+                                            <option value="">Select</option>
+                                            <option value="NID">NID</option>
+                                            <option value="BRN">BRN</option>
+                                            <option value="passport">
+                                                passport
+                                            </option>
+                                            <option value="driving_license">
+                                                DRIVING LICENSE
+                                            </option>
+                                        </>
+                                    )}
+                                </select>
+                                <InputError
+                                    message={errors.identification_type}
+                                />
+                            </div>
+                            <div>
+                                <Label className="text-xs">
+                                    Identification Number
+                                </Label>
+                                <Input
+                                    value={data.identification_number}
+                                    onChange={(e) =>
+                                        setData(
+                                            'identification_number',
+                                            e.target.value,
+                                        )
+                                    }
+                                    className="h-8 text-sm"
+                                />
+                                <InputError
+                                    message={errors.identification_number}
+                                />
+                            </div>
+                        </div>
+
+                        {/* KYC STATUS */}
+                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                            <div>
+                                <Label className="text-xs">KYC Status</Label>
+                                <select
+                                    value={data.kyc_status}
+                                    disabled
+                                    className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground"
+                                >
+                                    <option>pending</option>
+                                    <option>verified</option>
+                                    <option>rejected</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                {/* basic INFO */}
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
-                    <div>
-                        <Label className="text-xs">Customer Type</Label>
-                        <select
-                            value={data.type}
-                            onChange={(e) => handleTypeChange(e.target.value)}
-                            className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                        >
-                            <option value="">Select Type</option>
-                            <option value="individual">Individual</option>
-                            <option value="organization">Organization</option>
-                        </select>
-                        <InputError message={errors.type} />
-                    </div>
-
-                    <div>
-                        <Label className="text-xs">Name</Label>
-                        <Input
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
-                            className="h-8 text-sm"
-                        />
-                        <InputError message={errors.name} />
-                    </div>
-
-                    <div>
-                        <Label className="text-xs">Phone</Label>
-                        <Input
-                            value={data.phone}
-                            onChange={(e) => setData('phone', e.target.value)}
-                            className="h-8 text-sm"
-                        />
-                        <InputError message={errors.phone} />
-                    </div>
-
-                    <div>
-                        <Label className="text-xs">Email</Label>
-                        <Input
-                            value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
-                            className="h-8 text-sm"
-                        />
-                        <InputError message={errors.email} />
-                    </div>
-                </div>
-
-                {/* individual ONLY FIELDS */}
-                {isIndividual && (
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
-                        <div>
-                            <Label className="text-xs">Date of Birth</Label>
-                            <AppDatePicker
-                                value={data.dob}
-                                onChange={(val) => setData('dob', val)}
+                    {/* photo */}
+                    <div className="mt-6">
+                        {photoPreview ? (
+                            <img
+                                src={photoPreview}
+                                alt="Preview"
+                                className="h-32 w-32 rounded-md border object-cover sm:h-40 sm:w-40"
                             />
-                            <InputError message={errors.dob} />
-                        </div>
+                        ) : (
+                            <div className="h-32 w-32 rounded-md border bg-muted sm:h-40 sm:w-40">
+                                <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
+                                    No Photo
+                                </div>
+                            </div>
+                        )}
 
                         <div>
-                            <Label className="text-xs">Gender</Label>
-                            <select
-                                value={data.gender}
-                                onChange={(e) =>
-                                    setData('gender', e.target.value)
-                                }
-                                className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                            >
-                                <option value="">Select</option>
-                                <option>male</option>
-                                <option>female</option>
-                                <option>other</option>
-                            </select>
-                            <InputError message={errors.gender} />
-                        </div>
-
-                        <div>
-                            <Label className="text-xs">Religion</Label>
-                            <select
-                                value={data.religion}
-                                onChange={(e) =>
-                                    setData('religion', e.target.value)
-                                }
-                                className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                            >
-                                <option value="">Select</option>
-                                <option>islam</option>
-                                <option>hinduism</option>
-                                <option>christianity</option>
-                                <option>buddhism</option>
-                                <option>other</option>
-                            </select>
-                            <InputError message={errors.religion} />
-                        </div>
-
-                        <div>
-                            <Label className="text-xs">Marital Status</Label>
-                            <select
-                                value={data.marital_status}
-                                onChange={(e) =>
-                                    setData('marital_status', e.target.value)
-                                }
-                                className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                            >
-                                <option value="">Select</option>
-                                <option>single</option>
-                                <option>married</option>
-                                <option>divorced</option>
-                                <option>widowed</option>
-                            </select>
-                            <InputError message={errors.marital_status} />
-                        </div>
-
-                        <div>
-                            <Label className="text-xs">Blood Group</Label>
-                            <select
-                                value={data.blood_group}
-                                onChange={(e) =>
-                                    setData('blood_group', e.target.value)
-                                }
-                                className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                            >
-                                <option value="">Select</option>
-                                <option>A+</option>
-                                <option>A-</option>
-                                <option>B+</option>
-                                <option>B-</option>
-                                <option>O+</option>
-                                <option>O-</option>
-                                <option>AB+</option>
-                                <option>AB-</option>
-                            </select>
-                            <InputError message={errors.blood_group} />
-                        </div>
-
-                        <div>
-                            <Label className="text-xs">Nationality</Label>
-                            <Input
-                                value={data.nationality}
-                                onChange={(e) =>
-                                    setData('nationality', e.target.value)
-                                }
-                                className="h-8 text-sm"
+                            <Label className="text-xs">Upload Photo</Label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handlePhotoChange}
+                                className="block w-full text-sm text-muted-foreground"
                             />
-                            <InputError message={errors.nationality} />
+                            <InputError message={errors.photo} />
                         </div>
-
-                        <div>
-                            <Label className="text-xs">Occupation</Label>
-                            <Input
-                                value={data.occupation}
-                                onChange={(e) =>
-                                    setData('occupation', e.target.value)
-                                }
-                                className="h-8 text-sm"
-                            />
-                            <InputError message={errors.occupation} />
-                        </div>
-
-                        <div>
-                            <Label className="text-xs">Education</Label>
-                            <Input
-                                value={data.education}
-                                onChange={(e) =>
-                                    setData('education', e.target.value)
-                                }
-                                className="h-8 text-sm"
-                            />
-                            <InputError message={errors.education} />
-                        </div>
-                    </div>
-                )}
-
-                {/* IDENTIFICATION */}
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-                    <div>
-                        <Label className="text-xs">Identification Type</Label>
-                        <select
-                            value={data.identification_type}
-                            onChange={(e) =>
-                                setData('identification_type', e.target.value)
-                            }
-                            className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                        >
-                            {isOrganization ? (
-                                <option value="REGISTRATION_NO">
-                                    Registration No
-                                </option>
-                            ) : (
-                                <>
-                                    <option value="">Select</option>
-                                    <option value="NID">NID</option>
-                                    <option value="BRN">BRN</option>
-                                    <option value="passport">passport</option>
-                                    <option value="driving_license">
-                                        DRIVING LICENSE
-                                    </option>
-                                </>
-                            )}
-                        </select>
-                        <InputError message={errors.identification_type} />
-                    </div>
-                    <div>
-                        <Label className="text-xs">Identification Number</Label>
-                        <Input
-                            value={data.identification_number}
-                            onChange={(e) =>
-                                setData('identification_number', e.target.value)
-                            }
-                            className="h-8 text-sm"
-                        />
-                        <InputError message={errors.identification_number} />
-                    </div>
-                </div>
-
-                {/* KYC STATUS */}
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-                    <div>
-                        <Label className="text-xs">KYC Status</Label>
-                        <select
-                            value={data.kyc_status}
-                            disabled
-                            className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground"
-                        >
-                            <option>pending</option>
-                            <option>verified</option>
-                            <option>rejected</option>
-                        </select>
                     </div>
                 </div>
 
                 {/* SUBMIT */}
-                <div className="mt-4 flex justify-end">
+                <div className="">
                     <Button
                         type="submit"
                         disabled={processing}

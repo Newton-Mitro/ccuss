@@ -182,7 +182,7 @@ export default function CustomAuthLayout({
      * Render
      * ------------------------------------------------------------------ */
     return (
-        <div className="flex h-screen bg-background">
+        <div className="flex h-screen bg-background text-foreground">
             {/* Sidebar */}
             <aside
                 className={cn(

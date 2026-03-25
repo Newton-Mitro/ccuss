@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react';
-
+import { motion } from 'framer-motion';
 import CustomAuthLayout from '../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../types';
 
@@ -11,7 +11,12 @@ export default function HomePage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Home" />
 
-            <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center gap-4 px-4">
+            <motion.div
+                initial={{ scale: 0.2, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 1 }}
+                className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center gap-4 px-4"
+            >
                 {/* Hero Card */}
                 <div className="w-full max-w-5xl bg-background">
                     <div className="flex items-center justify-center">
@@ -35,11 +40,11 @@ export default function HomePage() {
                         Core banking & credit solution for co-operative credit
                         unions.
                     </p>
-                    <div className="mt-1 rounded-full bg-warning px-3 py-0.5 text-xs text-warning-foreground">
+                    <div className="mt-3 inline-block rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">
                         Version 1.0
                     </div>
                 </div>
-            </div>
+            </motion.div>
         </CustomAuthLayout>
     );
 }
