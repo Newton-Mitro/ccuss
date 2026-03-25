@@ -6,7 +6,6 @@ use App\FinanceAndAccounting\Models\AccountingPeriod;
 use App\FinanceAndAccounting\Models\FiscalYear;
 use App\FinanceAndAccounting\Models\InstrumentType;
 use App\FinanceAndAccounting\Models\LedgerAccount;
-use App\FinanceAndAccounting\Models\Voucher;
 use App\Http\Controllers\Controller;
 use App\SystemAdministration\Models\Branch;
 use Carbon\Carbon;
@@ -23,55 +22,21 @@ class TellerTransactionController extends Controller
             ['is_active', true],
         ])->first();
 
-        $cashControl = LedgerAccount::where([
-            ['name', 'Cash in Vault'],
-            ['is_control_account', true],
-            ['is_active', true],
-        ])->first();
-
-        $cashLedgers = $cashControl
-            ? LedgerAccount::where('parent_id', $cashControl->id)
-                ->where('is_active', true)
-                ->where('is_control_account', false)
-                ->orderBy('code')
-                ->get()
-            : collect();
-
-        $cashSubledgers = $cashLedger ? $cashLedgers : [];
+        $cashSubledgers = [];
 
         $instrumentTypes = InstrumentType::all();
 
-        $vouchers = Voucher::where('voucher_type', 'CREDIT_OR_RECEIPT')
-            ->where('created_by', auth()->id())
-            ->whereDate('created_at', today())
-            ->orderBy('id', 'desc')
-            ->get();
+        $vouchers = [];
 
         return Inertia::render('branch-cash-and-treasury/customer-cash-deposit/CustomerCashDepositPage', [
             'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
             'fiscal_years' => FiscalYear::select('id', 'code')->get(),
             'accounting_periods' => AccountingPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
             'branches' => Branch::select('id', 'name')->get(),
-            'cash_ledgers' => $cashLedgers,
             'cash_subledgers' => $cashSubledgers,
             'instrument_types' => $instrumentTypes,
             'lines' => [
-                [
-                    'id' => 1,
-                    'voucher_id' => 0,
-                    'ledger_account_id' => $cashLedger->id,
-                    'ledger_account' => $cashLedger,
-                    'subledger_id' => null,
-                    'subledger_type' => null,
-                    'subledger' => null,
-                    'instrument_type_id' => 1,
-                    'instrument_id' => null,
-                    'debit' => 0,
-                    'credit' => 0,
-                    'particulars' => 'Cash In Hand',
-                    'dr_cr' => 'DR',
-                    'is_selected' => true
-                ],
+
             ],
             'vouchers' => $vouchers,
             'user_branch_id' => auth()->user()->branch_id,

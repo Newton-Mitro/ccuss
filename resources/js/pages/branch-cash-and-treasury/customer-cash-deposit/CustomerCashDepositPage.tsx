@@ -9,7 +9,6 @@ import { BreadcrumbItem } from '../../../types';
 import { route } from 'ziggy-js';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { normalizeErrors } from '../../../lib/normalize_errors';
-import { VoucherLine } from '../../../types/accounting';
 import { Customer } from '../../../types/customer_kyc_module';
 import CashLedgerSection from './components/CashLedgerSection';
 import DepositLedgersSection from './components/DepositLedgersSection';

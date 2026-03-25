@@ -350,60 +350,138 @@ class ChartOfAccountsSeeder extends Seeder
                 'is_control_account' => true,
             ]);
 
-            LedgerAccount::create([
+            // ----------------------------
+            // OPERATING EXPENSES (5100)
+            // ----------------------------
+            $operatingExpenses = LedgerAccount::create([
                 'organization_id' => $organization->id,
-                'code' => '5101',
-                'name' => 'Salaries & Wages',
+                'code' => '5100',
+                'name' => 'Operating Expenses',
                 'type' => 'expense',
                 'parent_id' => $expenses->id,
+                'is_control_account' => true,
             ]);
 
-            LedgerAccount::create([
+            LedgerAccount::insert([
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '5101',
+                    'name' => 'Salaries & Wages',
+                    'type' => 'expense',
+                    'parent_id' => $operatingExpenses->id,
+                ],
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '5102',
+                    'name' => 'Office Expenses',
+                    'type' => 'expense',
+                    'parent_id' => $operatingExpenses->id,
+                ],
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '5103',
+                    'name' => 'Utilities',
+                    'type' => 'expense',
+                    'parent_id' => $operatingExpenses->id,
+                ],
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '5104',
+                    'name' => 'Stationery',
+                    'type' => 'expense',
+                    'parent_id' => $operatingExpenses->id,
+                ],
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '5105',
+                    'name' => 'Printing & Photocopy',
+                    'type' => 'expense',
+                    'parent_id' => $operatingExpenses->id,
+                ],
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '5106',
+                    'name' => 'Office Supplies',
+                    'type' => 'expense',
+                    'parent_id' => $operatingExpenses->id,
+                ],
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '5107',
+                    'name' => 'Cleaning Materials',
+                    'type' => 'expense',
+                    'parent_id' => $operatingExpenses->id,
+                ],
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '5108',
+                    'name' => 'Pantry / Snacks',
+                    'type' => 'expense',
+                    'parent_id' => $operatingExpenses->id,
+                ],
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '5109',
+                    'name' => 'Courier / Delivery',
+                    'type' => 'expense',
+                    'parent_id' => $operatingExpenses->id,
+                ],
+            ]);
+
+            // ----------------------------
+            // FINANCIAL EXPENSES (5200)
+            // ----------------------------
+            $financialExpenses = LedgerAccount::create([
                 'organization_id' => $organization->id,
-                'code' => '5102',
-                'name' => 'Office Expenses',
+                'code' => '5200',
+                'name' => 'Financial Expenses',
                 'type' => 'expense',
                 'parent_id' => $expenses->id,
+                'is_control_account' => true,
             ]);
 
-            LedgerAccount::create([
-                'organization_id' => $organization->id,
-                'code' => '5103',
-                'name' => 'Utilities',
-                'type' => 'expense',
-                'parent_id' => $expenses->id,
+            LedgerAccount::insert([
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '5201',
+                    'name' => 'Savings Interest Expense',
+                    'type' => 'expense',
+                    'parent_id' => $financialExpenses->id,
+                ],
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '5202',
+                    'name' => 'Fixed Deposit Interest Expense',
+                    'type' => 'expense',
+                    'parent_id' => $financialExpenses->id,
+                ],
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '5203',
+                    'name' => 'Term Deposit Interest Expense',
+                    'type' => 'expense',
+                    'parent_id' => $financialExpenses->id,
+                ],
             ]);
 
-            LedgerAccount::create([
-                'organization_id' => $organization->id,
-                'code' => '5201',
-                'name' => 'Savings Interest Expense',
-                'type' => 'expense',
-                'parent_id' => $expenses->id,
-            ]);
-
-            LedgerAccount::create([
-                'organization_id' => $organization->id,
-                'code' => '5202',
-                'name' => 'Fixed Deposit Interest Expense',
-                'type' => 'expense',
-                'parent_id' => $expenses->id,
-            ]);
-
-            LedgerAccount::create([
-                'organization_id' => $organization->id,
-                'code' => '5203',
-                'name' => 'Term Deposit Interest Expense',
-                'type' => 'expense',
-                'parent_id' => $expenses->id,
-            ]);
-
-            LedgerAccount::create([
+            // ----------------------------
+            // PROVISIONS (5300)
+            // ----------------------------
+            $provisions = LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '5300',
-                'name' => 'Provision For Loan Losses',
+                'name' => 'Provisions',
                 'type' => 'expense',
                 'parent_id' => $expenses->id,
+                'is_control_account' => true,
+            ]);
+
+            LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '5301',
+                'name' => 'Provision For Loan Losses',
+                'type' => 'expense',
+                'parent_id' => $provisions->id,
             ]);
 
             $this->command->info('✅ full Banking-Grade COA Seeded Successfully!');

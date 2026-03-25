@@ -8,9 +8,6 @@ return new class extends Migration {
 
     public function up(): void
     {
-        // ------------------------
-        // 1. Vendors / Suppliers
-        // ------------------------
         Schema::create('vendors', function (Blueprint $table) {
             $table->id();
             $table->string('name');
@@ -26,9 +23,6 @@ return new class extends Migration {
             $table->softDeletes();
         });
 
-        // ------------------------
-        // 2. Vendor Addresses
-        // ------------------------
         Schema::create('vendor_addresses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('vendor_id')->constrained()->cascadeOnDelete();
@@ -42,9 +36,6 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        // ------------------------
-        // 3. Vendor Contacts
-        // ------------------------
         Schema::create('vendor_contacts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('vendor_id')->constrained()->cascadeOnDelete();
@@ -56,9 +47,6 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        // ------------------------
-        // 4. Vendor Categories (Optional)
-        // ------------------------
         Schema::create('vendor_categories', function (Blueprint $table) {
             $table->id();
             $table->string('name');
@@ -67,9 +55,6 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        // ------------------------
-        // 5. Vendor Assignments (Vendor -> Category)
-        // ------------------------
         Schema::create('vendor_category_assignments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('vendor_id')->constrained()->cascadeOnDelete();
@@ -77,29 +62,10 @@ return new class extends Migration {
             $table->timestamps();
             $table->unique(['vendor_id', 'vendor_category_id'], 'vendor_category_unique');
         });
-
-        // ------------------------
-        // 6. Vendor Transactions (Payments / Invoices)
-        // ------------------------
-        Schema::create('vendor_transactions', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('vendor_id')->constrained()->cascadeOnDelete();
-            $table->string('transaction_no')->unique();
-            $table->enum('type', ['invoice', 'payment', 'credit_note'])->default('invoice');
-            $table->decimal('debit', 18, 2)->default(0);
-            $table->decimal('credit', 18, 2)->default(0);
-            $table->decimal('balance_after', 18, 2)->nullable();
-            $table->date('transaction_date');
-            $table->text('remarks')->nullable();
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamps();
-            $table->index(['vendor_id', 'transaction_date']);
-        });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('vendor_transactions');
         Schema::dropIfExists('vendor_category_assignments');
         Schema::dropIfExists('vendor_categories');
         Schema::dropIfExists('vendor_contacts');

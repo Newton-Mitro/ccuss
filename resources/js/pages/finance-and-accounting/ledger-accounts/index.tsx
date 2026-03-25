@@ -302,7 +302,7 @@ export default function GlAccountsIndex({
         >
             <Head title="Chart of Accounts" />
 
-            <div className="space-y-6">
+            <div className="space-y-4">
                 <HeadingSmall
                     title="Chart of Accounts"
                     description="Manage your ledger hierarchy"
@@ -315,57 +315,64 @@ export default function GlAccountsIndex({
                     </Button>
 
                     <div className="flex gap-2">
-                        <Select
-                            error={errors.fiscal_year_id}
-                            value={data.fiscal_year_id?.toString() || ''}
-                            options={fiscalYears.map((fy: any) => ({
-                                value: fy.id.toString(),
-                                label: fy.code,
-                            }))}
-                            onChange={(e) => {
-                                setData(
-                                    'fiscal_year_id',
-                                    Number(e.target.value),
-                                );
-                                setData('accounting_period_id', null);
-                            }}
-                        />
-                        <Select
-                            error={errors.accounting_period_id}
-                            value={data.accounting_period_id?.toString() || ''}
-                            options={fiscalPeriods
-                                .filter(
-                                    (fp) =>
-                                        fp.fiscal_year_id ===
-                                        data.fiscal_year_id,
-                                )
-                                .map((fp) => ({
-                                    value: fp.id.toString(),
-                                    label: fp.period_name,
+                        <div className="w-40">
+                            <Select
+                                error={errors.fiscal_year_id}
+                                value={data.fiscal_year_id?.toString() || ''}
+                                options={fiscalYears.map((fy: any) => ({
+                                    value: fy.id.toString(),
+                                    label: fy.code,
                                 }))}
-                            onChange={(e) =>
-                                setData(
-                                    'accounting_period_id',
-                                    Number(e.target.value),
-                                )
-                            }
-                        />
-                        <Button size="sm" variant="outline" onClick={expandAll}>
+                                onChange={(value) => {
+                                    setData('fiscal_year_id', Number(value));
+                                    setData('accounting_period_id', null);
+                                }}
+                            />
+                        </div>
+                        <div className="w-40">
+                            <Select
+                                error={errors.accounting_period_id}
+                                value={
+                                    data.accounting_period_id?.toString() || ''
+                                }
+                                options={fiscalPeriods
+                                    .filter(
+                                        (fp) =>
+                                            fp.fiscal_year_id ===
+                                            data.fiscal_year_id,
+                                    )
+                                    .map((fp) => ({
+                                        value: fp.id.toString(),
+                                        label: fp.period_name,
+                                    }))}
+                                onChange={(value) =>
+                                    setData(
+                                        'accounting_period_id',
+                                        Number(value),
+                                    )
+                                }
+                            />
+                        </div>
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-border"
+                            onClick={expandAll}
+                        >
                             <ChevronDownIcon className="mr-1 h-4 w-4" />
-                            Expand All
                         </Button>
                         <Button
                             size="sm"
                             variant="outline"
+                            className="border-border"
                             onClick={collapseAll}
                         >
                             <ChevronUpIcon className="mr-1 h-4 w-4" />
-                            Collapse All
                         </Button>
                     </div>
                 </div>
 
-                <Card className="h-[calc(100vh-240px)] overflow-y-auto p-6">
+                <Card className="h-[calc(100vh-300px)] overflow-y-auto p-6">
                     {renderTree(glAccounts)}
                 </Card>
             </div>
@@ -417,16 +424,13 @@ export default function GlAccountsIndex({
                                 <Label>Type</Label>
                                 <Select
                                     value={data.type}
-                                    onChange={(e) =>
-                                        setData('type', e.target.value)
-                                    }
+                                    onChange={(value) => setData('type', value)}
                                     options={Object.keys(TYPE_COLORS).map(
                                         (t) => ({
                                             value: t,
                                             label: t,
                                         }),
                                     )}
-                                    includeNone={true}
                                 />
                                 <InputError message={errors.type} />
                             </div>
@@ -435,17 +439,16 @@ export default function GlAccountsIndex({
                                 <Label>Control Account</Label>
                                 <Select
                                     value={data.is_control_account ? '1' : '0'}
-                                    onChange={(e) =>
+                                    onChange={(value) =>
                                         setData(
                                             'is_control_account',
-                                            e.target.value === '1',
+                                            value === '1',
                                         )
                                     }
                                     options={[
                                         { value: '0', label: 'No' },
                                         { value: '1', label: 'Yes' },
                                     ]}
-                                    includeNone={false}
                                 />
                             </div>
 
@@ -453,8 +456,8 @@ export default function GlAccountsIndex({
                                 <Label>Parent Account</Label>
                                 <Select
                                     value={data.parent_id}
-                                    onChange={(e) =>
-                                        setData('parent_id', e.target.value)
+                                    onChange={(value) =>
+                                        setData('parent_id', value)
                                     }
                                     options={groupAccounts
                                         .filter(
@@ -465,7 +468,6 @@ export default function GlAccountsIndex({
                                             value: a.id.toString(),
                                             label: `${a.code} — ${a.name}`,
                                         }))}
-                                    includeNone={true}
                                 />
                             </div>
 
@@ -502,17 +504,16 @@ export default function GlAccountsIndex({
                                             data.opening_balance_fiscal_year_id ||
                                             ''
                                         }
-                                        onChange={(e) =>
+                                        onChange={(value) =>
                                             setData(
                                                 'opening_balance_fiscal_year_id',
-                                                e.target.value,
+                                                value,
                                             )
                                         }
                                         options={fiscalYears.map((fy: any) => ({
                                             value: fy.id.toString(),
                                             label: fy.code,
                                         }))}
-                                        includeNone={true}
                                     />
                                     <InputError
                                         message={
@@ -528,10 +529,10 @@ export default function GlAccountsIndex({
                                             data.opening_balance_fiscal_period_id ||
                                             ''
                                         }
-                                        onChange={(e) =>
+                                        onChange={(value) =>
                                             setData(
                                                 'opening_balance_fiscal_period_id',
-                                                e.target.value,
+                                                value,
                                             )
                                         }
                                         options={fiscalPeriods.map(
@@ -540,7 +541,6 @@ export default function GlAccountsIndex({
                                                 label: fp.period_name,
                                             }),
                                         )}
-                                        includeNone={true}
                                     />
                                     <InputError
                                         message={

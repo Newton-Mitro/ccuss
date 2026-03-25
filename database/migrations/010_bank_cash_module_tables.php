@@ -56,32 +56,6 @@ return new class extends Migration {
         });
 
         // ------------------------
-        // 4. Bank Transactions
-        // ------------------------
-        Schema::create('bank_transactions', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('bank_account_id')->constrained()->cascadeOnDelete();
-            $table->enum('type', [
-                'deposit',
-                'withdraw',
-                'transfer',
-                'cheque_deposit',
-                'CHEQUE_ISSUE'
-            ]);
-            $table->decimal('debit', 18, 2)->default(0);
-            $table->decimal('credit', 18, 2)->default(0);
-            $table->decimal('balance_after', 18, 2)->nullable();
-            $table->date('transaction_date');
-            $table->string('reference_no')->nullable(); // e.g., cheque number, transfer ID
-            $table->morphs('reference'); // polymorphic reference
-            $table->text('remarks')->nullable();
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamps();
-            $table->index(['bank_account_id', 'transaction_date']);
-            $table->softDeletes();
-        });
-
-        // ------------------------
         // 5. Bank Cheques
         // ------------------------
         Schema::create('bank_cheques', function (Blueprint $table) {
@@ -121,7 +95,6 @@ return new class extends Migration {
     {
         Schema::dropIfExists('bank_reconciliations');
         Schema::dropIfExists('bank_cheques');
-        Schema::dropIfExists('bank_transactions');
         Schema::dropIfExists('bank_accounts');
         Schema::dropIfExists('bank_branches');
         Schema::dropIfExists('banks');

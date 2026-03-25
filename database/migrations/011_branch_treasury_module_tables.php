@@ -86,7 +86,7 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        // Vault Transfers
+        // cash_movements  (for approval process. after approval, it will be move to transactions table)
         Schema::create('cash_movements', function (Blueprint $table) {
             $table->id();
             $table->morphs('source');

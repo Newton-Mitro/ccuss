@@ -8,6 +8,72 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
+        /*
+       |--------------------------------------------------------------------------
+       | Instrument Types
+       |--------------------------------------------------------------------------
+       */
+        Schema::create('instrument_types', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('organization_id')->constrained();
+            $table->string('code', 50)->unique();
+            $table->string('name', 100);
+            $table->timestamps();
+        });
+
+        // Schema::create('cheque_instruments', function (Blueprint $table) {
+        //     $table->id();
+
+        //     $table->string('cheque_no', 50);
+        //     $table->date('cheque_date');
+
+        //     $table->foreignId('bank_id')->constrained();
+        //     $table->string('branch_name', 100)->nullable();
+
+        //     $table->string('payee_name', 150)->nullable();
+        //     $table->enum('status', ['issued', 'cleared', 'bounced'])
+        //         ->default('issued');
+
+        //     $table->timestamps();
+        // });
+
+        // Schema::create('bank_transfer_instruments', function (Blueprint $table) {
+        //     $table->id();
+
+        //     $table->foreignId('bank_id')->constrained();
+        //     $table->string('account_no', 50);
+
+        //     $table->string('transaction_ref', 100)->unique();
+        //     $table->date('transfer_date');
+
+        //     $table->timestamps();
+        // });
+
+        // Schema::create('mobile_banking_instruments', function (Blueprint $table) {
+        //     $table->id();
+
+        //     $table->string('provider', 50); // bKash, Nagad, etc
+        //     $table->string('wallet_no', 30);
+
+        //     $table->string('transaction_id', 100)->unique();
+        //     $table->date('transaction_date');
+
+        //     $table->timestamps();
+        // });
+
+        // Schema::create('card_instruments', function (Blueprint $table) {
+        //     $table->id();
+
+        //     $table->enum('card_type', ['DEBIT', 'CREDIT']);
+        //     $table->string('card_last4', 4);
+
+        //     $table->string('transaction_ref', 100)->unique();
+        //     $table->date('transaction_date');
+
+        //     $table->timestamps();
+        // });
+
+
         Schema::create('transaction_types', function (Blueprint $table) {
             $table->id();
             // 🔑 Unique key (used in code)
