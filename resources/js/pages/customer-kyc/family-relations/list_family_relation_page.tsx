@@ -11,11 +11,13 @@ import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
+import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { Badge } from '../../../lib/statusConfig';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { CustomerFamilyRelation } from '../../../types/customer_kyc_module';
+import { familyRelationStatuses } from './data/family_relation_statuses';
 
 export default function FamilyRelationIndex() {
     const { props } = usePage<
@@ -34,7 +36,7 @@ export default function FamilyRelationIndex() {
         search: filters.search || '',
         per_page: Number(filters.per_page) || 10,
         page: Number(filters.page) || 1,
-        verification_status: filters.verification_status || '',
+        verification_status: filters.verification_status || null,
     });
 
     useEffect(() => {
@@ -103,19 +105,14 @@ export default function FamilyRelationIndex() {
                     />
 
                     {/* Status Filter */}
-                    <select
-                        value={data.verification_status}
-                        onChange={(e) => {
-                            setData('verification_status', e.target.value);
+                    <Select
+                        value={data.verification_status as string}
+                        onChange={(value) => {
+                            setData('verification_status', value);
                             setData('page', 1);
                         }}
-                        className="h-9 rounded-md border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-                    >
-                        <option value="">All Status</option>
-                        <option value="pending">Pending</option>
-                        <option value="verified">Verified</option>
-                        <option value="rejected">Rejected</option>
-                    </select>
+                        options={familyRelationStatuses}
+                    />
                 </div>
 
                 {/* ===================== */}

@@ -11,11 +11,13 @@ import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
+import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { Badge } from '../../../lib/statusConfig';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Customer } from '../../../types/customer_kyc_module';
+import { kycStatuses } from './data/customer_data_types';
 
 export default function Index() {
     const { props } = usePage<
@@ -108,20 +110,14 @@ export default function Index() {
                         className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
                     />
 
-                    <select
+                    <Select
                         value={data.status}
-                        onChange={(e) => {
-                            setData('status', e.target.value);
+                        onChange={(value) => {
+                            setData('status', value);
                             setData('page', 1);
                         }}
-                        className="h-9 w-full rounded-md border bg-background px-3 text-sm focus:ring-2 focus:ring-ring focus:outline-none sm:max-w-xs"
-                    >
-                        <option value="all">All Statuses</option>
-                        <option value="active">Active</option>
-                        <option value="pending">Pending</option>
-                        <option value="SUSPENDED">Suspended</option>
-                        <option value="closed">Closed</option>
-                    </select>
+                        options={kycStatuses}
+                    />
                 </div>
 
                 {/* ===================== */}

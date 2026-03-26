@@ -8,10 +8,12 @@ import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
+import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 import { Customer } from '../../../types/customer_kyc_module';
 import { CustomerSearchBox } from '../customers/components/customer-search-box';
+import { getRelations } from './data/family_and_relative_relations';
 
 const Edit = () => {
     const { family_relation, flash } = usePage().props as any;
@@ -42,6 +44,8 @@ const Edit = () => {
             onError: (e) => toast.error(JSON.stringify(e)),
         });
     };
+
+    const relations = getRelations(customer?.gender, selectedRelative?.gender);
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Family Relations', href: route('family-relations.index') },
@@ -143,21 +147,13 @@ const Edit = () => {
                 <div>
                     <Label className="text-xs">Relation Type</Label>
 
-                    <select
+                    <Select
                         value={data.relation_type}
-                        onChange={(e) =>
-                            setData('relation_type', e.target.value)
-                        }
-                        className="h-8 w-full rounded-md border bg-background px-2 text-sm"
-                    >
-                        <option value="">Select</option>
-                        <option>father</option>
-                        <option>mother</option>
-                        <option>son</option>
-                        <option>daughter</option>
-                        <option>husband</option>
-                        <option>wife</option>
-                    </select>
+                        onChange={(value) => {
+                            setData('relation_type', value);
+                        }}
+                        options={relations}
+                    />
 
                     <InputError message={errors.relation_type} />
                 </div>

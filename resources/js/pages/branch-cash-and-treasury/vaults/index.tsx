@@ -11,9 +11,11 @@ import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
+import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem } from '../../../types';
+import { vaultStatuses } from './data/vault_status';
 
 interface VaultPageProps {
     vaults: {
@@ -119,38 +121,30 @@ export default function Index() {
 
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                         {/* Branch Filter */}
-                        <select
+                        <Select
                             value={data.branch_id}
-                            onChange={(e) => {
-                                setData('branch_id', e.target.value);
+                            onChange={(value) => {
+                                setData('branch_id', value);
                                 setData('page', 1);
                             }}
-                            className="h-9 rounded-md border bg-background px-3 text-sm"
-                        >
-                            <option value="">All Branches</option>
-                            {/* You must pass branches from backend */}
-                            {(usePage().props as any).branches?.map(
+                            options={(usePage().props as any).branches?.map(
                                 (b: any) => (
                                     <option key={b.id} value={b.id}>
                                         {b.name}
                                     </option>
                                 ),
                             )}
-                        </select>
+                        />
 
                         {/* Status Filter */}
-                        <select
+                        <Select
                             value={data.status}
-                            onChange={(e) => {
-                                setData('status', e.target.value);
+                            onChange={(value) => {
+                                setData('status', value);
                                 setData('page', 1);
                             }}
-                            className="h-9 rounded-md border bg-background px-3 text-sm"
-                        >
-                            <option value="">All Status</option>
-                            <option value="1">Active</option>
-                            <option value="0">Inactive</option>
-                        </select>
+                            options={vaultStatuses}
+                        />
                     </div>
                 </div>
 
