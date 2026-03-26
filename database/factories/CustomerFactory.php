@@ -31,8 +31,8 @@ class CustomerFactory extends Factory
 
         $prefix = $type === 'individual' ? 'IND' : 'ORG';
 
-        $individualIds = ['NID', 'BRN', 'passport', 'driving_license'];
-        $organizationIds = ['REGISTRATION_NO'];
+        $individualIds = ['nid', 'brn', 'passport', 'driving_license'];
+        $organizationIds = ['registration_no'];
 
         // Pick a random organization and branch
         $organization = Organization::inRandomOrder()->first();
@@ -74,7 +74,7 @@ class CustomerFactory extends Factory
             'customer_no' => 'IND-' . fake()->unique()->numberBetween(1, 99999),
             'dob' => fake()->dateTimeBetween('-65 years', '-18 years')->format('Y-m-d'),
             'religion' => fake()->randomElement(['christianity', 'islam', 'hinduism', 'buddhism', 'other']),
-            'identification_type' => fake()->randomElement(['NID', 'BRN', 'passport', 'driving_license']),
+            'identification_type' => fake()->randomElement(['nid', 'brn', 'passport', 'driving_license']),
         ]);
     }
 
@@ -87,7 +87,7 @@ class CustomerFactory extends Factory
             'customer_no' => 'IND-' . fake()->unique()->numberBetween(1, 99999),
             'dob' => fake()->dateTimeBetween('-65 years', '-18 years')->format('Y-m-d'),
             'religion' => fake()->randomElement(['christianity', 'islam', 'hinduism', 'buddhism', 'other']),
-            'identification_type' => fake()->randomElement(['NID', 'BRN', 'passport', 'driving_license']),
+            'identification_type' => fake()->randomElement(['nid', 'brn', 'passport', 'driving_license']),
         ]);
     }
 
@@ -98,7 +98,7 @@ class CustomerFactory extends Factory
             'gender' => null,
             'name' => fake()->company(),
             'customer_no' => 'ORG-' . fake()->unique()->numberBetween(1, 99999),
-            'identification_type' => 'REGISTRATION_NO',
+            'identification_type' => 'registration_no',
         ]);
     }
 }

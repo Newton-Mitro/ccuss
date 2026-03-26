@@ -9,11 +9,14 @@ import { Eye, Plus } from 'lucide-react';
 import { useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { route } from 'ziggy-js';
+import DataTablePagination from '../../../components/data-table-pagination';
 import Heading from '../../../components/heading';
 import HeadingSmall from '../../../components/heading-small';
+import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { formatDate, formatDateTime } from '../../../lib/date_util';
+import { branchDayStatuses } from './data/branch_day_status';
 
 interface BranchDayPageProps {
     branchDays: {
@@ -115,35 +118,35 @@ export default function Index() {
 
                     <div className="flex gap-2">
                         {/* Branch Filter */}
-                        <select
-                            value={data.branch_id}
-                            onChange={(e) => {
-                                setData('branch_id', e.target.value);
-                                setData('page', 1);
-                            }}
-                            className="h-9 rounded-md border bg-card px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-                        >
-                            <option value="">All Branches</option>
-                            {branches.map((b) => (
-                                <option key={b.id} value={b.id}>
-                                    {b.name}
-                                </option>
-                            ))}
-                        </select>
-
+                        <div className="w-48">
+                            <Select
+                                value={data.branch_id}
+                                onChange={(value) => {
+                                    setData('branch_id', value);
+                                    setData('page', 1);
+                                }}
+                                options={branches.map((branch) => ({
+                                    value: branch.id.toString(),
+                                    label: branch.name,
+                                }))}
+                            ></Select>
+                        </div>
                         {/* Status Filter */}
-                        <select
-                            value={data.status}
-                            onChange={(e) => {
-                                setData('status', e.target.value);
-                                setData('page', 1);
-                            }}
-                            className="h-9 rounded-md border bg-card px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-                        >
-                            <option value="">All Status</option>
-                            <option value="open">Open</option>
-                            <option value="closed">Closed</option>
-                        </select>
+                        <div className="w-48">
+                            <Select
+                                value={data.branch_id}
+                                onChange={(value) => {
+                                    setData('status', value);
+                                    setData('page', 1);
+                                }}
+                                options={branchDayStatuses.map(
+                                    (branchDayStats) => ({
+                                        value: branchDayStats.value,
+                                        label: branchDayStats.label,
+                                    }),
+                                )}
+                            ></Select>
+                        </div>
                     </div>
                 </div>
 
@@ -314,38 +317,14 @@ export default function Index() {
                     ))}
                 </div>
 
-                {/* Pagination */}
-                <div className="flex items-center justify-between">
-                    <select
-                        value={data.per_page}
-                        onChange={(e) => {
-                            setData('per_page', Number(e.target.value));
-                            setData('page', 1);
-                        }}
-                        className="h-9 rounded-md border bg-card px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-                    >
-                        {[10, 20, 50].map((n) => (
-                            <option key={n} value={n}>
-                                {n}
-                            </option>
-                        ))}
-                    </select>
-
-                    <div className="flex gap-1">
-                        {branchDays.links.map((link, i) => (
-                            <Link
-                                key={i}
-                                href={link.url || '#'}
-                                className={`rounded px-3 py-1 text-sm ${
-                                    link.active
-                                        ? 'bg-primary text-primary-foreground'
-                                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                                }`}
-                                dangerouslySetInnerHTML={{ __html: link.label }}
-                            />
-                        ))}
-                    </div>
-                </div>
+                <DataTablePagination
+                    links={branchDays.links}
+                    perPage={data.per_page}
+                    onPerPageChange={function (value: number): void {
+                        setData('per_page', Number(value));
+                        setData('page', 1);
+                    }}
+                />
             </div>
         </CustomAuthLayout>
     );

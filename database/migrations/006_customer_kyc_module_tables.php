@@ -19,9 +19,9 @@ return new class extends Migration {
             $table->string('phone', 50)->nullable();
             $table->string('email', 100)->nullable();
             $table->enum('identification_type', [
-                'NID',
-                'BRN',
-                'REGISTRATION_NO',
+                'nid',
+                'brn',
+                'registration_no',
                 'passport',
                 'driving_license'
             ]);

@@ -9,6 +9,7 @@ import { Eye, Pencil, Trash2, UserPlus } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
+import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
@@ -94,6 +95,7 @@ export default function Index() {
                 </div>
 
                 {/* Search & Filters */}
+
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <input
                         type="text"
@@ -280,44 +282,14 @@ export default function Index() {
                 </div>
 
                 {/* Pagination */}
-                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">
-                            Show
-                        </span>
-                        <select
-                            value={data.per_page}
-                            onChange={(e) => {
-                                setData('per_page', Number(e.target.value));
-                                setData('page', 1);
-                            }}
-                            className="h-9 rounded-md border bg-background px-3 text-sm"
-                        >
-                            {[5, 10, 20, 50].map((n) => (
-                                <option key={n} value={n}>
-                                    {n}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="flex gap-1 overflow-x-auto">
-                        {customers.links.map((link: any, i: number) => (
-                            <a
-                                key={i}
-                                href={link.url || '#'}
-                                className={`rounded-full px-3 py-1 text-sm ${
-                                    link.active
-                                        ? 'bg-primary text-primary-foreground'
-                                        : 'bg-muted text-muted-foreground'
-                                }`}
-                                dangerouslySetInnerHTML={{
-                                    __html: link.label,
-                                }}
-                            />
-                        ))}
-                    </div>
-                </div>
+                <DataTablePagination
+                    perPage={customers.per_page}
+                    onPerPageChange={function (value: number): void {
+                        setData('per_page', value);
+                        setData('page', 1);
+                    }}
+                    links={customers.links}
+                />
             </div>
         </CustomAuthLayout>
     );

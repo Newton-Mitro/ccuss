@@ -9,8 +9,22 @@ import AppDatePicker from '../../../components/ui/app_date_picker';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
+import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
+import {
+    bloodGroups,
+    customerTypes,
+    educations,
+    genders,
+    individualIdentificationTypes,
+    kycStatuses,
+    maritalStatuses,
+    nationalities,
+    occupations,
+    organizationIdentificationTypes,
+    religions,
+} from './data/customer_data_types';
 
 const Create = () => {
     const { flash } = usePage().props;
@@ -70,7 +84,6 @@ const Create = () => {
             if (value !== null) formData.append(key, value as any);
         });
         post(route('customers.store'), {
-            data: formData,
             preserveScroll: true,
             forceFormData: true,
             onError: (e) => toast.error(JSON.stringify(e)),
@@ -87,7 +100,7 @@ const Create = () => {
         setData('type', value);
 
         if (value === 'organization') {
-            setData('identification_type', 'REGISTRATION_NO');
+            setData('identification_type', 'registration_no');
             setData('identification_number', '');
             // Clear individual-only fields
             setData('dob', '');
@@ -142,23 +155,14 @@ const Create = () => {
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                             <div>
                                 <Label className="text-xs">Customer Type</Label>
-                                <select
+                                <Select
                                     value={data.type}
-                                    onChange={(e) =>
-                                        handleTypeChange(e.target.value)
+                                    onChange={(value) =>
+                                        handleTypeChange(value)
                                     }
-                                    className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                                >
-                                    <option value="">
-                                        Select Customer Type
-                                    </option>
-                                    <option value="individual">
-                                        Individual
-                                    </option>
-                                    <option value="organization">
-                                        Organization
-                                    </option>
-                                </select>
+                                    options={customerTypes}
+                                />
+
                                 <InputError message={errors.type} />
                             </div>
 
@@ -212,59 +216,40 @@ const Create = () => {
                                 </div>
                                 <div>
                                     <Label className="text-xs">Gender</Label>
-                                    <select
+                                    <Select
                                         value={data.gender}
-                                        onChange={(e) =>
-                                            setData('gender', e.target.value)
+                                        onChange={(value) =>
+                                            setData('gender', value)
                                         }
-                                        className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                                    >
-                                        <option value="">Select</option>
-                                        <option>male</option>
-                                        <option>female</option>
-                                        <option>other</option>
-                                    </select>
+                                        options={genders}
+                                    />
+
                                     <InputError message={errors.gender} />
                                 </div>
                                 <div>
                                     <Label className="text-xs">Religion</Label>
-                                    <select
+                                    <Select
                                         value={data.religion}
-                                        onChange={(e) =>
-                                            setData('religion', e.target.value)
+                                        onChange={(value) =>
+                                            setData('religion', value)
                                         }
-                                        className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                                    >
-                                        <option value="">Select</option>
-                                        <option>islam</option>
-                                        <option>hinduism</option>
-                                        <option>christianity</option>
-                                        <option>buddhism</option>
-                                        <option>other</option>
-                                    </select>
+                                        options={religions}
+                                    />
+
                                     <InputError message={errors.religion} />
                                 </div>
                                 <div>
                                     <Label className="text-xs">
                                         Marital Status
                                     </Label>
-                                    <select
+                                    <Select
                                         value={data.marital_status}
-                                        onChange={(e) =>
-                                            setData(
-                                                'marital_status',
-                                                e.target.value,
-                                            )
+                                        onChange={(value) =>
+                                            setData('marital_status', value)
                                         }
-                                        className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                                    >
-                                        <option value="">Select</option>
-                                        <option>single</option>
-                                        <option>married</option>
-                                        <option>widowed</option>
-                                        <option>divorced</option>
-                                        <option>other</option>
-                                    </select>
+                                        options={maritalStatuses}
+                                    />
+
                                     <InputError
                                         message={errors.marital_status}
                                     />
@@ -273,69 +258,55 @@ const Create = () => {
                                     <Label className="text-xs">
                                         Blood Group
                                     </Label>
-                                    <select
+
+                                    <Select
                                         value={data.blood_group}
-                                        onChange={(e) =>
-                                            setData(
-                                                'blood_group',
-                                                e.target.value,
-                                            )
+                                        onChange={(value) =>
+                                            setData('blood_group', value)
                                         }
-                                        className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                                    >
-                                        <option value="">Select</option>
-                                        <option>A+</option>
-                                        <option>A-</option>
-                                        <option>B+</option>
-                                        <option>B-</option>
-                                        <option>AB+</option>
-                                        <option>AB-</option>
-                                        <option>O+</option>
-                                        <option>O-</option>
-                                    </select>
+                                        options={bloodGroups}
+                                    />
+
                                     <InputError message={errors.blood_group} />
                                 </div>
                                 <div>
                                     <Label className="text-xs">
                                         Nationality
                                     </Label>
-                                    <Input
+                                    <Select
                                         value={data.nationality}
-                                        onChange={(e) =>
-                                            setData(
-                                                'nationality',
-                                                e.target.value,
-                                            )
+                                        onChange={(value) =>
+                                            setData('nationality', value)
                                         }
-                                        className="h-8 text-sm"
+                                        options={nationalities}
                                     />
+
                                     <InputError message={errors.nationality} />
                                 </div>
                                 <div>
                                     <Label className="text-xs">
                                         Occupation
                                     </Label>
-                                    <Input
+                                    <Select
                                         value={data.occupation}
-                                        onChange={(e) =>
-                                            setData(
-                                                'occupation',
-                                                e.target.value,
-                                            )
+                                        onChange={(value) =>
+                                            setData('occupation', value)
                                         }
-                                        className="h-8 text-sm"
+                                        options={occupations}
                                     />
+
                                     <InputError message={errors.occupation} />
                                 </div>
                                 <div>
                                     <Label className="text-xs">Education</Label>
-                                    <Input
+                                    <Select
                                         value={data.education}
-                                        onChange={(e) =>
-                                            setData('education', e.target.value)
+                                        onChange={(value) =>
+                                            setData('education', value)
                                         }
-                                        className="h-8 text-sm"
+                                        options={educations}
                                     />
+
                                     <InputError message={errors.education} />
                                 </div>
                             </div>
@@ -347,34 +318,18 @@ const Create = () => {
                                 <Label className="text-xs">
                                     Identification Type
                                 </Label>
-                                <select
-                                    value={data.identification_type}
-                                    onChange={(e) =>
-                                        setData(
-                                            'identification_type',
-                                            e.target.value,
-                                        )
+                                <Select
+                                    value={data.education}
+                                    onChange={(value) =>
+                                        setData('education', value)
                                     }
-                                    className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                                >
-                                    {data.type === 'organization' ? (
-                                        <option value="REGISTRATION_NO">
-                                            Registration No
-                                        </option>
-                                    ) : (
-                                        <>
-                                            <option value="">Select</option>
-                                            <option value="NID">NID</option>
-                                            <option value="BRN">BRN</option>
-                                            <option value="passport">
-                                                passport
-                                            </option>
-                                            <option value="driving_license">
-                                                DRIVING LICENSE
-                                            </option>
-                                        </>
-                                    )}
-                                </select>
+                                    options={
+                                        data.type === 'organization'
+                                            ? organizationIdentificationTypes
+                                            : individualIdentificationTypes
+                                    }
+                                />
+
                                 <InputError
                                     message={errors.identification_type}
                                 />
@@ -403,15 +358,15 @@ const Create = () => {
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             <div>
                                 <Label className="text-xs">KYC Status</Label>
-                                <select
+                                <Select
                                     value={data.kyc_status}
                                     disabled
-                                    className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground"
-                                >
-                                    <option>pending</option>
-                                    <option>verified</option>
-                                    <option>rejected</option>
-                                </select>
+                                    onChange={(value) =>
+                                        setData('kyc_status', value)
+                                    }
+                                    options={kycStatuses}
+                                />
+
                                 <InputError message={errors.kyc_status} />
                             </div>
                         </div>

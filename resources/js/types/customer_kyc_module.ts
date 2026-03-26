@@ -13,9 +13,9 @@ export type Religion =
     | 'buddhism'
     | 'other';
 export type IdentificationType =
-    | 'NID'
-    | 'BRN'
-    | 'REGISTRATION_NO'
+    | 'nid'
+    | 'brn'
+    | 'registration_no'
     | 'passport'
     | 'driving_license';
 export type KycStatus = 'pending' | 'verified' | 'rejected';

@@ -1,5 +1,7 @@
 import { useForm } from '@inertiajs/react';
 import { route } from 'ziggy-js';
+import InputError from '../../../components/input-error';
+import { Select } from '../../../components/ui/select';
 
 type Props = {
     vault?: any;
@@ -27,18 +29,15 @@ export default function VaultForm({ vault, branches }: Props) {
         <form onSubmit={submit} className="space-y-4">
             <div>
                 <label>Branch</label>
-                <select
+                <Select
                     value={data.branch_id}
-                    onChange={(e) => setData('branch_id', e.target.value)}
-                >
-                    <option value="">Select Branch</option>
-                    {branches.map((b) => (
-                        <option key={b.id} value={b.id}>
-                            {b.name}
-                        </option>
-                    ))}
-                </select>
-                {errors.branch_id && <div>{errors.branch_id}</div>}
+                    onChange={(value) => setData('branch_id', value)}
+                    options={branches.map((b) => ({
+                        value: b.id.toString(),
+                        label: b.name,
+                    }))}
+                />
+                <InputError message={errors.branch_id} />
             </div>
 
             <div>
@@ -47,7 +46,7 @@ export default function VaultForm({ vault, branches }: Props) {
                     value={data.name}
                     onChange={(e) => setData('name', e.target.value)}
                 />
-                {errors.name && <div>{errors.name}</div>}
+                <InputError message={errors.name} />
             </div>
 
             <div>

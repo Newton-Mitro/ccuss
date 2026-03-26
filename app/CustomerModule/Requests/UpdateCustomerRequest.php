@@ -60,7 +60,7 @@ class UpdateCustomerRequest extends FormRequest
             /* ================= Identification ================= */
             'identification_type' => [
                 'required',
-                Rule::in(['NID', 'BRN', 'passport', 'driving_license', 'REGISTRATION_NO']),
+                Rule::in(['nid', 'brn', 'passport', 'driving_license', 'registration_no']),
             ],
             'identification_number' => ['required', 'string', 'max:50'],
 

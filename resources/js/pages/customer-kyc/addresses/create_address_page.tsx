@@ -9,8 +9,10 @@ import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
+import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
+import { addressTypes } from './data/address_types';
 
 const Create = () => {
     const { customer, flash } = usePage().props as any;
@@ -126,19 +128,14 @@ const Create = () => {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div>
                         <Label className="text-xs">Address Type</Label>
-                        <select
+                        <Select
                             value={data.type}
-                            onChange={(e) => setData('type', e.target.value)}
-                            className="h-8 w-full rounded-md border bg-background px-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                        >
-                            <option value="">Select</option>
-                            <option>current</option>
-                            <option>permanent</option>
-                            <option>mailing</option>
-                            <option>work</option>
-                            <option>registered</option>
-                            <option>other</option>
-                        </select>
+                            onChange={(value) => setData('type', value)}
+                            options={addressTypes.map((addressType) => ({
+                                value: addressType.value.toString(),
+                                label: addressType.label,
+                            }))}
+                        ></Select>
                         <InputError message={errors.type} />
                     </div>
 

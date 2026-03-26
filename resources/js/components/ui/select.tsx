@@ -30,7 +30,10 @@ const Select: React.FC<SelectSearchProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [openUpward, setOpenUpward] = useState(false);
+
   const ref = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const selectedOption = options.find((opt) => opt.value === value);
 
@@ -46,6 +49,7 @@ const Select: React.FC<SelectSearchProps> = ({
     setSearch("");
   };
 
+  // 👉 Detect click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (ref.current && !ref.current.contains(event.target as Node)) {
@@ -58,12 +62,44 @@ const Select: React.FC<SelectSearchProps> = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // 👉 Detect dropdown position (flip logic)
+  useEffect(() => {
+    if (!open || !ref.current) return;
+
+    const calculatePosition = () => {
+      const rect = ref.current!.getBoundingClientRect();
+
+      const dropdownHeight =
+        dropdownRef.current?.offsetHeight || 200;
+
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+
+      if (spaceBelow < dropdownHeight && spaceAbove > dropdownHeight) {
+        setOpenUpward(true);
+      } else {
+        setOpenUpward(false);
+      }
+    };
+
+    calculatePosition();
+
+    window.addEventListener("scroll", calculatePosition, true);
+    window.addEventListener("resize", calculatePosition);
+
+    return () => {
+      window.removeEventListener("scroll", calculatePosition, true);
+      window.removeEventListener("resize", calculatePosition);
+    };
+  }, [open]);
+
   return (
     <div className="relative w-full" ref={ref}>
+      {/* Trigger */}
       <button
         type="button"
         disabled={disabled}
-        onClick={() => !disabled && setOpen(!open)}
+        onClick={() => !disabled && setOpen((prev) => !prev)}
         className={cn(
           "w-full rounded-md border px-2 text-left text-sm bg-background text-base shadow-sm-xs flex justify-between items-center transition-[color,box-shadow] outline-none h-8",
           error ? "border-destructive" : "border-input",
@@ -83,8 +119,16 @@ const Select: React.FC<SelectSearchProps> = ({
         />
       </button>
 
+      {/* Dropdown */}
       {open && !disabled && (
-        <div className="absolute z-50 mt-1 w-full rounded-md border border-input bg-background shadow-sm-xs">
+        <div
+          ref={dropdownRef}
+          className={cn(
+            "absolute z-50 w-full rounded-md border border-input bg-background shadow-sm-xs",
+            openUpward ? "bottom-full mb-1" : "top-full mt-1"
+          )}
+        >
+          {/* Search */}
           <input
             type="text"
             value={search}
@@ -93,16 +137,17 @@ const Select: React.FC<SelectSearchProps> = ({
             className="w-full border-b border-input px-2 py-1 text-sm bg-background outline-none h-8"
           />
 
+          {/* Options */}
           <ul className="max-h-40 overflow-y-auto">
             {filteredOptions.map((opt) => (
               <li
                 key={opt.value}
                 onClick={() => handleSelect(opt)}
                 className={cn(
-                  "px-2 py-1 text-sm",
+                  "px-2 py-1 text-sm transition-colors",
                   opt.disabled
                     ? "text-muted-foreground cursor-not-allowed"
-                    : "cursor-pointer hover:bg-primary/10"
+                    : "cursor-pointer hover:bg-accent hover:text-accent-foreground"
                 )}
               >
                 {opt.label}
@@ -118,6 +163,7 @@ const Select: React.FC<SelectSearchProps> = ({
         </div>
       )}
 
+      {/* Error */}
       {error && showErrorText && <InputError message={error} />}
     </div>
   );

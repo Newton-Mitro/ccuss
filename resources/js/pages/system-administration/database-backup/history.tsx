@@ -18,6 +18,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import DataTablePagination from '../../../components/data-table-pagination';
 import { appSwal } from '../../../lib/appSwal';
 
 interface BackupLog {
@@ -250,42 +251,14 @@ export default function History() {
                 </div>
 
                 {/* Pagination */}
-                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">
-                            Show
-                        </span>
-                        <select
-                            value={data.per_page}
-                            onChange={(e) => {
-                                setData('per_page', Number(e.target.value));
-                                setData('page', 1);
-                            }}
-                            className="h-9 rounded-md border bg-background px-3 text-sm"
-                        >
-                            {[5, 10, 20, 50].map((n) => (
-                                <option key={n} value={n}>
-                                    {n}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="flex gap-1 overflow-x-auto">
-                        {logs.links.map((link: any, i: number) => (
-                            <a
-                                key={i}
-                                href={link.url || '#'}
-                                className={`rounded-full px-3 py-1 text-sm ${
-                                    link.active
-                                        ? 'bg-primary text-primary-foreground'
-                                        : 'bg-muted text-muted-foreground'
-                                }`}
-                                dangerouslySetInnerHTML={{ __html: link.label }}
-                            />
-                        ))}
-                    </div>
-                </div>
+                <DataTablePagination
+                    perPage={data.per_page}
+                    onPerPageChange={function (value: number): void {
+                        setData('per_page', value);
+                        setData('page', 1);
+                    }}
+                    links={logs.links}
+                />
             </div>
         </CustomAuthLayout>
     );
