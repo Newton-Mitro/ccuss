@@ -7,6 +7,7 @@ import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
+import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 
@@ -112,20 +113,17 @@ export default function FiscalPeriodForm({ backUrl }: { backUrl: string }) {
 
                 <div>
                     <Label className="text-xs">Fiscal Year</Label>
-                    <select
-                        value={data.fiscal_year_id || ''}
-                        onChange={(e) =>
-                            setData('fiscal_year_id', Number(e.target.value))
+                    <Select
+                        value={data.fiscal_year_id?.toString()}
+                        onChange={(value) =>
+                            setData('fiscal_year_id', Number(value))
                         }
-                        className="h-8 w-full rounded-md border px-2 text-sm"
-                    >
-                        <option value="">Select Fiscal Year</option>
-                        {fiscalYears.map((fy) => (
-                            <option key={fy.id} value={fy.id}>
-                                {fy.code}
-                            </option>
-                        ))}
-                    </select>
+                        options={fiscalYears.map((fiscalYear) => ({
+                            value: fiscalYear.id.toString(),
+                            label: `${fiscalYear.code}`,
+                        }))}
+                    />
+
                     <InputError message={errors.fiscal_year_id} />
                 </div>
 

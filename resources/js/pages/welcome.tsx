@@ -18,13 +18,13 @@ export default function HomePage() {
                 className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center gap-4 px-4"
             >
                 {/* Hero Card */}
-                <div className="w-full max-w-5xl bg-background">
+                <div className="w-full max-w-5xl">
                     <div className="flex items-center justify-center">
                         <div className="">
                             <img
                                 src="/logo.png"
                                 alt="Logo"
-                                className="h-28 w-28 rounded-full border bg-background object-contain p-2 md:h-56 md:w-56"
+                                className="h-28 w-28 bg-background object-contain p-2 md:h-56 md:w-56"
                             />
                         </div>
                     </div>

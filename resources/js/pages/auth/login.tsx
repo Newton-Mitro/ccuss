@@ -28,11 +28,7 @@ export default function Login({ status, canResetPassword, canRegister }) {
                 transition={{ duration: 1 }}
                 className="hidden w-7/12 flex-col items-center justify-center lg:flex"
             >
-                <img
-                    src="/logo.png"
-                    alt="Logo"
-                    className="h-40 w-40 rounded-full"
-                />
+                <img src="/logo.png" alt="Logo" className="h-60 w-60" />
 
                 <div className="text-center">
                     <h1 className="text-4xl font-bold tracking-tight">

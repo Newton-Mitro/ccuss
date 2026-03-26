@@ -9,11 +9,13 @@ import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
+import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
+import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem } from '../../../types';
-import { Voucher } from '../../../types/accounting';
+import { transactionStatus } from './data/transaction_statuses';
 
 interface VoucherPageProps {
     vouchers: {
@@ -154,20 +156,14 @@ export default function Index() {
                         className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                     />
 
-                    <select
+                    <Select
                         value={data.status}
-                        onChange={(e) => {
-                            setData('status', e.target.value);
+                        onChange={(value) => {
+                            setData('status', value);
                             setData('page', 1);
                         }}
-                        className="h-9 rounded-md border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none sm:max-w-xs"
-                    >
-                        <option value="all">All Statuses</option>
-                        <option value="DRAFT">Draft</option>
-                        <option value="approved">Approved</option>
-                        <option value="POSTED">Posted</option>
-                        <option value="cancelled">Cancelled</option>
-                    </select>
+                        options={transactionStatus}
+                    />
                 </div>
 
                 {/* Table */}
@@ -344,45 +340,14 @@ export default function Index() {
                 </div>
 
                 {/* Pagination + Records Dropdown */}
-                <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">
-                            Show
-                        </span>
-                        <select
-                            value={data.per_page}
-                            onChange={(e) => {
-                                setData('per_page', Number(e.target.value));
-                                setData('page', 1);
-                            }}
-                            className="h-9 rounded-md border bg-background px-3 text-sm text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-                        >
-                            {[5, 10, 20, 50, 100, 500].map((n) => (
-                                <option key={n} value={n}>
-                                    {n}
-                                </option>
-                            ))}
-                        </select>
-                        <span className="text-sm text-muted-foreground">
-                            records
-                        </span>
-                    </div>
-
-                    <div className="flex gap-1 overflow-x-auto">
-                        {vouchers.links.map((link, i) => (
-                            <Link
-                                key={i}
-                                href={link.url || '#'}
-                                className={`rounded-full px-3 py-1 text-sm transition-colors ${
-                                    link.active
-                                        ? 'bg-primary text-primary-foreground'
-                                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                                }`}
-                                dangerouslySetInnerHTML={{ __html: link.label }}
-                            />
-                        ))}
-                    </div>
-                </div>
+                <DataTablePagination
+                    perPage={data.per_page}
+                    onPerPageChange={function (value: number): void {
+                        setData('per_page', Number(value));
+                        setData('page', 1);
+                    }}
+                    links={vouchers.links}
+                />
             </div>
         </CustomAuthLayout>
     );

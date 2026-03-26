@@ -8,18 +8,12 @@ import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
+import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 import { Customer } from '../../../types/customer_kyc_module';
 import { CustomerSearchBox } from '../customers/components/customer-search-box';
-
-const RELATIONSHIP_TYPES = [
-    'family',
-    'friend',
-    'business',
-    'colleague',
-    'other',
-];
+import { relationshipTypes } from './data/relationship_types';
 
 const Create = () => {
     const { customer, flash } = usePage().props as any;
@@ -177,21 +171,13 @@ const Create = () => {
                 <div>
                     <Label className="text-xs">Relationship Type</Label>
 
-                    <select
+                    <Select
                         value={data.relationship_type}
-                        onChange={(e) =>
-                            setData('relationship_type', e.target.value)
+                        onChange={(value) =>
+                            setData('relationship_type', value)
                         }
-                        className="h-8 w-full rounded-md border bg-background px-2 text-sm"
-                    >
-                        <option value="">Select</option>
-
-                        {RELATIONSHIP_TYPES.map((type) => (
-                            <option key={type} value={type}>
-                                {type}
-                            </option>
-                        ))}
-                    </select>
+                        options={relationshipTypes}
+                    />
 
                     <InputError message={errors.relationship_type} />
                 </div>

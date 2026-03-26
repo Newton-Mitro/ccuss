@@ -10,10 +10,12 @@ import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
+import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatDateTime } from '../../../lib/date_util';
 import { BreadcrumbItem } from '../../../types';
 import { Audit } from '../../../types/audit_models';
+import { auditEvents } from './data/audit_events';
 
 interface AuditsPageProps {
     audits: {
@@ -81,16 +83,11 @@ export default function Index() {
 
                 {/* Filters */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <select
+                    <Select
                         value={data.event}
-                        onChange={(e) => setData('event', e.target.value)}
-                        className="h-9 rounded-md border bg-background px-3 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
-                    >
-                        <option value="">All Events</option>
-                        <option value="created">created</option>
-                        <option value="updated">updated</option>
-                        <option value="deleted">deleted</option>
-                    </select>
+                        onChange={(value) => setData('event', value)}
+                        options={auditEvents}
+                    />
                 </div>
 
                 {/* Desktop Table */}

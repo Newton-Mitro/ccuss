@@ -7,42 +7,10 @@ import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
+import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-
-const DOCUMENT_TYPES = [
-    'nid',
-    'nid',
-    'smart_nid',
-    'passport',
-    'driving_license',
-    'birth_certificate',
-
-    'utility_bill',
-    'electricity_bill',
-    'water_bill',
-    'gas_bill',
-    'bank_statement',
-    'rental_agreement',
-
-    'tin_certificate',
-    'tax_return',
-    'salary_slip',
-    'income_certificate',
-
-    'trade_license',
-    'certificate_of_incorporation',
-    'memorandum_of_association',
-    'articles_of_association',
-    'partnership_deed',
-
-    'photo',
-    'signature',
-    'live_selfie',
-
-    'pep_declaration',
-    'fatca_form',
-];
+import { documentTypes } from './data/document_types';
 
 const CreateKycDocument = () => {
     const { customer, flash } = usePage().props as any;
@@ -57,7 +25,7 @@ const CreateKycDocument = () => {
 
     const { data, setData, post, processing, errors } = useForm({
         customer_id: customer.id,
-        document_type: '',
+        document_type: null as string | null,
         file: null as File | null,
     });
 
@@ -86,7 +54,6 @@ const CreateKycDocument = () => {
         if (data.file) formData.append('file', data.file);
 
         post(route('kyc-documents.store'), {
-            data: formData,
             preserveScroll: true,
             onError: () => toast.error('Please fix the errors and try again.'),
             onSuccess: () => toast.success('Document uploaded successfully!'),
@@ -181,20 +148,12 @@ const CreateKycDocument = () => {
                 {/* DOCUMENT TYPE */}
                 <div>
                     <Label className="text-xs">Document Type</Label>
-                    <select
+                    <Select
                         value={data.document_type}
-                        onChange={(e) =>
-                            setData('document_type', e.target.value)
-                        }
-                        className="h-8 w-full rounded-md border bg-background px-2 text-sm"
-                    >
-                        <option value="">Select</option>
-                        {DOCUMENT_TYPES.map((type) => (
-                            <option key={type} value={type}>
-                                {type}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={(value) => setData('document_type', value)}
+                        options={documentTypes}
+                    />
+
                     <InputError message={errors.document_type} />
                 </div>
 

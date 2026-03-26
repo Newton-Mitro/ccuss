@@ -12,11 +12,13 @@ import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
+import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { Badge } from '../../../lib/statusConfig';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { CustomerIntroducer } from '../../../types/customer_kyc_module';
+import { introducerStatuses } from './data/introducer_status';
 
 export default function IntroducersIndex() {
     const { props } = usePage<
@@ -96,19 +98,14 @@ export default function IntroducersIndex() {
                         className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm"
                     />
 
-                    <select
+                    <Select
                         value={data.verification_status}
-                        onChange={(e) => {
-                            setData('verification_status', e.target.value);
+                        onChange={(value) => {
+                            setData('verification_status', value);
                             setData('page', 1);
                         }}
-                        className="h-9 w-full rounded-md border bg-background px-3 text-sm sm:max-w-xs"
-                    >
-                        <option value="all">All Statuses</option>
-                        <option value="pending">Pending</option>
-                        <option value="verified">Verified</option>
-                        <option value="rejected">Rejected</option>
-                    </select>
+                        options={introducerStatuses}
+                    />
                 </div>
 
                 {/* ================= Desktop Table ================= */}

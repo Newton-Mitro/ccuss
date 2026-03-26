@@ -11,11 +11,14 @@ import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
+import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { Badge } from '../../../lib/statusConfig';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { KycDocument } from '../../../types/customer_kyc_module';
+import { documentStatuses } from './data/document_statuses';
+import { documentTypes } from './data/document_types';
 
 export default function KycDocumentsIndex() {
     const { props } = usePage<
@@ -97,35 +100,23 @@ export default function KycDocumentsIndex() {
                     />
 
                     <div className="flex gap-2">
-                        <select
+                        <Select
                             value={data.document_type}
-                            onChange={(e) => {
-                                setData('document_type', e.target.value);
+                            onChange={(value) => {
+                                setData('document_type', value);
                                 setData('page', 1);
                             }}
-                            className="h-9 rounded-md border bg-background px-3 text-sm"
-                        >
-                            <option value="all">All Types</option>
-                            <option>nid</option>
-                            <option>nid</option>
-                            <option>passport</option>
-                            <option>driving_license</option>
-                            <option>utility_bill</option>
-                        </select>
+                            options={documentTypes}
+                        />
 
-                        <select
+                        <Select
                             value={data.verification_status}
-                            onChange={(e) => {
-                                setData('verification_status', e.target.value);
+                            onChange={(value) => {
+                                setData('verification_status', value);
                                 setData('page', 1);
                             }}
-                            className="h-9 rounded-md border bg-background px-3 text-sm"
-                        >
-                            <option value="all">All Statuses</option>
-                            <option>pending</option>
-                            <option>verified</option>
-                            <option>rejected</option>
-                        </select>
+                            options={documentStatuses}
+                        />
                     </div>
                 </div>
 
