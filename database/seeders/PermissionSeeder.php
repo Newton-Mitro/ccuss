@@ -17,38 +17,68 @@ class PermissionSeeder extends Seeder
         foreach ($routes as $route) {
 
             $name = $route->getName();
+            $action = $route->getActionName();
 
-            // Skip unnamed routes
+            // ❌ Skip unnamed routes
             if (!$name)
                 continue;
 
-            // Example: customers.index → customer.view
+            // ❌ Skip Laravel internal / vendor routes
+            if (str_contains($action, 'Illuminate\\'))
+                continue;
+            if (str_contains($action, 'Laravel\\'))
+                continue;
+
+            // ❌ Skip debug / system routes
+            if (str_starts_with($name, '_'))
+                continue;
+            if (str_starts_with($name, 'ignition'))
+                continue;
+            if (str_starts_with($name, 'sanctum'))
+                continue;
+
+            // ❌ Skip closure routes (optional but recommended)
+            if ($action === 'Closure')
+                continue;
+
+            // ✅ Only allow App controllers
+            if (!str_starts_with($action, 'App\\'))
+                continue;
+
+            // ----------------------------
+            // Extract module & action
+            // ----------------------------
             $parts = explode('.', $name);
 
             if (count($parts) < 2)
                 continue;
 
             $module = $parts[0];
-            $action = end($parts);
+            $actionName = end($parts);
 
-            if (!$module || !$action)
+            if (!$module || !$actionName)
                 continue;
 
-            $slug = "{$module}.{$action}";
+            $slug = "{$module}.{$actionName}";
 
-            $nameWithoutDash = str_replace('-', ' ', $slug);
-            $nameWithoutDash = str_replace('.', ' ', $nameWithoutDash);
-            $nameWithoutUnderscore = str_replace('_', ' ', $nameWithoutDash);
+            // ----------------------------
+            // Format names
+            // ----------------------------
+            $formattedModule = ucwords(str_replace(['-', '_'], ' ', $module));
+            $formattedName = ucwords(str_replace(['-', '_', '.'], ' ', $slug));
 
             $permissions[$slug] = [
-                'module' => ucwords(str_replace(['-', '.', '_'], ' ', $module)),
-                'name' => ucwords($nameWithoutUnderscore),
+                'module' => $formattedModule,
+                'name' => $formattedName,
                 'slug' => $slug,
-                'action' => $action,
+                'action' => $actionName,
                 'description' => "Auto generated for {$name}",
             ];
         }
 
+        // ----------------------------
+        // Insert permissions
+        // ----------------------------
         foreach ($permissions as $perm) {
             Permission::firstOrCreate(
                 ['slug' => $perm['slug']],
@@ -56,14 +86,21 @@ class PermissionSeeder extends Seeder
             );
         }
 
-        // After creating permissions
-        $superAdmin = Role::firstOrCreate(['name' => 'Super Admin', 'slug' => 'super_admin']);
-        $superAdmin->permissions()->sync(Permission::pluck('id')->toArray());
+        // ----------------------------
+        // Super Admin (full access)
+        // ----------------------------
+        $superAdmin = Role::firstOrCreate([
+            'slug' => 'super_admin'
+        ], [
+            'name' => 'Super Admin'
+        ]);
 
-        $this->command->info('✅ Permissions and roles seeded successfully!');
+        $superAdmin->permissions()->sync(
+            Permission::pluck('id')->toArray()
+        );
+
+        $this->command->info('✅ Clean permissions generated successfully!');
     }
-
-
 }
 
 // 1. System Administrator / Super Admin

@@ -135,120 +135,147 @@ const RolePermissionForm = ({
                                 {selectAll ? 'Deselect All' : 'Select All'}
                             </Button>
                         </div>
-                        <div className="scrollbar-thin scrollbar-thumb-muted scrollbar-track-muted/20 h-[calc(100vh-400px)] space-y-4 overflow-y-auto rounded-md border p-3">
+                        <div className="scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent h-[calc(100vh-400px)] space-y-5 overflow-y-auto rounded-xl border bg-muted/20 p-4">
                             {Object.entries(groupedPermissions).map(
-                                ([module, perms]) => (
-                                    <div
-                                        key={module}
-                                        className="rounded-md border p-3"
-                                    >
-                                        {/* Module Header */}
-                                        <div className="mb-2 flex items-center justify-between">
-                                            <h3 className="text-sm font-semibold capitalize">
-                                                {module.replace('-', ' ')}
-                                            </h3>
+                                ([module, perms]) => {
+                                    const ids = perms.map((p) => p.id);
+                                    const allSelected = ids.every((id) =>
+                                        data.permissions.includes(id),
+                                    );
 
-                                            {/* Toggle All */}
-                                            <button
-                                                type="button"
-                                                className="text-xs text-accent hover:underline"
-                                                onClick={() => {
-                                                    const ids = perms.map(
-                                                        (p) => p.id,
-                                                    );
-
-                                                    const allSelected =
-                                                        ids.every((id) =>
-                                                            data.permissions.includes(
-                                                                id,
-                                                            ),
-                                                        );
-
-                                                    if (allSelected) {
-                                                        setData(
-                                                            'permissions',
-                                                            data.permissions.filter(
-                                                                (id) =>
-                                                                    !ids.includes(
-                                                                        id,
-                                                                    ),
-                                                            ),
-                                                        );
-                                                    } else {
-                                                        setData(
-                                                            'permissions',
-                                                            Array.from(
-                                                                new Set([
-                                                                    ...data.permissions,
-                                                                    ...ids,
-                                                                ]),
-                                                            ),
-                                                        );
-                                                    }
-                                                }}
-                                            >
-                                                Toggle All
-                                            </button>
-                                        </div>
-
-                                        {/* Permissions Grid */}
-                                        <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-4">
-                                            {perms.map((perm) => (
-                                                <label
-                                                    key={perm.id}
-                                                    className="flex cursor-pointer items-start gap-3 rounded-md p-2 transition hover:bg-muted/80"
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        value={perm.id}
-                                                        checked={data.permissions.includes(
-                                                            perm.id,
+                                    return (
+                                        <div
+                                            key={module}
+                                            className="rounded-xl border bg-background shadow-sm transition hover:shadow-md"
+                                        >
+                                            {/* Module Header */}
+                                            <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-xl border-b bg-background/80 px-4 py-3 backdrop-blur">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="h-2 w-2 rounded-full bg-primary" />
+                                                    <h3 className="text-sm font-semibold tracking-wide capitalize">
+                                                        {module.replace(
+                                                            '-',
+                                                            ' ',
                                                         )}
-                                                        onChange={(e) => {
-                                                            const permId =
-                                                                perm.id;
+                                                    </h3>
+                                                </div>
 
-                                                            if (
-                                                                e.target.checked
-                                                            ) {
-                                                                setData(
-                                                                    'permissions',
-                                                                    [
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    className="text-xs"
+                                                    onClick={() => {
+                                                        if (allSelected) {
+                                                            setData(
+                                                                'permissions',
+                                                                data.permissions.filter(
+                                                                    (id) =>
+                                                                        !ids.includes(
+                                                                            id,
+                                                                        ),
+                                                                ),
+                                                            );
+                                                        } else {
+                                                            setData(
+                                                                'permissions',
+                                                                Array.from(
+                                                                    new Set([
                                                                         ...data.permissions,
-                                                                        permId,
-                                                                    ],
-                                                                );
-                                                            } else {
-                                                                setData(
-                                                                    'permissions',
-                                                                    data.permissions.filter(
-                                                                        (id) =>
-                                                                            id !==
-                                                                            permId,
-                                                                    ),
-                                                                );
-                                                            }
-                                                        }}
-                                                        className="mt-1 h-4 w-4 rounded border bg-background text-primary focus:ring-2 focus:ring-ring focus:outline-none"
-                                                    />
+                                                                        ...ids,
+                                                                    ]),
+                                                                ),
+                                                            );
+                                                        }
+                                                    }}
+                                                >
+                                                    {allSelected
+                                                        ? 'Clear'
+                                                        : 'Select'}{' '}
+                                                    All
+                                                </Button>
+                                            </div>
 
-                                                    <div className="flex flex-col">
-                                                        <span className="text-sm font-medium">
-                                                            {perm.name}
-                                                        </span>
-                                                        {perm.description && (
-                                                            <span className="text-xs text-muted-foreground">
-                                                                {
-                                                                    perm.description
-                                                                }
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </label>
-                                            ))}
+                                            {/* Permissions */}
+                                            <div className="grid grid-cols-2 gap-2 p-3 md:grid-cols-3 lg:grid-cols-4">
+                                                {perms.map((perm) => {
+                                                    const checked =
+                                                        data.permissions.includes(
+                                                            perm.id,
+                                                        );
+
+                                                    return (
+                                                        <label
+                                                            key={perm.id}
+                                                            className={`group flex cursor-pointer items-center justify-between rounded-lg border px-3 py-2 text-sm transition-all ${
+                                                                checked
+                                                                    ? 'border-primary bg-primary/10 shadow-sm'
+                                                                    : 'hover:bg-muted/50'
+                                                            }`}
+                                                        >
+                                                            <div className="flex items-center gap-2">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={
+                                                                        checked
+                                                                    }
+                                                                    onChange={(
+                                                                        e,
+                                                                    ) => {
+                                                                        if (
+                                                                            e
+                                                                                .target
+                                                                                .checked
+                                                                        ) {
+                                                                            setData(
+                                                                                'permissions',
+                                                                                [
+                                                                                    ...data.permissions,
+                                                                                    perm.id,
+                                                                                ],
+                                                                            );
+                                                                        } else {
+                                                                            setData(
+                                                                                'permissions',
+                                                                                data.permissions.filter(
+                                                                                    (
+                                                                                        id,
+                                                                                    ) =>
+                                                                                        id !==
+                                                                                        perm.id,
+                                                                                ),
+                                                                            );
+                                                                        }
+                                                                    }}
+                                                                    className="h-4 w-4"
+                                                                />
+
+                                                                {/* Action Badge */}
+                                                                <div className="">
+                                                                    <div className="capitalize">
+                                                                        {
+                                                                            perm.name
+                                                                        }
+                                                                    </div>
+                                                                    <div className="text-xs">
+                                                                        {
+                                                                            perm.description
+                                                                        }
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Optional indicator */}
+                                                            {checked && (
+                                                                <CheckCheck className="h-4 w-4 text-primary opacity-80" />
+                                                            )}
+                                                        </label>
+                                                    );
+                                                })}
+                                            </div>
                                         </div>
-                                    </div>
-                                ),
+                                    );
+                                },
                             )}
                         </div>
                         <InputError message={errors.permissions} />
