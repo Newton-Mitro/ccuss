@@ -15,8 +15,10 @@ export interface Role {
 // types/permission.ts
 export interface Permission {
     id: number;
+    module: string;
     name: string;
     slug: string;
+    action?: string;
     description?: string | null;
     created_at?: string;
     updated_at?: string;

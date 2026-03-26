@@ -9,8 +9,10 @@ return new class extends Migration {
     {
         Schema::create('permissions', function (Blueprint $table) {
             $table->id();
+            $table->string('module')->nullable();
             $table->string('name');
             $table->string('slug')->unique();
+            $table->string('action')->nullable();
             $table->string('description')->nullable();
             $table->timestamps();
         });

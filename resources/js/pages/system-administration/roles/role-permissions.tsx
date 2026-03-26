@@ -73,6 +73,15 @@ const RolePermissionForm = ({
         }
     };
 
+    const groupedPermissions = permissions.reduce(
+        (acc, perm) => {
+            if (!acc[perm.module]) acc[perm.module] = [];
+            acc[perm.module].push(perm);
+            return acc;
+        },
+        {} as Record<string, Permission[]>,
+    );
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Roles', href: '/roles' },
         { title: 'Role Permissions', href: '' },
@@ -90,7 +99,7 @@ const RolePermissionForm = ({
 
             <form
                 onSubmit={handleSubmit}
-                className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6 lg:w-5xl"
+                className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6"
             >
                 {/* Role Selector */}
                 <div>
@@ -126,48 +135,121 @@ const RolePermissionForm = ({
                                 {selectAll ? 'Deselect All' : 'Select All'}
                             </Button>
                         </div>
-                        <div className="scrollbar-thin scrollbar-thumb-muted scrollbar-track-muted/20 grid max-h-96 grid-cols-3 gap-2 overflow-y-scroll rounded-md border p-2">
-                            {permissions.map((perm) => (
-                                <div
-                                    key={perm.id}
-                                    className="inline-flex items-center gap-4 rounded-md p-2 transition hover:bg-muted/80"
-                                >
-                                    <input
-                                        type="checkbox"
-                                        value={perm.id}
-                                        checked={data.permissions.includes(
-                                            perm.id,
-                                        )}
-                                        onChange={(e) => {
-                                            const permId = perm.id;
-                                            if (e.target.checked) {
-                                                setData('permissions', [
-                                                    ...data.permissions,
-                                                    permId,
-                                                ]);
-                                            } else {
-                                                setData(
-                                                    'permissions',
-                                                    data.permissions.filter(
-                                                        (id) => id !== permId,
-                                                    ),
-                                                );
-                                            }
-                                        }}
-                                        className="h-4 w-4 rounded border bg-background text-primary focus:ring-2 focus:ring-ring focus:outline-none"
-                                    />
-                                    <div className="flex flex-col">
-                                        <span className="text-sm font-medium">
-                                            {perm.name}
-                                        </span>
-                                        {perm.description && (
-                                            <span className="text-xs text-muted-foreground">
-                                                {perm.description}
-                                            </span>
-                                        )}
+                        <div className="scrollbar-thin scrollbar-thumb-muted scrollbar-track-muted/20 h-[calc(100vh-400px)] space-y-4 overflow-y-auto rounded-md border p-3">
+                            {Object.entries(groupedPermissions).map(
+                                ([module, perms]) => (
+                                    <div
+                                        key={module}
+                                        className="rounded-md border p-3"
+                                    >
+                                        {/* Module Header */}
+                                        <div className="mb-2 flex items-center justify-between">
+                                            <h3 className="text-sm font-semibold capitalize">
+                                                {module.replace('-', ' ')}
+                                            </h3>
+
+                                            {/* Toggle All */}
+                                            <button
+                                                type="button"
+                                                className="text-xs text-accent hover:underline"
+                                                onClick={() => {
+                                                    const ids = perms.map(
+                                                        (p) => p.id,
+                                                    );
+
+                                                    const allSelected =
+                                                        ids.every((id) =>
+                                                            data.permissions.includes(
+                                                                id,
+                                                            ),
+                                                        );
+
+                                                    if (allSelected) {
+                                                        setData(
+                                                            'permissions',
+                                                            data.permissions.filter(
+                                                                (id) =>
+                                                                    !ids.includes(
+                                                                        id,
+                                                                    ),
+                                                            ),
+                                                        );
+                                                    } else {
+                                                        setData(
+                                                            'permissions',
+                                                            Array.from(
+                                                                new Set([
+                                                                    ...data.permissions,
+                                                                    ...ids,
+                                                                ]),
+                                                            ),
+                                                        );
+                                                    }
+                                                }}
+                                            >
+                                                Toggle All
+                                            </button>
+                                        </div>
+
+                                        {/* Permissions Grid */}
+                                        <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-4">
+                                            {perms.map((perm) => (
+                                                <label
+                                                    key={perm.id}
+                                                    className="flex cursor-pointer items-start gap-3 rounded-md p-2 transition hover:bg-muted/80"
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        value={perm.id}
+                                                        checked={data.permissions.includes(
+                                                            perm.id,
+                                                        )}
+                                                        onChange={(e) => {
+                                                            const permId =
+                                                                perm.id;
+
+                                                            if (
+                                                                e.target.checked
+                                                            ) {
+                                                                setData(
+                                                                    'permissions',
+                                                                    [
+                                                                        ...data.permissions,
+                                                                        permId,
+                                                                    ],
+                                                                );
+                                                            } else {
+                                                                setData(
+                                                                    'permissions',
+                                                                    data.permissions.filter(
+                                                                        (id) =>
+                                                                            id !==
+                                                                            permId,
+                                                                    ),
+                                                                );
+                                                            }
+                                                        }}
+                                                        className="mt-1 h-4 w-4 rounded border bg-background text-primary focus:ring-2 focus:ring-ring focus:outline-none"
+                                                    />
+
+                                                    <div className="flex flex-col">
+                                                        <span className="text-sm font-medium">
+                                                            {perm.name}
+                                                        </span>
+                                                        {perm.description && (
+                                                            <span className="text-xs text-muted-foreground">
+                                                                {
+                                                                    perm.description
+                                                                }
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </label>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                ),
+                            )}
                         </div>
                         <InputError message={errors.permissions} />
                     </div>
