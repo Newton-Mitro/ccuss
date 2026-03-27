@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class AccountingPeriod extends Model
+class FiscalPeriod extends Model
 {
     use HasFactory, Auditable;
 

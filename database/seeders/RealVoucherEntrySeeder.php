@@ -9,7 +9,7 @@ use App\FinanceAndAccounting\Models\LedgerAccount;
 use App\FinanceAndAccounting\Models\LedgerAccountBalance;
 use App\FinanceAndAccounting\Models\Voucher;
 use App\FinanceAndAccounting\Models\VoucherLine;
-use App\FinanceAndAccounting\Models\AccountingPeriod;
+use App\FinanceAndAccounting\Models\FiscalPeriod;
 use App\FinanceAndAccounting\Models\FiscalYear;
 use App\FinanceAndAccounting\Models\InstrumentType;
 
@@ -28,7 +28,7 @@ class RealVoucherEntrySeeder extends Seeder
             $user = User::first() ?? User::factory()->create();
             $branch = Branch::first() ?? Branch::factory()->create();
             $fiscalYear = FiscalYear::where('is_active', true)->firstOrFail();
-            $fiscalPeriod = AccountingPeriod::where('is_open', true)->firstOrFail();
+            $fiscalPeriod = FiscalPeriod::where('is_open', true)->firstOrFail();
             $customer = Customer::first() ?? Customer::factory()->create();
 
             // Instruments

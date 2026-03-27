@@ -2,7 +2,7 @@
 
 namespace App\FinanceAndAccounting\Controllers;
 
-use App\FinanceAndAccounting\Models\AccountingPeriod;
+use App\FinanceAndAccounting\Models\FiscalPeriod;
 use App\FinanceAndAccounting\Models\FiscalYear;
 use App\FinanceAndAccounting\Models\LedgerAccount;
 use App\FinanceAndAccounting\Models\Voucher;
@@ -92,7 +92,7 @@ class LedgerAccountController extends Controller
             ->orderBy('code', 'desc')
             ->get(['id', 'code']);
 
-        $fiscalPeriods = AccountingPeriod::query()
+        $fiscalPeriods = FiscalPeriod::query()
             ->orderBy('period_name')
             ->get(['id', 'period_name']);
 

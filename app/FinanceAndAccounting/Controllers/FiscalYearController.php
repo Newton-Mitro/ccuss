@@ -2,7 +2,7 @@
 
 namespace App\FinanceAndAccounting\Controllers;
 
-use App\FinanceAndAccounting\Models\AccountingPeriod;
+use App\FinanceAndAccounting\Models\FiscalPeriod;
 use App\FinanceAndAccounting\Models\FiscalYear;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -117,7 +117,7 @@ class FiscalYearController
         $end = Carbon::parse($fiscalYear->end_date)->endOfMonth();
 
         while ($start->lte($end)) {
-            AccountingPeriod::create([
+            FiscalPeriod::create([
                 'fiscal_year_id' => $fiscalYear->id,
                 'period_name' => strtoupper($start->format('M-Y')),
                 'start_date' => $start->copy()->startOfMonth(),

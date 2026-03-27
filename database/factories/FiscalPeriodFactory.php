@@ -2,15 +2,15 @@
 
 namespace Database\Factories;
 
-use App\FinanceAndAccounting\Models\AccountingPeriod;
+use App\FinanceAndAccounting\Models\FiscalPeriod;
 use App\FinanceAndAccounting\Models\FiscalYear;
 use App\SystemAdministration\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Carbon\Carbon;
 
-class AccountingPeriodFactory extends Factory
+class FiscalPeriodFactory extends Factory
 {
-    protected $model = AccountingPeriod::class;
+    protected $model = FiscalPeriod::class;
 
     public function definition(): array
     {

@@ -16,7 +16,6 @@ class DatabaseSeeder extends Seeder
                 PermissionSeeder::class,
 
                 CustomerSeeder::class,
-                InstrumentTypeSeeder::class,
                 FiscalYearSeeder::class,
 
                 ChartOfAccountsSeeder::class,

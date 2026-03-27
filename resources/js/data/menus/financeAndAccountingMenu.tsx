@@ -15,11 +15,11 @@ export const financeAndAccountingMenu: SidebarItem[] = [
                 permission: ['settings.fiscal_year.view'],
             },
             {
-                name: 'Accounting Periods',
+                name: 'Fiscal Periods',
                 icon: <i className="fa-solid fa-calendar-days" />,
-                path: '/accounting-periods',
-                match_path: 'accounting-periods',
-                permission: ['settings.accounting_period.view'],
+                path: '/fiscal-periods',
+                match_path: 'fiscal-periods',
+                permission: ['settings.fiscal.view'],
             },
             {
                 name: 'Chart of Accounts',

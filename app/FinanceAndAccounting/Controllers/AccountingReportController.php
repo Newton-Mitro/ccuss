@@ -2,7 +2,7 @@
 
 namespace App\FinanceAndAccounting\Controllers;
 
-use App\FinanceAndAccounting\Models\AccountingPeriod;
+use App\FinanceAndAccounting\Models\FiscalPeriod;
 use App\FinanceAndAccounting\Models\FiscalYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -51,7 +51,7 @@ class AccountingReportController
         return Inertia::render('finance-and-accounting/reports/trial-balance-page', [
             'trialBalance' => $query->get(),
             'fiscalYears' => FiscalYear::orderBy('id')->get(),
-            'fiscalPeriods' => AccountingPeriod::orderBy('id')->get(),
+            'fiscalPeriods' => FiscalPeriod::orderBy('id')->get(),
             'selectedFiscalYear' => $fiscalYearId,
             'selectedFiscalPeriod' => $fiscalPeriodId,
         ]);
@@ -82,7 +82,7 @@ class AccountingReportController
         return Inertia::render('finance-and-accounting/reports/profit-and-loss-page', [
             'profitAndLoss' => $query->get(),
             'fiscalYears' => FiscalYear::all(),
-            'fiscalPeriods' => AccountingPeriod::all(),
+            'fiscalPeriods' => FiscalPeriod::all(),
             'selectedFiscalYear' => $fiscalYearId,
             'selectedFiscalPeriod' => $fiscalPeriodId,
         ]);
@@ -139,7 +139,7 @@ class AccountingReportController
         return Inertia::render('finance-and-accounting/reports/cash-flow-page', [
             'cashFlows' => $query->get(), // ✅ plural & consistent
             'fiscalYears' => FiscalYear::orderBy('id')->get(),
-            'fiscalPeriods' => AccountingPeriod::orderBy('id')->get(),
+            'fiscalPeriods' => FiscalPeriod::orderBy('id')->get(),
             'selectedFiscalYear' => $fiscalYearId,
             'selectedFiscalPeriod' => $fiscalPeriodId,
         ]);
@@ -174,7 +174,7 @@ class AccountingReportController
          |------------------------------------------------------------
          */
         if ($fiscalYearId) {
-            $periodIds = AccountingPeriod::where('fiscal_year_id', $fiscalYearId)
+            $periodIds = FiscalPeriod::where('fiscal_year_id', $fiscalYearId)
                 ->pluck('id');
 
             $query->whereIn('fiscal_period_id', $periodIds);
@@ -183,7 +183,7 @@ class AccountingReportController
         return Inertia::render('finance-and-accounting/reports/shareholders-equity-page', [
             'equityStatement' => $query->get(),
             'fiscalYears' => FiscalYear::orderBy('start_date')->get(),
-            'fiscalPeriods' => AccountingPeriod::orderBy('start_date')->get(),
+            'fiscalPeriods' => FiscalPeriod::orderBy('start_date')->get(),
             'selectedFiscalYear' => $fiscalYearId,
             'selectedFiscalPeriod' => $fiscalPeriodId,
         ]);

@@ -4,7 +4,7 @@ namespace Database\Factories;
 
 use App\FinanceAndAccounting\Models\LedgerAccount;
 use App\FinanceAndAccounting\Models\LedgerAccountBalance;
-use App\FinanceAndAccounting\Models\AccountingPeriod;
+use App\FinanceAndAccounting\Models\FiscalPeriod;
 use App\SystemAdministration\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -22,7 +22,7 @@ class LedgerAccountBalanceFactory extends Factory
             'organization_id' => $organization->id,
         ]);
 
-        $period = AccountingPeriod::factory()->create([
+        $period = FiscalPeriod::factory()->create([
             'organization_id' => $organization->id,
         ]);
 

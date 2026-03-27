@@ -60,7 +60,7 @@ class LedgerAccountBalance extends Model
 
     public function accountingPeriod(): BelongsTo
     {
-        return $this->belongsTo(AccountingPeriod::class);
+        return $this->belongsTo(FiscalPeriod::class);
     }
 
     /*
