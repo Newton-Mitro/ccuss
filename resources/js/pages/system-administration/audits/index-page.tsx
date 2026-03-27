@@ -91,7 +91,7 @@ export default function Index() {
                 </div>
 
                 {/* Desktop Table */}
-                <div className="hidden h-[calc(100vh-360px)] overflow-auto rounded-md border md:block md:h-[calc(100vh-300px)]">
+                <div className="hidden h-[calc(100vh-360px)] overflow-auto rounded-md border bg-card md:block md:h-[calc(100vh-300px)]">
                     <table className="w-full min-w-150 border-collapse text-sm">
                         <thead className="sticky top-0 bg-muted">
                             <tr>

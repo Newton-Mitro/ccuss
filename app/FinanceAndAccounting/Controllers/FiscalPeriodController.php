@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class AccountingPeriodController
+class FiscalPeriodController
 {
     public function index(Request $request): Response
     {

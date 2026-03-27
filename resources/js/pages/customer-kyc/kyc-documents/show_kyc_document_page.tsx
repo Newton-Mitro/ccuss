@@ -1,8 +1,8 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, XCircle } from 'lucide-react';
-
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import ReactPanZoom from 'react-image-pan-zoom-rotate';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
@@ -99,11 +99,12 @@ const Show = () => {
                     <p className="text-sm font-medium">Document Preview</p>
 
                     {document.mime?.startsWith('image') && (
-                        <img
-                            src={document.url}
-                            alt={document.alt_text || 'Document'}
-                            className="max-h-[500px] w-full rounded-md border object-contain"
-                        />
+                        <div className="relative h-[calc(100vh-16rem)] w-full overflow-hidden rounded-md">
+                            <ReactPanZoom
+                                image={document.url}
+                                alt={document.document_type}
+                            />
+                        </div>
                     )}
 
                     {document.mime === 'application/pdf' && (

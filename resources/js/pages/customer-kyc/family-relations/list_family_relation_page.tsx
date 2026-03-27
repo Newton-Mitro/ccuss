@@ -118,7 +118,7 @@ export default function FamilyRelationIndex() {
                 {/* ===================== */}
                 {/* Desktop Table */}
                 {/* ===================== */}
-                <div className="hidden h-[calc(100vh-360px)] overflow-auto rounded-md border md:block">
+                <div className="hidden h-[calc(100vh-360px)] overflow-auto rounded-md border bg-card md:block">
                     <table className="w-full border-collapse">
                         <thead className="sticky top-0 bg-muted">
                             <tr>

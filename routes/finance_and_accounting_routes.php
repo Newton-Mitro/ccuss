@@ -1,10 +1,10 @@
 <?php
 
 use App\FinanceAndAccounting\Controllers\AccountingReportController;
+use App\FinanceAndAccounting\Controllers\FiscalPeriodController;
 use App\FinanceAndAccounting\Controllers\LedgerAccountController;
 use Illuminate\Support\Facades\Route;
 use App\FinanceAndAccounting\Controllers\FiscalYearController;
-use App\FinanceAndAccounting\Controllers\AccountingPeriodController;
 
 // Fiscal Years
 Route::middleware(['auth',])->group(function () {
@@ -19,7 +19,7 @@ Route::middleware(['auth',])->group(function () {
         ]);
 
     // Fiscal Periods
-    Route::resource('accounting-periods', AccountingPeriodController::class)
+    Route::resource('fiscal-periods', FiscalPeriodController::class)
         ->names([
             'index' => 'fiscal-periods.index',
             'create' => 'fiscal-periods.create',

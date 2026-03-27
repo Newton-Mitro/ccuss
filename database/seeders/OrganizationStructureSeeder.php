@@ -53,93 +53,31 @@ class OrganizationStructureSeeder extends Seeder
             ['name' => 'Accountant', 'email' => 'accountant@email.com'],
         ];
 
-        $customerId = 1;
 
         foreach ($defaultUsers as $userData) {
-            User::firstOrCreate(
+            $user = User::firstOrCreate(
                 ['email' => $userData['email']],
                 [
                     'name' => $userData['name'],
                     'organization_id' => $organization->id,
                     'branch_id' => 1,
-                    'customer_id' => $customerId++,
+                    // 'customer_id' => $customerId++,
                     'password' => Hash::make('password'),
                     'email_verified_at' => now(),
                 ]
             );
-        }
 
-        Teller::create([
-            'user_id' => 1,
-            'branch_id' => $branch->id,
-            'code' => 'TLR-' . $branch->id . '-' . str_pad(9999, 3, '0', STR_PAD_LEFT),
-            'name' => 'Super Admin',
-            'max_cash_limit' => 500000,
-            'max_transaction_limit' => 100000,
-            'is_active' => true,
-        ]);
+            Teller::create([
+                'user_id' => $user->id,
+                'branch_id' => 1,
+                'code' => 'TLR-' . $user->id . '-' . str_pad(9999, 3, '0', STR_PAD_LEFT),
+                'name' => $userData['name'],
+                'max_cash_limit' => 500000,
+                'max_transaction_limit' => 100000,
+                'is_active' => true,
+            ]);
+        }
 
         $this->command->info('✅ Core admin users created.');
-
-        // -------------------------------
-        // 4. Create Tellers per Branch
-        // -------------------------------
-        foreach ($branches as $branch) {
-
-            // Create 3–5 tellers per branch
-            $tellersCount = rand(3, 5);
-
-            for ($i = 1; $i <= $tellersCount; $i++) {
-
-                // Create user for teller
-                $user = User::factory()->create([
-                    'organization_id' => $organization->id,
-                    'branch_id' => $branch->id,
-                    'customer_id' => $customerId++,
-                ]);
-
-                // Create teller linked to user
-                Teller::create([
-                    'user_id' => $user->id,
-                    'branch_id' => $branch->id,
-                    'code' => 'TLR-' . $branch->id . '-' . str_pad($i, 3, '0', STR_PAD_LEFT),
-                    'name' => $user->name,
-                    'max_cash_limit' => 500000,
-                    'max_transaction_limit' => 100000,
-                    'is_active' => true,
-                ]);
-            }
-        }
-
-        $this->command->info('✅ Tellers created for each branch.');
-
-        // -------------------------------
-        // 5. Optional: Add Special Roles
-        // -------------------------------
-        User::firstOrCreate(
-            ['email' => 'teller@email.com'],
-            [
-                'name' => 'Main Teller',
-                'organization_id' => $organization->id,
-                'branch_id' => $branches->first()->id,
-                'customer_id' => $customerId++,
-                'password' => Hash::make('password'),
-                'email_verified_at' => now(),
-            ]
-        );
-
-        User::firstOrCreate(
-            ['email' => 'collector@email.com'],
-            [
-                'name' => 'Cash Collector',
-                'organization_id' => $organization->id,
-                'branch_id' => $branches->first()->id,
-                'customer_id' => $customerId++,
-                'password' => Hash::make('password'),
-                'email_verified_at' => now(),
-            ]
-        );
-
-        $this->command->info('✅ Additional operational users created.');
     }
 }

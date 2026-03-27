@@ -20,6 +20,7 @@ import {
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import DataTablePagination from '../../../components/data-table-pagination';
 import { appSwal } from '../../../lib/appSwal';
+import { SharedData } from '../../../types';
 
 interface BackupLog {
     id: number;
@@ -34,7 +35,7 @@ interface BackupLog {
     error?: string;
 }
 
-interface BackupPageProps {
+interface BackupPageProps extends SharedData {
     logs: {
         data: BackupLog[];
         links: { url: string | null; label: string; active: boolean }[];
@@ -43,9 +44,7 @@ interface BackupPageProps {
 }
 
 export default function History() {
-    const { logs, filters, flash } = usePage().props as BackupPageProps & {
-        flash?: { success?: string; error?: string };
-    };
+    const { logs, filters, flash } = usePage<BackupPageProps>().props;
 
     const { data, setData, get } = useForm({
         search: filters.search || '',
@@ -140,7 +139,7 @@ export default function History() {
                 </div>
 
                 {/* Table */}
-                <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border md:block">
+                <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
                     <table className="w-full border-collapse">
                         <thead className="sticky top-0 bg-muted">
                             <tr>
