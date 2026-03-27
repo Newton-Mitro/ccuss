@@ -11,11 +11,14 @@ import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
+import { Input } from '../../../components/ui/input';
+import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
+import { tellerSessionStatuses } from './data/teller_session_statuses';
 
-interface TellerSessionPageProps {
+interface TellerSessionPageProps extends SharedData {
     sessions: {
         data: {
             id: number;
@@ -117,29 +120,28 @@ export default function TellerSessionsIndexPage() {
 
                 {/* Filters */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <input
-                        type="text"
-                        placeholder="Search teller sessions..."
-                        value={data.search}
-                        onChange={(e) => {
-                            setData('search', e.target.value);
-                            setData('page', 1);
-                        }}
-                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-                    />
+                    <div className="w-60">
+                        <Input
+                            type="text"
+                            placeholder="Search teller sessions..."
+                            value={data.search}
+                            onChange={(e) => {
+                                setData('search', e.target.value);
+                                setData('page', 1);
+                            }}
+                        />
+                    </div>
 
-                    <select
-                        value={data.status}
-                        onChange={(e) => {
-                            setData('status', e.target.value);
-                            setData('page', 1);
-                        }}
-                        className="h-9 max-w-xs rounded-md border bg-background px-3 text-sm"
-                    >
-                        <option value="">All Status</option>
-                        <option value="open">Open</option>
-                        <option value="closed">Closed</option>
-                    </select>
+                    <div className="w-48">
+                        <Select
+                            value={data.status}
+                            onChange={(value) => {
+                                setData('status', value);
+                                setData('page', 1);
+                            }}
+                            options={tellerSessionStatuses}
+                        />
+                    </div>
                 </div>
 
                 {/* Table */}

@@ -14,7 +14,7 @@ import CustomAuthLayout from '../../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../../lib/appSwal';
 import { formatBDTCurrency } from '../../../../lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '../../../../types';
-import { VoucherLine } from '../../../../types/accounting';
+import { VoucherLine } from '../../../../types/finance_and_accounting';
 import { LedgerSearchInput } from '../../components/ledger-search-input';
 
 /* -------------------------------------------------------
@@ -53,7 +53,7 @@ interface VoucherFormData {
     voucher_date: string;
     voucher_type: string;
     fiscal_year_id?: number;
-    accounting_period_id?: number;
+    fiscal_period_id?: number;
     branch_id?: number;
     status: string;
     narration: string;
@@ -95,7 +95,7 @@ export default function CreditVoucherEntryPage({
         voucher_date: new Date().toISOString().split('T')[0],
         voucher_type: 'CREDIT_OR_RECEIPT',
         fiscal_year_id: activeFiscalYearId || 0,
-        accounting_period_id: activeFiscalPeriodId || 0,
+        fiscal_period_id: activeFiscalPeriodId || 0,
         branch_id: userBranchId || branches[0]?.id,
         status: 'DRAFT',
         narration: '',
@@ -547,10 +547,7 @@ export default function CreditVoucherEntryPage({
                                                 'fiscal_year_id',
                                                 Number(e.target.value),
                                             );
-                                            setData(
-                                                'accounting_period_id',
-                                                null,
-                                            );
+                                            setData('fiscal_period_id', null);
                                         }}
                                     />
                                 </div>
@@ -560,9 +557,9 @@ export default function CreditVoucherEntryPage({
                                         Fiscal Period
                                     </Label>
                                     <Select
-                                        error={errors.accounting_period_id}
+                                        error={errors.fiscal_period_id}
                                         value={
-                                            data.accounting_period_id?.toString() ||
+                                            data.fiscal_period_id?.toString() ||
                                             ''
                                         }
                                         options={fiscalPeriods
@@ -577,7 +574,7 @@ export default function CreditVoucherEntryPage({
                                             }))}
                                         onChange={(e) =>
                                             setData(
-                                                'accounting_period_id',
+                                                'fiscal_period_id',
                                                 Number(e.target.value),
                                             )
                                         }

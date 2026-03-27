@@ -5,7 +5,7 @@ import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '../../../types';
-import { FiscalYear } from '../../../types/accounting';
+import { FiscalYear } from '../../../types/finance_and_accounting';
 
 /* ---------------- Types ---------------- */
 
@@ -118,7 +118,7 @@ export default function ShareholdersEquityPage() {
 
                         <button
                             onClick={() => window.print()}
-                            className="hover:bg-primary/80 rounded-md bg-primary px-3 py-1 text-sm font-medium text-primary-foreground"
+                            className="rounded-md bg-primary px-3 py-1 text-sm font-medium text-primary-foreground hover:bg-primary/80"
                         >
                             Print
                         </button>

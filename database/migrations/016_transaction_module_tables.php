@@ -8,19 +8,6 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        /*
-       |--------------------------------------------------------------------------
-       | Instrument Types
-       |--------------------------------------------------------------------------
-       */
-        Schema::create('instrument_types', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('organization_id')->constrained();
-            $table->string('code', 50)->unique();
-            $table->string('name', 100);
-            $table->timestamps();
-        });
-
         // Schema::create('cheque_instruments', function (Blueprint $table) {
         //     $table->id();
 
@@ -55,7 +42,7 @@ return new class extends Migration {
         //     $table->string('provider', 50); // bKash, Nagad, etc
         //     $table->string('wallet_no', 30);
 
-        //     $table->string('transaction_id', 100)->unique();
+        //     $table->string('journal_id', 100)->unique();
         //     $table->date('transaction_date');
 
         //     $table->timestamps();
@@ -96,10 +83,10 @@ return new class extends Migration {
         // -----------------------
         // Transactions
         // -----------------------
-        Schema::create('transactions', function (Blueprint $table) {
+        Schema::create('journals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('fiscal_year_id')->constrained();
-            $table->foreignId('accounting_period_id')->constrained();
+            $table->foreignId('fiscal_period_id')->constrained();
             $table->string('reference')->unique(); // 🔑 Unique Reference
             // 🧠 Classification
             $table->foreignId('transaction_type_id')->constrained()->cascadeOnDelete();
@@ -113,7 +100,7 @@ return new class extends Migration {
             // 🔗 Polymorphic Source (Deposit, Loan, Vendor, etc.)
             $table->nullableMorphs('source_entity');
             // 🔁 Reversal Handling
-            $table->foreignId('reversal_of')->nullable()->constrained('transactions')->nullOnDelete();
+            $table->foreignId('reversal_of')->nullable()->constrained('journals')->nullOnDelete();
             $table->boolean('is_reversed')->default(false);
             // 💰 Optional (NOT accounting source of truth)
             $table->decimal('amount', 15, 2)->nullable();
@@ -136,9 +123,9 @@ return new class extends Migration {
         // -----------------------
         // Transaction Entries
         // -----------------------
-        Schema::create('transaction_entries', function (Blueprint $table) {
+        Schema::create('journal_entries', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('transaction_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('journal_id')->constrained()->cascadeOnDelete();
             // 🧾 GL Account (still required)
             $table->foreignId('ledger_account_id')->constrained('ledger_accounts');
             // 🔥 POLYMORPHIC ACCOUNT (who owns this entry)
@@ -164,7 +151,7 @@ return new class extends Migration {
             $table->timestamps();
 
             // 🚀 Indexing
-            $table->index(['transaction_id']);
+            $table->index(['journal_id']);
             $table->index(['ledger_account_id']);
             $table->index(['account_type', 'account_id'], 'txn_entries_account_type_idx');
         });
@@ -196,7 +183,7 @@ return new class extends Migration {
             t.fiscal_year_id,
             fy.code AS fiscal_year_code,
 
-            t.accounting_period_id,
+            t.fiscal_period_id,
             ap.period_name,
 
             SUM(te.debit)  AS total_debit,
@@ -210,18 +197,18 @@ return new class extends Migration {
             END AS balance
 
         FROM ledger_accounts a
-        JOIN transaction_entries te ON te.ledger_account_id = a.id
-        JOIN transactions t ON t.id = te.transaction_id
+        JOIN journal_entries te ON te.ledger_account_id = a.id
+        JOIN journals t ON t.id = te.journal_id
             AND t.status = 'posted'
         JOIN fiscal_years fy ON fy.id = t.fiscal_year_id
-        JOIN accounting_periods ap ON ap.id = t.accounting_period_id
+        JOIN fiscal_periods ap ON ap.id = t.fiscal_period_id
 
         WHERE a.is_active = TRUE
 
         GROUP BY 
             a.id, a.code, a.name, a.type,
             t.fiscal_year_id, fy.code,
-            t.accounting_period_id, ap.period_name
+            t.fiscal_period_id, ap.period_name
 
         ORDER BY a.code;
         ");
@@ -246,7 +233,7 @@ return new class extends Migration {
             t.fiscal_year_id,
             fy.code AS fiscal_year_code,
 
-            t.accounting_period_id,
+            t.fiscal_period_id,
             ap.period_name,
 
             COALESCE(SUM(
@@ -257,11 +244,11 @@ return new class extends Migration {
             ),0) AS amount
 
         FROM ledger_accounts a
-        LEFT JOIN transaction_entries te ON te.ledger_account_id = a.id
-        LEFT JOIN transactions t ON t.id = te.transaction_id
+        LEFT JOIN journal_entries te ON te.ledger_account_id = a.id
+        LEFT JOIN journals t ON t.id = te.journal_id
             AND t.status = 'posted'
         LEFT JOIN fiscal_years fy ON fy.id = t.fiscal_year_id
-        LEFT JOIN accounting_periods ap ON ap.id = t.accounting_period_id
+        LEFT JOIN fiscal_periods ap ON ap.id = t.fiscal_period_id
 
         WHERE a.type IN ('income','expense')
         AND a.is_active = TRUE
@@ -270,7 +257,7 @@ return new class extends Migration {
         GROUP BY 
             a.id, a.code, a.name, category,
             t.fiscal_year_id, fy.code,
-            t.accounting_period_id, ap.period_name
+            t.fiscal_period_id, ap.period_name
 
         ORDER BY a.code;
         ");
@@ -291,7 +278,7 @@ return new class extends Migration {
             t.fiscal_year_id,
             fy.code AS fiscal_year_code,
 
-            t.accounting_period_id,
+            t.fiscal_period_id,
             ap.period_name,
 
             SUM(
@@ -304,11 +291,11 @@ return new class extends Migration {
             ) AS balance
 
         FROM ledger_accounts a
-        JOIN transaction_entries te ON te.ledger_account_id = a.id
-        JOIN transactions t ON t.id = te.transaction_id
+        JOIN journal_entries te ON te.ledger_account_id = a.id
+        JOIN journals t ON t.id = te.journal_id
             AND t.status = 'posted'
         JOIN fiscal_years fy ON fy.id = t.fiscal_year_id
-        JOIN accounting_periods ap ON ap.id = t.accounting_period_id
+        JOIN fiscal_periods ap ON ap.id = t.fiscal_period_id
 
         WHERE a.type IN ('asset','liability','equity')
         AND a.is_active = TRUE
@@ -316,7 +303,7 @@ return new class extends Migration {
         GROUP BY 
             a.id, a.code, a.name, a.type,
             t.fiscal_year_id, fy.code,
-            t.accounting_period_id, ap.period_name
+            t.fiscal_period_id, ap.period_name
 
         ORDER BY a.code;
         ");
@@ -332,7 +319,7 @@ return new class extends Migration {
             t.fiscal_year_id,
             fy.code AS fiscal_year_code,
 
-            t.accounting_period_id,
+            t.fiscal_period_id,
             ap.period_name,
 
             CASE
@@ -349,25 +336,25 @@ return new class extends Migration {
                 END
             ) AS net_cash
 
-        FROM transaction_entries te
-        JOIN transactions t ON t.id = te.transaction_id
+        FROM journal_entries te
+        JOIN journals t ON t.id = te.journal_id
             AND t.status = 'posted'
         JOIN transaction_types tt ON tt.id = t.transaction_type_id
         JOIN ledger_accounts la ON la.id = te.ledger_account_id
         JOIN fiscal_years fy ON fy.id = t.fiscal_year_id
-        JOIN accounting_periods ap ON ap.id = t.accounting_period_id
+        JOIN fiscal_periods ap ON ap.id = t.fiscal_period_id
 
         WHERE la.is_active = TRUE
         AND tt.is_cash = TRUE
 
         GROUP BY 
             t.fiscal_year_id, fy.code,
-            t.accounting_period_id, ap.period_name,
+            t.fiscal_period_id, ap.period_name,
             cash_category
 
         ORDER BY 
             t.fiscal_year_id,
-            t.accounting_period_id,
+            t.fiscal_period_id,
             cash_category;
         ");
 
@@ -386,7 +373,7 @@ return new class extends Migration {
         net_profit AS (
             SELECT
                 t.fiscal_year_id,
-                t.accounting_period_id,
+                t.fiscal_period_id,
 
                 COALESCE(SUM(
                     CASE 
@@ -396,14 +383,14 @@ return new class extends Migration {
                     END
                 ),0) AS net_profit
 
-            FROM transaction_entries te
-            JOIN transactions t ON t.id = te.transaction_id
+            FROM journal_entries te
+            JOIN journals t ON t.id = te.journal_id
                 AND t.status = 'posted'
             JOIN ledger_accounts la ON la.id = te.ledger_account_id
 
             WHERE la.type IN ('income','expense')
 
-            GROUP BY t.fiscal_year_id, t.accounting_period_id
+            GROUP BY t.fiscal_year_id, t.fiscal_period_id
         )
         SELECT
             eq.id AS ledger_account_id,
@@ -411,7 +398,7 @@ return new class extends Migration {
             eq.name AS account_name,
 
             np.fiscal_year_id,
-            np.accounting_period_id,
+            np.fiscal_period_id,
             np.net_profit
 
         FROM equity_accounts eq
@@ -431,7 +418,7 @@ return new class extends Migration {
         DB::statement('DROP VIEW IF EXISTS view_profit_and_loss');
         DB::statement('DROP VIEW IF EXISTS view_trial_balance');
 
-        Schema::dropIfExists('transaction_entries');
-        Schema::dropIfExists('transactions');
+        Schema::dropIfExists('journal_entries');
+        Schema::dropIfExists('journals');
     }
 };

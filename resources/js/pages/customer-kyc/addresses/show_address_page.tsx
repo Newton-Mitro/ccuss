@@ -10,10 +10,10 @@ import {
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 import { CustomerAddress } from '../../../types/customer_kyc_module';
 
-interface Props {
+interface Props extends SharedData {
     address: CustomerAddress;
 }
 

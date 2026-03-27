@@ -2,7 +2,7 @@ import { Eye } from 'lucide-react';
 import { useMemo } from 'react';
 import { formatBDTCurrency } from '../../../../lib/bdtCurrencyFormatter';
 import { formatDate } from '../../../../lib/date_util';
-import { Voucher } from '../../../../types/accounting';
+import { Voucher } from '../../../../types/finance_and_accounting';
 
 interface Props {
     vouchers: Voucher[];

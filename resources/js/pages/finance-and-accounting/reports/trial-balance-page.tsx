@@ -5,7 +5,10 @@ import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '../../../types';
-import { FiscalPeriod, FiscalYear } from '../../../types/accounting';
+import {
+    FiscalPeriod,
+    FiscalYear,
+} from '../../../types/finance_and_accounting';
 
 /* ---------------- Types ---------------- */
 
@@ -16,7 +19,7 @@ interface TrialBalanceRow {
     account_type: string;
     fiscal_year_id: number;
     fiscal_year_code: string;
-    accounting_period_id: number;
+    fiscal_period_id: number;
     period_name: string;
     total_debit: number;
     total_credit: number;
@@ -62,7 +65,7 @@ export default function TrialBalancePage() {
         setFiscalYear(year);
         router.get(
             '/reports/trial-balance',
-            { fiscal_year_id: year, accounting_period_id: fiscalPeriod },
+            { fiscal_year_id: year, fiscal_period_id: fiscalPeriod },
             { preserveState: true },
         );
     };
@@ -74,7 +77,7 @@ export default function TrialBalancePage() {
         setFiscalPeriod(period);
         router.get(
             '/reports/trial-balance',
-            { fiscal_year_id: fiscalYear, accounting_period_id: period },
+            { fiscal_year_id: fiscalYear, fiscal_period_id: period },
             { preserveState: true },
         );
     };
@@ -149,7 +152,7 @@ export default function TrialBalancePage() {
 
                         <button
                             onClick={() => window.print()}
-                            className="hover:bg-primary/80 rounded-md bg-primary px-3 py-1 text-sm font-medium text-primary-foreground"
+                            className="rounded-md bg-primary px-3 py-1 text-sm font-medium text-primary-foreground hover:bg-primary/80"
                         >
                             Print
                         </button>

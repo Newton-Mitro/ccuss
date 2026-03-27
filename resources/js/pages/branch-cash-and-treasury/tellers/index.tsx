@@ -11,11 +11,14 @@ import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
+import { Input } from '../../../components/ui/input';
+import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
+import { tellerStatuses } from './data/teller_statuses';
 
-interface TellerPageProps {
+interface TellerPageProps extends SharedData {
     tellers: {
         data: {
             id: number;
@@ -33,8 +36,7 @@ interface TellerPageProps {
 }
 
 export default function Index() {
-    const { tellers, filters, branches } = usePage()
-        .props as unknown as TellerPageProps;
+    const { tellers, filters, branches } = usePage<TellerPageProps>().props;
 
     const {
         data,
@@ -110,49 +112,47 @@ export default function Index() {
 
                 {/* Search */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <input
-                        type="text"
-                        placeholder="Search tellers..."
-                        value={data.search}
-                        onChange={(e) => {
-                            setData('search', e.target.value);
-                            setData('page', 1);
-                        }}
-                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-                    />
+                    <div className="w-60">
+                        {' '}
+                        <Input
+                            type="text"
+                            placeholder="Search tellers..."
+                            value={data.search}
+                            onChange={(e) => {
+                                setData('search', e.target.value);
+                                setData('page', 1);
+                            }}
+                        />
+                    </div>
 
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                             {/* Branch Filter */}
-                            <select
-                                value={data.branch_id}
-                                onChange={(e) => {
-                                    setData('branch_id', e.target.value);
-                                    setData('page', 1);
-                                }}
-                                className="h-9 rounded-md border bg-background px-3 text-sm"
-                            >
-                                <option value="">All Branches</option>
-                                {branches?.map((b) => (
-                                    <option key={b.id} value={b.id}>
-                                        {b.name}
-                                    </option>
-                                ))}
-                            </select>
+                            <div className="w-48">
+                                <Select
+                                    value={data.branch_id}
+                                    onChange={(value) => {
+                                        setData('branch_id', value);
+                                        setData('page', 1);
+                                    }}
+                                    options={branches.map((branch) => ({
+                                        value: branch.id.toString(),
+                                        label: branch.name,
+                                    }))}
+                                />
+                            </div>
 
                             {/* Status Filter */}
-                            <select
-                                value={data.status}
-                                onChange={(e) => {
-                                    setData('status', e.target.value);
-                                    setData('page', 1);
-                                }}
-                                className="h-9 rounded-md border bg-background px-3 text-sm"
-                            >
-                                <option value="">All Status</option>
-                                <option value="1">Active</option>
-                                <option value="0">Inactive</option>
-                            </select>
+                            <div className="w-48">
+                                <Select
+                                    value={data.status}
+                                    onChange={(value) => {
+                                        setData('status', value);
+                                        setData('page', 1);
+                                    }}
+                                    options={tellerStatuses}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>

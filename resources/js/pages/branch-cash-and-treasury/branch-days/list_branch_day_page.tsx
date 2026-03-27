@@ -12,13 +12,16 @@ import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import Heading from '../../../components/heading';
 import HeadingSmall from '../../../components/heading-small';
+import { Input } from '../../../components/ui/input';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { formatDate, formatDateTime } from '../../../lib/date_util';
+import { SharedData } from '../../../types';
+import { Branch } from '../../../types/branch';
 import { branchDayStatuses } from './data/branch_day_status';
 
-interface BranchDayPageProps {
+interface BranchDayPageProps extends SharedData {
     branchDays: {
         data: {
             id: number;
@@ -26,17 +29,17 @@ interface BranchDayPageProps {
             opened_at: string | null;
             closed_at: string | null;
             status: 'open' | 'closed';
-            branch: { id: number; name: string };
+            branch: Branch;
         }[];
         links: { url: string | null; label: string; active: boolean }[];
     };
     filters: Record<string, string>;
-    branches: { id: number; name: string }[];
+    branches: Branch[];
 }
 
 export default function Index() {
-    const { branchDays, filters, branches } = usePage()
-        .props as unknown as BranchDayPageProps;
+    const { branchDays, filters, branches } =
+        usePage<BranchDayPageProps>().props;
 
     const { data, setData, get, put } = useForm({
         search: filters.search || '',
@@ -105,16 +108,17 @@ export default function Index() {
 
                 {/* Filters */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
-                    <input
-                        type="text"
-                        placeholder="Search..."
-                        value={data.search}
-                        onChange={(e) => {
-                            setData('search', e.target.value);
-                            setData('page', 1);
-                        }}
-                        className="h-9 max-w-sm rounded-md border bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-                    />
+                    <div className="w-60">
+                        <Input
+                            type="text"
+                            placeholder="Search..."
+                            value={data.search}
+                            onChange={(e) => {
+                                setData('search', e.target.value);
+                                setData('page', 1);
+                            }}
+                        />
+                    </div>
 
                     <div className="flex gap-2">
                         {/* Branch Filter */}
@@ -271,7 +275,7 @@ export default function Index() {
 
                 {/* Mobile Cards */}
                 <div className="space-y-3 md:hidden">
-                    {branchDays.data.map((bd, idx) => (
+                    {branchDays.data.map((bd) => (
                         <div
                             key={bd.id}
                             className="rounded-md border border-border bg-card p-3 shadow-sm"

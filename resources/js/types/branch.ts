@@ -1,4 +1,4 @@
-import { Customer } from './customer';
+import { Customer } from './customer_kyc_module';
 
 export interface Branch {
     id: number;
@@ -11,7 +11,7 @@ export interface Branch {
     longitude?: number | null; // Optional GPS longitude
 
     manager_id?: number | null; // Foreign key (users.id)
-    manager?: Customer;
+    manager?: Customer | null;
 
     created_at: string; // ISO date string
     updated_at: string; // ISO date string

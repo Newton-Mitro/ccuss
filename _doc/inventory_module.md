@@ -130,7 +130,7 @@ Purpose:
 
 - Savings management
 - Interest calculation
-- Deposit transactions
+- Deposit journals
 
 ---
 

@@ -11,7 +11,7 @@ interface PLRow {
     account_name: string;
     amount: number;
     fiscal_year_id?: number;
-    accounting_period_id?: number;
+    fiscal_period_id?: number;
 }
 
 interface FiscalYear {
@@ -55,7 +55,7 @@ export default function ProfitAndLossPage() {
         setFiscalYear(year);
         router.get(
             '/reports/profit-loss',
-            { fiscal_year_id: year, accounting_period_id: fiscalPeriod },
+            { fiscal_year_id: year, fiscal_period_id: fiscalPeriod },
             { preserveState: true },
         );
     };
@@ -67,7 +67,7 @@ export default function ProfitAndLossPage() {
         setFiscalPeriod(period);
         router.get(
             '/reports/profit-loss',
-            { fiscal_year_id: fiscalYear, accounting_period_id: period },
+            { fiscal_year_id: fiscalYear, fiscal_period_id: period },
             { preserveState: true },
         );
     };

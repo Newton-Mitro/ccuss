@@ -15,10 +15,8 @@ return new class extends Migration {
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             $table->foreignId('custodian_id')->nullable()->constrained('users')->nullOnDelete();
             $table->decimal('imprest_amount', 15, 2)->default(0); // fixed fund
-            $table->decimal('current_balance', 15, 2)->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
-
         });
 
 

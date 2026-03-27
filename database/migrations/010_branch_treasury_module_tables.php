@@ -33,7 +33,6 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->decimal('total_balance', 18, 2)->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
@@ -72,65 +71,10 @@ return new class extends Migration {
             $table->enum('status', ['open', 'closed'])->default('open');
             $table->timestamps();
         });
-
-
-        // Cash Adjustments
-        Schema::create('cash_adjustments', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('teller_session_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->decimal('amount', 18, 2);
-            $table->enum('type', ['shortage', 'excess', 'other']);
-            $table->text('reason')->nullable();
-            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamps();
-        });
-
-        // cash_movements  (for approval process. after approval, it will be move to transactions table)
-        Schema::create('cash_movements', function (Blueprint $table) {
-            $table->id();
-            $table->morphs('source');
-            $table->morphs('destination');
-            $table->decimal('amount', 18, 2);
-            $table->timestamp('transfer_date');
-            $table->enum('type', ['internal', 'external']);
-            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
-            $table->foreignId('initiated_by')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->text('remarks')->nullable();
-            $table->timestamps();
-        });
-
-        // Cash Audit Logs
-        Schema::create('cash_audit_logs', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('teller_session_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('action');
-            $table->text('details')->nullable();
-            $table->timestamp('action_time');
-            $table->timestamps();
-        });
-
-        // Branch Alerts
-        Schema::create('branch_alerts', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
-            $table->string('title');
-            $table->text('message');
-            $table->enum('severity', ['info', 'warning', 'critical'])->default('info');
-            $table->boolean('read')->default(false);
-            $table->timestamps();
-        });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('branch_alerts');
-        Schema::dropIfExists('cash_audit_logs');
-        Schema::dropIfExists('vault_transfers');
-        Schema::dropIfExists('cash_adjustments');
-        Schema::dropIfExists('cash_transactions');
         Schema::dropIfExists('vault_denominations');
         Schema::dropIfExists('tellers');
         Schema::dropIfExists('teller_sessions');

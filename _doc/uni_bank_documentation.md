@@ -1,6 +1,6 @@
 # 🧠 Master Transaction Classification (Clean Architecture)
 
-All transactions are classified by **business intent first**, then by **cash/system behavior**.
+All journals are classified by **business intent first**, then by **cash/system behavior**.
 
 ---
 

@@ -13,7 +13,7 @@ import { Select } from '../../../../components/ui/select';
 import CustomAuthLayout from '../../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../../lib/appSwal';
 import { BreadcrumbItem } from '../../../../types';
-import { VoucherLine } from '../../../../types/accounting';
+import { VoucherLine } from '../../../../types/finance_and_accounting';
 import { LedgerSearchInput } from '../../components/ledger-search-input';
 
 /* -------------------------------------------------------
@@ -49,7 +49,7 @@ interface VoucherFormData {
     voucher_date: string;
     voucher_type: string;
     fiscal_year_id?: number;
-    accounting_period_id?: number;
+    fiscal_period_id?: number;
     branch_id?: number;
     status: string;
     narration: string;
@@ -95,7 +95,7 @@ export default function EditDebitVoucherEntry({
         voucher_date: voucher.voucher_date,
         voucher_type: voucher.voucher_type,
         fiscal_year_id: voucher.fiscal_year_id,
-        accounting_period_id: voucher.accounting_period_id,
+        fiscal_period_id: voucher.fiscal_period_id,
         branch_id: voucher.branch_id,
         status: voucher.status,
         narration: voucher.narration || '',
@@ -342,7 +342,7 @@ export default function EditDebitVoucherEntry({
                                             'fiscal_year_id',
                                             Number(e.target.value),
                                         );
-                                        setData('accounting_period_id', null);
+                                        setData('fiscal_period_id', null);
                                     }}
                                 />
                             </div>
@@ -351,10 +351,9 @@ export default function EditDebitVoucherEntry({
                             <div>
                                 <Label className="text-xs">Fiscal Period</Label>
                                 <Select
-                                    error={errors.accounting_period_id}
+                                    error={errors.fiscal_period_id}
                                     value={
-                                        data.accounting_period_id?.toString() ||
-                                        ''
+                                        data.fiscal_period_id?.toString() || ''
                                     }
                                     disabled={disabled}
                                     options={fiscalPeriods
@@ -369,7 +368,7 @@ export default function EditDebitVoucherEntry({
                                         }))}
                                     onChange={(e) =>
                                         setData(
-                                            'accounting_period_id',
+                                            'fiscal_period_id',
                                             Number(e.target.value),
                                         )
                                     }

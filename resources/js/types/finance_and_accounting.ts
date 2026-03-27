@@ -36,7 +36,7 @@ export interface LedgerAccount extends AuditFields {
 export interface AccountBalance extends AuditFields {
     id: number;
     ledger_account_id: number;
-    accounting_period_id: number;
+    fiscal_period_id: number;
     opening_balance: number;
     debit_total: number;
     credit_total: number;

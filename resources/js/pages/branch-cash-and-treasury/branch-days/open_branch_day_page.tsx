@@ -1,4 +1,4 @@
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
 import React, { useEffect } from 'react';
 import toast from 'react-hot-toast';
@@ -10,22 +10,21 @@ import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
+import { Branch } from '../../../types/branch';
 
-interface Branch {
-    id: number;
-    name: string;
-}
-
-interface Props {
+interface Props extends SharedData {
     branches: Branch[];
     business_date: string;
     branch_id: number;
 }
 
-const OpenBranchDay = ({ branches, business_date, branch_id }: Props) => {
-    const { flash } = usePage().props;
-
+const OpenBranchDay = ({
+    branches,
+    business_date,
+    branch_id,
+    flash,
+}: Props) => {
     const { data, setData, post, processing, errors } = useForm({
         branch_id: branch_id ?? '',
         business_date: business_date ?? '',
@@ -74,7 +73,7 @@ const OpenBranchDay = ({ branches, business_date, branch_id }: Props) => {
 
             <form
                 onSubmit={handleSubmit}
-                className="flex w-full flex-col rounded-md border bg-card p-4 sm:p-6 lg:w-4/12"
+                className="flex w-full flex-col gap-4 rounded-md border bg-card p-4 sm:p-6 lg:w-4/12"
             >
                 {/* Branch Selection */}
                 <div>

@@ -2,15 +2,18 @@ import { Input } from '../../../../components/ui/input';
 import { Label } from '../../../../components/ui/label';
 import { Select } from '../../../../components/ui/select';
 import { formatDate } from '../../../../lib/date_util';
-import { FiscalPeriod, FiscalYear } from '../../../../types/accounting';
 import { Branch } from '../../../../types/branch';
+import {
+    FiscalPeriod,
+    FiscalYear,
+} from '../../../../types/finance_and_accounting';
 
 interface VoucherHeaderSectionProps {
     data: any;
     errors: any;
     setData: (key: string, value: any) => void;
     fiscal_years: FiscalYear[];
-    accounting_periods: FiscalPeriod[];
+    fiscal_periods: FiscalPeriod[];
     branches: Branch[];
 }
 
@@ -19,7 +22,7 @@ function VoucherHeaderSection({
     errors,
     setData,
     fiscal_years,
-    accounting_periods,
+    fiscal_periods,
     branches,
 }: VoucherHeaderSectionProps) {
     return (
@@ -77,7 +80,7 @@ function VoucherHeaderSection({
                         }))}
                         onChange={(value) => {
                             setData('fiscal_year_id', Number(value));
-                            setData('accounting_period_id', null);
+                            setData('fiscal_period_id', null);
                         }}
                     />
                 </div>
@@ -87,9 +90,9 @@ function VoucherHeaderSection({
                     <Label className="text-xs">Fiscal Period</Label>
                     <Select
                         disabled
-                        error={errors?.accounting_period_id}
-                        value={data.accounting_period_id?.toString() || ''}
-                        options={accounting_periods
+                        error={errors?.fiscal_period_id}
+                        value={data.fiscal_period_id?.toString() || ''}
+                        options={fiscal_periods
                             .filter(
                                 (fp) =>
                                     fp.fiscal_year_id === data.fiscal_year_id,
@@ -99,7 +102,7 @@ function VoucherHeaderSection({
                                 label: fp.period_name,
                             }))}
                         onChange={(value) =>
-                            setData('accounting_period_id', Number(value))
+                            setData('fiscal_period_id', Number(value))
                         }
                     />
                 </div>

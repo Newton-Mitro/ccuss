@@ -22,7 +22,7 @@ class LedgerAccountBalance extends Model
     protected $fillable = [
         'organization_id',
         'ledger_account_id',
-        'accounting_period_id',
+        'fiscal_period_id',
         'opening_balance',
         'debit_total',
         'credit_total',

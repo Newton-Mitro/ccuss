@@ -8,7 +8,7 @@ import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { formatDate, formatDateTime } from '../../../lib/date_util';
 import { takaToText } from '../../../lib/taka_to_text';
 import { BreadcrumbItem } from '../../../types';
-import { Voucher } from '../../../types/accounting';
+import { Voucher } from '../../../types/finance_and_accounting';
 
 interface VoucherViewProps {
     voucher: Voucher;

@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { Input } from '../../../../components/ui/input';
 import { formatBDTCurrency } from '../../../../lib/bdtCurrencyFormatter';
 import { formatDate } from '../../../../lib/date_util';
-import { Voucher } from '../../../../types/accounting';
+import { Voucher } from '../../../../types/finance_and_accounting';
 
 interface Props {
     vouchers: Voucher[];

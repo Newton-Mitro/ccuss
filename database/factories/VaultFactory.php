@@ -14,7 +14,6 @@ class VaultFactory extends Factory
         return [
             'branch_id' => Branch::factory(),
             'name' => 'Vault ' . $this->faker->unique()->word(),
-            'total_balance' => $this->faker->randomFloat(2, 10000, 1000000),
             'is_active' => true,
         ];
     }

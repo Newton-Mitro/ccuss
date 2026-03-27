@@ -1,4 +1,4 @@
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
 import React, { useEffect } from 'react';
 import toast from 'react-hot-toast';
@@ -13,11 +13,10 @@ import {
     ToggleGroupItem,
 } from '../../../components/ui/toggle-group';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 import { Branch } from '../../../types/branch';
 
-interface VaultFormPageProps {
-    backUrl: string;
+interface VaultFormPageProps extends SharedData {
     vault?: {
         id: number;
         name: string;
@@ -28,9 +27,7 @@ interface VaultFormPageProps {
     branches: Branch[];
 }
 
-const VaultForm = ({ vault, branches }: VaultFormPageProps) => {
-    const { flash } = usePage().props;
-
+const VaultForm = ({ vault, branches, flash }: VaultFormPageProps) => {
     useEffect(() => {
         if (flash?.error) toast.error(flash.error);
         if (flash?.success) toast.success(flash.success);
@@ -49,15 +46,11 @@ const VaultForm = ({ vault, branches }: VaultFormPageProps) => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const payload = new FormData();
-        Object.entries(data).forEach(([key, value]) => {
-            payload.append(key, value as any);
-        });
 
         if (isEdit) {
-            put(`/vaults/${vault.id}`, { data: payload, preserveScroll: true });
+            put(`/vaults/${vault.id}`, { preserveScroll: true });
         } else {
-            post('/vaults', { data: payload, preserveScroll: true });
+            post('/vaults', { preserveScroll: true });
         }
     };
 
@@ -99,7 +92,7 @@ const VaultForm = ({ vault, branches }: VaultFormPageProps) => {
                 className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6 lg:w-3xl"
             >
                 {/* Vault Info */}
-                <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2">
                     <div>
                         <Label className="text-xs">Vault Name</Label>
                         <Input

@@ -11,27 +11,24 @@ import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
+import { Input } from '../../../components/ui/input';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { Badge } from '../../../lib/statusConfig';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { KycDocument } from '../../../types/customer_kyc_module';
+import { PaginatedResponse } from '../../../types/paginated_response';
 import { documentStatuses } from './data/document_statuses';
 import { documentTypes } from './data/document_types';
 
-export default function KycDocumentsIndex() {
-    const { props } = usePage<
-        SharedData & {
-            documents: {
-                data: KycDocument[];
-                links: any[];
-            };
-            filters: Record<string, string>;
-        }
-    >();
+interface Props extends SharedData {
+    paginated_data: PaginatedResponse<KycDocument>;
+    filters: Record<string, string>;
+}
 
-    const { documents, filters } = props;
+export default function KycDocumentsIndex() {
+    const { paginated_data, filters } = usePage<Props>().props;
 
     const { data, setData, get } = useForm({
         search: filters.search || '',
@@ -88,18 +85,19 @@ export default function KycDocumentsIndex() {
 
                 {/* Filters */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <input
-                        type="text"
-                        placeholder="Search customer…"
-                        value={data.search}
-                        onChange={(e) => {
-                            setData('search', e.target.value);
-                            setData('page', 1);
-                        }}
-                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm"
-                    />
+                    <div className="w-full lg:w-60">
+                        <Input
+                            type="text"
+                            placeholder="Search customer…"
+                            value={data.search}
+                            onChange={(e) => {
+                                setData('search', e.target.value);
+                                setData('page', 1);
+                            }}
+                        />
+                    </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex w-full flex-col gap-2 lg:w-96 lg:flex-row">
                         <Select
                             value={data.document_type}
                             onChange={(value) => {
@@ -142,7 +140,7 @@ export default function KycDocumentsIndex() {
                             </tr>
                         </thead>
                         <tbody>
-                            {documents.data.map((i) => (
+                            {paginated_data.data.map((i) => (
                                 <tr
                                     key={i.id}
                                     className="border-b even:bg-muted/30"
@@ -205,7 +203,7 @@ export default function KycDocumentsIndex() {
 
                 {/* ================= Mobile Cards ================= */}
                 <div className="space-y-3 md:hidden">
-                    {documents.data.map((i) => (
+                    {paginated_data.data.map((i) => (
                         <div
                             key={i.id}
                             className="space-y-2 rounded-md border bg-card p-3"
@@ -260,7 +258,7 @@ export default function KycDocumentsIndex() {
                         setData('per_page', value);
                         setData('page', 1);
                     }}
-                    links={documents.links}
+                    links={paginated_data.links}
                 />
             </div>
         </CustomAuthLayout>

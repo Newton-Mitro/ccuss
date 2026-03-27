@@ -42,7 +42,7 @@ class PettyCashAccount extends Model
         return $this->hasMany(PettyCashReplenishment::class);
     }
 
-    public function transactions()
+    public function journals()
     {
         return $this->morphMany(PettyCashTransaction::class, 'reference');
     }

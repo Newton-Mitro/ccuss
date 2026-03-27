@@ -5,26 +5,14 @@ import { Button } from '../../../components/ui/button';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { formatDateTime } from '../../../lib/date_util';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
+import { Vault } from '../../../types/cash_treasury_module';
 
-interface Vault {
-    id: number;
-    name: string;
-    total_balance: number;
-    is_active: boolean;
-    branch?: {
-        id: number;
-        name: string;
-    };
-    created_at: string;
-    updated_at: string;
-}
-
-interface Props {
+interface ShowVaultPageProps extends SharedData {
     vault: Vault;
 }
 
-export default function ShowVaultPage({ vault }: Props) {
+export default function ShowVaultPage({ vault }: ShowVaultPageProps) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Vaults', href: route('vaults.index') },
         { title: 'Vault Details', href: '' },

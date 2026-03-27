@@ -41,7 +41,7 @@ class KycDocumentController extends Controller
             ->withQueryString();
 
         return Inertia::render('customer-kyc/kyc-documents/list_kyc_documents_page', [
-            'documents' => $documents,
+            'paginated_data' => $documents,
             'filters' => $request->only([
                 'search',
                 'document_type',

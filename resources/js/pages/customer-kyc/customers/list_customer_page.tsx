@@ -11,25 +11,25 @@ import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
+import { Input } from '../../../components/ui/input';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { Badge } from '../../../lib/statusConfig';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Customer } from '../../../types/customer_kyc_module';
+import { PaginatedResponse } from '../../../types/paginated_response';
 import { kycStatuses } from './data/customer_data_types';
 
+interface Props extends SharedData {
+    paginated_data: PaginatedResponse<Customer>;
+    filters: Record<string, string>;
+}
+
 export default function Index() {
-    const { props } = usePage<
-        SharedData & {
-            customers: any;
-            filters: Record<string, string>;
-        }
-    >();
+    const { paginated_data, filters } = usePage<Props>().props;
 
-    const { customers, filters } = props;
-
-    console.log(customers);
+    console.log(paginated_data);
 
     const { data, setData, get } = useForm({
         search: filters.search || '',
@@ -99,25 +99,28 @@ export default function Index() {
                 {/* Search & Filters */}
 
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <input
-                        type="text"
-                        placeholder="Search customers..."
-                        value={data.search}
-                        onChange={(e) => {
-                            setData('search', e.target.value);
-                            setData('page', 1);
-                        }}
-                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
-                    />
+                    <div className="w-60">
+                        <Input
+                            type="text"
+                            placeholder="Search customers..."
+                            value={data.search}
+                            onChange={(e) => {
+                                setData('search', e.target.value);
+                                setData('page', 1);
+                            }}
+                        />
+                    </div>
 
-                    <Select
-                        value={data.status}
-                        onChange={(value) => {
-                            setData('status', value);
-                            setData('page', 1);
-                        }}
-                        options={kycStatuses}
-                    />
+                    <div className="w-48">
+                        <Select
+                            value={data.status}
+                            onChange={(value) => {
+                                setData('status', value);
+                                setData('page', 1);
+                            }}
+                            options={kycStatuses}
+                        />
+                    </div>
                 </div>
 
                 {/* ===================== */}
@@ -147,7 +150,7 @@ export default function Index() {
                             </tr>
                         </thead>
                         <tbody>
-                            {customers.data.map((c: Customer) => (
+                            {paginated_data.data.map((c: Customer) => (
                                 <tr
                                     key={c.id}
                                     className="border-b even:bg-muted/30"
@@ -231,7 +234,7 @@ export default function Index() {
                 {/* Mobile Cards */}
                 {/* ===================== */}
                 <div className="space-y-3 md:hidden">
-                    {customers.data.map((c: Customer) => (
+                    {paginated_data.data.map((c: Customer) => (
                         <div
                             key={c.id}
                             className="space-y-2 rounded-md border bg-card p-3"
@@ -279,12 +282,12 @@ export default function Index() {
 
                 {/* Pagination */}
                 <DataTablePagination
-                    perPage={customers.per_page}
+                    perPage={paginated_data.per_page}
                     onPerPageChange={function (value: number): void {
                         setData('per_page', value);
                         setData('page', 1);
                     }}
-                    links={customers.links}
+                    links={paginated_data.links}
                 />
             </div>
         </CustomAuthLayout>

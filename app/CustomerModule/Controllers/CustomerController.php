@@ -93,7 +93,7 @@ class CustomerController extends Controller
             ->withQueryString();
 
         return Inertia::render('customer-kyc/customers/list_customer_page', [
-            'customers' => $customers,
+            'paginated_data' => $customers,
             'filters' => $request->only(['search', 'kyc_status', 'per_page', 'page']),
         ]);
     }

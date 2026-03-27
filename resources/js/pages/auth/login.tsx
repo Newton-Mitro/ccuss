@@ -30,7 +30,7 @@ export default function Login({ status, canResetPassword, canRegister }) {
             >
                 <img src="/logo.png" alt="Logo" className="h-60 w-60" />
 
-                <div className="text-center">
+                <div className="mt-3 text-center">
                     <h1 className="text-4xl font-bold tracking-tight">
                         <span className="text-accent">Union</span> Banking
                     </h1>
@@ -50,9 +50,12 @@ export default function Login({ status, canResetPassword, canRegister }) {
                     {/* Header */}
                     <div className="mb-6 text-center">
                         <AppLogoIcon className="mx-auto h-28 w-28 text-accent" />
-                        <h2 className="mt-3 text-lg font-semibold">
-                            Welcome back
+                        <h2 className="mt-3 text-sm text-muted-foreground">
+                            Welcome back to
                         </h2>
+                        <h1 className="text-xl font-bold tracking-tight">
+                            <span className="text-accent">Union</span> Banking
+                        </h1>
                         <p className="text-xs text-muted-foreground">
                             Login to your account to continue
                         </p>

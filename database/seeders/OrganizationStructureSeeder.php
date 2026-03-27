@@ -36,7 +36,6 @@ class OrganizationStructureSeeder extends Seeder
             Vault::create([
                 'branch_id' => $branch->id,
                 'name' => $branch->name . ' Main Vault',
-                'total_balance' => 0,
                 'is_active' => true,
             ]);
         }

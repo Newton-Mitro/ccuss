@@ -11,28 +11,31 @@ import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
+import { Input } from '../../../components/ui/input';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
+import { Branch } from '../../../types/branch';
 import { vaultStatuses } from './data/vault_status';
 
-interface VaultPageProps {
+interface VaultPageProps extends SharedData {
     vaults: {
         data: {
             id: number;
             name: string;
             total_balance: number;
             is_active: boolean;
-            branch: { id: number; name: string };
+            branch: Branch;
         }[];
         links: { url: string | null; label: string; active: boolean }[];
     };
+    branches: Branch[];
     filters: Record<string, string>;
 }
 
 export default function Index() {
-    const { vaults, filters } = usePage().props as unknown as VaultPageProps;
+    const { vaults, branches, filters } = usePage<VaultPageProps>().props;
 
     const {
         data,
@@ -108,43 +111,45 @@ export default function Index() {
 
                 {/* Search */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <input
-                        type="text"
-                        placeholder="Search vaults..."
-                        value={data.search}
-                        onChange={(e) => {
-                            setData('search', e.target.value);
-                            setData('page', 1);
-                        }}
-                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-                    />
+                    <div className="w-60">
+                        <Input
+                            type="text"
+                            placeholder="Search vaults..."
+                            value={data.search}
+                            onChange={(e) => {
+                                setData('search', e.target.value);
+                                setData('page', 1);
+                            }}
+                        />
+                    </div>
 
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                         {/* Branch Filter */}
-                        <Select
-                            value={data.branch_id}
-                            onChange={(value) => {
-                                setData('branch_id', value);
-                                setData('page', 1);
-                            }}
-                            options={(usePage().props as any).branches?.map(
-                                (b: any) => (
-                                    <option key={b.id} value={b.id}>
-                                        {b.name}
-                                    </option>
-                                ),
-                            )}
-                        />
+                        <div className="w-44">
+                            <Select
+                                value={data.branch_id}
+                                onChange={(value) => {
+                                    setData('branch_id', value);
+                                    setData('page', 1);
+                                }}
+                                options={branches.map((b) => ({
+                                    value: b.id.toString(),
+                                    label: b.name,
+                                }))}
+                            />
+                        </div>
 
                         {/* Status Filter */}
-                        <Select
-                            value={data.status}
-                            onChange={(value) => {
-                                setData('status', value);
-                                setData('page', 1);
-                            }}
-                            options={vaultStatuses}
-                        />
+                        <div className="w-36">
+                            <Select
+                                value={data.status}
+                                onChange={(value) => {
+                                    setData('status', value);
+                                    setData('page', 1);
+                                }}
+                                options={vaultStatuses}
+                            />
+                        </div>
                     </div>
                 </div>
 

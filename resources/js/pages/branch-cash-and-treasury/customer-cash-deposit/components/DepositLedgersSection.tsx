@@ -3,8 +3,8 @@ import { Button } from '../../../../components/ui/button';
 import { Checkbox } from '../../../../components/ui/checkbox';
 import { Input } from '../../../../components/ui/input';
 import { formatBDTCurrency } from '../../../../lib/bdtCurrencyFormatter';
-import { VoucherLine } from '../../../../types/accounting';
 import { Customer } from '../../../../types/customer';
+import { VoucherLine } from '../../../../types/finance_and_accounting';
 import { CustomerSearchBox } from '../../../customer-kyc/customers/components/customer-search-box';
 
 interface CollectionLedgersSectionProps {

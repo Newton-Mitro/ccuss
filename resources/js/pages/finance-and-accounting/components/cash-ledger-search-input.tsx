@@ -3,7 +3,7 @@ import { Search } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
-import { LedgerAccount } from '../../../types/accounting';
+import { LedgerAccount } from '../../../types/finance_and_accounting';
 
 interface CashLedgerSearchInputProps {
     onSelect: (ledger: LedgerAccount) => void;
@@ -88,13 +88,13 @@ export const CashLedgerSearchInput: React.FC<CashLedgerSearchInputProps> = ({
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={placeholder || 'Search ledgers...'}
-                    className="focus:ring-primary/50 h-8 w-full rounded-md border bg-background px-3 pr-10 text-sm focus:outline-none focus:ring-2"
+                    className="h-8 w-full rounded-md border bg-background px-3 pr-10 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
                 />
 
                 <button
                     type="button"
                     onClick={searchLedgers}
-                    className="absolute right-1 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-primary"
+                    className="absolute top-1/2 right-1 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-primary"
                     title="Search"
                 >
                     {loading ? (

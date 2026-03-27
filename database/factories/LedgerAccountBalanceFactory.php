@@ -35,7 +35,7 @@ class LedgerAccountBalanceFactory extends Factory
         return [
             'organization_id' => $organization->id,
             'ledger_account_id' => $ledgerAccount->id,
-            'accounting_period_id' => $period->id,
+            'fiscal_period_id' => $period->id,
             'opening_balance' => $opening,
             'debit_total' => $debit,
             'credit_total' => $credit,

@@ -15,13 +15,6 @@ export const pettyCashMenu: SidebarItem[] = [
                 match_path: 'petty-cash-accounts',
             },
             {
-                name: 'Expense Categories',
-                icon: <i className="fa-solid fa-tags" />,
-                permission: ['expense_categories.view'],
-                path: '/expense-categories',
-                match_path: 'expense-categories',
-            },
-            {
                 name: 'Petty Cash Vouchers',
                 icon: <i className="fa-solid fa-file-invoice-dollar" />,
                 permission: ['petty_cash.vouchers.view'],
@@ -29,11 +22,11 @@ export const pettyCashMenu: SidebarItem[] = [
                 match_path: 'petty-cash-vouchers',
             },
             {
-                name: 'Replenishments',
+                name: 'Replenishment',
                 icon: <i className="fa-solid fa-hand-holding-dollar" />,
-                permission: ['petty_cash.replenishments.view'],
-                path: '/petty-cash-replenishments',
-                match_path: 'petty-cash-replenishments',
+                permission: ['petty_cash.replenishment.view'],
+                path: '/petty-cash-replenishment',
+                match_path: 'petty-cash-replenishment',
             },
             {
                 name: 'Approvals',
@@ -41,13 +34,6 @@ export const pettyCashMenu: SidebarItem[] = [
                 permission: ['petty_cash.approvals.view'],
                 path: '/petty-cash-approvals',
                 match_path: 'petty-cash-approvals',
-            },
-            {
-                name: 'Transactions Log',
-                icon: <i className="fa-solid fa-book" />,
-                permission: ['petty_cash.transactions.view'],
-                path: '/petty-cash-transactions',
-                match_path: 'petty-cash-transactions',
             },
             {
                 name: 'Reports',

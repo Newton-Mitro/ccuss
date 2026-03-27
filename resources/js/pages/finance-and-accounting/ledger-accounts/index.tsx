@@ -125,7 +125,7 @@ export default function GlAccountsIndex({
                 opening_balance_fiscal_year_id:
                     account.opening_balance?.fiscal_year_id || '',
                 opening_balance_fiscal_period_id:
-                    account.opening_balance?.accounting_period_id || '',
+                    account.opening_balance?.fiscal_period_id || '',
             });
         } else {
             reset();
@@ -325,16 +325,14 @@ export default function GlAccountsIndex({
                                 }))}
                                 onChange={(value) => {
                                     setData('fiscal_year_id', Number(value));
-                                    setData('accounting_period_id', null);
+                                    setData('fiscal_period_id', null);
                                 }}
                             />
                         </div>
                         <div className="w-40">
                             <Select
-                                error={errors.accounting_period_id}
-                                value={
-                                    data.accounting_period_id?.toString() || ''
-                                }
+                                error={errors.fiscal_period_id}
+                                value={data.fiscal_period_id?.toString() || ''}
                                 options={fiscalPeriods
                                     .filter(
                                         (fp) =>
@@ -346,10 +344,7 @@ export default function GlAccountsIndex({
                                         label: fp.period_name,
                                     }))}
                                 onChange={(value) =>
-                                    setData(
-                                        'accounting_period_id',
-                                        Number(value),
-                                    )
+                                    setData('fiscal_period_id', Number(value))
                                 }
                             />
                         </div>

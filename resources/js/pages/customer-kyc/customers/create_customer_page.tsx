@@ -11,7 +11,7 @@ import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 import {
     bloodGroups,
     customerTypes,
@@ -26,8 +26,14 @@ import {
     religions,
 } from './data/customer_data_types';
 
+interface Props extends SharedData {
+    errors: {
+        [key: string]: string;
+    };
+}
+
 const Create = () => {
-    const { flash } = usePage().props;
+    const { flash } = usePage<Props>().props;
 
     useEffect(() => {
         if (flash?.error) toast.error(flash.error);

@@ -6,9 +6,9 @@ import HeadingSmall from '../../../components/heading-small';
 import { Input } from '../../../components/ui/input';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 
-interface Props {
+interface Props extends SharedData {
     tellers: { id: number; name: string }[];
     user_teller: { id: number; name: string } | null;
     branch_days: { id: number; business_date: string }[];
@@ -16,8 +16,7 @@ interface Props {
 }
 
 export default function OpenTellerSession() {
-    const { tellers, branch_days, user_teller, flash } = usePage()
-        .props as unknown as Props;
+    const { tellers, branch_days, user_teller, flash } = usePage<Props>().props;
 
     const { data, setData, post, processing, errors, reset } = useForm({
         teller_id: user_teller?.id || '',

@@ -8,30 +8,26 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
-
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
+import { Input } from '../../../components/ui/input';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { Badge } from '../../../lib/statusConfig';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { CustomerIntroducer } from '../../../types/customer_kyc_module';
+import { PaginatedResponse } from '../../../types/paginated_response';
 import { introducerStatuses } from './data/introducer_status';
 
-export default function IntroducersIndex() {
-    const { props } = usePage<
-        SharedData & {
-            introducers: {
-                data: CustomerIntroducer[];
-                links: any[];
-            };
-            filters: Record<string, string>;
-        }
-    >();
+interface Props extends SharedData {
+    paginated_data: PaginatedResponse<CustomerIntroducer>;
+    filters: Record<string, string>;
+}
 
-    const { introducers, filters } = props;
+export default function IntroducersIndex() {
+    const { paginated_data, filters } = usePage<Props>().props;
 
     const { data, setData, get } = useForm({
         search: filters.search || '',
@@ -87,25 +83,28 @@ export default function IntroducersIndex() {
 
                 {/* Filters */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <input
-                        type="text"
-                        placeholder="Search customer…"
-                        value={data.search}
-                        onChange={(e) => {
-                            setData('search', e.target.value);
-                            setData('page', 1);
-                        }}
-                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm"
-                    />
-
-                    <Select
-                        value={data.verification_status}
-                        onChange={(value) => {
-                            setData('verification_status', value);
-                            setData('page', 1);
-                        }}
-                        options={introducerStatuses}
-                    />
+                    <div className="w-60">
+                        {' '}
+                        <Input
+                            type="text"
+                            placeholder="Search customer…"
+                            value={data.search}
+                            onChange={(e) => {
+                                setData('search', e.target.value);
+                                setData('page', 1);
+                            }}
+                        />
+                    </div>
+                    <div className="w-48">
+                        <Select
+                            value={data.verification_status}
+                            onChange={(value) => {
+                                setData('verification_status', value);
+                                setData('page', 1);
+                            }}
+                            options={introducerStatuses}
+                        />
+                    </div>
                 </div>
 
                 {/* ================= Desktop Table ================= */}
@@ -131,7 +130,7 @@ export default function IntroducersIndex() {
                             </tr>
                         </thead>
                         <tbody>
-                            {introducers.data.map((i) => (
+                            {paginated_data.data.map((i) => (
                                 <tr
                                     key={i.id}
                                     className="border-b even:bg-muted/30"
@@ -197,7 +196,7 @@ export default function IntroducersIndex() {
 
                 {/* ================= Mobile Cards ================= */}
                 <div className="space-y-3 md:hidden">
-                    {introducers.data.map((i) => (
+                    {paginated_data.data.map((i) => (
                         <div
                             key={i.id}
                             className="space-y-2 rounded-md border bg-card p-3"
@@ -245,7 +244,7 @@ export default function IntroducersIndex() {
                         setData('per_page', value);
                         setData('page', 1);
                     }}
-                    links={introducers.links}
+                    links={paginated_data.links}
                 />
             </div>
         </CustomAuthLayout>

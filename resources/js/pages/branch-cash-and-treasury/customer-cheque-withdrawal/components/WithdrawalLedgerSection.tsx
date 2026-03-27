@@ -8,8 +8,8 @@ import { Label } from '../../../../components/ui/label';
 import { Select } from '../../../../components/ui/select';
 import { formatBDTCurrency } from '../../../../lib/bdtCurrencyFormatter';
 import { takaToText } from '../../../../lib/taka_to_text';
-import { VoucherLine } from '../../../../types/accounting';
 import { Customer } from '../../../../types/customer_kyc_module';
+import { VoucherLine } from '../../../../types/finance_and_accounting';
 import { CustomerSearchBox } from '../../../customer-kyc/customers/components/customer-search-box';
 
 interface WithdrawalLedgersSectionProps {

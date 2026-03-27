@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        Schema::create('accounting_periods', function (Blueprint $table) {
+        Schema::create('fiscal_periods', function (Blueprint $table) {
             $table->id();
             $table->foreignId('organization_id')->constrained();
             $table->foreignId('fiscal_year_id')->constrained()->cascadeOnDelete();
@@ -33,7 +33,7 @@ return new class extends Migration {
         Schema::create('closing_entries', function (Blueprint $table) {
             $table->id();
             $table->foreignId('organization_id')->constrained();
-            $table->foreignId('accounting_period_id')->constrained();
+            $table->foreignId('fiscal_period_id')->constrained();
             $table->timestamp('closed_at');
         });
 
@@ -55,7 +55,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('organization_id')->constrained();
             $table->foreignId('ledger_account_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('accounting_period_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('fiscal_period_id')->constrained()->cascadeOnDelete();
             $table->decimal('opening_balance', 18, 2)->default(0);
             $table->decimal('debit_total', 18, 2)->default(0);
             $table->decimal('credit_total', 18, 2)->default(0);
@@ -69,7 +69,7 @@ return new class extends Migration {
         Schema::dropIfExists('ledger_account_balances');
         Schema::dropIfExists('ledger_accounts');
         Schema::dropIfExists('closing_entries');
-        Schema::dropIfExists('accounting_periods');
+        Schema::dropIfExists('fiscal_periods');
         Schema::dropIfExists('fiscal_years');
     }
 };

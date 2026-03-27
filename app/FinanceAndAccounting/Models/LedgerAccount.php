@@ -78,7 +78,7 @@ class LedgerAccount extends Model
     public function balanceForPeriod($periodId)
     {
         return $this->hasOne(LedgerAccountBalance::class)
-            ->where('accounting_period_id', $periodId);
+            ->where('fiscal_period_id', $periodId);
     }
 
     // Dynamic balance filter
@@ -95,7 +95,7 @@ class LedgerAccount extends Model
             ->when(
                 $fiscalPeriodId,
                 fn($q) =>
-                $q->where('accounting_period_id', $fiscalPeriodId)
+                $q->where('fiscal_period_id', $fiscalPeriodId)
             );
     }
 

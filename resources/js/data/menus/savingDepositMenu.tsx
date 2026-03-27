@@ -137,8 +137,8 @@ export const savingDepositMenu: SidebarItem[] = [
                     {
                         name: 'Deposits / Withdrawals',
                         icon: <i className="fa-solid fa-arrow-up-right-dots" />,
-                        path: '/deposit-transactions',
-                        match_path: 'deposit-transactions',
+                        path: '/deposit-journals',
+                        match_path: 'deposit-journals',
                         permission: ['deposit.transaction.view'],
                     },
                     {

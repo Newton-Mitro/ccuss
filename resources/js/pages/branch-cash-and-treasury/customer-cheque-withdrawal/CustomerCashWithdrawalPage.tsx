@@ -7,8 +7,8 @@ import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { normalizeErrors } from '../../../lib/normalize_errors';
 import { BreadcrumbItem } from '../../../types';
-import { VoucherLine } from '../../../types/accounting';
 import { Customer } from '../../../types/customer_kyc_module';
+import { VoucherLine } from '../../../types/finance_and_accounting';
 import CashLedgerSection from './components/CashLedgerSection';
 import VoucherHeaderSection from './components/VoucherHeaderSection';
 import VoucherQueueSection from './components/VoucherQueueSection';
@@ -19,7 +19,7 @@ interface VoucherFormData {
     voucher_date: string;
     voucher_type: string;
     fiscal_year_id?: number;
-    accounting_period_id?: number;
+    fiscal_period_id?: number;
 
     branch_id?: number;
     status: string;
@@ -31,7 +31,7 @@ interface VoucherFormData {
 export default function CustomerCashWithdrawalPage() {
     const {
         fiscal_years,
-        accounting_periods,
+        fiscal_periods,
         branches,
         cash_ledgers,
         cash_subledgers,
@@ -40,7 +40,7 @@ export default function CustomerCashWithdrawalPage() {
         vouchers,
         user_branch_id,
         fiscal_year_id,
-        accounting_period_id,
+        fiscal_period_id,
         flash,
     } = usePage().props as any;
 
@@ -55,7 +55,7 @@ export default function CustomerCashWithdrawalPage() {
         voucher_date: new Date().toISOString().split('T')[0],
         voucher_type: 'DEBIT_OR_PAYMENT',
         fiscal_year_id: fiscal_year_id || 0,
-        accounting_period_id: accounting_period_id || 0,
+        fiscal_period_id: fiscal_period_id || 0,
         branch_id: user_branch_id || branches[0]?.id,
         status: 'DRAFT',
         reference: '',
@@ -200,7 +200,7 @@ export default function CustomerCashWithdrawalPage() {
                         errors={errors}
                         setData={setData}
                         fiscal_years={fiscal_years}
-                        accounting_periods={accounting_periods}
+                        fiscal_periods={fiscal_periods}
                         branches={branches}
                     />
 

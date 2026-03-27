@@ -5,29 +5,10 @@ import { Button } from '../../../components/ui/button';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { formatDateTime } from '../../../lib/date_util';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
+import { Teller } from '../../../types/cash_treasury_module';
 
-interface Teller {
-    id: number;
-    code: string;
-    name: string;
-    max_cash_limit: number;
-    max_transaction_limit: number;
-    is_active: boolean;
-    user?: {
-        id: number;
-        name: string;
-        email?: string;
-    };
-    branch?: {
-        id: number;
-        name: string;
-    };
-    created_at: string;
-    updated_at: string;
-}
-
-interface Props {
+interface Props extends SharedData {
     teller: Teller;
 }
 

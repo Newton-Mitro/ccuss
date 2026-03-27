@@ -8,7 +8,7 @@ import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem } from '../../../types';
-import { FiscalYear } from '../../../types/accounting';
+import { FiscalYear } from '../../../types/finance_and_accounting';
 
 interface FiscalYearPageProps {
     fiscalYears: {

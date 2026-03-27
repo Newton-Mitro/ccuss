@@ -73,7 +73,7 @@ class RealVoucherEntrySeeder extends Seeder
                 'total_amount' => max($totalDebit, $totalCredit),
                 'branch_id' => $branch->id,
                 'fiscal_year_id' => $fiscalYear->id,
-                'accounting_period_id' => $fiscalPeriod->id,
+                'fiscal_period_id' => $fiscalPeriod->id,
                 'created_by' => $user->id,
                 'posted_by' => $user->id,
                 'posted_at' => now(),
@@ -89,7 +89,7 @@ class RealVoucherEntrySeeder extends Seeder
                 'dr_cr' => 'DR',
             ]);
             LedgerAccountBalance::updateOrCreate(
-                ['organization_id' => $organizationId, 'ledger_account_id' => $cashInHand->id, 'accounting_period_id' => $fiscalPeriod->id],
+                ['organization_id' => $organizationId, 'ledger_account_id' => $cashInHand->id, 'fiscal_period_id' => $fiscalPeriod->id],
                 ['organization_id' => $organizationId, 'opening_balance' => 20000, 'debit_total' => 0, 'credit_total' => 0, 'closing_balance' => 20000]
             );
 
@@ -102,7 +102,7 @@ class RealVoucherEntrySeeder extends Seeder
                 'dr_cr' => 'DR',
             ]);
             LedgerAccountBalance::updateOrCreate(
-                ['organization_id' => $organizationId, 'ledger_account_id' => $cashInBank->id, 'accounting_period_id' => $fiscalPeriod->id],
+                ['organization_id' => $organizationId, 'ledger_account_id' => $cashInBank->id, 'fiscal_period_id' => $fiscalPeriod->id],
                 ['organization_id' => $organizationId, 'opening_balance' => 40000, 'debit_total' => 0, 'credit_total' => 0, 'closing_balance' => 40000]
             );
 
@@ -115,7 +115,7 @@ class RealVoucherEntrySeeder extends Seeder
                 'dr_cr' => 'DR',
             ]);
             LedgerAccountBalance::updateOrCreate(
-                ['organization_id' => $organizationId, 'ledger_account_id' => $savingsDeposit->id, 'accounting_period_id' => $fiscalPeriod->id],
+                ['organization_id' => $organizationId, 'ledger_account_id' => $savingsDeposit->id, 'fiscal_period_id' => $fiscalPeriod->id],
                 ['organization_id' => $organizationId, 'opening_balance' => 30000, 'debit_total' => 0, 'credit_total' => 0, 'closing_balance' => 30000]
             );
 
@@ -128,7 +128,7 @@ class RealVoucherEntrySeeder extends Seeder
                 'dr_cr' => 'CR',
             ]);
             LedgerAccountBalance::updateOrCreate(
-                ['organization_id' => $organizationId, 'ledger_account_id' => $retainedEarnings->id, 'accounting_period_id' => $fiscalPeriod->id],
+                ['organization_id' => $organizationId, 'ledger_account_id' => $retainedEarnings->id, 'fiscal_period_id' => $fiscalPeriod->id],
                 ['organization_id' => $organizationId, 'opening_balance' => 10000, 'debit_total' => 0, 'credit_total' => 0, 'closing_balance' => -10000]
             );
 
@@ -141,7 +141,7 @@ class RealVoucherEntrySeeder extends Seeder
                 'dr_cr' => 'CR',
             ]);
             LedgerAccountBalance::updateOrCreate(
-                ['organization_id' => $organizationId, 'ledger_account_id' => $shareCapital->id, 'accounting_period_id' => $fiscalPeriod->id],
+                ['organization_id' => $organizationId, 'ledger_account_id' => $shareCapital->id, 'fiscal_period_id' => $fiscalPeriod->id],
                 ['organization_id' => $organizationId, 'opening_balance' => $diff, 'debit_total' => 0, 'credit_total' => 0, 'closing_balance' => -$diff]
             );
 
@@ -158,7 +158,7 @@ class RealVoucherEntrySeeder extends Seeder
                 'total_amount' => 800,
                 'branch_id' => $branch->id,
                 'fiscal_year_id' => $fiscalYear->id,
-                'accounting_period_id' => $fiscalPeriod->id,
+                'fiscal_period_id' => $fiscalPeriod->id,
                 'created_by' => $user->id,
                 'posted_by' => $user->id,
                 'posted_at' => now(),
@@ -193,7 +193,7 @@ class RealVoucherEntrySeeder extends Seeder
                 'total_amount' => 15000,
                 'branch_id' => $branch->id,
                 'fiscal_year_id' => $fiscalYear->id,
-                'accounting_period_id' => $fiscalPeriod->id,
+                'fiscal_period_id' => $fiscalPeriod->id,
                 'created_by' => $user->id,
                 'posted_by' => $user->id,
                 'posted_at' => now(),
@@ -228,7 +228,7 @@ class RealVoucherEntrySeeder extends Seeder
                 'total_amount' => 25000,
                 'branch_id' => $branch->id,
                 'fiscal_year_id' => $fiscalYear->id,
-                'accounting_period_id' => $fiscalPeriod->id,
+                'fiscal_period_id' => $fiscalPeriod->id,
                 'created_by' => $user->id,
                 'posted_by' => $user->id,
                 'posted_at' => now(),

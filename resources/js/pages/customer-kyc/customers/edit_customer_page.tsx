@@ -11,7 +11,7 @@ import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 import {
     Customer,
     CustomerType,
@@ -34,12 +34,8 @@ import {
     religions,
 } from './data/customer_data_types';
 
-interface EditProps {
+interface EditProps extends SharedData {
     customer: Customer;
-    flash?: {
-        error?: string;
-        success?: string;
-    };
 }
 
 const Edit = ({ customer, flash }: EditProps) => {

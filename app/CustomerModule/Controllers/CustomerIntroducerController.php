@@ -54,7 +54,7 @@ class CustomerIntroducerController extends Controller
         return Inertia::render(
             'customer-kyc/introducers/list_introducer_page',
             [
-                'introducers' => $introducers,
+                'paginated_data' => $introducers,
                 'filters' => $request->only([
                     'search',
                     'verification_status',

@@ -1,6 +1,9 @@
 import { Label } from '../../../../components/ui/label';
 import { Select } from '../../../../components/ui/select';
-import { LedgerAccount, VoucherLine } from '../../../../types/accounting';
+import {
+    LedgerAccount,
+    VoucherLine,
+} from '../../../../types/finance_and_accounting';
 
 interface CashLedgerSectionProps {
     data: any;

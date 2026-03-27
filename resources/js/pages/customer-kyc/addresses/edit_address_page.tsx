@@ -11,11 +11,19 @@ import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
+import {
+    AddressType,
+    CustomerAddress,
+} from '../../../types/customer_kyc_module';
 import { addressTypes } from './data/address_types';
 
+interface Props extends SharedData {
+    address: CustomerAddress;
+}
+
 const Edit = () => {
-    const { address, flash } = usePage().props as any;
+    const { address, flash } = usePage<Props>().props;
     const customer = address?.customer;
 
     useEffect(() => {
@@ -125,7 +133,9 @@ const Edit = () => {
                         <Label className="text-xs">Address Type</Label>
                         <Select
                             value={data.type}
-                            onChange={(value) => setData('type', value)}
+                            onChange={(value) =>
+                                setData('type', value as AddressType)
+                            }
                             options={addressTypes.map((addressType) => ({
                                 value: addressType.value.toString(),
                                 label: addressType.label,

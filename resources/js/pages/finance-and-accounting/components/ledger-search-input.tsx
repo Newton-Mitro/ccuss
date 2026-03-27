@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import InputError from '../../../components/input-error';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
-import { LedgerAccount } from '../../../types/accounting';
+import { LedgerAccount } from '../../../types/finance_and_accounting';
 
 interface LedgerSearchInputProps {
     value: string;
@@ -90,14 +90,14 @@ export const LedgerSearchInput: React.FC<LedgerSearchInputProps> = ({
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={placeholder || 'Search ledgers...'}
-                    className={`focus:ring-primary/50 h-8 w-full rounded-md border px-3 pr-10 text-sm focus:outline-none focus:ring-2 ${error ? 'border-destructive' : ''} `}
+                    className={`h-8 w-full rounded-md border px-3 pr-10 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none ${error ? 'border-destructive' : ''} `}
                 />
 
                 <button
                     type="button"
                     disabled={disabled}
                     onClick={searchLedgers}
-                    className="absolute right-1 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-primary"
+                    className="absolute top-1/2 right-1 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-primary"
                     title="Search"
                 >
                     {loading ? (

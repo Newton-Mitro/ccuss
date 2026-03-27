@@ -41,7 +41,7 @@ export interface Vault {
 
     branch?: Branch;
     vaultDenominations?: VaultDenomination[];
-    transactions?: VaultTransaction[];
+    journals?: VaultTransaction[];
 }
 
 export interface Teller {
@@ -50,6 +50,8 @@ export interface Teller {
     branch_id: number;
     code: string;
     name: string;
+    max_cash_limit: number;
+    max_transaction_limit: number;
     is_active: boolean;
     created_at: string;
     updated_at: string;
@@ -117,7 +119,7 @@ export interface CashDrawer {
 
     session?: TellerSession;
     vault?: Vault;
-    transactions?: CashTransaction[];
+    journals?: CashTransaction[];
     balancings?: CashBalancing[];
     adjustments?: CashAdjustment[];
     auditLogs?: CashAuditLog[];

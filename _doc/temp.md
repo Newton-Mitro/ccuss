@@ -21,7 +21,7 @@ The Organization module manages the system structure.
 
 ### Purpose
 
-Defines who can access the system and where transactions occur.
+Defines who can access the system and where journals occur.
 
 ---
 
@@ -34,7 +34,7 @@ Manages bank institutions and company bank accounts.
 - Bank management
 - Bank branches
 - Bank accounts
-- Bank transactions
+- Bank journals
 - Cheques
 - Bank reconciliation
 
@@ -79,7 +79,7 @@ Handles internal cash management.
 
 - Vaults
 - Cash drawers
-- Cash transactions
+- Cash journals
 - Cash transfers
 - Cash balance tracking
 
@@ -87,7 +87,7 @@ Handles internal cash management.
 
 - Branch cash handling
 - Daily cash operations
-- Teller transactions
+- Teller journals
 
 ---
 
@@ -101,7 +101,7 @@ Manages suppliers and vendor financial interactions.
 - Vendor contacts
 - Vendor addresses
 - Vendor categories
-- Vendor transactions
+- Vendor journals
 - Vendor ledger
 
 ### Used For

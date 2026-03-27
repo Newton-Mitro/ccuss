@@ -11,26 +11,23 @@ import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
+import { Input } from '../../../components/ui/input';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { Badge } from '../../../lib/statusConfig';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { CustomerFamilyRelation } from '../../../types/customer_kyc_module';
+import { PaginatedResponse } from '../../../types/paginated_response';
 import { familyRelationStatuses } from './data/family_relation_statuses';
 
-export default function FamilyRelationIndex() {
-    const { props } = usePage<
-        SharedData & {
-            familyRelations: {
-                data: CustomerFamilyRelation[];
-                links: { url: string | null; label: string; active: boolean }[];
-            };
-            filters: Record<string, string | number>;
-        }
-    >();
+interface Props extends SharedData {
+    paginated_data: PaginatedResponse<CustomerFamilyRelation>;
+    filters: Record<string, string | number>;
+}
 
-    const { familyRelations, filters } = props;
+export default function FamilyRelationIndex() {
+    const { paginated_data, filters } = usePage<Props>().props;
 
     const { data, setData, get } = useForm({
         search: filters.search || '',
@@ -93,26 +90,29 @@ export default function FamilyRelationIndex() {
                 {/* Search & Per Page */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     {/* Search */}
-                    <input
-                        type="text"
-                        placeholder="Search by customer or relative name..."
-                        value={data.search}
-                        onChange={(e) => {
-                            setData('search', e.target.value);
-                            setData('page', 1);
-                        }}
-                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-                    />
+                    <div className="w-60">
+                        <Input
+                            type="text"
+                            placeholder="Search by customer or relative name..."
+                            value={data.search}
+                            onChange={(e) => {
+                                setData('search', e.target.value);
+                                setData('page', 1);
+                            }}
+                        />
+                    </div>
 
                     {/* Status Filter */}
-                    <Select
-                        value={data.verification_status as string}
-                        onChange={(value) => {
-                            setData('verification_status', value);
-                            setData('page', 1);
-                        }}
-                        options={familyRelationStatuses}
-                    />
+                    <div className="w-48">
+                        <Select
+                            value={data.verification_status as string}
+                            onChange={(value) => {
+                                setData('verification_status', value);
+                                setData('page', 1);
+                            }}
+                            options={familyRelationStatuses}
+                        />
+                    </div>
                 </div>
 
                 {/* ===================== */}
@@ -141,8 +141,8 @@ export default function FamilyRelationIndex() {
                             </tr>
                         </thead>
                         <tbody>
-                            {familyRelations.data.length > 0 ? (
-                                familyRelations.data.map((f) => (
+                            {paginated_data.data.length > 0 ? (
+                                paginated_data.data.map((f) => (
                                     <tr
                                         key={f.id}
                                         className="border-b even:bg-muted/30"
@@ -229,7 +229,7 @@ export default function FamilyRelationIndex() {
                 {/* Mobile Cards */}
                 {/* ===================== */}
                 <div className="space-y-3 md:hidden">
-                    {familyRelations.data.map((f) => (
+                    {paginated_data.data.map((f) => (
                         <div
                             key={f.id}
                             className="rounded-md border bg-card p-3 shadow-sm"
@@ -291,7 +291,7 @@ export default function FamilyRelationIndex() {
                         setData('per_page', value);
                         setData('page', 1);
                     }}
-                    links={familyRelations.links}
+                    links={paginated_data.links}
                 />
             </div>
         </CustomAuthLayout>

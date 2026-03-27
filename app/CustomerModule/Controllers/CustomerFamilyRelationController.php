@@ -43,7 +43,7 @@ class CustomerFamilyRelationController extends Controller
             ->withQueryString();
 
         return Inertia::render('customer-kyc/family-relations/list_family_relation_page', [
-            'familyRelations' => $relations,
+            'paginated_data' => $relations,
             'filters' => $request->only([
                 'search',
                 'verification_status', // ✅ added

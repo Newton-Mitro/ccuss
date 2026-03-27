@@ -5,7 +5,10 @@ import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '../../../types';
-import { FiscalPeriod, FiscalYear } from '../../../types/accounting';
+import {
+    FiscalPeriod,
+    FiscalYear,
+} from '../../../types/finance_and_accounting';
 
 /* ---------------- Types ---------------- */
 
@@ -58,7 +61,7 @@ export default function CashFlowStatementPage() {
             '/reports/cash-flow',
             {
                 fiscal_year_id: year || undefined,
-                accounting_period_id: fiscalPeriod || undefined,
+                fiscal_period_id: fiscalPeriod || undefined,
             },
             { preserveState: false, replace: true },
         );
@@ -73,7 +76,7 @@ export default function CashFlowStatementPage() {
             '/reports/cash-flow',
             {
                 fiscal_year_id: fiscalYear || undefined,
-                accounting_period_id: period || undefined,
+                fiscal_period_id: period || undefined,
             },
             { preserveState: false, replace: true },
         );
@@ -140,7 +143,7 @@ export default function CashFlowStatementPage() {
 
                         <button
                             onClick={() => window.print()}
-                            className="hover:bg-primary/80 rounded-md bg-primary px-3 py-1 text-sm font-medium text-primary-foreground"
+                            className="rounded-md bg-primary px-3 py-1 text-sm font-medium text-primary-foreground hover:bg-primary/80"
                         >
                             Print
                         </button>

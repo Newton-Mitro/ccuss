@@ -1,4 +1,4 @@
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
 import React, { useEffect } from 'react';
 import toast from 'react-hot-toast';
@@ -14,28 +14,23 @@ import {
     ToggleGroupItem,
 } from '../../../components/ui/toggle-group';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 import { Branch } from '../../../types/branch';
+import { Teller } from '../../../types/cash_treasury_module';
 import { User } from '../../../types/user';
 
-interface TellerFormPageProps {
-    teller?: {
-        id: number;
-        name: string;
-        code: string;
-        user_id: number;
-        branch_id: number;
-        max_cash_limit: number;
-        max_transaction_limit: number;
-        is_active: boolean;
-    };
+interface TellerFormPageProps extends SharedData {
+    teller?: Teller;
     users: User[];
     branches: Branch[];
 }
 
-const TellerForm = ({ teller, branches, users }: TellerFormPageProps) => {
-    const { flash } = usePage().props;
-
+const TellerForm = ({
+    teller,
+    branches,
+    users,
+    flash,
+}: TellerFormPageProps) => {
     useEffect(() => {
         if (flash?.error) toast.error(flash.error);
         if (flash?.success) toast.success(flash.success);
@@ -64,11 +59,10 @@ const TellerForm = ({ teller, branches, users }: TellerFormPageProps) => {
 
         if (isEdit) {
             put(`/tellers/${teller!.id}`, {
-                data: payload,
                 preserveScroll: true,
             });
         } else {
-            post('/tellers', { data: payload, preserveScroll: true });
+            post('/tellers', { preserveScroll: true });
         }
     };
 
@@ -114,7 +108,7 @@ const TellerForm = ({ teller, branches, users }: TellerFormPageProps) => {
                 className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6 lg:w-3xl"
             >
                 {/* Basic Info */}
-                <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2">
                     <div>
                         <Label className="text-xs">Teller Name</Label>
                         <Input

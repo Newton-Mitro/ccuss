@@ -31,16 +31,24 @@ export const bankAndChequeMenu: SidebarItem[] = [
             {
                 name: 'Transactions',
                 icon: <i className="fa-solid fa-exchange-alt" />,
-                permission: ['bank_transactions.view'],
-                path: '/bank-transactions',
-                match_path: 'bank-transactions',
-            },
-            {
-                name: 'Cheques',
-                icon: <i className="fa-solid fa-money-check" />,
-                permission: ['bank_cheques.view'],
-                path: '/bank-cheques',
-                match_path: 'bank-cheques',
+                children_expanded: false,
+                permission: [''],
+                children: [
+                    {
+                        name: 'Bank Transactions',
+                        icon: <i className="fa-solid fa-file-invoice-dollar" />,
+                        permission: ['bank_transactions.view'],
+                        path: '/bank-journals',
+                        match_path: 'bank-journals',
+                    },
+                    {
+                        name: 'Cheque Transactions',
+                        icon: <i className="fa-solid fa-file-invoice-dollar" />,
+                        permission: ['cheque_transactions.view'],
+                        path: '/cheque-journals',
+                        match_path: 'cheque-journals',
+                    },
+                ],
             },
             {
                 name: 'Reconciliation',
