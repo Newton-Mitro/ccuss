@@ -5,6 +5,7 @@ namespace App\SystemAdministration\Models;
 use Database\Factories\OrganizationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Organization extends Model
 {
@@ -29,6 +30,14 @@ class Organization extends Model
         'report_header_line1',
         'report_header_line2',
         'report_footer',
+    ];
+
+    /**
+     * Append computed attributes
+     */
+    protected $appends = [
+        'full_address',
+        'logo_url',
     ];
 
     /*
@@ -58,6 +67,15 @@ class Organization extends Model
             $this->postal_code,
             $this->country
         ])->filter()->implode(', ');
+    }
+
+    public function getLogoUrlAttribute()
+    {
+        if (!$this->logo_path) {
+            return null; // or return asset('images/default-logo.png');
+        }
+
+        return Storage::disk('public')->url($this->logo_path);
     }
 
     protected static function newFactory()

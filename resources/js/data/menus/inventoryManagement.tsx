@@ -24,9 +24,9 @@ export const inventoryManagementMenu: SidebarItem[] = [
             {
                 name: 'Stock Transactions',
                 icon: <i className="fa-solid fa-exchange-alt" />,
-                path: '/stock-journals',
-                match_path: 'stock-journals',
-                permission: ['stock.journals.view'],
+                path: '/stock-vouchers',
+                match_path: 'stock-vouchers',
+                permission: ['stock.vouchers.view'],
             },
             {
                 name: 'Stock Adjustments',

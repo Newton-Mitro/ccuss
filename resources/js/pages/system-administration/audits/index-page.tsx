@@ -83,11 +83,13 @@ export default function Index() {
 
                 {/* Filters */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <Select
-                        value={data.event}
-                        onChange={(value) => setData('event', value)}
-                        options={auditEvents}
-                    />
+                    <div className="w-60">
+                        <Select
+                            value={data.event}
+                            onChange={(value) => setData('event', value)}
+                            options={auditEvents}
+                        />
+                    </div>
                 </div>
 
                 {/* Desktop Table */}

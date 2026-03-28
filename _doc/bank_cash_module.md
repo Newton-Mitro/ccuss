@@ -4,8 +4,8 @@
 
 - **Admin / System Admin** – manages banks, branches, and accounts
 - **Branch Manager** – manages branch setup and oversight
-- **Finance Officer / Teller / Vault Officer** – executes journals, manages vaults, teller sessions, and reconciliations
-- **Approver** – approves cheques or high-value journals
+- **Finance Officer / Teller / Vault Officer** – executes vouchers, manages vaults, teller sessions, and reconciliations
+- **Approver** – approves cheques or high-value vouchers
 - **Auditor** – verifies reconciliations and audits
 
 ---

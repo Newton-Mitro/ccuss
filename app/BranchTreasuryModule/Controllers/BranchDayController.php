@@ -96,8 +96,11 @@ class BranchDayController extends Controller
 
     public function show(BranchDay $branchDay)
     {
+        $branchDay = $branchDay->load(['branch', 'openedBy', 'closedBy']);
+        $sessions = $branchDay->tellerSessions()->with('teller')->get();
         return Inertia::render('branch-cash-and-treasury/branch-days/branch_day_status_page', [
-            'branch_day' => $branchDay
+            'branch_day' => $branchDay,
+            'sessions' => $sessions
         ]);
     }
 }

@@ -5,7 +5,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Link, useForm, usePage } from '@inertiajs/react';
-import { Eye, Plus } from 'lucide-react';
+import { Eye, Plus, StopCircle } from 'lucide-react';
 import { useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { route } from 'ziggy-js';
@@ -102,7 +102,7 @@ export default function Index() {
                         href={route('branch-days.create')}
                         className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground"
                     >
-                        <Plus className="h-4 w-4" /> Add
+                        <Plus className="h-4 w-4" /> Open Branch Day
                     </Link>
                 </div>
 
@@ -235,19 +235,15 @@ export default function Index() {
                                                             <TooltipTrigger
                                                                 asChild
                                                             >
-                                                                <button
-                                                                    onClick={() =>
-                                                                        handleClose(
-                                                                            bd.id,
-                                                                            bd
-                                                                                .branch
-                                                                                .name,
-                                                                        )
-                                                                    }
-                                                                    className="text-destructive hover:text-destructive/80"
+                                                                <Link
+                                                                    href={route(
+                                                                        'branch-days.show',
+                                                                        bd.id,
+                                                                    )}
+                                                                    className="text-info"
                                                                 >
-                                                                    Close
-                                                                </button>
+                                                                    <StopCircle className="h-5 w-5 text-destructive" />
+                                                                </Link>
                                                             </TooltipTrigger>
                                                             <TooltipContent>
                                                                 Close Branch Day

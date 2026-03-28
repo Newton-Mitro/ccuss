@@ -132,6 +132,16 @@ return new class extends Migration {
             $table->timestamps();
         });
 
+        Schema::create('loan_lien_accounts', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('loan_account_id')->constrained()->cascadeOnDelete();
+            $table->morphs('lienable');
+            $table->decimal('amount', 15, 2);
+
+            $table->enum('status', ['pending', 'approved', 'active', 'closed', 'defaulted', 'written_off', 'released', 'cancelled'])->default('pending');
+            $table->timestamps();
+        });
+
         Schema::create('loan_collaterals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('loan_account_id')->constrained()->cascadeOnDelete();

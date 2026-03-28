@@ -1,6 +1,6 @@
 # Deposit Module Action Flow
 
-The Deposit Module handles all deposit products (savings, recurring, term deposits, shares) and their associated accounts, journals, cheques, interest accrual, penalties, and statements. Below is a step-by-step action flow.
+The Deposit Module handles all deposit products (savings, recurring, term deposits, shares) and their associated accounts, vouchers, cheques, interest accrual, penalties, and statements. Below is a step-by-step action flow.
 
 ---
 
@@ -14,7 +14,7 @@ The Deposit Module handles all deposit products (savings, recurring, term deposi
 2. **Open Deposit Account**
     - **Purpose:** Open an account for a customer using a deposit product.
     - **Key Fields:** `account_no`, `account_name`, `customer_id`, `deposit_product_id`, `branch_id`, `balance`, `status`.
-    - **Outcome:** Account is ready for deposits, withdrawals, and journals.
+    - **Outcome:** Account is ready for deposits, withdrawals, and vouchers.
 
 3. **Assign Account Holders and Nominees**
     - **Purpose:** Define account ownership and beneficiaries.
@@ -22,7 +22,7 @@ The Deposit Module handles all deposit products (savings, recurring, term deposi
     - **Outcome:** Ownership and nominee structure is established.
 
 4. **Deposit / Withdrawal / Transaction**
-    - **Purpose:** Record account journals such as deposits, withdrawals, transfers, interest, penalties, and cheque activities.
+    - **Purpose:** Record account vouchers such as deposits, withdrawals, transfers, interest, penalties, and cheque activities.
     - **Transaction Types:** `deposit`, `withdraw`, `transfer`, `interest`, `penalty`, `cheque_withdrawal`, `cheque_deposit`, `reversal`.
     - **Outcome:** Account balances are updated and transaction history is recorded.
 
@@ -35,7 +35,7 @@ The Deposit Module handles all deposit products (savings, recurring, term deposi
     - **Purpose:** Manage cheque books and individual cheques.
     - **Key Fields:** `cheque_book_id`, `cheque_number`, `amount`, `payee_name`, `status`.
     - **Cheque Statuses:** `unused`, `issued`, `presented`, `cleared`, `bounced`, `cancelled`.
-    - **Outcome:** Cheque usage and stop-payments are tracked and linked to journals.
+    - **Outcome:** Cheque usage and stop-payments are tracked and linked to vouchers.
 
 7. **Interest Accrual**
     - **Purpose:** Calculate accrued interest for eligible accounts.
@@ -45,17 +45,17 @@ The Deposit Module handles all deposit products (savings, recurring, term deposi
 8. **Penalty Assessment**
     - **Purpose:** Apply penalties for premature withdrawal, overdue installments, or other rules.
     - **Key Fields:** `penalty_type`, `penalty_amount`, `is_posted`.
-    - **Outcome:** Penalties are recorded and may generate journals.
+    - **Outcome:** Penalties are recorded and may generate vouchers.
 
 9. **Account Fees**
     - **Purpose:** Apply fees like opening, maintenance, or transaction charges.
     - **Key Fields:** `fee_type`, `amount`, `frequency`, `is_paid`.
-    - **Outcome:** Fees are tracked and can be linked to journals.
+    - **Outcome:** Fees are tracked and can be linked to vouchers.
 
 10. **Account Statement**
-    - **Purpose:** Generate statement entries from all journals.
+    - **Purpose:** Generate statement entries from all vouchers.
     - **Key Fields:** `debit`, `credit`, `balance`, `posted_at`.
-    - **Outcome:** Complete ledger for account with balances and journals.
+    - **Outcome:** Complete ledger for account with balances and vouchers.
 
 ---
 

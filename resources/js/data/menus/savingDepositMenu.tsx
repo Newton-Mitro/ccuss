@@ -104,13 +104,6 @@ export const savingDepositMenu: SidebarItem[] = [
                 permission: ['deposit.servicing.view'],
                 children: [
                     {
-                        name: 'Active Deposit Accounts',
-                        icon: <i className="fa-solid fa-wallet" />,
-                        path: '/deposit-active-accounts',
-                        match_path: 'deposit-active-accounts',
-                        permission: ['deposit.account.view'],
-                    },
-                    {
                         name: 'Interest Posting',
                         icon: <i className="fa-solid fa-percent" />,
                         path: '/deposit-interest-penalty-posting',
@@ -135,20 +128,12 @@ export const savingDepositMenu: SidebarItem[] = [
                         permission: ['deposit.fees.view'],
                     },
                     {
-                        name: 'Deposits / Withdrawals',
-                        icon: <i className="fa-solid fa-arrow-up-right-dots" />,
-                        path: '/deposit-journals',
-                        match_path: 'deposit-journals',
-                        permission: ['deposit.transaction.view'],
-                    },
-                    {
                         name: 'Transfers',
                         icon: <i className="fa-solid fa-exchange-alt" />,
                         path: '/deposit-transfers',
                         match_path: 'deposit-transfers',
                         permission: ['deposit.transfer.view'],
                     },
-
                     {
                         name: 'Account Closures',
                         icon: <i className="fa-solid fa-door-closed" />,
@@ -188,20 +173,6 @@ export const savingDepositMenu: SidebarItem[] = [
                         path: '/cheques',
                         match_path: 'cheques',
                         permission: ['cheque.view'],
-                    },
-                    {
-                        name: 'Cheque Deposits',
-                        icon: <i className="fa-solid fa-arrow-down" />,
-                        path: '/cheque-deposits',
-                        match_path: 'cheque-deposits',
-                        permission: ['cheque.deposit.view'],
-                    },
-                    {
-                        name: 'Cheque Withdrawals',
-                        icon: <i className="fa-solid fa-arrow-up" />,
-                        path: '/cheque-withdrawals',
-                        match_path: 'cheque-withdrawals',
-                        permission: ['cheque.withdrawal.view'],
                     },
                     {
                         name: 'Cheque Clearings',

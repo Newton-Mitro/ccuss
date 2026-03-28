@@ -68,7 +68,7 @@ Branch operations become available for the day.
 
 ## Result
 
-Teller is authorized to perform cash journals.
+Teller is authorized to perform cash vouchers.
 
 ---
 
@@ -167,7 +167,7 @@ Teller receives operational cash.
 # 6. Teller Cash Transaction
 
 **Actor:** Teller  
-**Purpose:** Process customer cash journals.
+**Purpose:** Process customer cash vouchers.
 
 ## Flow
 
@@ -271,7 +271,7 @@ Cash discrepancy formally recorded and approved.
 1. Teller selects **Close Session**
 2. System verifies:
     - drawer balanced
-    - no pending journals
+    - no pending vouchers
 
 3. Teller enters:
     - `closing_cash`
@@ -360,7 +360,7 @@ Branch day status updated to `closed`.
 
 - Cash transfers
 - Teller session open / close
-- Vault journals
+- Vault vouchers
 - Cash adjustments
 - Cash balancing
 
@@ -400,7 +400,7 @@ I --> J[Branch Day Close]
 
 # Cash Transactions and Affected Tables
 
-This document outlines all possible cash-related journals in the system and the tables that are affected for each action. It also highlights how `cash_audit_logs` captures every activity for auditing purposes.
+This document outlines all possible cash-related vouchers in the system and the tables that are affected for each action. It also highlights how `cash_audit_logs` captures every activity for auditing purposes.
 
 ---
 

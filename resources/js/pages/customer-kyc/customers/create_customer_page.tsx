@@ -325,9 +325,9 @@ const Create = () => {
                                     Identification Type
                                 </Label>
                                 <Select
-                                    value={data.education}
+                                    value={data.identification_type}
                                     onChange={(value) =>
-                                        setData('education', value)
+                                        setData('identification_type', value)
                                     }
                                     options={
                                         data.type === 'organization'

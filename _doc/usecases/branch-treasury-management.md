@@ -97,7 +97,7 @@ Start teller working session for the day.
 
 ### Postconditions
 
-- Teller can perform cash journals
+- Teller can perform cash vouchers
 
 ---
 
@@ -299,7 +299,7 @@ End teller work session.
 
 ### Preconditions
 
-- All journals must be completed
+- All vouchers must be completed
 - Drawer must be balanced
 
 ### Main Flow
@@ -386,7 +386,7 @@ Record all financial operations for audit.
 
 - Branch day open / close
 - Teller session open / close
-- Cash journals
+- Cash vouchers
 - Vault transfers
 - Cash balancing
 - Cash adjustments

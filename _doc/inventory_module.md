@@ -130,7 +130,7 @@ Purpose:
 
 - Savings management
 - Interest calculation
-- Deposit journals
+- Deposit vouchers
 
 ---
 
@@ -160,7 +160,7 @@ Records financial entries for reporting and auditing.
 Tables:
 
 - chart_of_accounts
-- journal_entries
+- voucher_entries
 - journal_entry_lines
 - ledgers
 

@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/tooltip';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import DataTablePagination from '../../../components/data-table-pagination';
+import { Input } from '../../../components/ui/input';
 import { appSwal } from '../../../lib/appSwal';
 import { SharedData } from '../../../types';
 
@@ -126,16 +127,17 @@ export default function History() {
             <div className="space-y-4">
                 {/* Filters */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <input
-                        type="text"
-                        placeholder="Search backups..."
-                        value={data.search}
-                        onChange={(e) => {
-                            setData('search', e.target.value);
-                            setData('page', 1);
-                        }}
-                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-                    />
+                    <div className="w-60">
+                        <Input
+                            type="text"
+                            placeholder="Search backups..."
+                            value={data.search}
+                            onChange={(e) => {
+                                setData('search', e.target.value);
+                                setData('page', 1);
+                            }}
+                        />
+                    </div>
                 </div>
 
                 {/* Table */}

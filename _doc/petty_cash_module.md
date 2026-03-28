@@ -4,7 +4,7 @@
 
 - **Branch Staff / Petty Cash Custodian** – manages petty cash, creates vouchers.
 - **Finance Manager / Approver** – approves replenishments.
-- **System / Database** – maintains records, logs journals automatically.
+- **System / Database** – maintains records, logs vouchers automatically.
 
 ---
 
@@ -91,7 +91,7 @@
 
 **Actions:**
 
-1. Review petty cash balance and journals.
+1. Review petty cash balance and vouchers.
 2. Ensure vouchers match replenishments.
 3. Close or reconcile petty cash accounts periodically.
 

@@ -51,7 +51,7 @@ export const financeAndAccountingMenu: SidebarItem[] = [
                         path: '/accounting/vouchers/bank',
                         match_path: 'finance-and-accounting/vouchers/bank',
                         permission: ['accounting.voucher.bank.view'],
-                        description: 'Record bank journals using vouchers.',
+                        description: 'Record bank vouchers using vouchers.',
                     },
                     {
                         name: 'Journal Voucher',

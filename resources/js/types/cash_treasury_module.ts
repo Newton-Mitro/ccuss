@@ -41,7 +41,7 @@ export interface Vault {
 
     branch?: Branch;
     vaultDenominations?: VaultDenomination[];
-    journals?: VaultTransaction[];
+    vouchers?: VaultTransaction[];
 }
 
 export interface Teller {
@@ -119,7 +119,7 @@ export interface CashDrawer {
 
     session?: TellerSession;
     vault?: Vault;
-    journals?: CashTransaction[];
+    vouchers?: CashTransaction[];
     balancings?: CashBalancing[];
     adjustments?: CashAdjustment[];
     auditLogs?: CashAuditLog[];
