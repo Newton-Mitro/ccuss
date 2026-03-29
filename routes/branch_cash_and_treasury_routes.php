@@ -15,6 +15,7 @@ Route::prefix('teller-sessions')->name('teller-sessions.')->group(function () {
     Route::get('/create', [TellerSessionController::class, 'create'])->name('create');
     Route::post('/', [TellerSessionController::class, 'store'])->name('store');
     Route::get('/{tellerSession}', [TellerSessionController::class, 'show'])->name('show');
+    Route::get('/close/{tellerSession}', [TellerSessionController::class, 'closePage'])->name('close-page');
     Route::post('/close/{tellerSession}', [TellerSessionController::class, 'close'])->name('close');
 });
 

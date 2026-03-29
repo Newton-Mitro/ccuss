@@ -90,6 +90,7 @@ return new class extends Migration {
             $table->string('reference')->unique(); // 🔑 Unique Reference ex. deposit receipt
             // 🧠 Classification
             $table->foreignId('transaction_type_id')->constrained()->cascadeOnDelete();
+            $table->enum('voucher_class', ['cash', 'bank', 'journal', 'contra', 'adjustment'])->default('journal');
             $table->enum('source_type', ['teller', 'online', 'system'])->default('system');
             $table->enum('channel', ['branch', 'mobile_app', 'internet_banking', 'atm', 'api'])->default('branch');
             // 🏦 Organization Context
@@ -98,21 +99,16 @@ return new class extends Migration {
             // 👤 Teller Session (nullable)
             $table->foreignId('teller_session_id')->nullable()->constrained()->nullOnDelete();
             // 🔗 Polymorphic Source (Deposit, Loan, Vendor, etc.)
-            $table->nullableMorphs('source_entity');
+            // $table->nullableMorphs('source_entity');
             // 🔁 Reversal Handling
             $table->foreignId('reversal_of')->nullable()->constrained('vouchers')->nullOnDelete();
             $table->boolean('is_reversed')->default(false);
+            $table->boolean('is_adjustment')->default(false);
             // 💰 Optional (NOT accounting source of truth)
             $table->decimal('amount', 15, 2)->nullable();
             $table->text('description')->nullable();
             $table->date('transaction_date');     // business date
 
-            // 👤 Audit
-            $table->foreignId('initiated_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamp('approved_at')->nullable();
-            $table->foreignId('posted_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamp('posted_at')->nullable();
             $table->enum('status', ['draft', 'pending', 'approved', 'posted', 'reversed', 'cancelled'])->default('draft');
             $table->timestamps();
 
@@ -120,6 +116,26 @@ return new class extends Migration {
             $table->index(['branch_id', 'transaction_date']);
             $table->index(['transaction_type_id']);
             $table->index(['source_type']);
+        });
+
+        Schema::create('voucher_audits', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('voucher_id')->constrained()->cascadeOnDelete();
+            $table->enum('action', ['created', 'updated', 'submitted', 'approved', 'rejected', 'posted', 'reversed', 'cancelled']);
+            // 📊 State tracking
+            $table->string('old_status')->nullable();
+            $table->string('new_status')->nullable();
+            // 👤 Who did it
+            $table->foreignId('performed_by')->nullable()->constrained('users')->nullOnDelete();
+            // 🌐 Context (VERY useful in real systems)
+            $table->string('ip_address')->nullable();
+            $table->string('user_agent')->nullable();
+            // 🧾 Change snapshot (JSON)
+            $table->json('changes')->nullable();
+            $table->timestamp('performed_at')->useCurrent();
+            $table->timestamps();
+            $table->index(['voucher_id']);
+            $table->index(['action']);
         });
 
         // -----------------------
@@ -422,5 +438,6 @@ return new class extends Migration {
 
         Schema::dropIfExists('voucher_entries');
         Schema::dropIfExists('vouchers');
+        Schema::dropIfExists('transaction_types');
     }
 };

@@ -61,18 +61,11 @@ class TellerSessionController extends Controller
     public function create()
     {
         $user = auth()->user();
-
-        $userTeller = Teller::where('user_id', $user->id)->first();
-
+        $userTeller = Teller::where('user_id', $user->id)->where('is_active', true)->first();
+        $userBranchBusinessDay = BranchDay::where('branch_id', $user->branch_id)->where('status', 'open')->first();
         return Inertia::render('branch-cash-and-treasury/teller-sessions/open_teller_session_page', [
-            // ✅ Only user's teller (not all)
-            'tellers' => $userTeller ? [$userTeller] : [],
-            'user_teller' => $userTeller ?? null,
-
-            // ✅ Only OPEN branch days (and optionally filter by branch)
-            'branch_days' => BranchDay::where('status', 'open')
-                ->where('branch_id', $user->branch_id) // 🔥 important
-                ->get(['id', 'business_date']),
+            'teller' => $userTeller,
+            'branch_day' => $userBranchBusinessDay
         ]);
     }
 
@@ -81,7 +74,6 @@ class TellerSessionController extends Controller
         $request->validate([
             'teller_id' => 'required|exists:tellers,id',
             'branch_day_id' => 'required|exists:branch_days,id',
-            'opening_cash' => 'required|numeric|min:0',
         ]);
 
         // 🚫 Prevent multiple OPEN sessions for same teller
@@ -115,6 +107,13 @@ class TellerSessionController extends Controller
     public function show(TellerSession $tellerSession)
     {
         return Inertia::render('branch-cash-and-treasury/teller-sessions/show_teller_session_page', [
+            'session' => $tellerSession->load(['teller', 'branchDay']),
+        ]);
+    }
+
+    public function closePage(TellerSession $tellerSession)
+    {
+        return Inertia::render('branch-cash-and-treasury/teller-sessions/close_teller_session_page', [
             'session' => $tellerSession->load(['teller', 'branchDay']),
         ]);
     }

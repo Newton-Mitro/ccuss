@@ -4,27 +4,26 @@ import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import { Input } from '../../../components/ui/input';
-import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { formatDate } from '../../../lib/date_util';
 import { BreadcrumbItem, SharedData } from '../../../types';
+import { BranchDay, Teller } from '../../../types/cash_treasury_module';
 
 interface Props extends SharedData {
-    tellers: { id: number; name: string }[];
-    user_teller: { id: number; name: string } | null;
-    branch_days: { id: number; business_date: string }[];
-    flash?: { success?: string; error?: string };
+    teller: Teller;
+    branch_day: BranchDay;
 }
 
 export default function OpenTellerSession() {
-    const { tellers, branch_days, user_teller, flash } = usePage<Props>().props;
+    const { branch_day, teller, flash } = usePage<Props>().props;
 
-    const { data, setData, post, processing, errors, reset } = useForm({
-        teller_id: user_teller?.id || '',
-        branch_day_id: '',
-        opening_cash: '',
+    console.log({ branch_day, teller, flash });
+
+    const { post, processing, errors, reset } = useForm({
+        teller_id: teller?.id || '',
+        branch_day_id: branch_day?.id || '',
     });
 
-    console.log({ tellers, branch_days, flash });
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
         if (flash?.error) toast.error(flash.error);
@@ -68,14 +67,7 @@ export default function OpenTellerSession() {
                         <label className="mb-1 block text-sm font-medium">
                             Teller
                         </label>
-                        <Select
-                            value={data.teller_id?.toString() || ''}
-                            onChange={(value) => setData('teller_id', value)}
-                            options={tellers?.map((teller) => ({
-                                value: teller.id.toString(),
-                                label: teller.name,
-                            }))}
-                        ></Select>
+                        <Input value={teller?.name || ''} disabled></Input>
                         {errors.teller_id && (
                             <p className="text-sm text-destructive">
                                 {errors.teller_id}
@@ -88,40 +80,13 @@ export default function OpenTellerSession() {
                         <label className="mb-1 block text-sm font-medium">
                             Branch Day
                         </label>
-                        <Select
-                            value={data.branch_day_id}
-                            onChange={(value) =>
-                                setData('branch_day_id', value)
-                            }
-                            options={branch_days?.map((branch_day) => ({
-                                value: branch_day.id.toString(),
-                                label: branch_day.business_date,
-                            }))}
-                        ></Select>
+                        <Input
+                            value={formatDate(branch_day?.business_date || '')}
+                            disabled
+                        ></Input>
                         {errors.branch_day_id && (
                             <p className="text-sm text-destructive">
                                 {errors.branch_day_id}
-                            </p>
-                        )}
-                    </div>
-
-                    {/* Opening Cash */}
-                    <div>
-                        <label className="mb-1 block text-sm font-medium">
-                            Opening Cash
-                        </label>
-                        <Input
-                            type="number"
-                            value={data.opening_cash}
-                            onChange={(e) =>
-                                setData('opening_cash', e.target.value)
-                            }
-                            placeholder="Enter opening cash amount"
-                            className="w-full rounded-md border px-3 py-2"
-                        />
-                        {errors.opening_cash && (
-                            <p className="text-sm text-destructive">
-                                {errors.opening_cash}
                             </p>
                         )}
                     </div>

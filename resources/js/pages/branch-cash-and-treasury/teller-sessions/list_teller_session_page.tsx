@@ -4,17 +4,15 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Plus, StopCircle } from 'lucide-react';
 import { useEffect } from 'react';
-import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
 import { Input } from '../../../components/ui/input';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { tellerSessionStatuses } from './data/teller_session_statuses';
 
@@ -55,45 +53,6 @@ export default function TellerSessionsIndexPage() {
         const delay = setTimeout(handleSearch, 400);
         return () => clearTimeout(delay);
     }, [data.search, data.status, data.per_page, data.page]);
-
-    const handleCloseSession = (id: number, tellerName: string) => {
-        appSwal
-            .fire({
-                title: 'Are you sure?',
-                text: `Close the teller session for "${tellerName}"?`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, close it!',
-            })
-            .then((result) => {
-                if (result.isConfirmed) {
-                    const closingCash = prompt(
-                        'Enter closing cash amount:',
-                        '0',
-                    );
-                    if (closingCash === null) return;
-
-                    router.post(
-                        route('teller-sessions.close', id),
-                        { closing_cash: closingCash },
-                        {
-                            preserveScroll: true,
-                            preserveState: true,
-                            onSuccess: () => {
-                                toast.success(
-                                    `Session for "${tellerName}" closed successfully!`,
-                                );
-                            },
-                            onError: () => {
-                                toast.error(
-                                    `Failed to close session for "${tellerName}".`,
-                                );
-                            },
-                        },
-                    );
-                }
-            });
-    };
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Teller Sessions', href: '#' },
@@ -226,20 +185,15 @@ export default function TellerSessionsIndexPage() {
                                                             <TooltipTrigger
                                                                 asChild
                                                             >
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() =>
-                                                                        handleCloseSession(
-                                                                            s.id,
-                                                                            s
-                                                                                .teller
-                                                                                .name,
-                                                                        )
-                                                                    }
+                                                                <Link
+                                                                    href={route(
+                                                                        'teller-sessions.close-page',
+                                                                        s.id,
+                                                                    )}
                                                                     className="text-red-500 hover:text-red-600"
                                                                 >
                                                                     <StopCircle className="h-5 w-5" />
-                                                                </button>
+                                                                </Link>
                                                             </TooltipTrigger>
                                                             <TooltipContent>
                                                                 Close Session

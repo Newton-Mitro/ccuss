@@ -15,18 +15,18 @@ export const branchCashAndTreasuryMenu: SidebarItem[] = [
                 permission: ['vault.list.view'],
             },
             {
-                name: 'Branch Days',
-                icon: <i className="fa-solid fa-calendar-day" />,
-                path: '/branch-days',
-                match_path: 'branch-days',
-                permission: ['branch_day.view'],
-            },
-            {
                 name: 'Tellers',
                 icon: <i className="fa-solid fa-users" />,
                 path: '/tellers',
                 match_path: 'tellers',
                 permission: ['teller.list.view'],
+            },
+            {
+                name: 'Branch Days',
+                icon: <i className="fa-solid fa-calendar-day" />,
+                path: '/branch-days',
+                match_path: 'branch-days',
+                permission: ['branch_day.view'],
             },
             {
                 name: 'Teller Sessions',
@@ -55,6 +55,13 @@ export const branchCashAndTreasuryMenu: SidebarItem[] = [
                         path: '/withdrawal',
                         match_path: 'withdrawal',
                         permission: ['transaction.withdraw.create'],
+                    },
+                    {
+                        name: 'Teller to Teller Transfer',
+                        icon: <i className="fa-solid fa-cash-register" />,
+                        path: '/cash-transfers/teller-to-vault',
+                        match_path: 'cash-transfers/teller-to-vault',
+                        permission: ['teller_to_vault.create'],
                     },
                 ],
             },
@@ -114,13 +121,6 @@ export const branchCashAndTreasuryMenu: SidebarItem[] = [
                     },
                     {
                         name: 'Teller Cash Return',
-                        icon: <i className="fa-solid fa-cash-register" />,
-                        path: '/cash-transfers/teller-to-vault',
-                        match_path: 'cash-transfers/teller-to-vault',
-                        permission: ['teller_to_vault.create'],
-                    },
-                    {
-                        name: 'Teller to Teller Transfer',
                         icon: <i className="fa-solid fa-cash-register" />,
                         path: '/cash-transfers/teller-to-vault',
                         match_path: 'cash-transfers/teller-to-vault',

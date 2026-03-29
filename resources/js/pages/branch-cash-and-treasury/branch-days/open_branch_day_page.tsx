@@ -7,26 +7,21 @@ import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import AppDatePicker from '../../../components/ui/app_date_picker';
 import { Button } from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
-import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Branch } from '../../../types/branch';
 
 interface Props extends SharedData {
-    branches: Branch[];
+    branch: Branch;
     business_date: string;
-    branch_id: number;
 }
 
-const OpenBranchDay = ({
-    branches,
-    business_date,
-    branch_id,
-    flash,
-}: Props) => {
+const OpenBranchDay = ({ branch, business_date, flash }: Props) => {
+    console.log({ branch, business_date, flash });
     const { data, setData, post, processing, errors } = useForm({
-        branch_id: branch_id ?? '',
+        branch_id: branch.id,
         business_date: business_date ?? '',
     });
 
@@ -78,14 +73,7 @@ const OpenBranchDay = ({
                 {/* Branch Selection */}
                 <div>
                     <Label className="text-xs">Select Branch</Label>
-                    <Select
-                        value={data.branch_id?.toString()}
-                        onChange={(value) => setData('branch_id', value)}
-                        options={branches.map((branch) => ({
-                            value: branch.id.toString(),
-                            label: branch.name,
-                        }))}
-                    ></Select>
+                    <Input value={branch?.name} disabled></Input>
                     <InputError message={errors.branch_id} />
                 </div>
 

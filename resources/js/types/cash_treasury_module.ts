@@ -7,16 +7,14 @@ export interface BranchDay {
     business_date: string; // ISO date
     opened_at?: string; // ISO datetime
     closed_at?: string; // ISO datetime
-    opened_by?: number;
-    closed_by?: number;
+    opened_by?: User;
+    closed_by?: User;
     status: 'open' | 'closed';
     created_at: string;
     updated_at: string;
 
     // Optional relations
     branch?: Branch;
-    openedBy?: User;
-    closedBy?: User;
     tellerSessions?: TellerSession[];
 }
 
@@ -50,6 +48,7 @@ export interface Teller {
     branch_id: number;
     code: string;
     name: string;
+    current_balance: number;
     max_cash_limit: number;
     max_transaction_limit: number;
     is_active: boolean;

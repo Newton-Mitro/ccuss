@@ -74,6 +74,7 @@ return new class extends Migration {
             $table->index(['bank_account_id', 'status', 'cheque_date']);
         });
 
+
         // ------------------------
         // 6. Bank Reconciliations
         // ------------------------
