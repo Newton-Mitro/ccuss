@@ -11,33 +11,11 @@ class BranchFactory extends Factory
 {
     protected $model = Branch::class;
 
-    private array $dhakaBranches = [
-        'Dhaka Main Branch',
-        'Gulshan Branch',
-        'Uttara Branch',
-        'Mirpur Branch',
-        'Dhanmondi Branch',
-        'Mohammadpur Branch',
-        'Savar Branch',
-        'Keraniganj Branch',
-        'Gazipur Branch',
-        'Tongi Branch',
-        'Narayanganj Branch',
-        'Rupganj Branch',
-        'Narsingdi Branch',
-        'Manikganj Branch',
-        'Tangail Branch',
-        'Kishoreganj Branch',
-        'Faridpur Branch',
-        'Gopalganj Branch',
-        'Madaripur Branch',
-        'Rajbari Branch',
-        'Shariatpur Branch',
-    ];
+
 
     public function definition(): array
     {
-        $name = fake()->unique()->randomElement($this->dhakaBranches);
+        $name = fake()->company();
 
         return [
             'organization_id' => Organization::factory(),

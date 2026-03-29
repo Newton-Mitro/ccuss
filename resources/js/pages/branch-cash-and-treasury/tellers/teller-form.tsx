@@ -22,15 +22,10 @@ import { User } from '../../../types/user';
 interface TellerFormPageProps extends SharedData {
     teller?: Teller;
     users: User[];
-    branches: Branch[];
+    branch: Branch;
 }
 
-const TellerForm = ({
-    teller,
-    branches,
-    users,
-    flash,
-}: TellerFormPageProps) => {
+const TellerForm = ({ teller, branch, users, flash }: TellerFormPageProps) => {
     useEffect(() => {
         if (flash?.error) toast.error(flash.error);
         if (flash?.success) toast.success(flash.success);
@@ -144,17 +139,7 @@ const TellerForm = ({
 
                     <div>
                         <Label className="text-xs">Branch</Label>
-                        <Select
-                            value={data.branch_id.toString()}
-                            onChange={(val) =>
-                                setData('branch_id', Number(val))
-                            }
-                            options={branches.map((b) => ({
-                                value: b.id.toString(),
-                                label: b.name,
-                            }))}
-                            placeholder="Select Branch"
-                        />
+                        <Input value={branch?.name} disabled />
                         <InputError message={errors.branch_id} />
                     </div>
 

@@ -142,17 +142,5 @@ class UserController extends Controller
         return redirect()->route('users.index')->with('success', 'User deleted successfully.');
     }
 
-    // -----------------------------
-    // ASSIGN ROLES: Update roles separately
-    // -----------------------------
-    public function updateRoles(Request $request, User $user)
-    {
-        $validated = $request->validate([
-            'roles' => 'array|exists:roles,id',
-        ]);
 
-        $user->roles()->sync($validated['roles'] ?? []);
-
-        return redirect()->back()->with('success', 'User roles updated successfully.');
-    }
 }

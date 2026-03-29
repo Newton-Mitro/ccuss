@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\BranchTreasuryModule\Models\Teller;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\User;
+use Auth;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -59,11 +60,11 @@ class TellerController extends Controller
     // Create page
     public function create(): Response
     {
-        $users = User::all();
-        $branches = Branch::all();
+        $branch = Auth::user()->branch;
+        $users = User::where('branch_id', auth()->user()->branch_id)->get();
         return Inertia::render('branch-cash-and-treasury/tellers/teller-form', [
             'users' => $users,
-            'branches' => $branches,
+            'branch' => $branch,
             'backUrl' => route('tellers.index'),
         ]);
     }
@@ -74,28 +75,41 @@ class TellerController extends Controller
         $data = $request->validate([
             'branch_id' => 'required|exists:branches,id',
             'user_id' => 'required|exists:users,id',
-            'code' => 'required|unique:tellers,code',
             'name' => 'required|string|max:255',
             'max_cash_limit' => 'required|numeric',
             'max_transaction_limit' => 'required|numeric',
             'is_active' => 'boolean',
         ]);
 
-        Teller::create($data);
+        // Generate a unique Teller code: TLR-<branch_id>-<increment_id>
+        $lastTeller = Teller::where('branch_id', $data['branch_id'])
+            ->latest('id')
+            ->first();
+
+        $nextId = $lastTeller ? $lastTeller->id + 1 : 1;
+
+        $data['code'] = 'TLR-' . str_pad($data['branch_id'], 3, '0', STR_PAD_LEFT)
+            . '-' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
+
+        // Default is_active if not provided
+        $data['is_active'] = $data['is_active'] ?? true;
+
+        $teller = Teller::create($data);
 
         return redirect()->route('tellers.index')
-            ->with('success', 'Teller created successfully.');
+            ->with('success', 'Teller created successfully with code: ' . $teller->code);
     }
 
     // Edit page
     public function edit(Teller $teller): Response
     {
-        $users = User::all();
-        $branches = Branch::all();
+
+        $branch = Auth::user()->branch;
+        $users = User::where('branch_id', auth()->user()->branch_id)->get();
         return Inertia::render('branch-cash-and-treasury/tellers/teller-form', [
             'users' => $users,
             'teller' => $teller,
-            'branches' => $branches,
+            'branch' => $branch,
             'backUrl' => route('tellers.index'),
         ]);
     }
@@ -103,16 +117,24 @@ class TellerController extends Controller
     // Update
     public function update(Request $request, Teller $teller)
     {
+        // Ensure the teller belongs to the authenticated user's branch
+        if ($teller->branch_id !== auth()->user()->branch_id) {
+            abort(403, 'Unauthorized access to update this teller.');
+        }
+
         $data = $request->validate([
             'branch_id' => 'required|exists:branches,id',
             'user_id' => 'required|exists:users,id',
-            'code' => 'required|unique:tellers,code,' . $teller->id,
             'name' => 'required|string|max:255',
             'max_cash_limit' => 'required|numeric',
             'max_transaction_limit' => 'required|numeric',
             'is_active' => 'boolean',
         ]);
 
+        // Optional: prevent changing branch for security
+        $data['branch_id'] = $teller->branch_id;
+
+        // Update teller
         $teller->update($data);
 
         return redirect()->route('tellers.index')

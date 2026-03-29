@@ -1,4 +1,4 @@
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Key, Loader2 } from 'lucide-react';
 import React, { useEffect } from 'react';
 import toast from 'react-hot-toast';
@@ -9,13 +9,12 @@ import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 import { Branch } from '../../../types/branch';
 import { Organization } from '../../../types/organization';
 import { Role, User } from '../../../types/user';
 
-interface UserFormPageProps {
-    backUrl: string;
+interface UserFormPageProps extends SharedData {
     user?: User;
     roles: Role[];
     organizations: Organization[];
@@ -23,14 +22,12 @@ interface UserFormPageProps {
 }
 
 const UserForm = ({
-    backUrl,
     user,
     roles,
     organizations,
     branches,
+    flash,
 }: UserFormPageProps) => {
-    const { flash } = usePage().props;
-
     useEffect(() => {
         if (flash?.error) toast.error(flash.error);
         if (flash?.success) toast.success(flash.success);
@@ -59,13 +56,11 @@ const UserForm = ({
 
         if (isEdit) {
             put(`/users/${user.id}`, {
-                data: payload,
                 preserveScroll: true,
                 onError: (err) => toast.error(JSON.stringify(err)),
             });
         } else {
             post('/users', {
-                data: payload,
                 preserveScroll: true,
                 onError: (err) => toast.error(JSON.stringify(err)),
             });
@@ -187,7 +182,7 @@ const UserForm = ({
                 {/* ROLES */}
                 <div>
                     <Label className="text-xs">Roles</Label>
-                    <div className="mt-1 grid max-h-60 grid-cols-3 gap-2 overflow-y-auto rounded-md border p-2">
+                    <div className="mt-1 grid h-[calc(100vh-34rem)] grid-cols-3 gap-2 overflow-y-auto rounded-md border p-2">
                         {roles.map((role) => (
                             <label
                                 key={role.id}
