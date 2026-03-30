@@ -9,10 +9,10 @@ import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 import { Permission, Role } from '../../../types/user';
 
-interface RolePermissionFormProps {
+interface RolePermissionFormProps extends SharedData {
     roles: Role[];
     permissions: Permission[];
 }
@@ -21,7 +21,7 @@ const RolePermissionForm = ({
     roles,
     permissions,
 }: RolePermissionFormProps) => {
-    const { flash } = usePage().props;
+    const { flash } = usePage<RolePermissionFormProps>().props;
     const [selectedRole, setSelectedRole] = useState<Role | null>(
         roles[0] || null,
     );
@@ -135,7 +135,7 @@ const RolePermissionForm = ({
                                 {selectAll ? 'Deselect All' : 'Select All'}
                             </Button>
                         </div>
-                        <div className="scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent h-[calc(100vh-400px)] space-y-5 overflow-y-auto rounded-xl border bg-muted/20 p-4">
+                        <div className="scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent h-[calc(100vh-400px)] space-y-5 overflow-y-auto rounded-xl bg-muted/20">
                             {Object.entries(groupedPermissions).map(
                                 ([module, perms]) => {
                                     const ids = perms.map((p) => p.id);

@@ -336,7 +336,7 @@ function EditOrganization() {
                                     Report Header/Footer
                                 </h3>
                                 <div className="grid grid-cols-1 gap-x-5 md:grid-cols-4">
-                                    <div>
+                                    <div className="md:col-span-2">
                                         <Label>Report Header Line 1</Label>
                                         <Input
                                             value={data.report_header_line1}
@@ -354,7 +354,7 @@ function EditOrganization() {
                                         />
                                     </div>
 
-                                    <div>
+                                    <div className="md:col-span-2">
                                         <Label>Report Header Line 2</Label>
                                         <Input
                                             value={data.report_header_line2}
