@@ -25,7 +25,7 @@ class TellerTransactionController extends Controller
         $cashSubledgers = [];
 
 
-        $vouchers = [];
+        $journal_entries = [];
 
         return Inertia::render('branch-cash-and-treasury/customer-cash-deposit/CustomerCashDepositPage', [
             'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
@@ -37,7 +37,7 @@ class TellerTransactionController extends Controller
             'lines' => [
 
             ],
-            'vouchers' => $vouchers,
+            'journal_entries' => $journal_entries,
             'user_branch_id' => auth()->user()->branch_id,
             'fiscal_year_id' => optional(FiscalYear::where('is_active', true)->first())->id,
             'fiscal_period_id' => optional(
@@ -72,7 +72,7 @@ class TellerTransactionController extends Controller
             : collect();
 
         $cashSubledgers = $cashLedger ? $cashLedgers : [];
-        $vouchers = Voucher::where('voucher_type', 'DEBIT_OR_PAYMENT')
+        $journal_entries = Voucher::where('voucher_type', 'DEBIT_OR_PAYMENT')
             ->where('created_by', auth()->id())
             ->whereDate('created_at', today())
             ->orderBy('id', 'desc')
@@ -89,7 +89,7 @@ class TellerTransactionController extends Controller
             'lines' => [
                 [
                     'id' => 1,
-                    'voucher_id' => 0,
+                    'journal_entry_id' => 0,
                     'ledger_account_id' => $cashLedger->id,
                     'ledger_account' => $cashLedger,
                     'subledger_id' => null,
@@ -104,7 +104,7 @@ class TellerTransactionController extends Controller
                     'is_selected' => true
                 ],
             ],
-            'vouchers' => $vouchers,
+            'journal_entries' => $journal_entries,
             'user_branch_id' => auth()->user()->branch_id,
             'fiscal_year_id' => optional(FiscalYear::where('is_active', true)->first())->id,
             'fiscal_period_id' => optional(
@@ -137,7 +137,7 @@ class TellerTransactionController extends Controller
         return response()->json([
             [
                 'id' => 2,
-                'voucher_id' => 0,
+                'journal_entry_id' => 0,
                 'ledger_account_id' => $savingDepositLedger->id,
                 'ledger_account' => $savingDepositLedger,
                 'subledger_id' => null,
@@ -153,7 +153,7 @@ class TellerTransactionController extends Controller
             ],
             [
                 'id' => 3,
-                'voucher_id' => 0,
+                'journal_entry_id' => 0,
                 'ledger_account_id' => $termDepositLedger->id,
                 'ledger_account' => $termDepositLedger,
                 'subledger_id' => null,
@@ -169,7 +169,7 @@ class TellerTransactionController extends Controller
             ],
             [
                 'id' => 4,
-                'voucher_id' => 0,
+                'journal_entry_id' => 0,
                 'ledger_account_id' => $loanInterestLedger->id,
                 'ledger_account' => $loanInterestLedger,
                 'subledger_id' => null,
@@ -196,7 +196,7 @@ class TellerTransactionController extends Controller
         return response()->json([
             [
                 'id' => 2,
-                'voucher_id' => 0,
+                'journal_entry_id' => 0,
                 'ledger_account_id' => $savingDepositLedger->id,
                 'ledger_account' => $savingDepositLedger,
                 'subledger_id' => null,

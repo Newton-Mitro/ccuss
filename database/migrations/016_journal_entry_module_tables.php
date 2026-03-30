@@ -42,7 +42,7 @@ return new class extends Migration {
         //     $table->string('provider', 50); // bKash, Nagad, etc
         //     $table->string('wallet_no', 30);
 
-        //     $table->string('voucher_id', 100)->unique();
+        //     $table->string('journal_entry_id', 100)->unique();
         //     $table->date('transaction_date');
 
         //     $table->timestamps();
@@ -80,16 +80,75 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        // -----------------------
-        // Vouchers
-        // -----------------------
-        Schema::create('vouchers', function (Blueprint $table) {
+        Schema::create('transactions', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->constrained();
+            $table->foreignId('transaction_type_id')->constrained()->cascadeOnDelete();
+            $table->decimal('amount', 15, 2);
+            $table->date('transaction_date');
+            $table->string('reference')->nullable(); // e.g., invoice number, receipt no.
+            $table->enum('status', ['draft', 'approved', 'posted', 'cancelled'])->default('draft');
+            $table->foreignId('branch_id')->constrained(); // optional: branch context
+            $table->foreignId('customer_id')->nullable()->constrained(); // optional, if customer-related
+            $table->timestamps();
+            $table->index(['transaction_type_id', 'status']);
+            $table->index(['transaction_date']);
+        });
+
+        Schema::create('transaction_allocations', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('transaction_id')->constrained()->cascadeOnDelete();
+            // Polymorphic account reference
+            $table->morphs('account'); // account_type: DepositAccount/Loan/Vault/Teller, account_id: respective ID
+            $table->decimal('amount', 15, 2); // total allocated amount for this account
+            $table->string('allocation_type')->nullable(); // optional: principal, interest, penalty, deposit, etc.
+            // Optional reference for invoice, loan schedule, etc.
+            $table->nullableMorphs('reference');
+            $table->timestamps();
+            $table->index(['account_type', 'account_id'], 'txn_alloc_account_type_idx');
+            $table->index(['transaction_id']);
+        });
+
+        Schema::create('loan_allocation_details', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('transaction_allocation_id')->constrained()->cascadeOnDelete();
+            // Split allocation amounts
+            $table->decimal('principal_amount', 15, 2)->default(0);
+            $table->decimal('interest_amount', 15, 2)->default(0);
+            $table->decimal('penalty_amount', 15, 2)->default(0);
+            // Optional: for partial allocation or adjustments
+            $table->decimal('other_amount', 15, 2)->default(0);
+            $table->timestamps();
+            $table->index(['transaction_allocation_id']);
+        });
+
+        // -----------------------
+        // Journals
+        // -----------------------
+        Schema::create('journals', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
+            $table->string('name'); // Sales Journal, Cash Journal
+            $table->string('code')->unique();
+            $table->timestamps();
+        });
+        // CASH | Cash Journal      | Cash transactions
+        // BANK | Bank Journal      | Bank transactions
+        // SALE | Sales Journal     | Revenue entries
+        // PURC | Purchase Journal  | Expense entries
+        // GEN  | General Journal   | Adjustments
+        // PAY  | Payment Journal   | Outgoing payments
+        // REC  | Receipt Journal   | Incoming payments
+
+        // -----------------------
+        // Journal Entries
+        // -----------------------
+        Schema::create('journal_entries', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
             $table->foreignId('fiscal_year_id')->constrained();
             $table->foreignId('fiscal_period_id')->constrained();
             $table->string('reference')->unique(); // 🔑 Unique Reference ex. deposit receipt
-            // 🧠 Classification
-            $table->foreignId('transaction_type_id')->constrained()->cascadeOnDelete();
             $table->enum('voucher_class', ['cash', 'bank', 'journal', 'contra', 'adjustment'])->default('journal');
             $table->enum('source_type', ['teller', 'online', 'system'])->default('system');
             $table->enum('channel', ['branch', 'mobile_app', 'internet_banking', 'atm', 'api'])->default('branch');
@@ -101,26 +160,26 @@ return new class extends Migration {
             // 🔗 Polymorphic Source (Deposit, Loan, Vendor, etc.)
             // $table->nullableMorphs('source_entity');
             // 🔁 Reversal Handling
-            $table->foreignId('reversal_of')->nullable()->constrained('vouchers')->nullOnDelete();
+            $table->foreignId('reversal_of')->nullable()->constrained('journal_entries')->nullOnDelete();
             $table->boolean('is_reversed')->default(false);
             $table->boolean('is_adjustment')->default(false);
             // 💰 Optional (NOT accounting source of truth)
             $table->decimal('amount', 15, 2)->nullable();
             $table->text('description')->nullable();
             $table->date('transaction_date');     // business date
+            $table->foreignId('transaction_id')->nullable()->constrained()->nullOnDelete();
 
-            $table->enum('status', ['draft', 'pending', 'approved', 'posted', 'reversed', 'cancelled'])->default('draft');
+            $table->enum('status', ['draft', 'posted', 'reversed', 'cancelled'])->default('draft');
             $table->timestamps();
 
             // 🚀 Indexing
             $table->index(['branch_id', 'transaction_date']);
-            $table->index(['transaction_type_id']);
             $table->index(['source_type']);
         });
 
-        Schema::create('voucher_audits', function (Blueprint $table) {
+        Schema::create('journal_entry_audits', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('voucher_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('journal_entry_id')->constrained()->cascadeOnDelete();
             $table->enum('action', ['created', 'updated', 'submitted', 'approved', 'rejected', 'posted', 'reversed', 'cancelled']);
             // 📊 State tracking
             $table->string('old_status')->nullable();
@@ -134,16 +193,16 @@ return new class extends Migration {
             $table->json('changes')->nullable();
             $table->timestamp('performed_at')->useCurrent();
             $table->timestamps();
-            $table->index(['voucher_id']);
+            $table->index(['journal_entry_id']);
             $table->index(['action']);
         });
 
         // -----------------------
         // Voucher Entries
         // -----------------------
-        Schema::create('voucher_entries', function (Blueprint $table) {
+        Schema::create('journal_entry_lines', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('voucher_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('journal_entry_id')->constrained()->cascadeOnDelete();
             // 🧾 GL Account (still required)
             $table->foreignId('ledger_account_id')->constrained('ledger_accounts');
             // 🔥 POLYMORPHIC ACCOUNT (who owns this entry)
@@ -169,7 +228,7 @@ return new class extends Migration {
             $table->timestamps();
 
             // 🚀 Indexing
-            $table->index(['voucher_id']);
+            $table->index(['journal_entry_id']);
             $table->index(['ledger_account_id']);
             $table->index(['account_type', 'account_id'], 'txn_entries_account_type_idx');
         });
@@ -215,8 +274,8 @@ return new class extends Migration {
             END AS balance
 
         FROM ledger_accounts a
-        JOIN voucher_entries te ON te.ledger_account_id = a.id
-        JOIN vouchers t ON t.id = te.voucher_id
+        JOIN journal_entry_lines te ON te.ledger_account_id = a.id
+        JOIN journal_entries t ON t.id = te.journal_entry_id
             AND t.status = 'posted'
         JOIN fiscal_years fy ON fy.id = t.fiscal_year_id
         JOIN fiscal_periods ap ON ap.id = t.fiscal_period_id
@@ -262,8 +321,8 @@ return new class extends Migration {
             ),0) AS amount
 
         FROM ledger_accounts a
-        LEFT JOIN voucher_entries te ON te.ledger_account_id = a.id
-        LEFT JOIN vouchers t ON t.id = te.voucher_id
+        LEFT JOIN journal_entry_lines te ON te.ledger_account_id = a.id
+        LEFT JOIN journal_entries t ON t.id = te.journal_entry_id
             AND t.status = 'posted'
         LEFT JOIN fiscal_years fy ON fy.id = t.fiscal_year_id
         LEFT JOIN fiscal_periods ap ON ap.id = t.fiscal_period_id
@@ -309,8 +368,8 @@ return new class extends Migration {
             ) AS balance
 
         FROM ledger_accounts a
-        JOIN voucher_entries te ON te.ledger_account_id = a.id
-        JOIN vouchers t ON t.id = te.voucher_id
+        JOIN journal_entry_lines te ON te.ledger_account_id = a.id
+        JOIN journal_entries t ON t.id = te.journal_entry_id
             AND t.status = 'posted'
         JOIN fiscal_years fy ON fy.id = t.fiscal_year_id
         JOIN fiscal_periods ap ON ap.id = t.fiscal_period_id
@@ -332,49 +391,49 @@ return new class extends Migration {
         |--------------------------------------------------------------------------
         */
         DB::statement("
-        CREATE VIEW view_cash_flow AS
-        SELECT
-            t.fiscal_year_id,
-            fy.code AS fiscal_year_code,
+    CREATE VIEW view_cash_flow AS
+    SELECT
+        je.fiscal_year_id,
+        fy.code AS fiscal_year_code,
 
-            t.fiscal_period_id,
-            ap.period_name,
+        je.fiscal_period_id,
+        fp.period_name,
 
-            CASE
-                WHEN tt.category = 'cash' THEN 'Operating'
-                WHEN tt.category = 'loan' THEN 'Financing'
-                WHEN tt.category = 'vendor' THEN 'Investing'
-                ELSE 'Other'
-            END AS cash_category,
+        CASE
+            WHEN tt.voucher_class = 'cash' THEN 'Operating'
+            WHEN tt.voucher_class = 'bank' THEN 'Financing'
+            WHEN tt.voucher_class = 'journal' THEN 'Investing'
+            ELSE 'Other'
+        END AS cash_category,
 
-            SUM(
-                CASE 
-                    WHEN la.type IN ('asset','expense') THEN te.debit - te.credit
-                    ELSE te.credit - te.debit
-                END
-            ) AS net_cash
+        SUM(
+            CASE 
+                WHEN la.type IN ('asset','expense') THEN jel.debit - jel.credit
+                ELSE jel.credit - jel.debit
+            END
+        ) AS net_cash
 
-        FROM voucher_entries te
-        JOIN vouchers t ON t.id = te.voucher_id
-            AND t.status = 'posted'
-        JOIN transaction_types tt ON tt.id = t.transaction_type_id
-        JOIN ledger_accounts la ON la.id = te.ledger_account_id
-        JOIN fiscal_years fy ON fy.id = t.fiscal_year_id
-        JOIN fiscal_periods ap ON ap.id = t.fiscal_period_id
+    FROM journal_entry_lines jel
+    JOIN journal_entries je ON je.id = jel.journal_entry_id
+        AND je.status = 'posted'
+    JOIN transaction_types tt ON tt.id = je.transaction_type_id
+    JOIN ledger_accounts la ON la.id = jel.ledger_account_id
+    JOIN fiscal_years fy ON fy.id = je.fiscal_year_id
+    JOIN fiscal_periods fp ON fp.id = je.fiscal_period_id
 
-        WHERE la.is_active = TRUE
-        AND tt.is_cash = TRUE
+    WHERE la.is_active = TRUE
+    AND tt.is_cash = TRUE
 
-        GROUP BY 
-            t.fiscal_year_id, fy.code,
-            t.fiscal_period_id, ap.period_name,
-            cash_category
+    GROUP BY 
+        je.fiscal_year_id, fy.code,
+        je.fiscal_period_id, fp.period_name,
+        cash_category
 
-        ORDER BY 
-            t.fiscal_year_id,
-            t.fiscal_period_id,
-            cash_category;
-        ");
+    ORDER BY 
+        je.fiscal_year_id,
+        je.fiscal_period_id,
+        cash_category;
+");
 
         /*
         |--------------------------------------------------------------------------
@@ -401,8 +460,8 @@ return new class extends Migration {
                     END
                 ),0) AS net_profit
 
-            FROM voucher_entries te
-            JOIN vouchers t ON t.id = te.voucher_id
+            FROM journal_entry_lines te
+            JOIN journal_entries t ON t.id = te.journal_entry_id
                 AND t.status = 'posted'
             JOIN ledger_accounts la ON la.id = te.ledger_account_id
 
@@ -436,8 +495,8 @@ return new class extends Migration {
         DB::statement('DROP VIEW IF EXISTS view_profit_and_loss');
         DB::statement('DROP VIEW IF EXISTS view_trial_balance');
 
-        Schema::dropIfExists('voucher_entries');
-        Schema::dropIfExists('vouchers');
+        Schema::dropIfExists('journal_entry_lines');
+        Schema::dropIfExists('journal_entries');
         Schema::dropIfExists('transaction_types');
     }
 };

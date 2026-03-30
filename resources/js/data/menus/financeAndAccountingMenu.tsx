@@ -39,34 +39,39 @@ export const financeAndAccountingMenu: SidebarItem[] = [
                     {
                         name: 'Cash Voucher',
                         icon: <i className="fa-solid fa-money-bill-wave" />,
-                        path: '/accounting/vouchers/cash',
-                        match_path: 'finance-and-accounting/vouchers/cash',
+                        path: '/accounting/journal_entries/cash',
+                        match_path:
+                            'finance-and-accounting/journal_entries/cash',
                         permission: ['accounting.voucher.cash.view'],
                         description:
-                            'Record cash receipts or payments using vouchers.',
+                            'Record cash receipts or payments using journal_entries.',
                     },
                     {
                         name: 'Bank Voucher',
                         icon: <i className="fa-solid fa-university" />,
-                        path: '/accounting/vouchers/bank',
-                        match_path: 'finance-and-accounting/vouchers/bank',
+                        path: '/accounting/journal_entries/bank',
+                        match_path:
+                            'finance-and-accounting/journal_entries/bank',
                         permission: ['accounting.voucher.bank.view'],
-                        description: 'Record bank vouchers using vouchers.',
+                        description:
+                            'Record bank journal_entries using journal_entries.',
                     },
                     {
                         name: 'Journal Voucher',
                         icon: <i className="fa-solid fa-book" />,
-                        path: '/accounting/vouchers/journal',
-                        match_path: 'finance-and-accounting/vouchers/journal',
+                        path: '/accounting/journal_entries/journal',
+                        match_path:
+                            'finance-and-accounting/journal_entries/journal',
                         permission: ['accounting.voucher.journal.view'],
                         description:
-                            'Record general journal entries via vouchers.',
+                            'Record general journal entries via journal_entries.',
                     },
                     {
                         name: 'Payment Voucher',
                         icon: <i className="fa-solid fa-credit-card" />,
-                        path: '/accounting/vouchers/payment',
-                        match_path: 'finance-and-accounting/vouchers/payment',
+                        path: '/accounting/journal_entries/payment',
+                        match_path:
+                            'finance-and-accounting/journal_entries/payment',
                         permission: ['accounting.voucher.payment.view'],
                         description:
                             'Record payments to vendors or third parties.',
@@ -76,11 +81,11 @@ export const financeAndAccountingMenu: SidebarItem[] = [
             {
                 name: 'Vouchers',
                 icon: <i className="fa-solid fa-book-open-reader" />,
-                path: '/accounting/vouchers',
-                match_path: 'finance-and-accounting/vouchers',
-                permission: ['accounting.vouchers.view'],
+                path: '/accounting/journal_entries',
+                match_path: 'finance-and-accounting/journal_entries',
+                permission: ['accounting.journal_entries.view'],
                 description:
-                    'View and manage all vouchers (cash, bank, journal, payment).',
+                    'View and manage all journal_entries (cash, bank, journal, payment).',
             },
             {
                 name: 'General Ledger',
@@ -89,7 +94,7 @@ export const financeAndAccountingMenu: SidebarItem[] = [
                 match_path: 'finance-and-accounting/general-ledger',
                 permission: ['accounting.gl.view'],
                 description:
-                    'View account balances consolidated from posted vouchers.',
+                    'View account balances consolidated from posted journal_entries.',
             },
             {
                 name: 'Trial Balance',
@@ -124,7 +129,7 @@ export const financeAndAccountingMenu: SidebarItem[] = [
                             'finance-and-accounting/financial-reports/balance-sheet',
                         permission: ['accounting.balance_sheet.view'],
                         description:
-                            'Snapshot of assets, liabilities, and equity derived from posted vouchers.',
+                            'Snapshot of assets, liabilities, and equity derived from posted journal_entries.',
                     },
                     {
                         name: 'Shareholders Equity',
@@ -134,7 +139,7 @@ export const financeAndAccountingMenu: SidebarItem[] = [
                             'finance-and-accounting/financial-reports/shareholders-equity',
                         permission: ['accounting.shareholders-equity.view'],
                         description:
-                            'Track capital contributions, retained earnings, and equity movements from vouchers.',
+                            'Track capital contributions, retained earnings, and equity movements from journal_entries.',
                     },
                 ],
             },

@@ -37,7 +37,7 @@ export default function CustomerCashDepositPage() {
         cash_subledgers,
         instrument_types,
         lines,
-        vouchers,
+        journal_entries,
         user_branch_id,
         fiscal_year_id,
         fiscal_period_id,
@@ -163,24 +163,28 @@ export default function CustomerCashDepositPage() {
     };
 
     const collectNowHandler = () =>
-        post('/vouchers', {
+        post('/journal_entries', {
             preserveScroll: true,
             onSuccess: () => toast.success('Voucher saved'),
         });
 
     const collectLaterHandler = () =>
-        post('/vouchers', {
+        post('/journal_entries', {
             preserveScroll: true,
             onSuccess: () => toast.success('Voucher saved'),
         });
 
     const voucherCollectNowHandler = (voucherId: number) => {
-        router.get(`/vouchers/${voucherId}`, {}, { preserveScroll: true });
+        router.get(
+            `/journal_entries/${voucherId}`,
+            {},
+            { preserveScroll: true },
+        );
     };
 
     const viewVoucherHandler = (voucherId: number) => {
         window.open(
-            route('vouchers.show', voucherId),
+            route('journal_entries.show', voucherId),
             '_blank',
             'noopener,noreferrer',
         );
@@ -188,7 +192,7 @@ export default function CustomerCashDepositPage() {
 
     const cancelVoucherHandler = (voucherId: number) => {
         if (!confirm('Cancel this voucher?')) return;
-        router.delete(`/vouchers/${voucherId}`, {
+        router.delete(`/journal_entries/${voucherId}`, {
             preserveScroll: true,
             onSuccess: () => toast.success('Voucher cancelled'),
         });
@@ -242,7 +246,7 @@ export default function CustomerCashDepositPage() {
                     />
 
                     <VoucherQueueSection
-                        vouchers={vouchers}
+                        journal_entries={journal_entries}
                         onView={viewVoucherHandler}
                         voucherCollectNowHandler={voucherCollectNowHandler}
                         cancelVoucherHandler={cancelVoucherHandler}

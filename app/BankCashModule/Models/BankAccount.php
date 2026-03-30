@@ -44,7 +44,7 @@ class BankAccount extends Model
         return $this->belongsTo(User::class, 'approved_by');
     }
 
-    public function vouchers()
+    public function journal_entries()
     {
         return $this->hasMany(BankTransaction::class);
     }

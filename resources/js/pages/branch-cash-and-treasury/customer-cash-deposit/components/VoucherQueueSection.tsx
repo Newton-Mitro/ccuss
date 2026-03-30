@@ -6,14 +6,14 @@ import { formatDate } from '../../../../lib/date_util';
 import { Voucher } from '../../../../types/finance_and_accounting';
 
 interface Props {
-    vouchers: Voucher[];
+    journal_entries: Voucher[];
     onView: (id: number) => void;
     voucherCollectNowHandler: (id: number) => void;
     cancelVoucherHandler: (id: number) => void;
 }
 
 function VoucherQueueSection({
-    vouchers,
+    journal_entries,
     onView,
     voucherCollectNowHandler,
     cancelVoucherHandler,
@@ -21,7 +21,7 @@ function VoucherQueueSection({
     const [receivedAmount, setReceivedAmount] = useState<number>(0);
 
     const { pendingAmount, postedAmount } = useMemo(() => {
-        return vouchers.reduce(
+        return journal_entries.reduce(
             (acc, voucher) => {
                 const amount = Number(voucher.total_amount) || 0;
 
@@ -37,7 +37,7 @@ function VoucherQueueSection({
             },
             { pendingAmount: 0, postedAmount: 0 },
         );
-    }, [vouchers]);
+    }, [journal_entries]);
 
     const returnAmount = useMemo(() => {
         if (!receivedAmount) return 0;
@@ -58,17 +58,17 @@ function VoucherQueueSection({
                         Voucher Queue
                     </h2>
                     <span className="text-xs text-muted-foreground">
-                        {vouchers.length} vouchers
+                        {journal_entries.length} journal_entries
                     </span>
                 </div>
 
                 {/* Voucher List */}
                 <div className="flex-1 divide-y overflow-y-auto">
-                    {vouchers.map((voucher: Voucher) => {
+                    {journal_entries.map((voucher: Voucher) => {
                         // Determine if this is the last updated voucher
                         const isLastUpdated =
                             Math.max(
-                                ...vouchers.map((v) =>
+                                ...journal_entries.map((v) =>
                                     new Date(v.updated_at).getTime(),
                                 ),
                             ) === new Date(voucher.updated_at).getTime();

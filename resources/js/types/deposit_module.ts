@@ -58,7 +58,7 @@ export interface DepositAccount {
     shareDetails?: ShareAccountDetail;
     termDeposit?: TermDepositDetail;
     recurringDeposit?: RecurringDepositDetail;
-    vouchers?: DepositTransaction[];
+    journal_entries?: DepositTransaction[];
     fees?: DepositAccountFee[];
     cheques?: ChequeBook[];
 }

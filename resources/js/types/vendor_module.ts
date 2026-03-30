@@ -20,7 +20,7 @@ export interface Vendor {
     addresses?: VendorAddress[];
     contacts?: VendorContact[];
     categories?: VendorCategory[];
-    vouchers?: VendorTransaction[];
+    journal_entries?: VendorTransaction[];
 }
 
 export interface VendorAddress {

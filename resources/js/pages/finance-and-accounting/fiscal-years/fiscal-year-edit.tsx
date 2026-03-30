@@ -7,10 +7,14 @@ import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
+import {
+    ToggleGroup,
+    ToggleGroupItem,
+} from '../../../components/ui/toggle-group';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 
-interface FiscalYearProps {
+interface FiscalYearProps extends SharedData {
     fiscalYear?: {
         id: number;
         code: string;
@@ -19,14 +23,10 @@ interface FiscalYearProps {
         is_active: boolean;
         is_closed: boolean;
     };
-    flash: { success?: string; error?: string };
-    errors: Record<string, string>;
-    backUrl: string;
 }
 
-export default function FiscalYearForm({ backUrl }: { backUrl: string }) {
-    const { fiscalYear, flash, errors } = usePage()
-        .props as unknown as FiscalYearProps;
+export default function FiscalYearForm() {
+    const { fiscalYear, flash } = usePage<FiscalYearProps>().props;
 
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
@@ -35,7 +35,7 @@ export default function FiscalYearForm({ backUrl }: { backUrl: string }) {
 
     const handleBack = () => window.history.back();
 
-    const { data, setData, post, put, processing } = useForm({
+    const { data, setData, post, put, processing, errors } = useForm({
         code: fiscalYear?.code || '',
         start_date: fiscalYear?.start_date || '',
         end_date: fiscalYear?.end_date || '',
@@ -122,31 +122,42 @@ export default function FiscalYearForm({ backUrl }: { backUrl: string }) {
                         />
                         <InputError message={errors.end_date} />
                     </div>
-                </div>
 
-                <div className="flex gap-4">
-                    <label className="flex items-center gap-2">
-                        <input
-                            type="checkbox"
-                            checked={data.is_active}
-                            onChange={(e) =>
-                                setData('is_active', e.target.checked)
+                    <div className="">
+                        <Label className="text-xs">Active</Label>
+                        <ToggleGroup
+                            type="single"
+                            value={data.is_active ? 'true' : 'false'}
+                            onValueChange={(val) =>
+                                setData('is_active', val === 'true')
                             }
-                            className="h-4 w-4"
-                        />
-                        Active
-                    </label>
-                    <label className="flex items-center gap-2">
-                        <input
-                            type="checkbox"
-                            checked={data.is_closed}
-                            onChange={(e) =>
-                                setData('is_closed', e.target.checked)
+                            size="sm"
+                            variant="outline"
+                        >
+                            <ToggleGroupItem value="true">True</ToggleGroupItem>
+                            <ToggleGroupItem value="false">
+                                False
+                            </ToggleGroupItem>
+                        </ToggleGroup>
+                    </div>
+
+                    <div className="">
+                        <Label className="text-xs">Closed</Label>
+                        <ToggleGroup
+                            type="single"
+                            value={data.is_closed ? 'true' : 'false'}
+                            onValueChange={(val) =>
+                                setData('is_closed', val === 'true')
                             }
-                            className="h-4 w-4"
-                        />
-                        Closed
-                    </label>
+                            size="sm"
+                            variant="outline"
+                        >
+                            <ToggleGroupItem value="true">True</ToggleGroupItem>
+                            <ToggleGroupItem value="false">
+                                False
+                            </ToggleGroupItem>
+                        </ToggleGroup>
+                    </div>
                 </div>
 
                 <Button

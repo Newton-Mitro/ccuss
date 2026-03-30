@@ -1,4 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { Plus } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
@@ -101,9 +102,18 @@ export default function BranchDayStatusPage({
 
                     {/* SESSIONS */}
                     <div>
-                        <h3 className="mb-2 text-sm font-semibold">
-                            Teller Sessions
-                        </h3>
+                        <div className="mb-4 flex items-center justify-between border-b border-border pb-2">
+                            <h3 className="mb-2 text-sm font-semibold">
+                                Teller Sessions
+                            </h3>
+
+                            <Link
+                                href={route('teller-sessions.create')}
+                                className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                            >
+                                <Plus className="h-4 w-4" /> Open Teller Session
+                            </Link>
+                        </div>
 
                         {sessions.length === 0 ? (
                             <p className="text-xs text-muted-foreground">
@@ -156,7 +166,7 @@ export default function BranchDayStatusPage({
                                                         )}
                                                         className="rounded-full bg-destructive px-4 py-1.5 text-xs font-medium text-destructive-foreground hover:underline hover:ring-2 hover:ring-destructive/50"
                                                     >
-                                                        Close
+                                                        Close Teller Session
                                                     </Link>
                                                 )}
                                             </div>

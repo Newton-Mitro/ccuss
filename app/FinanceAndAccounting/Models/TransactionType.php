@@ -30,7 +30,7 @@ class TransactionType extends Model
     ];
 
     // 🔗 Relationship
-    public function vouchers()
+    public function journal_entries()
     {
         return $this->hasMany(Transaction::class);
     }

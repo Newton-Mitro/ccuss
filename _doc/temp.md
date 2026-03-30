@@ -21,7 +21,7 @@ The Organization module manages the system structure.
 
 ### Purpose
 
-Defines who can access the system and where vouchers occur.
+Defines who can access the system and where journal_entries occur.
 
 ---
 
@@ -34,7 +34,7 @@ Manages bank institutions and company bank accounts.
 - Bank management
 - Bank branches
 - Bank accounts
-- Bank vouchers
+- Bank journal_entries
 - Cheques
 - Bank reconciliation
 
@@ -79,7 +79,7 @@ Handles internal cash management.
 
 - Vaults
 - Cash drawers
-- Cash vouchers
+- Cash journal_entries
 - Cash transfers
 - Cash balance tracking
 
@@ -87,7 +87,7 @@ Handles internal cash management.
 
 - Branch cash handling
 - Daily cash operations
-- Teller vouchers
+- Teller journal_entries
 
 ---
 
@@ -101,7 +101,7 @@ Manages suppliers and vendor financial interactions.
 - Vendor contacts
 - Vendor addresses
 - Vendor categories
-- Vendor vouchers
+- Vendor journal_entries
 - Vendor ledger
 
 ### Used For

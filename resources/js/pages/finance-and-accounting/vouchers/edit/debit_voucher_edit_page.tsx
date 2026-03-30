@@ -120,7 +120,7 @@ export default function EditDebitVoucherEntry({
             ...data.lines,
             {
                 id: -Date.now(),
-                voucher_id: voucher.id,
+                journal_entry_id: voucher.id,
                 ledger_account_id: null,
                 ledger_account: null,
                 subledger_id: null,
@@ -190,7 +190,7 @@ export default function EditDebitVoucherEntry({
             e.target.value ? Number(e.target.value) : null,
         );
         router.get(
-            '/vouchers/debit/edit',
+            '/journal_entries/debit/edit',
             {
                 cash_ledger_id: e.target.value ? Number(e.target.value) : null,
                 cash_subledger_id: data.cash_subledger_id,
@@ -206,7 +206,7 @@ export default function EditDebitVoucherEntry({
             toast.error('Debit and Credit totals must be equal!');
             return;
         }
-        put(`/vouchers/${voucher.id}`, { preserveScroll: true });
+        put(`/journal_entries/${voucher.id}`, { preserveScroll: true });
     };
 
     const debitTotal = data.lines.reduce(
@@ -220,7 +220,7 @@ export default function EditDebitVoucherEntry({
     const isBalanced = data.lines.length > 0 && debitTotal === creditTotal;
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Vouchers', href: '/vouchers' },
+        { title: 'Vouchers', href: '/journal_entries' },
         { title: `Edit Debit Voucher: ${voucher.voucher_no}`, href: '' },
     ];
 

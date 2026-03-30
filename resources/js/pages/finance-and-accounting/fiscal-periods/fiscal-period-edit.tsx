@@ -8,10 +8,14 @@ import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import { Select } from '../../../components/ui/select';
+import {
+    ToggleGroup,
+    ToggleGroupItem,
+} from '../../../components/ui/toggle-group';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 
-interface FiscalPeriodProps {
+interface FiscalPeriodProps extends SharedData {
     fiscalPeriod?: {
         id: number;
         period_name: string;
@@ -21,14 +25,11 @@ interface FiscalPeriodProps {
         is_open: boolean;
     };
     fiscalYears: { id: number; code: string }[];
-    flash: { success?: string; error?: string };
-    errors: Record<string, string>;
-    backUrl: string;
 }
 
-export default function FiscalPeriodForm({ backUrl }: { backUrl: string }) {
-    const { fiscalPeriod, fiscalYears, flash, errors } = usePage()
-        .props as unknown as FiscalPeriodProps;
+export default function FiscalPeriodForm() {
+    const { fiscalPeriod, fiscalYears, flash } =
+        usePage<FiscalPeriodProps>().props;
 
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
@@ -37,7 +38,7 @@ export default function FiscalPeriodForm({ backUrl }: { backUrl: string }) {
 
     const handleBack = () => window.history.back();
 
-    const { data, setData, post, put, processing } = useForm({
+    const { data, setData, post, put, processing, errors } = useForm({
         period_name: fiscalPeriod?.period_name || '',
         fiscal_year_id: fiscalPeriod?.fiscal_year_id || undefined,
         start_date: fiscalPeriod?.start_date || '',
@@ -152,17 +153,27 @@ export default function FiscalPeriodForm({ backUrl }: { backUrl: string }) {
                         />
                         <InputError message={errors.end_date} />
                     </div>
-                </div>
 
-                <label className="flex items-center gap-2">
-                    <input
-                        type="checkbox"
-                        checked={data.is_open}
-                        onChange={(e) => setData('is_open', e.target.checked)}
-                        className="h-4 w-4"
-                    />
-                    Open
-                </label>
+                    <div className="">
+                        <Label className="text-xs">Closed</Label>
+                        <ToggleGroup
+                            type="single"
+                            value={data.is_open ? 'true' : 'false'}
+                            onValueChange={(val) =>
+                                setData('is_open', val === 'true')
+                            }
+                            size="sm"
+                            variant="outline"
+                        >
+                            <ToggleGroupItem value="true">
+                                False
+                            </ToggleGroupItem>
+                            <ToggleGroupItem value="false">
+                                True
+                            </ToggleGroupItem>
+                        </ToggleGroup>
+                    </div>
+                </div>
 
                 <Button
                     type="submit"

@@ -49,7 +49,7 @@ export interface BankAccount {
     branch?: BankBranch;
     createdBy?: User;
     approvedBy?: User;
-    vouchers?: BankTransaction[];
+    journal_entries?: BankTransaction[];
     cheques?: BankCheque[];
     reconciliations?: BankReconciliation[];
 }
@@ -100,7 +100,7 @@ export interface BankCheque {
     account?: BankAccount;
     createdBy?: User;
     approvedBy?: User;
-    vouchers?: BankTransaction[];
+    journal_entries?: BankTransaction[];
 }
 
 export interface BankReconciliation {

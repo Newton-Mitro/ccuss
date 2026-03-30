@@ -4,7 +4,7 @@ namespace App\FinanceAndAccounting\Models;
 
 use App\SystemAdministration\Traits\Auditable;
 use App\SystemAdministration\Models\Organization;
-use Database\Factories\AccountingPeriodFactory;
+use Database\Factories\FiscalPeriodFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -45,7 +45,7 @@ class FiscalPeriod extends Model
         return $this->belongsTo(FiscalYear::class);
     }
 
-    public function vouchers(): HasMany
+    public function journal_entries(): HasMany
     {
         return $this->hasMany(Voucher::class);
     }
@@ -56,8 +56,8 @@ class FiscalPeriod extends Model
     |--------------------------------------------------------------------------
     */
 
-    protected static function newFactory(): AccountingPeriodFactory
+    protected static function newFactory(): FiscalPeriodFactory
     {
-        return AccountingPeriodFactory::new();
+        return FiscalPeriodFactory::new();
     }
 }

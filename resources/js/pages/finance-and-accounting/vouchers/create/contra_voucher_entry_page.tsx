@@ -118,7 +118,7 @@ export default function ContraVoucherEntryPage({
             ...data.lines,
             {
                 id: -Date.now(),
-                voucher_id: 0,
+                journal_entry_id: 0,
                 ledger_account_id: null,
                 ledger_account: null,
                 subledger_id: null,
@@ -184,7 +184,7 @@ export default function ContraVoucherEntryPage({
         );
 
         router.get(
-            '/vouchers/debit/create',
+            '/journal_entries/debit/create',
             {
                 cash_ledger_id: e.target.value ? Number(e.target.value) : null,
                 cash_subledger_id: data.cash_subledger_id,
@@ -195,7 +195,7 @@ export default function ContraVoucherEntryPage({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/vouchers', { preserveScroll: true });
+        post('/journal_entries', { preserveScroll: true });
     };
 
     const debitTotal = data.lines.reduce((sum, l) => sum + (l.debit || 0), 0);
@@ -205,7 +205,7 @@ export default function ContraVoucherEntryPage({
         data.lines.length > 0 && debitTotal === creditTotal && hasValidLines;
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Vouchers', href: '/vouchers' },
+        { title: 'Vouchers', href: '/journal_entries' },
         { title: 'Journal/Non-Cash Voucher Entry', href: '' },
     ];
 

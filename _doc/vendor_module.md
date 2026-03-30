@@ -1,6 +1,6 @@
 # Vendor Module Action Flow
 
-The Vendor Module manages suppliers, their contact information, categorization, and financial vouchers such as invoices and payments.
+The Vendor Module manages suppliers, their contact information, categorization, and financial journal_entries such as invoices and payments.
 
 ---
 
@@ -23,7 +23,7 @@ A vendor (supplier) must be created before any procurement or payment activity.
 
 ### Result
 
-Vendor record is created and becomes available for vouchers.
+Vendor record is created and becomes available for journal_entries.
 
 ---
 
@@ -102,7 +102,7 @@ Vendor becomes part of categorized supplier groups.
 
 # 5. Vendor Transactions
 
-Vendor vouchers track financial interactions with suppliers.
+Vendor journal_entries track financial interactions with suppliers.
 
 ### Transaction Types
 

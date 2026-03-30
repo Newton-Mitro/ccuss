@@ -5,18 +5,18 @@ import { formatDate } from '../../../../lib/date_util';
 import { Voucher } from '../../../../types/finance_and_accounting';
 
 interface Props {
-    vouchers: Voucher[];
+    journal_entries: Voucher[];
     handleVoucherView: (id: number) => void;
     handleVoucherCancel: (id: number) => void;
 }
 
 function VoucherQueueSection({
-    vouchers,
+    journal_entries,
     handleVoucherView,
     handleVoucherCancel,
 }: Props) {
     const { pendingAmount, postedAmount } = useMemo(() => {
-        return vouchers.reduce(
+        return journal_entries.reduce(
             (acc, voucher) => {
                 const amount = Number(voucher.total_amount) || 0;
 
@@ -32,7 +32,7 @@ function VoucherQueueSection({
             },
             { pendingAmount: 0, postedAmount: 0 },
         );
-    }, [vouchers]);
+    }, [journal_entries]);
 
     return (
         <div className="flex h-[calc(100vh/3+18px)] flex-col overflow-hidden rounded-md border">
@@ -42,16 +42,16 @@ function VoucherQueueSection({
                     Voucher Queue
                 </h2>
                 <span className="text-xs text-muted-foreground">
-                    {vouchers.length} vouchers
+                    {journal_entries.length} journal_entries
                 </span>
             </div>
 
             {/* Voucher List */}
             <div className="flex-1 divide-y overflow-y-auto">
-                {vouchers.map((voucher: Voucher) => {
+                {journal_entries.map((voucher: Voucher) => {
                     const isLastUpdated =
                         Math.max(
-                            ...vouchers.map((v) =>
+                            ...journal_entries.map((v) =>
                                 new Date(v.updated_at).getTime(),
                             ),
                         ) === new Date(voucher.updated_at).getTime();

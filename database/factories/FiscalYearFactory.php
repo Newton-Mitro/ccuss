@@ -10,19 +10,20 @@ use Carbon\Carbon;
 class FiscalYearFactory extends Factory
 {
     protected $model = FiscalYear::class;
+
     /**
      * Define the model's default state.
      *
      * @return array
      */
-
     public function definition(): array
     {
+        // Pick a random start year in the past 3 years
         $start = Carbon::instance(
             fake()->dateTimeBetween('-3 years', 'now')
         )->startOfYear();
 
-        $end = $start->copy()->addYear()->subDay();
+        $end = $start->copy()->endOfYear(); // full year
 
         return [
             'organization_id' => Organization::factory(),
@@ -32,23 +33,26 @@ class FiscalYearFactory extends Factory
             'start_date' => $start->toDateString(),
             'end_date' => $end->toDateString(),
 
-            'is_active' => false,
             'is_closed' => false,
         ];
     }
 
+    /**
+     * Mark fiscal year as active
+     */
     public function active(): static
     {
         return $this->state(fn() => [
-            'is_active' => true,
             'is_closed' => false,
         ]);
     }
 
+    /**
+     * Mark fiscal year as closed
+     */
     public function closed(): static
     {
         return $this->state(fn() => [
-            'is_active' => false,
             'is_closed' => true,
         ]);
     }

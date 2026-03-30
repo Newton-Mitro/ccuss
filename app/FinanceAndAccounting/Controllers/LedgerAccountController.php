@@ -158,7 +158,7 @@ class LedgerAccountController extends Controller
 
                 // Ledger line for the new account
                 VoucherLine::create([
-                    'voucher_id' => $openingVoucher->id,
+                    'journal_entry_id' => $openingVoucher->id,
                     'ledger_account_id' => $account->id,
                     'debit' => in_array($account->type, ['asset', 'expense']) ? $data['opening_balance'] : 0,
                     'credit' => in_array($account->type, ['liability', 'equity', 'income']) ? $data['opening_balance'] : 0,
@@ -167,7 +167,7 @@ class LedgerAccountController extends Controller
                 // Counterbalance entry
                 $openingEquity = LedgerAccount::where('code', '9999')->firstOrFail(); // Opening Balances Equity
                 VoucherLine::create([
-                    'voucher_id' => $openingVoucher->id,
+                    'journal_entry_id' => $openingVoucher->id,
                     'ledger_account_id' => $openingEquity->id,
                     'debit' => in_array($account->type, ['liability', 'equity', 'income']) ? $data['opening_balance'] : 0,
                     'credit' => in_array($account->type, ['asset', 'expense']) ? $data['opening_balance'] : 0,

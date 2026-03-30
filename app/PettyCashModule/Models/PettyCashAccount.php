@@ -32,7 +32,7 @@ class PettyCashAccount extends Model
         return $this->belongsTo(User::class, 'custodian_id');
     }
 
-    public function vouchers()
+    public function journal_entries()
     {
         return $this->hasMany(PettyCashVoucher::class);
     }
@@ -42,7 +42,7 @@ class PettyCashAccount extends Model
         return $this->hasMany(PettyCashReplenishment::class);
     }
 
-    public function vouchers()
+    public function journal_entries()
     {
         return $this->morphMany(PettyCashTransaction::class, 'reference');
     }

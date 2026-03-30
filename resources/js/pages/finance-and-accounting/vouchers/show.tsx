@@ -37,7 +37,7 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
     const handleBack = () => window.history.back();
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Vouchers', href: '/vouchers' },
+        { title: 'Vouchers', href: '/journal_entries' },
         { title: `Voucher ${voucher.voucher_no}`, href: '' },
     ];
 
@@ -67,7 +67,11 @@ export default function VoucherView({ backUrl }: { backUrl: string }) {
                     </button>
 
                     <Link
-                        href={isDisabled ? '#' : `/vouchers/${voucher.id}/edit`}
+                        href={
+                            isDisabled
+                                ? '#'
+                                : `/journal_entries/${voucher.id}/edit`
+                        }
                         onClick={(e) => isDisabled && e.preventDefault()}
                         className={`flex items-center gap-1 rounded px-3 py-1.5 text-sm text-white ${
                             isDisabled

@@ -17,9 +17,9 @@ export const pettyCashMenu: SidebarItem[] = [
             {
                 name: 'Petty Cash Vouchers',
                 icon: <i className="fa-solid fa-file-invoice-dollar" />,
-                permission: ['petty_cash.vouchers.view'],
-                path: '/petty-cash-vouchers',
-                match_path: 'petty-cash-vouchers',
+                permission: ['petty_cash.journal_entries.view'],
+                path: '/petty-cash-journal_entries',
+                match_path: 'petty-cash-journal_entries',
             },
             {
                 name: 'Replenishment',

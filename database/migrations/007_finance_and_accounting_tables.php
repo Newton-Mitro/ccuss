@@ -14,21 +14,24 @@ return new class extends Migration {
             $table->string('code')->unique()->comment('(FY-2025-26)');
             $table->date('start_date');
             $table->date('end_date');
-            $table->boolean('is_active')->default(false);
             $table->boolean('is_closed')->default(false);
             $table->timestamps();
         });
 
         Schema::create('fiscal_periods', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->constrained();
             $table->foreignId('fiscal_year_id')->constrained()->cascadeOnDelete();
             $table->string('period_name')->comment('(JAN-2026)');
             $table->date('start_date');
             $table->date('end_date');
-            $table->boolean('is_open')->default(true);
+            $table->enum('status', ['open', 'closed', 'locked'])->default('open');
             $table->timestamps();
         });
+
+        // 💡 Best Practice:
+        //    - open → allow posting
+        //    - closed → no new entries
+        //    - locked → fully finalized (audit-safe)
 
         Schema::create('closing_entries', function (Blueprint $table) {
             $table->id();
@@ -43,6 +46,7 @@ return new class extends Migration {
             $table->string('code', 50)->unique()->comment('Unique GL code');
             $table->string('name', 100)->comment('Account name');
             $table->enum('type', ['asset', 'liability', 'equity', 'income', 'expense']);
+            $table->string('description')->nullable();
             $table->boolean('is_control_account')->default(false);
             $table->boolean('requires_subledger')->default(false);
             $table->boolean('is_active')->default(true);

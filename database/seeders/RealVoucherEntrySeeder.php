@@ -81,7 +81,7 @@ class RealVoucherEntrySeeder extends Seeder
 
             // Create VoucherLines and LedgerAccountBalances explicitly
             VoucherLine::create([
-                'voucher_id' => $openingVoucher->id,
+                'journal_entry_id' => $openingVoucher->id,
                 'ledger_account_id' => $cashInHand->id,
                 'particulars' => 'Opening balance - Cash In Hand',
                 'debit' => 20000,
@@ -94,7 +94,7 @@ class RealVoucherEntrySeeder extends Seeder
             );
 
             VoucherLine::create([
-                'voucher_id' => $openingVoucher->id,
+                'journal_entry_id' => $openingVoucher->id,
                 'ledger_account_id' => $cashInBank->id,
                 'particulars' => 'Opening balance - Cash In Bank',
                 'debit' => 40000,
@@ -107,7 +107,7 @@ class RealVoucherEntrySeeder extends Seeder
             );
 
             VoucherLine::create([
-                'voucher_id' => $openingVoucher->id,
+                'journal_entry_id' => $openingVoucher->id,
                 'ledger_account_id' => $savingsDeposit->id,
                 'particulars' => 'Opening balance - Savings Deposit',
                 'debit' => 30000,
@@ -120,7 +120,7 @@ class RealVoucherEntrySeeder extends Seeder
             );
 
             VoucherLine::create([
-                'voucher_id' => $openingVoucher->id,
+                'journal_entry_id' => $openingVoucher->id,
                 'ledger_account_id' => $retainedEarnings->id,
                 'particulars' => 'Opening balance - Retained Earnings',
                 'debit' => 0,
@@ -133,7 +133,7 @@ class RealVoucherEntrySeeder extends Seeder
             );
 
             VoucherLine::create([
-                'voucher_id' => $openingVoucher->id,
+                'journal_entry_id' => $openingVoucher->id,
                 'ledger_account_id' => $shareCapital->id,
                 'particulars' => 'Opening balance - Share Capital',
                 'debit' => 0,

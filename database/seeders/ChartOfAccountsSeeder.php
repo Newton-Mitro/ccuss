@@ -12,17 +12,16 @@ class ChartOfAccountsSeeder extends Seeder
     public function run()
     {
         DB::transaction(function () {
-
             $organization = Organization::first() ?? Organization::factory()->create();
-
             // ----------------------------
-            // ASSETS
+            // ASSETS (1000)
             // ----------------------------
             $assets = LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '1000',
                 'name' => 'Assets',
                 'type' => 'asset',
+                'description' => 'All organizational assets',
                 'is_control_account' => true,
             ]);
 
@@ -32,6 +31,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'name' => 'Current Assets',
                 'type' => 'asset',
                 'parent_id' => $assets->id,
+                'description' => 'Short-term assets convertible to cash within a year',
                 'is_control_account' => true,
             ]);
 
@@ -41,6 +41,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'name' => 'Fixed Assets',
                 'type' => 'asset',
                 'parent_id' => $assets->id,
+                'description' => 'Long-term tangible assets for operational use',
                 'is_control_account' => true,
             ]);
 
@@ -51,6 +52,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'name' => 'Cash & Bank',
                 'type' => 'asset',
                 'parent_id' => $currentAssets->id,
+                'description' => 'Cash in hand and bank balances',
                 'is_control_account' => true,
             ]);
 
@@ -60,6 +62,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'name' => 'Cash In Bank',
                 'type' => 'asset',
                 'parent_id' => $cash->id,
+                'description' => 'Cash held in bank accounts',
             ]);
 
             LedgerAccount::create([
@@ -68,6 +71,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'name' => 'Petty Cash',
                 'type' => 'asset',
                 'parent_id' => $cash->id,
+                'description' => 'Small cash for daily operational expenses',
             ]);
 
             LedgerAccount::create([
@@ -76,6 +80,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'name' => 'Cash in Vault',
                 'type' => 'asset',
                 'parent_id' => $cash->id,
+                'description' => 'Cash stored securely in vault',
             ]);
 
             LedgerAccount::create([
@@ -84,41 +89,142 @@ class ChartOfAccountsSeeder extends Seeder
                 'name' => 'Teller Cash',
                 'type' => 'asset',
                 'parent_id' => $cash->id,
+                'description' => 'Cash held by teller for transactions',
             ]);
 
             // RECEIVABLES
             $receivables = LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '1130',
-                'name' => 'Receivables',
+                'name' => 'Accounts Receivable',
                 'type' => 'asset',
                 'parent_id' => $currentAssets->id,
+                'description' => 'Amounts due from customers',
+                'is_control_account' => true,
+            ]);
+
+            // Loan Receivables
+            $loanReceivables = LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '1131',
+                'name' => 'Loan Receivables',
+                'type' => 'asset',
+                'parent_id' => $receivables->id,
+                'description' => 'Outstanding loan amounts from borrowers',
                 'is_control_account' => true,
             ]);
 
             LedgerAccount::create([
                 'organization_id' => $organization->id,
-                'code' => '1131',
+                'code' => '11311',
                 'name' => 'Interest Receivable',
                 'type' => 'asset',
-                'parent_id' => $receivables->id,
+                'parent_id' => $loanReceivables->id,
+                'description' => 'Accrued interest on loans',
             ]);
 
             LedgerAccount::create([
                 'organization_id' => $organization->id,
-                'code' => '1132',
-                'name' => 'Fee Receivable',
+                'code' => '11312',
+                'name' => 'Loan Fee Receivable',
                 'type' => 'asset',
-                'parent_id' => $receivables->id,
+                'parent_id' => $loanReceivables->id,
+                'description' => 'Fees charged on loans not yet collected',
             ]);
 
-            // LOAN PORTFOLIO
+            // Service Receivables
+            $serviceReceivables = LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '1132',
+                'name' => 'Service Receivables',
+                'type' => 'asset',
+                'parent_id' => $receivables->id,
+                'description' => 'Amounts receivable for software/services provided',
+                'is_control_account' => true,
+            ]);
+
+            LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '11321',
+                'name' => 'Installation Receivable',
+                'type' => 'asset',
+                'parent_id' => $serviceReceivables->id,
+                'description' => 'Receivable for installation services',
+            ]);
+
+            LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '11322',
+                'name' => 'Migration Receivable',
+                'type' => 'asset',
+                'parent_id' => $serviceReceivables->id,
+                'description' => 'Receivable for migration services',
+            ]);
+
+            LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '11323',
+                'name' => 'Subscription Receivable',
+                'type' => 'asset',
+                'parent_id' => $serviceReceivables->id,
+                'description' => 'Receivable from subscription services',
+            ]);
+
+            LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '11324',
+                'name' => 'Support & Maintenance Receivable',
+                'type' => 'asset',
+                'parent_id' => $serviceReceivables->id,
+                'description' => 'Receivable for support and maintenance services',
+            ]);
+
+            // Other Receivables
+            $otherReceivables = LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '1133',
+                'name' => 'Other Receivables',
+                'type' => 'asset',
+                'parent_id' => $receivables->id,
+                'description' => 'Miscellaneous receivables',
+                'is_control_account' => true,
+            ]);
+
+            LedgerAccount::insert([
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '1134',
+                    'name' => 'Service Fees Receivable (One-Off)',
+                    'type' => 'asset',
+                    'parent_id' => $otherReceivables->id,
+                    'description' => 'One-time service fees receivable',
+                ],
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '1135',
+                    'name' => 'Receivable from Non-Asset Sales',
+                    'type' => 'asset',
+                    'parent_id' => $otherReceivables->id,
+                    'description' => 'Receivables from sales of non-assets',
+                ],
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '1136',
+                    'name' => 'Miscellaneous Receivables',
+                    'type' => 'asset',
+                    'parent_id' => $otherReceivables->id,
+                    'description' => 'Other miscellaneous receivables',
+                ],
+            ]);
+
+            // Loan Portfolio
             $loanPortfolio = LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '1140',
                 'name' => 'Loan Portfolio',
                 'type' => 'asset',
                 'parent_id' => $currentAssets->id,
+                'description' => 'All loans provided to borrowers',
                 'is_control_account' => true,
             ]);
 
@@ -128,6 +234,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'name' => 'General Loan',
                 'type' => 'asset',
                 'parent_id' => $loanPortfolio->id,
+                'description' => 'General purpose loans',
             ]);
 
             LedgerAccount::create([
@@ -136,6 +243,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'name' => 'Education Loan',
                 'type' => 'asset',
                 'parent_id' => $loanPortfolio->id,
+                'description' => 'Loans provided for educational purposes',
             ]);
 
             LedgerAccount::create([
@@ -144,23 +252,26 @@ class ChartOfAccountsSeeder extends Seeder
                 'name' => 'Housing Loan',
                 'type' => 'asset',
                 'parent_id' => $loanPortfolio->id,
+                'description' => 'Loans provided for housing purposes',
             ]);
 
             LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '1144',
-                'name' => 'sme Loan',
+                'name' => 'SME Loan',
                 'type' => 'asset',
                 'parent_id' => $loanPortfolio->id,
+                'description' => 'Loans for small and medium enterprises',
             ]);
 
-            // FIXED ASSETS
+            // Fixed Assets
             LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '1201',
                 'name' => 'Land',
                 'type' => 'asset',
                 'parent_id' => $fixedAssets->id,
+                'description' => 'Land owned by the organization',
             ]);
 
             LedgerAccount::create([
@@ -169,6 +280,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'name' => 'Building',
                 'type' => 'asset',
                 'parent_id' => $fixedAssets->id,
+                'description' => 'Buildings owned by the organization',
             ]);
 
             LedgerAccount::create([
@@ -177,6 +289,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'name' => 'Office Equipment',
                 'type' => 'asset',
                 'parent_id' => $fixedAssets->id,
+                'description' => 'Office furniture and equipment',
             ]);
 
             // ----------------------------
@@ -187,77 +300,145 @@ class ChartOfAccountsSeeder extends Seeder
                 'code' => '2000',
                 'name' => 'Liabilities',
                 'type' => 'liability',
+                'description' => 'All organizational obligations',
                 'is_control_account' => true,
             ]);
 
+            // ----------------------------
+            // CURRENT LIABILITIES (2100)
+            // ----------------------------
             $currentLiabilities = LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '2100',
                 'name' => 'Current Liabilities',
                 'type' => 'liability',
                 'parent_id' => $liabilities->id,
+                'description' => 'Obligations due within one year',
                 'is_control_account' => true,
             ]);
 
-            // MEMBER DEPOSITS
+            // ----------------------------
+            // MEMBER DEPOSITS (2010)
+            // ----------------------------
             $memberDeposits = LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '2010',
                 'name' => 'Member Deposits',
                 'type' => 'liability',
                 'parent_id' => $currentLiabilities->id,
+                'description' => 'Deposits made by members/customers',
                 'is_control_account' => true,
             ]);
 
-            LedgerAccount::create([
-                'organization_id' => $organization->id,
-                'code' => '2011',
-                'name' => 'Savings Deposit',
-                'type' => 'liability',
-                'parent_id' => $memberDeposits->id,
+            LedgerAccount::insert([
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '2011',
+                    'name' => 'Savings Deposit',
+                    'type' => 'liability',
+                    'parent_id' => $memberDeposits->id,
+                    'description' => 'Deposits in member savings accounts',
+                ],
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '2012',
+                    'name' => 'Fixed Deposit',
+                    'type' => 'liability',
+                    'parent_id' => $memberDeposits->id,
+                    'description' => 'Time-bound fixed deposits from members',
+                ],
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '2013',
+                    'name' => 'Term Deposit',
+                    'type' => 'liability',
+                    'parent_id' => $memberDeposits->id,
+                    'description' => 'Deposits held for a specific term duration',
+                ],
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '2014',
+                    'name' => 'Interest Payable',
+                    'type' => 'liability',
+                    'parent_id' => $memberDeposits->id,
+                    'description' => 'Interest owed to members on their deposits',
+                ],
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '2015',
+                    'name' => 'Interest in Probation / Suspense',
+                    'type' => 'liability',
+                    'parent_id' => $memberDeposits->id,
+                    'description' => 'Interest pending verification or under probation',
+                ],
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '2016',
+                    'name' => 'Interest Probation Expired / Forfeited',
+                    'type' => 'liability',
+                    'parent_id' => $memberDeposits->id,
+                    'description' => 'Interest forfeited after probation period expiration',
+                ],
             ]);
 
-            LedgerAccount::create([
-                'organization_id' => $organization->id,
-                'code' => '2012',
-                'name' => 'Fixed Deposit',
-                'type' => 'liability',
-                'parent_id' => $memberDeposits->id,
-            ]);
-
-            LedgerAccount::create([
-                'organization_id' => $organization->id,
-                'code' => '2013',
-                'name' => 'Term Deposit',
-                'type' => 'liability',
-                'parent_id' => $memberDeposits->id,
-            ]);
-
-            // PAYABLES (VENDORS)
+            // ----------------------------
+            // PAYABLES (2110)
+            // ----------------------------
             $payables = LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '2110',
                 'name' => 'Payables',
                 'type' => 'liability',
                 'parent_id' => $currentLiabilities->id,
+                'description' => 'Amounts payable to vendors, employees, and others',
                 'is_control_account' => true,
             ]);
 
-            LedgerAccount::create([
-                'organization_id' => $organization->id,
-                'code' => '2111',
-                'name' => 'Vendor Payables',
-                'type' => 'liability',
-                'parent_id' => $payables->id,
+            LedgerAccount::insert([
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '2111',
+                    'name' => 'Vendor Payables',
+                    'type' => 'liability',
+                    'parent_id' => $payables->id,
+                    'description' => 'Amounts owed to suppliers and vendors',
+                ],
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '2112',
+                    'name' => 'Salaries & Benefits Payable',
+                    'type' => 'liability',
+                    'parent_id' => $payables->id,
+                    'description' => 'Unpaid salaries and employee benefits',
+                ],
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '2113',
+                    'name' => 'Tax Payable',
+                    'type' => 'liability',
+                    'parent_id' => $payables->id,
+                    'description' => 'Taxes owed to government authorities',
+                ],
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '2114',
+                    'name' => 'Accrued Expenses / Other Payables',
+                    'type' => 'liability',
+                    'parent_id' => $payables->id,
+                    'description' => 'Expenses incurred but not yet paid',
+                ],
             ]);
 
-            // SUSPENSE
+            // ----------------------------
+            // SUSPENSE ACCOUNTS (2200)
+            // ----------------------------
             $suspense = LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '2200',
                 'name' => 'Suspense Accounts',
                 'type' => 'liability',
                 'parent_id' => $liabilities->id,
+                'description' => 'Temporarily held transactions pending classification',
                 'is_control_account' => true,
             ]);
 
@@ -267,16 +448,18 @@ class ChartOfAccountsSeeder extends Seeder
                 'name' => 'General Suspense',
                 'type' => 'liability',
                 'parent_id' => $suspense->id,
+                'description' => 'Unclassified or temporary liability entries',
             ]);
 
             // ----------------------------
-            // equity (3000)
+            // EQUITY (3000)
             // ----------------------------
             $equity = LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '3000',
                 'name' => 'Equity',
                 'type' => 'equity',
+                'description' => 'Owners’ capital and accumulated profits',
                 'is_control_account' => true,
             ]);
 
@@ -286,6 +469,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'name' => 'Share Capital',
                 'type' => 'equity',
                 'parent_id' => $equity->id,
+                'description' => 'Capital contributed by shareholders or members',
             ]);
 
             LedgerAccount::create([
@@ -294,16 +478,33 @@ class ChartOfAccountsSeeder extends Seeder
                 'name' => 'Retained Earnings',
                 'type' => 'equity',
                 'parent_id' => $equity->id,
+                'description' => 'Accumulated profits retained in the organization',
             ]);
 
             // ----------------------------
-            // income (4000)
+            // INCOME (4000)
             // ----------------------------
             $income = LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '4000',
                 'name' => 'Income',
                 'type' => 'income',
+                'description' => 'Revenue earned from core and other operations',
+                'is_control_account' => true,
+            ]);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Loan Related Income
+            |--------------------------------------------------------------------------
+            */
+            $loanIncome = LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '4100',
+                'name' => 'Loan Income',
+                'type' => 'income',
+                'parent_id' => $income->id,
+                'description' => 'Revenue generated from loans provided to members/customers',
                 'is_control_account' => true,
             ]);
 
@@ -312,7 +513,8 @@ class ChartOfAccountsSeeder extends Seeder
                 'code' => '4101',
                 'name' => 'Loan Interest Income',
                 'type' => 'income',
-                'parent_id' => $income->id,
+                'parent_id' => $loanIncome->id,
+                'description' => 'Interest earned from outstanding loan balances',
             ]);
 
             LedgerAccount::create([
@@ -320,7 +522,8 @@ class ChartOfAccountsSeeder extends Seeder
                 'code' => '4102',
                 'name' => 'Late Payment Fine',
                 'type' => 'income',
-                'parent_id' => $income->id,
+                'parent_id' => $loanIncome->id,
+                'description' => 'Penalties collected for late loan repayments',
             ]);
 
             LedgerAccount::create([
@@ -328,7 +531,8 @@ class ChartOfAccountsSeeder extends Seeder
                 'code' => '4103',
                 'name' => 'Loan Insurance Fee',
                 'type' => 'income',
-                'parent_id' => $income->id,
+                'parent_id' => $loanIncome->id,
+                'description' => 'Insurance fees charged on loans',
             ]);
 
             LedgerAccount::create([
@@ -336,7 +540,117 @@ class ChartOfAccountsSeeder extends Seeder
                 'code' => '4104',
                 'name' => 'Insurance Renewal Fee',
                 'type' => 'income',
+                'parent_id' => $loanIncome->id,
+                'description' => 'Fees from renewal of loan-related insurance policies',
+            ]);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Service / Software Income
+            |--------------------------------------------------------------------------
+            */
+            $serviceIncome = LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '4200',
+                'name' => 'Service Income',
+                'type' => 'income',
                 'parent_id' => $income->id,
+                'description' => 'Revenue from software, IT, and other services',
+                'is_control_account' => true,
+            ]);
+
+            LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '4201',
+                'name' => 'Installation Income',
+                'type' => 'income',
+                'parent_id' => $serviceIncome->id,
+                'description' => 'Fees for installation services provided to clients',
+            ]);
+
+            LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '4202',
+                'name' => 'Migration Income',
+                'type' => 'income',
+                'parent_id' => $serviceIncome->id,
+                'description' => 'Revenue from data or system migration projects',
+            ]);
+
+            LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '4203',
+                'name' => 'Monthly Service Income',
+                'type' => 'income',
+                'parent_id' => $serviceIncome->id,
+                'description' => 'Recurring monthly charges for service subscriptions',
+            ]);
+
+            LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '4204',
+                'name' => 'Support & Maintenance Income',
+                'type' => 'income',
+                'parent_id' => $serviceIncome->id,
+                'description' => 'Revenue from ongoing support and maintenance contracts',
+            ]);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Other Income
+            |--------------------------------------------------------------------------
+            */
+            $otherIncome = LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '4300',
+                'name' => 'Other Income',
+                'type' => 'income',
+                'parent_id' => $income->id,
+                'description' => 'Miscellaneous or non-core income sources',
+                'is_control_account' => true,
+            ]);
+
+            LedgerAccount::insert([
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '4301',
+                    'name' => 'Interest Income (Non-Loan)',
+                    'type' => 'income',
+                    'parent_id' => $otherIncome->id,
+                    'description' => 'Interest earned from investments or deposits',
+                ],
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '4310',
+                    'name' => 'Gain on Sale of Assets',
+                    'type' => 'income',
+                    'parent_id' => $otherIncome->id,
+                    'description' => 'Profit from selling company assets',
+                ],
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '4320',
+                    'name' => 'Gain on Sale of Non-Assets',
+                    'type' => 'income',
+                    'parent_id' => $otherIncome->id,
+                    'description' => 'Profit from selling items not classified as assets',
+                ],
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '4330',
+                    'name' => 'Miscellaneous Income',
+                    'type' => 'income',
+                    'parent_id' => $otherIncome->id,
+                    'description' => 'One-off or incidental income items',
+                ],
+                [
+                    'organization_id' => $organization->id,
+                    'code' => '4340',
+                    'name' => 'Service Fees (One-Off / Non-Regular)',
+                    'type' => 'income',
+                    'parent_id' => $otherIncome->id,
+                    'description' => 'Non-recurring service fee income',
+                ],
             ]);
 
             // ----------------------------
@@ -347,6 +661,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'code' => '5000',
                 'name' => 'Expenses',
                 'type' => 'expense',
+                'description' => 'All operating, financial, and other expenses',
                 'is_control_account' => true,
             ]);
 
@@ -359,73 +674,31 @@ class ChartOfAccountsSeeder extends Seeder
                 'name' => 'Operating Expenses',
                 'type' => 'expense',
                 'parent_id' => $expenses->id,
+                'description' => 'Day-to-day operational costs',
                 'is_control_account' => true,
             ]);
 
             LedgerAccount::insert([
-                [
-                    'organization_id' => $organization->id,
-                    'code' => '5101',
-                    'name' => 'Salaries & Wages',
-                    'type' => 'expense',
-                    'parent_id' => $operatingExpenses->id,
-                ],
-                [
-                    'organization_id' => $organization->id,
-                    'code' => '5102',
-                    'name' => 'Office Expenses',
-                    'type' => 'expense',
-                    'parent_id' => $operatingExpenses->id,
-                ],
-                [
-                    'organization_id' => $organization->id,
-                    'code' => '5103',
-                    'name' => 'Utilities',
-                    'type' => 'expense',
-                    'parent_id' => $operatingExpenses->id,
-                ],
-                [
-                    'organization_id' => $organization->id,
-                    'code' => '5104',
-                    'name' => 'Stationery',
-                    'type' => 'expense',
-                    'parent_id' => $operatingExpenses->id,
-                ],
-                [
-                    'organization_id' => $organization->id,
-                    'code' => '5105',
-                    'name' => 'Printing & Photocopy',
-                    'type' => 'expense',
-                    'parent_id' => $operatingExpenses->id,
-                ],
-                [
-                    'organization_id' => $organization->id,
-                    'code' => '5106',
-                    'name' => 'Office Supplies',
-                    'type' => 'expense',
-                    'parent_id' => $operatingExpenses->id,
-                ],
-                [
-                    'organization_id' => $organization->id,
-                    'code' => '5107',
-                    'name' => 'Cleaning Materials',
-                    'type' => 'expense',
-                    'parent_id' => $operatingExpenses->id,
-                ],
-                [
-                    'organization_id' => $organization->id,
-                    'code' => '5108',
-                    'name' => 'Pantry / Snacks',
-                    'type' => 'expense',
-                    'parent_id' => $operatingExpenses->id,
-                ],
-                [
-                    'organization_id' => $organization->id,
-                    'code' => '5109',
-                    'name' => 'Courier / Delivery',
-                    'type' => 'expense',
-                    'parent_id' => $operatingExpenses->id,
-                ],
+                // Human Resources
+                ['organization_id' => $organization->id, 'code' => '5101', 'name' => 'Salaries & Wages', 'type' => 'expense', 'parent_id' => $operatingExpenses->id, 'description' => 'Employee salary payments'],
+                ['organization_id' => $organization->id, 'code' => '5102', 'name' => 'Employee Benefits & Allowances', 'type' => 'expense', 'parent_id' => $operatingExpenses->id, 'description' => 'Benefits, insurance, and allowances'],
+
+                // Office/Admin
+                ['organization_id' => $organization->id, 'code' => '5103', 'name' => 'Office Rent', 'type' => 'expense', 'parent_id' => $operatingExpenses->id, 'description' => 'Rental payments for office premises'],
+                ['organization_id' => $organization->id, 'code' => '5104', 'name' => 'Office Utilities', 'type' => 'expense', 'parent_id' => $operatingExpenses->id, 'description' => 'Electricity, water, and utility bills'],
+                ['organization_id' => $organization->id, 'code' => '5105', 'name' => 'Office Supplies & Stationery', 'type' => 'expense', 'parent_id' => $operatingExpenses->id, 'description' => 'Consumables for office operations'],
+                ['organization_id' => $organization->id, 'code' => '5106', 'name' => 'Printing & Photocopy', 'type' => 'expense', 'parent_id' => $operatingExpenses->id, 'description' => 'Printing and copying costs'],
+                ['organization_id' => $organization->id, 'code' => '5107', 'name' => 'Cleaning & Pantry Supplies', 'type' => 'expense', 'parent_id' => $operatingExpenses->id, 'description' => 'Cleaning materials and pantry consumables'],
+                ['organization_id' => $organization->id, 'code' => '5108', 'name' => 'Courier & Delivery', 'type' => 'expense', 'parent_id' => $operatingExpenses->id, 'description' => 'Postage and delivery expenses'],
+
+                // IT / Tech
+                ['organization_id' => $organization->id, 'code' => '5110', 'name' => 'IT Software & Licenses', 'type' => 'expense', 'parent_id' => $operatingExpenses->id, 'description' => 'Software licenses and subscriptions'],
+                ['organization_id' => $organization->id, 'code' => '5111', 'name' => 'IT Hardware & Maintenance', 'type' => 'expense', 'parent_id' => $operatingExpenses->id, 'description' => 'Hardware costs and maintenance'],
+                ['organization_id' => $organization->id, 'code' => '5112', 'name' => 'Internet & Telecommunications', 'type' => 'expense', 'parent_id' => $operatingExpenses->id, 'description' => 'Internet, phone, and telecom charges'],
+
+                // Member / Service Expenses
+                ['organization_id' => $organization->id, 'code' => '5120', 'name' => 'Member Services Expenses', 'type' => 'expense', 'parent_id' => $operatingExpenses->id, 'description' => 'Costs of services provided to members'],
+                ['organization_id' => $organization->id, 'code' => '5121', 'name' => 'Promotional & Marketing Expenses', 'type' => 'expense', 'parent_id' => $operatingExpenses->id, 'description' => 'Advertising, promotions, and marketing campaigns'],
             ]);
 
             // ----------------------------
@@ -437,31 +710,14 @@ class ChartOfAccountsSeeder extends Seeder
                 'name' => 'Financial Expenses',
                 'type' => 'expense',
                 'parent_id' => $expenses->id,
+                'description' => 'Interest and other financial costs',
                 'is_control_account' => true,
             ]);
 
             LedgerAccount::insert([
-                [
-                    'organization_id' => $organization->id,
-                    'code' => '5201',
-                    'name' => 'Savings Interest Expense',
-                    'type' => 'expense',
-                    'parent_id' => $financialExpenses->id,
-                ],
-                [
-                    'organization_id' => $organization->id,
-                    'code' => '5202',
-                    'name' => 'Fixed Deposit Interest Expense',
-                    'type' => 'expense',
-                    'parent_id' => $financialExpenses->id,
-                ],
-                [
-                    'organization_id' => $organization->id,
-                    'code' => '5203',
-                    'name' => 'Term Deposit Interest Expense',
-                    'type' => 'expense',
-                    'parent_id' => $financialExpenses->id,
-                ],
+                ['organization_id' => $organization->id, 'code' => '5201', 'name' => 'Savings Interest Expense', 'type' => 'expense', 'parent_id' => $financialExpenses->id, 'description' => 'Interest paid on savings accounts'],
+                ['organization_id' => $organization->id, 'code' => '5202', 'name' => 'Fixed Deposit Interest Expense', 'type' => 'expense', 'parent_id' => $financialExpenses->id, 'description' => 'Interest on fixed deposits'],
+                ['organization_id' => $organization->id, 'code' => '5203', 'name' => 'Term Deposit Interest Expense', 'type' => 'expense', 'parent_id' => $financialExpenses->id, 'description' => 'Interest on term deposits'],
             ]);
 
             // ----------------------------
@@ -473,6 +729,7 @@ class ChartOfAccountsSeeder extends Seeder
                 'name' => 'Provisions',
                 'type' => 'expense',
                 'parent_id' => $expenses->id,
+                'description' => 'Funds set aside for potential liabilities or losses',
                 'is_control_account' => true,
             ]);
 
@@ -482,6 +739,26 @@ class ChartOfAccountsSeeder extends Seeder
                 'name' => 'Provision For Loan Losses',
                 'type' => 'expense',
                 'parent_id' => $provisions->id,
+                'description' => 'Estimated losses from bad loans',
+            ]);
+
+            // ----------------------------
+            // NON-OPERATING / OTHER EXPENSES (5400)
+            // ----------------------------
+            $otherExpenses = LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '5400',
+                'name' => 'Other Expenses',
+                'type' => 'expense',
+                'parent_id' => $expenses->id,
+                'description' => 'Non-core or one-off expenses',
+                'is_control_account' => true,
+            ]);
+
+            LedgerAccount::insert([
+                ['organization_id' => $organization->id, 'code' => '5401', 'name' => 'Loss on Sale of Assets', 'type' => 'expense', 'parent_id' => $otherExpenses->id, 'description' => 'Loss incurred on asset disposals'],
+                ['organization_id' => $organization->id, 'code' => '5402', 'name' => 'Write-Offs / Bad Debts', 'type' => 'expense', 'parent_id' => $otherExpenses->id, 'description' => 'Unrecoverable debts or write-offs'],
+                ['organization_id' => $organization->id, 'code' => '5403', 'name' => 'Fines & Penalties', 'type' => 'expense', 'parent_id' => $otherExpenses->id, 'description' => 'Legal fines or regulatory penalties'],
             ]);
 
             $this->command->info('✅ full Banking-Grade COA Seeded Successfully!');

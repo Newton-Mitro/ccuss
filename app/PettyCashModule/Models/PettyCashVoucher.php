@@ -34,7 +34,7 @@ class PettyCashVoucher extends Model
         return $this->hasMany(PettyCashVoucherItem::class);
     }
 
-    public function vouchers()
+    public function journal_entries()
     {
         return $this->morphMany(PettyCashTransaction::class, 'reference');
     }

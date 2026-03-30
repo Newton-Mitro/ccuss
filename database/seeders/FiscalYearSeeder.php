@@ -39,13 +39,12 @@ class FiscalYearSeeder extends Seeder
         for ($i = 0; $i < 12; $i++) {
             $periodStart = (clone $start)->addMonths($i);
 
-            FiscalPeriod::create([
-                'organization_id' => $organization->id,
+            FiscalPeriod::factory()->create([
                 'fiscal_year_id' => $fy->id,
                 'period_name' => strtoupper($periodStart->format('M-Y')),
-                'start_date' => $periodStart->copy()->startOfMonth(),
-                'end_date' => $periodStart->copy()->endOfMonth(),
-                'is_open' => true,
+                'start_date' => $periodStart->copy()->startOfMonth()->toDateString(),
+                'end_date' => $periodStart->copy()->endOfMonth()->toDateString(),
+                'status' => 'open', // default status
             ]);
         }
 
