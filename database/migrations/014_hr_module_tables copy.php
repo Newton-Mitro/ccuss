@@ -22,28 +22,15 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        Schema::create('allowance_categories', function (Blueprint $table) {
-            $table->id();
-            $table->string('name'); // e.g., 'mobile', 'internet' etc.
-            $table->string('description')->nullable(); // optional details
-            $table->boolean('is_active')->default(true);
-            $table->timestamps();
-        });
 
-        Schema::create('employee_monthly_allowances', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('employee_id')->constrained('employees')->cascadeOnDelete();
-            $table->foreignId('category_id')->constrained('allowance_categories')->cascadeOnDelete();
-            $table->decimal('amount', 15, 2)->default(0);
-            $table->timestamps();
-            $table->unique(['employee_id', 'category_id']); // one row per category per employee per month
-        });
+
+
+
+
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('employee_monthly_allowances');
-        Schema::dropIfExists('allowance_categories');
         Schema::dropIfExists('employees');
     }
 };

@@ -108,7 +108,7 @@ class ChartOfAccountsSeeder extends Seeder
             LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '13001',
-                'name' => 'Petty Cash Advances',
+                'name' => 'Advance Petty Cash',
                 'type' => 'asset',
                 'parent_id' => $employeeAdvances->id,
             ]);
@@ -116,7 +116,7 @@ class ChartOfAccountsSeeder extends Seeder
             LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '13002',
-                'name' => 'Salary Advances',
+                'name' => 'Advance Salary',
                 'type' => 'asset',
                 'parent_id' => $employeeAdvances->id,
             ]);

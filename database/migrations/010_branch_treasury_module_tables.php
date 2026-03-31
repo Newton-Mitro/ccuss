@@ -49,7 +49,7 @@ return new class extends Migration {
         // Tellers
         Schema::create('tellers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete(); // role: teller
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             $table->string('code', 20)->unique();
             $table->string('name');

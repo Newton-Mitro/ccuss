@@ -152,6 +152,7 @@ return new class extends Migration {
             $table->decimal('penalty_amount', 15, 2)->default(0);
         });
 
+        // daily provisioning of interest and monthly post to gl account
         Schema::create('deposit_interest_accruals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('deposit_account_id')->constrained()->cascadeOnDelete();
