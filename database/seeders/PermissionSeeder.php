@@ -166,6 +166,13 @@ class PermissionSeeder extends Seeder
                 'description' => 'Responsible for driving sales, customer onboarding, and product promotion.'
             ]
         );
+        $employee = Role::firstOrCreate(
+            ['slug' => 'employee'],
+            [
+                'name' => 'Employee',
+                'description' => 'Regular employee with limited access to certain modules.'
+            ]
+        );
         $basicUser = Role::firstOrCreate(
             ['slug' => 'basic_user'],
             [

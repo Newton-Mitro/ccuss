@@ -51,8 +51,6 @@ export default function CustomAuthLayout({
     const auth = page.props?.auth;
     const cleanup = useMobileNavigation();
 
-    console.log(auth.user);
-
     /* ------------------------------------------------------------------
      * Sidebar state
      * ------------------------------------------------------------------ */

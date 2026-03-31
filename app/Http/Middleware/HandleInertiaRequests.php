@@ -49,16 +49,7 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
-                'user' => $user ? [
-                    'id' => $user->id,
-                    'name' => $user->name,
-
-                    'organization' => $user->organization,
-                    'branch' => $user->branch,
-
-                    'roles' => $user->roles->pluck('name'),
-                    'permissions' => $user->permissions->pluck('slug'),
-                ] : null,
+                'user' => $user,
             ],
             'flash' => [
                 'success' => fn() => session('success'),

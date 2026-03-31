@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
 class User extends Authenticatable
@@ -22,6 +23,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'photo_path',
+        'status',
     ];
 
     protected $hidden = [
@@ -40,7 +43,10 @@ class User extends Authenticatable
         ];
     }
 
-    protected $appends = ['permissions'];
+    protected $appends = [
+        'permissions',
+        'avatar',
+    ];
 
     /*
     |--------------------------------------------------------------------------
@@ -68,12 +74,28 @@ class User extends Authenticatable
         return $this->belongsToMany(Role::class);
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
+
     public function getPermissionsAttribute()
     {
         return $this->roles
+            ->loadMissing('permissions')
             ->flatMap(fn($role) => $role->permissions)
             ->unique('id')
             ->values();
+    }
+
+    public function getAvatarAttribute(): ?string
+    {
+        if (!$this->photo_path) {
+            return null; // or return default avatar
+        }
+
+        return Storage::disk('public')->url($this->photo_path);
     }
 
     /*
@@ -100,27 +122,14 @@ class User extends Authenticatable
 
     public function hasPermission(string $permission): bool
     {
-        // Direct permission
-        if ($this->permissions->contains('name', $permission)) {
-            return true;
-        }
-
-        // Permission through roles
-        return $this->roles
-            ->flatMap->permissions
-            ->pluck('name')
-            ->contains($permission);
+        return $this->permissions->contains('name', $permission);
     }
 
     public function hasAnyPermission(array $permissions): bool
     {
-        foreach ($permissions as $permission) {
-            if ($this->hasPermission($permission)) {
-                return true;
-            }
-        }
-
-        return false;
+        return collect($permissions)->contains(
+            fn($permission) => $this->hasPermission($permission)
+        );
     }
 
     protected static function newFactory()

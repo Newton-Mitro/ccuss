@@ -65,15 +65,15 @@ return new class extends Migration {
         // -----------------------
         Schema::create('transaction_types', function (Blueprint $table) {
             $table->id();
-            $table->string('code')->unique(); // e.g. cash_deposit, loan_disbursement
-            $table->string('name'); // Human readable
-            $table->string('category'); // cash, loan, vendor, fee, system
+            $table->string('code')->unique(); // e.g., cash_deposit, loan_disbursement
+            $table->string('name');           // Human-readable
+            $table->string('category');       // cash, loan, vendor, fee, system
             $table->boolean('is_cash')->default(false);
             $table->boolean('affects_balance')->default(true);
             $table->boolean('requires_approval')->default(false);
             $table->boolean('is_system')->default(false);
             $table->enum('direction', ['inflow', 'outflow', 'both'])->default('both');
-            $table->json('meta')->nullable();
+            $table->json('meta')->nullable(); // extra metadata
             $table->timestamps();
         });
 
@@ -82,15 +82,17 @@ return new class extends Migration {
         // -----------------------
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->constrained();
-            $table->foreignId('transaction_type_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('transaction_type_id')->constrained('transaction_types')->cascadeOnDelete();
             $table->decimal('amount', 15, 2);
             $table->date('transaction_date');
             $table->string('reference')->nullable();
             $table->enum('status', ['draft', 'approved', 'posted', 'cancelled'])->default('draft');
-            $table->foreignId('branch_id')->constrained();
-            $table->foreignId('customer_id')->nullable()->constrained();
+            $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('customer_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
+
             $table->index(['transaction_type_id', 'status']);
             $table->index(['transaction_date']);
         });
@@ -101,23 +103,39 @@ return new class extends Migration {
         Schema::create('transaction_allocations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('transaction_id')->constrained()->cascadeOnDelete();
-            $table->morphs('account'); // DepositAccount/Loan/Vault/Teller
+
+            // Polymorphic account (DepositAccount / Loan / Vault / Teller / PettyCash / Bank)
+            $table->morphs('account');
+
             $table->decimal('amount', 15, 2);
-            $table->string('allocation_type')->nullable(); // principal, interest, etc.
-            $table->nullableMorphs('reference'); // invoice, loan schedule, etc.
+            $table->string('allocation_type')->nullable(); // e.g., principal, interest, fee
+
+            // Polymorphic reference for external entities like invoice, loan schedule, payment
+            $table->nullableMorphs('reference');
+
             $table->timestamps();
+
+            // Indexes
             $table->index(['account_type', 'account_id'], 'txn_alloc_account_type_idx');
             $table->index(['transaction_id']);
         });
 
+        // -----------------------
+        // Loan Allocation Details
+        // -----------------------
         Schema::create('loan_allocation_details', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('transaction_allocation_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('transaction_allocation_id')
+                ->constrained('transaction_allocations')
+                ->cascadeOnDelete();
+
             $table->decimal('principal_amount', 15, 2)->default(0);
             $table->decimal('interest_amount', 15, 2)->default(0);
             $table->decimal('penalty_amount', 15, 2)->default(0);
             $table->decimal('other_amount', 15, 2)->default(0);
+
             $table->timestamps();
+
             $table->index(['transaction_allocation_id']);
         });
 

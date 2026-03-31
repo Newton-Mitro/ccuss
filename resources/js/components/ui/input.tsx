@@ -24,7 +24,7 @@ function Input({
           // base (fully theme-driven)
           "flex h-8 w-full min-w-0 rounded-md border border-border",
           "bg-background text-foreground",
-          "px-3 py-1 text-sm shadow-sm outline-none",
+          "px-3 py-1 text-sm  outline-none",
           "transition-[color,box-shadow,border-color,background-color]",
 
           // file input

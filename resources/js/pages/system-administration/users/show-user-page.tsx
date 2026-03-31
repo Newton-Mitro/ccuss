@@ -94,7 +94,7 @@ function ShowUser() {
                             ? user.permissions.map((perm) => (
                                   <span
                                       key={perm.id}
-                                      className="rounded bg-info/20 px-2 py-1 text-xs font-medium text-info"
+                                      className="rounded bg-accent/30 px-2 py-1 text-xs font-medium text-accent-foreground"
                                   >
                                       {perm.name}
                                   </span>

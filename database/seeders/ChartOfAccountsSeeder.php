@@ -92,6 +92,35 @@ class ChartOfAccountsSeeder extends Seeder
                 'description' => 'Cash held by teller for transactions',
             ]);
 
+            // ----------------------------
+            // EMPLOYEE ADVANCES (1300) ✅ CRITICAL
+            // ----------------------------
+            $employeeAdvances = LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '1300',
+                'name' => 'Employee Advances',
+                'type' => 'asset',
+                'parent_id' => $currentAssets->id,
+                'description' => 'Advances given to employees',
+                'is_control_account' => true,
+            ]);
+
+            LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '13001',
+                'name' => 'Petty Cash Advances',
+                'type' => 'asset',
+                'parent_id' => $employeeAdvances->id,
+            ]);
+
+            LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '13002',
+                'name' => 'Salary Advances',
+                'type' => 'asset',
+                'parent_id' => $employeeAdvances->id,
+            ]);
+
             // RECEIVABLES
             $receivables = LedgerAccount::create([
                 'organization_id' => $organization->id,
@@ -699,6 +728,27 @@ class ChartOfAccountsSeeder extends Seeder
                 // Member / Service Expenses
                 ['organization_id' => $organization->id, 'code' => '5120', 'name' => 'Member Services Expenses', 'type' => 'expense', 'parent_id' => $operatingExpenses->id, 'description' => 'Costs of services provided to members'],
                 ['organization_id' => $organization->id, 'code' => '5121', 'name' => 'Promotional & Marketing Expenses', 'type' => 'expense', 'parent_id' => $operatingExpenses->id, 'description' => 'Advertising, promotions, and marketing campaigns'],
+            ]);
+
+            // ----------------------------
+            // PETTY CASH EXPENSES (5130)
+            // ----------------------------
+            $pettyCashExpenses = LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '5130',
+                'name' => 'Petty Cash Expenses',
+                'type' => 'expense',
+                'parent_id' => $operatingExpenses->id,
+                'description' => 'Expenses incurred via petty cash',
+                'is_control_account' => true,
+            ]);
+
+            LedgerAccount::insert([
+                ['organization_id' => $organization->id, 'code' => '5131', 'name' => 'Petty Cash - Travel', 'type' => 'expense', 'parent_id' => $pettyCashExpenses->id],
+                ['organization_id' => $organization->id, 'code' => '5132', 'name' => 'Petty Cash - Refreshments', 'type' => 'expense', 'parent_id' => $pettyCashExpenses->id],
+                ['organization_id' => $organization->id, 'code' => '5133', 'name' => 'Petty Cash - Office Misc', 'type' => 'expense', 'parent_id' => $pettyCashExpenses->id],
+                ['organization_id' => $organization->id, 'code' => '5134', 'name' => 'Petty Cash - Repairs', 'type' => 'expense', 'parent_id' => $pettyCashExpenses->id],
+                ['organization_id' => $organization->id, 'code' => '5135', 'name' => 'Petty Cash - Staff Welfare', 'type' => 'expense', 'parent_id' => $pettyCashExpenses->id],
             ]);
 
             // ----------------------------

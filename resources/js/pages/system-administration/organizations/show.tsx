@@ -25,9 +25,9 @@ function Show() {
 
                 {/* 🔹 Header Card */}
                 <div className="flex items-center gap-4 rounded-lg border bg-card p-4 shadow-sm">
-                    {organization.logo_path ? (
+                    {organization.logo_url ? (
                         <img
-                            src={`/storage/${organization.logo_path}`}
+                            src={organization.logo_url}
                             alt="Logo"
                             className="h-16 w-16 rounded-lg border object-cover"
                         />

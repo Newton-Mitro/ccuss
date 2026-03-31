@@ -1,6 +1,6 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Key, Loader2 } from 'lucide-react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
@@ -37,7 +37,7 @@ const UserForm = ({
 
     const isEdit = !!user;
 
-    const { data, setData, post, put, processing, errors } = useForm({
+    const { data, setData, processing, errors } = useForm({
         name: user?.name || '',
         email: user?.email || '',
         password: '',
@@ -45,23 +45,60 @@ const UserForm = ({
         organization_id: user?.organization_id || '',
         branch_id: user?.branch_id || '',
         roles: user?.roles?.map((r: any) => r.id) || [],
+        photo: null as File | null,
     });
+
+    console.log(user);
+
+    const [photoPreview, setPhotoPreview] = useState<string | null>(
+        user?.avatar || null,
+    );
+    const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            if (!file) return;
+            // Validate type
+            if (!file.type.startsWith('image/')) {
+                alert('Only image files are allowed');
+                return;
+            }
+            // Optional: limit size (e.g., 3MB)
+            if (file.size > 3 * 1024 * 1024) {
+                alert('Image must be less than 2MB');
+                return;
+            }
+            setData('photo', file);
+            setPhotoPreview(URL.createObjectURL(file));
+        }
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
         const payload = new FormData();
+
         Object.entries(data).forEach(([key, value]) => {
-            if (value !== null) payload.append(key, value as any);
+            if (value !== null && value !== undefined) {
+                if (Array.isArray(value)) {
+                    value.forEach((v) => payload.append(`${key}[]`, v));
+                } else {
+                    payload.append(key, value as any);
+                }
+            }
         });
 
         if (isEdit) {
-            put(`/users/${user.id}`, {
+            payload.append('_method', 'PUT'); // ✅ method spoofing
+
+            router.post(`/users/${user.id}`, payload, {
                 preserveScroll: true,
+                forceFormData: true,
                 onError: (err) => toast.error(JSON.stringify(err)),
             });
         } else {
-            post('/users', {
+            router.post('/users', payload, {
                 preserveScroll: true,
+                forceFormData: true,
                 onError: (err) => toast.error(JSON.stringify(err)),
             });
         }
@@ -101,88 +138,139 @@ const UserForm = ({
 
             <form
                 onSubmit={handleSubmit}
-                className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6 lg:w-5xl"
+                className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6"
             >
-                {/* basic INFO */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <div>
-                        <Label className="text-xs">Name</Label>
-                        <Input
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
-                            className="h-8 text-sm"
-                        />
-                        <InputError message={errors.name} />
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+                    {/* LEFT: FORM */}
+                    <div className="grid flex-1 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                        <div>
+                            <Label className="text-xs">Organization</Label>
+                            <Select
+                                value={data.organization_id?.toString()}
+                                onChange={(val) =>
+                                    setData('organization_id', Number(val))
+                                }
+                                options={organizations.map((org) => ({
+                                    value: org.id.toString(),
+                                    label: org.name,
+                                }))}
+                                placeholder="Select Organization"
+                            />
+                            <InputError message={errors.organization_id} />
+                        </div>
+
+                        <div>
+                            <Label className="text-xs">Branch</Label>
+                            <Select
+                                value={data.branch_id?.toString()}
+                                onChange={(val) =>
+                                    setData('branch_id', Number(val))
+                                }
+                                options={branches.map((b) => ({
+                                    value: b.id.toString(),
+                                    label: b.name,
+                                }))}
+                                placeholder="Select Branch"
+                            />
+                            <InputError message={errors.branch_id} />
+                        </div>
+
+                        <div>
+                            <Label className="text-xs">Name</Label>
+                            <Input
+                                value={data.name}
+                                onChange={(e) =>
+                                    setData('name', e.target.value)
+                                }
+                                className="h-9 text-sm"
+                            />
+                            <InputError message={errors.name} />
+                        </div>
+
+                        <div>
+                            <Label className="text-xs">Email</Label>
+                            <Input
+                                value={data.email}
+                                onChange={(e) =>
+                                    setData('email', e.target.value)
+                                }
+                                className="h-9 text-sm"
+                            />
+                            <InputError message={errors.email} />
+                        </div>
+
+                        <div>
+                            <Label className="text-xs">Password</Label>
+                            <Input
+                                type="password"
+                                value={data.password}
+                                onChange={(e) =>
+                                    setData('password', e.target.value)
+                                }
+                                className="h-9 text-sm"
+                            />
+                            <InputError message={errors.password} />
+                        </div>
+
+                        <div>
+                            <Label className="text-xs">Confirm Password</Label>
+                            <Input
+                                type="password"
+                                value={data.password_confirmation}
+                                onChange={(e) =>
+                                    setData(
+                                        'password_confirmation',
+                                        e.target.value,
+                                    )
+                                }
+                                className="h-9 text-sm"
+                            />
+                            <InputError
+                                message={errors.password_confirmation}
+                            />
+                        </div>
                     </div>
-                    <div>
-                        <Label className="text-xs">Email</Label>
-                        <Input
-                            value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
-                            className="h-8 text-sm"
-                        />
-                        <InputError message={errors.email} />
-                    </div>
-                    <div>
-                        <Label className="text-xs">Password</Label>
-                        <Input
-                            type="password"
-                            value={data.password}
-                            onChange={(e) =>
-                                setData('password', e.target.value)
-                            }
-                            className="h-8 text-sm"
-                        />
-                        <InputError message={errors.password} />
-                    </div>
-                    <div>
-                        <Label className="text-xs">Confirm Password</Label>
-                        <Input
-                            type="password"
-                            value={data.password_confirmation}
-                            onChange={(e) =>
-                                setData('password_confirmation', e.target.value)
-                            }
-                            className="h-8 text-sm"
-                        />
-                        <InputError message={errors.password_confirmation} />
-                    </div>
-                    <div>
-                        <Label className="text-xs">Organization</Label>
-                        <Select
-                            value={data.organization_id.toString()}
-                            onChange={(val) =>
-                                setData('organization_id', Number(val))
-                            }
-                            options={organizations.map((org) => ({
-                                value: org.id.toString(),
-                                label: org.name,
-                            }))}
-                            placeholder="Select Organization"
-                        />
-                        <InputError message={errors.organization_id} />
-                    </div>
-                    <div>
-                        <Label className="text-xs">Branch</Label>
-                        <Select
-                            value={data.branch_id.toString()}
-                            onChange={(val) =>
-                                setData('branch_id', Number(val))
-                            }
-                            options={branches.map((b) => ({
-                                value: b.id.toString(),
-                                label: b.name,
-                            }))}
-                            placeholder="Select Branch"
-                        />
-                        <InputError message={errors.branch_id} />
+
+                    {/* RIGHT: AVATAR */}
+                    <div className="flex w-full justify-center lg:w-64 lg:justify-center">
+                        <label className="group relative cursor-pointer">
+                            {/* Avatar */}
+                            {photoPreview ? (
+                                <img
+                                    src={photoPreview}
+                                    alt="Preview"
+                                    className="h-32 w-32 rounded-full border object-cover sm:h-40 sm:w-40"
+                                />
+                            ) : (
+                                <div className="flex h-32 w-32 items-center justify-center rounded-full border bg-muted sm:h-40 sm:w-40">
+                                    <span className="text-sm font-semibold text-muted-foreground">
+                                        No Photo
+                                    </span>
+                                </div>
+                            )}
+
+                            {/* Overlay */}
+                            <div className="absolute inset-0 hidden items-center justify-center rounded-full bg-black/50 transition group-hover:flex">
+                                <span className="text-xs font-medium text-white">
+                                    Upload
+                                </span>
+                            </div>
+
+                            {/* Input */}
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handlePhotoChange}
+                                className="hidden"
+                            />
+                        </label>
                     </div>
                 </div>
 
                 {/* ROLES */}
                 <div>
                     <Label className="text-xs">Roles</Label>
-                    <div className="mt-1 grid h-[calc(100vh-34rem)] grid-cols-3 gap-2 overflow-y-auto rounded-md border p-2">
+                    <div className="mt-1 grid h-[calc(100vh-34rem)] grid-cols-1 gap-2 overflow-y-auto rounded-md border p-2 md:grid-cols-2 lg:grid-cols-3">
                         {roles.map((role) => (
                             <label
                                 key={role.id}
