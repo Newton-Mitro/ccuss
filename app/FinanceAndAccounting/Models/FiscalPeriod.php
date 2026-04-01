@@ -3,7 +3,7 @@
 namespace App\FinanceAndAccounting\Models;
 
 use App\SystemAdministration\Traits\Auditable;
-use App\SystemAdministration\Models\Organization;
+use App\FinanceAndAccounting\Models\FiscalYear;
 use Database\Factories\FiscalPeriodFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,18 +15,17 @@ class FiscalPeriod extends Model
     use HasFactory, Auditable;
 
     protected $fillable = [
-        'organization_id',
         'fiscal_year_id',
         'period_name',
         'start_date',
         'end_date',
-        'is_open',
+        'status', // matches your enum in migration
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
-        'is_open' => 'boolean',
+        'status' => 'string',
     ];
 
     /*
@@ -35,19 +34,14 @@ class FiscalPeriod extends Model
     |--------------------------------------------------------------------------
     */
 
-    public function organization(): BelongsTo
-    {
-        return $this->belongsTo(Organization::class);
-    }
-
     public function fiscalYear(): BelongsTo
     {
-        return $this->belongsTo(FiscalYear::class);
+        return $this->belongsTo(FiscalYear::class, 'fiscal_year_id');
     }
 
     public function journal_entries(): HasMany
     {
-        return $this->hasMany(Voucher::class);
+        return $this->hasMany(Voucher::class, 'fiscal_period_id');
     }
 
     /*

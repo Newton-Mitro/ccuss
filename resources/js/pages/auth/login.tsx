@@ -32,7 +32,8 @@ export default function Login({ status, canResetPassword, canRegister }) {
 
                 <div className="mt-3 text-center">
                     <h1 className="text-4xl font-bold tracking-tight">
-                        <span className="text-primary">Union</span> Banking
+                        <span className="text-primary">Union</span>{' '}
+                        <span className="text-foreground/90">Banking</span>
                     </h1>
                     <p className="max-w-sm text-sm text-muted-foreground">
                         Smart core banking & credit solution designed for modern
@@ -56,7 +57,9 @@ export default function Login({ status, canResetPassword, canRegister }) {
                             </h2>
                             <h1 className="text-xl font-bold tracking-tight">
                                 <span className="text-primary">Union</span>{' '}
-                                Banking
+                                <span className="text-foreground/90">
+                                    Banking
+                                </span>
                             </h1>
                             <p className="text-xs text-muted-foreground">
                                 Login to your account to continue

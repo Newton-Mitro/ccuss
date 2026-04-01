@@ -88,19 +88,19 @@ export const financeAndAccountingMenu: SidebarItem[] = [
                     'View and manage all journal_entries (cash, bank, journal, payment).',
             },
             {
-                name: 'General Ledger',
-                icon: <i className="fa-solid fa-book-open-reader" />,
-                path: '/accounting/general-ledger',
-                match_path: 'finance-and-accounting/general-ledger',
-                permission: ['accounting.gl.view'],
-                description:
-                    'View account balances consolidated from posted journal_entries.',
-            },
-            {
                 name: 'Trial Balance',
                 icon: <i className="fa-solid fa-scale-balanced" />,
                 path: '/accounting/trial-balance',
                 match_path: 'finance-and-accounting/trial-balance',
+                permission: ['accounting.trial.view'],
+                description:
+                    'Verify total debits equal total credits; catch errors before reports.',
+            },
+            {
+                name: 'Ledger Statement',
+                icon: <i className="fa-solid fa-scale-balanced" />,
+                path: '/accounting/ledger-statement',
+                match_path: 'finance-and-accounting/ledger-statement',
                 permission: ['accounting.trial.view'],
                 description:
                     'Verify total debits equal total credits; catch errors before reports.',

@@ -34,7 +34,7 @@ export default function HomePage() {
                 <div className="flex flex-col items-center justify-center">
                     <h1 className="text-3xl font-semibold">
                         <span className="text-primary"> Union </span>
-                        Banking
+                        <span className="text-foreground/90">Banking</span>
                     </h1>
                     <p className="text-sm text-muted-foreground/80">
                         Core banking & credit solution for co-operative credit

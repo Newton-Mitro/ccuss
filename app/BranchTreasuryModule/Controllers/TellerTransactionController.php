@@ -4,7 +4,6 @@ namespace App\BranchTreasuryModule\Controllers;
 
 use App\FinanceAndAccounting\Models\FiscalPeriod;
 use App\FinanceAndAccounting\Models\FiscalYear;
-use App\FinanceAndAccounting\Models\InstrumentType;
 use App\FinanceAndAccounting\Models\LedgerAccount;
 use App\Http\Controllers\Controller;
 use App\SystemAdministration\Models\Branch;
@@ -16,14 +15,11 @@ class TellerTransactionController extends Controller
 {
     public function customerCashReceipt(Request $request)
     {
-
-        $cashLedger = LedgerAccount::where([
-            ['name', 'Cash & Bank'],
-            ['is_active', true],
-        ])->first();
+        $cashLedger = LedgerAccount::where('name', 'Cash & Bank')
+            ->where('is_active', true)
+            ->first();
 
         $cashSubledgers = [];
-
 
         $journal_entries = [];
 
@@ -33,15 +29,12 @@ class TellerTransactionController extends Controller
             'fiscal_periods' => FiscalPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
             'branches' => Branch::select('id', 'name')->get(),
             'cash_subledgers' => $cashSubledgers,
-            'instrument_types' => '',
-            'lines' => [
-
-            ],
+            'lines' => [],
             'journal_entries' => $journal_entries,
             'user_branch_id' => auth()->user()->branch_id,
-            'fiscal_year_id' => optional(FiscalYear::where('is_active', true)->first())->id,
+            'fiscal_year_id' => optional(FiscalYear::where('is_closed', false)->first())->id,
             'fiscal_period_id' => optional(
-                FiscalPeriod::where('is_open', true)
+                FiscalPeriod::where('status', 'open')
                     ->whereMonth('start_date', Carbon::now()->month)
                     ->whereYear('start_date', Carbon::now()->year)
                     ->first()
@@ -51,11 +44,9 @@ class TellerTransactionController extends Controller
 
     public function customerCashPayment(Request $request)
     {
-
-        $cashLedger = LedgerAccount::where([
-            ['name', 'Cash In Hand'],
-            ['is_active', true],
-        ])->first();
+        $cashLedger = LedgerAccount::where('name', 'Cash In Hand')
+            ->where('is_active', true)
+            ->first();
 
         $cashControl = LedgerAccount::where([
             ['name', 'Cash'],
@@ -65,18 +56,15 @@ class TellerTransactionController extends Controller
 
         $cashLedgers = $cashControl
             ? LedgerAccount::where('parent_id', $cashControl->id)
-                ->where('is_active', true)
+                ->where('is_closed', false)
                 ->where('is_control_account', false)
                 ->orderBy('code')
                 ->get()
             : collect();
 
-        $cashSubledgers = $cashLedger ? $cashLedgers : [];
-        $journal_entries = Voucher::where('voucher_type', 'DEBIT_OR_PAYMENT')
-            ->where('created_by', auth()->id())
-            ->whereDate('created_at', today())
-            ->orderBy('id', 'desc')
-            ->get();
+        $cashSubledgers = $cashLedger ? $cashLedgers : collect();
+
+        $journal_entries = [];
 
         return Inertia::render('branch-cash-and-treasury/customer-cheque-withdrawal/CustomerCashWithdrawalPage', [
             'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
@@ -85,12 +73,11 @@ class TellerTransactionController extends Controller
             'branches' => Branch::select('id', 'name')->get(),
             'cash_ledgers' => $cashLedgers,
             'cash_subledgers' => $cashSubledgers,
-            'instrument_types' => '',
             'lines' => [
                 [
                     'id' => 1,
                     'journal_entry_id' => 0,
-                    'ledger_account_id' => $cashLedger->id,
+                    'ledger_account_id' => $cashLedger?->id,
                     'ledger_account' => $cashLedger,
                     'subledger_id' => null,
                     'subledger_type' => null,
@@ -106,9 +93,9 @@ class TellerTransactionController extends Controller
             ],
             'journal_entries' => $journal_entries,
             'user_branch_id' => auth()->user()->branch_id,
-            'fiscal_year_id' => optional(FiscalYear::where('is_active', true)->first())->id,
+            'fiscal_year_id' => optional(FiscalYear::where('is_closed', false)->first())->id,
             'fiscal_period_id' => optional(
-                FiscalPeriod::where('is_open', true)
+                FiscalPeriod::where('status', 'open')
                     ->whereMonth('start_date', Carbon::now()->month)
                     ->whereYear('start_date', Carbon::now()->year)
                     ->first()
@@ -118,27 +105,15 @@ class TellerTransactionController extends Controller
 
     public function getCustomerCollectionLedgers(Request $request)
     {
-        $loanInterestLedger = LedgerAccount::where([
-            ['name', 'Loan Interest Income'],
-            ['is_active', true],
-        ])->first();
-
-        $savingDepositLedger = LedgerAccount::where([
-            ['name', 'Savings Deposit'],
-            ['is_active', true],
-        ])->first();
-
-        $termDepositLedger = LedgerAccount::where([
-            ['name', 'Term Deposit'],
-            ['is_active', true],
-        ])->first();
-
+        $loanInterestLedger = LedgerAccount::where('name', 'Loan Interest Income')->first();
+        $savingDepositLedger = LedgerAccount::where('name', 'Savings Deposit')->first();
+        $termDepositLedger = LedgerAccount::where('name', 'Term Deposit')->first();
 
         return response()->json([
             [
                 'id' => 2,
                 'journal_entry_id' => 0,
-                'ledger_account_id' => $savingDepositLedger->id,
+                'ledger_account_id' => $savingDepositLedger?->id,
                 'ledger_account' => $savingDepositLedger,
                 'subledger_id' => null,
                 'subledger_type' => null,
@@ -154,7 +129,7 @@ class TellerTransactionController extends Controller
             [
                 'id' => 3,
                 'journal_entry_id' => 0,
-                'ledger_account_id' => $termDepositLedger->id,
+                'ledger_account_id' => $termDepositLedger?->id,
                 'ledger_account' => $termDepositLedger,
                 'subledger_id' => null,
                 'subledger_type' => null,
@@ -170,7 +145,7 @@ class TellerTransactionController extends Controller
             [
                 'id' => 4,
                 'journal_entry_id' => 0,
-                'ledger_account_id' => $loanInterestLedger->id,
+                'ledger_account_id' => $loanInterestLedger?->id,
                 'ledger_account' => $loanInterestLedger,
                 'subledger_id' => null,
                 'subledger_type' => null,
@@ -188,16 +163,13 @@ class TellerTransactionController extends Controller
 
     public function getWithdrawableAccounts(Request $request)
     {
-        $savingDepositLedger = LedgerAccount::where([
-            ['name', 'Savings Deposit'],
-            ['is_active', true],
-        ])->first();
+        $savingDepositLedger = LedgerAccount::where('name', 'Savings Deposit')->first();
 
         return response()->json([
             [
                 'id' => 2,
                 'journal_entry_id' => 0,
-                'ledger_account_id' => $savingDepositLedger->id,
+                'ledger_account_id' => $savingDepositLedger?->id,
                 'ledger_account' => $savingDepositLedger,
                 'subledger_id' => null,
                 'subledger_type' => null,
@@ -212,5 +184,4 @@ class TellerTransactionController extends Controller
             ],
         ]);
     }
-
 }

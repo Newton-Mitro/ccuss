@@ -10,7 +10,6 @@ import { route } from 'ziggy-js';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { normalizeErrors } from '../../../lib/normalize_errors';
 import { Customer } from '../../../types/customer_kyc_module';
-import CashLedgerSection from './components/CashLedgerSection';
 import DepositLedgersSection from './components/DepositLedgersSection';
 import VoucherHeaderSection from './components/VoucherHeaderSection';
 import VoucherQueueSection from './components/VoucherQueueSection';
@@ -25,7 +24,7 @@ interface VoucherFormData {
     status: string;
     reference?: string;
     narration: string;
-    lines: VoucherLine[];
+    lines: any[];
 }
 
 export default function CustomerCashDepositPage() {
@@ -33,9 +32,6 @@ export default function CustomerCashDepositPage() {
         fiscal_years,
         fiscal_periods,
         branches,
-        cash_ledgers,
-        cash_subledgers,
-        instrument_types,
         lines,
         journal_entries,
         user_branch_id,
@@ -107,11 +103,7 @@ export default function CustomerCashDepositPage() {
         }
     };
 
-    const handleCreditLineChange = (
-        id: number,
-        field: keyof VoucherLine,
-        value: any,
-    ) => {
+    const handleCreditLineChange = (id: number, field: any, value: any) => {
         let creditLineUpdate = [];
         if (field === 'credit') {
             creditLineUpdate = data.lines.map((line) =>
@@ -151,11 +143,7 @@ export default function CustomerCashDepositPage() {
         setData('lines', updated);
     };
 
-    const handleDebitLineChange = (
-        id: number,
-        field: keyof VoucherLine,
-        value: any,
-    ) => {
+    const handleDebitLineChange = (id: number, field: any, value: any) => {
         const updated = data.lines.map((line) =>
             line.id === id ? { ...line, [field]: value } : line,
         );
@@ -234,15 +222,6 @@ export default function CustomerCashDepositPage() {
                         fiscal_years={fiscal_years}
                         fiscal_periods={fiscal_periods}
                         branches={branches}
-                    />
-
-                    <CashLedgerSection
-                        data={debitLines}
-                        errors={errors}
-                        instrument_types={instrument_types}
-                        cash_ledgers={cash_ledgers}
-                        cash_subledgers={cash_subledgers}
-                        handleDebitLineChange={handleDebitLineChange}
                     />
 
                     <VoucherQueueSection

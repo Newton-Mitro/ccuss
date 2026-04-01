@@ -31,12 +31,12 @@ Route::prefix('branch-cash')->group(function () {
 
 });
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth'])->prefix('teller-transactions')->group(function () {
     Route::get('/deposit', [TellerTransactionController::class, 'customerCashReceipt'])
-        ->name('transaction.deposit');
+        ->name('teller-transactions.deposit');
 
     Route::get('/withdrawal', [TellerTransactionController::class, 'customerCashPayment'])
-        ->name('transaction.withdrawal');
+        ->name('teller-transactions.withdrawal');
 
     Route::get('/customer-collection-ledgers', [TellerTransactionController::class, 'getCustomerCollectionLedgers'])
         ->name('teller-transaction.customer-collection-ledgers');

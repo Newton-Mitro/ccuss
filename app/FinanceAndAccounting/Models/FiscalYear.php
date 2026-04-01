@@ -19,14 +19,12 @@ class FiscalYear extends Model
         'code',
         'start_date',
         'end_date',
-        'is_active',
         'is_closed',
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
-        'is_active' => 'boolean',
         'is_closed' => 'boolean',
     ];
 
@@ -43,12 +41,12 @@ class FiscalYear extends Model
 
     public function periods(): HasMany
     {
-        return $this->hasMany(FiscalPeriod::class);
+        return $this->hasMany(FiscalPeriod::class, 'fiscal_year_id');
     }
 
     public function journal_entries(): HasMany
     {
-        return $this->hasMany(Voucher::class);
+        return $this->hasMany(Voucher::class, 'fiscal_year_id');
     }
 
     /*

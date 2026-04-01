@@ -1,3 +1,4 @@
+import { route } from 'ziggy-js';
 import { SidebarItem } from '../../types';
 
 export const branchCashAndTreasuryMenu: SidebarItem[] = [
@@ -36,7 +37,7 @@ export const branchCashAndTreasuryMenu: SidebarItem[] = [
                 permission: ['teller_session.view'],
             },
             {
-                name: 'Teller Cash Operations',
+                name: 'Cash Transactions',
                 icon: <i className="fa-solid fa-hand-holding-dollar" />,
                 children_expanded: false,
                 children: [
@@ -45,15 +46,15 @@ export const branchCashAndTreasuryMenu: SidebarItem[] = [
                         icon: (
                             <i className="fa-solid fa-circle-dollar-to-slot" />
                         ),
-                        path: '/deposit',
-                        match_path: 'deposit',
+                        path: route('teller-transactions.deposit'),
+                        match_path: 'teller-transactions/deposit',
                         permission: ['transaction.deposit.create'],
                     },
                     {
                         name: 'Customer Withdrawal',
                         icon: <i className="fa-solid fa-money-bill-transfer" />,
-                        path: '/withdrawal',
-                        match_path: 'withdrawal',
+                        path: route('teller-transactions.withdrawal'),
+                        match_path: 'teller-transactions/withdrawal',
                         permission: ['transaction.withdraw.create'],
                     },
                     {

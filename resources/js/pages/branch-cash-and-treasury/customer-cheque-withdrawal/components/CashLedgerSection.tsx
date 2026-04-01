@@ -1,32 +1,13 @@
 import { Label } from '../../../../components/ui/label';
 import { Select } from '../../../../components/ui/select';
-import {
-    LedgerAccount,
-    VoucherLine,
-} from '../../../../types/finance_and_accounting';
 
 interface CashLedgerSectionProps {
-    data: any;
-    errors: any;
-    cash_ledgers: LedgerAccount[];
-    cash_subledgers: LedgerAccount[];
-    instrument_types: any;
-    handleCashLedgerLineChange: (
-        id: number,
-        field: keyof VoucherLine,
-        value: any,
-    ) => void;
+    handleCashLedgerLineChange: (id: number, field: any, value: any) => void;
 }
 
 function CashLedgerSection({
-    data,
-    errors,
-    cash_ledgers,
-    cash_subledgers,
-    instrument_types,
     handleCashLedgerLineChange,
 }: CashLedgerSectionProps) {
-    console.log(data);
     return (
         <div className="rounded-md border bg-card">
             <div className="flex items-center justify-between border-b bg-destructive/5 px-4 py-3">
@@ -41,12 +22,9 @@ function CashLedgerSection({
                     <Label className="text-xs">Ledger Account</Label>
                     <Select
                         disabled
-                        error={errors?.cash_ledger_id}
-                        value={data.ledger_account_id?.toString() || ''}
-                        options={cash_ledgers.map((ledger) => ({
-                            value: ledger.id.toString(),
-                            label: `${ledger.code} - ${ledger.name}`,
-                        }))}
+                        error={''}
+                        value={''}
+                        options={[]}
                         onChange={(value) => {
                             handleCashLedgerLineChange(
                                 1,
@@ -62,12 +40,9 @@ function CashLedgerSection({
                     <Label className="text-xs">Subledger Account</Label>
                     <Select
                         disabled
-                        error={errors?.cash_subledger_id}
-                        value={data.cash_subledger_id?.toString() || ''}
-                        options={cash_subledgers.map((ledger) => ({
-                            value: ledger.id.toString(),
-                            label: `${ledger.code} - ${ledger.name}`,
-                        }))}
+                        error={''}
+                        value={''}
+                        options={[]}
                         onChange={(value) => {
                             handleCashLedgerLineChange(
                                 1,
@@ -85,11 +60,8 @@ function CashLedgerSection({
                     </Label>
                     <Select
                         disabled
-                        value={data.instrument_type || ''}
-                        options={instrument_types.map((type) => ({
-                            value: type.id,
-                            label: type.name,
-                        }))}
+                        value={''}
+                        options={[]}
                         onChange={(value) => {
                             handleCashLedgerLineChange(
                                 1,

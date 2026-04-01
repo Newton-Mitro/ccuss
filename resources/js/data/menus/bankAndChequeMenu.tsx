@@ -2,7 +2,7 @@ import { SidebarItem } from '../../types';
 
 export const bankAndChequeMenu: SidebarItem[] = [
     {
-        name: 'Bank & Cheques',
+        name: 'Bank Accounts & Cheques',
         icon: <i className="fa-solid fa-university" />,
         children_expanded: false,
         permission: ['bank.view'],
@@ -29,41 +29,35 @@ export const bankAndChequeMenu: SidebarItem[] = [
                 match_path: 'bank-accounts',
             },
             {
-                name: 'Transactions',
+                name: 'Bank Transactions',
                 icon: <i className="fa-solid fa-exchange-alt" />,
                 children_expanded: false,
                 permission: [''],
                 children: [
                     {
-                        name: 'Bank Transactions',
+                        name: 'Payments',
                         icon: <i className="fa-solid fa-file-invoice-dollar" />,
                         permission: ['bank_transactions.view'],
                         path: '/bank-journal_entries',
                         match_path: 'bank-journal_entries',
                     },
                     {
-                        name: 'Cheque Transactions',
-                        icon: <i className="fa-solid fa-file-invoice-dollar" />,
-                        permission: ['cheque_transactions.view'],
-                        path: '/cheque-journal_entries',
-                        match_path: 'cheque-journal_entries',
+                        name: 'Reconciliation',
+                        icon: <i className="fa-solid fa-calculator" />,
+                        permission: ['bank_reconciliations.view'],
+                        path: '/bank-reconciliations',
+                        match_path: 'bank-reconciliations',
+                    },
+                    {
+                        name: 'Approvals',
+                        icon: <i className="fa-solid fa-check-circle" />,
+                        permission: ['bank.approvals.view'],
+                        path: '/bank-approvals',
+                        match_path: 'bank-approvals',
                     },
                 ],
             },
-            {
-                name: 'Reconciliation',
-                icon: <i className="fa-solid fa-calculator" />,
-                permission: ['bank_reconciliations.view'],
-                path: '/bank-reconciliations',
-                match_path: 'bank-reconciliations',
-            },
-            {
-                name: 'Approvals',
-                icon: <i className="fa-solid fa-check-circle" />,
-                permission: ['bank.approvals.view'],
-                path: '/bank-approvals',
-                match_path: 'bank-approvals',
-            },
+
             {
                 name: 'Reports',
                 icon: <i className="fa-solid fa-chart-line" />,

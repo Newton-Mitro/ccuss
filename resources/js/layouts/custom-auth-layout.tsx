@@ -192,7 +192,7 @@ export default function CustomAuthLayout({
                 <div className="flex h-16 items-center gap-2 border-b pl-4">
                     <img
                         src="/logo.png"
-                        className="h-10 w-10 rounded-full border p-1"
+                        className="h-10 w-10 rounded-full border bg-card p-1"
                     />
                     <span
                         className={cn(
@@ -203,7 +203,9 @@ export default function CustomAuthLayout({
                         <div className="">
                             <h1 className="-mb-1 text-lg font-semibold">
                                 <span className="text-primary"> Union </span>{' '}
-                                Banking
+                                <span className="text-sidebar-foreground/90">
+                                    Banking
+                                </span>
                             </h1>
                             <p className="text-xs font-light text-sidebar-foreground/70">
                                 Core banking & credit solution.
@@ -284,7 +286,7 @@ export default function CustomAuthLayout({
                                 src={auth?.user?.avatar}
                                 alt={auth?.user?.name}
                             />
-                            <AvatarFallback className="rounded-lg bg-muted text-sm text-muted-foreground">
+                            <AvatarFallback className="rounded-lg bg-card text-sm text-muted-foreground">
                                 {getInitials(auth?.user?.name)}
                             </AvatarFallback>
                         </Avatar>
@@ -461,7 +463,7 @@ export default function CustomAuthLayout({
                                             src={auth?.user?.avatar}
                                             alt={auth?.user.name}
                                         />
-                                        <AvatarFallback className="rounded-lg bg-muted text-sm text-muted-foreground">
+                                        <AvatarFallback className="rounded-lg bg-card text-sm text-muted-foreground">
                                             {getInitials(auth?.user.name)}
                                         </AvatarFallback>
                                     </Avatar>

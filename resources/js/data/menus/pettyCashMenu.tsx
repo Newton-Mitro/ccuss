@@ -22,7 +22,7 @@ export const pettyCashMenu: SidebarItem[] = [
                 match_path: 'advance-petty-cashes',
             },
             {
-                name: 'Petty Cash Operations',
+                name: 'Petty Cash Transactions',
                 icon: <i className="fa-solid fa-arrows-rotate" />,
                 children_expanded: false,
                 permission: ['cash.branch.view'],
@@ -60,7 +60,7 @@ export const pettyCashMenu: SidebarItem[] = [
                         match_path: 'petty-cash-replenishment',
                     },
                     {
-                        name: 'Petty Cash Entries',
+                        name: 'Transaction Approvals',
                         icon: <i className="fa-solid fa-list-check" />,
                         permission: ['petty_cash.approvals.view'],
                         path: '/petty-cash-approvals',

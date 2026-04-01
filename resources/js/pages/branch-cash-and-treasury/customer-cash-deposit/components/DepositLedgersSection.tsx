@@ -3,22 +3,17 @@ import { Button } from '../../../../components/ui/button';
 import { Checkbox } from '../../../../components/ui/checkbox';
 import { Input } from '../../../../components/ui/input';
 import { formatBDTCurrency } from '../../../../lib/bdtCurrencyFormatter';
-import { Customer } from '../../../../types/customer';
-import { VoucherLine } from '../../../../types/finance_and_accounting';
+import { Customer } from '../../../../types/customer_kyc_module';
 import { CustomerSearchBox } from '../../../customer-kyc/customers/components/customer-search-box';
 
 interface CollectionLedgersSectionProps {
     errors: any;
-    creditLines: VoucherLine[];
+    creditLines: any[];
     processing: boolean;
     onCustomerSelect: (customer: Customer) => void;
     toggleSelectAll: () => void;
     toggleSelect: (id: number) => void;
-    handleCreditLineChange: (
-        id: number,
-        field: keyof VoucherLine,
-        value: any,
-    ) => void;
+    handleCreditLineChange: (id: number, field: any, value: any) => void;
     collectNowHandler: () => void;
     collectLaterHandler: () => void;
 }
