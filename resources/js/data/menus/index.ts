@@ -4,6 +4,8 @@ import { branchCashAndTreasuryMenu } from './branchCashAndTreasuaryMenu';
 import { customerKycMenu } from './customerKycMenu';
 import { dashboardMenu } from './dashboardMenu';
 import { financeAndAccountingMenu } from './financeAndAccountingMenu';
+import { fixedAssetMenu } from './fixedAssetMenu';
+import { hrAndPayrollMenu } from './hrAndPayrollMenu';
 import { loanManagementMenu } from './loanManagement';
 import { pettyCashMenu } from './pettyCashMenu';
 import { procurementMenu } from './procurementMenu';
@@ -19,8 +21,8 @@ export const sidebarMenu: SidebarItem[] = [
     ...pettyCashMenu,
     ...bankAndChequeMenu,
     ...procurementMenu,
-    // ...fixedAssetMenu,
-    // ...hrAndPayrollMenu,
+    ...fixedAssetMenu,
+    ...hrAndPayrollMenu,
     ...financeAndAccountingMenu,
     ...systemAdministrationMenu,
 ];

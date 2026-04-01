@@ -7,9 +7,11 @@ import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
 import { Input } from '../../../components/ui/input';
+import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem, SharedData } from '../../../types';
+import { bankStatuses } from './data/bankStatuses';
 
 interface BankPageProps extends SharedData {
     banks: {
@@ -105,18 +107,14 @@ export default function Index() {
                         />
                     </div>
                     <div className="w-36">
-                        <select
-                            className="input w-full"
+                        <Select
                             value={data.status}
-                            onChange={(e) => {
-                                setData('status', e.target.value);
+                            onChange={(value) => {
+                                setData('status', value);
                                 setData('page', 1);
                             }}
-                        >
-                            <option value="">All</option>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
+                            options={bankStatuses}
+                        />
                     </div>
                 </div>
 

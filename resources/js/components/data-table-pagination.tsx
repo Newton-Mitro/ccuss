@@ -14,12 +14,46 @@ interface Props {
     links: LinkItem[];
     perPageOptions?: number[];
 }
+const recordPerPage = [
+    {
+        value: -1,
+        label: 'All',
+    },
+    {
+        value: 10,
+        label: 10,
+    },
+    {
+        value: 25,
+        label: 25,
+    },
+    {
+        value: 50,
+        label: 50,
+    },
+    {
+        value: 100,
+        label: 100,
+    },
+    {
+        value: 200,
+        label: 200,
+    },
+    {
+        value: 500,
+        label: 500,
+    },
+    {
+        value: 1000,
+        label: 1000,
+    },
+];
 
 const DataTablePagination: React.FC<Props> = ({
     perPage,
     onPerPageChange,
     links,
-    perPageOptions = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000],
+    perPageOptions = recordPerPage,
 }) => {
     return (
         <div className="flex items-center justify-between">
@@ -29,8 +63,8 @@ const DataTablePagination: React.FC<Props> = ({
                     value={perPage.toString()}
                     onChange={(value) => onPerPageChange(Number(value))}
                     options={perPageOptions.map((n) => ({
-                        value: n.toString(),
-                        label: n.toString(),
+                        value: n.value.toString(),
+                        label: n.label.toString(),
                     }))}
                 />
             </div>

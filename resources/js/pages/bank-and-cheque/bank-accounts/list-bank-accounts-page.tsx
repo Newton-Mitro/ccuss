@@ -7,9 +7,11 @@ import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
 import { Input } from '../../../components/ui/input';
+import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem, SharedData } from '../../../types';
+import { bankAccountStatuses } from './data/bankAccountStatuses';
 
 interface BankAccountPageProps extends SharedData {
     accounts: {
@@ -132,57 +134,44 @@ export default function Index() {
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                         <div className="w-44">
-                            <select
-                                className="input w-full"
+                            <Select
                                 value={data.bank_id}
-                                onChange={(e) => {
-                                    setData('bank_id', e.target.value);
+                                onChange={(value) => {
+                                    setData('bank_id', value);
                                     setData('branch_id', '');
                                     setData('page', 1);
                                 }}
-                            >
-                                <option value="">All Banks</option>
-                                {banks.map((b) => (
-                                    <option key={b.id} value={b.id}>
-                                        {b.name}
-                                    </option>
-                                ))}
-                            </select>
+                                options={banks.map((b) => ({
+                                    value: b.id.toString(),
+                                    label: b.name,
+                                }))}
+                            />
                         </div>
 
                         <div className="w-44">
-                            <select
-                                className="input w-full"
+                            <Select
                                 value={data.branch_id}
-                                onChange={(e) => {
-                                    setData('branch_id', e.target.value);
+                                onChange={(value) => {
+                                    setData('branch_id', value);
                                     setData('page', 1);
                                 }}
                                 disabled={!data.bank_id}
-                            >
-                                <option value="">All Branches</option>
-                                {filteredBranches.map((b) => (
-                                    <option key={b.id} value={b.id}>
-                                        {b.name}
-                                    </option>
-                                ))}
-                            </select>
+                                options={filteredBranches.map((b) => ({
+                                    value: b.id.toString(),
+                                    label: b.name,
+                                }))}
+                            />
                         </div>
 
                         <div className="w-36">
-                            <select
-                                className="input w-full"
+                            <Select
                                 value={data.status}
-                                onChange={(e) => {
-                                    setData('status', e.target.value);
+                                onChange={(value) => {
+                                    setData('status', value);
                                     setData('page', 1);
                                 }}
-                            >
-                                <option value="">All Status</option>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                                <option value="closed">Closed</option>
-                            </select>
+                                options={bankAccountStatuses}
+                            />
                         </div>
                     </div>
                 </div>

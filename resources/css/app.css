@@ -263,12 +263,15 @@
 }
 
 .dark.theme-brown {
-    --background: oklch(0.05 0.03 40);
+    --background: oklch(7.216% 0.02961 29.223);
     --foreground: oklch(85.947% 0.01109 16.889);
-    --primary: oklch(14.825% 0.04522 24.506);
-    --accent: oklch(36.077% 0.07316 21.331);
+    --primary: oklch(0.55 0.12 40);
+    --accent: oklch(0.8 0.18 25);
 
-    --sidebar: oklch(0.08 0.03 40);
+    --card: oklch(11.98% 0.0267 65.813);
+    --card-foreground: var(--foreground);
+
+    --sidebar: oklch(8.072% 0.03313 29.223);
     --sidebar-foreground: var(--foreground);
     --sidebar-hover: oklch(0.12 0.02 40);
     --sidebar-active: var(--primary);

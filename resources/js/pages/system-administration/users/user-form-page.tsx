@@ -104,6 +104,10 @@ const UserForm = ({
         }
     };
 
+    const filteredRoles = roles.filter(
+        (role) => role.name.toLowerCase() !== 'system administrator',
+    );
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Users', href: '/users' },
         { title: isEdit ? `Edit ${user.name}` : 'Create User', href: '' },
@@ -271,7 +275,7 @@ const UserForm = ({
                 <div>
                     <Label className="text-xs">Roles</Label>
                     <div className="mt-1 grid h-[calc(100vh-34rem)] grid-cols-1 gap-2 overflow-y-auto rounded-md border p-2 md:grid-cols-2 lg:grid-cols-3">
-                        {roles.map((role) => (
+                        {filteredRoles.map((role) => (
                             <label
                                 key={role.id}
                                 className="rounded-md px-2 py-1.5 transition hover:bg-muted/80"

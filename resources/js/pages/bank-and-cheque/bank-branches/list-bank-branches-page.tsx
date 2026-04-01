@@ -7,6 +7,7 @@ import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
 import { Input } from '../../../components/ui/input';
+import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem, SharedData } from '../../../types';
@@ -111,21 +112,17 @@ export default function Index() {
                         />
                     </div>
                     <div className="w-44">
-                        <select
-                            className="input w-full"
+                        <Select
                             value={data.bank_id}
-                            onChange={(e) => {
-                                setData('bank_id', e.target.value);
+                            onChange={(value) => {
+                                setData('bank_id', value);
                                 setData('page', 1);
                             }}
-                        >
-                            <option value="">All Banks</option>
-                            {banks.map((b) => (
-                                <option key={b.id} value={b.id}>
-                                    {b.name}
-                                </option>
-                            ))}
-                        </select>
+                            options={banks.map((b) => ({
+                                value: b.id.toString(),
+                                label: b.name,
+                            }))}
+                        />
                     </div>
                 </div>
 
