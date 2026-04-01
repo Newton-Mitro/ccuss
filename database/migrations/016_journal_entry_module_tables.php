@@ -13,50 +13,37 @@ return new class extends Migration {
 
         //     $table->string('cheque_no', 50);
         //     $table->date('cheque_date');
-
         //     $table->foreignId('bank_id')->constrained();
         //     $table->string('branch_name', 100)->nullable();
-
         //     $table->string('payee_name', 150)->nullable();
-        //     $table->enum('status', ['issued', 'cleared', 'bounced'])
-        //         ->default('issued');
-
+        //     $table->enum('status', ['issued', 'cleared', 'bounced'])->default('issued');
         //     $table->timestamps();
         // });
 
         // Schema::create('bank_transfer_instruments', function (Blueprint $table) {
         //     $table->id();
-
         //     $table->foreignId('bank_id')->constrained();
         //     $table->string('account_no', 50);
-
         //     $table->string('transaction_ref', 100)->unique();
         //     $table->date('transfer_date');
-
         //     $table->timestamps();
         // });
 
         // Schema::create('mobile_banking_instruments', function (Blueprint $table) {
         //     $table->id();
-
         //     $table->string('provider', 50); // bKash, Nagad, etc
         //     $table->string('wallet_no', 30);
-
         //     $table->string('journal_entry_id', 100)->unique();
         //     $table->date('transaction_date');
-
         //     $table->timestamps();
         // });
 
         // Schema::create('card_instruments', function (Blueprint $table) {
         //     $table->id();
-
         //     $table->enum('card_type', ['DEBIT', 'CREDIT']);
         //     $table->string('card_last4', 4);
-
         //     $table->string('transaction_ref', 100)->unique();
         //     $table->date('transaction_date');
-
         //     $table->timestamps();
         // });
 
@@ -82,62 +69,42 @@ return new class extends Migration {
         // -----------------------
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
+            $table->string('trx_no')->unique();
+            $table->timestamp('trx_date');
             $table->foreignId('transaction_type_id')->constrained('transaction_types')->cascadeOnDelete();
-            $table->decimal('amount', 15, 2);
-            $table->date('transaction_date');
             $table->string('reference')->nullable();
+            $table->enum('channel', ['branch', 'mobile_app', 'internet_banking', 'atm', 'api'])->default('branch');
+            $table->enum('source_type', ['teller', 'online', 'system'])->default('system');
+
+            $table->decimal('total_amount', 15, 2);
+            $table->text('remarks')->nullable();
             $table->enum('status', ['draft', 'approved', 'posted', 'cancelled'])->default('draft');
-            $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('branch_day_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('teller_session_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('customer_id')->nullable()->constrained()->cascadeOnDelete();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
-
-            $table->index(['transaction_type_id', 'status']);
-            $table->index(['transaction_date']);
         });
 
         // -----------------------
-        // Transaction Allocations
+        // Transaction Entries
         // -----------------------
-        Schema::create('transaction_allocations', function (Blueprint $table) {
+        Schema::create('transaction_entries', function (Blueprint $table) {
             $table->id();
             $table->foreignId('transaction_id')->constrained()->cascadeOnDelete();
-
             // Polymorphic account (DepositAccount / Loan / Vault / Teller / PettyCash / Bank)
             $table->morphs('account');
-
-            $table->decimal('amount', 15, 2);
-            $table->string('allocation_type')->nullable(); // e.g., principal, interest, fee
-
+            $table->decimal('debit', 15, 2)->default(0);
+            $table->decimal('credit', 15, 2)->default(0);
             // Polymorphic reference for external entities like invoice, loan schedule, payment
             $table->nullableMorphs('reference');
-
+            $table->text('purpose')->nullable(); // principal, interest, fine, fee, etc
             $table->timestamps();
-
             // Indexes
             $table->index(['account_type', 'account_id'], 'txn_alloc_account_type_idx');
-            $table->index(['transaction_id']);
         });
 
-        // -----------------------
-        // Loan Allocation Details
-        // -----------------------
-        Schema::create('loan_allocation_details', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('transaction_allocation_id')
-                ->constrained('transaction_allocations')
-                ->cascadeOnDelete();
-
-            $table->decimal('principal_amount', 15, 2)->default(0);
-            $table->decimal('interest_amount', 15, 2)->default(0);
-            $table->decimal('penalty_amount', 15, 2)->default(0);
-            $table->decimal('other_amount', 15, 2)->default(0);
-
-            $table->timestamps();
-
-            $table->index(['transaction_allocation_id']);
-        });
 
         // -----------------------
         // Journals
