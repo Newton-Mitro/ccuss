@@ -7,22 +7,21 @@ use App\SystemAdministration\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PettyCashAccount extends Model
+class AdvancePettyCash extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'petty_cash_account_id',
+        'employee_id',
+        'branch_id',
         'name',
         'code',
-        'branch_id',
-        'custodian_id',
-        'imprest_amount',
         'balance',
         'is_active',
     ];
 
     protected $casts = [
-        'imprest_amount' => 'decimal:2',
         'balance' => 'decimal:2',
         'is_active' => 'boolean',
     ];
@@ -33,22 +32,22 @@ class PettyCashAccount extends Model
     |--------------------------------------------------------------------------
     */
 
+    public function pettyCashAccount()
+    {
+        return $this->belongsTo(PettyCashAccount::class);
+    }
+
+    public function employee()
+    {
+        return $this->belongsTo(User::class, 'employee_id');
+    }
+
     public function branch()
     {
         return $this->belongsTo(Branch::class);
     }
 
-    public function custodian()
-    {
-        return $this->belongsTo(User::class, 'custodian_id');
-    }
-
-    public function advanceAccounts()
-    {
-        return $this->hasMany(AdvancePettyCash::class);
-    }
-
-    // Future-proof (for transaction ledger)
+    // Future-proof ledger tracking
     // public function transactions()
     // {
     //     return $this->hasMany(PettyCashTransaction::class);

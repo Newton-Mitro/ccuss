@@ -13,8 +13,7 @@ return new class extends Migration {
             $table->string('code', 20)->unique();
             $table->string('name');
             $table->string('short_name')->nullable();
-            $table->enum('type', ['deposit', 'loan', 'share']);
-            $table->string('subtype');
+            $table->enum('type', ['saving', 'share', 'recurring', 'term'])->default('saving');
             $table->decimal('interest_rate', 5, 2)->nullable();
             $table->enum('interest_compounding', ['daily', 'monthly', 'quarterly', 'yearly'])->default('monthly');
             $table->decimal('minimum_balance', 15, 2)->default(0);
@@ -68,6 +67,7 @@ return new class extends Migration {
             $table->softDeletes();
         });
 
+        // subledger accounts for deposits
         Schema::create('deposit_accounts', function (Blueprint $table) {
             $table->id();
             $table->string('account_no', 30)->unique();
@@ -75,11 +75,7 @@ return new class extends Migration {
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->foreignId('deposit_product_id')->constrained()->cascadeOnDelete();
             $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
-            $table->decimal('balance', 15, 2)->default(0);
-            $table->decimal('available_balance', 15, 2)->default(0);
-            $table->decimal('hold_balance', 15, 2)->default(0);
             $table->decimal('interest_rate', 5, 2)->nullable();
-            $table->decimal('minimum_balance', 15, 2)->default(0);
             $table->date('opened_at');
             $table->date('closed_at')->nullable();
             $table->enum('status', ['pending', 'active', 'dormant', 'frozen', 'closed'])->default('pending');
@@ -108,6 +104,16 @@ return new class extends Migration {
             $table->text('remarks')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamps();
+        });
+
+        Schema::create('saving_account_details', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('deposit_account_id')->constrained('deposit_accounts');
+            $table->decimal('balance', 15, 2)->default(0);
+            $table->decimal('available_balance', 15, 2)->default(0);
+            $table->decimal('hold_balance', 15, 2)->default(0);
+            $table->decimal('minimum_balance', 15, 2)->default(0);
             $table->timestamps();
         });
 
@@ -149,7 +155,7 @@ return new class extends Migration {
             $table->decimal('amount_paid', 15, 2)->default(0);
             $table->date('paid_on')->nullable();
             $table->enum('status', ['due', 'paid', 'missed'])->default('due');
-            $table->decimal('penalty_amount', 15, 2)->default(0);
+            // $table->decimal('penalty_amount', 15, 2)->default(0);
         });
 
         // daily provisioning of interest and monthly post to gl account
@@ -216,7 +222,6 @@ return new class extends Migration {
             $table->unique(['union_cheque_book_id', 'cheque_number']);
         });
 
-
         Schema::create('cheque_presentations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('union_cheque_id')->constrained()->cascadeOnDelete();
@@ -279,6 +284,7 @@ return new class extends Migration {
         Schema::dropIfExists('recurring_deposit_details');
         Schema::dropIfExists('term_deposit_details');
         Schema::dropIfExists('share_account_details');
+        Schema::dropIfExists('saving_account_details');
         Schema::dropIfExists('deposit_account_nominees');
         Schema::dropIfExists('deposit_account_holders');
         Schema::dropIfExists('deposit_accounts');

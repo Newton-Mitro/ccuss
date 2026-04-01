@@ -46,7 +46,7 @@ export const systemAdministrationMenu: SidebarItem[] = [
                         name: 'Role Permissions',
                         icon: <i className="fa-solid fa-user" />,
                         path: '/roles/permissions',
-                        match_path: 'role-permissions',
+                        match_path: 'roles/permissions',
                         permission: ['organization.role-permissions.view'],
                     },
                 ],

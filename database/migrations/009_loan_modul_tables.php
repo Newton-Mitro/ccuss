@@ -13,7 +13,7 @@ return new class extends Migration {
             $table->string('code', 20)->unique();
             $table->string('name');
             $table->string('short_name')->nullable();
-            $table->enum('type', ['personal', 'sme', 'education', 'housing']);
+            $table->enum('type', ['members', 'sme', 'education', 'housing', 'vehicle', 'property'])->default('members');
             // Financial parameters
             $table->decimal('interest_rate', 5, 2)->nullable();
             $table->enum('interest_type', ['fixed', 'floating'])->default('fixed');
@@ -77,6 +77,46 @@ return new class extends Migration {
             $table->timestamps();
         });
 
+        // 🚀 1. High-Level Loan Lifecycle
+
+        // Think in 4 macro phases:
+
+        // 🧩 Phase 1: Application
+        // Create application
+        // Collect documents
+        // Perform verification
+        // 🧩 Phase 2: Approval
+        // Credit analysis
+        // Risk assessment
+        // Multi-level approval
+        // 🧩 Phase 3: Disbursement
+        // Loan account creation
+        // Fund transfer (cash/bank)
+        // 🧩 Phase 4: Repayment & Closure
+        // EMI schedule
+        // Payment tracking
+        // Closure / write-off
+
+        // PROCESS FLOW
+        // $table->enum('stage', [
+        //     'draft',
+        //     'submitted',
+        //     'under_review',
+        //     'document_verification',
+        //     'field_verification',
+        //     'credit_check',
+        //     'approval_pending',
+        //     'approved',
+        //     'rejected'
+        // ])->default('draft');
+
+        Schema::create('loan_stages', function (Blueprint $table) {
+            $table->id();
+            $table->string('code')->unique(); // submitted, review, etc.
+            $table->string('name');
+            $table->integer('sequence'); // ordering
+        });
+
         Schema::create('loan_applications', function (Blueprint $table) {
             $table->id();
             $table->string('application_no', 50)->unique();
@@ -85,7 +125,9 @@ return new class extends Migration {
             $table->decimal('applied_amount', 15, 2);
             $table->integer('applied_tenure');
             $table->text('purpose')->nullable();
-            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->foreignId('stage_id')->nullable()->constrained('loan_stages');
+            // FINAL STATE
+            $table->enum('status', ['pending', 'approved', 'rejected', 'disbursed', 'cancelled'])->nullable();
             $table->timestamps();
         });
 
@@ -95,6 +137,15 @@ return new class extends Migration {
             $table->string('document_type');
             $table->string('file_path');
             $table->timestamps();
+        });
+
+        Schema::create('loan_application_stage_histories', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('loan_application_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('stage_id')->constrained('loan_stages');
+            $table->foreignId('changed_by')->nullable()->constrained('users');
+            $table->timestamp('changed_at')->useCurrent();
+            $table->text('remarks')->nullable();
         });
 
         Schema::create('loan_approvals', function (Blueprint $table) {
@@ -124,7 +175,7 @@ return new class extends Migration {
             $table->date('disbursement_date')->nullable();
             $table->date('first_installment_date')->nullable();
             $table->date('maturity_date')->nullable();
-            $table->decimal('principal_outstanding', 15, 2)->default(0);
+            $table->decimal('principal_outstanding', 15, 2)->default(0); // বকেয়া মূলধন
             $table->decimal('interest_outstanding', 15, 2)->default(0);
             $table->decimal('penalty_outstanding', 15, 2)->default(0);
             $table->enum('status', ['pending', 'approved', 'active', 'closed', 'defaulted', 'written_off'])->default('pending');
@@ -171,15 +222,23 @@ return new class extends Migration {
             $table->unique(['loan_account_id', 'customer_id']);
         });
 
+        // Repayment is fluxible, not fixed date or fixed installments
         Schema::create('loan_repayment_schedules', function (Blueprint $table) {
             $table->id();
             $table->foreignId('loan_account_id')->constrained()->cascadeOnDelete();
             $table->integer('installment_no');
-            $table->date('due_date');
-            $table->decimal('principal', 15, 2);
-            $table->decimal('interest', 15, 2);
-            $table->decimal('penalty', 15, 2)->default(0);
-            $table->decimal('total_due', 15, 2);
+            // Month bucket instead of strict date
+            $table->date('period_start');
+            $table->date('period_end');
+            // Minimum expected payment
+            $table->decimal('minimum_amount', 15, 2);
+            // Optional guidance (not strict)
+            $table->decimal('expected_interest', 15, 2)->default(0);
+            $table->decimal('expected_principal', 15, 2)->default(0);
+            $table->decimal('expected_penalty', 15, 2)->default(0);
+            // Tracking
+            $table->decimal('paid_amount', 15, 2)->default(0);
+
             $table->enum('status', ['pending', 'paid', 'late'])->default('pending');
             $table->timestamps();
         });
@@ -195,12 +254,14 @@ return new class extends Migration {
 
         Schema::create('loan_repayments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('loan_account_id')->constrained()->cascadeOnDelete();
-            $table->integer('installment_no');
-            $table->decimal('principal_paid', 15, 2);
-            $table->decimal('interest_paid', 15, 2);
-            $table->decimal('penalty_paid', 15, 2)->default(0);
+            $table->foreignId('loan_account_id');
+            $table->foreignId('schedule_id')->nullable();
+            $table->decimal('amount', 15, 2);
+            $table->decimal('principal_amount', 15, 2)->default(0);
+            $table->decimal('interest_amount', 15, 2)->default(0);
+            $table->decimal('penalty_amount', 15, 2)->default(0);
             $table->date('payment_date');
+            // $table->foreignId('transaction_id');
             $table->timestamps();
         });
 

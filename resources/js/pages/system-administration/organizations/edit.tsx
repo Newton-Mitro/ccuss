@@ -393,29 +393,60 @@ function EditOrganization() {
                             </div>
                         </div>
 
-                        <div className="mt-13">
-                            {photoPreview ? (
-                                <img
-                                    src={photoPreview}
-                                    alt="Preview"
-                                    className="h-32 w-32 rounded-md border object-cover sm:h-40 sm:w-40"
-                                />
-                            ) : (
-                                <div className="h-32 w-32 rounded-md border bg-muted sm:h-36 sm:w-36">
-                                    <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
-                                        No Photo
-                                    </div>
+                        <div className="w-full lg:w-2/12">
+                            <div className="w-full space-y-2">
+                                <Label className="text-xs">Logo</Label>
+
+                                {/* Preview Box */}
+                                <div
+                                    className="group relative h-40 w-full cursor-pointer overflow-hidden rounded-md border bg-muted"
+                                    onClick={() =>
+                                        document
+                                            .getElementById('photoInput')
+                                            .click()
+                                    }
+                                >
+                                    {photoPreview ? (
+                                        <>
+                                            <img
+                                                src={photoPreview}
+                                                alt="Preview"
+                                                className="h-full w-full object-cover"
+                                            />
+
+                                            {/* Overlay (hover actions) */}
+                                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition group-hover:opacity-100">
+                                                <span className="text-xs font-medium text-white">
+                                                    Change Photo
+                                                </span>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
+                                            Click to Upload
+                                        </div>
+                                    )}
                                 </div>
-                            )}
-                            <div>
-                                <Label className="text-xs">Upload Photo</Label>
+
+                                {/* Hidden Input */}
                                 <input
+                                    id="photoInput"
                                     type="file"
                                     accept="image/*"
                                     onChange={handlePhotoChange}
-                                    className="block w-full text-sm text-muted-foreground"
+                                    className="hidden"
                                 />
-                                <InputError message={errors.logo} />
+
+                                {/* Optional Remove Button */}
+                                {photoPreview && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setPhotoPreview(null)}
+                                        className="w-full text-xs text-red-500 hover:underline"
+                                    >
+                                        Remove Photo
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>

@@ -199,10 +199,19 @@ return new class extends Migration {
 
             $table->timestamps();
         });
+
+        Schema::create('customer_accounts', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
+            $table->string('number')->unique();
+            $table->decimal('balance', 10, 2)->default(0);
+            $table->timestamps();
+        });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('customer_accounts');
         Schema::dropIfExists('customer_introducers');
         Schema::dropIfExists('kyc_documents');
         Schema::dropIfExists('kyc_profiles');

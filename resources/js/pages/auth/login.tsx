@@ -32,7 +32,7 @@ export default function Login({ status, canResetPassword, canRegister }) {
 
                 <div className="mt-3 text-center">
                     <h1 className="text-4xl font-bold tracking-tight">
-                        <span className="text-accent">Union</span> Banking
+                        <span className="text-primary">Union</span> Banking
                     </h1>
                     <p className="max-w-sm text-sm text-muted-foreground">
                         Smart core banking & credit solution designed for modern
@@ -45,120 +45,129 @@ export default function Login({ status, canResetPassword, canRegister }) {
             </motion.div>
 
             {/* Right Form Section */}
-            <div className="mx-4 my-6 flex w-full items-center justify-center rounded border bg-card p-6 shadow-lg lg:w-4/12 lg:px-24">
-                <div className="w-full max-w-md p-8">
-                    {/* Header */}
-                    <div className="mb-6 text-center">
-                        <AppLogoIcon className="mx-auto h-28 w-28 text-accent" />
-                        <h2 className="mt-3 text-sm text-muted-foreground">
-                            Welcome back to
-                        </h2>
-                        <h1 className="text-xl font-bold tracking-tight">
-                            <span className="text-accent">Union</span> Banking
-                        </h1>
-                        <p className="text-xs text-muted-foreground">
-                            Login to your account to continue
-                        </p>
-                    </div>
+            <div className="mx-4 flex w-full flex-col items-center justify-center lg:w-4/12">
+                <div className="flex h-[calc(90vh)] w-full flex-col items-center justify-center rounded border bg-card p-6 shadow">
+                    <div className="w-full lg:px-20">
+                        {/* Header */}
+                        <div className="mb-6 text-center">
+                            <AppLogoIcon className="mx-auto h-28 w-28 text-accent" />
+                            <h2 className="mt-3 text-sm text-muted-foreground">
+                                Welcome back to
+                            </h2>
+                            <h1 className="text-xl font-bold tracking-tight">
+                                <span className="text-primary">Union</span>{' '}
+                                Banking
+                            </h1>
+                            <p className="text-xs text-muted-foreground">
+                                Login to your account to continue
+                            </p>
+                        </div>
 
-                    {/* Form */}
-                    <Form
-                        {...store.form()}
-                        resetOnSuccess={['password']}
-                        className="space-y-5"
-                    >
-                        {({ processing, errors }) => (
-                            <>
-                                {/* Email */}
-                                <div className="space-y-1">
-                                    <Label htmlFor="email" className="text-xs">
-                                        Email
-                                    </Label>
-                                    <Input
-                                        id="email"
-                                        type="email"
-                                        name="email"
-                                        required
-                                        autoFocus
-                                        placeholder="you@example.com"
-                                    />
-                                    <InputError
-                                        message={errors.email}
-                                        className="text-xs"
-                                    />
-                                </div>
-
-                                {/* Password */}
-                                <div className="space-y-1">
-                                    <div className="flex items-center justify-between">
+                        {/* Form */}
+                        <Form
+                            {...store.form()}
+                            resetOnSuccess={['password']}
+                            className="space-y-5"
+                        >
+                            {({ processing, errors }) => (
+                                <>
+                                    {/* Email */}
+                                    <div className="space-y-1">
                                         <Label
-                                            htmlFor="password"
+                                            htmlFor="email"
                                             className="text-xs"
                                         >
-                                            Password
+                                            Email
                                         </Label>
-                                        {canResetPassword && (
-                                            <TextLink
-                                                href={request()}
-                                                className="text-xs text-accent hover:underline"
-                                            >
-                                                Forgot?
-                                            </TextLink>
-                                        )}
+                                        <Input
+                                            id="email"
+                                            type="email"
+                                            name="email"
+                                            required
+                                            autoFocus
+                                            placeholder="you@example.com"
+                                        />
+                                        <InputError
+                                            message={errors.email}
+                                            className="text-xs"
+                                        />
                                     </div>
-                                    <Input
-                                        id="password"
-                                        type="password"
-                                        name="password"
-                                        required
-                                        placeholder="••••••••"
-                                    />
-                                    <InputError
-                                        message={errors.password}
-                                        className="text-xs"
-                                    />
-                                </div>
 
-                                {/* Remember */}
-                                <div className="flex items-center gap-2">
-                                    <Checkbox id="remember" name="remember" />
-                                    <Label
-                                        htmlFor="remember"
-                                        className="text-xs"
+                                    {/* Password */}
+                                    <div className="space-y-1">
+                                        <div className="flex items-center justify-between">
+                                            <Label
+                                                htmlFor="password"
+                                                className="text-xs"
+                                            >
+                                                Password
+                                            </Label>
+                                            {canResetPassword && (
+                                                <TextLink
+                                                    href={request()}
+                                                    className="text-xs text-accent hover:underline"
+                                                >
+                                                    Forgot?
+                                                </TextLink>
+                                            )}
+                                        </div>
+                                        <Input
+                                            id="password"
+                                            type="password"
+                                            name="password"
+                                            required
+                                            placeholder="••••••••"
+                                        />
+                                        <InputError
+                                            message={errors.password}
+                                            className="text-xs"
+                                        />
+                                    </div>
+
+                                    {/* Remember */}
+                                    <div className="flex items-center gap-2">
+                                        <Checkbox
+                                            id="remember"
+                                            name="remember"
+                                        />
+                                        <Label
+                                            htmlFor="remember"
+                                            className="text-xs"
+                                        >
+                                            Remember me
+                                        </Label>
+                                    </div>
+
+                                    {/* Submit */}
+                                    <Button
+                                        type="submit"
+                                        disabled={processing}
+                                        className="flex w-full items-center justify-center gap-2"
                                     >
-                                        Remember me
-                                    </Label>
-                                </div>
+                                        {processing && <Spinner />}
+                                        Sign In
+                                    </Button>
 
-                                {/* Submit */}
-                                <Button
-                                    type="submit"
-                                    disabled={processing}
-                                    className="flex w-full items-center justify-center gap-2"
-                                >
-                                    {processing && <Spinner />}
-                                    Sign In
-                                </Button>
+                                    {/* Register */}
+                                    {canRegister && (
+                                        <p className="text-center text-xs text-muted-foreground">
+                                            No account?{' '}
+                                            <TextLink className="text-accent hover:underline">
+                                                Create one
+                                            </TextLink>
+                                        </p>
+                                    )}
+                                </>
+                            )}
+                        </Form>
 
-                                {/* Register */}
-                                {canRegister && (
-                                    <p className="text-center text-xs text-muted-foreground">
-                                        No account?{' '}
-                                        <TextLink className="text-accent hover:underline">
-                                            Create one
-                                        </TextLink>
-                                    </p>
-                                )}
-                            </>
+                        {/* Status */}
+                        {status && (
+                            <div className="mt-4 rounded-lg bg-muted p-2 text-center text-sm text-accent">
+                                {status}
+                            </div>
                         )}
-                    </Form>
-
-                    {/* Status */}
-                    {status && (
-                        <div className="mt-4 rounded-lg bg-muted p-2 text-center text-sm text-accent">
-                            {status}
-                        </div>
-                    )}
+                    </div>
                 </div>
             </div>
         </div>

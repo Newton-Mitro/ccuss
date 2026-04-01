@@ -202,10 +202,10 @@ export default function CustomAuthLayout({
                     >
                         <div className="">
                             <h1 className="-mb-1 text-lg font-semibold">
-                                <span className="text-accent"> Union </span>{' '}
+                                <span className="text-primary"> Union </span>{' '}
                                 Banking
                             </h1>
-                            <p className="text-xs text-sidebar-foreground/70">
+                            <p className="text-xs font-light text-sidebar-foreground/70">
                                 Core banking & credit solution.
                             </p>
                         </div>

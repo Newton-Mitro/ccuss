@@ -33,7 +33,7 @@ export default function HomePage() {
                 {/* Footer Hint */}
                 <div className="flex flex-col items-center justify-center">
                     <h1 className="text-3xl font-semibold">
-                        <span className="text-accent"> Union </span>
+                        <span className="text-primary"> Union </span>
                         Banking
                     </h1>
                     <p className="text-sm text-muted-foreground/80">
