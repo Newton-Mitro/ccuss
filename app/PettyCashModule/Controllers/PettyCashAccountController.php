@@ -65,7 +65,7 @@ class PettyCashAccountController extends Controller
 
     public function create()
     {
-        return Inertia::render('PettyCash/Accounts/Create', [
+        return Inertia::render('petty-cash-management/petty-cash-accounts/petty-cash-form-page', [
             'branches' => Branch::select('id', 'name')->get(),
             'users' => User::select('id', 'name')->get(),
         ]);
@@ -91,8 +91,17 @@ class PettyCashAccountController extends Controller
 
     public function edit(PettyCashAccount $pettyCashAccount)
     {
-        return Inertia::render('PettyCash/Accounts/Edit', [
-            'account' => $pettyCashAccount,
+        return Inertia::render('petty-cash-management/petty-cash-accounts/petty-cash-form-page', [
+            'pettyCash' => $pettyCashAccount,
+            'branches' => Branch::select('id', 'name')->get(),
+            'users' => User::select('id', 'name')->get(),
+        ]);
+    }
+
+    public function show(PettyCashAccount $pettyCashAccount)
+    {
+        return Inertia::render('petty-cash-management/petty-cash-accounts/show-petty-cash-page', [
+            'pettyCash' => $pettyCashAccount,
             'branches' => Branch::select('id', 'name')->get(),
             'users' => User::select('id', 'name')->get(),
         ]);

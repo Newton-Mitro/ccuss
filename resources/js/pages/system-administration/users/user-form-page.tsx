@@ -27,6 +27,7 @@ const UserForm = ({
     organizations,
     branches,
     flash,
+    auth,
 }: UserFormPageProps) => {
     useEffect(() => {
         if (flash?.error) toast.error(flash.error);
@@ -47,8 +48,6 @@ const UserForm = ({
         roles: user?.roles?.map((r: any) => r.id) || [],
         photo: null as File | null,
     });
-
-    console.log(user);
 
     const [photoPreview, setPhotoPreview] = useState<string | null>(
         user?.avatar || null,
@@ -104,9 +103,17 @@ const UserForm = ({
         }
     };
 
-    const filteredRoles = roles.filter(
-        (role) => role.name.toLowerCase() !== 'system administrator',
+    const systemAdminRole = auth.user.roles.filter(
+        (r) => r.slug == 'system_administrator',
     );
+
+    console.log(systemAdminRole);
+
+    const filteredRoles = roles.filter(
+        (role) => role.slug !== 'system_administrator',
+    );
+
+    const allRoles = [...systemAdminRole, ...filteredRoles];
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Users', href: '/users' },
@@ -275,7 +282,7 @@ const UserForm = ({
                 <div>
                     <Label className="text-xs">Roles</Label>
                     <div className="mt-1 grid h-[calc(100vh-34rem)] grid-cols-1 gap-2 overflow-y-auto rounded-md border p-2 md:grid-cols-2 lg:grid-cols-3">
-                        {filteredRoles.map((role) => (
+                        {allRoles.map((role) => (
                             <label
                                 key={role.id}
                                 className="rounded-md px-2 py-1.5 transition hover:bg-muted/80"

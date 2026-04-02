@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\SystemAdministration\Models\User;
 use Illuminate\Database\Seeder;
 use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
@@ -194,6 +195,12 @@ class PermissionSeeder extends Seeder
         $basicUser->permissions()->sync(
             Permission::inRandomOrder()->limit(5)->pluck('id')->toArray()
         );
+
+        $user = User::find(1);
+
+        $user->roles()->sync([
+            $superAdmin->id,
+        ]);
 
         $this->command->info('✅ Clean permissions generated successfully!');
     }

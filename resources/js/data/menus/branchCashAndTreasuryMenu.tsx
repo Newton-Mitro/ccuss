@@ -42,7 +42,7 @@ export const branchCashAndTreasuryMenu: SidebarItem[] = [
                 children_expanded: false,
                 children: [
                     {
-                        name: 'Customer Deposit',
+                        name: 'Cash Deposit',
                         icon: (
                             <i className="fa-solid fa-circle-dollar-to-slot" />
                         ),
@@ -51,7 +51,7 @@ export const branchCashAndTreasuryMenu: SidebarItem[] = [
                         permission: ['transaction.deposit.create'],
                     },
                     {
-                        name: 'Customer Withdrawal',
+                        name: 'Cheque Withdrawal',
                         icon: <i className="fa-solid fa-money-bill-transfer" />,
                         path: route('teller-transactions.withdrawal'),
                         match_path: 'teller-transactions/withdrawal',

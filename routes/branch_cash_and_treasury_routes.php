@@ -39,8 +39,8 @@ Route::middleware(['auth'])->prefix('teller-transactions')->group(function () {
         ->name('teller-transactions.withdrawal');
 
     Route::get('/customer-collection-ledgers', [TellerTransactionController::class, 'getCustomerCollectionLedgers'])
-        ->name('teller-transaction.customer-collection-ledgers');
+        ->name('teller-transactions.get-collection-ledgers');
 
     Route::get('/get-withdrawable-accounts', [TellerTransactionController::class, 'getWithdrawableAccounts'])
-        ->name('teller-transaction.customer-withdrawable-accounts');
+        ->name('teller-transactions.get-withdrawable-accounts');
 });

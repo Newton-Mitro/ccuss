@@ -40,26 +40,21 @@ export default function CustomerCashDepositPage() {
         flash,
     } = usePage().props as any;
 
-    const {
-        data,
-        setData,
-        post,
-        processing,
-        errors: rawErrors,
-    } = useForm<VoucherFormData>({
-        voucher_no: '',
-        voucher_date: new Date().toISOString().split('T')[0],
-        voucher_type: 'CREDIT_OR_RECEIPT',
-        fiscal_year_id: fiscal_year_id || 0,
-        fiscal_period_id: fiscal_period_id || 0,
-        branch_id: user_branch_id || branches[0]?.id,
-        status: 'DRAFT',
-        reference: '',
-        narration: '',
-        lines: lines || [],
-    });
+    const { data, setData, post, processing, errors } =
+        useForm<VoucherFormData>({
+            voucher_no: '',
+            voucher_date: new Date().toISOString().split('T')[0],
+            voucher_type: 'CREDIT_OR_RECEIPT',
+            fiscal_year_id: fiscal_year_id || 0,
+            fiscal_period_id: fiscal_period_id || 0,
+            branch_id: user_branch_id || branches[0]?.id,
+            status: 'DRAFT',
+            reference: '',
+            narration: '',
+            lines: lines || [],
+        });
 
-    const errors = useMemo(() => normalizeErrors(rawErrors), [rawErrors]);
+    const memoized_errors = useMemo(() => normalizeErrors(errors), [errors]);
 
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
@@ -83,7 +78,9 @@ export default function CustomerCashDepositPage() {
 
     const onCustomerSelected = async (customer: Customer) => {
         try {
-            const res = await axios.get('/customer-collection-ledgers');
+            const res = await axios.get(
+                route('teller-transactions.get-collection-ledgers'),
+            );
             const newCreditLines = res.data || [];
             const newDebitLines = [
                 {

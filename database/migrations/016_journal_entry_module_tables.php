@@ -48,65 +48,6 @@ return new class extends Migration {
         // });
 
         // -----------------------
-        // Transaction Types
-        // -----------------------
-        Schema::create('transaction_types', function (Blueprint $table) {
-            $table->id();
-            $table->string('code')->unique(); // e.g., cash_deposit, loan_disbursement
-            $table->string('name');           // Human-readable
-            $table->string('category');       // cash, loan, vendor, fee, system
-            $table->boolean('is_cash')->default(false);
-            $table->boolean('affects_balance')->default(true);
-            $table->boolean('requires_approval')->default(false);
-            $table->boolean('is_system')->default(false);
-            $table->enum('direction', ['inflow', 'outflow', 'both'])->default('both');
-            $table->json('meta')->nullable(); // extra metadata
-            $table->timestamps();
-        });
-
-        // -----------------------
-        // Transactions
-        // -----------------------
-        Schema::create('transactions', function (Blueprint $table) {
-            $table->id();
-            $table->string('trx_no')->unique();
-            $table->timestamp('trx_date');
-            $table->foreignId('transaction_type_id')->constrained('transaction_types')->cascadeOnDelete();
-            $table->string('reference')->nullable();
-            $table->enum('channel', ['branch', 'mobile_app', 'internet_banking', 'atm', 'api'])->default('branch');
-            $table->enum('source_type', ['teller', 'online', 'system'])->default('system');
-
-            $table->decimal('total_amount', 15, 2);
-            $table->text('remarks')->nullable();
-            $table->enum('status', ['draft', 'approved', 'posted', 'cancelled'])->default('draft');
-            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('branch_day_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('teller_session_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('customer_id')->nullable()->constrained()->cascadeOnDelete();
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamps();
-        });
-
-        // -----------------------
-        // Transaction Entries
-        // -----------------------
-        Schema::create('transaction_entries', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('transaction_id')->constrained()->cascadeOnDelete();
-            // Polymorphic account (DepositAccount / Loan / Vault / Teller / PettyCash / Bank)
-            $table->morphs('account');
-            $table->decimal('debit', 15, 2)->default(0);
-            $table->decimal('credit', 15, 2)->default(0);
-            // Polymorphic reference for external entities like invoice, loan schedule, payment
-            $table->nullableMorphs('reference');
-            $table->text('purpose')->nullable(); // principal, interest, fine, fee, etc
-            $table->timestamps();
-            // Indexes
-            $table->index(['account_type', 'account_id'], 'txn_alloc_account_type_idx');
-        });
-
-
-        // -----------------------
         // Journals
         // -----------------------
         Schema::create('journals', function (Blueprint $table) {
@@ -132,9 +73,11 @@ return new class extends Migration {
             $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
             $table->foreignId('fiscal_year_id')->constrained();
             $table->foreignId('fiscal_period_id')->constrained();
-            $table->string('reference')->unique();
+            $table->string('reference')->unique(); // receipt_no, payment_no, cheque_no, etc
             $table->foreignId('journal_id')->constrained();
-            $table->enum('source_type', ['teller', 'online', 'system'])->default('system');
+            // source: who created the journal entry
+            $table->enum('source_type', ['staff', 'customer', 'system', 'integration'])->default('system');
+            // channel: where the journal entry was created
             $table->enum('channel', ['branch', 'mobile_app', 'internet_banking', 'atm', 'api'])->default('branch');
             $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('branch_day_id')->nullable()->constrained()->nullOnDelete();
@@ -144,28 +87,11 @@ return new class extends Migration {
             $table->boolean('is_adjustment')->default(false);
             $table->decimal('amount', 15, 2)->nullable();
             $table->text('description')->nullable();
-            $table->date('transaction_date');
-            $table->foreignId('transaction_id')->nullable()->constrained()->nullOnDelete();
-            $table->enum('status', ['draft', 'posted', 'reversed', 'cancelled'])->default('draft');
+            $table->timestamp('transaction_date');
+            $table->enum('status', ['draft', 'cancelled', 'posted', 'reversed'])->default('draft');
             $table->timestamps();
             $table->index(['branch_id', 'transaction_date']);
             $table->index(['source_type']);
-        });
-
-        Schema::create('journal_entry_audits', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('journal_entry_id')->constrained()->cascadeOnDelete();
-            $table->enum('action', ['created', 'updated', 'submitted', 'approved', 'rejected', 'posted', 'reversed', 'cancelled']);
-            $table->string('old_status')->nullable();
-            $table->string('new_status')->nullable();
-            $table->foreignId('performed_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->string('ip_address')->nullable();
-            $table->string('user_agent')->nullable();
-            $table->json('changes')->nullable();
-            $table->timestamp('performed_at')->useCurrent();
-            $table->timestamps();
-            $table->index(['journal_entry_id']);
-            $table->index(['action']);
         });
 
         Schema::create('journal_entry_lines', function (Blueprint $table) {
@@ -183,6 +109,22 @@ return new class extends Migration {
             $table->index(['journal_entry_id']);
             $table->index(['ledger_account_id']);
             $table->index(['account_type', 'account_id'], 'txn_entries_account_type_idx');
+        });
+
+        Schema::create('journal_entry_audits', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('journal_entry_id')->constrained()->cascadeOnDelete();
+            $table->enum('action', ['created', 'updated', 'posted', 'reversed', 'cancelled']);
+            $table->string('old_status')->nullable();
+            $table->string('new_status')->nullable();
+            $table->foreignId('performed_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->string('ip_address')->nullable();
+            $table->string('user_agent')->nullable();
+            $table->json('changes')->nullable();
+            $table->timestamp('performed_at')->useCurrent();
+            $table->timestamps();
+            $table->index(['journal_entry_id']);
+            $table->index(['action']);
         });
 
         // -----------------------

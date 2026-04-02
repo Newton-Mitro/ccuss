@@ -20,14 +20,24 @@ const RolePermissionForm = ({
     roles,
     permissions,
 }: RolePermissionFormProps) => {
-    const { flash } = usePage<RolePermissionFormProps>().props;
+    const { auth, flash } = usePage<RolePermissionFormProps>().props;
+
+    const systemAdminRole = auth.user.roles.filter(
+        (r) => r.slug == 'system_administrator',
+    );
+
+    console.log(systemAdminRole);
 
     const filteredRoles = roles.filter(
-        (role) => role.name.toLowerCase() !== 'system administrator',
+        (role) => role.slug !== 'system_administrator',
     );
+
+    const allRoles = [...systemAdminRole, ...filteredRoles];
+
     const [selectedRole, setSelectedRole] = useState<Role | null>(
-        filteredRoles[0] || null,
+        allRoles[0] || null,
     );
+
     const [selectAll, setSelectAll] = useState(false);
 
     const { data, setData, put, processing, errors } = useForm({
@@ -103,7 +113,7 @@ const RolePermissionForm = ({
                 {/* Left: Role List */}
                 <div className="w-64 shrink-0 space-y-2 rounded-md border bg-card p-3">
                     <div className="py-2 text-sm">Roles</div>
-                    {filteredRoles.map((role) => (
+                    {allRoles.map((role) => (
                         <button
                             key={role.id}
                             type="button"

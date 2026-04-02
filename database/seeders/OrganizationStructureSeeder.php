@@ -94,6 +94,8 @@ class OrganizationStructureSeeder extends Seeder
                 ]
             );
 
+
+
             Teller::firstOrCreate(
                 [
                     'user_id' => $user->id,

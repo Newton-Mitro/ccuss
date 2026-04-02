@@ -66,7 +66,7 @@ class AdvancePettyCashController extends Controller
 
     public function create()
     {
-        return Inertia::render('PettyCash/AdvanceAccounts/Create', [
+        return Inertia::render('petty-cash-management/advance-petty-cash-accounts/advance-petty-cash-form-page', [
             'pettyCashAccounts' => PettyCashAccount::select('id', 'name')->get(),
             'employees' => User::select('id', 'name')->get(),
             'branches' => Branch::select('id', 'name')->get(),
@@ -91,7 +91,17 @@ class AdvancePettyCashController extends Controller
 
     public function edit(AdvancePettyCash $advancePettyCash)
     {
-        return Inertia::render('PettyCash/AdvanceAccounts/Edit', [
+        return Inertia::render('petty-cash-management/advance-petty-cash-accounts/advance-petty-cash-form-page', [
+            'account' => $advancePettyCash,
+            'pettyCashAccounts' => PettyCashAccount::select('id', 'name')->get(),
+            'employees' => User::select('id', 'name')->get(),
+            'branches' => Branch::select('id', 'name')->get(),
+        ]);
+    }
+
+    public function show(AdvancePettyCash $advancePettyCash)
+    {
+        return Inertia::render('petty-cash-management/advance-petty-cash-accounts/show-advance-petty-cash-page', [
             'account' => $advancePettyCash,
             'pettyCashAccounts' => PettyCashAccount::select('id', 'name')->get(),
             'employees' => User::select('id', 'name')->get(),
