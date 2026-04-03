@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\FinanceAndAccounting\Controllers\FiscalYearController;
 
 // Fiscal Years
-Route::middleware(['auth',])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('fiscal-years', FiscalYearController::class)
         ->names([
             'index' => 'fiscal-years.index',
@@ -30,13 +30,13 @@ Route::middleware(['auth',])->group(function () {
         ]);
 });
 
-Route::middleware(['auth',])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/api/search-ledger', [LedgerAccountController::class, 'ledgerSearch'])->name('ledger_accounts.search');
     Route::get('/api/get-cash-ledgers', [LedgerAccountController::class, 'cashLedgerList'])->name('ledger_accounts.cash-ledger-list');
 });
 
 
-Route::prefix('accounting')->middleware(['auth',])->group(function () {
+Route::prefix('accounting')->middleware(['auth', 'verified'])->group(function () {
     Route::get('/chart-of-accounts', [LedgerAccountController::class, 'index'])->name('ledger_accounts.index');
     Route::post('/ledger_accounts', [LedgerAccountController::class, 'store'])->name('ledger_accounts.store');
     Route::put('/ledger_accounts/{gl_account}', [LedgerAccountController::class, 'update'])->name('ledger_accounts.update');

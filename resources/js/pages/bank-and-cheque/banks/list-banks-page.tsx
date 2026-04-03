@@ -80,7 +80,7 @@ export default function Index() {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Banks" />
-            <div className="space-y-4 p-2 text-foreground">
+            <div className="space-y-4 text-foreground">
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
                         title="Banks"
@@ -118,7 +118,7 @@ export default function Index() {
                     </div>
                 </div>
 
-                <div className="overflow-auto rounded-md border bg-card">
+                <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border bg-card">
                     <table className="w-full border-collapse">
                         <thead className="sticky top-0 bg-muted">
                             <tr>

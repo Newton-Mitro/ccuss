@@ -3,6 +3,7 @@
 namespace App\BankCashModule\Controllers;
 
 use App\BankCashModule\Models\Bank;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -15,8 +16,10 @@ class BankController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where('name', 'like', "%{$search}%")
-                ->orWhere('short_name', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('short_name', 'like', "%{$search}%");
+            });
         }
 
         if ($request->filled('status')) {
@@ -35,49 +38,137 @@ class BankController extends Controller
 
     public function create()
     {
-        return Inertia::render('Bank/Create');
+        return Inertia::render('bank-and-cheque/banks/bank-branch-form-page');
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
+            // Bank
             'name' => 'required|string|max:255',
             'short_name' => 'nullable|string|max:50',
             'swift_code' => 'nullable|string|max:50',
             'routing_number' => 'nullable|string|max:50',
             'status' => 'required|in:active,inactive',
+
+            // Branches
+            'branches' => 'required|array|min:1',
+            'branches.*.name' => 'required|string|max:255',
+            'branches.*.routing_number' => 'nullable|string|max:50',
+            'branches.*.address' => 'nullable|string|max:255',
         ]);
 
-        Bank::create($request->all());
+        DB::transaction(function () use ($validated) {
 
-        return redirect()->route('banks.index')->with('success', 'Bank created successfully!');
+            $bank = Bank::create([
+                'name' => $validated['name'],
+                'short_name' => $validated['short_name'] ?? null,
+                'swift_code' => $validated['swift_code'] ?? null,
+                'routing_number' => $validated['routing_number'] ?? null,
+                'status' => $validated['status'],
+            ]);
+
+            foreach ($validated['branches'] as $branch) {
+                $bank->branches()->create($branch);
+            }
+        });
+
+        return redirect()
+            ->route('banks.index')
+            ->with('success', 'Bank & branches created successfully!');
     }
 
     public function edit(Bank $bank)
     {
-        return Inertia::render('Bank/Edit', [
+        $bank->load('branches');
+
+        return Inertia::render('bank-and-cheque/banks/bank-branch-form-page', [
+            'bank' => $bank,
+        ]);
+    }
+
+    public function show(Bank $bank)
+    {
+        $bank->load('branches');
+
+        return Inertia::render('bank-and-cheque/banks/bank-branch-form-page', [
             'bank' => $bank,
         ]);
     }
 
     public function update(Request $request, Bank $bank)
     {
-        $request->validate([
+        $validated = $request->validate([
+            // Bank
             'name' => 'required|string|max:255',
             'short_name' => 'nullable|string|max:50',
             'swift_code' => 'nullable|string|max:50',
             'routing_number' => 'nullable|string|max:50',
             'status' => 'required|in:active,inactive',
+
+            // Branches
+            'branches' => 'required|array|min:1',
+            'branches.*.id' => 'nullable|exists:bank_branches,id',
+            'branches.*.name' => 'required|string|max:255',
+            'branches.*.routing_number' => 'nullable|string|max:50',
+            'branches.*.address' => 'nullable|string|max:255',
         ]);
 
-        $bank->update($request->all());
+        DB::transaction(function () use ($validated, $bank) {
 
-        return redirect()->route('banks.index')->with('success', 'Bank updated successfully!');
+            // ------------------------
+            // Update Bank
+            // ------------------------
+            $bank->update([
+                'name' => $validated['name'],
+                'short_name' => $validated['short_name'] ?? null,
+                'swift_code' => $validated['swift_code'] ?? null,
+                'routing_number' => $validated['routing_number'] ?? null,
+                'status' => $validated['status'],
+            ]);
+
+            // ------------------------
+            // Sync Branches
+            // ------------------------
+            $existingIds = collect($validated['branches'])
+                ->pluck('id')
+                ->filter()
+                ->toArray();
+
+            // Delete removed branches
+            $bank->branches()
+                ->whereNotIn('id', $existingIds)
+                ->delete();
+
+            foreach ($validated['branches'] as $branchData) {
+
+                if (isset($branchData['id'])) {
+                    // Update
+                    $bank->branches()
+                        ->where('id', $branchData['id'])
+                        ->update([
+                            'name' => $branchData['name'],
+                            'routing_number' => $branchData['routing_number'] ?? null,
+                            'address' => $branchData['address'] ?? null,
+                        ]);
+                } else {
+                    // Create
+                    $bank->branches()->create($branchData);
+                }
+            }
+        });
+
+        return redirect()
+            ->route('banks.index')
+            ->with('success', 'Bank & branches updated successfully!');
     }
 
     public function destroy(Bank $bank)
     {
         $bank->delete();
-        return redirect()->route('banks.index')->with('success', 'Bank deleted successfully!');
+
+        return redirect()
+            ->route('banks.index')
+            ->with('success', 'Bank deleted successfully!');
     }
 }

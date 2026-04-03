@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 
 
 
-Route::prefix('addresses')->name('addresses.')->group(function () {
+Route::middleware(['auth', 'verified'])->prefix('addresses')->name('addresses.')->group(function () {
     Route::get('/create/{customer}', [CustomerAddressController::class, 'create'])->name('create');
     Route::post('/', [CustomerAddressController::class, 'store'])->name('store');
 
@@ -19,7 +19,7 @@ Route::prefix('addresses')->name('addresses.')->group(function () {
     Route::delete('/{address}', [CustomerAddressController::class, 'destroy'])->name('destroy');
 });
 
-Route::prefix('family-relations')->name('family-relations.')->group(function () {
+Route::middleware(['auth', 'verified'])->prefix('family-relations')->name('family-relations.')->group(function () {
     Route::get('/', [CustomerFamilyRelationController::class, 'index'])->name('index');
     Route::get('/create/{customer}', [CustomerFamilyRelationController::class, 'create'])->name('create');
     Route::post('/', [CustomerFamilyRelationController::class, 'store'])->name('store');
@@ -33,7 +33,7 @@ Route::prefix('family-relations')->name('family-relations.')->group(function () 
     Route::post('/family-relations/{familyRelation}/reject', [CustomerFamilyRelationController::class, 'reject'])->name('reject');
 });
 
-Route::prefix('introducers')->name('introducers.')->group(function () {
+Route::middleware(['auth', 'verified'])->prefix('introducers')->name('introducers.')->group(function () {
     Route::get('/', [CustomerIntroducerController::class, 'index'])->name('index');
     Route::get('/create/{customer}', [CustomerIntroducerController::class, 'create'])->name('create');
     Route::post('/', [CustomerIntroducerController::class, 'store'])->name('store');
@@ -48,7 +48,7 @@ Route::prefix('introducers')->name('introducers.')->group(function () {
     Route::post('/{introducer}/reject', [CustomerIntroducerController::class, 'reject'])->name('reject');
 });
 
-Route::prefix('kyc-documents')->name('kyc-documents.')->group(function () {
+Route::middleware(['auth', 'verified'])->prefix('kyc-documents')->name('kyc-documents.')->group(function () {
     Route::get('/', [KycDocumentController::class, 'index'])->name('index');
     Route::get('/create/{customer}', [KycDocumentController::class, 'create'])->name('create');
     Route::post('/', [KycDocumentController::class, 'store'])->name('store');

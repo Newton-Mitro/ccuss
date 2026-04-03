@@ -7,10 +7,12 @@ use App\BranchTreasuryModule\Controllers\TellerTransactionController;
 use App\BranchTreasuryModule\Controllers\VaultController;
 use Illuminate\Support\Facades\Route;
 
-Route::resource('vaults', VaultController::class);
-Route::resource('tellers', TellerController::class);
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('vaults', VaultController::class);
+    Route::resource('tellers', TellerController::class);
+});
 
-Route::prefix('teller-sessions')->name('teller-sessions.')->group(function () {
+Route::middleware(['auth', 'verified'])->prefix('teller-sessions')->name('teller-sessions.')->group(function () {
     Route::get('/', [TellerSessionController::class, 'index'])->name('index');
     Route::get('/create', [TellerSessionController::class, 'create'])->name('create');
     Route::post('/', [TellerSessionController::class, 'store'])->name('store');
@@ -19,7 +21,7 @@ Route::prefix('teller-sessions')->name('teller-sessions.')->group(function () {
     Route::post('/close/{tellerSession}', [TellerSessionController::class, 'close'])->name('close');
 });
 
-Route::prefix('branch-days')->name('branch-days.')->group(function () {
+Route::middleware(['auth', 'verified'])->prefix('branch-days')->name('branch-days.')->group(function () {
     Route::get('/', [BranchDayController::class, 'index'])->name('index');
     Route::get('/create', [BranchDayController::class, 'create'])->name('create'); // Move this up
     Route::get('/{branchDay}', [BranchDayController::class, 'show'])->name('show');
@@ -27,11 +29,11 @@ Route::prefix('branch-days')->name('branch-days.')->group(function () {
     Route::put('/{branchDay}/close', [BranchDayController::class, 'closeBranchDay'])->name('close');
 });
 
-Route::prefix('branch-cash')->group(function () {
+Route::middleware(['auth', 'verified'])->prefix('branch-cash')->group(function () {
 
 });
 
-Route::middleware(['auth'])->prefix('teller-transactions')->group(function () {
+Route::middleware(['auth', 'verified'])->prefix('teller-transactions')->group(function () {
     Route::get('/deposit', [TellerTransactionController::class, 'customerCashReceipt'])
         ->name('teller-transactions.deposit');
 
