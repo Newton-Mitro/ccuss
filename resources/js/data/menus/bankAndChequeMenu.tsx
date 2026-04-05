@@ -15,13 +15,6 @@ export const bankAndChequeMenu: SidebarItem[] = [
                 match_path: 'banks',
             },
             {
-                name: 'Bank Branches',
-                icon: <i className="fa-solid fa-code-branch" />,
-                permission: ['bank_branches.view'],
-                path: '/bank-branches',
-                match_path: 'bank-branches',
-            },
-            {
                 name: 'Bank Accounts',
                 icon: <i className="fa-solid fa-wallet" />,
                 permission: ['bank_accounts.view'],
@@ -38,8 +31,8 @@ export const bankAndChequeMenu: SidebarItem[] = [
                         name: 'Payments',
                         icon: <i className="fa-solid fa-file-invoice-dollar" />,
                         permission: ['bank_transactions.view'],
-                        path: '/bank-journal_entries',
-                        match_path: 'bank-journal_entries',
+                        path: '/bank-voucher_entries',
+                        match_path: 'bank-voucher_entries',
                     },
                     {
                         name: 'Reconciliation',

@@ -35,7 +35,7 @@ class TellerSession extends Model
     }
 
     /**
-     * All cash journal_entries for this session
+     * All cash voucher_entries for this session
      */
     public function cashTransactions(): HasMany
     {

@@ -37,7 +37,7 @@ export default function CustomerCashWithdrawalPage() {
         cash_subledgers,
         instrument_types,
         lines,
-        journal_entries,
+        voucher_entries,
         user_branch_id,
         fiscal_year_id,
         fiscal_period_id,
@@ -149,14 +149,14 @@ export default function CustomerCashWithdrawalPage() {
     };
 
     const collectNowHandler = () =>
-        post('/journal_entries', {
+        post('/voucher_entries', {
             preserveScroll: true,
             onSuccess: () => toast.success('Voucher saved'),
         });
 
     const viewVoucherHandler = (voucherId: number) => {
         window.open(
-            route('journal_entries.show', voucherId),
+            route('voucher_entries.show', voucherId),
             '_blank',
             'noopener,noreferrer',
         );
@@ -164,7 +164,7 @@ export default function CustomerCashWithdrawalPage() {
 
     const cancelVoucherHandler = (voucherId: number) => {
         if (!confirm('Cancel this voucher?')) return;
-        router.delete(`/journal_entries/${voucherId}`, {
+        router.delete(`/voucher_entries/${voucherId}`, {
             preserveScroll: true,
             onSuccess: () => toast.success('Voucher cancelled'),
         });
@@ -216,7 +216,7 @@ export default function CustomerCashWithdrawalPage() {
 
                     {/* Voucher Queue Section */}
                     <VoucherQueueSection
-                        journal_entries={journal_entries}
+                        voucher_entries={voucher_entries}
                         handleVoucherCancel={cancelVoucherHandler}
                         handleVoucherView={viewVoucherHandler}
                     />

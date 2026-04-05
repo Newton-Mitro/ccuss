@@ -21,7 +21,7 @@ class Vault extends Model
         return $this->hasMany(VaultDenomination::class);
     }
 
-    public function journal_entries(): HasMany
+    public function voucher_entries(): HasMany
     {
         return $this->hasMany(VaultTransaction::class);
     }

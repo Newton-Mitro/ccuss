@@ -6,7 +6,7 @@
 - **Teller** – Processes cheque-related operations
 - **Branch Manager** – Approves sensitive operations
 - **System** – Performs validations and automated checks
-- **Auditor** – Reviews cheque journal_entries and history
+- **Auditor** – Reviews cheque voucher_entries and history
 
 ---
 

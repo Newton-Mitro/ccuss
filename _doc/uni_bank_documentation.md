@@ -1,6 +1,6 @@
 # 🧠 Master Transaction Classification (Clean Architecture)
 
-All journal_entries are classified by **business intent first**, then by **cash/system behavior**.
+All voucher_entries are classified by **business intent first**, then by **cash/system behavior**.
 
 ---
 

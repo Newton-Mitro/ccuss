@@ -33,7 +33,7 @@ export default function CustomerCashDepositPage() {
         fiscal_periods,
         branches,
         lines,
-        journal_entries,
+        voucher_entries,
         user_branch_id,
         fiscal_year_id,
         fiscal_period_id,
@@ -148,20 +148,20 @@ export default function CustomerCashDepositPage() {
     };
 
     const collectNowHandler = () =>
-        post('/journal_entries', {
+        post('/voucher_entries', {
             preserveScroll: true,
             onSuccess: () => toast.success('Voucher saved'),
         });
 
     const collectLaterHandler = () =>
-        post('/journal_entries', {
+        post('/voucher_entries', {
             preserveScroll: true,
             onSuccess: () => toast.success('Voucher saved'),
         });
 
     const voucherCollectNowHandler = (voucherId: number) => {
         router.get(
-            `/journal_entries/${voucherId}`,
+            `/voucher_entries/${voucherId}`,
             {},
             { preserveScroll: true },
         );
@@ -169,7 +169,7 @@ export default function CustomerCashDepositPage() {
 
     const viewVoucherHandler = (voucherId: number) => {
         window.open(
-            route('journal_entries.show', voucherId),
+            route('voucher_entries.show', voucherId),
             '_blank',
             'noopener,noreferrer',
         );
@@ -177,7 +177,7 @@ export default function CustomerCashDepositPage() {
 
     const cancelVoucherHandler = (voucherId: number) => {
         if (!confirm('Cancel this voucher?')) return;
-        router.delete(`/journal_entries/${voucherId}`, {
+        router.delete(`/voucher_entries/${voucherId}`, {
             preserveScroll: true,
             onSuccess: () => toast.success('Voucher cancelled'),
         });
@@ -222,7 +222,7 @@ export default function CustomerCashDepositPage() {
                     />
 
                     <VoucherQueueSection
-                        journal_entries={journal_entries}
+                        voucher_entries={voucher_entries}
                         onView={viewVoucherHandler}
                         voucherCollectNowHandler={voucherCollectNowHandler}
                         cancelVoucherHandler={cancelVoucherHandler}

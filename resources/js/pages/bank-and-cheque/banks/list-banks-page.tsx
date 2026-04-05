@@ -1,6 +1,6 @@
 // resources/js/Pages/Bank/Index.tsx
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
@@ -151,22 +151,47 @@ export default function Index() {
                                         <td className="px-2 py-1">
                                             {b.status}
                                         </td>
-                                        <td className="flex space-x-2 px-2 py-1">
-                                            <Link
-                                                href={route('banks.edit', b.id)}
-                                                className="text-success"
-                                            >
-                                                <Pencil className="h-5 w-5" />
-                                            </Link>
-                                            <button
-                                                disabled={processing}
-                                                onClick={() =>
-                                                    handleDelete(b.id, b.name)
-                                                }
-                                                className="text-destructive hover:text-destructive/80 disabled:opacity-50"
-                                            >
-                                                <Trash2 className="h-5 w-5" />
-                                            </button>
+                                        <td className="px-2 py-1">
+                                            <div className="flex items-center gap-2">
+                                                {/* View */}
+                                                <Link
+                                                    href={route(
+                                                        'banks.show',
+                                                        b.id,
+                                                    )}
+                                                    className="text-muted-foreground transition-colors hover:text-primary"
+                                                    title="View"
+                                                >
+                                                    <Eye className="h-5 w-5" />
+                                                </Link>
+
+                                                {/* Edit */}
+                                                <Link
+                                                    href={route(
+                                                        'banks.edit',
+                                                        b.id,
+                                                    )}
+                                                    className="text-success transition hover:opacity-80"
+                                                    title="Edit"
+                                                >
+                                                    <Pencil className="h-5 w-5" />
+                                                </Link>
+
+                                                {/* Delete */}
+                                                <button
+                                                    disabled={processing}
+                                                    onClick={() =>
+                                                        handleDelete(
+                                                            b.id,
+                                                            b.name,
+                                                        )
+                                                    }
+                                                    className="text-destructive transition hover:text-destructive/80 disabled:opacity-50"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 className="h-5 w-5" />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))

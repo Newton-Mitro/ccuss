@@ -152,55 +152,66 @@ const BankForm = ({ bank, flash }) => {
                         </Button>
                     </div>
 
-                    {data.branches.map((branch, index) => (
-                        <div
-                            key={index}
-                            className="grid grid-cols-1 gap-3 rounded-md border p-3 sm:grid-cols-3"
-                        >
-                            <Input
-                                placeholder="Branch Name"
-                                value={branch.name}
-                                onChange={(e) =>
-                                    updateBranch(index, 'name', e.target.value)
-                                }
-                            />
+                    <div className="space-y-2 border p-3">
+                        {data.branches.map((branch, index) => (
+                            <div key={index} className="flex gap-3 rounded-md">
+                                <div className="w-3/12">
+                                    <Input
+                                        placeholder="Branch Name"
+                                        value={branch.name}
+                                        onChange={(e) =>
+                                            updateBranch(
+                                                index,
+                                                'name',
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
 
-                            <Input
-                                placeholder="Routing Number"
-                                value={branch.routing_number}
-                                onChange={(e) =>
-                                    updateBranch(
-                                        index,
-                                        'routing_number',
-                                        e.target.value,
-                                    )
-                                }
-                            />
+                                <div className="w-3/12">
+                                    <Input
+                                        placeholder="Routing Number"
+                                        value={branch.routing_number}
+                                        onChange={(e) =>
+                                            updateBranch(
+                                                index,
+                                                'routing_number',
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
 
-                            <div className="flex gap-2">
-                                <Input
-                                    placeholder="Address"
-                                    value={branch.address}
-                                    onChange={(e) =>
-                                        updateBranch(
-                                            index,
-                                            'address',
-                                            e.target.value,
-                                        )
-                                    }
-                                />
+                                <div className="flex w-6/12 gap-2">
+                                    <div className="w-11/12">
+                                        <Input
+                                            placeholder="Address"
+                                            value={branch.address}
+                                            onChange={(e) =>
+                                                updateBranch(
+                                                    index,
+                                                    'address',
+                                                    e.target.value,
+                                                )
+                                            }
+                                        />
+                                    </div>
 
-                                <Button
-                                    type="button"
-                                    variant="destructive"
-                                    size="icon"
-                                    onClick={() => removeBranch(index)}
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
+                                    <div className="1/12 flex items-center justify-end">
+                                        <Button
+                                            type="button"
+                                            variant="destructive"
+                                            size="icon"
+                                            onClick={() => removeBranch(index)}
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
 
                 {/* SUBMIT */}

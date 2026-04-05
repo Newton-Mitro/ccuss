@@ -2,9 +2,9 @@
 
 ## Actors
 
-- **Branch Staff / Petty Cash Custodian** – manages petty cash, creates journal_entries.
+- **Branch Staff / Petty Cash Custodian** – manages petty cash, creates voucher_entries.
 - **Finance Manager / Approver** – approves replenishments.
-- **System / Database** – maintains records, logs journal_entries automatically.
+- **System / Database** – maintains records, logs voucher_entries automatically.
 
 ---
 
@@ -91,8 +91,8 @@
 
 **Actions:**
 
-1. Review petty cash balance and journal_entries.
-2. Ensure journal_entries match replenishments.
+1. Review petty cash balance and voucher_entries.
+2. Ensure voucher_entries match replenishments.
 3. Close or reconcile petty cash accounts periodically.
 
 ---

@@ -39,7 +39,7 @@ class BankCheque extends Model
         return $this->belongsTo(User::class, 'approved_by');
     }
 
-    public function journal_entries()
+    public function voucher_entries()
     {
         return $this->morphMany(BankTransaction::class, 'reference');
     }

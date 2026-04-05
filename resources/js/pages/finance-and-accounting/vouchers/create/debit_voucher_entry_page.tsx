@@ -117,7 +117,7 @@ export default function DebitVoucherEntryPage({
             ...data.lines,
             {
                 id: -Date.now(),
-                journal_entry_id: 0,
+                voucher_entry_id: 0,
                 ledger_account_id: null,
                 ledger_account: null,
                 subledger_id: null,
@@ -180,7 +180,7 @@ export default function DebitVoucherEntryPage({
         );
 
         router.get(
-            '/journal_entries/debit/create',
+            '/voucher_entries/debit/create',
             {
                 cash_ledger_id: e.target.value ? Number(e.target.value) : null,
                 cash_subledger_id: data.cash_subledger_id,
@@ -191,7 +191,7 @@ export default function DebitVoucherEntryPage({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/journal_entries', { preserveScroll: true });
+        post('/voucher_entries', { preserveScroll: true });
     };
 
     const debitTotal = data.lines.reduce((sum, l) => sum + (l.debit || 0), 0);
@@ -201,7 +201,7 @@ export default function DebitVoucherEntryPage({
         data.lines.length > 0 && debitTotal === creditTotal && hasValidLines;
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Vouchers', href: '/journal_entries' },
+        { title: 'Vouchers', href: '/voucher_entries' },
         { title: 'Debit/Payment Voucher Entry', href: '' },
     ];
 

@@ -225,7 +225,7 @@ return new class extends Migration {
         Schema::create('cheque_presentations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('union_cheque_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('journal_entry_id')->nullable();
+            $table->foreignId('voucher_entry_id')->nullable();
             $table->decimal('amount', 18, 2);
             $table->date('presented_at');
             $table->enum('status', ['pending', 'sent_for_clearing', 'cleared', 'bounced'])->default('pending');

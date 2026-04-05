@@ -49,7 +49,7 @@ class BankAccountController extends Controller
 
     public function create()
     {
-        return Inertia::render('BankAccount/Create', [
+        return Inertia::render('bank-and-cheque/bank-accounts/bank-account-form-page', [
             'banks' => Bank::select('id', 'name')->get(),
             'branches' => BankBranch::select('id', 'name')->get(),
         ]);
@@ -77,10 +77,17 @@ class BankAccountController extends Controller
 
     public function edit(BankAccount $bankAccount)
     {
-        return Inertia::render('BankAccount/Edit', [
+        return Inertia::render('bank-and-cheque/bank-accounts/bank-account-form-page', [
             'account' => $bankAccount,
             'banks' => Bank::select('id', 'name')->get(),
             'branches' => BankBranch::select('id', 'name')->get(),
+        ]);
+    }
+
+    public function show(BankAccount $bankAccount)
+    {
+        return Inertia::render('bank-and-cheque/bank-accounts/show-bank-account-page', [
+            'account' => $bankAccount,
         ]);
     }
 

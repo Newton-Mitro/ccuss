@@ -31,7 +31,7 @@
 7. System sets `current_balance = imprest_amount`.
 8. System confirms account creation.
 
-**Result:** New petty cash account is ready for journal_entries.
+**Result:** New petty cash account is ready for voucher_entries.
 
 ---
 
@@ -188,7 +188,7 @@ balance = previous_balance + replenishment_amount
 - Transaction Logs
 
 3. Compare with physical receipts.
-4. Flag suspicious journal_entries if needed.
+4. Flag suspicious voucher_entries if needed.
 
 **Result:** Ensures financial transparency and accountability.
 

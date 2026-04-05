@@ -30,7 +30,7 @@
 6. System creates record in `banks`.
 7. System confirms successful creation.
 
-**Result:** Bank is available for branches, accounts, and journal_entries.
+**Result:** Bank is available for branches, accounts, and voucher_entries.
 
 ---
 
@@ -81,14 +81,14 @@
 6. System stores record in `bank_accounts`.
 7. System confirms creation.
 
-**Result:** Bank account is active and ready for journal_entries.
+**Result:** Bank account is active and ready for voucher_entries.
 
 ---
 
 # 4. Record Bank Transactions
 
 **Actor:** Teller / Accountant  
-**Purpose:** To record deposits, withdrawals, transfers, and cheque journal_entries.
+**Purpose:** To record deposits, withdrawals, transfers, and cheque voucher_entries.
 
 ### Flow
 

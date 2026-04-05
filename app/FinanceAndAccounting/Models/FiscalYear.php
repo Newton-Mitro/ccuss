@@ -44,7 +44,7 @@ class FiscalYear extends Model
         return $this->hasMany(FiscalPeriod::class, 'fiscal_year_id');
     }
 
-    public function journal_entries(): HasMany
+    public function voucher_entries(): HasMany
     {
         return $this->hasMany(Voucher::class, 'fiscal_year_id');
     }

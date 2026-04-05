@@ -91,7 +91,7 @@ class BankController extends Controller
     {
         $bank->load('branches');
 
-        return Inertia::render('bank-and-cheque/banks/bank-branch-form-page', [
+        return Inertia::render('bank-and-cheque/banks/show-bank-page', [
             'bank' => $bank,
         ]);
     }

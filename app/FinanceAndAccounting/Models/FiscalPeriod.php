@@ -39,7 +39,7 @@ class FiscalPeriod extends Model
         return $this->belongsTo(FiscalYear::class, 'fiscal_year_id');
     }
 
-    public function journal_entries(): HasMany
+    public function voucher_entries(): HasMany
     {
         return $this->hasMany(Voucher::class, 'fiscal_period_id');
     }

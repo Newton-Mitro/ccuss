@@ -18,7 +18,7 @@ import { BreadcrumbItem } from '../../../types';
 import { transactionStatus } from './data/transaction_statuses';
 
 interface VoucherPageProps {
-    journal_entries: {
+    voucher_entries: {
         data: Voucher[];
         links: { url: string | null; label: string; active: boolean }[];
     };
@@ -26,7 +26,7 @@ interface VoucherPageProps {
 }
 
 export default function Index() {
-    const { journal_entries, filters } = usePage()
+    const { voucher_entries, filters } = usePage()
         .props as unknown as VoucherPageProps;
 
     const {
@@ -42,10 +42,10 @@ export default function Index() {
         page: Number(filters.page) || 1,
     });
 
-    // Fetch journal_entries on filter/search change
+    // Fetch voucher_entries on filter/search change
     useEffect(() => {
         const delay = setTimeout(() => {
-            get(route('journal_entries.index'), {
+            get(route('voucher_entries.index'), {
                 preserveScroll: true,
                 preserveState: true,
             });
@@ -64,7 +64,7 @@ export default function Index() {
             })
             .then((result) => {
                 if (result.isConfirmed) {
-                    destroy(route('journal_entries.destroy', id), {
+                    destroy(route('voucher_entries.destroy', id), {
                         preserveScroll: true,
                         preserveState: true,
                         onSuccess: () =>
@@ -78,7 +78,7 @@ export default function Index() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Vouchers', href: '/journal_entries' },
+        { title: 'Vouchers', href: '/voucher_entries' },
     ];
 
     const getTotals = (lines?: { debit: number; credit: number }[]) => {
@@ -90,10 +90,10 @@ export default function Index() {
     };
 
     const editRouteMap = {
-        DEBIT_OR_PAYMENT: 'journal_entries.edit.debit',
-        CREDIT_OR_RECEIPT: 'journal_entries.edit.credit',
-        JOURNAL_OR_NON_CASH: 'journal_entries.edit.journal',
-        CONTRA: 'journal_entries.edit.contra',
+        DEBIT_OR_PAYMENT: 'voucher_entries.edit.debit',
+        CREDIT_OR_RECEIPT: 'voucher_entries.edit.credit',
+        JOURNAL_OR_NON_CASH: 'voucher_entries.edit.journal',
+        CONTRA: 'voucher_entries.edit.contra',
     };
 
     return (
@@ -105,7 +105,7 @@ export default function Index() {
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
                         title="Vouchers"
-                        description="Manage all journal_entries with ease"
+                        description="Manage all voucher_entries with ease"
                     />
 
                     {/* Voucher Type Buttons */}
@@ -113,22 +113,22 @@ export default function Index() {
                         {[
                             {
                                 label: 'Debit / Payment',
-                                route: 'journal_entries.create.debit',
+                                route: 'voucher_entries.create.debit',
                                 color: 'bg-blue-600',
                             },
                             {
                                 label: 'Credit / Receipt',
-                                route: 'journal_entries.create.credit',
+                                route: 'voucher_entries.create.credit',
                                 color: 'bg-green-600',
                             },
                             {
                                 label: 'Journal / Non-Cash',
-                                route: 'journal_entries.create.journal',
+                                route: 'voucher_entries.create.journal',
                                 color: 'bg-purple-600',
                             },
                             {
                                 label: 'Contra',
-                                route: 'journal_entries.create.contra',
+                                route: 'voucher_entries.create.contra',
                                 color: 'bg-gray-600',
                             },
                         ].map((v) => (
@@ -147,7 +147,7 @@ export default function Index() {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <input
                         type="text"
-                        placeholder="Search journal_entries..."
+                        placeholder="Search voucher_entries..."
                         value={data.search}
                         onChange={(e) => {
                             setData('search', e.target.value);
@@ -193,8 +193,8 @@ export default function Index() {
                             </tr>
                         </thead>
                         <tbody>
-                            {journal_entries.data.length > 0 ? (
-                                journal_entries.data.map((v) => {
+                            {voucher_entries.data.length > 0 ? (
+                                voucher_entries.data.map((v) => {
                                     const NON_EDITABLE = [
                                         'OPENING_BALANCE',
                                         'CLOSING_BALANCE',
@@ -250,7 +250,7 @@ export default function Index() {
                                                             >
                                                                 <Link
                                                                     href={route(
-                                                                        'journal_entries.show',
+                                                                        'voucher_entries.show',
                                                                         v.id,
                                                                     )}
                                                                     className="text-primary hover:text-primary/80"
@@ -331,7 +331,7 @@ export default function Index() {
                                         colSpan={10}
                                         className="px-4 py-6 text-center text-muted-foreground"
                                     >
-                                        No journal_entries found.
+                                        No voucher_entries found.
                                     </td>
                                 </tr>
                             )}
@@ -346,7 +346,7 @@ export default function Index() {
                         setData('per_page', Number(value));
                         setData('page', 1);
                     }}
-                    links={journal_entries.links}
+                    links={voucher_entries.links}
                 />
             </div>
         </CustomAuthLayout>

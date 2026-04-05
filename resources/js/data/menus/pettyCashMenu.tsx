@@ -39,9 +39,9 @@ export const pettyCashMenu: SidebarItem[] = [
                     {
                         name: 'Expense Entry',
                         icon: <i className="fa-solid fa-receipt" />,
-                        permission: ['petty_cash.journal_entries.view'],
-                        path: '/petty-cash-journal_entries',
-                        match_path: 'petty-cash-journal_entries',
+                        permission: ['petty_cash.voucher_entries.view'],
+                        path: '/petty-cash-voucher_entries',
+                        match_path: 'petty-cash-voucher_entries',
                     },
                     {
                         name: 'Advance Payment Entry',
