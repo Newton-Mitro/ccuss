@@ -174,20 +174,6 @@ export const savingDepositMenu: SidebarItem[] = [
                         match_path: 'cheques',
                         permission: ['cheque.view'],
                     },
-                    {
-                        name: 'Cheque Clearings',
-                        icon: <i className="fa-solid fa-check-circle" />,
-                        path: '/cheque-clearings',
-                        match_path: 'cheque-clearings',
-                        permission: ['cheque.clearing.view'],
-                    },
-                    {
-                        name: 'Cheque Bounce',
-                        icon: <i className="fa-solid fa-ban" />,
-                        path: '/cheque-bounce',
-                        match_path: 'cheque-bounce',
-                        permission: ['cheque.bounce.view'],
-                    },
                 ],
             },
 

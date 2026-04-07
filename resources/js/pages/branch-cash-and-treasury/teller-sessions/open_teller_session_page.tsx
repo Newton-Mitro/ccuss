@@ -47,7 +47,7 @@ export default function OpenTellerSession() {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="w-full max-w-md space-y-2 rounded-md border bg-card p-6 md:p-10"
+                    className="w-full space-y-2 rounded-md border bg-card p-6 md:p-10"
                 >
                     {/* Teller */}
                     <div>

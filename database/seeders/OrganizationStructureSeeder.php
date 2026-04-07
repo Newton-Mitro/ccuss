@@ -28,33 +28,23 @@ class OrganizationStructureSeeder extends Seeder
 
     public function run(): void
     {
-        // -------------------------------
-        // 1. Create Organization
-        // -------------------------------
-        $organization = Organization::firstOrCreate(
-            ['code' => 'ORG001'],
-            [
-                'name' => 'Demo Microfinance Ltd',
-                'short_name' => 'DML'
-            ]
-        );
+        // 1. Organization (use factory but controlled)
+        $organization = Organization::factory()->create([
+            'code' => 'ORG001',
+            'name' => 'Demo Microfinance Ltd',
+            'short_name' => 'DML',
+        ]);
 
-        // -------------------------------
-        // 2. Create Branches
-        // -------------------------------
+        // 2. Branches (use factory but override names)
         $branches = collect($this->dhakaBranches)->map(function ($branchName, $index) use ($organization) {
-            return Branch::firstOrCreate(
-                [
-                    'name' => $branchName,
-                    'organization_id' => $organization->id
-                ],
-                [
-                    'code' => 'BR-' . str_pad($index + 1, 3, '0', STR_PAD_LEFT),
-                ]
-            );
+            return Branch::factory()->create([
+                'organization_id' => $organization->id,
+                'name' => $branchName,
+                'code' => 'BR-' . str_pad($index + 1, 3, '0', STR_PAD_LEFT),
+            ]);
         });
 
-        $this->command->info('✅ Organization with ' . $branches->count() . ' branches created.');
+        $this->command->info('✅ Organization with branches created.');
 
         // -------------------------------
         // 3. Create Vault per Branch

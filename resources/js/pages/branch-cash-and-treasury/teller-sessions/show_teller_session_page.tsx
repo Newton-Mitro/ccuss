@@ -45,7 +45,7 @@ export default function ShowTellerSessionPage({ session }: Props) {
                 />
             </div>
 
-            <div className="w-full space-y-6 rounded-md border bg-card p-6 sm:p-8 lg:w-5xl">
+            <div className="w-full space-y-6 rounded-md border bg-card p-6 sm:p-8">
                 {!session ? (
                     <p className="text-center text-gray-600">
                         No session details available.

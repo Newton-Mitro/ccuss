@@ -1,7 +1,11 @@
 <?php
 
-namespace App\BankCashModule\Models;
+namespace App\BankAndChequeModule\Models;
 
+use App\BankCashModule\Models\Bank;
+use App\BankCashModule\Models\BankBranch;
+use App\BankCashModule\Models\BankCheque;
+use App\BankCashModule\Models\BankReconciliation;
 use App\SystemAdministration\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -42,11 +46,6 @@ class BankAccount extends Model
     public function approvedBy()
     {
         return $this->belongsTo(User::class, 'approved_by');
-    }
-
-    public function voucher_entries()
-    {
-        return $this->hasMany(BankTransaction::class);
     }
 
     public function cheques()

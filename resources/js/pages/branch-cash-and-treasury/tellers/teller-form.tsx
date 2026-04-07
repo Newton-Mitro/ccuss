@@ -97,7 +97,7 @@ const TellerForm = ({ teller, branch, users }: TellerFormPageProps) => {
 
             <form
                 onSubmit={handleSubmit}
-                className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6 lg:w-3xl"
+                className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6"
             >
                 {/* Basic Info */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2">

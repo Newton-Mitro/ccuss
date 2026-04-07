@@ -50,7 +50,7 @@ export default function ShowVaultPage({ vault }: ShowVaultPageProps) {
                 </Link>
             </div>
 
-            <div className="w-full space-y-6 rounded-md border bg-card p-6 sm:p-8 lg:w-5xl">
+            <div className="w-full space-y-6 rounded-md border bg-card p-6 sm:p-8">
                 <div className="flex items-center justify-between">
                     <h3 className="text-lg font-semibold text-info">
                         Vault Info

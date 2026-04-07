@@ -48,7 +48,7 @@ export default function Login({ status, canResetPassword, canRegister }) {
             {/* Right Form Section */}
             <div className="mx-4 flex w-full flex-col items-center justify-center lg:w-4/12">
                 <div className="flex h-[calc(90vh)] w-full flex-col items-center justify-center rounded border bg-card p-6 shadow">
-                    <div className="w-full lg:px-20">
+                    <div className="w-full md:px-10 lg:px-14 xl:px-20">
                         {/* Header */}
                         <div className="mb-6 text-center">
                             <AppLogoIcon className="mx-auto h-28 w-28 text-accent" />

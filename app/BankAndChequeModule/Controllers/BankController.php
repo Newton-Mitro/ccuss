@@ -1,8 +1,8 @@
 <?php
 
-namespace App\BankCashModule\Controllers;
+namespace App\BankAndChequeModule\Controllers;
 
-use App\BankCashModule\Models\Bank;
+use App\BankAndChequeModule\Models\Bank;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;

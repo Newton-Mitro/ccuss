@@ -4,7 +4,7 @@ namespace App\PettyCashModule\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\PettyCashModule\Models\AdvanceExpense;
-use App\PettyCashModule\Models\PettyCashAccount;
+use App\PettyCashModule\Models\PettyCashExpense;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\User;
 use Illuminate\Http\Request;
@@ -67,7 +67,7 @@ class AdvanceExpenseController extends Controller
     public function create()
     {
         return Inertia::render('petty-cash-management/advance-expenses/advance-expense-form-page', [
-            'pettyCashAccounts' => PettyCashAccount::select('id', 'name')->get(),
+            'pettyCashAccounts' => PettyCashExpense::select('id', 'name')->get(),
             'employees' => User::select('id', 'name')->get(),
             'branches' => Branch::select('id', 'name')->get(),
         ]);
@@ -93,7 +93,7 @@ class AdvanceExpenseController extends Controller
     {
         return Inertia::render('petty-cash-management/advance-expenses/advance-expense-form-page', [
             'account' => $advanceExpense,
-            'pettyCashAccounts' => PettyCashAccount::select('id', 'name')->get(),
+            'pettyCashAccounts' => PettyCashExpense::select('id', 'name')->get(),
             'employees' => User::select('id', 'name')->get(),
             'branches' => Branch::select('id', 'name')->get(),
         ]);
@@ -103,7 +103,7 @@ class AdvanceExpenseController extends Controller
     {
         return Inertia::render('petty-cash-management/advance-expenses/show-advance-expense-page', [
             'account' => $advanceExpense,
-            'pettyCashAccounts' => PettyCashAccount::select('id', 'name')->get(),
+            'pettyCashAccounts' => PettyCashExpense::select('id', 'name')->get(),
             'employees' => User::select('id', 'name')->get(),
             'branches' => Branch::select('id', 'name')->get(),
         ]);

@@ -10,16 +10,12 @@ import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem, SharedData } from '../../../types';
+import { Bank } from '../../../types/bank_and_cheques_module';
 import { bankStatuses } from './data/bankStatuses';
 
 interface BankPageProps extends SharedData {
     banks: {
-        data: {
-            id: number;
-            name: string;
-            short_name?: string;
-            status: 'active' | 'inactive';
-        }[];
+        data: Bank[];
         links: { url: string | null; label: string; active: boolean }[];
     };
     filters: Record<string, string>;

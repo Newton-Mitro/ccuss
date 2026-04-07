@@ -50,7 +50,7 @@ export default function ShowTellerPage({ teller }: Props) {
                 </Link>
             </div>
 
-            <div className="w-full space-y-6 rounded-md border bg-card p-6 sm:p-8 lg:w-5xl">
+            <div className="w-full space-y-6 rounded-md border bg-card p-6 sm:p-8">
                 <div className="flex items-center justify-between">
                     <h3 className="text-lg font-semibold">Teller Info</h3>
                     {StatusBadge({ isActive: teller.is_active })}

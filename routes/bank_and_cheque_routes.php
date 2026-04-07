@@ -1,8 +1,8 @@
 <?php
 
 
-use App\BankCashModule\Controllers\BankAccountController;
-use App\BankCashModule\Controllers\BankController;
+use App\BankAndChequeModule\Controllers\BankAccountController;
+use App\BankAndChequeModule\Controllers\BankController;
 use Illuminate\Support\Facades\Route;
 
 

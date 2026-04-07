@@ -1,7 +1,9 @@
 <?php
 
-namespace App\BankCashModule\Models;
+namespace App\BankAndChequeModule\Models;
 
+use App\BankCashModule\Models\Bank;
+use App\BankCashModule\Models\BankAccount;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;

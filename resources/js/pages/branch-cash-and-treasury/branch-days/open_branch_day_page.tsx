@@ -62,7 +62,7 @@ const OpenBranchDay = ({ branch, business_date }: Props) => {
 
             <form
                 onSubmit={handleSubmit}
-                className="flex w-full flex-col gap-4 rounded-md border bg-card p-4 sm:p-6 lg:w-4/12"
+                className="flex w-full flex-col gap-4 rounded-md border bg-card p-4 sm:p-6"
             >
                 {/* Branch Selection */}
                 <div>

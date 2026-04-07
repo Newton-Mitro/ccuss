@@ -1,10 +1,10 @@
 <?php
 
-namespace App\BankCashModule\Controllers;
+namespace App\BankAndChequeModule\Controllers;
 
-use App\BankCashModule\Models\Bank;
-use App\BankCashModule\Models\BankAccount;
-use App\BankCashModule\Models\BankBranch;
+use App\BankAndChequeModule\Models\Bank;
+use App\BankAndChequeModule\Models\BankAccount;
+use App\BankAndChequeModule\Models\BankBranch;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

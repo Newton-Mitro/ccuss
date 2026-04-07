@@ -76,7 +76,7 @@ const Edit = () => {
 
             <form
                 onSubmit={handleSubmit}
-                className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6 lg:w-5xl"
+                className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6"
             >
                 {/* CUSTOMER INFO (UNCHANGED) */}
                 <div className="mt-3 flex flex-col gap-4 rounded-md border bg-background/60 p-3 md:flex-row">

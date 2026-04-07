@@ -1,4 +1,3 @@
-// resources/js/Pages/BankAccount/Index.tsx
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
@@ -11,24 +10,20 @@ import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem, SharedData } from '../../../types';
+import {
+    Bank,
+    BankAccount,
+    BankBranch,
+} from '../../../types/bank_and_cheques_module';
 import { bankAccountStatuses } from './data/bankAccountStatuses';
 
 interface BankAccountPageProps extends SharedData {
     accounts: {
-        data: {
-            id: number;
-            account_name: string;
-            account_number: string;
-            balance: number;
-            currency: string;
-            status: 'active' | 'inactive' | 'closed';
-            bank: { id: number; name: string };
-            branch?: { id: number; name: string };
-        }[];
+        data: BankAccount[];
         links: { url: string | null; label: string; active: boolean }[];
     };
-    banks: { id: number; name: string }[];
-    branches: { id: number; name: string; bank_id: number }[];
+    banks: Bank[];
+    branches: BankBranch[];
     filters: Record<string, string>;
 }
 
@@ -182,7 +177,6 @@ export default function Index() {
                                     'Account Number',
                                     'Bank',
                                     'Branch',
-                                    'Balance',
                                     'Currency',
                                     'Status',
                                     'Actions',
@@ -215,9 +209,7 @@ export default function Index() {
                                         <td className="px-2 py-1">
                                             {a.branch?.name || '-'}
                                         </td>
-                                        <td className="px-2 py-1">
-                                            {a.balance.toFixed(2)}
-                                        </td>
+
                                         <td className="px-2 py-1">
                                             {a.currency}
                                         </td>
