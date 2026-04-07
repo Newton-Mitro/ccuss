@@ -1,6 +1,6 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { CheckCheck, Loader2, Plus, Trash2 } from 'lucide-react';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import toast from 'react-hot-toast';
 
 import InputError from '../../../../components/input-error';
@@ -10,6 +10,7 @@ import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Label } from '../../../../components/ui/label';
 import { Select } from '../../../../components/ui/select';
+import useFlashToastHandler from '../../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../../lib/appSwal';
 import { formatBDTCurrency } from '../../../../lib/bdtCurrencyFormatter';
@@ -105,12 +106,7 @@ export default function DebitVoucherEntryPage({
 
     const errors = useMemo(() => normalizeErrors(rawErrors), [rawErrors]);
 
-    useEffect(() => {
-        if (flash?.success) toast.success(flash.success);
-        if (flash?.error) toast.error(flash.error);
-    }, [flash]);
-
-    const handleBack = () => window.history.back();
+    useFlashToastHandler();
 
     const addLine = () => {
         setData('lines', [

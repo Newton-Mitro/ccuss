@@ -1,9 +1,9 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
-import React, { useEffect } from 'react';
-import toast from 'react-hot-toast';
+import React from 'react';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import { Input } from '../../../components/ui/input';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatDate } from '../../../lib/date_util';
 import { BreadcrumbItem, SharedData } from '../../../types';
@@ -15,17 +15,14 @@ interface Props extends SharedData {
 }
 
 export default function OpenTellerSession() {
-    const { branch_day, teller, flash } = usePage<Props>().props;
+    const { branch_day, teller } = usePage<Props>().props;
 
-    const { post, processing, errors, reset } = useForm({
+    const { post, processing, errors } = useForm({
         teller_id: teller?.id || '',
         branch_day_id: branch_day?.id || '',
     });
 
-    useEffect(() => {
-        if (flash?.success) toast.success(flash.success);
-        if (flash?.error) toast.error(flash.error);
-    }, [flash]);
+    useFlashToastHandler();
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();

@@ -6,8 +6,7 @@ import {
     UserIcon,
     XCircle,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
+import { useState } from 'react';
 
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
@@ -16,6 +15,7 @@ import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
 import { Card, CardContent } from '../../../components/ui/card';
 import { Input } from '../../../components/ui/input';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatDateTime } from '../../../lib/date_util';
 import { BreadcrumbItem, SharedData } from '../../../types';
@@ -26,13 +26,10 @@ export default function ShowIntroducer() {
         SharedData & { introducer_request: CustomerIntroducer; flash?: any }
     >();
 
-    const { introducer_request, flash, errors } = props;
+    const { introducer_request, errors } = props;
     const [rejection_reason, setReasonForRejection] = useState('');
 
-    useEffect(() => {
-        if (flash?.error) toast.error(flash.error);
-        if (flash?.success) toast.success(flash.success);
-    }, [flash]);
+    useFlashToastHandler();
 
     const handleBack = () => window.history.back();
 

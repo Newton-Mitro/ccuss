@@ -1,15 +1,11 @@
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, Pencil } from 'lucide-react';
-import { useEffect } from 'react';
-import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 
-const ShowAdvanceExpensePage = ({ advance, flash }: any) => {
-    useEffect(() => {
-        if (flash?.error) toast.error(flash.error);
-        if (flash?.success) toast.success(flash.success);
-    }, [flash]);
+const ShowAdvanceExpensePage = ({ advance }: any) => {
+    useFlashToastHandler();
 
     return (
         <CustomAuthLayout>

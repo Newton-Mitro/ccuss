@@ -1,9 +1,8 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
-import { useEffect } from 'react';
-import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import { Button } from '../../../components/ui/button';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatDate, formatDateTime } from '../../../lib/date_util';
 import { SharedData } from '../../../types';
@@ -14,15 +13,8 @@ interface Props extends SharedData {
     sessions: TellerSession[];
 }
 
-export default function BranchDayStatusPage({
-    branch_day,
-    sessions,
-    flash,
-}: Props) {
-    useEffect(() => {
-        if (flash?.success) toast.success(flash.success);
-        if (flash?.error) toast.error(flash.error);
-    }, [flash]);
+export default function BranchDayStatusPage({ branch_day, sessions }: Props) {
+    useFlashToastHandler();
 
     const handleClose = () => {
         if (!branch_day) return;

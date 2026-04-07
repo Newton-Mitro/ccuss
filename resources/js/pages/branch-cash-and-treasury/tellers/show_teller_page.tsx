@@ -1,9 +1,8 @@
 import { Head, Link } from '@inertiajs/react';
-import { useEffect } from 'react';
-import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import { Button } from '../../../components/ui/button';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { formatDateTime } from '../../../lib/date_util';
@@ -14,11 +13,8 @@ interface Props extends SharedData {
     teller: Teller;
 }
 
-export default function ShowTellerPage({ teller, flash }: Props) {
-    useEffect(() => {
-        if (flash?.error) toast.error(flash.error);
-        if (flash?.success) toast.success(flash.success);
-    }, [flash]);
+export default function ShowTellerPage({ teller }: Props) {
+    useFlashToastHandler();
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Tellers', href: route('tellers.index') },

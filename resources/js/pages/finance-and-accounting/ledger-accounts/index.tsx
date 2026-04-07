@@ -17,9 +17,9 @@ import {
     XIcon,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import { Select } from '../../../components/ui/select';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import { appSwal } from '../../../lib/appSwal';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 
@@ -71,7 +71,6 @@ export default function GlAccountsIndex({
     groupAccounts,
     fiscalYears,
     fiscalPeriods,
-    flash,
 }: any) {
     const [expandedIds, setExpandedIds] = useState<number[]>([]);
     const [modalOpen, setModalOpen] = useState(false);
@@ -88,13 +87,7 @@ export default function GlAccountsIndex({
         opening_balance_fiscal_period_id: '',
     });
 
-    /* ---------------------------------------------
-     | Flash
-     --------------------------------------------- */
-    useEffect(() => {
-        if (flash?.success) toast.success(flash.success);
-        if (flash?.error) toast.error(flash.error);
-    }, [flash]);
+    useFlashToastHandler();
 
     /* ---------------------------------------------
      | Auto-expand root control accounts

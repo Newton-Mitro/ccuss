@@ -1,8 +1,8 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import axios from 'axios';
-import { useEffect, useMemo } from 'react';
-import toast from 'react-hot-toast';
+import { useMemo } from 'react';
 import { route } from 'ziggy-js';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { normalizeErrors } from '../../../lib/normalize_errors';
@@ -41,7 +41,6 @@ export default function CustomerCashWithdrawalPage() {
         user_branch_id,
         fiscal_year_id,
         fiscal_period_id,
-        flash,
     } = usePage<VoucherFormData>().props;
 
     const {
@@ -63,13 +62,9 @@ export default function CustomerCashWithdrawalPage() {
         lines: lines || [],
     });
 
-    console.log(data);
     const errors = useMemo(() => normalizeErrors(rawErrors), [rawErrors]);
 
-    useEffect(() => {
-        if (flash?.success) toast.success(flash.success);
-        if (flash?.error) toast.error(flash.error);
-    }, [flash]);
+    useFlashToastHandler();
 
     const creditLines = useMemo(
         () =>

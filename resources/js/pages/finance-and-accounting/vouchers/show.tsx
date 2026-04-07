@@ -1,8 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowLeft, Edit2, Printer } from 'lucide-react';
-import { useEffect } from 'react';
-import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { formatDate, formatDateTime } from '../../../lib/date_util';
@@ -17,12 +16,9 @@ interface VoucherViewProps extends SharedData {
 }
 
 export default function VoucherView() {
-    const { voucher, flash } = usePage<VoucherViewProps>().props;
+    const { voucher } = usePage<VoucherViewProps>().props;
 
-    useEffect(() => {
-        if (flash?.success) toast.success(flash.success);
-        if (flash?.error) toast.error(flash.error);
-    }, [flash]);
+    useFlashToastHandler();
 
     const getTotals = (lines?: { debit: number; credit: number }[]) => {
         const totalDebit =

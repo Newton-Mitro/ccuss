@@ -7,11 +7,11 @@ import {
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { Archive, ListChecks } from 'lucide-react';
 import { useEffect } from 'react';
-import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
 import { Select } from '../../../components/ui/select';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatDateTime } from '../../../lib/date_util';
 import { BreadcrumbItem, SharedData } from '../../../types';
@@ -32,12 +32,9 @@ interface AuditsPageProps extends SharedData {
 }
 
 export default function Index() {
-    const { audits, filters, flash } = usePage<AuditsPageProps>().props;
+    const { audits, filters } = usePage<AuditsPageProps>().props;
 
-    useEffect(() => {
-        if (flash?.error) toast.error(flash.error);
-        if (flash?.success) toast.success(flash.success);
-    }, [flash]);
+    useFlashToastHandler();
 
     const { data, setData } = useForm({
         event: filters.event || '',

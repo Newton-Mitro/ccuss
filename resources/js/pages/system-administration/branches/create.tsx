@@ -1,21 +1,18 @@
 import { Head, useForm } from '@inertiajs/react';
-import React, { useEffect } from 'react';
-import toast from 'react-hot-toast';
+import React from 'react';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 import { Customer } from '../../../types/customer_kyc_module';
 import { CustomerSearchBox } from '../../customer-kyc/customers/components/customer-search-box';
 
-function Create({ flash }: { flash: any }) {
-    useEffect(() => {
-        if (flash?.error) toast.error(flash.error);
-        if (flash?.success) toast.success(flash.success);
-    }, [flash]);
+function Create() {
+    useFlashToastHandler();
     const { data, setData, post, processing, errors } = useForm({
         code: '',
         name: '',

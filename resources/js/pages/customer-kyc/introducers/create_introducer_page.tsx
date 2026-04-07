@@ -1,7 +1,7 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, ListFilter, Loader2 } from 'lucide-react';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
@@ -9,6 +9,7 @@ import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
 import { Select } from '../../../components/ui/select';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 import { Customer } from '../../../types/customer_kyc_module';
@@ -16,15 +17,12 @@ import { CustomerSearchBox } from '../customers/components/customer-search-box';
 import { relationshipTypes } from './data/relationship_types';
 
 const Create = () => {
-    const { customer, flash } = usePage().props as any;
+    const { customer } = usePage().props as any;
 
     const [selectedIntroducer, setSelectedIntroducer] =
         useState<Customer | null>(null);
 
-    useEffect(() => {
-        if (flash?.error) toast.error(flash.error);
-        if (flash?.success) toast.success(flash.success);
-    }, [flash]);
+    useFlashToastHandler();
 
     const handleBack = () => window.history.back();
 

@@ -7,12 +7,12 @@ import {
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
-import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
 import { Input } from '../../../components/ui/input';
 import { Select } from '../../../components/ui/select';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { Badge } from '../../../lib/statusConfig';
@@ -27,12 +27,9 @@ interface Props extends SharedData {
 }
 
 export default function IntroducersIndex() {
-    const { paginated_data, filters, flash } = usePage<Props>().props;
+    const { paginated_data, filters } = usePage<Props>().props;
 
-    useEffect(() => {
-        if (flash?.error) toast.error(flash.error);
-        if (flash?.success) toast.success(flash.success);
-    }, [flash]);
+    useFlashToastHandler();
 
     const { data, setData, get } = useForm({
         search: filters.search || '',

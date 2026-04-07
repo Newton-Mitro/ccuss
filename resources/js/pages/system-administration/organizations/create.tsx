@@ -1,23 +1,17 @@
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import { CheckCheck, Loader2 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
+import React, { useState } from 'react';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '../../../types';
-
-interface Props extends SharedData {}
+import { BreadcrumbItem } from '../../../types';
 
 function CreateOrganization() {
-    const { flash } = usePage<Props>().props;
-    useEffect(() => {
-        if (flash?.error) toast.error(flash.error);
-        if (flash?.success) toast.success(flash.success);
-    }, [flash]);
+    useFlashToastHandler();
 
     const { data, setData, post, processing, errors } = useForm({
         code: '',

@@ -1,23 +1,19 @@
 import { Head, usePage } from '@inertiajs/react';
-import { useEffect } from 'react';
-import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import {
     Avatar,
     AvatarFallback,
     AvatarImage,
 } from '../../../components/ui/avatar';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import { useInitials } from '../../../hooks/use-initials';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 import InfoItem from '../organizations/info-item';
 
 function ShowUser() {
-    const { user, flash } = usePage<any>().props;
-    useEffect(() => {
-        if (flash?.error) toast.error(flash.error);
-        if (flash?.success) toast.success(flash.success);
-    }, [flash]);
+    const { user } = usePage<any>().props;
+    useFlashToastHandler();
 
     const getInitials = useInitials();
 

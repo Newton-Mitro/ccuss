@@ -1,7 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
-import React, { useEffect } from 'react';
-import toast from 'react-hot-toast';
+import React from 'react';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
@@ -9,6 +8,7 @@ import AppDatePicker from '../../../components/ui/app_date_picker';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Branch } from '../../../types/branch';
@@ -18,16 +18,13 @@ interface Props extends SharedData {
     business_date: string;
 }
 
-const OpenBranchDay = ({ branch, business_date, flash }: Props) => {
+const OpenBranchDay = ({ branch, business_date }: Props) => {
     const { data, setData, post, processing, errors } = useForm({
         branch_id: branch.id,
         business_date: business_date ?? '',
     });
 
-    useEffect(() => {
-        if (flash?.error) toast.error(flash.error);
-        if (flash?.success) toast.success(flash.success);
-    }, [flash]);
+    useFlashToastHandler();
 
     const handleBack = () => window.history.back();
 

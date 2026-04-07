@@ -2,17 +2,18 @@
 
 namespace App\PettyCashModule\Models;
 
+use App\PettyCashModule\Models\PettyCashExpense;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class AdvancePettyCash extends Model
+class AdvanceExpense extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'petty_cash_account_id',
+        'petty_cash_expense_id',
         'employee_id',
         'branch_id',
         'name',
@@ -32,9 +33,9 @@ class AdvancePettyCash extends Model
     |--------------------------------------------------------------------------
     */
 
-    public function pettyCashAccount()
+    public function pettyCashExpense()
     {
-        return $this->belongsTo(PettyCashAccount::class);
+        return $this->belongsTo(PettyCashExpense::class);
     }
 
     public function employee()

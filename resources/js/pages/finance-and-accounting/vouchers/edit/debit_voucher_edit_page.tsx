@@ -1,6 +1,6 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2, Plus, Trash2 } from 'lucide-react';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import toast from 'react-hot-toast';
 
 import HeadingSmall from '../../../../components/heading-small';
@@ -10,6 +10,7 @@ import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Label } from '../../../../components/ui/label';
 import { Select } from '../../../../components/ui/select';
+import useFlashToastHandler from '../../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../../lib/appSwal';
 import { BreadcrumbItem } from '../../../../types';
@@ -78,7 +79,6 @@ export default function EditDebitVoucherEntry({
         activeFiscalYearId,
         activeFiscalPeriodId,
         userBranchId,
-        flash,
     } = usePage().props as any;
 
     const isPosted = voucher?.status === 'POSTED';
@@ -104,13 +104,9 @@ export default function EditDebitVoucherEntry({
         lines: voucher.lines.map((l: VoucherLine) => ({ ...l })),
     });
 
-    console.log(voucher.voucher_date);
     const errors = useMemo(() => normalizeErrors(rawErrors), [rawErrors]);
 
-    useEffect(() => {
-        if (flash?.success) toast.success(flash.success);
-        if (flash?.error) toast.error(flash.error);
-    }, [flash]);
+    useFlashToastHandler();
 
     const handleBack = () => window.history.back();
 

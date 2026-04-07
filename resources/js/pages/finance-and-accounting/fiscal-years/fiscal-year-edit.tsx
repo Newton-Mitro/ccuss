@@ -1,7 +1,6 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
-import React, { useEffect } from 'react';
-import toast from 'react-hot-toast';
+import React from 'react';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
@@ -11,6 +10,7 @@ import {
     ToggleGroup,
     ToggleGroupItem,
 } from '../../../components/ui/toggle-group';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
 
@@ -26,12 +26,9 @@ interface FiscalYearProps extends SharedData {
 }
 
 export default function FiscalYearForm() {
-    const { fiscalYear, flash } = usePage<FiscalYearProps>().props;
+    const { fiscalYear } = usePage<FiscalYearProps>().props;
 
-    useEffect(() => {
-        if (flash?.success) toast.success(flash.success);
-        if (flash?.error) toast.error(flash.error);
-    }, [flash]);
+    useFlashToastHandler();
 
     const handleBack = () => window.history.back();
 

@@ -7,7 +7,6 @@ import {
     XCircle,
 } from 'lucide-react';
 import { useEffect } from 'react';
-import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 
 import HeadingSmall from '@/components/heading-small';
@@ -20,6 +19,7 @@ import {
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import DataTablePagination from '../../../components/data-table-pagination';
 import { Input } from '../../../components/ui/input';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import { appSwal } from '../../../lib/appSwal';
 import { SharedData } from '../../../types';
 
@@ -45,7 +45,7 @@ interface BackupPageProps extends SharedData {
 }
 
 export default function History() {
-    const { logs, filters, flash } = usePage<BackupPageProps>().props;
+    const { logs, filters } = usePage<BackupPageProps>().props;
 
     const { data, setData, get } = useForm({
         search: filters.search || '',
@@ -61,11 +61,7 @@ export default function History() {
         return () => clearInterval(interval);
     }, []);
 
-    // Flash messages
-    useEffect(() => {
-        if (flash?.success) toast.success(flash.success);
-        if (flash?.error) toast.error(flash.error);
-    }, [flash]);
+    useFlashToastHandler();
 
     // Auto-search
     useEffect(() => {

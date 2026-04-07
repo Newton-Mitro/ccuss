@@ -12,10 +12,9 @@ import {
     UsersIcon,
     X,
 } from 'lucide-react';
-import { useEffect } from 'react';
-import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import { UserInfo } from '../../../components/user-info';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { formatDate } from '../../../lib/date_util';
@@ -28,16 +27,13 @@ interface ShowProps extends SharedData {
     customer: Customer;
 }
 
-export default function Show({ customer, flash }: ShowProps) {
+export default function Show({ customer }: ShowProps) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customers', href: route('customers.index') },
         { title: customer.name, href: '' },
     ];
 
-    useEffect(() => {
-        if (flash?.error) toast.error(flash.error);
-        if (flash?.success) toast.success(flash.success);
-    }, [flash]);
+    useFlashToastHandler();
 
     const isIndividual = customer.type === 'individual';
     const isOrganization = customer.type === 'organization';

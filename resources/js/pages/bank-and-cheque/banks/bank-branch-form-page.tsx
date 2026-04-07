@@ -7,14 +7,10 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { Head, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2, Plus, Trash2 } from 'lucide-react';
-import { useEffect } from 'react';
-import toast from 'react-hot-toast';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 
-const BankForm = ({ bank, flash }) => {
-    useEffect(() => {
-        if (flash?.error) toast.error(flash.error);
-        if (flash?.success) toast.success(flash.success);
-    }, [flash]);
+const BankForm = ({ bank }) => {
+    useFlashToastHandler();
 
     const isEdit = !!bank;
     const handleBack = () => window.history.back();

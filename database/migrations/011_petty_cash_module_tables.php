@@ -8,7 +8,7 @@ return new class extends Migration {
 
     public function up(): void
     {
-        Schema::create('petty_cash_accounts', function (Blueprint $table) {
+        Schema::create('petty_cash_expenses', function (Blueprint $table) {
             $table->id();
             $table->string('name'); // e.g., Office Petty Cash
             $table->string('code')->unique();
@@ -20,9 +20,9 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        Schema::create('advance_petty_cashes', function (Blueprint $table) {
+        Schema::create('advance_expenses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('petty_cash_account_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('petty_cash_expense_id')->constrained()->cascadeOnDelete();
             $table->foreignId('employee_id')->constrained('users')->cascadeOnDelete(); // role: employee
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             // $table->foreignId('petty_cash_transaction_id')->constrained()->cascadeOnDelete();

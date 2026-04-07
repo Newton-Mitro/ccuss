@@ -1,7 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
-import { useEffect } from 'react';
-import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
@@ -12,6 +10,7 @@ import {
     ToggleGroup,
     ToggleGroupItem,
 } from '../../../components/ui/toggle-group';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import {
@@ -30,12 +29,8 @@ const AdvanceExpenseForm = ({
     advance,
     employees,
     pettyCashAccounts,
-    flash,
 }: AdvanceExpenseFormProps) => {
-    useEffect(() => {
-        if (flash?.error) toast.error(flash.error);
-        if (flash?.success) toast.success(flash.success);
-    }, [flash]);
+    useFlashToastHandler();
 
     const isEdit = !!advance;
 

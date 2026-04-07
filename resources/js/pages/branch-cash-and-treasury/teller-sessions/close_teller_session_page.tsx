@@ -1,9 +1,9 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
-import React, { useEffect } from 'react';
-import toast from 'react-hot-toast';
+import React from 'react';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import { Input } from '../../../components/ui/input';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { TellerSession } from '../../../types/cash_treasury_module';
@@ -13,7 +13,7 @@ interface Props extends SharedData {
 }
 
 export default function CloseTellerSession() {
-    const { session, flash } = usePage<Props>().props;
+    const { session } = usePage<Props>().props;
 
     const { data, setData, post, processing, errors } = useForm({
         counted_balance: '',
@@ -25,10 +25,7 @@ export default function CloseTellerSession() {
     // ✅ Difference calculation
     const difference = Number(data.counted_balance || 0) - systemBalance;
 
-    useEffect(() => {
-        if (flash?.success) toast.success(flash.success);
-        if (flash?.error) toast.error(flash.error);
-    }, [flash]);
+    useFlashToastHandler();
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();

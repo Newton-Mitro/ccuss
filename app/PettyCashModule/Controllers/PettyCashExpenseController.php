@@ -3,7 +3,7 @@
 namespace App\PettyCashModule\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\PettyCashModule\Models\PettyCashAccount;
+use App\PettyCashModule\Models\PettyCashExpense;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\User;
 use Illuminate\Http\Request;
@@ -13,7 +13,7 @@ class PettyCashExpenseController extends Controller
 {
     public function index(Request $request)
     {
-        $query = PettyCashAccount::query()
+        $query = PettyCashExpense::query()
             ->with(['branch', 'custodian']);
 
         // 🔍 Search (name, code, branch, custodian)
@@ -75,7 +75,7 @@ class PettyCashExpenseController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:50|unique:petty_cash_accounts,code',
+            'code' => 'required|string|max:50|unique:petty_cash_expenses,code',
             'branch_id' => 'required|exists:branches,id',
             'custodian_id' => 'nullable|exists:users,id',
             'imprest_amount' => 'nullable|numeric|min:0',
@@ -83,50 +83,50 @@ class PettyCashExpenseController extends Controller
 
         $data['balance'] = $data['imprest_amount'] ?? 0;
 
-        PettyCashAccount::create($data);
+        PettyCashExpense::create($data);
 
         return redirect()->route('petty-cash-expenses.index')
-            ->with('success', 'Petty Cash Account created successfully');
+            ->with('success', 'Petty Cash Expense created successfully');
     }
 
-    public function edit(PettyCashAccount $pettyCashAccount)
+    public function edit(PettyCashExpense $pettyCashExpense)
     {
         return Inertia::render('petty-cash-management/petty-cash-expenses/petty-cash-expense-form-page', [
-            'pettyCash' => $pettyCashAccount,
+            'pettyCash' => $pettyCashExpense,
             'branches' => Branch::select('id', 'name')->get(),
             'users' => User::select('id', 'name')->get(),
         ]);
     }
 
-    public function show(PettyCashAccount $pettyCashAccount)
+    public function show(PettyCashExpense $pettyCashExpense)
     {
         return Inertia::render('petty-cash-management/petty-cash-expenses/show-petty-cash-expense-page', [
-            'pettyCash' => $pettyCashAccount,
+            'pettyCash' => $pettyCashExpense,
             'branches' => Branch::select('id', 'name')->get(),
             'users' => User::select('id', 'name')->get(),
         ]);
     }
 
-    public function update(Request $request, PettyCashAccount $pettyCashAccount)
+    public function update(Request $request, PettyCashExpense $pettyCashExpense)
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'code' => "required|string|max:50|unique:petty_cash_accounts,code,{$pettyCashAccount->id}",
+            'code' => "required|string|max:50|unique:petty_cash_expenses,code,{$pettyCashExpense->id}",
             'branch_id' => 'required|exists:branches,id',
             'custodian_id' => 'nullable|exists:users,id',
             'imprest_amount' => 'nullable|numeric|min:0',
             'is_active' => 'boolean',
         ]);
 
-        $pettyCashAccount->update($data);
+        $pettyCashExpense->update($data);
 
         return redirect()->route('petty-cash-expenses.index')
             ->with('success', 'Updated successfully');
     }
 
-    public function destroy(PettyCashAccount $pettyCashAccount)
+    public function destroy(PettyCashExpense $pettyCashExpense)
     {
-        $pettyCashAccount->delete();
+        $pettyCashExpense->delete();
 
         return back()->with('success', 'Deleted successfully');
     }

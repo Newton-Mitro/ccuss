@@ -2,12 +2,13 @@
 
 namespace App\PettyCashModule\Models;
 
+use App\PettyCashModule\Models\AdvanceExpense;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PettyCashAccount extends Model
+class PettyCashExpense extends Model
 {
     use HasFactory;
 
@@ -43,9 +44,9 @@ class PettyCashAccount extends Model
         return $this->belongsTo(User::class, 'custodian_id');
     }
 
-    public function advanceAccounts()
+    public function advanceExpenses()
     {
-        return $this->hasMany(AdvancePettyCash::class);
+        return $this->hasMany(AdvanceExpense::class);
     }
 
     // Future-proof (for transaction ledger)

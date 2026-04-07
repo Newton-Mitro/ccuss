@@ -1,11 +1,11 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
-import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
 import { Select } from '../../../components/ui/select';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem, SharedData } from '../../../types';
@@ -27,13 +27,9 @@ interface FiscalPeriodPageProps extends SharedData {
 }
 
 export default function FiscalPeriodIndex() {
-    const { fiscalPeriods, filters, flash } =
-        usePage<FiscalPeriodPageProps>().props;
+    const { fiscalPeriods, filters } = usePage<FiscalPeriodPageProps>().props;
 
-    useEffect(() => {
-        if (flash?.error) toast.error(flash.error);
-        if (flash?.success) toast.success(flash.success);
-    }, [flash]);
+    useFlashToastHandler();
 
     const {
         data,

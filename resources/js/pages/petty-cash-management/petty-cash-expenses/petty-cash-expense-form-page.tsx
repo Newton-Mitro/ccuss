@@ -1,7 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
-import React, { useEffect } from 'react';
-import toast from 'react-hot-toast';
+import React from 'react';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
@@ -12,6 +11,7 @@ import {
     ToggleGroup,
     ToggleGroupItem,
 } from '../../../components/ui/toggle-group';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Branch } from '../../../types/branch';
@@ -28,13 +28,8 @@ const PettyCashExpenseForm = ({
     pettyCash,
     branches,
     users,
-    flash,
 }: PettyCashExpenseFormPageProps) => {
-    useEffect(() => {
-        if (flash?.error) toast.error(flash.error);
-        if (flash?.success) toast.success(flash.success);
-    }, [flash]);
-
+    useFlashToastHandler();
     const handleBack = () => window.history.back();
     const isEdit = !!pettyCash;
 

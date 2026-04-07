@@ -1,8 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, Clock, Hash, MapPin } from 'lucide-react';
-import { useEffect } from 'react';
-import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Branch } from '../../../types/branch';
@@ -11,11 +10,8 @@ interface ShowProps extends SharedData {
     branch: Branch;
 }
 
-export default function Show({ branch, flash }: ShowProps) {
-    useEffect(() => {
-        if (flash?.error) toast.error(flash.error);
-        if (flash?.success) toast.success(flash.success);
-    }, [flash]);
+export default function Show({ branch }: ShowProps) {
+    useFlashToastHandler();
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Branches', href: '/branches' },

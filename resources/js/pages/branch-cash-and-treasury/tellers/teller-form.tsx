@@ -1,7 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
-import React, { useEffect } from 'react';
-import toast from 'react-hot-toast';
+import React from 'react';
 
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
@@ -13,6 +12,7 @@ import {
     ToggleGroup,
     ToggleGroupItem,
 } from '../../../components/ui/toggle-group';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Branch } from '../../../types/branch';
@@ -25,11 +25,8 @@ interface TellerFormPageProps extends SharedData {
     branch: Branch;
 }
 
-const TellerForm = ({ teller, branch, users, flash }: TellerFormPageProps) => {
-    useEffect(() => {
-        if (flash?.error) toast.error(flash.error);
-        if (flash?.success) toast.success(flash.success);
-    }, [flash]);
+const TellerForm = ({ teller, branch, users }: TellerFormPageProps) => {
+    useFlashToastHandler();
 
     const isEdit = !!teller;
 

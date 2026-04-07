@@ -1,7 +1,6 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { CheckCheck, Loader2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
@@ -12,6 +11,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '../../../components/ui/tooltip';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Permission, Role } from '../../../types/user';
@@ -25,7 +25,7 @@ const RolePermissionForm = ({
     roles,
     permissions,
 }: RolePermissionFormProps) => {
-    const { auth, flash } = usePage<RolePermissionFormProps>().props;
+    const { auth } = usePage<RolePermissionFormProps>().props;
 
     const systemAdminRole = auth.user.roles.filter(
         (r) => r.slug == 'system_administrator',
@@ -47,10 +47,7 @@ const RolePermissionForm = ({
         permissions: selectedRole?.permissions?.map((p) => p.id) || [],
     });
 
-    useEffect(() => {
-        if (flash?.error) toast.error(flash.error);
-        if (flash?.success) toast.success(flash.success);
-    }, [flash]);
+    useFlashToastHandler();
 
     useEffect(() => {
         if (!selectedRole) return;
