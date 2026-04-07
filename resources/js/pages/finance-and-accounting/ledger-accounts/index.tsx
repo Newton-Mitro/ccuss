@@ -150,7 +150,6 @@ export default function GlAccountsIndex({
         action({
             preserveScroll: true,
             onSuccess: closeModal,
-            onError: () => toast.error('Operation failed'),
         });
     };
 
@@ -199,8 +198,6 @@ export default function GlAccountsIndex({
 
                 router.delete(route('ledger_accounts.destroy', id), {
                     preserveScroll: true,
-                    onSuccess: () => toast.success('Account deleted'),
-                    onError: () => toast.error('Delete failed'),
                 });
             });
     };

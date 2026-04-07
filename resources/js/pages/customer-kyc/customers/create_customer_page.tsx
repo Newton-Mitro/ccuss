@@ -92,7 +92,6 @@ const Create = () => {
         post(route('customers.store'), {
             preserveScroll: true,
             forceFormData: true,
-            onError: (e) => toast.error(JSON.stringify(e)),
         });
     };
 

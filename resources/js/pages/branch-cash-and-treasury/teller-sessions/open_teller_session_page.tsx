@@ -32,15 +32,7 @@ export default function OpenTellerSession() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        post(route('teller-sessions.store'), {
-            onSuccess: () => {
-                toast.success('Teller session opened successfully!');
-                reset();
-            },
-            onError: () => {
-                toast.error('Failed to open teller session.');
-            },
-        });
+        post(route('teller-sessions.store'), {});
     };
 
     const breadcrumbs: BreadcrumbItem[] = [

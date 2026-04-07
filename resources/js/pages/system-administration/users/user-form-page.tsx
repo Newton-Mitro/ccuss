@@ -92,13 +92,11 @@ const UserForm = ({
             router.post(`/users/${user.id}`, payload, {
                 preserveScroll: true,
                 forceFormData: true,
-                onError: (err) => toast.error(JSON.stringify(err)),
             });
         } else {
             router.post('/users', payload, {
                 preserveScroll: true,
                 forceFormData: true,
-                onError: (err) => toast.error(JSON.stringify(err)),
             });
         }
     };

@@ -41,7 +41,6 @@ const Edit = () => {
 
         put(route('family-relations.update', family_relation.id), {
             preserveScroll: true,
-            onError: (e) => toast.error(JSON.stringify(e)),
         });
     };
 

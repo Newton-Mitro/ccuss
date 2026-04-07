@@ -46,7 +46,6 @@ const Create = () => {
         e.preventDefault();
         post(route('addresses.store'), {
             preserveScroll: true,
-            onError: (e) => toast.error(JSON.stringify(e)),
         });
     };
 

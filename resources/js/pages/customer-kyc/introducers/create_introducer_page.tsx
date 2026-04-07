@@ -44,9 +44,6 @@ const Create = () => {
 
         post(route('introducers.store'), {
             preserveScroll: true,
-            onError: () => {
-                toast.error('Please fix the errors and try again.');
-            },
         });
     };
 

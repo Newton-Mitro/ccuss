@@ -1,7 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 import { CheckCheck, Loader2 } from 'lucide-react';
 import React, { useState } from 'react';
-import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
@@ -59,8 +58,6 @@ function CreateOrganization() {
         post('/organizations', {
             preserveScroll: true,
             preserveState: true,
-            onSuccess: () =>
-                toast.success('Organization created successfully!'),
         });
     };
 
@@ -90,7 +87,7 @@ function CreateOrganization() {
                                 <h3 className="text-lg font-semibold text-info">
                                     Basic Details
                                 </h3>
-                                <div className="grid grid-cols-1 gap-x-5 md:grid-cols-3">
+                                <div className="grid grid-cols-1 gap-x-5 gap-y-2 md:grid-cols-3">
                                     <div>
                                         <Label>Organization Code</Label>
                                         <Input
@@ -176,7 +173,7 @@ function CreateOrganization() {
                                 <h3 className="text-lg font-semibold text-info">
                                     Contact & Address
                                 </h3>
-                                <div className="grid grid-cols-1 gap-x-5 md:grid-cols-4">
+                                <div className="grid grid-cols-1 gap-x-5 gap-y-2 md:grid-cols-4">
                                     <div>
                                         <Label>Phone</Label>
                                         <Input
@@ -322,7 +319,7 @@ function CreateOrganization() {
                                 <h3 className="text-lg font-semibold text-info">
                                     Report Header/Footer
                                 </h3>
-                                <div className="grid grid-cols-1 gap-x-5 md:grid-cols-4">
+                                <div className="grid grid-cols-1 gap-x-5 gap-y-2 md:grid-cols-4">
                                     <div className="md:col-span-2">
                                         <Label>Report Header Line 1</Label>
                                         <Input

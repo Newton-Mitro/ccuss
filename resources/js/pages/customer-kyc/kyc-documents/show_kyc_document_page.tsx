@@ -44,23 +44,11 @@ const Show = () => {
 
     // 🚀 Actions (optional endpoints)
     const handleApprove = () => {
-        router.post(
-            route('kyc-documents.approve', document.id),
-            {},
-            {
-                onSuccess: () => toast.success('Document approved'),
-            },
-        );
+        router.post(route('kyc-documents.approve', document.id), {});
     };
 
     const handleReject = () => {
-        router.post(
-            route('kyc-documents.reject', document.id),
-            {},
-            {
-                onSuccess: () => toast.success('Document rejected'),
-            },
-        );
+        router.post(route('kyc-documents.reject', document.id), {});
     };
 
     return (

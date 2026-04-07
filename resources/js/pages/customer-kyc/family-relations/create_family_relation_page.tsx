@@ -38,7 +38,6 @@ const Create = () => {
         e.preventDefault();
         post(route('family-relations.store'), {
             preserveScroll: true,
-            onError: (e) => toast.error(JSON.stringify(e)),
         });
     };
 

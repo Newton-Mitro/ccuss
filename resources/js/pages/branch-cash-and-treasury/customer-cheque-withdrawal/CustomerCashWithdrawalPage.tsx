@@ -151,7 +151,6 @@ export default function CustomerCashWithdrawalPage() {
     const collectNowHandler = () =>
         post('/voucher_entries', {
             preserveScroll: true,
-            onSuccess: () => toast.success('Voucher saved'),
         });
 
     const viewVoucherHandler = (voucherId: number) => {
@@ -166,7 +165,6 @@ export default function CustomerCashWithdrawalPage() {
         if (!confirm('Cancel this voucher?')) return;
         router.delete(`/voucher_entries/${voucherId}`, {
             preserveScroll: true,
-            onSuccess: () => toast.success('Voucher cancelled'),
         });
     };
 

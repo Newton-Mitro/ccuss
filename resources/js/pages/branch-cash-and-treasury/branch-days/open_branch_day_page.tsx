@@ -36,8 +36,6 @@ const OpenBranchDay = ({ branch, business_date, flash }: Props) => {
         e.preventDefault();
         post(route('branch-days.store'), {
             preserveScroll: true,
-            onError: (e) => toast.error('Error: ' + JSON.stringify(e)),
-            onSuccess: () => toast.success('Branch day opened successfully!'),
         });
     };
 

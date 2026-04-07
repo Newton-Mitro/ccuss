@@ -41,9 +41,6 @@ const Edit = () => {
 
         put(route('introducers.update', introducer.id), {
             preserveScroll: true,
-            onError: () => {
-                toast.error('Please fix the errors and try again.');
-            },
         });
     };
 

@@ -7,7 +7,6 @@ import {
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
-import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
@@ -67,11 +66,6 @@ export default function Index() {
                     destroy(route('voucher_entries.destroy', id), {
                         preserveScroll: true,
                         preserveState: true,
-                        onSuccess: () =>
-                            toast.success(
-                                `Voucher "${voucherNo}" deleted successfully!`,
-                            ),
-                        onError: () => toast.error('Failed to delete voucher.'),
                     });
                 }
             });

@@ -1,6 +1,5 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
 import React from 'react';
-import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
@@ -34,9 +33,6 @@ function Edit() {
         put(`/branches/${branch.id}`, {
             preserveScroll: true,
             preserveState: true,
-            onSuccess: () => {
-                toast.success('Branch updated successfully!');
-            },
         });
     };
 
@@ -65,7 +61,7 @@ function Edit() {
                             Basic Details
                         </h3>
 
-                        <div className="grid grid-cols-1 gap-x-5 md:grid-cols-4">
+                        <div className="grid grid-cols-1 gap-x-5 gap-y-2 md:grid-cols-4">
                             <div>
                                 <Label>Branch Code</Label>
                                 <Input
@@ -98,7 +94,7 @@ function Edit() {
                             Address & Location
                         </h3>
 
-                        <div className="grid grid-cols-1 gap-x-5 md:grid-cols-4">
+                        <div className="grid grid-cols-1 gap-x-5 gap-y-2 md:grid-cols-4">
                             <div className="md:col-span-4">
                                 <Label>Address</Label>
                                 <Input
@@ -147,7 +143,7 @@ function Edit() {
                             Management
                         </h3>
 
-                        <div className="grid grid-cols-1 gap-x-5 md:grid-cols-3">
+                        <div className="grid grid-cols-1 gap-x-5 gap-y-2 md:grid-cols-3">
                             <div className="md:col-span-2">
                                 <Label>Search Branch Manager</Label>
                                 <CustomerSearchBox

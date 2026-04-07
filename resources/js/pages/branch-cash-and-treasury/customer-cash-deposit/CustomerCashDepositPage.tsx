@@ -150,13 +150,11 @@ export default function CustomerCashDepositPage() {
     const collectNowHandler = () =>
         post('/voucher_entries', {
             preserveScroll: true,
-            onSuccess: () => toast.success('Voucher saved'),
         });
 
     const collectLaterHandler = () =>
         post('/voucher_entries', {
             preserveScroll: true,
-            onSuccess: () => toast.success('Voucher saved'),
         });
 
     const voucherCollectNowHandler = (voucherId: number) => {
@@ -179,7 +177,6 @@ export default function CustomerCashDepositPage() {
         if (!confirm('Cancel this voucher?')) return;
         router.delete(`/voucher_entries/${voucherId}`, {
             preserveScroll: true,
-            onSuccess: () => toast.success('Voucher cancelled'),
         });
     };
 

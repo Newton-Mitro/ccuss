@@ -7,6 +7,11 @@ import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '../../../components/ui/tooltip';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Permission, Role } from '../../../types/user';
@@ -68,8 +73,6 @@ const RolePermissionForm = ({
         put(route('roles.update-permissions', selectedRole.id), {
             data,
             preserveScroll: true,
-            onSuccess: () => toast.success('Permissions updated successfully!'),
-            onError: (err) => toast.error(JSON.stringify(err)),
         });
     };
 
@@ -257,16 +260,24 @@ const RolePermissionForm = ({
                                                                         className="h-4 w-4"
                                                                     />
                                                                     <div className="flex flex-col">
-                                                                        <span className="capitalize">
-                                                                            {
-                                                                                perm.name
-                                                                            }
-                                                                        </span>
-                                                                        {/* <span className="text-xs">
-                                                                            {
-                                                                                perm.description
-                                                                            }
-                                                                        </span> */}
+                                                                        <Tooltip>
+                                                                            <TooltipTrigger
+                                                                                asChild
+                                                                            >
+                                                                                <span className="capitalize">
+                                                                                    {
+                                                                                        perm.name
+                                                                                    }
+                                                                                </span>
+                                                                            </TooltipTrigger>
+                                                                            <TooltipContent>
+                                                                                <span className="text-xs">
+                                                                                    {
+                                                                                        perm.description
+                                                                                    }
+                                                                                </span>
+                                                                            </TooltipContent>
+                                                                        </Tooltip>
                                                                     </div>
                                                                 </div>
                                                                 {checked && (

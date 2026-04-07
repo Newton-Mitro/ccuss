@@ -7,7 +7,6 @@ import {
 import { Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Plus, StopCircle } from 'lucide-react';
 import { useEffect } from 'react';
-import { toast } from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import Heading from '../../../components/heading';
@@ -74,10 +73,6 @@ export default function Index() {
                     put(route('branch-days.close', id), {
                         preserveScroll: true,
                         preserveState: true,
-                        onSuccess: () =>
-                            toast.success('Branch day closed successfully!'),
-                        onError: () =>
-                            toast.error('Failed to close branch day.'),
                     });
                 }
             });

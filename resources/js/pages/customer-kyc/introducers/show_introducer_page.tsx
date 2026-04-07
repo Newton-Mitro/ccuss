@@ -69,23 +69,11 @@ export default function ShowIntroducer() {
 
     // ✅ Actions for pending verification
     const handleApprove = () => {
-        router.post(
-            route('introducers.approve', introducer_request.id),
-            {},
-            {
-                onSuccess: () => toast.success('Introducer approved'),
-            },
-        );
+        router.post(route('introducers.approve', introducer_request.id), {});
     };
 
     const handleReject = () => {
-        router.post(
-            route('introducers.reject', introducer_request.id),
-            {},
-            {
-                onSuccess: () => toast.success('Introducer rejected'),
-            },
-        );
+        router.post(route('introducers.reject', introducer_request.id), {});
     };
 
     return (

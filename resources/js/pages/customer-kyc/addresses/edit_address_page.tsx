@@ -49,7 +49,6 @@ const Edit = () => {
 
         put(route('addresses.update', address.id), {
             preserveScroll: true,
-            onError: (e) => toast.error(JSON.stringify(e)),
         });
     };
 

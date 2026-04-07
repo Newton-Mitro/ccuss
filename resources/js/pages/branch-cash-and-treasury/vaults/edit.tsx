@@ -48,12 +48,10 @@ const VaultForm = ({ vault, branches, flash }: VaultFormPageProps) => {
         if (isEdit) {
             put(`/vaults/${vault.id}`, {
                 preserveScroll: true,
-                onSuccess: () => toast.success('Vault updated successfully!'),
             });
         } else {
             post('/vaults', {
                 preserveScroll: true,
-                onSuccess: () => toast.success('Vault created successfully!'),
             });
         }
     };

@@ -7,7 +7,6 @@ import {
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
-import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
@@ -58,9 +57,6 @@ export default function KycDocumentsIndex() {
                 if (res.isConfirmed) {
                     router.delete(route('kyc-documents.destroy', id), {
                         preserveScroll: true,
-                        onSuccess: () =>
-                            toast.success('Document deleted successfully'),
-                        onError: () => toast.error('Failed to delete document'),
                     });
                 }
             });

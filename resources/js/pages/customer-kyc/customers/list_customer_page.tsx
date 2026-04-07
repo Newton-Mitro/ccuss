@@ -7,7 +7,6 @@ import {
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Trash2, UserPlus } from 'lucide-react';
 import { useEffect } from 'react';
-import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
@@ -59,12 +58,6 @@ export default function Index() {
                     router.delete(route('customers.destroy', id), {
                         preserveScroll: true,
                         preserveState: true,
-                        onSuccess: () =>
-                            toast.success(
-                                `Customer "${name}" deleted successfully!`,
-                            ),
-                        onError: () =>
-                            toast.error('Failed to delete the customer.'),
                     });
                 }
             });

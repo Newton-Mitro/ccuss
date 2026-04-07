@@ -37,14 +37,7 @@ export default function CloseTellerSession() {
             return;
         }
 
-        post(route('teller-sessions.close'), {
-            onSuccess: () => {
-                toast.success('Teller session closed successfully!');
-            },
-            onError: () => {
-                toast.error('Failed to close teller session.');
-            },
-        });
+        post(route('teller-sessions.close'), {});
     };
 
     const breadcrumbs: BreadcrumbItem[] = [

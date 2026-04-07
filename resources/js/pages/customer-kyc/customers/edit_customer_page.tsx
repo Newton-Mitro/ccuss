@@ -102,7 +102,6 @@ const Edit = ({ customer, flash }: EditProps) => {
             {
                 forceFormData: true,
                 preserveScroll: true,
-                onError: (e) => toast.error(JSON.stringify(e)),
             },
         );
     };

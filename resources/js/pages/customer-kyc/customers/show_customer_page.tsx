@@ -12,7 +12,6 @@ import {
     UsersIcon,
     X,
 } from 'lucide-react';
-import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import { UserInfo } from '../../../components/user-info';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
@@ -52,14 +51,6 @@ export default function Show({ customer }: ShowProps) {
                     router.delete(route('addresses.destroy', id), {
                         preserveScroll: true,
                         preserveState: true,
-                        onSuccess: () =>
-                            toast.success(
-                                `Customer address deleted successfully!`,
-                            ),
-                        onError: () =>
-                            toast.error(
-                                'Failed to delete the customer address.',
-                            ),
                     });
                 }
             });
@@ -79,14 +70,6 @@ export default function Show({ customer }: ShowProps) {
                     router.delete(route('family-relations.destroy', id), {
                         preserveScroll: true,
                         preserveState: true,
-                        onSuccess: () =>
-                            toast.success(
-                                `Customer family relation deleted successfully!`,
-                            ),
-                        onError: () =>
-                            toast.error(
-                                'Failed to delete the customer family relation.',
-                            ),
                     });
                 }
             });
@@ -106,14 +89,6 @@ export default function Show({ customer }: ShowProps) {
                     router.delete(route('introducers.destroy', id), {
                         preserveScroll: true,
                         preserveState: true,
-                        onSuccess: () =>
-                            toast.success(
-                                `Customer introducer deleted successfully!`,
-                            ),
-                        onError: () =>
-                            toast.error(
-                                'Failed to delete the customer introducer.',
-                            ),
                     });
                 }
             });
@@ -133,14 +108,6 @@ export default function Show({ customer }: ShowProps) {
                     router.delete(route('kyc-documents.destroy', id), {
                         preserveScroll: true,
                         preserveState: true,
-                        onSuccess: () =>
-                            toast.success(
-                                `Customer kyc document deleted successfully!`,
-                            ),
-                        onError: () =>
-                            toast.error(
-                                'Failed to delete the customer kyc document.',
-                            ),
                     });
                 }
             });

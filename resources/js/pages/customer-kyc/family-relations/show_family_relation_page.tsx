@@ -72,13 +72,7 @@ export default function ShowFamilyRelation() {
 
     // ✅ Actions for pending verification
     const handleApprove = () => {
-        router.post(
-            route('family-relations.approve', familyRelation.id),
-            {},
-            {
-                onSuccess: () => toast.success('Relation approved'),
-            },
-        );
+        router.post(route('family-relations.approve', familyRelation.id), {});
     };
 
     const handleReject = () => {
@@ -87,19 +81,7 @@ export default function ShowFamilyRelation() {
             {
                 rejection_reason,
             },
-            {
-                onSuccess: () => {
-                    toast.success('Relation rejected');
-                    setReasonForRejection('');
-                },
-                onError: (errors) => {
-                    if (errors.rejection_reason) {
-                        toast.error(errors.rejection_reason);
-                    } else {
-                        toast.error('Validation failed');
-                    }
-                },
-            },
+            {},
         );
     };
     return (

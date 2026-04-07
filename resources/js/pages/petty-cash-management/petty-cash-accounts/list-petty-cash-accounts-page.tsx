@@ -7,7 +7,6 @@ import {
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
-import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
@@ -68,11 +67,6 @@ export default function Index() {
                     destroy(route('petty-cash-accounts.destroy', id), {
                         preserveScroll: true,
                         preserveState: true,
-                        onSuccess: () =>
-                            toast.success(
-                                `Account "${name}" deleted successfully!`,
-                            ),
-                        onError: () => toast.error('Failed to delete account.'),
                     });
                 }
             });

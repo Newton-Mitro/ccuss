@@ -7,7 +7,6 @@ import {
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
-import toast from 'react-hot-toast';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
 import { Input } from '../../../components/ui/input';
@@ -65,10 +64,6 @@ export default function Index() {
                     router.delete(`/organizations/${id}`, {
                         preserveScroll: true,
                         preserveState: true,
-                        onSuccess: () =>
-                            toast.success(`Organization deleted successfully!`),
-                        onError: () =>
-                            toast.error('Failed to delete organization.'),
                     });
                 }
             });
