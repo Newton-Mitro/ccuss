@@ -1,11 +1,18 @@
 import { useForm } from '@inertiajs/react';
-import React from 'react';
+import React, { useEffect } from 'react';
+import toast from 'react-hot-toast';
+import { SharedData } from '../../../types';
 
-interface Props {
+interface Props extends SharedData {
     drawer_id: number;
 }
 
-export default function AdjustmentApproval({ drawer_id }: Props) {
+export default function AdjustmentApproval({ drawer_id, flash }: Props) {
+    useEffect(() => {
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) toast.success(flash.success);
+    }, [flash]);
+
     const { data, setData, post } = useForm({
         cash_drawer_id: drawer_id,
         amount: '',

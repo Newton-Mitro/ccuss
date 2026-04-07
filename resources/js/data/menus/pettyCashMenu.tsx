@@ -8,18 +8,18 @@ export const pettyCashMenu: SidebarItem[] = [
         permission: ['cash.branch.view'],
         children: [
             {
-                name: 'Petty Cash Accounts',
+                name: 'Petty Cash Expenses',
                 icon: <i className="fa-solid fa-piggy-bank" />,
                 permission: ['petty_cash.accounts.view'],
-                path: '/petty-cash-accounts',
-                match_path: 'petty-cash-accounts',
+                path: '/petty-cash-expenses',
+                match_path: 'petty-cash-expenses',
             },
             {
-                name: 'Advance Accounts',
+                name: 'Advance Expenses',
                 icon: <i className="fa-solid fa-hand-holding-dollar" />,
                 permission: ['petty_cash.accounts.view'],
-                path: '/advance-petty-cashes',
-                match_path: 'advance-petty-cashes',
+                path: '/advance-expenses',
+                match_path: 'advance-expenses',
             },
             {
                 name: 'Petty Cash Transactions',

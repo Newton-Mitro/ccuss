@@ -1,12 +1,18 @@
 import { Head, usePage } from '@inertiajs/react';
+import { useEffect } from 'react';
+import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-import { Organization } from '../../../types/organization';
 import InfoItem from './info-item';
 
 function Show() {
-    const { organization } = usePage<{ organization: Organization }>().props;
+    const { organization, flash } = usePage<any>().props;
+
+    useEffect(() => {
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) toast.success(flash.success);
+    }, [flash]);
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Organizations', href: '/organizations' },

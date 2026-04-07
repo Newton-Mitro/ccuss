@@ -2,7 +2,7 @@ import { AuditFields } from './base_types';
 import { Branch } from './branch';
 import { User } from './user';
 
-export interface PettyCashAccount extends AuditFields {
+export interface PettyCashExpense extends AuditFields {
     id: number;
     name: string;
     code: string;
@@ -20,10 +20,10 @@ export interface PettyCashAccount extends AuditFields {
 
     custodian?: User;
 
-    advance_accounts?: AdvancePettyCash[];
+    advance_accounts?: AdvanceExpense[];
 }
 
-export interface AdvancePettyCash extends AuditFields {
+export interface AdvanceExpense extends AuditFields {
     id: number;
     petty_cash_account_id: number;
     employee_id: number;
@@ -36,7 +36,7 @@ export interface AdvancePettyCash extends AuditFields {
     is_active: boolean;
 
     // relations
-    petty_cash_account?: PettyCashAccount;
+    petty_cash_account?: PettyCashExpense;
 
     employee?: User;
 

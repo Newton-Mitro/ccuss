@@ -1,12 +1,24 @@
 import { useForm } from '@inertiajs/react';
-import React from 'react';
+import React, { useEffect } from 'react';
+import toast from 'react-hot-toast';
+import { route } from 'ziggy-js';
+import { SharedData } from '../../../types';
 
-interface Props {
+interface Props extends SharedData {
     expected_balance: number;
     drawer_id: number;
 }
 
-export default function BalanceCash({ expected_balance, drawer_id }: Props) {
+export default function BalanceCash({
+    expected_balance,
+    drawer_id,
+    flash,
+}: Props) {
+    useEffect(() => {
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) toast.success(flash.success);
+    }, [flash]);
+
     const { data, setData, post } = useForm({
         cash_drawer_id: drawer_id,
         actual_balance: '',

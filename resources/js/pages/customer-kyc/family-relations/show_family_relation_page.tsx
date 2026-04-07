@@ -22,13 +22,9 @@ import { BreadcrumbItem, SharedData } from '../../../types';
 import { CustomerFamilyRelation } from '../../../types/customer_kyc_module';
 
 export default function ShowFamilyRelation() {
-    const { props } = usePage<
+    const { familyRelation, flash, errors } = usePage<
         SharedData & { familyRelation: CustomerFamilyRelation; flash?: any }
-    >();
-
-    const { familyRelation, flash, errors } = props;
-
-    console.log(familyRelation);
+    >().props;
 
     useEffect(() => {
         if (flash?.error) toast.error(flash.error);

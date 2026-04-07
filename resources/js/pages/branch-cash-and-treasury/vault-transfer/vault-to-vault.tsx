@@ -1,11 +1,19 @@
 import { useForm } from '@inertiajs/react';
-import React from 'react';
+import React, { useEffect } from 'react';
+import toast from 'react-hot-toast';
+import { route } from 'ziggy-js';
+import { SharedData } from '../../../types';
 
-interface Props {
+interface Props extends SharedData {
     vaults: any[];
 }
 
-export default function VaultToVault({ vaults }: Props) {
+export default function VaultToVault({ vaults, flash }: Props) {
+    useEffect(() => {
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) toast.success(flash.success);
+    }, [flash]);
+
     const { data, setData, post } = useForm({
         from_vault_id: '',
         to_vault_id: '',

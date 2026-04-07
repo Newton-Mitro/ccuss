@@ -7,17 +7,18 @@ import {
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { Archive, ListChecks } from 'lucide-react';
 import { useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatDateTime } from '../../../lib/date_util';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 import { Audit } from '../../../types/audit_models';
 import { auditEvents } from './data/audit_events';
 
-interface AuditsPageProps {
+interface AuditsPageProps extends SharedData {
     audits: {
         data: Audit[];
         links: { url: string | null; label: string; active: boolean }[];
@@ -31,7 +32,12 @@ interface AuditsPageProps {
 }
 
 export default function Index() {
-    const { audits, filters } = usePage().props as unknown as AuditsPageProps;
+    const { audits, filters, flash } = usePage<AuditsPageProps>().props;
+
+    useEffect(() => {
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) toast.success(flash.success);
+    }, [flash]);
 
     const { data, setData } = useForm({
         event: filters.event || '',

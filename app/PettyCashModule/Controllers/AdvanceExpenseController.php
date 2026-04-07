@@ -10,7 +10,7 @@ use App\SystemAdministration\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class AdvancePettyCashController extends Controller
+class AdvanceExpenseController extends Controller
 {
     public function index(Request $request)
     {
@@ -51,7 +51,7 @@ class AdvancePettyCashController extends Controller
             ->paginate($request->input('per_page', 10))
             ->withQueryString();
 
-        return Inertia::render('petty-cash-management/advance-petty-cash-accounts/list-advance-petty-cash-accounts-page', [
+        return Inertia::render('petty-cash-management/advance-expenses/list-advance-expenses-page', [
             'accounts' => $accounts,
             'filters' => $request->only([
                 'search',
@@ -66,7 +66,7 @@ class AdvancePettyCashController extends Controller
 
     public function create()
     {
-        return Inertia::render('petty-cash-management/advance-petty-cash-accounts/advance-petty-cash-form-page', [
+        return Inertia::render('petty-cash-management/advance-expenses/advance-expense-form-page', [
             'pettyCashAccounts' => PettyCashAccount::select('id', 'name')->get(),
             'employees' => User::select('id', 'name')->get(),
             'branches' => Branch::select('id', 'name')->get(),
@@ -91,7 +91,7 @@ class AdvancePettyCashController extends Controller
 
     public function edit(AdvancePettyCash $advancePettyCash)
     {
-        return Inertia::render('petty-cash-management/advance-petty-cash-accounts/advance-petty-cash-form-page', [
+        return Inertia::render('petty-cash-management/advance-expenses/advance-expense-form-page', [
             'account' => $advancePettyCash,
             'pettyCashAccounts' => PettyCashAccount::select('id', 'name')->get(),
             'employees' => User::select('id', 'name')->get(),
@@ -101,7 +101,7 @@ class AdvancePettyCashController extends Controller
 
     public function show(AdvancePettyCash $advancePettyCash)
     {
-        return Inertia::render('petty-cash-management/advance-petty-cash-accounts/show-advance-petty-cash-page', [
+        return Inertia::render('petty-cash-management/advance-expenses/show-advance-expense-page', [
             'account' => $advancePettyCash,
             'pettyCashAccounts' => PettyCashAccount::select('id', 'name')->get(),
             'employees' => User::select('id', 'name')->get(),

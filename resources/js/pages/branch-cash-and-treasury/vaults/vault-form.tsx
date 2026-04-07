@@ -1,14 +1,22 @@
 import { useForm } from '@inertiajs/react';
+import { useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import InputError from '../../../components/input-error';
 import { Select } from '../../../components/ui/select';
+import { SharedData } from '../../../types';
 
-type Props = {
+interface Props extends SharedData {
     vault?: any;
     branches: { id: number; name: string }[];
-};
+}
 
-export default function VaultForm({ vault, branches }: Props) {
+export default function VaultForm({ vault, branches, flash }: Props) {
+    useEffect(() => {
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) toast.success(flash.success);
+    }, [flash]);
+
     const { data, setData, post, put, processing, errors } = useForm({
         branch_id: vault?.branch_id || '',
         name: vault?.name || '',

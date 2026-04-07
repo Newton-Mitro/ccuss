@@ -7,16 +7,17 @@ import {
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 import { transactionStatus } from './data/transaction_statuses';
 
-interface VoucherPageProps {
+interface VoucherPageProps extends SharedData {
     voucher_entries: {
         data: Voucher[];
         links: { url: string | null; label: string; active: boolean }[];
@@ -25,8 +26,13 @@ interface VoucherPageProps {
 }
 
 export default function Index() {
-    const { voucher_entries, filters } = usePage()
-        .props as unknown as VoucherPageProps;
+    const { voucher_entries, filters, flash } =
+        usePage<VoucherPageProps>().props;
+
+    useEffect(() => {
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) toast.success(flash.success);
+    }, [flash]);
 
     const {
         data,

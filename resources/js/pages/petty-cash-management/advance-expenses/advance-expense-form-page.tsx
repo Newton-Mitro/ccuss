@@ -1,5 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
+import { useEffect } from 'react';
+import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
@@ -11,24 +13,30 @@ import {
     ToggleGroupItem,
 } from '../../../components/ui/toggle-group';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 import {
-    AdvancePettyCash,
-    PettyCashAccount,
+    AdvanceExpense,
+    PettyCashExpense,
 } from '../../../types/petty_cash_module';
 import { User } from '../../../types/user';
 
-interface AdvancePettyCashFormProps {
-    advance?: AdvancePettyCash;
+interface AdvanceExpenseFormProps extends SharedData {
+    advance?: AdvanceExpense;
     employees: User[];
-    pettyCashAccounts: PettyCashAccount[];
+    pettyCashAccounts: PettyCashExpense[];
 }
 
-const AdvancePettyCashForm = ({
+const AdvanceExpenseForm = ({
     advance,
     employees,
     pettyCashAccounts,
-}: AdvancePettyCashFormProps) => {
+    flash,
+}: AdvanceExpenseFormProps) => {
+    useEffect(() => {
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) toast.success(flash.success);
+    }, [flash]);
+
     const isEdit = !!advance;
 
     const { data, setData, post, put, processing, errors } = useForm({
@@ -43,26 +51,26 @@ const AdvancePettyCashForm = ({
         e.preventDefault();
 
         if (isEdit) {
-            put(`/advance-petty-cashes/${advance.id}`);
+            put(`/advance-expenses/${advance.id}`);
         } else {
-            post('/advance-petty-cashes');
+            post('/advance-expenses');
         }
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Advance Petty Cash', href: '/advance-petty-cashes' },
+        { title: 'Advance Expenses', href: '/advance-expenses' },
         { title: isEdit ? 'Edit' : 'Create', href: '' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Advance Petty Cash" />
+            <Head title="Advance Expenses" />
 
             {/* Header */}
             <div className="flex justify-between pb-4">
                 <HeadingSmall
                     title={isEdit ? 'Edit Advance' : 'Create Advance'}
-                    description="Assign petty cash advance to employee."
+                    description="Assign advance to employee."
                 />
                 <button
                     onClick={() => window.history.back()}
@@ -164,4 +172,4 @@ const AdvancePettyCashForm = ({
     );
 };
 
-export default AdvancePettyCashForm;
+export default AdvanceExpenseForm;

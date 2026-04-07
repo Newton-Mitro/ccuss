@@ -1,5 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
-import React from 'react';
+import React, { useEffect } from 'react';
+import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
@@ -10,7 +11,11 @@ import { BreadcrumbItem } from '../../../types';
 import { Customer } from '../../../types/customer_kyc_module';
 import { CustomerSearchBox } from '../../customer-kyc/customers/components/customer-search-box';
 
-function Create() {
+function Create({ flash }: { flash: any }) {
+    useEffect(() => {
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) toast.success(flash.success);
+    }, [flash]);
     const { data, setData, post, processing, errors } = useForm({
         code: '',
         name: '',

@@ -17,8 +17,6 @@ interface Props extends SharedData {
 export default function OpenTellerSession() {
     const { branch_day, teller, flash } = usePage<Props>().props;
 
-    console.log({ branch_day, teller, flash });
-
     const { post, processing, errors, reset } = useForm({
         teller_id: teller?.id || '',
         branch_day_id: branch_day?.id || '',

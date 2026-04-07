@@ -7,6 +7,7 @@ import {
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
@@ -16,20 +17,25 @@ import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Branch } from '../../../types/branch';
-import { AdvancePettyCash } from '../../../types/petty_cash_module';
+import { PettyCashExpense } from '../../../types/petty_cash_module';
 
-interface AdvancePettyCashPageProps extends SharedData {
+interface ListPettyCashExpensesPageProps extends SharedData {
     accounts: {
-        data: AdvancePettyCash[];
+        data: PettyCashExpense[];
         links: { url: string | null; label: string; active: boolean }[];
     };
     branches: Branch[];
     filters: Record<string, string>;
 }
 
-export default function Index() {
-    const { accounts, branches, filters } =
-        usePage<AdvancePettyCashPageProps>().props;
+export default function ListPettyCashExpensesPage() {
+    const { accounts, branches, filters, flash } =
+        usePage<ListPettyCashExpensesPageProps>().props;
+
+    useEffect(() => {
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) toast.success(flash.success);
+    }, [flash]);
 
     const {
         data,
@@ -46,7 +52,7 @@ export default function Index() {
     });
 
     const handleSearch = () => {
-        get('/advance-petty-cashes', { preserveState: true });
+        get('/petty-cash-expenses', { preserveState: true });
     };
 
     useEffect(() => {
@@ -58,14 +64,14 @@ export default function Index() {
         appSwal
             .fire({
                 title: 'Are you sure?',
-                text: `Advance "${name}" will be permanently deleted!`,
+                text: `Account "${name}" will be permanently deleted!`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Yes, delete it!',
             })
             .then((result) => {
                 if (result.isConfirmed) {
-                    destroy(route('advance-petty-cashes.destroy', id), {
+                    destroy(route('petty-cash-expenses.destroy', id), {
                         preserveScroll: true,
                         preserveState: true,
                     });
@@ -74,25 +80,25 @@ export default function Index() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Advance Petty Cash', href: '/advance-petty-cashes' },
+        { title: 'Petty Cash Expenses', href: '/petty-cash-expenses' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Advance Petty Cash" />
+            <Head title="Petty Cash Expenses" />
 
             <div className="space-y-4 p-2 text-foreground">
                 {/* Header */}
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
-                        title="Advance Petty Cash"
-                        description="Manage employee advance petty cash balances"
+                        title="Petty Cash Expenses"
+                        description="Manage petty cash balances and custodians"
                     />
                     <Link
-                        href="/advance-petty-cashes/create"
+                        href="/petty-cash-expenses/create"
                         className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                     >
-                        <Plus className="h-4 w-4" /> Add Advance
+                        <Plus className="h-4 w-4" /> Add Account
                     </Link>
                 </div>
 
@@ -101,7 +107,7 @@ export default function Index() {
                     <div className="w-60">
                         <Input
                             type="text"
-                            placeholder="Search advances..."
+                            placeholder="Search accounts..."
                             value={data.search}
                             onChange={(e) => {
                                 setData('search', e.target.value);
@@ -150,9 +156,8 @@ export default function Index() {
                                 {[
                                     'Name',
                                     'Code',
-                                    'Employee',
-                                    'Petty Cash',
                                     'Branch',
+                                    'Imprest',
                                     'Balance',
                                     'Status',
                                     'Actions',
@@ -177,13 +182,12 @@ export default function Index() {
                                         <td className="px-2 py-1">{a.name}</td>
                                         <td className="px-2 py-1">{a.code}</td>
                                         <td className="px-2 py-1">
-                                            {a.employee?.name}
-                                        </td>
-                                        <td className="px-2 py-1">
-                                            {a.petty_cash_account?.name}
-                                        </td>
-                                        <td className="px-2 py-1">
                                             {a.branch?.name}
+                                        </td>
+                                        <td className="px-2 py-1">
+                                            {Number(a.imprest_amount).toFixed(
+                                                2,
+                                            )}
                                         </td>
                                         <td className="px-2 py-1 font-medium">
                                             {Number(a.balance).toFixed(2)}
@@ -201,7 +205,7 @@ export default function Index() {
                                                         <TooltipTrigger asChild>
                                                             <Link
                                                                 href={route(
-                                                                    'advance-petty-cashes.show',
+                                                                    'petty-cash-expenses.show',
                                                                     a.id,
                                                                 )}
                                                             >
@@ -217,7 +221,7 @@ export default function Index() {
                                                         <TooltipTrigger asChild>
                                                             <Link
                                                                 href={route(
-                                                                    'advance-petty-cashes.edit',
+                                                                    'petty-cash-expenses.edit',
                                                                     a.id,
                                                                 )}
                                                             >
@@ -257,10 +261,10 @@ export default function Index() {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={8}
+                                        colSpan={7}
                                         className="py-6 text-center text-muted-foreground"
                                     >
-                                        No advance accounts found.
+                                        No accounts found.
                                     </td>
                                 </tr>
                             )}

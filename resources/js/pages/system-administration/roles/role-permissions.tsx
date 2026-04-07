@@ -31,8 +31,6 @@ const RolePermissionForm = ({
         (r) => r.slug == 'system_administrator',
     );
 
-    console.log(systemAdminRole);
-
     const filteredRoles = roles.filter(
         (role) => role.slug !== 'system_administrator',
     );

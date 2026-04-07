@@ -5,14 +5,19 @@ import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { formatDate, formatDateTime } from '../../../lib/date_util';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 import { TellerSession } from '../../../types/cash_treasury_module';
 
-interface Props {
+interface Props extends SharedData {
     session: TellerSession | null;
 }
 
-export default function ShowTellerSessionPage({ session }: Props) {
+export default function ShowTellerSessionPage({ session, flash }: Props) {
+    useEffect(() => {
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) toast.success(flash.success);
+    }, [flash]);
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Teller Sessions', href: '/teller-sessions' },
         { title: 'Session Details', href: '' },

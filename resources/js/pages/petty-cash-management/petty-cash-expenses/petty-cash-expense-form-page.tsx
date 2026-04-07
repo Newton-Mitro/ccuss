@@ -15,21 +15,21 @@ import {
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Branch } from '../../../types/branch';
-import { PettyCashAccount } from '../../../types/petty_cash_module';
+import { PettyCashExpense } from '../../../types/petty_cash_module';
 import { User } from '../../../types/user';
 
-interface PettyCashFormPageProps extends SharedData {
-    pettyCash?: PettyCashAccount;
+interface PettyCashExpenseFormPageProps extends SharedData {
+    pettyCash?: PettyCashExpense;
     branches: Branch[];
     users: User[];
 }
 
-const PettyCashForm = ({
+const PettyCashExpenseForm = ({
     pettyCash,
     branches,
     users,
     flash,
-}: PettyCashFormPageProps) => {
+}: PettyCashExpenseFormPageProps) => {
     useEffect(() => {
         if (flash?.error) toast.error(flash.error);
         if (flash?.success) toast.success(flash.success);
@@ -51,18 +51,20 @@ const PettyCashForm = ({
         e.preventDefault();
 
         if (isEdit) {
-            put(`/petty-cash-accounts/${pettyCash.id}`, {
+            put(`/petty-cash-expenses/${pettyCash.id}`, {
                 preserveScroll: true,
             });
         } else {
-            post('/petty-cash-accounts', { preserveScroll: true });
+            post('/petty-cash-expenses', { preserveScroll: true });
         }
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Petty Cash Accounts', href: '/petty-cash-accounts' },
+        { title: 'Petty Cash Expenses', href: '/petty-cash-expenses' },
         {
-            title: isEdit ? `Edit: ${pettyCash?.name}` : 'Create Petty Cash',
+            title: isEdit
+                ? `Edit: ${pettyCash?.name}`
+                : 'Create Petty Cash Expenses',
             href: '',
         },
     ];
@@ -72,8 +74,8 @@ const PettyCashForm = ({
             <Head
                 title={
                     isEdit
-                        ? `Edit Petty Cash - ${pettyCash?.name}`
-                        : 'Create Petty Cash'
+                        ? `Edit Petty Cash Expenses - ${pettyCash?.name}`
+                        : 'Create Petty Cash Expenses'
                 }
             />
 
@@ -83,9 +85,9 @@ const PettyCashForm = ({
                     title={
                         isEdit
                             ? `Edit: ${pettyCash?.name}`
-                            : 'Create Petty Cash'
+                            : 'Create Petty Cash Expenses'
                     }
-                    description="Manage petty cash account details."
+                    description="Manage petty cash expenses details."
                 />
                 <button
                     type="button"
@@ -216,4 +218,4 @@ const PettyCashForm = ({
     );
 };
 
-export default PettyCashForm;
+export default PettyCashExpenseForm;

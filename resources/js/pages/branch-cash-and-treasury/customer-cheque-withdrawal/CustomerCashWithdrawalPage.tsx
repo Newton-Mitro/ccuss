@@ -6,7 +6,7 @@ import { route } from 'ziggy-js';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { normalizeErrors } from '../../../lib/normalize_errors';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 import { Customer } from '../../../types/customer_kyc_module';
 import { VoucherLine } from '../../../types/finance_and_accounting';
 import CashLedgerSection from './components/CashLedgerSection';
@@ -14,7 +14,7 @@ import VoucherHeaderSection from './components/VoucherHeaderSection';
 import VoucherQueueSection from './components/VoucherQueueSection';
 import WithdrawalLedgerSection from './components/WithdrawalLedgerSection';
 
-interface VoucherFormData {
+interface VoucherFormData extends SharedData {
     voucher_no: string;
     voucher_date: string;
     voucher_type: string;
@@ -42,7 +42,7 @@ export default function CustomerCashWithdrawalPage() {
         fiscal_year_id,
         fiscal_period_id,
         flash,
-    } = usePage().props as any;
+    } = usePage<VoucherFormData>().props;
 
     const {
         data,

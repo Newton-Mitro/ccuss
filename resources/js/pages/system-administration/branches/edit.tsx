@@ -1,5 +1,6 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
-import React from 'react';
+import React, { useEffect } from 'react';
+import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
@@ -7,15 +8,17 @@ import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-import { Branch } from '../../../types/branch';
 import { Customer } from '../../../types/customer_kyc_module';
 import { CustomerSearchBox } from '../../customer-kyc/customers/components/customer-search-box';
 
 function Edit() {
-    const { branch } = usePage<{ branch: Branch }>().props;
+    const { branch, flash } = usePage<any>().props;
     const manager = branch?.manager as Customer;
 
-    console.log(branch);
+    useEffect(() => {
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) toast.success(flash.success);
+    }, [flash]);
 
     const { data, setData, put, processing, errors } = useForm({
         code: branch.code || '',

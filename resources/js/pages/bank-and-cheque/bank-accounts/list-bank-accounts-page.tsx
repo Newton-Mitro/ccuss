@@ -2,6 +2,7 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
@@ -32,8 +33,13 @@ interface BankAccountPageProps extends SharedData {
 }
 
 export default function Index() {
-    const { accounts, banks, branches, filters } =
+    const { accounts, banks, branches, filters, flash } =
         usePage<BankAccountPageProps>().props;
+
+    useEffect(() => {
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) toast.success(flash.success);
+    }, [flash]);
 
     const {
         data,

@@ -7,6 +7,8 @@ import {
     UserIcon,
     X,
 } from 'lucide-react';
+import { useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
@@ -17,7 +19,12 @@ interface Props extends SharedData {
     address: CustomerAddress;
 }
 
-export default function ViewAddress({ address }: Props) {
+export default function ViewAddress({ address, flash }: Props) {
+    useEffect(() => {
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) toast.success(flash.success);
+    }, [flash]);
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customers', href: route('customers.index') },
         {
@@ -25,8 +32,6 @@ export default function ViewAddress({ address }: Props) {
             href: '#',
         },
     ];
-
-    console.log(address);
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>

@@ -1,4 +1,6 @@
 import { Head, usePage } from '@inertiajs/react';
+import { useEffect } from 'react';
+import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import {
     Avatar,
@@ -8,11 +10,15 @@ import {
 import { useInitials } from '../../../hooks/use-initials';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-import { User } from '../../../types/user';
 import InfoItem from '../organizations/info-item';
 
 function ShowUser() {
-    const { user } = usePage<{ user: User }>().props;
+    const { user, flash } = usePage<any>().props;
+    useEffect(() => {
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) toast.success(flash.success);
+    }, [flash]);
+
     const getInitials = useInitials();
 
     const breadcrumbs: BreadcrumbItem[] = [

@@ -12,6 +12,8 @@ import {
     UsersIcon,
     X,
 } from 'lucide-react';
+import { useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import { UserInfo } from '../../../components/user-info';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
@@ -19,20 +21,23 @@ import { appSwal } from '../../../lib/appSwal';
 import { formatDate } from '../../../lib/date_util';
 import kycDocumentStatusConfig from '../../../lib/kycDocumentStatusConfig';
 import statusConfig, { Status } from '../../../lib/statusConfig';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 import { Customer } from '../../../types/customer_kyc_module';
 
-interface ShowProps {
+interface ShowProps extends SharedData {
     customer: Customer;
 }
 
-export default function Show({ customer }: ShowProps) {
+export default function Show({ customer, flash }: ShowProps) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customers', href: route('customers.index') },
         { title: customer.name, href: '' },
     ];
 
-    console.log(customer);
+    useEffect(() => {
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) toast.success(flash.success);
+    }, [flash]);
 
     const isIndividual = customer.type === 'individual';
     const isOrganization = customer.type === 'organization';

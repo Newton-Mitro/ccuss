@@ -7,19 +7,17 @@ import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { formatDate, formatDateTime } from '../../../lib/date_util';
 import { takaToText } from '../../../lib/taka_to_text';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 import { Voucher } from '../../../types/finance_and_accounting';
 
-interface VoucherViewProps {
+interface VoucherViewProps extends SharedData {
     voucher: Voucher;
     flash: { success?: string; error?: string };
     backUrl: string;
 }
 
-export default function VoucherView({ backUrl }: { backUrl: string }) {
-    const { voucher, flash } = usePage().props as unknown as VoucherViewProps;
-
-    console.log(voucher);
+export default function VoucherView() {
+    const { voucher, flash } = usePage<VoucherViewProps>().props;
 
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);

@@ -19,7 +19,6 @@ interface Props extends SharedData {
 }
 
 const OpenBranchDay = ({ branch, business_date, flash }: Props) => {
-    console.log({ branch, business_date, flash });
     const { data, setData, post, processing, errors } = useForm({
         branch_id: branch.id,
         business_date: business_date ?? '',

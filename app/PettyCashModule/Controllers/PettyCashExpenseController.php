@@ -9,7 +9,7 @@ use App\SystemAdministration\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class PettyCashAccountController extends Controller
+class PettyCashExpenseController extends Controller
 {
     public function index(Request $request)
     {
@@ -48,7 +48,7 @@ class PettyCashAccountController extends Controller
             ->withQueryString();
 
         return Inertia::render(
-            'petty-cash-management/petty-cash-accounts/list-petty-cash-accounts-page',
+            'petty-cash-management/petty-cash-expenses/list-petty-cash-expenses-page',
             [
                 'accounts' => $accounts,
                 'filters' => $request->only([
@@ -65,7 +65,7 @@ class PettyCashAccountController extends Controller
 
     public function create()
     {
-        return Inertia::render('petty-cash-management/petty-cash-accounts/petty-cash-form-page', [
+        return Inertia::render('petty-cash-management/petty-cash-expenses/petty-cash-expense-form-page', [
             'branches' => Branch::select('id', 'name')->get(),
             'users' => User::select('id', 'name')->get(),
         ]);
@@ -85,13 +85,13 @@ class PettyCashAccountController extends Controller
 
         PettyCashAccount::create($data);
 
-        return redirect()->route('petty-cash-accounts.index')
+        return redirect()->route('petty-cash-expenses.index')
             ->with('success', 'Petty Cash Account created successfully');
     }
 
     public function edit(PettyCashAccount $pettyCashAccount)
     {
-        return Inertia::render('petty-cash-management/petty-cash-accounts/petty-cash-form-page', [
+        return Inertia::render('petty-cash-management/petty-cash-expenses/petty-cash-expense-form-page', [
             'pettyCash' => $pettyCashAccount,
             'branches' => Branch::select('id', 'name')->get(),
             'users' => User::select('id', 'name')->get(),
@@ -100,7 +100,7 @@ class PettyCashAccountController extends Controller
 
     public function show(PettyCashAccount $pettyCashAccount)
     {
-        return Inertia::render('petty-cash-management/petty-cash-accounts/show-petty-cash-page', [
+        return Inertia::render('petty-cash-management/petty-cash-expenses/show-petty-cash-expense-page', [
             'pettyCash' => $pettyCashAccount,
             'branches' => Branch::select('id', 'name')->get(),
             'users' => User::select('id', 'name')->get(),
@@ -120,7 +120,7 @@ class PettyCashAccountController extends Controller
 
         $pettyCashAccount->update($data);
 
-        return redirect()->route('petty-cash-accounts.index')
+        return redirect()->route('petty-cash-expenses.index')
             ->with('success', 'Updated successfully');
     }
 

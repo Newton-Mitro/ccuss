@@ -1,9 +1,16 @@
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, Pencil } from 'lucide-react';
+import { useEffect } from 'react';
+import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 
-const AdvancePettyCashShow = ({ advance }: any) => {
+const ShowAdvanceExpensePage = ({ advance, flash }: any) => {
+    useEffect(() => {
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) toast.success(flash.success);
+    }, [flash]);
+
     return (
         <CustomAuthLayout>
             <Head title={advance.name} />
@@ -12,7 +19,7 @@ const AdvancePettyCashShow = ({ advance }: any) => {
             <div className="flex justify-between pb-4">
                 <HeadingSmall
                     title={advance.name}
-                    description="Advance petty cash details."
+                    description="Advance expense overview and details."
                 />
 
                 <div className="flex gap-2">
@@ -24,7 +31,7 @@ const AdvancePettyCashShow = ({ advance }: any) => {
                     </button>
 
                     <Link
-                        href={`/advance-petty-cashes/${advance.id}/edit`}
+                        href={`/advance-expenses/${advance.id}/edit`}
                         className="btn-primary"
                     >
                         <Pencil className="h-4 w-4" /> Edit
@@ -83,4 +90,4 @@ const AdvancePettyCashShow = ({ advance }: any) => {
     );
 };
 
-export default AdvancePettyCashShow;
+export default ShowAdvanceExpensePage;

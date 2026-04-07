@@ -1,31 +1,41 @@
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, Pencil } from 'lucide-react';
+import { useEffect } from 'react';
+import toast from 'react-hot-toast';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../../types';
-import { PettyCashAccount } from '../../../types/petty_cash_module';
+import { BreadcrumbItem, SharedData } from '../../../types';
+import { PettyCashExpense } from '../../../types/petty_cash_module';
 
-interface PettyCashShowProps {
-    pettyCash: PettyCashAccount;
+interface ShowPettyCashExpensePageProps extends SharedData {
+    pettyCash: PettyCashExpense;
 }
 
-const PettyCashShow = ({ pettyCash }: PettyCashShowProps) => {
+const ShowPettyCashExpensePage = ({
+    pettyCash,
+    flash,
+}: ShowPettyCashExpensePageProps) => {
     const handleBack = () => window.history.back();
 
+    useEffect(() => {
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) toast.success(flash.success);
+    }, [flash]);
+
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Petty Cash Accounts', href: '/petty-cash-accounts' },
+        { title: 'Petty Cash Expenses', href: '/petty-cash-expenses' },
         { title: pettyCash.name, href: '' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title={`Petty Cash - ${pettyCash.name}`} />
+            <Head title={`Petty Cash Expense - ${pettyCash.name}`} />
 
             {/* Header */}
             <div className="flex flex-col gap-3 pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <HeadingSmall
                     title={pettyCash.name}
-                    description="Petty cash account overview and details."
+                    description="Petty cash expense overview and details."
                 />
 
                 <div className="flex gap-2">
@@ -38,7 +48,7 @@ const PettyCashShow = ({ pettyCash }: PettyCashShowProps) => {
                     </button>
 
                     <Link
-                        href={`/petty-cash-accounts/${pettyCash.id}/edit`}
+                        href={`/petty-cash-expenses/${pettyCash.id}/edit`}
                         className="flex items-center gap-1 rounded bg-primary px-3 py-1.5 text-sm text-white hover:bg-primary/90"
                     >
                         <Pencil className="h-4 w-4" />
@@ -124,4 +134,4 @@ const PettyCashShow = ({ pettyCash }: PettyCashShowProps) => {
     );
 };
 
-export default PettyCashShow;
+export default ShowPettyCashExpensePage;

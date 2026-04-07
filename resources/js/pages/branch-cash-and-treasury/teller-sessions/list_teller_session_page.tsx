@@ -7,6 +7,7 @@ import {
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Plus, StopCircle } from 'lucide-react';
 import { useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
@@ -34,8 +35,13 @@ interface TellerSessionPageProps extends SharedData {
 }
 
 export default function TellerSessionsIndexPage() {
-    const { sessions, filters } = usePage()
-        .props as unknown as TellerSessionPageProps;
+    const { sessions, filters, flash } =
+        usePage<TellerSessionPageProps>().props;
+
+    useEffect(() => {
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) toast.success(flash.success);
+    }, [flash]);
 
     const { data, setData, get } = useForm({
         search: filters.search || '',

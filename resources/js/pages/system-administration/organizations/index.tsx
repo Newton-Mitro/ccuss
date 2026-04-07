@@ -7,6 +7,7 @@ import {
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
+import toast from 'react-hot-toast';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
 import { Input } from '../../../components/ui/input';
@@ -28,7 +29,12 @@ export default function Index() {
         }
     >();
 
-    const { organizations, filters } = props;
+    const { organizations, filters, flash } = props;
+
+    useEffect(() => {
+        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) toast.success(flash.success);
+    }, [flash]);
 
     const { data, setData, get } = useForm({
         search: filters.search || '',
