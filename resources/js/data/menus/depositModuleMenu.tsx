@@ -1,6 +1,6 @@
 import { SidebarItem } from '../../types';
 
-export const savingDepositMenu: SidebarItem[] = [
+export const depositModuleMenu: SidebarItem[] = [
     {
         name: 'Deposit Management',
         icon: <i className="fa-solid fa-piggy-bank" />,
@@ -150,33 +150,6 @@ export const savingDepositMenu: SidebarItem[] = [
                     },
                 ],
             },
-
-            // ===============================
-            // Cheque Management
-            // ===============================
-            {
-                name: 'Cheque Management',
-                icon: <i className="fa-solid fa-file-invoice" />,
-                children_expanded: false,
-                permission: ['cheque.view'],
-                children: [
-                    {
-                        name: 'Cheque Books',
-                        icon: <i className="fa-solid fa-book" />,
-                        path: '/cheque-books',
-                        match_path: 'cheque-books',
-                        permission: ['cheque.book.view'],
-                    },
-                    {
-                        name: 'Cheques',
-                        icon: <i className="fa-solid fa-money-check" />,
-                        path: '/cheques',
-                        match_path: 'cheques',
-                        permission: ['cheque.view'],
-                    },
-                ],
-            },
-
             // ===============================
             // Deposit Reports
             // ===============================

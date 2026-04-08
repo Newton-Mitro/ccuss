@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\SystemAdministration\Models\DatabaseBackupLog;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class DeleteAllBackups extends Command
 {
@@ -13,38 +13,30 @@ class DeleteAllBackups extends Command
 
     public function handle()
     {
-        $basePath = storage_path('app/backups');
+        $disk = Storage::disk('backup');
 
-        if (!File::exists($basePath)) {
-            $this->info('Backup directory does not exist. Nothing to delete.');
+        $allFiles = $disk->allFiles();
+
+        if (empty($allFiles)) {
+            $this->info('Backup disk is empty. Nothing to delete.');
             return 0;
         }
 
         $deletedFiles = 0;
         $deletedLogs = 0;
 
-        // Get all files recursively
-        $files = File::allFiles($basePath);
-
-        foreach ($files as $file) {
-            $relativePath = str_replace(
-                storage_path('app') . DIRECTORY_SEPARATOR,
-                '',
-                $file->getRealPath()
-            );
-
-            // Delete the file
-            File::delete($file->getRealPath());
+        foreach ($allFiles as $file) {
+            $disk->delete($file);
             $deletedFiles++;
 
             // Delete corresponding database log
-            $deletedLogs += DatabaseBackupLog::where('file_path', $relativePath)->delete();
+            $deletedLogs += DatabaseBackupLog::where('file_path', $file)->delete();
 
-            $this->info("Deleted backup: {$relativePath}");
+            $this->info("Deleted backup: {$file}");
         }
 
-        // Remove empty directories
-        $this->cleanupEmptyDirectories($basePath);
+        // Remove empty directories recursively
+        $this->cleanupEmptyDirectories($disk, '');
 
         $this->info("All backups deleted.");
         $this->info("Files deleted: {$deletedFiles}");
@@ -54,17 +46,19 @@ class DeleteAllBackups extends Command
     }
 
     /**
-     * Remove empty directories recursively
+     * Remove empty folders recursively on a disk
      */
-    protected function cleanupEmptyDirectories(string $path): void
+    protected function cleanupEmptyDirectories($disk, string $path): void
     {
-        $directories = File::directories($path);
+        $directories = $disk->directories($path);
 
         foreach ($directories as $directory) {
-            $this->cleanupEmptyDirectories($directory);
+            // Recurse first
+            $this->cleanupEmptyDirectories($disk, $directory);
 
-            if (count(File::files($directory)) === 0 && count(File::directories($directory)) === 0) {
-                File::deleteDirectory($directory);
+            // Delete if empty
+            if (count($disk->files($directory)) === 0 && count($disk->directories($directory)) === 0) {
+                $disk->deleteDirectory($directory);
                 $this->info("Removed empty directory: {$directory}");
             }
         }

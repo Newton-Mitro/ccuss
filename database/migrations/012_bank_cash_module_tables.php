@@ -55,24 +55,6 @@ return new class extends Migration {
             $table->index(['bank_id', 'bank_branch_id']);
         });
 
-        // ------------------------
-        // 5. Bank Cheques
-        // ------------------------
-        Schema::create('bank_cheques', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('bank_account_id')->constrained()->cascadeOnDelete();
-            $table->string('cheque_no')->unique();
-            $table->decimal('amount', 18, 2);
-            $table->string('payee')->nullable();
-            $table->date('cheque_date');
-            $table->enum('status', ['issued', 'cleared', 'bounced', 'cancelled'])->default('issued');
-            $table->text('remarks')->nullable();
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamps();
-            $table->softDeletes();
-            $table->index(['bank_account_id', 'status', 'cheque_date']);
-        });
 
 
         // ------------------------
@@ -90,12 +72,13 @@ return new class extends Migration {
             $table->softDeletes();
             $table->unique(['bank_account_id', 'reconcile_date']);
         });
+
+
     }
 
     public function down(): void
     {
         Schema::dropIfExists('bank_reconciliations');
-        Schema::dropIfExists('bank_cheques');
         Schema::dropIfExists('bank_accounts');
         Schema::dropIfExists('bank_branches');
         Schema::dropIfExists('banks');

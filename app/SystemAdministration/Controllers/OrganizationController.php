@@ -51,7 +51,7 @@ class OrganizationController extends Controller
 
         // Handle logo upload
         if ($request->hasFile('logo')) {
-            $data['logo_path'] = $request->file('logo')->store('organizations', 'public');
+            $data['logo_path'] = $request->file('logo')->store('uploads/organizations', 'public');
         }
 
         Organization::create($data);
@@ -95,7 +95,7 @@ class OrganizationController extends Controller
                 Storage::disk('public')->delete($organization->logo);
             }
 
-            $data['logo_path'] = $request->file('logo')->store('organizations', 'public');
+            $data['logo_path'] = $request->file('logo')->store('uploads/organizations', 'public');
         }
 
         $organization->update($data);

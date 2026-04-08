@@ -35,6 +35,5 @@ Route::prefix('audits')->middleware(['auth', 'verified'])->group(function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('database/backups', [DatabaseBackupController::class, 'history'])->name('backup.history');
-    Route::post('/database/backups', [DatabaseBackupController::class, 'backup'])->name('backup.run');
     Route::delete('/database/backups/{id}', [DatabaseBackupController::class, 'destroy'])->name('backup.destroy');
 });

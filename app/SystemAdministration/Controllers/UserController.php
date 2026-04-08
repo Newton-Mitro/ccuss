@@ -93,7 +93,7 @@ class UserController extends Controller
         // Upload photo
         $photoPath = null;
         if ($request->hasFile('photo')) {
-            $photoPath = $request->file('photo')->store('users', 'public');
+            $photoPath = $request->file('photo')->store('uploads/users', 'public');
         }
 
         $user = User::create([
@@ -165,7 +165,7 @@ class UserController extends Controller
                 Storage::disk('public')->delete($user->photo_path);
             }
 
-            $validated['photo_path'] = $request->file('photo')->store('users', 'public');
+            $validated['photo_path'] = $request->file('photo')->store('uploads/users', 'public');
         }
 
         // Handle password safely

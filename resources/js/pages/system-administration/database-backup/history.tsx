@@ -74,11 +74,6 @@ export default function History() {
     const formatSize = (bytes?: number) =>
         bytes ? (bytes / 1024 / 1024).toFixed(2) + ' MB' : '-';
 
-    // Trigger backup
-    const createBackup = () => {
-        router.post(route('backup.run'), {}, { preserveState: true });
-    };
-
     // Delete backup
     const handleDelete = (log: BackupLog) => {
         appSwal
@@ -112,12 +107,6 @@ export default function History() {
                     title="Database Backup History"
                     description="All generated system backups."
                 />
-                <button
-                    onClick={createBackup}
-                    className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-                >
-                    <DatabaseBackup className="h-4 w-4" /> Create Backup Now
-                </button>
             </div>
 
             <div className="space-y-4">

@@ -191,7 +191,7 @@ export default function Index() {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={5}
+                                        colSpan={7}
                                         className="px-4 py-6 text-center text-muted-foreground"
                                     >
                                         No audit logs found.

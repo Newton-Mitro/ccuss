@@ -7,6 +7,7 @@ use App\Jobs\RunDatabaseBackup;
 use App\SystemAdministration\Models\DatabaseBackupLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class DatabaseBackupController extends Controller
@@ -45,36 +46,35 @@ class DatabaseBackupController extends Controller
     {
         try {
             $log = DatabaseBackupLog::findOrFail($id);
+            $disk = Storage::disk('backup');
 
-            // Delete the backup file if it exists
-            if ($log->file_path && File::exists($log->file_path)) {
-                File::delete($log->file_path);
+            if ($log->file_path) {
+                // Normalize: remove leading slash
+                $relativePath = ltrim($log->file_path, '/');
+
+                // First, try disk deletion
+                if ($disk->exists($relativePath)) {
+                    $disk->delete($relativePath);
+                    \Log::info("Deleted backup via disk: {$relativePath}");
+                } else {
+                    // fallback absolute path
+                    $absolutePath = storage_path('app/backup/' . $relativePath);
+                    if (file_exists($absolutePath)) {
+                        unlink($absolutePath);
+                        \Log::info("Deleted backup via absolute path: {$absolutePath}");
+                    } else {
+                        \Log::warning("Backup file not found: {$absolutePath}");
+                    }
+                }
             }
 
-            // Delete the database record
             $log->delete();
+            \Log::info("Deleted database log record for backup: {$log->file_path}");
 
-            // Redirect back with success message
             return redirect()->back()->with('success', 'Backup deleted successfully.');
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return redirect()->back()->with('error', 'Backup record not found.');
         } catch (\Exception $e) {
             \Log::error('Failed to delete backup: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Failed to delete the backup. Please try again.');
+            return redirect()->back()->with('error', 'Failed to delete the backup.');
         }
-    }
-
-    public function backup()
-    {
-        $log = DatabaseBackupLog::create([
-            'status' => 'running',
-            'backup_type' => 'full',
-            'created_by' => auth()->id(),
-            'started_at' => now()
-        ]);
-
-        RunDatabaseBackup::dispatch($log->id);
-
-        return redirect()->back()->with('success', 'Backup created successfully.');
     }
 }

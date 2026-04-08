@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\SystemAdministration\Models\DatabaseBackupLog;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class BackupRun extends Command
 {
@@ -21,30 +21,30 @@ class BackupRun extends Command
         ]);
 
         try {
-            // 📁 Dynamic folder (Year/Month)
+            $disk = Storage::disk('backup'); // Use the 'backup' disk
+
             $now = now();
             $year = $now->format('Y');
             $month = $now->format('M');
 
-            $basePath = storage_path('app/backups');
-            $path = $basePath . DIRECTORY_SEPARATOR . $year . DIRECTORY_SEPARATOR . $month;
+            // Dynamic folder inside disk: "2026/Apr"
+            $relativePath = "{$year}/{$month}";
 
-            // Ensure directory exists
-            if (!File::exists($path)) {
-                File::makeDirectory($path, 0755, true);
+            // Ensure folder exists on the disk
+            if (!$disk->exists($relativePath)) {
+                $disk->makeDirectory($relativePath, 0755, true);
             }
 
-            // 📄 File name
-            $fileName = 'db_ccuss_' . $now->format('Y_M_d_His') . '.sql';
-            $fullPath = $path . DIRECTORY_SEPARATOR . $fileName;
+            $fileName = 'union_banking_db_' . $now->format('Y_m_d_His') . '.sql';
+            $fullPath = $disk->path($relativePath . '/' . $fileName);
 
-            // 🛢️ DB credentials
+            // Database credentials
             $host = env('DB_HOST');
             $user = env('DB_USERNAME');
             $pass = env('DB_PASSWORD');
             $db = env('DB_DATABASE');
 
-            // ⚙️ Safer mysqldump (no password exposure)
+            // Dump the database directly into the disk
             $command = sprintf(
                 'MYSQL_PWD=%s mysqldump --skip-ssl -h %s -u %s %s > %s 2>&1',
                 escapeshellarg($pass),
@@ -56,8 +56,7 @@ class BackupRun extends Command
 
             exec($command, $output, $result);
 
-            // ❌ Failure handling
-            if ($result !== 0) {
+            if ($result !== 0 || !file_exists($fullPath)) {
                 $log->update([
                     'status' => 'failed',
                     'error' => implode("\n", $output),
@@ -68,18 +67,18 @@ class BackupRun extends Command
                 return 1;
             }
 
-            // 📊 File metadata
+            // File metadata
             $fileSize = filesize($fullPath);
             $checksum = hash_file('sha256', $fullPath);
 
-            // 🧹 Cleanup old backups
-            $this->cleanupOldBackups($basePath, 30);
+            // Cleanup old backups (keep latest 30)
+            $this->cleanupOldBackups($disk, 30);
 
-            // ✅ Success log
+            // Update log
             $log->update([
                 'status' => 'success',
                 'file_name' => $fileName,
-                'file_path' => "backups/{$year}/{$month}/{$fileName}", // relative path
+                'file_path' => $relativePath . '/' . $fileName,
                 'file_size' => $fileSize,
                 'checksum' => $checksum,
                 'duration_seconds' => $log->started_at->diffInSeconds(now()),
@@ -104,26 +103,21 @@ class BackupRun extends Command
     }
 
     /**
-     * 🧹 Keep only latest N backups
+     * Remove old backups, keep only latest N files on the disk
      */
-    protected function cleanupOldBackups(string $basePath, int $keep = 30): void
+    protected function cleanupOldBackups($disk, int $keep = 30): void
     {
-        if (!File::exists($basePath)) {
-            return;
-        }
-
-        $files = File::allFiles($basePath);
+        $allFiles = $disk->allFiles();
 
         // Sort newest first
-        usort($files, function ($a, $b) {
-            return $b->getMTime() <=> $a->getMTime();
+        usort($allFiles, function ($a, $b) use ($disk) {
+            return $disk->lastModified($b) <=> $disk->lastModified($a);
         });
 
-        // Older files
-        $filesToDelete = array_slice($files, $keep);
+        $filesToDelete = array_slice($allFiles, $keep);
 
         foreach ($filesToDelete as $file) {
-            File::delete($file->getRealPath());
+            $disk->delete($file);
         }
     }
 }

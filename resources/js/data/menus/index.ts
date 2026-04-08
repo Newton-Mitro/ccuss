@@ -1,23 +1,25 @@
 import { SidebarItem } from '../../types';
-import { bankAndChequeMenu } from './bankAndChequeMenu';
+import { bankModuleMenu } from './bankModuleMenu';
 import { branchCashAndTreasuryMenu } from './branchCashAndTreasuryMenu';
+import { chequeManagementMenu } from './chequeManagementMenu';
 import { customerKycMenu } from './customerKycMenu';
 import { dashboardMenu } from './dashboardMenu';
+import { depositModuleMenu } from './depositModuleMenu';
 import { financeAndAccountingMenu } from './financeAndAccountingMenu';
 import { pettyCashMenu } from './pettyCashMenu';
-import { savingDepositMenu } from './savingDepositMenu';
 import { systemAdministrationMenu } from './systemAdministrationMenu';
 
 export const sidebarMenu: SidebarItem[] = [
     ...dashboardMenu,
     ...customerKycMenu,
-    ...savingDepositMenu,
+    ...depositModuleMenu,
     // ...loanManagementMenu,
     ...branchCashAndTreasuryMenu,
-    ...bankAndChequeMenu,
+    ...bankModuleMenu,
     ...pettyCashMenu,
     // ...procurementMenu,
     // ...fixedAssetMenu,
+    ...chequeManagementMenu,
     // ...hrAndPayrollMenu,
     ...financeAndAccountingMenu,
     ...systemAdministrationMenu,

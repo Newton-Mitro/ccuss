@@ -166,7 +166,7 @@ class CustomerController extends Controller
             if ($request->hasFile('photo')) {
 
                 $file = $request->file('photo');
-                $path = $file->store('customers/' . $customer->id, 'public');
+                $path = $file->store('uploads/customers/' . $customer->id, 'public');
 
                 $customer->kycDocuments()->create([
                     'document_type' => 'photo',
@@ -284,7 +284,7 @@ class CustomerController extends Controller
 
                 // Store new photo
                 $file = $request->file('photo');
-                $path = $file->store('customers/' . $customer->id, 'public');
+                $path = $file->store('uploads/customers/' . $customer->id, 'public');
 
                 $customer->kycDocuments()->create([
                     'document_type' => 'photo',

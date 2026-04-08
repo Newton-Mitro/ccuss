@@ -69,7 +69,7 @@ class KycDocumentController extends Controller
         ]);
 
         $file = $request->file('file');
-        $path = $file->store('customers/' . $request->customer_id, 'public');
+        $path = $file->store('uploads/customers/' . $request->customer_id, 'public');
 
         KycDocument::create([
             'customer_id' => $request->customer_id,
