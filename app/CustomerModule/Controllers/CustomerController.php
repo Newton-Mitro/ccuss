@@ -223,8 +223,7 @@ class CustomerController extends Controller
     public function update(UpdateCustomerRequest $request, Customer $customer): RedirectResponse
     {
         $data = $request->validated();
-        $data['organization_id'] = auth()->user()->organization_id;
-        $data['branch_id'] = auth()->user()->branch_id;
+
 
         if (empty($data['phone']) && empty($data['email'])) {
             return back()->withInput()->with('error', 'Phone or email is required.');

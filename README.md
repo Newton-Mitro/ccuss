@@ -55,9 +55,9 @@ docker exec -it union_banking_app php artisan optimize:clear
 docker exec -it union_banking_app composer dump-autoload
 docker exec -it union_banking_app npm run dev
 docker exec -it union_banking_app php artisan wayfinder:generate --with-form
+
 docker exec -it union_banking_app chown -R www-data:www-data storage bootstrap/cache
 docker exec -it union_banking_app chmod -R 775 storage bootstrap/cache
-docker exec -it union_banking_app php artisan permissions:generate
 
 chown -R $USER:$USER storage bootstrap/cache resources/js/actions/Laravel
 
