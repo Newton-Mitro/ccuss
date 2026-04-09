@@ -2,10 +2,7 @@
 
 namespace App\BankAndChequeModule\Models;
 
-use App\BankCashModule\Models\Bank;
-use App\BankCashModule\Models\BankBranch;
-use App\BankCashModule\Models\BankCheque;
-use App\BankCashModule\Models\BankReconciliation;
+use App\ChequeManagement\Models\BankCheque;
 use App\SystemAdministration\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -21,12 +18,31 @@ class BankAccount extends Model
         'account_name',
         'account_number',
         'iban',
-        'opening_balance',
-        'currency',
         'status',
         'created_by',
         'approved_by',
     ];
+
+    protected $appends = [
+        'display_name',
+        'account_type_label',
+        'account_type_class',
+    ];
+
+    public function getDisplayNameAttribute()
+    {
+        return "{$this->bank?->name} - {$this->account_number}";
+    }
+
+    public function getAccountTypeLabelAttribute()
+    {
+        return 'Bank Account';
+    }
+
+    public function getAccountTypeClassAttribute()
+    {
+        return self::class;
+    }
 
     public function bank()
     {
@@ -51,10 +67,5 @@ class BankAccount extends Model
     public function cheques()
     {
         return $this->hasMany(BankCheque::class);
-    }
-
-    public function reconciliations()
-    {
-        return $this->hasMany(BankReconciliation::class);
     }
 }

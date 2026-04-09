@@ -24,9 +24,15 @@ class AppServiceProvider extends ServiceProvider
             'flash' => fn() => [
                 'success' => session('success'),
                 'error' => session('error'),
-                'warning' => session('warning'),
                 'message' => session('message'),
+
             ],
+            'appName' => config('app.name'),
+            'appNameFirst' => config('app.name_first'),
+            'appNameSecond' => config('app.name_second'),
+            'appVersion' => config('app.app_version'),
+            'appShortTag' => config('app.app_short_tag'),
+            'appLongTag' => config('app.app_long_tag'),
         ]);
     }
 }

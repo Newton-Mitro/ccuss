@@ -110,10 +110,10 @@ return new class extends Migration {
         Schema::create('saving_account_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('deposit_account_id')->constrained('deposit_accounts');
-            $table->decimal('balance', 15, 2)->default(0);
-            $table->decimal('available_balance', 15, 2)->default(0);
-            $table->decimal('hold_balance', 15, 2)->default(0);
-            $table->decimal('minimum_balance', 15, 2)->default(0);
+            $table->decimal('balance', 18, 2)->default(0);
+            $table->decimal('available_balance', 18, 2)->default(0);
+            $table->decimal('hold_balance', 18, 2)->default(0);
+            $table->decimal('minimum_balance', 18, 2)->default(0);
             $table->timestamps();
         });
 

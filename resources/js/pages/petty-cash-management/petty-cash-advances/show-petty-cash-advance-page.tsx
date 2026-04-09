@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, Pencil } from 'lucide-react';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
@@ -27,7 +28,7 @@ const ShowAdvanceExpensePage = ({ advance }: any) => {
                     </button>
 
                     <Link
-                        href={`/advance-expenses/${advance.id}/edit`}
+                        href={route('petty-cash-advances.edit', advance.id)}
                         className="btn-primary"
                     >
                         <Pencil className="h-4 w-4" /> Edit

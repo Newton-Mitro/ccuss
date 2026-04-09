@@ -54,7 +54,13 @@ class HandleInertiaRequests extends Middleware
             'flash' => [
                 'success' => fn() => session('success'),
                 'error' => fn() => session('error'),
+
             ],
+            'appName' => config('app.name'),
+            'appNameFirst' => config('app.name_first'),
+            'appNameSecond' => config('app.name_second'),
+            'appShortTag' => config('app.app_short_tag'),
+            'appLongTag' => config('app.app_long_tag'),
             'sidebarOpen' => !$request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

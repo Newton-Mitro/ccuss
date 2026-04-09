@@ -204,7 +204,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->string('number')->unique();
-            $table->decimal('balance', 10, 2)->default(0);
+            $table->decimal('current_balance', 18, 2)->default(0);
             $table->timestamps();
         });
     }

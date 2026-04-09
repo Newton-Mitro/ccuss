@@ -33,7 +33,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->decimal('balance', 15, 2)->default(0);
+            $table->decimal('current_balance', 18, 2)->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
@@ -54,7 +54,7 @@ return new class extends Migration {
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             $table->string('code', 20)->unique();
             $table->string('name');
-            $table->decimal('balance', 15, 2)->default(0);
+            $table->decimal('current_balance', 18, 2)->default(0);
             $table->decimal('max_cash_limit', 18, 2)->default(0);
             $table->decimal('max_transaction_limit', 18, 2)->default(0);
             $table->boolean('is_active')->default(true);
@@ -68,7 +68,7 @@ return new class extends Migration {
             $table->foreignId('branch_day_id')->constrained()->cascadeOnDelete();
             $table->decimal('opening_cash', 18, 2)->nullable();
             $table->decimal('closing_cash', 18, 2)->nullable();
-            $table->decimal('balance', 15, 2)->default(0);
+            $table->decimal('current_balance', 18, 2)->default(0);
             $table->timestamp('opened_at');
             $table->timestamp('closed_at')->nullable();
             $table->enum('status', ['open', 'closed'])->default('open');

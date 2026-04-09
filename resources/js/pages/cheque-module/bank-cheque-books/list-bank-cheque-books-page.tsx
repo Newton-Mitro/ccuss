@@ -64,18 +64,20 @@ export default function Index() {
 
             <div className="space-y-4">
                 {/* Header */}
-                <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <HeadingSmall
                         title="Cheque Books"
                         description="Manage cheque book issuance"
                     />
-                    <Link
-                        href={route('bank-cheque-books.create')}
-                        className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground"
-                    >
-                        <Plus className="h-4 w-4" />
-                        Add Book
-                    </Link>
+                    <div className="flex gap-2">
+                        <Link
+                            href={route('bank-cheque-books.create')}
+                            className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition hover:bg-primary/90"
+                        >
+                            <Plus className="h-4 w-4" />
+                            Add Book
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Filters */}

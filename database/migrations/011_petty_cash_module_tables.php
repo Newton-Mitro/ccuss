@@ -8,36 +8,35 @@ return new class extends Migration {
 
     public function up(): void
     {
-        Schema::create('petty_cash_expenses', function (Blueprint $table) {
+        Schema::create('petty_cash_accounts', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // e.g., Office Petty Cash
-            $table->string('code')->unique();
-            $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('custodian_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->decimal('imprest_amount', 15, 2)->default(0); // fixed fund
-            $table->decimal('balance', 15, 2)->default(0);
-            $table->boolean('is_active')->default(true);
-            $table->timestamps();
-        });
-
-        Schema::create('advance_expenses', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('petty_cash_expense_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('employee_id')->constrained('users')->cascadeOnDelete(); // role: employee
-            $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
-            // $table->foreignId('petty_cash_transaction_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->string('name');
-            $table->string('code')->unique();
-            $table->decimal('balance', 15, 2)->default(0);
-            $table->boolean('is_active')->default(true);
+            $table->decimal('current_balance', 18, 2)->default(0);
+            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
 
-
+        Schema::create('petty_cash_advances', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('petty_cash_account_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('employee_id')->constrained('users')->cascadeOnDelete();
+            $table->decimal('amount', 18, 2);
+            $table->date('advance_date');
+            $table->string('purpose')->nullable();
+            $table->enum('status', ['pending', 'approved', 'settled', 'rejected'])->default('pending');
+            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('settled_at')->nullable();
+            $table->text('remarks')->nullable();
+            $table->timestamps();
+        });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('petty_cash_advances');
         Schema::dropIfExists('petty_cash_accounts');
     }
 };

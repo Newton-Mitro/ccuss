@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, Pencil } from 'lucide-react';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
@@ -18,7 +19,10 @@ const ShowPettyCashExpensePage = ({
     useFlashToastHandler();
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Petty Cash Expenses', href: '/petty-cash-expenses' },
+        {
+            title: 'Petty Cash Expenses',
+            href: route('petty-cash-accounts.index'),
+        },
         { title: pettyCash.name, href: '' },
     ];
 

@@ -12,7 +12,15 @@ import { Form, Head } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { useEffect } from 'react';
 
-export default function Login({ status, canResetPassword, canRegister }) {
+export default function Login({
+    status,
+    canResetPassword,
+    canRegister,
+    appNameFirst,
+    appVersion,
+    appNameSecond,
+    appLongTag,
+}) {
     useEffect(() => {
         localStorage.clear();
     }, []);
@@ -28,19 +36,20 @@ export default function Login({ status, canResetPassword, canRegister }) {
                 transition={{ duration: 1 }}
                 className="hidden w-7/12 flex-col items-center justify-center lg:flex"
             >
-                <img src="/logo.png" alt="Logo" className="h-60 w-60" />
+                <img src="/logo.png" alt="Logo" className="w-60" />
 
                 <div className="mt-3 text-center">
                     <h1 className="text-4xl font-bold tracking-tight">
-                        <span className="text-primary">Union</span>{' '}
-                        <span className="text-foreground/90">Banking</span>
+                        <span className="text-primary">{appNameFirst}</span>{' '}
+                        <span className="text-foreground/90">
+                            {appNameSecond}
+                        </span>
                     </h1>
                     <p className="max-w-sm text-sm text-muted-foreground">
-                        Smart core banking & credit solution designed for modern
-                        cooperative institutions.
+                        {appLongTag}
                     </p>
                     <div className="mt-3 inline-block rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">
-                        Version 1.0
+                        {appVersion}
                     </div>
                 </div>
             </motion.div>
@@ -51,14 +60,16 @@ export default function Login({ status, canResetPassword, canRegister }) {
                     <div className="w-full md:px-10 lg:px-14 xl:px-20">
                         {/* Header */}
                         <div className="mb-6 text-center">
-                            <AppLogoIcon className="mx-auto h-28 w-28 text-accent" />
+                            <AppLogoIcon className="mx-auto w-28 text-accent" />
                             <h2 className="mt-3 text-sm text-muted-foreground">
                                 Welcome back to
                             </h2>
                             <h1 className="text-xl font-bold tracking-tight">
-                                <span className="text-primary">Union</span>{' '}
+                                <span className="text-primary">
+                                    {appNameFirst}
+                                </span>{' '}
                                 <span className="text-foreground/90">
-                                    Banking
+                                    {appNameSecond}
                                 </span>
                             </h1>
                             <p className="text-xs text-muted-foreground">

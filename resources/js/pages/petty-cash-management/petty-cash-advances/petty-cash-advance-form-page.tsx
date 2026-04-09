@@ -1,5 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
@@ -46,14 +47,14 @@ const AdvanceExpenseForm = ({
         e.preventDefault();
 
         if (isEdit) {
-            put(`/advance-expenses/${advance.id}`);
+            put(route('petty-cash-advances.update', advance!.id));
         } else {
-            post('/advance-expenses');
+            post(route('petty-cash-advances.store'));
         }
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Advance Expenses', href: '/advance-expenses' },
+        { title: 'Advance Expenses', href: route('petty-cash-advances.index') },
         { title: isEdit ? 'Edit' : 'Create', href: '' },
     ];
 

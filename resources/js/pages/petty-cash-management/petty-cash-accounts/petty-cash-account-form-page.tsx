@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
 import React from 'react';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
@@ -46,16 +47,19 @@ const PettyCashExpenseForm = ({
         e.preventDefault();
 
         if (isEdit) {
-            put(`/petty-cash-expenses/${pettyCash.id}`, {
+            put(route('petty-cash-accounts.update', pettyCash!.id), {
                 preserveScroll: true,
             });
         } else {
-            post('/petty-cash-expenses', { preserveScroll: true });
+            post(route('petty-cash-accounts.store'), { preserveScroll: true });
         }
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Petty Cash Expenses', href: '/petty-cash-expenses' },
+        {
+            title: 'Petty Cash Expenses',
+            href: route('petty-cash-accounts.index'),
+        },
         {
             title: isEdit
                 ? `Edit: ${pettyCash?.name}`

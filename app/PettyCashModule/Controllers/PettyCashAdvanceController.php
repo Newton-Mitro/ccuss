@@ -3,18 +3,18 @@
 namespace App\PettyCashModule\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\PettyCashModule\Models\AdvanceExpense;
-use App\PettyCashModule\Models\PettyCashExpense;
+use App\PettyCashModule\Models\PettyCashAccount;
+use App\PettyCashModule\Models\PettyCashAdvance;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class AdvanceExpenseController extends Controller
+class PettyCashAdvanceController extends Controller
 {
     public function index(Request $request)
     {
-        $query = AdvanceExpense::query()
+        $query = PettyCashAdvance::query()
             ->with(['employee', 'pettyCashAccount', 'branch']);
 
         // 🔍 Search (name, code, employee, petty cash account, branch)
@@ -51,7 +51,7 @@ class AdvanceExpenseController extends Controller
             ->paginate($request->input('per_page', 10))
             ->withQueryString();
 
-        return Inertia::render('petty-cash-management/advance-expenses/list-advance-expenses-page', [
+        return Inertia::render('petty-cash-management/petty-cash-advances/list-petty-cash-advances-page', [
             'accounts' => $accounts,
             'filters' => $request->only([
                 'search',
@@ -66,8 +66,8 @@ class AdvanceExpenseController extends Controller
 
     public function create()
     {
-        return Inertia::render('petty-cash-management/advance-expenses/advance-expense-form-page', [
-            'pettyCashAccounts' => PettyCashExpense::select('id', 'name')->get(),
+        return Inertia::render('petty-cash-management/petty-cash-advances/petty-cash-advance-form-page', [
+            'pettyCashAccounts' => PettyCashAccount::select('id', 'name')->get(),
             'employees' => User::select('id', 'name')->get(),
             'branches' => Branch::select('id', 'name')->get(),
         ]);
@@ -83,52 +83,52 @@ class AdvanceExpenseController extends Controller
             'code' => 'required|string|max:50|unique:advance_petty_cashes,code',
         ]);
 
-        AdvanceExpense::create($data);
+        PettyCashAdvance::create($data);
 
         return redirect()->route('advance-petty-cashes.index')
             ->with('success', 'Advance account created');
     }
 
-    public function edit(AdvanceExpense $advanceExpense)
+    public function edit(PettyCashAdvance $pettyCashAdvance)
     {
-        return Inertia::render('petty-cash-management/advance-expenses/advance-expense-form-page', [
-            'account' => $advanceExpense,
-            'pettyCashAccounts' => PettyCashExpense::select('id', 'name')->get(),
+        return Inertia::render('petty-cash-management/petty-cash-advances/petty-cash-advance-form-page', [
+            'account' => $pettyCashAdvance,
+            'pettyCashAccounts' => PettyCashAdvance::select('id', 'name')->get(),
             'employees' => User::select('id', 'name')->get(),
             'branches' => Branch::select('id', 'name')->get(),
         ]);
     }
 
-    public function show(AdvanceExpense $advanceExpense)
+    public function show(PettyCashAdvance $pettyCashAdvance)
     {
-        return Inertia::render('petty-cash-management/advance-expenses/show-advance-expense-page', [
-            'account' => $advanceExpense,
-            'pettyCashAccounts' => PettyCashExpense::select('id', 'name')->get(),
+        return Inertia::render('petty-cash-management/petty-cash-advances/show-petty-cash-advance-page', [
+            'account' => $pettyCashAdvance,
+            'pettyCashAccounts' => PettyCashAdvance::select('id', 'name')->get(),
             'employees' => User::select('id', 'name')->get(),
             'branches' => Branch::select('id', 'name')->get(),
         ]);
     }
 
-    public function update(Request $request, AdvanceExpense $advanceExpense)
+    public function update(Request $request, PettyCashAdvance $pettyCashAdvance)
     {
         $data = $request->validate([
             'petty_cash_expense_id' => 'required|exists:petty_cash_expenses,id',
             'employee_id' => 'required|exists:users,id',
             'branch_id' => 'required|exists:branches,id',
             'name' => 'required|string|max:255',
-            'code' => "required|string|max:50|unique:advance_petty_cashes,code,{$advanceExpense->id}",
+            'code' => "required|string|max:50|unique:advance_petty_cashes,code,{$pettyCashAdvance->id}",
             'is_active' => 'boolean',
         ]);
 
-        $advanceExpense->update($data);
+        $pettyCashAdvance->update($data);
 
         return redirect()->route('advance-petty-cashes.index')
             ->with('success', 'Updated successfully');
     }
 
-    public function destroy(AdvanceExpense $advanceExpense)
+    public function destroy(PettyCashAdvance $pettyCashAdvance)
     {
-        $advanceExpense->delete();
+        $pettyCashAdvance->delete();
 
         return back()->with('success', 'Deleted successfully');
     }

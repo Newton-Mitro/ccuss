@@ -14,6 +14,11 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
+    'name_first' => env('APP_NAME_FIRST', 'Laravel'),
+    'name_second' => env('APP_NAME_SECOND', 'Application'),
+    'app_version' => env('APP_VERSION', '1.0'),
+    'app_short_tag' => env('APP_SHORT_TAG', 'Laravel'),
+    'app_long_tag' => env('APP_LONG_TAG', 'Laravel Application'),
 
     /*
     |--------------------------------------------------------------------------

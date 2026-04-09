@@ -2,30 +2,27 @@
 
 namespace App\PettyCashModule\Models;
 
-use App\PettyCashModule\Models\AdvanceExpense;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PettyCashExpense extends Model
+class PettyCashAccount extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'name',
-        'code',
         'branch_id',
-        'custodian_id',
-        'imprest_amount',
-        'balance',
-        'is_active',
+        'current_balance',
+        'status',
+        'created_by',
+        'approved_by',
     ];
 
     protected $casts = [
-        'imprest_amount' => 'decimal:2',
-        'balance' => 'decimal:2',
-        'is_active' => 'boolean',
+        'current_balance' => 'decimal:2',
+        'status' => 'string', // enum handled as string
     ];
 
     /*
@@ -39,19 +36,18 @@ class PettyCashExpense extends Model
         return $this->belongsTo(Branch::class);
     }
 
-    public function custodian()
+    public function createdBy()
     {
-        return $this->belongsTo(User::class, 'custodian_id');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function advanceExpenses()
+    public function approvedBy()
     {
-        return $this->hasMany(AdvanceExpense::class);
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
-    // Future-proof (for transaction ledger)
-    // public function transactions()
-    // {
-    //     return $this->hasMany(PettyCashTransaction::class);
-    // }
+    public function pettyCashAdvances()
+    {
+        return $this->hasMany(PettyCashAdvance::class);
+    }
 }

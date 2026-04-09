@@ -45,8 +45,7 @@ return new class extends Migration {
             $table->string('account_name');
             $table->string('account_number')->unique();
             $table->string('iban')->nullable();
-            $table->decimal('balance', 15, 2)->default(0);
-            $table->string('currency', 10)->default('BDT');
+            $table->decimal('current_balance', 18, 2)->default(0);
             $table->enum('status', ['active', 'inactive', 'closed'])->default('active');
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();

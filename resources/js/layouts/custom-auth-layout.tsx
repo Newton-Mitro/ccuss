@@ -48,7 +48,8 @@ export default function CustomAuthLayout({
     breadcrumbs,
 }: CustomAuthLayoutProps) {
     const page = usePage<SharedData>();
-    const auth = page.props?.auth;
+
+    const { auth, appNameFirst, appNameSecond, appShortTag } = page.props;
     const cleanup = useMobileNavigation();
 
     /* ------------------------------------------------------------------
@@ -202,13 +203,15 @@ export default function CustomAuthLayout({
                     >
                         <div className="">
                             <h1 className="-mb-1 text-lg font-semibold">
-                                <span className="text-primary"> Union </span>{' '}
+                                <span className="text-primary">
+                                    {appNameFirst as string}{' '}
+                                </span>
                                 <span className="text-sidebar-foreground/90">
-                                    Banking
+                                    {appNameSecond as string}
                                 </span>
                             </h1>
                             <p className="text-xs font-light text-sidebar-foreground/70">
-                                Core banking & credit solution.
+                                {appShortTag as string}
                             </p>
                         </div>
                     </span>

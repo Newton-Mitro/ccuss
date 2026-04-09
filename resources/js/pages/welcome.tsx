@@ -3,7 +3,12 @@ import { motion } from 'framer-motion';
 import CustomAuthLayout from '../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../types';
 
-export default function HomePage() {
+export default function HomePage({
+    appNameFirst,
+    appNameSecond,
+    appVersion,
+    appLongTag,
+}) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Home', href: '/dashboard' },
     ];
@@ -24,7 +29,7 @@ export default function HomePage() {
                             <img
                                 src="/logo.png"
                                 alt="Logo"
-                                className="h-28 w-28 bg-background object-contain p-2 md:h-56 md:w-56"
+                                className="w-28 bg-background object-contain p-2 md:w-56"
                             />
                         </div>
                     </div>
@@ -33,15 +38,16 @@ export default function HomePage() {
                 {/* Footer Hint */}
                 <div className="flex flex-col items-center justify-center">
                     <h1 className="text-3xl font-semibold">
-                        <span className="text-primary"> Union </span>
-                        <span className="text-foreground/90">Banking</span>
+                        <span className="text-primary"> {appNameFirst} </span>
+                        <span className="text-foreground/90">
+                            {appNameSecond}
+                        </span>
                     </h1>
                     <p className="text-sm text-muted-foreground/80">
-                        Core banking & credit solution for co-operative credit
-                        unions.
+                        {appLongTag}
                     </p>
                     <div className="mt-3 inline-block rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">
-                        Version 1.0
+                        {appVersion}
                     </div>
                 </div>
             </motion.div>
