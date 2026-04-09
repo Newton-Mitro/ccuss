@@ -46,7 +46,7 @@ export default function Batch({ batch }: BatchPageProps) {
                                     <div className="mb-1 font-semibold text-muted-foreground">
                                         Old
                                     </div>
-                                    <pre className="max-h-40 overflow-auto rounded-md border bg-muted/20 p-2 text-xs">
+                                    <pre className="h-[calc(90vh-200px)] overflow-auto rounded-md border bg-muted/20 p-2 text-xs">
                                         {JSON.stringify(c.old, null, 2)}
                                     </pre>
                                 </div>
@@ -56,7 +56,7 @@ export default function Batch({ batch }: BatchPageProps) {
                                     <div className="mb-1 font-semibold text-muted-foreground">
                                         New
                                     </div>
-                                    <pre className="max-h-40 overflow-auto rounded-md border bg-muted/20 p-2 text-xs">
+                                    <pre className="h-[calc(90vh-200px)] overflow-auto rounded-md border bg-muted/20 p-2 text-xs">
                                         {JSON.stringify(c.new, null, 2)}
                                     </pre>
                                 </div>
