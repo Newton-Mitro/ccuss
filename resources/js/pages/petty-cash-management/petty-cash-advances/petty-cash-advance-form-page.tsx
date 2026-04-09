@@ -3,44 +3,45 @@ import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
+import AppDatePicker from '../../../components/ui/app_date_picker';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import { Select } from '../../../components/ui/select';
-import {
-    ToggleGroup,
-    ToggleGroupItem,
-} from '../../../components/ui/toggle-group';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import {
-    AdvanceExpense,
-    PettyCashExpense,
+    PettyCashAccount,
+    PettyCashAdvance,
 } from '../../../types/petty_cash_module';
 import { User } from '../../../types/user';
 
-interface AdvanceExpenseFormProps extends SharedData {
-    advance?: AdvanceExpense;
+interface AdvanceFormProps extends SharedData {
+    advance?: PettyCashAdvance;
     employees: User[];
-    pettyCashAccounts: PettyCashExpense[];
+    pettyCashAccounts: PettyCashAccount[];
 }
 
 const AdvanceExpenseForm = ({
     advance,
     employees,
     pettyCashAccounts,
-}: AdvanceExpenseFormProps) => {
+}: AdvanceFormProps) => {
     useFlashToastHandler();
 
     const isEdit = !!advance;
 
     const { data, setData, post, put, processing, errors } = useForm({
-        name: advance?.name || '',
-        code: advance?.code || '',
         petty_cash_account_id: advance?.petty_cash_account_id || '',
         employee_id: advance?.employee_id || '',
-        is_active: advance?.is_active ?? true,
+        amount: advance?.amount || '',
+        advance_date: advance?.advance_date?.split('T')[0] || '',
+        purpose: advance?.purpose || '',
+        status: advance?.status || 'pending',
+        approved_by: advance?.approved_by || '',
+        settled_at: advance?.settled_at || '',
+        remarks: advance?.remarks || '',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -54,19 +55,22 @@ const AdvanceExpenseForm = ({
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Advance Expenses', href: route('petty-cash-advances.index') },
+        {
+            title: 'Petty Cash Advances',
+            href: route('petty-cash-advances.index'),
+        },
         { title: isEdit ? 'Edit' : 'Create', href: '' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Advance Expenses" />
+            <Head title="Petty Cash Advance" />
 
             {/* Header */}
             <div className="flex justify-between pb-4">
                 <HeadingSmall
                     title={isEdit ? 'Edit Advance' : 'Create Advance'}
-                    description="Assign advance to employee."
+                    description="Manage petty cash advance for employee"
                 />
                 <button
                     onClick={() => window.history.back()}
@@ -82,26 +86,6 @@ const AdvanceExpenseForm = ({
                 className="space-y-4 rounded-md border bg-card p-4"
             >
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    {/* Name */}
-                    <div>
-                        <Label className="text-xs">Name</Label>
-                        <Input
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
-                        />
-                        <InputError message={errors.name} />
-                    </div>
-
-                    {/* Code */}
-                    <div>
-                        <Label className="text-xs">Code</Label>
-                        <Input
-                            value={data.code}
-                            onChange={(e) => setData('code', e.target.value)}
-                        />
-                        <InputError message={errors.code} />
-                    </div>
-
                     {/* Petty Cash Account */}
                     <div>
                         <Label className="text-xs">Petty Cash Account</Label>
@@ -133,19 +117,73 @@ const AdvanceExpenseForm = ({
                         />
                         <InputError message={errors.employee_id} />
                     </div>
-                </div>
 
-                {/* Status */}
-                <ToggleGroup
-                    type="single"
-                    value={data.is_active ? 'true' : 'false'}
-                    onValueChange={(val) =>
-                        setData('is_active', val === 'true')
-                    }
-                >
-                    <ToggleGroupItem value="true">Active</ToggleGroupItem>
-                    <ToggleGroupItem value="false">Inactive</ToggleGroupItem>
-                </ToggleGroup>
+                    {/* Amount */}
+                    <div>
+                        <Label className="text-xs">Amount</Label>
+                        <Input
+                            type="number"
+                            value={data.amount}
+                            onChange={(e) => setData('amount', e.target.value)}
+                        />
+                        <InputError message={errors.amount} />
+                    </div>
+
+                    {/* Advance Date */}
+                    <div>
+                        <Label className="text-xs">Advance Date</Label>
+                        <AppDatePicker
+                            value={data.advance_date}
+                            onChange={(value) => setData('advance_date', value)}
+                        />
+                        <InputError message={errors.advance_date} />
+                    </div>
+
+                    {/* Purpose */}
+                    <div className="sm:col-span-2">
+                        <Label className="text-xs">Purpose</Label>
+                        <Input
+                            value={data.purpose}
+                            onChange={(e) => setData('purpose', e.target.value)}
+                        />
+                        <InputError message={errors.purpose} />
+                    </div>
+
+                    {/* Status */}
+                    <div>
+                        <Label className="text-xs">Status</Label>
+                        <Select
+                            value={data.status}
+                            onChange={(val) =>
+                                setData(
+                                    'status',
+                                    val as
+                                        | 'pending'
+                                        | 'approved'
+                                        | 'settled'
+                                        | 'rejected',
+                                )
+                            }
+                            options={[
+                                { value: 'pending', label: 'Pending' },
+                                { value: 'approved', label: 'Approved' },
+                                { value: 'settled', label: 'Settled' },
+                                { value: 'rejected', label: 'Rejected' },
+                            ]}
+                        />
+                        <InputError message={errors.status} />
+                    </div>
+
+                    {/* Remarks */}
+                    <div className="sm:col-span-2">
+                        <Label className="text-xs">Remarks</Label>
+                        <Input
+                            value={data.remarks}
+                            onChange={(e) => setData('remarks', e.target.value)}
+                        />
+                        <InputError message={errors.remarks} />
+                    </div>
+                </div>
 
                 {/* Submit */}
                 <div className="flex justify-end">

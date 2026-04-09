@@ -14,21 +14,15 @@ class PettyCashAccountController extends Controller
     public function index(Request $request)
     {
         $query = PettyCashAccount::query()
-            ->with(['branch', 'custodian']);
+            ->with(['branch', 'createdBy', 'approvedBy']);
 
-        // 🔍 Search (name, code, branch, custodian)
+        // 🔍 Search by name or branch
         if ($request->filled('search')) {
             $search = $request->search;
 
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('code', 'like', "%{$search}%")
-                    ->orWhereHas('branch', function ($b) use ($search) {
-                        $b->where('name', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('custodian', function ($c) use ($search) {
-                        $c->where('name', 'like', "%{$search}%");
-                    });
+                    ->orWhereHas('branch', fn($b) => $b->where('name', 'like', "%{$search}%"));
             });
         }
 
@@ -37,9 +31,9 @@ class PettyCashAccountController extends Controller
             $query->where('branch_id', $request->branch_id);
         }
 
-        // 📊 Status Filter (Active / Inactive)
+        // 📊 Status Filter
         if ($request->filled('status')) {
-            $query->where('is_active', $request->status);
+            $query->where('status', $request->status);
         }
 
         // 📦 Pagination
@@ -47,20 +41,11 @@ class PettyCashAccountController extends Controller
             ->paginate($request->input('per_page', 10))
             ->withQueryString();
 
-        return Inertia::render(
-            'petty-cash-management/petty-cash-accounts/list-petty-cash-accounts-page',
-            [
-                'accounts' => $accounts,
-                'filters' => $request->only([
-                    'search',
-                    'branch_id',
-                    'status',
-                    'per_page',
-                    'page',
-                ]),
-                'branches' => Branch::select('id', 'name')->get(),
-            ]
-        );
+        return Inertia::render('petty-cash-management/petty-cash-accounts/list-petty-cash-accounts-page', [
+            'accounts' => $accounts,
+            'filters' => $request->only(['search', 'branch_id', 'status', 'per_page', 'page']),
+            'branches' => Branch::select('id', 'name')->get(),
+        ]);
     }
 
     public function create()
@@ -75,22 +60,21 @@ class PettyCashAccountController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:50|unique:petty_cash_expenses,code',
             'branch_id' => 'required|exists:branches,id',
-            'custodian_id' => 'nullable|exists:users,id',
-            'imprest_amount' => 'nullable|numeric|min:0',
+            'created_by' => 'nullable|exists:users,id',
+            'approved_by' => 'nullable|exists:users,id',
+            'status' => 'in:active,inactive',
         ]);
-
-        $data['balance'] = $data['imprest_amount'] ?? 0;
 
         PettyCashAccount::create($data);
 
         return redirect()->route('petty-cash-accounts.index')
-            ->with('success', 'Petty Cash Expense created successfully');
+            ->with('success', 'Petty Cash Account created successfully');
     }
 
     public function edit(PettyCashAccount $pettyCashAccount)
     {
+        $pettyCashAccount->load(['branch', 'createdBy', 'approvedBy']);
         return Inertia::render('petty-cash-management/petty-cash-accounts/petty-cash-account-form-page', [
             'pettyCash' => $pettyCashAccount,
             'branches' => Branch::select('id', 'name')->get(),
@@ -100,10 +84,9 @@ class PettyCashAccountController extends Controller
 
     public function show(PettyCashAccount $pettyCashAccount)
     {
+        $pettyCashAccount->load(['branch', 'createdBy', 'approvedBy']);
         return Inertia::render('petty-cash-management/petty-cash-accounts/show-petty-cash-account-page', [
             'pettyCash' => $pettyCashAccount,
-            'branches' => Branch::select('id', 'name')->get(),
-            'users' => User::select('id', 'name')->get(),
         ]);
     }
 
@@ -111,11 +94,10 @@ class PettyCashAccountController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'code' => "required|string|max:50|unique:petty_cash_expenses,code,{$pettyCashAccount->id}",
             'branch_id' => 'required|exists:branches,id',
-            'custodian_id' => 'nullable|exists:users,id',
-            'imprest_amount' => 'nullable|numeric|min:0',
-            'is_active' => 'boolean',
+            'created_by' => 'nullable|exists:users,id',
+            'approved_by' => 'nullable|exists:users,id',
+            'status' => 'in:active,inactive',
         ]);
 
         $pettyCashAccount->update($data);

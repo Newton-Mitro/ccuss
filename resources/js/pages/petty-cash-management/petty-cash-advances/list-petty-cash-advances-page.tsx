@@ -15,21 +15,24 @@ import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
+import { formatDateTime } from '../../../lib/date_util';
 import { BreadcrumbItem, SharedData } from '../../../types';
-import { Branch } from '../../../types/branch';
-import { AdvanceExpense } from '../../../types/petty_cash_module';
+import {
+    PettyCashAccount,
+    PettyCashAdvance,
+} from '../../../types/petty_cash_module';
 
 interface ListAdvanceExpensesPageProps extends SharedData {
-    accounts: {
-        data: AdvanceExpense[];
+    paginated_data: {
+        data: PettyCashAdvance[];
         links: { url: string | null; label: string; active: boolean }[];
     };
-    branches: Branch[];
+    pettyCashAccounts: PettyCashAccount[];
     filters: Record<string, string>;
 }
 
 export default function ListAdvanceExpensesPage() {
-    const { accounts, branches, filters } =
+    const { paginated_data, filters, pettyCashAccounts } =
         usePage<ListAdvanceExpensesPageProps>().props;
 
     useFlashToastHandler();
@@ -42,26 +45,34 @@ export default function ListAdvanceExpensesPage() {
         processing,
     } = useForm({
         search: filters.search || '',
-        branch_id: filters.branch_id || '',
+        petty_cash_account_id: filters.petty_cash_account_id || '',
         status: filters.status || '',
         per_page: Number(filters.per_page) || 10,
         page: Number(filters.page) || 1,
     });
 
     const handleSearch = () => {
-        get(route('petty-cash-advances.index'), { preserveState: true });
+        get(route('petty-cash-advances.index'), {
+            preserveState: true,
+        });
     };
 
     useEffect(() => {
         const delay = setTimeout(handleSearch, 400);
         return () => clearTimeout(delay);
-    }, [data.search, data.branch_id, data.status, data.per_page, data.page]);
+    }, [
+        data.search,
+        data.petty_cash_account_id,
+        data.status,
+        data.per_page,
+        data.page,
+    ]);
 
-    const handleDelete = (id: number, name: string) => {
+    const handleDelete = (id: number, label: string) => {
         appSwal
             .fire({
                 title: 'Are you sure?',
-                text: `Advance "${name}" will be permanently deleted!`,
+                text: `"${label}" will be permanently deleted!`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Yes, delete it!',
@@ -77,34 +88,40 @@ export default function ListAdvanceExpensesPage() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Advance Expenses', href: route('petty-cash-advances.index') },
+        {
+            title: 'Petty Cash Advances',
+            href: route('petty-cash-advances.index'),
+        },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Advance Expenses" />
+            <Head title="Petty Cash Advances" />
 
             <div className="space-y-4 p-2 text-foreground">
                 {/* Header */}
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
-                        title="Advance Expenses"
-                        description="Manage employee advance petty cash balances"
+                        title="Petty Cash Advances"
+                        description="Manage employee advance petty cash"
                     />
+
                     <Link
                         href={route('petty-cash-advances.create')}
                         className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                     >
-                        <Plus className="h-4 w-4" /> Add Advance
+                        <Plus className="h-4 w-4" />
+                        Add Advance
                     </Link>
                 </div>
 
                 {/* Filters */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="w-60">
+                    {/* Search */}
+                    <div className="w-64">
                         <Input
                             type="text"
-                            placeholder="Search advances..."
+                            placeholder="Search employee or account..."
                             value={data.search}
                             onChange={(e) => {
                                 setData('search', e.target.value);
@@ -114,21 +131,26 @@ export default function ListAdvanceExpensesPage() {
                     </div>
 
                     <div className="flex gap-2">
-                        <div className="w-44">
+                        {/* Petty Cash Account */}
+                        <div className="w-56">
                             <Select
-                                value={data.branch_id}
+                                value={data.petty_cash_account_id}
                                 onChange={(value) => {
-                                    setData('branch_id', value);
+                                    setData('petty_cash_account_id', value);
                                     setData('page', 1);
                                 }}
-                                options={branches.map((b) => ({
-                                    value: b.id.toString(),
-                                    label: b.name,
-                                }))}
+                                options={[
+                                    { value: '', label: 'All Accounts' },
+                                    ...pettyCashAccounts.map((a) => ({
+                                        value: a.id.toString(),
+                                        label: a.name,
+                                    })),
+                                ]}
                             />
                         </div>
 
-                        <div className="w-36">
+                        {/* Status */}
+                        <div className="w-44">
                             <Select
                                 value={data.status}
                                 onChange={(value) => {
@@ -136,9 +158,11 @@ export default function ListAdvanceExpensesPage() {
                                     setData('page', 1);
                                 }}
                                 options={[
-                                    { value: '', label: 'All' },
-                                    { value: '1', label: 'Active' },
-                                    { value: '0', label: 'Inactive' },
+                                    { value: '', label: 'All Status' },
+                                    { value: 'pending', label: 'Pending' },
+                                    { value: 'approved', label: 'Approved' },
+                                    { value: 'settled', label: 'Settled' },
+                                    { value: 'rejected', label: 'Rejected' },
                                 ]}
                             />
                         </div>
@@ -151,12 +175,10 @@ export default function ListAdvanceExpensesPage() {
                         <thead className="sticky top-0 bg-muted">
                             <tr>
                                 {[
-                                    'Name',
-                                    'Code',
                                     'Employee',
-                                    'Petty Cash',
-                                    'Branch',
-                                    'Balance',
+                                    'Petty Cash Account',
+                                    'Amount',
+                                    'Advance Date',
                                     'Status',
                                     'Actions',
                                 ].map((h) => (
@@ -171,40 +193,41 @@ export default function ListAdvanceExpensesPage() {
                         </thead>
 
                         <tbody>
-                            {accounts.data.length ? (
-                                accounts.data.map((a) => (
+                            {paginated_data.data.length ? (
+                                paginated_data.data.map((a) => (
                                     <tr
                                         key={a.id}
                                         className="border-b even:bg-muted/30"
                                     >
-                                        <td className="px-2 py-1">{a.name}</td>
-                                        <td className="px-2 py-1">{a.code}</td>
                                         <td className="px-2 py-1">
                                             {a.employee?.name}
                                         </td>
+
                                         <td className="px-2 py-1">
                                             {a.petty_cash_account?.name}
                                         </td>
+
                                         <td className="px-2 py-1">
-                                            {a.branch?.name}
+                                            {Number(a.amount).toLocaleString()}
                                         </td>
-                                        <td className="px-2 py-1 font-medium">
-                                            {Number(a.balance).toFixed(2)}
-                                        </td>
+
                                         <td className="px-2 py-1">
-                                            {a.is_active
-                                                ? 'Active'
-                                                : 'Inactive'}
+                                            {formatDateTime(a.advance_date)}
+                                        </td>
+
+                                        <td className="px-2 py-1 capitalize">
+                                            {a.status}
                                         </td>
 
                                         <td className="px-2 py-1">
                                             <TooltipProvider>
                                                 <div className="flex space-x-2">
+                                                    {/* View */}
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link
                                                                 href={route(
-                                                                    'advance-expenses.show',
+                                                                    'petty-cash-advances.show',
                                                                     a.id,
                                                                 )}
                                                             >
@@ -216,11 +239,12 @@ export default function ListAdvanceExpensesPage() {
                                                         </TooltipContent>
                                                     </Tooltip>
 
+                                                    {/* Edit */}
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link
                                                                 href={route(
-                                                                    'advance-expenses.edit',
+                                                                    'petty-cash-advances.edit',
                                                                     a.id,
                                                                 )}
                                                             >
@@ -232,13 +256,17 @@ export default function ListAdvanceExpensesPage() {
                                                         </TooltipContent>
                                                     </Tooltip>
 
+                                                    {/* Delete */}
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <button
                                                                 onClick={() =>
                                                                     handleDelete(
                                                                         a.id,
-                                                                        a.name,
+                                                                        a
+                                                                            .employee
+                                                                            ?.name ||
+                                                                            'Advance',
                                                                     )
                                                                 }
                                                                 disabled={
@@ -260,10 +288,10 @@ export default function ListAdvanceExpensesPage() {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={8}
+                                        colSpan={6}
                                         className="py-6 text-center text-muted-foreground"
                                     >
-                                        No advance accounts found.
+                                        No advances found.
                                     </td>
                                 </tr>
                             )}
@@ -278,7 +306,7 @@ export default function ListAdvanceExpensesPage() {
                         setData('per_page', value);
                         setData('page', 1);
                     }}
-                    links={accounts.links}
+                    links={paginated_data.links}
                 />
             </div>
         </CustomAuthLayout>

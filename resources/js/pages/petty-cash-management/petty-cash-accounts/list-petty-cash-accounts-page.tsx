@@ -17,20 +17,20 @@ import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Branch } from '../../../types/branch';
-import { PettyCashExpense } from '../../../types/petty_cash_module';
+import { PettyCashAccount } from '../../../types/petty_cash_module';
 
-interface ListPettyCashExpensesPageProps extends SharedData {
+interface ListPettyCashAccountsPageProps extends SharedData {
     accounts: {
-        data: PettyCashExpense[];
+        data: PettyCashAccount[];
         links: { url: string | null; label: string; active: boolean }[];
     };
     branches: Branch[];
     filters: Record<string, string>;
 }
 
-export default function ListPettyCashExpensesPage() {
+export default function ListPettyCashAccountsPage() {
     const { accounts, branches, filters } =
-        usePage<ListPettyCashExpensesPageProps>().props;
+        usePage<ListPettyCashAccountsPageProps>().props;
 
     useFlashToastHandler();
 
@@ -78,20 +78,20 @@ export default function ListPettyCashExpensesPage() {
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Petty Cash Expenses',
+            title: 'Petty Cash Accounts',
             href: route('petty-cash-accounts.index'),
         },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Petty Cash Expenses" />
+            <Head title="Petty Cash Accounts" />
 
             <div className="space-y-4 p-2 text-foreground">
                 {/* Header */}
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
-                        title="Petty Cash Expenses"
+                        title="Petty Cash Accounts"
                         description="Manage petty cash balances and custodians"
                     />
                     <Link
@@ -124,10 +124,13 @@ export default function ListPettyCashExpensesPage() {
                                     setData('branch_id', value);
                                     setData('page', 1);
                                 }}
-                                options={branches.map((b) => ({
-                                    value: b.id.toString(),
-                                    label: b.name,
-                                }))}
+                                options={[
+                                    { value: '', label: 'All Branches' },
+                                    ...branches.map((b) => ({
+                                        value: b.id.toString(),
+                                        label: b.name,
+                                    })),
+                                ]}
                             />
                         </div>
 
@@ -139,9 +142,9 @@ export default function ListPettyCashExpensesPage() {
                                     setData('page', 1);
                                 }}
                                 options={[
-                                    { value: '', label: 'All' },
-                                    { value: '1', label: 'Active' },
-                                    { value: '0', label: 'Inactive' },
+                                    { value: '', label: 'All Status' },
+                                    { value: 'active', label: 'Active' },
+                                    { value: 'inactive', label: 'Inactive' },
                                 ]}
                             />
                         </div>
@@ -153,22 +156,16 @@ export default function ListPettyCashExpensesPage() {
                     <table className="w-full">
                         <thead className="sticky top-0 bg-muted">
                             <tr>
-                                {[
-                                    'Name',
-                                    'Code',
-                                    'Branch',
-                                    'Imprest',
-                                    'Balance',
-                                    'Status',
-                                    'Actions',
-                                ].map((h) => (
-                                    <th
-                                        key={h}
-                                        className="border-b p-2 text-left text-sm text-muted-foreground"
-                                    >
-                                        {h}
-                                    </th>
-                                ))}
+                                {['Name', 'Branch', 'Status', 'Actions'].map(
+                                    (h) => (
+                                        <th
+                                            key={h}
+                                            className="border-b p-2 text-left text-sm text-muted-foreground"
+                                        >
+                                            {h}
+                                        </th>
+                                    ),
+                                )}
                             </tr>
                         </thead>
 
@@ -180,20 +177,11 @@ export default function ListPettyCashExpensesPage() {
                                         className="border-b even:bg-muted/30"
                                     >
                                         <td className="px-2 py-1">{a.name}</td>
-                                        <td className="px-2 py-1">{a.code}</td>
                                         <td className="px-2 py-1">
                                             {a.branch?.name}
                                         </td>
                                         <td className="px-2 py-1">
-                                            {Number(a.imprest_amount).toFixed(
-                                                2,
-                                            )}
-                                        </td>
-                                        <td className="px-2 py-1 font-medium">
-                                            {Number(a.balance).toFixed(2)}
-                                        </td>
-                                        <td className="px-2 py-1">
-                                            {a.is_active
+                                            {a.status === 'active'
                                                 ? 'Active'
                                                 : 'Inactive'}
                                         </td>
@@ -205,7 +193,7 @@ export default function ListPettyCashExpensesPage() {
                                                         <TooltipTrigger asChild>
                                                             <Link
                                                                 href={route(
-                                                                    'petty-cash-expenses.show',
+                                                                    'petty-cash-accounts.show',
                                                                     a.id,
                                                                 )}
                                                             >
@@ -221,7 +209,7 @@ export default function ListPettyCashExpensesPage() {
                                                         <TooltipTrigger asChild>
                                                             <Link
                                                                 href={route(
-                                                                    'petty-cash-expenses.edit',
+                                                                    'petty-cash-accounts.edit',
                                                                     a.id,
                                                                 )}
                                                             >
@@ -261,7 +249,7 @@ export default function ListPettyCashExpensesPage() {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={7}
+                                        colSpan={4}
                                         className="py-6 text-center text-muted-foreground"
                                     >
                                         No accounts found.

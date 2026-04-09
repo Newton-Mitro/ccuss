@@ -2,43 +2,38 @@ import { AuditFields } from './base_types';
 import { Branch } from './branch';
 import { User } from './user';
 
-export interface PettyCashExpense extends AuditFields {
+export interface PettyCashAccount extends AuditFields {
     id: number;
     name: string;
-    code: string;
 
     branch_id: number;
-    custodian_id?: number | null;
+    created_by?: number | null;
+    approved_by?: number | null;
 
-    imprest_amount: string; // decimal comes as string from Laravel
-    balance: string;
+    status: 'active' | 'inactive';
 
-    is_active: boolean;
-
-    // روابط (relations)
+    // relations
     branch?: Branch;
-
-    custodian?: User;
-
-    advance_accounts?: AdvanceExpense[];
+    creator?: User;
+    approver?: User;
+    advances?: PettyCashAdvance[];
 }
 
-export interface AdvanceExpense extends AuditFields {
+export interface PettyCashAdvance extends AuditFields {
     id: number;
     petty_cash_account_id: number;
     employee_id: number;
-    branch_id: number;
 
-    name: string;
-    code: string;
-
-    balance: string;
-    is_active: boolean;
+    amount: string; // decimal as string from Laravel
+    advance_date: string; // ISO date string
+    purpose?: string | null;
+    status: 'pending' | 'approved' | 'settled' | 'rejected';
+    approved_by?: number | null;
+    settled_at?: string | null; // ISO datetime string
+    remarks?: string | null;
 
     // relations
-    petty_cash_account?: PettyCashExpense;
-
+    petty_cash_account?: PettyCashAccount;
     employee?: User;
-
-    branch?: Branch;
+    approver?: User;
 }

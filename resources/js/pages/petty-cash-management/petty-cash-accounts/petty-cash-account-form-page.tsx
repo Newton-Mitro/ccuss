@@ -6,41 +6,30 @@ import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
-import { Label } from '../../../components/ui/label';
 import { Select } from '../../../components/ui/select';
-import {
-    ToggleGroup,
-    ToggleGroupItem,
-} from '../../../components/ui/toggle-group';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Branch } from '../../../types/branch';
-import { PettyCashExpense } from '../../../types/petty_cash_module';
-import { User } from '../../../types/user';
+import { PettyCashAccount } from '../../../types/petty_cash_module';
 
-interface PettyCashExpenseFormPageProps extends SharedData {
-    pettyCash?: PettyCashExpense;
+interface PettyCashAccountFormPageProps extends SharedData {
+    pettyCash?: PettyCashAccount;
     branches: Branch[];
-    users: User[];
 }
 
-const PettyCashExpenseForm = ({
+const PettyCashAccountForm = ({
     pettyCash,
     branches,
-    users,
-}: PettyCashExpenseFormPageProps) => {
+}: PettyCashAccountFormPageProps) => {
     useFlashToastHandler();
     const handleBack = () => window.history.back();
     const isEdit = !!pettyCash;
 
     const { data, setData, post, put, processing, errors } = useForm({
         name: pettyCash?.name || '',
-        code: pettyCash?.code || '',
         branch_id: pettyCash?.branch_id || '',
-        custodian_id: pettyCash?.custodian_id || '',
-        imprest_amount: pettyCash?.imprest_amount || 0,
-        is_active: pettyCash?.is_active ?? true,
+        status: pettyCash?.status || 'active',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -57,13 +46,11 @@ const PettyCashExpenseForm = ({
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Petty Cash Expenses',
+            title: 'Petty Cash Accounts',
             href: route('petty-cash-accounts.index'),
         },
         {
-            title: isEdit
-                ? `Edit: ${pettyCash?.name}`
-                : 'Create Petty Cash Expenses',
+            title: isEdit ? `Edit: ${pettyCash?.name}` : 'Create Account',
             href: '',
         },
     ];
@@ -73,8 +60,8 @@ const PettyCashExpenseForm = ({
             <Head
                 title={
                     isEdit
-                        ? `Edit Petty Cash Expenses - ${pettyCash?.name}`
-                        : 'Create Petty Cash Expenses'
+                        ? `Edit Petty Cash Account - ${pettyCash?.name}`
+                        : 'Create Petty Cash Account'
                 }
             />
 
@@ -84,9 +71,9 @@ const PettyCashExpenseForm = ({
                     title={
                         isEdit
                             ? `Edit: ${pettyCash?.name}`
-                            : 'Create Petty Cash Expenses'
+                            : 'Create Petty Cash Account'
                     }
-                    description="Manage petty cash expenses details."
+                    description="Manage petty cash account details."
                 />
                 <button
                     type="button"
@@ -106,29 +93,18 @@ const PettyCashExpenseForm = ({
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {/* Name */}
                     <div>
-                        <Label className="text-xs">Account Name</Label>
+                        <label className="text-xs">Account Name</label>
                         <Input
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
-                            className="h-8 text-sm"
+                            className="h-8 w-full border px-2 text-sm"
                         />
                         <InputError message={errors.name} />
                     </div>
 
-                    {/* Code */}
-                    <div>
-                        <Label className="text-xs">Code</Label>
-                        <Input
-                            value={data.code}
-                            onChange={(e) => setData('code', e.target.value)}
-                            className="h-8 text-sm"
-                        />
-                        <InputError message={errors.code} />
-                    </div>
-
                     {/* Branch */}
                     <div>
-                        <Label className="text-xs">Branch</Label>
+                        <label className="text-xs">Branch</label>
                         <Select
                             value={data.branch_id.toString()}
                             onChange={(val) =>
@@ -143,57 +119,21 @@ const PettyCashExpenseForm = ({
                         <InputError message={errors.branch_id} />
                     </div>
 
-                    {/* Custodian */}
+                    {/* Status */}
                     <div>
-                        <Label className="text-xs">Custodian (User)</Label>
+                        <label className="text-xs">Status</label>
                         <Select
-                            value={data.custodian_id?.toString()}
+                            value={data.status}
                             onChange={(val) =>
-                                setData('custodian_id', Number(val))
+                                setData('status', val as 'active' | 'inactive')
                             }
-                            options={users.map((u) => ({
-                                value: u.id.toString(),
-                                label: u.name,
-                            }))}
-                            placeholder="Select Custodian"
+                            options={[
+                                { value: 'active', label: 'Active' },
+                                { value: 'inactive', label: 'Inactive' },
+                            ]}
                         />
-                        <InputError message={errors.custodian_id} />
+                        <InputError message={errors.status} />
                     </div>
-
-                    {/* Imprest Amount */}
-                    <div>
-                        <Label className="text-xs">Imprest Amount</Label>
-                        <Input
-                            type="number"
-                            value={data.imprest_amount}
-                            onChange={(e) =>
-                                setData(
-                                    'imprest_amount',
-                                    Number(e.target.value),
-                                )
-                            }
-                            className="h-8 text-sm"
-                        />
-                        <InputError message={errors.imprest_amount} />
-                    </div>
-                </div>
-
-                {/* Status */}
-                <div>
-                    <ToggleGroup
-                        type="single"
-                        value={data.is_active ? 'true' : 'false'}
-                        onValueChange={(val) =>
-                            setData('is_active', val === 'true')
-                        }
-                        size="sm"
-                        variant="outline"
-                    >
-                        <ToggleGroupItem value="true">Active</ToggleGroupItem>
-                        <ToggleGroupItem value="false">
-                            Inactive
-                        </ToggleGroupItem>
-                    </ToggleGroup>
                 </div>
 
                 {/* Submit */}
@@ -217,4 +157,4 @@ const PettyCashExpenseForm = ({
     );
 };
 
-export default PettyCashExpenseForm;
+export default PettyCashAccountForm;
