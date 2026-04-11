@@ -12,6 +12,8 @@ class PermissionMiddleware
     {
         $user = $request->user();
 
+        // dd($user, $permissions);
+
         if (!$user) {
             abort(403, 'Unauthorized - No user logged in');
         }

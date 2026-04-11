@@ -57,6 +57,8 @@ trait Auditable
 
     public function audits()
     {
-        return $this->morphMany(AuditLog::class, 'auditable');
+        return $this->morphMany(AuditLog::class, 'auditable')
+            ->with('user')
+            ->latest();
     }
 }

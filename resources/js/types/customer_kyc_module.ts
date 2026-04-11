@@ -1,4 +1,5 @@
-import { AuditFields, ID, Timestamp } from './base_types';
+import { Audit } from './audit_models';
+import { ID, Timestamp, Timestamped } from './base_types';
 import { User } from './user';
 
 /* ===========================
@@ -33,7 +34,7 @@ export type RiskLevel = 'low' | 'medium' | 'high';
 /* ===========================
  * Customer
  * =========================== */
-export interface Customer extends AuditFields {
+export interface Customer extends Timestamped {
     id: ID;
     customer_no: string;
     type: CustomerType;
@@ -76,12 +77,13 @@ export interface Customer extends AuditFields {
     online_service_client?: User | null;
     kyc_profile?: KycProfile | null;
     kyc_documents?: KycDocument[];
+    audits?: Audit[];
 }
 
 /* ===========================
  * KYC Documents
  * =========================== */
-export interface KycDocument extends AuditFields {
+export interface KycDocument extends Timestamped {
     id: ID;
     customer_id: ID;
     customer?: Customer | null;
@@ -103,7 +105,7 @@ export interface KycDocument extends AuditFields {
 /* ===========================
  * Customer Addresses
  * =========================== */
-export interface CustomerAddress extends AuditFields {
+export interface CustomerAddress extends Timestamped {
     id: ID;
     customer_id: ID;
     customer?: Customer | null;
@@ -151,7 +153,7 @@ export type RelationType =
     | 'brother_in_law'
     | 'sister_in_law';
 
-export interface CustomerFamilyRelation extends AuditFields {
+export interface CustomerFamilyRelation extends Timestamped {
     id: ID;
     customer_id: ID;
     customer?: Customer | null;
@@ -178,7 +180,7 @@ export type IntroducerRelationshipType =
     | 'colleague'
     | 'other';
 
-export interface CustomerIntroducer extends AuditFields {
+export interface CustomerIntroducer extends Timestamped {
     id: ID;
 
     introduced_customer_id: ID;
@@ -201,7 +203,7 @@ export interface CustomerIntroducer extends AuditFields {
 /* ===========================
  * KYC Profile
  * =========================== */
-export interface KycProfile extends AuditFields {
+export interface KycProfile extends Timestamped {
     id: ID;
     customer_id: ID;
     customer?: Customer | null;

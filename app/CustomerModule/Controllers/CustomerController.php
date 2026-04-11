@@ -16,6 +16,18 @@ use Illuminate\Http\RedirectResponse;
 
 class CustomerController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:customers.index,customers.show')->only(['index', 'show']);
+        $this->middleware('permission:customers.create')->only(['create']);
+        $this->middleware('permission:customers.store')->only(['store']);
+        $this->middleware('permission:customers.edit')->only(['edit']);
+        $this->middleware('permission:customers.update')->only(['update']);
+        $this->middleware('permission:customers.destroy')->only(['destroy']);
+        $this->middleware('permission:customers.search-customers')->only(['searchCustomers']);
+        $this->middleware('permission:customers.find-customer')->only(['findCustomer']);
+    }
+
     /* ==========================
      * Search Customers (AJAX)
      * ========================== */
@@ -198,6 +210,7 @@ class CustomerController extends Controller
             'kycDocuments',
             'onlineServiceClient.organization',
             'onlineServiceClient.branch',
+            'audits',
         ]);
 
         return Inertia::render('customer-kyc/customers/show_customer_page', [

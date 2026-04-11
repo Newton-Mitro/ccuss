@@ -112,22 +112,6 @@ return new class extends Migration {
             $table->index(['account_type', 'account_id'], 'txn_entries_account_type_idx');
         });
 
-        Schema::create('voucher_audits', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('voucher_entry_id')->constrained()->cascadeOnDelete();
-            $table->enum('action', ['created', 'updated', 'posted', 'reversed', 'cancelled']);
-            $table->string('old_status')->nullable();
-            $table->string('new_status')->nullable();
-            $table->foreignId('performed_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->string('ip_address')->nullable();
-            $table->string('user_agent')->nullable();
-            $table->json('changes')->nullable();
-            $table->timestamp('performed_at')->useCurrent();
-            $table->timestamps();
-            $table->index(['voucher_entry_id']);
-            $table->index(['action']);
-        });
-
         // -----------------------
         // DROP EXISTING VIEWS (Safety)
         // -----------------------
@@ -308,9 +292,5 @@ return new class extends Migration {
         Schema::dropIfExists('voucher_entry_lines');
         Schema::dropIfExists('voucher_entries');
         Schema::dropIfExists('vouchers');
-        Schema::dropIfExists('loan_allocation_details');
-        Schema::dropIfExists('transaction_allocations');
-        Schema::dropIfExists('transactions');
-        Schema::dropIfExists('transaction_types');
     }
 };

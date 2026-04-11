@@ -1,8 +1,7 @@
-import { AuditFields } from './base_types';
 import { Branch } from './branch';
 import { User } from './user';
 
-export interface PettyCashAccount extends AuditFields {
+export interface PettyCashAccount extends Timestamped {
     id: number;
     name: string;
 
@@ -19,7 +18,7 @@ export interface PettyCashAccount extends AuditFields {
     advances?: PettyCashAdvance[];
 }
 
-export interface PettyCashAdvance extends AuditFields {
+export interface PettyCashAdvance extends Timestamped {
     id: number;
     petty_cash_account_id: number;
     employee_id: number;

@@ -87,7 +87,7 @@ export default function ListPettyCashAccountsPage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Petty Cash Accounts" />
 
-            <div className="space-y-4 p-2 text-foreground">
+            <div className="space-y-4 text-foreground">
                 {/* Header */}
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall

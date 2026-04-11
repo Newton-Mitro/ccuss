@@ -1,7 +1,5 @@
-import { AuditFields } from './base_types';
-
 // Fiscal Year
-export interface FiscalYear extends AuditFields {
+export interface FiscalYear extends Timestamped {
     id: number;
     code: string; // e.g. "FY-2025-26"
     start_date: string; // ISO date
@@ -11,7 +9,7 @@ export interface FiscalYear extends AuditFields {
 }
 
 // Fiscal Period
-export interface FiscalPeriod extends AuditFields {
+export interface FiscalPeriod extends Timestamped {
     id: number;
     fiscal_year_id: number;
     period_name: string; // e.g. "JAN-2026"
@@ -21,7 +19,7 @@ export interface FiscalPeriod extends AuditFields {
 }
 
 // Account
-export interface LedgerAccount extends AuditFields {
+export interface LedgerAccount extends Timestamped {
     id: number;
     code: string;
     name: string;
@@ -33,7 +31,7 @@ export interface LedgerAccount extends AuditFields {
 }
 
 // Account Balance
-export interface AccountBalance extends AuditFields {
+export interface AccountBalance extends Timestamped {
     id: number;
     ledger_account_id: number;
     fiscal_period_id: number;

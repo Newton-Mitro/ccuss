@@ -1,9 +1,9 @@
-import { AuditFields } from './base_types';
+import { Timestamped } from './base_types';
 import { User } from './user';
 
 export type AuditEvent = 'created' | 'updated' | 'deleted';
 
-export interface Audit extends AuditFields {
+export interface Audit extends Timestamped {
     id: number;
 
     // Polymorphic target
@@ -28,10 +28,6 @@ export interface Audit extends AuditFields {
     url: string | null;
     ip_address: string | null;
     user_agent: string | null;
-
-    // Timestamps
-    created_at: string; // ISO datetime
-    updated_at: string; // ISO datetime
 }
 
 export type AuditChange = {

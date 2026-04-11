@@ -1,11 +1,16 @@
 import { Head, Link, router } from '@inertiajs/react';
 import {
     Edit2,
+    Edit3,
     Eye,
     FileText,
+    History,
     HomeIcon,
     ListFilter,
     Plus,
+    PlusCircle,
+    Shield,
+    Trash2,
     UserCheckIcon,
     UserIcon,
     Users,
@@ -17,7 +22,7 @@ import { UserInfo } from '../../../components/user-info';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
-import { formatDate } from '../../../lib/date_util';
+import { formatDate, formatDateTime } from '../../../lib/date_util';
 import kycDocumentStatusConfig from '../../../lib/kycDocumentStatusConfig';
 import statusConfig, { Status } from '../../../lib/statusConfig';
 import { BreadcrumbItem, SharedData } from '../../../types';
@@ -32,6 +37,8 @@ export default function Show({ customer }: ShowProps) {
         { title: 'Customers', href: route('customers.index') },
         { title: customer.name, href: '' },
     ];
+
+    console.log(customer);
 
     useFlashToastHandler();
 
@@ -528,11 +535,74 @@ export default function Show({ customer }: ShowProps) {
                     </div>
                 </SectionHeader>
             )}
+
+            <SectionHeader
+                icon={<History size={18} />}
+                title="Customer Audit History"
+            >
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
+                    {customer.audits.map((audit) => (
+                        <DataCard key={audit.id}>
+                            <a
+                                key={audit.id}
+                                href={route('audits.batch', audit.batch_id)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="group flex items-center justify-between transition hover:border-primary/30 hover:shadow-md"
+                            >
+                                {/* LEFT SIDE */}
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
+                                        {getAuditIcon(audit.event)}
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <div className="text-sm font-semibold text-foreground">
+                                            <span className="tracking-wide uppercase">
+                                                {audit.event}
+                                            </span>{' '}
+                                            <span className="font-normal text-muted-foreground">
+                                                by{' '}
+                                                {audit.user?.name ?? 'SYSTEM'}
+                                            </span>
+                                        </div>
+
+                                        <div className="text-xs text-muted-foreground">
+                                            {formatDateTime(audit.created_at)}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* RIGHT ACTION */}
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground transition group-hover:text-primary">
+                                    View details
+                                    <span className="transition group-hover:translate-x-1">
+                                        →
+                                    </span>
+                                </div>
+                            </a>
+                        </DataCard>
+                    ))}
+                </div>
+            </SectionHeader>
         </CustomAuthLayout>
     );
 }
 
 /* ================= UI Components ================= */
+
+const getAuditIcon = (event) => {
+    switch (event) {
+        case 'created':
+            return <PlusCircle size={16} className="text-green-500" />;
+        case 'updated':
+            return <Edit3 size={16} className="text-blue-500" />;
+        case 'deleted':
+            return <Trash2 size={16} className="text-red-500" />;
+        default:
+            return <Shield size={16} className="text-gray-400" />;
+    }
+};
 
 const ActionButton = ({ children, icon, as = 'button', ...props }: any) =>
     as === 'button' ? (

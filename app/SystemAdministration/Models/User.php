@@ -107,12 +107,12 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function hasRole(string $role): bool
     {
-        return $this->roles->contains('name', $role);
+        return $this->roles->contains('slug', $role);
     }
 
     public function hasAnyRole(array $roles): bool
     {
-        return $this->roles->whereIn('name', $roles)->isNotEmpty();
+        return $this->roles->whereIn('slug', $roles)->isNotEmpty();
     }
 
     /*
@@ -123,7 +123,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function hasPermission(string $permission): bool
     {
-        return $this->permissions->contains('name', $permission);
+        return $this->permissions->contains('slug', $permission);
     }
 
     public function hasAnyPermission(array $permissions): bool
