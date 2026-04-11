@@ -27,7 +27,7 @@ export default function HomePage({
                     <div className="flex items-center justify-center">
                         <div className="">
                             <img
-                                src="/logo.png"
+                                src={import.meta.env.VITE_LOGO_PATH}
                                 alt="Logo"
                                 className="w-28 bg-background object-contain p-2 md:w-56"
                             />

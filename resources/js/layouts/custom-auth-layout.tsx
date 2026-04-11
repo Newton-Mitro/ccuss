@@ -192,7 +192,7 @@ export default function CustomAuthLayout({
                 {/* Logo */}
                 <div className="flex h-16 items-center gap-2 border-b pl-4">
                     <img
-                        src="/logo.png"
+                        src={import.meta.env.VITE_LOGO_PATH}
                         className="h-10 w-10 rounded-full border bg-card p-1"
                     />
                     <span

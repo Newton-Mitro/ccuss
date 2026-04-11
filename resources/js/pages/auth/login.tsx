@@ -25,6 +25,8 @@ export default function Login({
         localStorage.clear();
     }, []);
 
+    console.log(import.meta.env.VITE_LOGO_PATH);
+
     return (
         <div className="flex min-h-screen bg-card/50">
             <Head title="Log in" />
@@ -36,7 +38,11 @@ export default function Login({
                 transition={{ duration: 1 }}
                 className="hidden w-7/12 flex-col items-center justify-center lg:flex"
             >
-                <img src="/logo.png" alt="Logo" className="w-60" />
+                <img
+                    src={import.meta.env.VITE_LOGO_PATH}
+                    alt="Logo"
+                    className="w-60"
+                />
 
                 <div className="mt-3 text-center">
                     <h1 className="text-4xl font-bold tracking-tight">
