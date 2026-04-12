@@ -18,14 +18,11 @@ class CustomerController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:customers.index')->only(['index']);
-        $this->middleware('permission:customers.show')->only(['show']);
-        $this->middleware('permission:customers.create')->only(['create']);
-        $this->middleware('permission:customers.store')->only(['store']);
-        $this->middleware('permission:customers.edit')->only(['edit']);
-        $this->middleware('permission:customers.update')->only(['update']);
-        $this->middleware('permission:customers.destroy')->only(['destroy']);
-        $this->middleware('permission:customers.search')->only(['search']);
+        $this->middleware('permission:customer.view')->only(['index', 'show']);
+        $this->middleware('permission:customer.create')->only(['create']);
+        $this->middleware('permission:customer.update')->only(['update', 'edit']);
+        $this->middleware('permission:customer.delete')->only(['destroy']);
+        $this->middleware('permission:customer.search')->only(['search']);
     }
 
     /* ==========================

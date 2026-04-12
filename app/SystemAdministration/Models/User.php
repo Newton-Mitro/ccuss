@@ -3,6 +3,7 @@
 namespace App\SystemAdministration\Models;
 
 use App\CustomerModule\Models\Customer;
+use App\SystemAdministration\Traits\Auditable;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,7 +16,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use HasFactory, Notifiable, TwoFactorAuthenticatable, Auditable;
 
     protected $fillable = [
         'organization_id',

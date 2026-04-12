@@ -7,13 +7,22 @@ use App\CustomerModule\Models\CustomerFamilyRelation;
 use App\CustomerModule\Requests\StoreFamilyRelationRequest;
 use App\CustomerModule\Requests\UpdateFamilyRelationRequest;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class CustomerFamilyRelationController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:customer_family_relation.view')->only(['index', 'show']);
+        $this->middleware('permission:customer_family_relation.create')->only(['create']);
+        $this->middleware('permission:customer_family_relation.update')->only(['update', 'edit']);
+        $this->middleware('permission:customer_family_relation.delete')->only(['destroy']);
+        $this->middleware('permission:customer_family_relation.approve')->only(['approve']);
+        $this->middleware('permission:customer_family_relation.reject')->only(['reject']);
+    }
+
     public function index(Request $request): Response
     {
         $query = CustomerFamilyRelation::query()

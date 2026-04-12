@@ -4,13 +4,14 @@ namespace App\BankAndChequeModule\Models;
 
 use App\ChequeManagement\Models\BankCheque;
 use App\SystemAdministration\Models\User;
+use App\SystemAdministration\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class BankAccount extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, Auditable;
 
     protected $fillable = [
         'bank_id',

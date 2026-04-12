@@ -6,6 +6,7 @@ use App\BranchTreasuryModule\Models\Teller;
 use App\BranchTreasuryModule\Models\Vault;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
+use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -84,7 +85,13 @@ class OrganizationStructureSeeder extends Seeder
                 ]
             );
 
+            $roleModels = Role::where('slug', 'system_administrator')->first();
 
+            if ($roleModels) {
+                $user->roles()->sync([
+                    $roleModels->id,
+                ]);
+            }
 
             Teller::firstOrCreate(
                 [

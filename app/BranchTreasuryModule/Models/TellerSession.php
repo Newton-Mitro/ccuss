@@ -2,12 +2,15 @@
 
 namespace App\BranchTreasuryModule\Models;
 
+use App\SystemAdministration\Traits\Auditable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TellerSession extends Model
 {
+    use HasFactory, Auditable;
     protected $fillable = [
         'teller_id',
         'branch_day_id',

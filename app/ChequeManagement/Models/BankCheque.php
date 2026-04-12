@@ -2,17 +2,18 @@
 
 namespace App\ChequeManagement\Models;
 
+use App\ChequeManagement\Models\BankChequeBook;
 use App\SystemAdministration\Models\User;
+use App\SystemAdministration\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class BankCheque extends Model
 {
-    use HasFactory;
+    use HasFactory, Auditable;
 
     protected $fillable = [
         'bank_cheque_book_id',
-        'bank_account_id',
         'cheque_number',
         'cheque_date',
         'amount',
@@ -22,17 +23,21 @@ class BankCheque extends Model
         'stop_payment',
         'created_by',
         'approved_by',
+        'cleared_at',
+        'bounced_at',
     ];
 
     protected $casts = [
         'cheque_date' => 'date',
         'amount' => 'decimal:2',
         'stop_payment' => 'boolean',
+        'cleared_at' => 'datetime',
+        'bounced_at' => 'datetime',
     ];
 
     /*
     |--------------------------------------------------------------------------
-    | Status Constants (Single Source of Truth)
+    | Status Constants
     |--------------------------------------------------------------------------
     */
 
@@ -53,11 +58,6 @@ class BankCheque extends Model
         return $this->belongsTo(BankChequeBook::class, 'bank_cheque_book_id');
     }
 
-    public function bankAccount()
-    {
-        return $this->belongsTo(BankAccount::class);
-    }
-
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by');
@@ -70,7 +70,7 @@ class BankCheque extends Model
 
     /*
     |--------------------------------------------------------------------------
-    | Scopes (Query Optimization Layer)
+    | Scopes
     |--------------------------------------------------------------------------
     */
 
@@ -107,7 +107,7 @@ class BankCheque extends Model
 
     /*
     |--------------------------------------------------------------------------
-    | Helpers (Business Logic Layer)
+    | Domain Helpers
     |--------------------------------------------------------------------------
     */
 
@@ -134,5 +134,23 @@ class BankCheque extends Model
     public function isPayable(): bool
     {
         return $this->isIssued() && !$this->stop_payment;
+    }
+
+    // Helpers
+
+    public function markCleared(): void
+    {
+        $this->update([
+            'status' => self::STATUS_CLEARED,
+            'cleared_at' => now(),
+        ]);
+    }
+
+    public function markBounced(): void
+    {
+        $this->update([
+            'status' => self::STATUS_BOUNCED,
+            'bounced_at' => now(),
+        ]);
     }
 }

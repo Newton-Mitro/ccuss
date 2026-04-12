@@ -8,18 +8,6 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        // Schema::create('cheque_instruments', function (Blueprint $table) {
-        //     $table->id();
-
-        //     $table->string('cheque_no', 50);
-        //     $table->date('cheque_date');
-        //     $table->foreignId('bank_id')->constrained();
-        //     $table->string('branch_name', 100)->nullable();
-        //     $table->string('payee_name', 150)->nullable();
-        //     $table->enum('status', ['issued', 'cleared', 'bounced'])->default('issued');
-        //     $table->timestamps();
-        // });
-
         // Schema::create('bank_transfer_instruments', function (Blueprint $table) {
         //     $table->id();
         //     $table->foreignId('bank_id')->constrained();
@@ -67,7 +55,7 @@ return new class extends Migration {
         // CASH | Contra Voucher    | Cash transactions
 
         // -----------------------
-        // Journal Entries
+        // Voucher Entries
         // -----------------------
         Schema::create('voucher_entries', function (Blueprint $table) {
             $table->id();
@@ -99,7 +87,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('voucher_entry_id')->constrained()->cascadeOnDelete();
             $table->foreignId('ledger_account_id')->constrained('ledger_accounts');
-            $table->morphs('account');
+            $table->foreignId('account_id')->constrained('accounts');
             $table->nullableMorphs('reference');
             $table->decimal('debit', 15, 2)->default(0);
             $table->decimal('credit', 15, 2)->default(0);
@@ -109,7 +97,6 @@ return new class extends Migration {
             $table->timestamps();
             $table->index(['voucher_entry_id']);
             $table->index(['ledger_account_id']);
-            $table->index(['account_type', 'account_id'], 'txn_entries_account_type_idx');
         });
 
         // -----------------------

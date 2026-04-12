@@ -3,7 +3,6 @@
 namespace App\ChequeManagement\Controllers;
 
 use App\ChequeManagement\Models\BankChequeBook;
-use App\Models\DepositAccount;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -20,16 +19,12 @@ class BankChequeBookController extends Controller
             ->with(['issuedBy'])
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
-
                     $q->where('book_no', 'like', "%{$search}%")
                         ->orWhere('start_number', 'like', "%{$search}%")
                         ->orWhere('end_number', 'like', "%{$search}%")
-
-                        // Search by issued user
                         ->orWhereHas('issuedBy', function ($userQuery) use ($search) {
                             $userQuery->where('name', 'like', "%{$search}%");
                         });
-
                 });
             })
             ->latest()
@@ -45,29 +40,21 @@ class BankChequeBookController extends Controller
         );
     }
 
-    /**
-     * ✅ Create Page (IMPORTANT for Inertia)
-     */
     public function create()
     {
         return Inertia::render(
             'cheque-module/bank-cheque-books/create-bank-cheque-book-page',
             [
-                'accounts' => [],
+                'accounts' => []
             ]
         );
     }
 
-    /**
-     * ✅ Store (Redirect instead of JSON)
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'deposit_account_id' => 'nullable|exists:deposit_accounts,id',
-            'bank_account_id' => 'nullable|exists:bank_accounts,id',
-            'book_no' => 'required|string|max:50',
-            'start_number' => 'required|integer',
+            'book_no' => 'required|string|max:50|unique:bank_cheque_books,book_no',
+            'start_number' => 'required|integer|min:1',
             'end_number' => 'required|integer|gte:start_number',
             'issued_at' => 'nullable|date',
         ]);
@@ -79,14 +66,21 @@ class BankChequeBookController extends Controller
                 'issued_by' => auth()->id(),
             ]);
 
-            // 🔥 Auto-generate cheques
+            $cheques = [];
+
             for ($i = $book->start_number; $i <= $book->end_number; $i++) {
-                $book->cheques()->create([
-                    'cheque_number' => $i,
+                $cheques[] = [
+                    'bank_cheque_book_id' => $book->id,
+                    'cheque_number' => (string) $i,
                     'amount' => 0,
                     'status' => 'issued',
-                ]);
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
             }
+
+            // 🔥 Bulk insert (FAST + SCALABLE)
+            $book->cheques()->insert($cheques);
         });
 
         return redirect()
@@ -94,40 +88,29 @@ class BankChequeBookController extends Controller
             ->with('success', 'Cheque book created successfully');
     }
 
-    /**
-     * ✅ Show Page (optional UI page)
-     */
     public function show(BankChequeBook $bankChequeBook)
     {
         return Inertia::render(
             'cheque-module/bank-cheque-books/show-bank-cheque-book-page',
             [
-                'book' => $bankChequeBook->load(['depositAccount', 'cheques']),
+                'book' => $bankChequeBook->load(['issuedBy', 'cheques']),
             ]
         );
     }
 
-    /**
-     * ✅ Edit Page
-     */
     public function edit(BankChequeBook $bankChequeBook)
     {
         return Inertia::render(
             'cheque-module/bank-cheque-books/edit-bank-cheque-book-page',
             [
                 'chequeBook' => $bankChequeBook,
-                'accounts' => [],
             ]
         );
     }
 
-    /**
-     * ✅ Update (Redirect style)
-     */
     public function update(Request $request, BankChequeBook $bankChequeBook)
     {
         $validated = $request->validate([
-            'book_no' => 'sometimes|string|max:50',
             'issued_at' => 'nullable|date',
         ]);
 
@@ -138,9 +121,6 @@ class BankChequeBookController extends Controller
             ->with('success', 'Cheque book updated successfully');
     }
 
-    /**
-     * ✅ Destroy (Redirect back)
-     */
     public function destroy(BankChequeBook $bankChequeBook)
     {
         $bankChequeBook->delete();

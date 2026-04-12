@@ -2,10 +2,12 @@
 
 namespace App\SystemAdministration\Models;
 
+use App\SystemAdministration\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 
 class DatabaseBackupLog extends Model
 {
+    use Auditable;
     protected $fillable = [
         'file_name',
         'file_path',

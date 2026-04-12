@@ -13,6 +13,17 @@ use Inertia\Response;
 
 class CustomerIntroducerController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:customer_introducer.view')->only(['index', 'show']);
+        $this->middleware('permission:customer_introducer.create')->only(['create']);
+        $this->middleware('permission:customer_introducer.update')->only(['update', 'edit']);
+        $this->middleware('permission:customer_introducer.delete')->only(['destroy']);
+        $this->middleware('permission:customer_introducer.approve')->only(['approve']);
+        $this->middleware('permission:customer_introducer.reject')->only(['reject']);
+    }
+
+
     public function index(Request $request): Response
     {
         $query = CustomerIntroducer::query()

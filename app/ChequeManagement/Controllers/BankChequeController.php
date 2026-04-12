@@ -6,6 +6,7 @@ use App\ChequeManagement\Models\BankCheque;
 use App\ChequeManagement\Models\BankChequeBook;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class BankChequeController extends Controller
@@ -27,9 +28,7 @@ class BankChequeController extends Controller
                         });
                 });
             })
-            ->when($status && $status !== '', function ($query) use ($status) {
-                $query->where('status', $status);
-            })
+            ->when($status, fn($q) => $q->where('status', $status))
             ->latest()
             ->paginate($perPage)
             ->withQueryString();
@@ -43,9 +42,6 @@ class BankChequeController extends Controller
         );
     }
 
-    /**
-     * ✅ Create Page
-     */
     public function create()
     {
         return Inertia::render(
@@ -56,9 +52,6 @@ class BankChequeController extends Controller
         );
     }
 
-    /**
-     * ❗ Optional (if you allow manual creation)
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -72,7 +65,7 @@ class BankChequeController extends Controller
 
         BankCheque::create([
             ...$validated,
-            'status' => 'issued',
+            'status' => BankCheque::STATUS_ISSUED,
         ]);
 
         return redirect()
@@ -80,9 +73,6 @@ class BankChequeController extends Controller
             ->with('success', 'Cheque created successfully');
     }
 
-    /**
-     * ✅ Show Page
-     */
     public function show(BankCheque $bankCheque)
     {
         return Inertia::render(
@@ -93,9 +83,6 @@ class BankChequeController extends Controller
         );
     }
 
-    /**
-     * ✅ Edit Page
-     */
     public function edit(BankCheque $bankCheque)
     {
         return Inertia::render(
@@ -107,9 +94,6 @@ class BankChequeController extends Controller
         );
     }
 
-    /**
-     * ✅ Update
-     */
     public function update(Request $request, BankCheque $bankCheque)
     {
         $validated = $request->validate([
@@ -117,7 +101,6 @@ class BankChequeController extends Controller
             'amount' => 'nullable|numeric|min:0',
             'payee_name' => 'nullable|string|max:255',
             'remarks' => 'nullable|string',
-            'status' => 'required|in:issued,presented,cleared,bounced,cancelled',
             'stop_payment' => 'boolean',
         ]);
 
@@ -128,33 +111,34 @@ class BankChequeController extends Controller
             ->with('success', 'Cheque updated successfully');
     }
 
-    /**
-     * ✅ Destroy
-     */
     public function destroy(BankCheque $bankCheque)
     {
         $bankCheque->delete();
 
-        return redirect()
-            ->back()
-            ->with('success', 'Cheque deleted successfully');
+        return back()->with('success', 'Cheque deleted successfully');
     }
 
     /*
     |--------------------------------------------------------------------------
-    | 🚀 Business Actions (Lifecycle)
+    | 🚀 Lifecycle Actions (SAFE STATE MACHINE STYLE)
     |--------------------------------------------------------------------------
     */
 
     public function markPresented(BankCheque $bankCheque)
     {
         if ($bankCheque->stop_payment) {
-            return back()->with('error', 'Cannot present a stopped cheque');
+            return back()->with('error', 'Stop payment active');
         }
 
-        $bankCheque->update(['status' => 'presented']);
+        if ($bankCheque->status !== BankCheque::STATUS_ISSUED) {
+            return back()->with('error', 'Only issued cheques can be presented');
+        }
 
-        return back()->with('success', 'Cheque marked as presented');
+        $bankCheque->update([
+            'status' => BankCheque::STATUS_PRESENTED,
+        ]);
+
+        return back()->with('success', 'Cheque presented');
     }
 
     public function markCleared(BankCheque $bankCheque)
@@ -163,22 +147,45 @@ class BankChequeController extends Controller
             return back()->with('error', 'Stopped cheque cannot be cleared');
         }
 
-        // ⚠️ Future: integrate accounting (journal entry)
-        $bankCheque->update(['status' => 'cleared']);
+        if ($bankCheque->status !== BankCheque::STATUS_PRESENTED) {
+            return back()->with('error', 'Only presented cheques can be cleared');
+        }
 
-        return back()->with('success', 'Cheque cleared successfully');
+        DB::transaction(function () use ($bankCheque) {
+            $bankCheque->update([
+                'status' => BankCheque::STATUS_CLEARED,
+                'cleared_at' => now(),
+            ]);
+
+            // 🔥 Future hook: ledger posting
+        });
+
+        return back()->with('success', 'Cheque cleared');
     }
 
     public function markBounced(BankCheque $bankCheque)
     {
-        $bankCheque->update(['status' => 'bounced']);
+        if ($bankCheque->status === BankCheque::STATUS_CLEARED) {
+            return back()->with('error', 'Cleared cheque cannot be bounced');
+        }
 
-        return back()->with('success', 'Cheque marked as bounced');
+        $bankCheque->update([
+            'status' => BankCheque::STATUS_BOUNCED,
+            'bounced_at' => now(),
+        ]);
+
+        return back()->with('success', 'Cheque bounced');
     }
 
     public function stopPayment(BankCheque $bankCheque)
     {
-        $bankCheque->update(['stop_payment' => true]);
+        if ($bankCheque->status === BankCheque::STATUS_CLEARED) {
+            return back()->with('error', 'Cannot stop a cleared cheque');
+        }
+
+        $bankCheque->update([
+            'stop_payment' => true,
+        ]);
 
         return back()->with('success', 'Stop payment applied');
     }

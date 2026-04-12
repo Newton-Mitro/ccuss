@@ -4,12 +4,13 @@ namespace App\PettyCashModule\Models;
 
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\User;
+use App\SystemAdministration\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PettyCashAccount extends Model
 {
-    use HasFactory;
+    use HasFactory, Auditable;
 
     protected $fillable = [
         'name',

@@ -8,21 +8,25 @@ return new class extends Migration {
 
     public function up(): void
     {
-        Schema::create('bank_cheque_books', function (Blueprint $table) {
+        Schema::create('cheque_books', function (Blueprint $table) {
             $table->id();
-            $table->morphs('account');
-            $table->string('book_no');
+            $table->foreignId('account_id')->constrained()->cascadeOnDelete();
+            $table->string('book_no')->unique();
             $table->integer('start_number');
             $table->integer('end_number');
             $table->date('issued_at')->nullable();
-            $table->foreignId('issued_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
-            $table->unique(['book_no']);
         });
 
-        Schema::create('bank_cheques', function (Blueprint $table) {
+        Schema::create('cheques', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('bank_cheque_book_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('cheque_book_id')->nullable()->constrained()->nullOnDelete();
+            // issuer (internal account)
+            $table->foreignId('issuer_account_id')->nullable()->constrained('accounts')->nullOnDelete();
+
+            $table->string('issuer_bank_name')->nullable();
+            $table->string('issuer_branch')->nullable();
+
             $table->string('cheque_number');
             $table->date('cheque_date')->nullable();
             $table->decimal('amount', 18, 2);
@@ -30,10 +34,19 @@ return new class extends Migration {
             $table->text('remarks')->nullable();
             $table->enum('status', ['issued', 'presented', 'cleared', 'bounced', 'cancelled'])->default('issued');
             $table->boolean('stop_payment')->default(false);
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('cleared_at')->nullable();
             $table->timestamp('bounced_at')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('cheque_deposits', function (Blueprint $table) {
+            $table->id();
+            // where money goes (must be accounts table)
+            $table->foreignId('deposit_account_id')->constrained('accounts')->cascadeOnDelete();
+            $table->foreignId('cheque_id')->constrained()->cascadeOnDelete();
+            $table->decimal('amount', 18, 2);
+            $table->date('deposit_date');
+            $table->enum('status', ['pending', 'sent_to_clearing', 'cleared', 'rejected'])->default('pending');
             $table->timestamps();
         });
 
@@ -45,24 +58,22 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        Schema::create('cheque_presentations', function (Blueprint $table) {
+        Schema::create('clearing_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('bank_cheque_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('voucher_entry_id')->nullable();
-            $table->decimal('amount', 18, 2);
-            $table->date('presented_at');
-            $table->enum('status', ['pending', 'sent_for_clearing', 'cleared', 'bounced'])->default('pending');
+            $table->foreignId('clearing_batch_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('cheque_id')->constrained()->cascadeOnDelete();
+            $table->enum('status', ['sent', 'cleared', 'bounced'])->default('sent');
             $table->string('return_reason')->nullable();
-            $table->foreignId('clearing_batch_id')->nullable()->constrained()->nullOnDelete();
             $table->timestamps();
+            $table->unique(['clearing_batch_id', 'cheque_id']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('cheque_presentations');
-        Schema::dropIfExists('clearing_batches');
-        Schema::dropIfExists('cheques');
         Schema::dropIfExists('cheque_books');
+        Schema::dropIfExists('cheques');
+        Schema::dropIfExists('clearing_batches');
+        Schema::dropIfExists('clearing_items');
     }
 };

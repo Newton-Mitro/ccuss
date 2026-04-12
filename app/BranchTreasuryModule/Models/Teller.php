@@ -4,12 +4,15 @@ namespace App\BranchTreasuryModule\Models;
 
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\User;
+use App\SystemAdministration\Traits\Auditable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Teller extends Model
 {
+    use HasFactory, Auditable;
     // ✅ Add new numeric fields to fillable
     protected $fillable = [
         'user_id',

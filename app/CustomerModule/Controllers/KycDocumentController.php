@@ -10,6 +10,16 @@ use Inertia\Inertia;
 
 class KycDocumentController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:customer_kyc_document.view')->only(['index', 'show']);
+        $this->middleware('permission:customer_kyc_document.create')->only(['create']);
+        $this->middleware('permission:customer_kyc_document.update')->only(['update', 'edit']);
+        $this->middleware('permission:customer_kyc_document.delete')->only(['destroy']);
+        $this->middleware('permission:customer_kyc_document.approve')->only(['approve']);
+        $this->middleware('permission:customer_kyc_document.reject')->only(['reject']);
+    }
+
     public function index(Request $request)
     {
         $query = KycDocument::with('customer');

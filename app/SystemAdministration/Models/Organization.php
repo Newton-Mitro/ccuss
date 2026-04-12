@@ -2,6 +2,7 @@
 
 namespace App\SystemAdministration\Models;
 
+use App\SystemAdministration\Traits\Auditable;
 use Database\Factories\OrganizationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +10,8 @@ use Illuminate\Support\Facades\Storage;
 
 class Organization extends Model
 {
-    use HasFactory;
+
+    use HasFactory, Auditable;
 
     protected $fillable = [
         'code',

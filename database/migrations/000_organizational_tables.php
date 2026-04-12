@@ -41,11 +41,33 @@ return new class extends Migration {
             $table->foreignId('manager_id')->nullable()->comment('Branch manager customer ID (no constraint)');
             $table->timestamps();
         });
+
+        Schema::create('fiscal_years', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('organization_id')->constrained();
+            $table->string('code')->unique()->comment('(FY-2025-26)');
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->boolean('is_closed')->default(false);
+            $table->timestamps();
+        });
+
+        Schema::create('fiscal_periods', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('fiscal_year_id')->constrained()->cascadeOnDelete();
+            $table->string('period_name')->comment('(JAN-2026)');
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->enum('status', ['open', 'closed', 'locked'])->default('open');
+            $table->timestamps();
+        });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('organizations');
+        Schema::dropIfExists('fiscal_periods');
+        Schema::dropIfExists('fiscal_years');
         Schema::dropIfExists('branches');
+        Schema::dropIfExists('organizations');
     }
 };

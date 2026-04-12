@@ -7,13 +7,19 @@ use App\CustomerModule\Models\CustomerAddress;
 use App\CustomerModule\Requests\StoreAddressRequest;
 use App\CustomerModule\Requests\UpdateAddressRequest;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class CustomerAddressController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:customer_address.view')->only(['show']);
+        $this->middleware('permission:customer_address.create')->only(['create']);
+        $this->middleware('permission:customer_address.update')->only(['update', 'edit']);
+        $this->middleware('permission:customer_address.delete')->only(['destroy']);
+    }
+
     public function show(CustomerAddress $address): Response
     {
         // Load the related customer info

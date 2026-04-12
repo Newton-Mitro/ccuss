@@ -8,31 +8,6 @@ return new class extends Migration {
 
     public function up(): void
     {
-        Schema::create('fiscal_years', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('organization_id')->constrained();
-            $table->string('code')->unique()->comment('(FY-2025-26)');
-            $table->date('start_date');
-            $table->date('end_date');
-            $table->boolean('is_closed')->default(false);
-            $table->timestamps();
-        });
-
-        Schema::create('fiscal_periods', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('fiscal_year_id')->constrained()->cascadeOnDelete();
-            $table->string('period_name')->comment('(JAN-2026)');
-            $table->date('start_date');
-            $table->date('end_date');
-            $table->enum('status', ['open', 'closed', 'locked'])->default('open');
-            $table->timestamps();
-        });
-
-        // 💡 Best Practice:
-        //    - open → allow posting
-        //    - closed → no new entries
-        //    - locked → fully finalized (audit-safe)
-
         Schema::create('closing_entries', function (Blueprint $table) {
             $table->id();
             $table->foreignId('organization_id')->constrained();
@@ -73,7 +48,5 @@ return new class extends Migration {
         Schema::dropIfExists('ledger_account_balances');
         Schema::dropIfExists('ledger_accounts');
         Schema::dropIfExists('closing_entries');
-        Schema::dropIfExists('fiscal_periods');
-        Schema::dropIfExists('fiscal_years');
     }
 };
