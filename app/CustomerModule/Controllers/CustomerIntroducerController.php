@@ -19,7 +19,6 @@ class CustomerIntroducerController extends Controller
             ->with([
                 'introducedCustomer:id,name,customer_no',
                 'introducer:id,name,customer_no',
-                'verifier:id,name',
             ]);
 
         // 🔍 Search filter
@@ -72,7 +71,7 @@ class CustomerIntroducerController extends Controller
             'introducedCustomer.photo',
             'introducer',
             'introducer.photo',
-            'verifier',
+            'audits',
         ]);
 
         return Inertia::render(

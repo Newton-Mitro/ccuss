@@ -41,9 +41,6 @@ class Customer extends Model
         'religion',
 
         'kyc_status',
-
-        'created_by',
-        'updated_by',
     ];
 
     protected $casts = [
@@ -130,20 +127,6 @@ class Customer extends Model
     public function onlineServiceClient(): HasOne
     {
         return $this->hasOne(User::class);
-    }
-
-    /* ========================
-     * Audit
-     * ======================== */
-
-    public function creator(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function updater(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'updated_by');
     }
 
     protected static function newFactory()

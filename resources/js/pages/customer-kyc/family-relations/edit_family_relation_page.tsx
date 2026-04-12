@@ -125,7 +125,7 @@ const Edit = () => {
                     </div>
                 </div>
 
-                {/* RELATIVE */}
+                {/* relative */}
                 <div>
                     <Label className="text-xs">Relative</Label>
 

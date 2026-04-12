@@ -24,8 +24,6 @@ class CustomerAddress extends Model
         'postal_code',
         'country',
         'type',
-        'created_by',
-        'updated_by',
     ];
 
     /* ========================
@@ -37,19 +35,6 @@ class CustomerAddress extends Model
         return $this->belongsTo(Customer::class);
     }
 
-    /* ========================
-     * Audit
-     * ======================== */
-
-    public function creator(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function updater(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'updated_by');
-    }
 
     protected static function newFactory()
     {

@@ -55,7 +55,7 @@ class CustomerFamilyRelationController extends Controller
 
     public function show(CustomerFamilyRelation $familyRelation): Response
     {
-        $familyRelation->load(['customer', 'relative', 'customer.photo', 'relative.photo', 'verifier']);
+        $familyRelation->load(['customer', 'relative', 'audits', 'customer.photo', 'relative.photo']);
 
         return Inertia::render('customer-kyc/family-relations/show_family_relation_page', [
             'familyRelation' => $familyRelation,

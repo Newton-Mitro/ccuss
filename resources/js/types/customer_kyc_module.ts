@@ -60,8 +60,6 @@ export interface Customer extends Timestamped {
 
     // KYC
     kyc_status: KycStatus;
-    kyc_verified_by?: ID | null;
-    kyc_verified_by_user?: User | null;
     kyc_verified_at?: Timestamp | null;
 
     // Files
@@ -96,10 +94,9 @@ export interface KycDocument extends Timestamped {
     url: string;
 
     verification_status: VerificationStatus;
-    verified_by?: ID | null;
-    verified_by_user?: User | null;
     verified_at?: Timestamp | null;
     remarks?: string | null;
+    audits?: Audit[];
 }
 
 /* ===========================
@@ -122,10 +119,9 @@ export interface CustomerAddress extends Timestamped {
     type: AddressType;
 
     verification_status: VerificationStatus;
-    verified_by?: ID | null;
-    verified_by_user?: User | null;
     verified_at?: Timestamp | null;
     remarks?: string | null;
+    audits?: Audit[];
 }
 
 /* ===========================
@@ -164,10 +160,9 @@ export interface CustomerFamilyRelation extends Timestamped {
     relation_type: RelationType;
 
     verification_status: VerificationStatus;
-    verified_by?: ID | null;
-    verifier?: User | null;
     verified_at?: Timestamp | null;
     remarks?: string | null;
+    audits?: Audit[];
 }
 
 /* ===========================
@@ -194,10 +189,9 @@ export interface CustomerIntroducer extends Timestamped {
     relationship_type: IntroducerRelationshipType;
 
     verification_status: VerificationStatus;
-    verified_by?: ID | null;
-    verified_by_user?: User | null;
     verified_at?: Timestamp | null;
     remarks?: string | null;
+    audits?: Audit[];
 }
 
 /* ===========================
@@ -212,8 +206,7 @@ export interface KycProfile extends Timestamped {
     risk_level: RiskLevel;
 
     verification_status: 'pending' | 'approved' | 'rejected';
-    verified_by?: ID | null;
-    verified_by_user?: User | null;
     verified_at?: Timestamp | null;
     remarks?: string | null;
+    audits?: Audit[];
 }

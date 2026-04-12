@@ -32,7 +32,7 @@ export const CustomerSearchInput: React.FC<CustomerSearchInputProps> = ({
 
         try {
             setLoading(true);
-            const res = await axios.get(route('customers.search-customers'), {
+            const res = await axios.get(route('customers.search'), {
                 params: { search: query },
             });
 

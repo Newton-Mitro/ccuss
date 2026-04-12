@@ -36,16 +36,10 @@ class CustomerFamilyRelationFactory extends Factory
 
         return [
             'relation_type' => fake()->randomElement($relationTypes),
-
             // Verification
             'verification_status' => 'pending',
-            'verified_by' => null,
             'verified_at' => null,
             'remarks' => fake()->optional()->sentence(),
-
-            // Audit
-            'created_by' => null,
-            'updated_by' => null,
         ];
     }
 }

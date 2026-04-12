@@ -1,16 +1,14 @@
 import { Head, Link, router } from '@inertiajs/react';
 import {
+    Clock,
     Edit2,
-    Edit3,
     Eye,
     FileText,
     History,
     HomeIcon,
     ListFilter,
     Plus,
-    PlusCircle,
-    Shield,
-    Trash2,
+    User,
     UserCheckIcon,
     UserIcon,
     Users,
@@ -536,73 +534,51 @@ export default function Show({ customer }: ShowProps) {
                 </SectionHeader>
             )}
 
-            <SectionHeader
-                icon={<History size={18} />}
-                title="Customer Audit History"
-            >
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
-                    {customer.audits.map((audit) => (
-                        <DataCard key={audit.id}>
+            {customer.audits.length > 0 && (
+                <SectionHeader
+                    icon={<History size={18} />}
+                    title="Customer Audit History"
+                >
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                        {customer.audits.map((audit) => (
                             <a
                                 key={audit.id}
                                 href={route('audits.batch', audit.batch_id)}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="group flex items-center justify-between transition hover:border-primary/30 hover:shadow-md"
+                                className="group flex items-center justify-between rounded-md border bg-card px-3 py-2 text-xs transition hover:border-primary/40 hover:shadow-sm"
                             >
-                                {/* LEFT SIDE */}
-                                <div className="flex items-center gap-3">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
-                                        {getAuditIcon(audit.event)}
-                                    </div>
+                                {/* Left: Event + User */}
+                                <div className="flex items-center gap-2 overflow-hidden">
+                                    <span className="truncate capitalize">
+                                        {`${audit.event} by`}
+                                    </span>
 
-                                    <div className="flex flex-col">
-                                        <div className="text-sm font-semibold text-foreground">
-                                            <span className="tracking-wide uppercase">
-                                                {audit.event}
-                                            </span>{' '}
-                                            <span className="font-normal text-muted-foreground">
-                                                by{' '}
-                                                {audit.user?.name ?? 'SYSTEM'}
-                                            </span>
-                                        </div>
-
-                                        <div className="text-xs text-muted-foreground">
-                                            {formatDateTime(audit.created_at)}
-                                        </div>
-                                    </div>
+                                    <span className="flex items-center gap-1">
+                                        <User size={12} />
+                                        <span className="max-w-[80px] truncate">
+                                            {audit.user?.name ?? 'SYS'}
+                                        </span>
+                                    </span>
                                 </div>
 
-                                {/* RIGHT ACTION */}
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground transition group-hover:text-primary">
-                                    View details
-                                    <span className="transition group-hover:translate-x-1">
-                                        →
+                                {/* Right: Time */}
+                                <div className="flex shrink-0 items-center gap-1 text-muted-foreground">
+                                    <Clock size={10} />
+                                    <span>
+                                        {formatDateTime(audit.created_at)}
                                     </span>
                                 </div>
                             </a>
-                        </DataCard>
-                    ))}
-                </div>
-            </SectionHeader>
+                        ))}
+                    </div>
+                </SectionHeader>
+            )}
         </CustomAuthLayout>
     );
 }
 
 /* ================= UI Components ================= */
-
-const getAuditIcon = (event) => {
-    switch (event) {
-        case 'created':
-            return <PlusCircle size={16} className="text-green-500" />;
-        case 'updated':
-            return <Edit3 size={16} className="text-blue-500" />;
-        case 'deleted':
-            return <Trash2 size={16} className="text-red-500" />;
-        default:
-            return <Shield size={16} className="text-gray-400" />;
-    }
-};
 
 const ActionButton = ({ children, icon, as = 'button', ...props }: any) =>
     as === 'button' ? (

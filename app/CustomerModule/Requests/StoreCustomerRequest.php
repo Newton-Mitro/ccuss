@@ -68,10 +68,6 @@ class StoreCustomerRequest extends FormRequest
             'organization_id' => ['nullable', 'integer', 'exists:organizations,id'],
             'branch_id' => ['nullable', 'integer', 'exists:branches,id'],
             'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
-
-            /* ================= Audit (Optional) ================= */
-            'created_by' => ['nullable', 'integer', 'exists:users,id'],
-            'updated_by' => ['nullable', 'integer', 'exists:users,id'],
         ];
     }
 

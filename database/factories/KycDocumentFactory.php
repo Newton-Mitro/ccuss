@@ -54,7 +54,6 @@ class KycDocumentFactory extends Factory
             'mime' => 'image/jpeg',
             'alt_text' => ucfirst(str_replace('_', ' ', $docType)),
             'verification_status' => fake()->randomElement($verificationStatuses),
-            'verified_by' => null,
             'verified_at' => null,
             'remarks' => fake()->optional()->sentence(),
         ];

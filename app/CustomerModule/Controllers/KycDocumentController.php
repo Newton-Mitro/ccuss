@@ -12,7 +12,7 @@ class KycDocumentController extends Controller
 {
     public function index(Request $request)
     {
-        $query = KycDocument::with('customer', 'verifier');
+        $query = KycDocument::with('customer');
 
         // 🔍 Search (by customer name)
         if ($search = $request->string('search')->toString()) {
@@ -95,7 +95,7 @@ class KycDocumentController extends Controller
     public function show(KycDocument $kycDocument)
     {
         return Inertia::render('customer-kyc/kyc-documents/show_kyc_document_page', [
-            'document' => $kycDocument->load('customer', 'customer.photo', 'verifier'),
+            'document' => $kycDocument->load('customer', 'customer.photo', 'audits'),
         ]);
     }
 

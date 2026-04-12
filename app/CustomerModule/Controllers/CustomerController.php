@@ -18,20 +18,20 @@ class CustomerController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:customers.index,customers.show')->only(['index', 'show']);
+        $this->middleware('permission:customers.index')->only(['index']);
+        $this->middleware('permission:customers.show')->only(['show']);
         $this->middleware('permission:customers.create')->only(['create']);
         $this->middleware('permission:customers.store')->only(['store']);
         $this->middleware('permission:customers.edit')->only(['edit']);
         $this->middleware('permission:customers.update')->only(['update']);
         $this->middleware('permission:customers.destroy')->only(['destroy']);
-        $this->middleware('permission:customers.search-customers')->only(['searchCustomers']);
-        $this->middleware('permission:customers.find-customer')->only(['findCustomer']);
+        $this->middleware('permission:customers.search')->only(['search']);
     }
 
     /* ==========================
      * Search Customers (AJAX)
      * ========================== */
-    public function searchCustomers(Request $request): JsonResponse
+    public function search(Request $request): JsonResponse
     {
         $search = $request->query('search');
 
@@ -57,24 +57,6 @@ class CustomerController extends Controller
         return response()->json(
             $query->latest()->limit(20)->get()
         );
-    }
-
-    /* ==========================
-     * Find Customer by ID
-     * ========================== */
-    public function findCustomer(int $id): JsonResponse
-    {
-        $customer = Customer::with([
-            'photo',
-            'addresses',
-            'familyRelations.relative.photo',
-            'introducers.introducer',
-            'introducers.introducedCustomer',
-            'kycProfile',
-            'kycDocuments'
-        ])->findOrFail($id);
-
-        return response()->json($customer);
     }
 
     /* ==========================

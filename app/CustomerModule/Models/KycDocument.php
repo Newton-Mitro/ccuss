@@ -23,12 +23,8 @@ class KycDocument extends Model
         'alt_text',
 
         'verification_status',
-        'verified_by',
         'verified_at',
         'remarks',
-
-        'created_by',
-        'updated_by',
     ];
 
     protected $casts = [
@@ -44,29 +40,6 @@ class KycDocument extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
-    }
-
-    /* ========================
-     * Verification
-     * ======================== */
-
-    public function verifier(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'verified_by');
-    }
-
-    /* ========================
-     * Audit
-     * ======================== */
-
-    public function creator(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function updater(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'updated_by');
     }
 
     /* ========================

@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { ArrowLeft, CheckCheck, XCircle } from 'lucide-react';
+import { ArrowLeft, CheckCheck, Clock, User, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import ReactPanZoom from 'react-image-pan-zoom-rotate';
 import { route } from 'ziggy-js';
@@ -189,33 +189,58 @@ const Show = () => {
                     </div>
 
                     {/* VERIFICATION */}
-                    <div className="space-y-2 rounded-md border bg-card p-4">
-                        <p className="text-sm font-medium">Verification</p>
-
-                        <div>
-                            <p className="text-xs text-muted-foreground">
-                                Verified By
-                            </p>
-                            <p className="text-sm">
-                                {document.verifier?.name ?? '—'}
-                            </p>
+                    <div className="rounded-xl border bg-card p-5 shadow-sm">
+                        {/* Header */}
+                        <div className="mb-4 flex items-center justify-between">
+                            <p className="text-sm font-semibold">Audit Trail</p>
+                            <span className="text-xs text-muted-foreground">
+                                {document?.audits?.length || 0} records
+                            </span>
                         </div>
 
-                        <div>
-                            <p className="text-xs text-muted-foreground">
-                                Verified At
-                            </p>
-                            <p className="text-sm">
-                                {formatDateTime(document.verified_at) ?? '—'}
-                            </p>
-                        </div>
+                        {/* Content */}
+                        {document?.audits?.length > 0 ? (
+                            <div className="space-y-4">
+                                {document.audits.map((audit) => (
+                                    <a
+                                        key={audit.id}
+                                        href={route(
+                                            'audits.batch',
+                                            audit.batch_id,
+                                        )}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="group flex items-center justify-between rounded-md border bg-card px-3 py-2 text-xs transition hover:border-primary/40 hover:shadow-sm"
+                                    >
+                                        {/* Left: Event + User */}
+                                        <div className="flex items-center gap-2 overflow-hidden">
+                                            <span className="truncate capitalize">
+                                                {`${audit.event} by`}
+                                            </span>
 
-                        {document.remarks && (
-                            <div>
-                                <p className="text-xs text-muted-foreground">
-                                    Remarks
-                                </p>
-                                <p className="text-sm">{document.remarks}</p>
+                                            <span className="flex items-center gap-1">
+                                                <User size={12} />
+                                                <span className="max-w-[80px] truncate">
+                                                    {audit.user?.name ?? 'SYS'}
+                                                </span>
+                                            </span>
+                                        </div>
+
+                                        {/* Right: Time */}
+                                        <div className="flex shrink-0 items-center gap-1 text-muted-foreground">
+                                            <Clock size={10} />
+                                            <span>
+                                                {formatDateTime(
+                                                    audit.created_at,
+                                                )}
+                                            </span>
+                                        </div>
+                                    </a>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="flex items-center justify-center py-6 text-xs text-muted-foreground">
+                                No audit records found.
                             </div>
                         )}
                     </div>

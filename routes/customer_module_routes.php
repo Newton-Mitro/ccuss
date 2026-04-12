@@ -67,12 +67,10 @@ Route::middleware(['auth', 'verified'])->prefix('customers')->name('customers.')
     Route::get('/', [CustomerController::class, 'index'])->name('index');
     Route::get('/create', [CustomerController::class, 'create'])->name('create');
     Route::post('/', [CustomerController::class, 'store'])->name('store');
-
     Route::get('/{customer}', [CustomerController::class, 'show'])->name('show');
     Route::get('/{customer}/edit', [CustomerController::class, 'edit'])->name('edit');
     Route::put('/{customer}', [CustomerController::class, 'update'])->name('update');
     Route::delete('/{customer}', [CustomerController::class, 'destroy'])->name('destroy');
-    Route::get('/api/search-customers', [CustomerController::class, 'searchCustomers'])->name('search-customers');
-    Route::get('/api/find-customers/{search}', [CustomerController::class, 'findCustomer'])->name('find-customer');
+    Route::get('/api/search', [CustomerController::class, 'search'])->name('search');
 });
 

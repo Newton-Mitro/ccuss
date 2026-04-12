@@ -60,8 +60,6 @@ class CustomerFactory extends Factory
                 : fake()->randomElement($organizationIds),
             'identification_number' => strtoupper(Str::random(12)),
             'kyc_status' => 'pending',
-            'created_by' => $creator->id ?? null,
-            'updated_by' => $creator->id ?? null,
         ];
     }
 

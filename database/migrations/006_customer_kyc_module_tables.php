@@ -37,9 +37,6 @@ return new class extends Migration {
             $table->enum('religion', ['christianity', 'islam', 'hinduism', 'buddhism', 'other'])->nullable();
 
             $table->enum('kyc_status', ['pending', 'verified', 'rejected'])->default('pending');
-            // Audit
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
 
@@ -55,9 +52,6 @@ return new class extends Migration {
             $table->string('postal_code', 20)->nullable();
             $table->string('country', 150)->default('Bangladesh');
             $table->enum('type', ['current', 'permanent', 'mailing', 'work', 'registered', 'other']);
-            // Audit
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
 
             // One address per type per customer
@@ -96,13 +90,8 @@ return new class extends Migration {
 
             // Verification
             $table->enum('verification_status', ['pending', 'verified', 'rejected'])->default('pending');
-            $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('verified_at')->nullable();
             $table->text('remarks')->nullable();
-
-            // Audit
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
 
@@ -155,10 +144,8 @@ return new class extends Migration {
             $table->string('alt_text')->nullable();
             // Verification
             $table->enum('verification_status', ['pending', 'verified', 'rejected'])->default('pending');
-            $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('verified_at')->nullable();
             $table->text('remarks')->nullable();
-
             $table->timestamps();
         });
 
@@ -183,7 +170,6 @@ return new class extends Migration {
 
             // Verification
             $table->enum('verification_status', ['pending', 'verified', 'rejected'])->default('pending');
-            $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('verified_at')->nullable();
             $table->text('remarks')->nullable();
 
@@ -192,11 +178,6 @@ return new class extends Migration {
                 ['introduced_customer_id', 'introducer_customer_id'],
                 'uq_customer_introducer'
             );
-
-            // Audit
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
-
             $table->timestamps();
         });
 

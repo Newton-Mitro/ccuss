@@ -17,7 +17,7 @@ class CustomerIntroducerFactory extends Factory
             'introducer_customer_id' => Customer::factory(),
             'relationship_type' => fake()->randomElement([
                 'friend',
-                'RELATIVE',
+                'relative',
                 'business'
             ]),
             'verification_status' => 'pending',
