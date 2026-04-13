@@ -2,6 +2,7 @@
 
 namespace App\BankModule\Models;
 
+use App\SubledgerModule\Models\Account;
 use App\SystemAdministration\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +13,7 @@ class BankAccount extends Model
     use HasFactory, SoftDeletes, Auditable;
 
     protected $fillable = [
+        'account_id',
         'bank_name',
         'branch_name',
         'account_number',
@@ -24,7 +26,28 @@ class BankAccount extends Model
         'display_name',
         'account_type_label',
         'account_type_class',
+        'balance',
     ];
+
+    // ------------------------
+    // Relationships
+    // ------------------------
+
+    /**
+     * Core ledger account (single source of truth for balance)
+     */
+    public function account()
+    {
+        return $this->belongsTo(Account::class);
+    }
+
+    /**
+     * Bank reconciliations for this account
+     */
+    public function reconciliations()
+    {
+        return $this->hasMany(BankReconciliation::class);
+    }
 
     // ------------------------
     // Accessors
@@ -45,15 +68,11 @@ class BankAccount extends Model
         return self::class;
     }
 
-    // ------------------------
-    // Relationships
-    // ------------------------
-
     /**
-     * Bank reconciliations for this account
+     * Balance is now delegated to central accounts table
      */
-    public function reconciliations()
+    public function getBalanceAttribute()
     {
-        return $this->hasMany(BankReconciliation::class);
+        return $this->account?->balance ?? 0;
     }
 }

@@ -23,6 +23,7 @@ return new class extends Migration {
             $table->string('ip_address', 45)->nullable();
             $table->string('user_agent')->nullable();
             $table->timestamps();
+            $table->softDeletes();
             // Indexes
             $table->index(['auditable_type', 'auditable_id'], 'idx_auditable');
             $table->index('user_id', 'idx_user');
@@ -45,6 +46,7 @@ return new class extends Migration {
             $table->timestamp('started_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->timestamps();
+            $table->softDeletes();
             $table->index('status');
         });
     }

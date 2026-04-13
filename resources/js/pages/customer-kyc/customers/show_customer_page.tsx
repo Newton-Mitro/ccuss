@@ -144,7 +144,7 @@ export default function Show({ customer }: ShowProps) {
                             {customer.name}
                         </h1>
 
-                        <p className="text-xs text-foreground/70">
+                        <p className="text-xs text-foreground/70 capitalize">
                             {customer.customer_no} | {customer.type}
                         </p>
 
@@ -188,30 +188,40 @@ export default function Show({ customer }: ShowProps) {
                                 value={formatDate(customer.dob)}
                             />
 
-                            <InfoItem label="Gender" value={customer.gender} />
+                            <InfoItem
+                                label="Gender"
+                                value={customer.gender}
+                                valueClassName="capitalize"
+                            />
                             <InfoItem
                                 label="Religion"
                                 value={customer.religion}
+                                valueClassName="capitalize"
                             />
                             <InfoItem
                                 label="Marital Status"
                                 value={customer.marital_status}
+                                valueClassName="capitalize"
                             />
                             <InfoItem
                                 label="Blood Group"
                                 value={customer.blood_group}
+                                valueClassName="capitalize"
                             />
                             <InfoItem
                                 label="Nationality"
                                 value={customer.nationality}
+                                valueClassName="capitalize"
                             />
                             <InfoItem
                                 label="Occupation"
                                 value={customer.occupation}
+                                valueClassName="capitalize"
                             />
                             <InfoItem
                                 label="Education"
                                 value={customer.education}
+                                valueClassName="capitalize"
                             />
                         </>
                     )}
@@ -225,7 +235,8 @@ export default function Show({ customer }: ShowProps) {
 
                     <InfoItem
                         label="ID Type"
-                        value={customer.identification_type}
+                        value={customer.identification_type.replace(/_/g, ' ')}
+                        valueClassName="capitalize"
                     />
 
                     <InfoItem
@@ -246,12 +257,14 @@ export default function Show({ customer }: ShowProps) {
                             <InfoItem
                                 label="KYC Level"
                                 value={customer.kyc_profile.kyc_level}
+                                valueClassName="capitalize"
                             />
                         </div>
                         <div className="rounded-md border bg-card px-4 py-2 shadow-sm hover:shadow-md">
                             <InfoItem
                                 label="Risk Level"
                                 value={customer.kyc_profile.risk_level}
+                                valueClassName="capitalize"
                             />
                         </div>
                     </div>
@@ -285,7 +298,7 @@ export default function Show({ customer }: ShowProps) {
                                 handleDeleteCustomerAddress(addr.id);
                             }}
                         >
-                            <div className="text-sm font-semibold">
+                            <div className="text-sm font-semibold capitalize">
                                 {addr.type}
                             </div>
 
@@ -356,8 +369,13 @@ export default function Show({ customer }: ShowProps) {
                                         </Link>
                                     </div>
 
-                                    <div className="flex gap-2">
-                                        <span>{rel.relation_type}</span>
+                                    <div className="flex gap-2 capitalize">
+                                        <span>
+                                            {rel.relation_type.replace(
+                                                /_/g,
+                                                ' ',
+                                            )}
+                                        </span>
 
                                         <Badge text={rel.verification_status} />
                                     </div>
@@ -393,8 +411,13 @@ export default function Show({ customer }: ShowProps) {
                                         </Link>
                                     </div>
 
-                                    <div className="flex gap-2">
-                                        <span>{rel.relation_type}</span>
+                                    <div className="flex gap-2 capitalize">
+                                        <span>
+                                            {rel.relation_type.replace(
+                                                /_/g,
+                                                ' ',
+                                            )}
+                                        </span>
 
                                         <Badge text={rel.verification_status} />
                                     </div>
@@ -462,8 +485,13 @@ export default function Show({ customer }: ShowProps) {
                                         </Link>
                                     </div>
 
-                                    <div className="flex gap-2 text-xs">
-                                        <span>{intro.relationship_type}</span>
+                                    <div className="flex gap-2 text-xs capitalize">
+                                        <span>
+                                            {intro.relationship_type.replace(
+                                                /_/g,
+                                                ' ',
+                                            )}
+                                        </span>
 
                                         <Badge
                                             text={intro.verification_status}
@@ -503,12 +531,12 @@ export default function Show({ customer }: ShowProps) {
                                 handleDeleteCustomerKycDocument(doc.id);
                             }}
                         >
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 capitalize">
                                 <VerificationStatus
                                     status={doc.verification_status}
                                 />
                                 <div className="text-sm font-semibold">
-                                    {doc.document_type}
+                                    {doc.document_type.replace(/_/g, ' ')}
                                 </div>
                             </div>
                         </DataCard>
@@ -597,10 +625,10 @@ const ActionButton = ({ children, icon, as = 'button', ...props }: any) =>
         </Link>
     );
 
-const InfoItem = ({ label, value }: any) => (
+const InfoItem = ({ label, value, valueClassName }: any) => (
     <div className="flex flex-col">
         <span className="text-[10px] text-foreground">{label}</span>
-        <span className="text-sm">{value || '—'}</span>
+        <span className={`text-sm ${valueClassName}`}>{value || '—'}</span>
     </div>
 );
 

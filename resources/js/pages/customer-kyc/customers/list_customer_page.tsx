@@ -154,7 +154,9 @@ export default function Index() {
                                         {c.customer_no}
                                     </td>
                                     <td className="px-2 py-1">{c.name}</td>
-                                    <td className="px-2 py-1">{c.type}</td>
+                                    <td className="px-2 py-1 capitalize">
+                                        {c.type}
+                                    </td>
                                     <td className="px-2 py-1">{c.phone}</td>
                                     <td className="px-2 py-1">{c.email}</td>
                                     <td className="px-2 py-1">
@@ -236,7 +238,7 @@ export default function Index() {
                             <div className="flex items-start justify-between">
                                 <div>
                                     <p className="font-medium">{c.name}</p>
-                                    <p className="text-xs text-muted-foreground">
+                                    <p className="text-xs text-muted-foreground capitalize">
                                         {c.customer_no} · {c.type}
                                     </p>
                                 </div>

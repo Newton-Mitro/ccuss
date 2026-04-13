@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\BranchTreasuryModule\Models\Teller;
 use App\BranchTreasuryModule\Models\Vault;
+use App\SubledgerModule\Models\Account;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Role;
@@ -29,14 +30,14 @@ class OrganizationStructureSeeder extends Seeder
 
     public function run(): void
     {
-        // 1. Organization (use factory but controlled)
+        // 1. Organization
         $organization = Organization::factory()->create([
             'code' => 'ORG001',
             'name' => 'Demo Microfinance Ltd',
             'short_name' => 'DML',
         ]);
 
-        // 2. Branches (use factory but override names)
+        // 2. Branches
         $branches = collect($this->dhakaBranches)->map(function ($branchName, $index) use ($organization) {
             return Branch::factory()->create([
                 'organization_id' => $organization->id,
@@ -48,21 +49,40 @@ class OrganizationStructureSeeder extends Seeder
         $this->command->info('✅ Organization with branches created.');
 
         // -------------------------------
-        // 3. Create Vault per Branch
+        // 3. Vault + Account per Branch
         // -------------------------------
-        foreach ($branches as $branch) {
-            Vault::firstOrCreate(
-                [
-                    'branch_id' => $branch->id,
-                ],
-                [
-                    'name' => $branch->name . ' Main Vault',
-                    'is_active' => true,
-                ]
-            );
-        }
+        // foreach ($branches as $branch) {
 
-        $this->command->info('✅ Vault created for each branch.');
+        //     // ✅ Step 1: Create Vault FIRST
+        //     $vault = Vault::firstOrCreate(
+        //         [
+        //             'branch_id' => $branch->id,
+        //         ],
+        //         [
+        //             'name' => $branch->name . ' Main Vault',
+        //             'is_active' => true,
+        //             'account_id' => null, // temporary
+        //         ]
+        //     );
+
+        //     // ✅ Step 2: Create Account linked to Vault
+        //     $vaultAccount = Account::factory()
+        //         ->vault()
+        //         ->create([
+        //             'organization_id' => $organization->id,
+        //             'branch_id' => $branch->id,
+        //             'name' => $branch->name . ' Vault Account',
+        //             'accountable_id' => $vault->id,
+        //             'accountable_type' => Vault::class,
+        //         ]);
+
+        //     // ✅ Step 3: Update Vault with account_id
+        //     $vault->update([
+        //         'account_id' => $vaultAccount->id,
+        //     ]);
+        // }
+
+        $this->command->info('✅ Vault + account created for each branch.');
 
         // -------------------------------
         // 4. Default System Users
@@ -71,9 +91,10 @@ class OrganizationStructureSeeder extends Seeder
             ['name' => 'Super Admin', 'email' => 'super.admin@email.com'],
         ];
 
-        $mainBranch = $branches->first(); // safer than hardcoding
+        $mainBranch = $branches->first();
 
         foreach ($defaultUsers as $userData) {
+
             $user = User::firstOrCreate(
                 ['email' => $userData['email']],
                 [
@@ -85,29 +106,46 @@ class OrganizationStructureSeeder extends Seeder
                 ]
             );
 
+            // Assign role
             $roleModels = Role::where('slug', 'system_administrator')->first();
 
             if ($roleModels) {
-                $user->roles()->sync([
-                    $roleModels->id,
-                ]);
+                $user->roles()->sync([$roleModels->id]);
             }
 
-            Teller::firstOrCreate(
-                [
-                    'user_id' => $user->id,
-                ],
-                [
-                    'branch_id' => $mainBranch->id,
-                    'code' => 'TLR-' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
-                    'name' => $userData['name'],
-                    'max_cash_limit' => 500000,
-                    'max_transaction_limit' => 100000,
-                    'is_active' => true,
-                ]
-            );
+            // ✅ Step 1: Create Teller FIRST
+            // $teller = Teller::firstOrCreate(
+            //     [
+            //         'user_id' => $user->id,
+            //     ],
+            //     [
+            //         'branch_id' => $mainBranch->id,
+            //         'account_id' => null, // temporary
+            //         'code' => 'TLR-' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
+            //         'name' => $userData['name'],
+            //         'max_cash_limit' => 500000,
+            //         'max_transaction_limit' => 100000,
+            //         'is_active' => true,
+            //     ]
+            // );
+
+            // // ✅ Step 2: Create Teller Account
+            // $tellerAccount = Account::factory()
+            //     ->teller()
+            //     ->create([
+            //         'organization_id' => $organization->id,
+            //         'branch_id' => $mainBranch->id,
+            //         'name' => $userData['name'] . ' Teller Cash Account',
+            //         'accountable_id' => $teller->id,
+            //         'accountable_type' => Teller::class,
+            //     ]);
+
+            // // ✅ Step 3: Update Teller
+            // $teller->update([
+            //     'account_id' => $tellerAccount->id,
+            // ]);
         }
 
-        $this->command->info('✅ Core admin users created.');
+        $this->command->info('✅ Core admin users + teller accounts created.');
     }
 }

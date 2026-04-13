@@ -20,6 +20,7 @@ return new class extends Migration {
             $table->enum('role', ['employee', 'manager', 'admin'])->default('employee');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

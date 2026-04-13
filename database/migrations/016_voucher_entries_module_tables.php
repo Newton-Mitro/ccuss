@@ -44,6 +44,7 @@ return new class extends Migration {
             $table->string('name'); // e.g. Sales Journal, Cash Journal
             $table->string('code')->unique();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         // BANK | Bank Voucher      | Bank transactions
@@ -79,6 +80,7 @@ return new class extends Migration {
             $table->timestamp('transaction_date');
             $table->enum('status', ['draft', 'cancelled', 'posted', 'reversed'])->default('draft');
             $table->timestamps();
+            $table->softDeletes();
             $table->index(['branch_id', 'transaction_date']);
             $table->index(['source_type']);
         });
@@ -95,6 +97,7 @@ return new class extends Migration {
             $table->date('transaction_date');
             $table->string('narration')->nullable();
             $table->timestamps();
+            $table->softDeletes();
             $table->index(['voucher_entry_id']);
             $table->index(['ledger_account_id']);
         });

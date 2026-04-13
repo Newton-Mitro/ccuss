@@ -10,10 +10,13 @@ return new class extends Migration {
     {
         Schema::create('customer_accounts', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->string('account_number')->unique();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

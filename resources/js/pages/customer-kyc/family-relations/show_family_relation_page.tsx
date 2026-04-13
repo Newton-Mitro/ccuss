@@ -325,7 +325,7 @@ function CustomerDetails({ customer }: { customer?: any }) {
                     {customer?.name || '—'}{' '}
                 </Link>
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground capitalize">
                 {customer?.type} • {customer?.kyc_status}
             </p>
             <p className="text-xs text-muted-foreground">

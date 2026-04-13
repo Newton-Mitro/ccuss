@@ -14,8 +14,8 @@ export type Religion =
     | 'buddhism'
     | 'other';
 export type IdentificationType =
-    | 'nid'
-    | 'brn'
+    | 'national_identification_number'
+    | 'birth_registration_number'
     | 'registration_no'
     | 'passport'
     | 'driving_license';

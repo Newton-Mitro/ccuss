@@ -140,8 +140,8 @@ export default function IntroducersIndex() {
                                     <td className="px-2 py-1">
                                         {i.introducer?.name ?? '—'}
                                     </td>
-                                    <td className="px-2 py-1">
-                                        {i.relationship_type}
+                                    <td className="px-2 py-1 capitalize">
+                                        {i.relationship_type.replace(/_/g, ' ')}
                                     </td>
                                     <td className="px-2 py-1">
                                         <Badge text={i.verification_status} />

@@ -28,6 +28,7 @@ return new class extends Migration {
             $table->string('report_header_line2', 255)->nullable();
             $table->string('report_footer', 255)->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('branches', function (Blueprint $table) {
@@ -40,6 +41,7 @@ return new class extends Migration {
             $table->decimal('longitude', 11, 8)->nullable()->comment('Longitude for map/GPS');
             $table->foreignId('manager_id')->nullable()->comment('Branch manager customer ID (no constraint)');
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('fiscal_years', function (Blueprint $table) {
@@ -50,6 +52,7 @@ return new class extends Migration {
             $table->date('end_date');
             $table->boolean('is_closed')->default(false);
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('fiscal_periods', function (Blueprint $table) {
@@ -60,6 +63,7 @@ return new class extends Migration {
             $table->date('end_date');
             $table->enum('status', ['open', 'closed', 'locked'])->default('open');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

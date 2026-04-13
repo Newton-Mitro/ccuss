@@ -75,6 +75,7 @@ return new class extends Migration {
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         // 🚀 1. High-Level Loan Lifecycle
@@ -115,10 +116,14 @@ return new class extends Migration {
             $table->string('code')->unique(); // submitted, review, etc.
             $table->string('name');
             $table->integer('sequence'); // ordering
+            $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('loan_applications', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->string('application_no', 50)->unique();
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->foreignId('loan_product_id')->constrained()->cascadeOnDelete();
@@ -129,6 +134,7 @@ return new class extends Migration {
             // FINAL STATE
             $table->enum('status', ['pending', 'approved', 'rejected', 'disbursed', 'cancelled'])->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('loan_documents', function (Blueprint $table) {
@@ -137,6 +143,7 @@ return new class extends Migration {
             $table->string('document_type');
             $table->string('file_path');
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('loan_application_stage_histories', function (Blueprint $table) {
@@ -146,6 +153,8 @@ return new class extends Migration {
             $table->foreignId('changed_by')->nullable()->constrained('users');
             $table->timestamp('changed_at')->useCurrent();
             $table->text('remarks')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('loan_approvals', function (Blueprint $table) {
@@ -158,15 +167,17 @@ return new class extends Migration {
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->dateTime('approved_at')->nullable();
             $table->timestamps();
+            $table->softDeletes();
             $table->unique(['loan_application_id'], 'loan_approval_unique');
         });
 
         Schema::create('loan_accounts', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->string('account_no', 30)->unique();
             $table->string('account_name');
             $table->foreignId('loan_product_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->decimal('principal_amount', 15, 2);
             $table->decimal('interest_rate', 5, 2);
             $table->integer('tenure_months');
@@ -181,6 +192,7 @@ return new class extends Migration {
             $table->enum('status', ['pending', 'approved', 'active', 'closed', 'defaulted', 'written_off'])->default('pending');
             $table->text('remarks')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('loan_lien_accounts', function (Blueprint $table) {
@@ -191,6 +203,7 @@ return new class extends Migration {
 
             $table->enum('status', ['pending', 'approved', 'active', 'closed', 'defaulted', 'written_off', 'released', 'cancelled'])->default('pending');
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('loan_collaterals', function (Blueprint $table) {
@@ -200,6 +213,7 @@ return new class extends Migration {
             $table->text('description')->nullable();
             $table->decimal('estimated_value', 15, 2)->default(0);
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('loan_guarantors', function (Blueprint $table) {
@@ -209,6 +223,7 @@ return new class extends Migration {
             $table->decimal('guarantee_amount', 15, 2);
             $table->string('relationship')->nullable();
             $table->timestamps();
+            $table->softDeletes();
             $table->unique(['loan_account_id', 'customer_id']);
         });
 
@@ -219,6 +234,7 @@ return new class extends Migration {
             $table->enum('role', ['primary', 'co_borrower'])->default('primary');
             $table->decimal('liability_percentage', 5, 2)->default(100);
             $table->timestamps();
+            $table->softDeletes();
             $table->unique(['loan_account_id', 'customer_id']);
         });
 
@@ -241,6 +257,7 @@ return new class extends Migration {
 
             $table->enum('status', ['pending', 'paid', 'late'])->default('pending');
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('loan_reschedules', function (Blueprint $table) {
@@ -250,6 +267,7 @@ return new class extends Migration {
             $table->integer('new_tenure');
             $table->text('reason')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('loan_repayments', function (Blueprint $table) {
@@ -263,6 +281,7 @@ return new class extends Migration {
             $table->date('payment_date');
             // $table->foreignId('transaction_id');
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('loan_disbursements', function (Blueprint $table) {
@@ -275,6 +294,7 @@ return new class extends Migration {
             $table->text('remarks')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
+            $table->softDeletes();
             $table->unique(['loan_account_id', 'disbursement_date'], 'loan_disbursement_unique');
         });
 
@@ -286,6 +306,7 @@ return new class extends Migration {
             $table->boolean('is_posted')->default(false);
             // $table->foreignId('loan_transaction_id')->nullable()->constrained('loan_transactions')->nullOnDelete()->comment('Linked transaction when posted');
             $table->timestamps();
+            $table->softDeletes();
             $table->unique(['loan_account_id', 'accrual_date'], 'loan_interest_unique');
         });
 
@@ -299,6 +320,7 @@ return new class extends Migration {
             // $table->foreignId('loan_transaction_id')->nullable()->constrained('loan_transactions')->nullOnDelete()->comment('Linked transaction when posted');
             $table->text('remarks')->nullable();
             $table->timestamps();
+            $table->softDeletes();
             $table->unique(['loan_account_id', 'penalty_date', 'penalty_type'], 'loan_penalty_unique');
         });
 
@@ -309,6 +331,7 @@ return new class extends Migration {
             $table->decimal('amount', 15, 2)->default(0);
             $table->enum('charge_type', ['processing', 'insurance', 'documentation', 'other'])->default('other');
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('loan_writeoffs', function (Blueprint $table) {
@@ -318,6 +341,7 @@ return new class extends Migration {
             $table->text('reason')->nullable();
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('loan_notification_templates', function (Blueprint $table) {
@@ -342,6 +366,7 @@ return new class extends Migration {
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('loan_notifications', function (Blueprint $table) {
@@ -362,6 +387,7 @@ return new class extends Migration {
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

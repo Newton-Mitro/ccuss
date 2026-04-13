@@ -158,11 +158,11 @@ export const religions = [
 export const individualIdentificationTypes = [
     {
         label: 'NID',
-        value: 'nid',
+        value: 'national_identification_number',
     },
     {
         label: 'BRN',
-        value: 'brn',
+        value: 'birth_registration_number',
     },
     {
         label: 'Passport',

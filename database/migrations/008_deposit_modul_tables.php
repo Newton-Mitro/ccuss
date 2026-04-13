@@ -68,6 +68,8 @@ return new class extends Migration {
         Schema::create('saving_accounts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('deposit_product_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('organization_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->string('account_no', 30)->unique();
             $table->string('account_name');
             $table->decimal('interest_rate', 5, 2)->nullable();
@@ -76,11 +78,14 @@ return new class extends Migration {
             $table->decimal('hold_balance', 18, 2)->default(0);
             $table->decimal('minimum_balance', 18, 2)->default(0);
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('share_accounts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('deposit_product_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('organization_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->string('account_no', 30)->unique();
             $table->string('account_name');
             $table->decimal('interest_rate', 5, 2)->nullable();
@@ -90,11 +95,14 @@ return new class extends Migration {
             $table->decimal('share_value', 10, 2)->default(0);
             $table->boolean('voting_rights')->default(true);
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('term_deposit_accounts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('deposit_product_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('organization_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->string('account_no', 30)->unique();
             $table->string('account_name');
             $table->decimal('interest_rate', 5, 2)->nullable();
@@ -105,11 +113,14 @@ return new class extends Migration {
             $table->decimal('premature_penalty_rate', 5, 2)->default(0);
             $table->enum('payout_mode', ['maturity', 'monthly'])->default('maturity');
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('recurring_deposit_accounts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('deposit_product_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('organization_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->string('account_no', 30)->unique();
             $table->string('account_name');
             $table->decimal('interest_rate', 5, 2)->nullable();
@@ -124,6 +135,7 @@ return new class extends Migration {
             $table->integer('grace_days')->default(0);
             $table->decimal('maturity_amount', 15, 2)->default(0);
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('recurring_deposit_installments', function (Blueprint $table) {
@@ -144,6 +156,7 @@ return new class extends Migration {
             $table->enum('status', ['due', 'paid', 'missed'])->default('due');
             // $table->decimal('penalty_amount', 15, 2)->default(0);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->integer('end_number');
             $table->date('issued_at')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('cheques', function (Blueprint $table) {
@@ -37,6 +38,7 @@ return new class extends Migration {
             $table->timestamp('cleared_at')->nullable();
             $table->timestamp('bounced_at')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('cheque_deposits', function (Blueprint $table) {
@@ -48,6 +50,7 @@ return new class extends Migration {
             $table->date('deposit_date');
             $table->enum('status', ['pending', 'sent_to_clearing', 'cleared', 'rejected'])->default('pending');
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('clearing_batches', function (Blueprint $table) {
@@ -56,6 +59,7 @@ return new class extends Migration {
             $table->date('clearing_date');
             $table->enum('status', ['pending', 'sent', 'settled', 'failed'])->default('pending');
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('clearing_items', function (Blueprint $table) {
@@ -65,6 +69,7 @@ return new class extends Migration {
             $table->enum('status', ['sent', 'cleared', 'bounced'])->default('sent');
             $table->string('return_reason')->nullable();
             $table->timestamps();
+            $table->softDeletes();
             $table->unique(['clearing_batch_id', 'cheque_id']);
         });
     }

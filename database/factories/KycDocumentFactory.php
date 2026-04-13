@@ -13,8 +13,8 @@ class KycDocumentFactory extends Factory
     public function definition(): array
     {
         $documentTypes = [
-            'nid',
-            'nid',
+            'birth_registration_number',
+            'national_identification_number',
             'smart_nid',
             'passport',
             'driving_license',

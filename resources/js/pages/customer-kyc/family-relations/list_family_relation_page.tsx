@@ -155,10 +155,10 @@ export default function FamilyRelationIndex() {
                                         <td className="px-2 py-1">
                                             {f.relative?.phone || '—'}
                                         </td>
-                                        <td className="px-2 py-1 text-blue-600">
+                                        <td className="px-2 py-1 text-blue-600 capitalize">
                                             {f.relation_type.replace(/_/g, ' ')}
                                         </td>
-                                        <td className="px-2 py-1">
+                                        <td className="px-2 py-1 capitalize">
                                             <Badge
                                                 text={f.verification_status}
                                             />

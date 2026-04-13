@@ -2,24 +2,31 @@
 
 namespace App\BankModule\Controllers;
 
-use App\BankModule\Models\BankAccount;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\BankModule\Models\BankAccount;
+use App\SubledgerModule\Models\Account;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class BankAccountController extends Controller
 {
     public function index(Request $request)
     {
-        $query = BankAccount::query();
+        $query = BankAccount::query()
+            ->with(['account']); // assumes relation exists
 
         if ($request->filled('search')) {
             $search = $request->search;
 
             $query->where(function ($q) use ($search) {
                 $q->where('bank_name', 'like', "%{$search}%")
+                    ->orWhere('branch_name', 'like', "%{$search}%")
                     ->orWhere('account_number', 'like', "%{$search}%")
-                    ->orWhere('branch_name', 'like', "%{$search}%");
+                    ->orWhereHas('account', function ($aq) use ($search) {
+                        $aq->where('account_number', 'like', "%{$search}%")
+                            ->orWhere('name', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -41,15 +48,53 @@ class BankAccountController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
+            // account layer
+            'name' => 'nullable|string|max:255',
+            'account_number' => 'required|string|unique:accounts,account_number',
+
+            'organization_id' => 'nullable|exists:organizations,id',
+            'branch_id' => 'nullable|exists:branches,id',
+
+            // bank layer
             'bank_name' => 'required|string|max:255',
             'branch_name' => 'nullable|string|max:255',
-            'account_number' => 'required|string|unique:bank_accounts,account_number',
             'iban' => 'nullable|string|max:50',
             'swift_code' => 'nullable|string|max:50',
             'routing_number' => 'nullable|string|max:50',
         ]);
 
-        BankAccount::create($data);
+        DB::transaction(function () use ($data) {
+
+            // 1. Create bank account first
+            $bankAccount = BankAccount::create([
+                'bank_name' => $data['bank_name'],
+                'branch_name' => $data['branch_name'] ?? null,
+                'account_number' => $data['account_number'],
+                'iban' => $data['iban'] ?? null,
+                'swift_code' => $data['swift_code'] ?? null,
+                'routing_number' => $data['routing_number'] ?? null,
+            ]);
+
+            // 2. Create central ledger/account
+            $account = Account::create([
+                'organization_id' => $data['organization_id'] ?? null,
+                'branch_id' => $data['branch_id'] ?? null,
+                'account_number' => $data['account_number'],
+                'name' => $data['name'] ?? $data['bank_name'],
+                'type' => 'bank',
+                'balance' => 0,
+                'status' => 'active',
+
+                // polymorphic link
+                'accountable_type' => BankAccount::class,
+                'accountable_id' => $bankAccount->id,
+            ]);
+
+            // 3. Optional reverse link (ONLY if you need bidirectional access)
+            $bankAccount->update([
+                'account_id' => $account->id,
+            ]);
+        });
 
         return redirect()
             ->route('bank-accounts.index')
@@ -58,6 +103,8 @@ class BankAccountController extends Controller
 
     public function show(BankAccount $bankAccount)
     {
+        $bankAccount->load('account');
+
         return Inertia::render('bank-and-cheque/bank-accounts/show-bank-account-page', [
             'account' => $bankAccount,
         ]);
@@ -65,6 +112,8 @@ class BankAccountController extends Controller
 
     public function edit(BankAccount $bankAccount)
     {
+        $bankAccount->load('account');
+
         return Inertia::render('bank-and-cheque/bank-accounts/bank-account-form-page', [
             'account' => $bankAccount,
         ]);
@@ -73,6 +122,10 @@ class BankAccountController extends Controller
     public function update(Request $request, BankAccount $bankAccount)
     {
         $data = $request->validate([
+            // account layer
+            'name' => 'nullable|string|max:255',
+
+            // bank layer
             'bank_name' => 'required|string|max:255',
             'branch_name' => 'nullable|string|max:255',
             'account_number' => "required|string|unique:bank_accounts,account_number,{$bankAccount->id}",
@@ -81,7 +134,22 @@ class BankAccountController extends Controller
             'routing_number' => 'nullable|string|max:50',
         ]);
 
-        $bankAccount->update($data);
+        DB::transaction(function () use ($data, $bankAccount) {
+
+            $bankAccount->update([
+                'bank_name' => $data['bank_name'],
+                'branch_name' => $data['branch_name'] ?? null,
+                'account_number' => $data['account_number'],
+                'iban' => $data['iban'] ?? null,
+                'swift_code' => $data['swift_code'] ?? null,
+                'routing_number' => $data['routing_number'] ?? null,
+            ]);
+
+            $bankAccount->account?->update([
+                'name' => $data['name'] ?? $data['bank_name'],
+                'account_number' => $data['account_number'],
+            ]);
+        });
 
         return redirect()
             ->route('bank-accounts.index')
@@ -90,7 +158,10 @@ class BankAccountController extends Controller
 
     public function destroy(BankAccount $bankAccount)
     {
-        $bankAccount->delete();
+        DB::transaction(function () use ($bankAccount) {
+            $bankAccount->account?->delete();
+            $bankAccount->delete();
+        });
 
         return redirect()
             ->route('bank-accounts.index')

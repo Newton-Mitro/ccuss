@@ -19,8 +19,8 @@ return new class extends Migration {
             $table->string('phone', 50)->nullable();
             $table->string('email', 100)->nullable();
             $table->enum('identification_type', [
-                'nid',
-                'brn',
+                'national_identification_number',
+                'birth_registration_number',
                 'registration_no',
                 'passport',
                 'driving_license'
@@ -38,6 +38,7 @@ return new class extends Migration {
 
             $table->enum('kyc_status', ['pending', 'verified', 'rejected'])->default('pending');
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('customer_addresses', function (Blueprint $table) {
@@ -53,6 +54,7 @@ return new class extends Migration {
             $table->string('country', 150)->default('Bangladesh');
             $table->enum('type', ['current', 'permanent', 'mailing', 'work', 'registered', 'other']);
             $table->timestamps();
+            $table->softDeletes();
 
             // One address per type per customer
             $table->unique(['customer_id', 'type'], 'uq_customer_address_type');
@@ -93,6 +95,7 @@ return new class extends Migration {
             $table->timestamp('verified_at')->nullable();
             $table->text('remarks')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('kyc_profiles', function (Blueprint $table) {
@@ -101,13 +104,14 @@ return new class extends Migration {
             $table->enum('kyc_level', ['basic', 'full', 'enhanced'])->default('basic');
             $table->enum('risk_level', ['low', 'medium', 'high'])->default('low');
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('kyc_documents', function (Blueprint $table) {
             $table->id();
             $table->foreignId('customer_id')->constrained();
             $table->enum('document_type', [
-                'nid',
+                'national_identification_number',
                 'smart_nid',
                 'passport',
                 'driving_license',
@@ -147,6 +151,7 @@ return new class extends Migration {
             $table->timestamp('verified_at')->nullable();
             $table->text('remarks')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('customer_introducers', function (Blueprint $table) {
@@ -179,6 +184,7 @@ return new class extends Migration {
                 'uq_customer_introducer'
             );
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

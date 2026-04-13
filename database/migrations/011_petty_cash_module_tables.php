@@ -17,6 +17,7 @@ return new class extends Migration {
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('petty_cash_advances', function (Blueprint $table) {
@@ -31,6 +32,7 @@ return new class extends Migration {
             $table->timestamp('settled_at')->nullable();
             $table->text('remarks')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

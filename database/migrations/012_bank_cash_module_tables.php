@@ -13,6 +13,7 @@ return new class extends Migration {
         // ------------------------
         Schema::create('bank_accounts', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('account_id')->nullable()->constrained()->nullOnDelete();
             $table->string('bank_name');
             $table->string('branch_name')->nullable();
             $table->string('account_number')->unique();

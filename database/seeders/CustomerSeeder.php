@@ -130,7 +130,7 @@ class CustomerSeeder extends Seeder
                     'mime' => 'image/' . $signatureExt,
                 ]);
 
-                KycDocument::factory()->for($customer)->type('nid')->create([
+                KycDocument::factory()->for($customer)->type('national_identification_number')->create([
                     'file_name' => $nidFileName,
                     'file_path' => "{$basePath}/{$nidFileName}",
                     'mime' => 'image/' . $nidExt,

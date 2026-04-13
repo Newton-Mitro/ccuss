@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->string('description')->nullable();
             $table->boolean('for_admin')->default(false);
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('roles', function (Blueprint $table) {
@@ -24,6 +25,7 @@ return new class extends Migration {
             $table->string('slug')->unique();
             $table->string('description')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

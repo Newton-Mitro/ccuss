@@ -47,9 +47,13 @@ docker compose -f docker-compose.prod.yml up -d --build
 docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build
 docker exec -it union_banking_app sh
 docker compose exec union_banking_app php artisan key:generate
+
 docker exec -it union_banking_app php artisan migrate:fresh
 docker exec -it union_banking_app php artisan db:seed
 docker exec -it union_banking_app php artisan storage:link
+docker exec -it union_banking_app chown -R www-data:www-data storage bootstrap/cache
+docker exec -it union_banking_app chmod -R 775 storage bootstrap/cache
+
 docker compose exec union_banking_mysql mysql -u union_banking_user -p
 docker exec -it union_banking_app php artisan optimize:clear
 docker exec -it union_banking_app composer dump-autoload

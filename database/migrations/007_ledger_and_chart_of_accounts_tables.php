@@ -13,6 +13,7 @@ return new class extends Migration {
             $table->foreignId('organization_id')->constrained();
             $table->foreignId('fiscal_period_id')->constrained();
             $table->timestamp('closed_at');
+            $table->softDeletes();
         });
 
         Schema::create('ledger_accounts', function (Blueprint $table) {
@@ -28,6 +29,7 @@ return new class extends Migration {
             $table->boolean('is_leaf')->default(true);
             $table->foreignId('parent_id')->nullable()->constrained('ledger_accounts')->nullOnDelete();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('ledger_account_balances', function (Blueprint $table) {
@@ -40,6 +42,7 @@ return new class extends Migration {
             $table->decimal('credit_total', 18, 2)->default(0);
             $table->decimal('closing_balance', 18, 2)->default(0);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

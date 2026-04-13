@@ -148,8 +148,8 @@ export default function KycDocumentsIndex() {
                                     <td className="px-2 py-1">
                                         {i.customer?.name ?? '—'}
                                     </td>
-                                    <td className="px-2 py-1">
-                                        {i.document_type}
+                                    <td className="px-2 py-1 capitalize">
+                                        {i.document_type.replace(/_/g, ' ')}
                                     </td>
                                     <td className="px-2 py-1">
                                         <Badge text={i.verification_status} />

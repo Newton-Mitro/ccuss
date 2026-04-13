@@ -31,7 +31,7 @@ class CustomerFactory extends Factory
 
         $prefix = $type === 'individual' ? 'IND' : 'ORG';
 
-        $individualIds = ['nid', 'brn', 'passport', 'driving_license'];
+        $individualIds = ['national_identification_number', 'birth_registration_number', 'passport', 'driving_license'];
         $organizationIds = ['registration_no'];
 
         // Pick a random organization and branch
@@ -72,7 +72,7 @@ class CustomerFactory extends Factory
             'customer_no' => 'IND-' . fake()->unique()->numberBetween(1, 99999),
             'dob' => fake()->dateTimeBetween('-65 years', '-18 years')->format('Y-m-d'),
             'religion' => fake()->randomElement(['christianity', 'islam', 'hinduism', 'buddhism', 'other']),
-            'identification_type' => fake()->randomElement(['nid', 'brn', 'passport', 'driving_license']),
+            'identification_type' => fake()->randomElement(['national_identification_number', 'birth_registration_number', 'passport', 'driving_license']),
         ]);
     }
 
@@ -85,7 +85,7 @@ class CustomerFactory extends Factory
             'customer_no' => 'IND-' . fake()->unique()->numberBetween(1, 99999),
             'dob' => fake()->dateTimeBetween('-65 years', '-18 years')->format('Y-m-d'),
             'religion' => fake()->randomElement(['christianity', 'islam', 'hinduism', 'buddhism', 'other']),
-            'identification_type' => fake()->randomElement(['nid', 'brn', 'passport', 'driving_license']),
+            'identification_type' => fake()->randomElement(['national_identification_number', 'birth_registration_number', 'passport', 'driving_license']),
         ]);
     }
 

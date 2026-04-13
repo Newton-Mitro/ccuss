@@ -1,7 +1,7 @@
 export const documentTypes = [
     {
         label: 'NID',
-        value: 'nid',
+        value: 'national_identification_number',
     },
     {
         label: 'Smart NID',

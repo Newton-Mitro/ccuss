@@ -20,6 +20,7 @@ return new class extends Migration {
             $table->decimal('balance', 18, 2)->default(0); // central balance
             $table->enum('status', ['pending', 'active', 'dormant', 'frozen', 'closed'])->default('pending');
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('account_holders', function (Blueprint $table) {
@@ -31,6 +32,7 @@ return new class extends Migration {
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('account_nominees', function (Blueprint $table) {
@@ -44,6 +46,7 @@ return new class extends Migration {
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('account_balances', function (Blueprint $table) {
@@ -56,6 +59,7 @@ return new class extends Migration {
             $table->decimal('credit_total', 18, 2)->default(0);
             $table->decimal('closing_balance', 18, 2)->default(0);
             $table->timestamps();
+            $table->softDeletes();
         });
 
         // daily provisioning of interest and monthly post to gl account
@@ -67,6 +71,7 @@ return new class extends Migration {
             $table->boolean('is_posted')->default(false);
             // $table->foreignId('deposit_transaction_id')->nullable()->constrained('deposit_transactions')->nullOnDelete();
             $table->timestamps();
+            $table->softDeletes();
             $table->unique(['account_id', 'accrual_date']);
         });
 
@@ -80,6 +85,7 @@ return new class extends Migration {
             // $table->foreignId('deposit_transaction_id')->nullable()->constrained('deposit_transactions')->nullOnDelete();
             $table->text('remarks')->nullable();
             $table->timestamps();
+            $table->softDeletes();
             $table->unique(['account_id', 'penalty_date', 'penalty_type'], 'dep_penalty_unique');
         });
 
@@ -94,6 +100,7 @@ return new class extends Migration {
             // $table->foreignId('paid_transaction_id')->nullable()->constrained('deposit_transactions')->nullOnDelete();
             $table->text('remarks')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
 
     }
