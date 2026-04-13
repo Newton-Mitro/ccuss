@@ -84,7 +84,7 @@ export function SidebarMenuItem({
 
     /** Tailwind classes for container */
     const containerClasses = cn(
-        'block w-full rounded-lg text-sm transition-colors duration-200',
+        'block w-full rounded-lg text-sm transition-all duration-200 hover:scale-105',
         sidebarOpen ? 'px-0' : '',
         isActive
             ? isSelfActive

@@ -28,9 +28,7 @@ import { Breadcrumbs } from '../components/breadcrumbs';
 import { SidebarMenuItem } from '../components/sidebar-menu-item';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { sidebarMenu } from '../data/menus';
-import { sidebarMenuPermissions } from '../data/permissions';
 import { useAppearance } from '../hooks/use-appearance';
-import { filterMenuByPermission } from '../lib/filter_menu_by_permission';
 import { edit } from '../routes/profile';
 import { BreadcrumbItem, SharedData, SidebarItem } from '../types';
 
@@ -144,10 +142,6 @@ export default function CustomAuthLayout({
         router.post(logout(), {}, { preserveScroll: false });
     };
 
-    const permissionFilteredMenu = filterMenuByPermission(
-        sidebarMenu,
-        sidebarMenuPermissions,
-    );
     /* ------------------------------------------------------------------
      * Sidebar search filter
      * ------------------------------------------------------------------ */
@@ -257,7 +251,7 @@ export default function CustomAuthLayout({
                     ref={sidebarScrollRef}
                     className="flex-1 overflow-y-auto px-2 pb-4" // flex-1 takes remaining space
                 >
-                    <ul className="space-y-0">
+                    <ul className="space-y-0 transition-all duration-300 ease-in-out">
                         {filteredMenu.map((item, index) => (
                             <SidebarMenuItem
                                 key={`${item.name}-${index}`}
