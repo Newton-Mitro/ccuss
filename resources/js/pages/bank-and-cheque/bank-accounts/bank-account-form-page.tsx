@@ -3,37 +3,38 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { Head, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
-import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 
-const BankAccountForm = ({ account, banks, branches }) => {
+const BankAccountForm = ({ account }) => {
     useFlashToastHandler();
 
     const isEdit = !!account;
+
     const handleBack = () => window.history.back();
 
     const { data, setData, post, put, processing, errors } = useForm({
-        bank_id: account?.bank_id || '',
-        bank_branch_id: account?.bank_branch_id || '',
-        account_name: account?.account_name || '',
+        bank_name: account?.bank_name || '',
+        branch_name: account?.branch_name || '',
         account_number: account?.account_number || '',
         iban: account?.iban || '',
-        balance: account?.balance || 0,
-        currency: account?.currency || 'BDT',
-        status: account?.status || 'active',
+        swift_code: account?.swift_code || '',
+        routing_number: account?.routing_number || '',
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
         if (isEdit) {
-            put(`/bank-accounts/${account.id}`, { preserveScroll: true });
+            put(`/bank-accounts/${account.id}`, {
+                preserveScroll: true,
+            });
         } else {
-            post('/bank-accounts', { preserveScroll: true });
+            post('/bank-accounts', {
+                preserveScroll: true,
+            });
         }
     };
 
@@ -48,7 +49,7 @@ const BankAccountForm = ({ account, banks, branches }) => {
                 <HeadingSmall
                     title={
                         isEdit
-                            ? `Edit: ${account?.account_name}`
+                            ? `Edit: ${account?.bank_name}`
                             : 'Create Bank Account'
                     }
                     description="Manage bank account configuration."
@@ -68,19 +69,33 @@ const BankAccountForm = ({ account, banks, branches }) => {
                 onSubmit={handleSubmit}
                 className="space-y-6 rounded-md border bg-card p-6"
             >
-                {/* ---------------- ACCOUNT INFO ---------------- */}
+                {/* ---------------- BANK INFO ---------------- */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                        <Label className="text-xs">Account Name</Label>
+                        <Label className="text-xs">Bank Name</Label>
                         <Input
-                            value={data.account_name}
+                            value={data.bank_name}
                             onChange={(e) =>
-                                setData('account_name', e.target.value)
+                                setData('bank_name', e.target.value)
                             }
                         />
-                        <InputError message={errors.account_name} />
+                        <InputError message={errors.bank_name} />
                     </div>
 
+                    <div>
+                        <Label className="text-xs">Branch Name</Label>
+                        <Input
+                            value={data.branch_name}
+                            onChange={(e) =>
+                                setData('branch_name', e.target.value)
+                            }
+                        />
+                        <InputError message={errors.branch_name} />
+                    </div>
+                </div>
+
+                {/* ---------------- ACCOUNT INFO ---------------- */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <Label className="text-xs">Account Number</Label>
                         <Input
@@ -98,72 +113,34 @@ const BankAccountForm = ({ account, banks, branches }) => {
                             value={data.iban}
                             onChange={(e) => setData('iban', e.target.value)}
                         />
+                        <InputError message={errors.iban} />
                     </div>
                 </div>
 
-                {/* ---------------- BANK SELECTION ---------------- */}
+                {/* ---------------- FINANCIAL IDENTIFIERS ---------------- */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                        <Label className="text-xs">Bank</Label>
-                        <Select
-                            value={data.bank_id?.toString()}
-                            onChange={(val) => setData('bank_id', val)}
-                            options={banks.map((bank) => ({
-                                value: bank.id.toString(),
-                                label: bank.name,
-                            }))}
-                        />
-
-                        <InputError message={errors.bank_id} />
-                    </div>
-
-                    <div>
-                        <Label className="text-xs">Branch</Label>
-                        <Select
-                            value={data.bank_branch_id?.toString()}
-                            onChange={(val) => setData('bank_branch_id', val)}
-                            options={branches.map((branch) => ({
-                                value: branch.id.toString(),
-                                label: branch.name,
-                            }))}
-                        />
-                    </div>
-                </div>
-
-                {/* ---------------- FINANCIAL ---------------- */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
-                        <Label className="text-xs">Opening Balance</Label>
+                        <Label className="text-xs">SWIFT Code</Label>
                         <Input
-                            type="number"
-                            value={data.balance}
-                            onChange={(e) => setData('balance', e.target.value)}
+                            value={data.swift_code}
+                            onChange={(e) =>
+                                setData('swift_code', e.target.value)
+                            }
                         />
+                        <InputError message={errors.swift_code} />
                     </div>
 
                     <div>
-                        <Label className="text-xs">Currency</Label>
-                        <Select
-                            value={data.currency}
-                            onChange={(val) => setData('currency', val)}
-                            options={[
-                                { value: 'BDT', label: 'BDT' },
-                                { value: 'USD', label: 'USD' },
-                            ]}
+                        <Label className="text-xs">Routing Number</Label>
+                        <Input
+                            value={data.routing_number}
+                            onChange={(e) =>
+                                setData('routing_number', e.target.value)
+                            }
                         />
+                        <InputError message={errors.routing_number} />
                     </div>
                 </div>
-
-                {/* ---------------- STATUS ---------------- */}
-                <ToggleGroup
-                    type="single"
-                    value={data.status}
-                    onValueChange={(val) => val && setData('status', val)}
-                >
-                    <ToggleGroupItem value="active">Active</ToggleGroupItem>
-                    <ToggleGroupItem value="inactive">Inactive</ToggleGroupItem>
-                    <ToggleGroupItem value="closed">Closed</ToggleGroupItem>
-                </ToggleGroup>
 
                 {/* ---------------- SUBMIT ---------------- */}
                 <div className="flex justify-end">

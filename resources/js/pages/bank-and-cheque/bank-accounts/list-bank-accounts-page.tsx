@@ -2,34 +2,26 @@ import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
+
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
 import { Input } from '../../../components/ui/input';
-import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem, SharedData } from '../../../types';
-import {
-    Bank,
-    BankAccount,
-    BankBranch,
-} from '../../../types/bank_and_cheques_module';
-import { bankAccountStatuses } from './data/bankAccountStatuses';
+import { BankAccount } from '../../../types/bank_and_cheques_module';
 
 interface BankAccountPageProps extends SharedData {
     accounts: {
         data: BankAccount[];
         links: { url: string | null; label: string; active: boolean }[];
     };
-    banks: Bank[];
-    branches: BankBranch[];
     filters: Record<string, string>;
 }
 
 export default function Index() {
-    const { accounts, banks, branches, filters } =
-        usePage<BankAccountPageProps>().props;
+    const { accounts, filters } = usePage<BankAccountPageProps>().props;
 
     useFlashToastHandler();
 
@@ -41,9 +33,6 @@ export default function Index() {
         processing,
     } = useForm({
         search: filters.search || '',
-        bank_id: filters.bank_id || '',
-        branch_id: filters.branch_id || '',
-        status: filters.status || '',
         per_page: Number(filters.per_page) || 10,
         page: Number(filters.page) || 1,
     });
@@ -55,14 +44,7 @@ export default function Index() {
     useEffect(() => {
         const delay = setTimeout(handleSearch, 400);
         return () => clearTimeout(delay);
-    }, [
-        data.search,
-        data.bank_id,
-        data.branch_id,
-        data.status,
-        data.per_page,
-        data.page,
-    ]);
+    }, [data.search, data.per_page, data.page]);
 
     const handleDelete = (id: number, name: string) => {
         appSwal
@@ -87,21 +69,18 @@ export default function Index() {
         { title: 'Bank Accounts', href: '/bank-accounts' },
     ];
 
-    // Filter branches based on selected bank
-    const filteredBranches = data.bank_id
-        ? branches.filter((b) => b.bank_id.toString() === data.bank_id)
-        : branches;
-
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Bank Accounts" />
+
             <div className="space-y-4 text-foreground">
                 {/* Header */}
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
                         title="Bank Accounts"
-                        description="Manage bank accounts and balances"
+                        description="Manage bank accounts"
                     />
+
                     <Link
                         href={route('bank-accounts.create')}
                         className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
@@ -115,55 +94,13 @@ export default function Index() {
                     <div className="w-60">
                         <Input
                             type="text"
-                            placeholder="Search account name/number..."
+                            placeholder="Search bank / account number..."
                             value={data.search}
                             onChange={(e) => {
                                 setData('search', e.target.value);
                                 setData('page', 1);
                             }}
                         />
-                    </div>
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                        <div className="w-44">
-                            <Select
-                                value={data.bank_id}
-                                onChange={(value) => {
-                                    setData('bank_id', value);
-                                    setData('branch_id', '');
-                                    setData('page', 1);
-                                }}
-                                options={banks.map((b) => ({
-                                    value: b.id.toString(),
-                                    label: b.name,
-                                }))}
-                            />
-                        </div>
-
-                        <div className="w-44">
-                            <Select
-                                value={data.branch_id}
-                                onChange={(value) => {
-                                    setData('branch_id', value);
-                                    setData('page', 1);
-                                }}
-                                disabled={!data.bank_id}
-                                options={filteredBranches.map((b) => ({
-                                    value: b.id.toString(),
-                                    label: b.name,
-                                }))}
-                            />
-                        </div>
-
-                        <div className="w-36">
-                            <Select
-                                value={data.status}
-                                onChange={(value) => {
-                                    setData('status', value);
-                                    setData('page', 1);
-                                }}
-                                options={bankAccountStatuses}
-                            />
-                        </div>
                     </div>
                 </div>
 
@@ -173,12 +110,12 @@ export default function Index() {
                         <thead className="sticky top-0 bg-muted">
                             <tr>
                                 {[
-                                    'Account Name',
-                                    'Account Number',
                                     'Bank',
                                     'Branch',
-                                    'Currency',
-                                    'Status',
+                                    'Account Number',
+                                    'IBAN',
+                                    'SWIFT',
+                                    'Routing',
                                     'Actions',
                                 ].map((header) => (
                                     <th
@@ -190,6 +127,7 @@ export default function Index() {
                                 ))}
                             </tr>
                         </thead>
+
                         <tbody>
                             {accounts.data.length > 0 ? (
                                 accounts.data.map((a) => (
@@ -198,24 +136,29 @@ export default function Index() {
                                         className="border-b even:bg-muted/30"
                                     >
                                         <td className="px-2 py-1">
-                                            {a.account_name}
-                                        </td>
-                                        <td className="px-2 py-1">
-                                            {a.account_number}
-                                        </td>
-                                        <td className="px-2 py-1">
-                                            {a.bank?.name}
-                                        </td>
-                                        <td className="px-2 py-1">
-                                            {a.branch?.name || '-'}
+                                            {a.bank_name}
                                         </td>
 
                                         <td className="px-2 py-1">
-                                            {a.currency}
+                                            {a.branch_name || '-'}
                                         </td>
+
                                         <td className="px-2 py-1">
-                                            {a.status}
+                                            {a.account_number}
                                         </td>
+
+                                        <td className="px-2 py-1">
+                                            {a.iban || '-'}
+                                        </td>
+
+                                        <td className="px-2 py-1">
+                                            {a.swift_code || '-'}
+                                        </td>
+
+                                        <td className="px-2 py-1">
+                                            {a.routing_number || '-'}
+                                        </td>
+
                                         <td className="flex space-x-2 px-2 py-1">
                                             <Link
                                                 href={route(
@@ -226,12 +169,13 @@ export default function Index() {
                                             >
                                                 <Pencil className="h-5 w-5" />
                                             </Link>
+
                                             <button
                                                 disabled={processing}
                                                 onClick={() =>
                                                     handleDelete(
                                                         a.id,
-                                                        a.account_name,
+                                                        a.bank_name,
                                                     )
                                                 }
                                                 className="text-destructive hover:text-destructive/80 disabled:opacity-50"
@@ -244,7 +188,7 @@ export default function Index() {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={8}
+                                        colSpan={7}
                                         className="px-4 py-6 text-center text-muted-foreground"
                                     >
                                         No bank accounts found.

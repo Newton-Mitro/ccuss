@@ -1,29 +1,11 @@
 <?php
 
 
-use App\BankAndChequeModule\Controllers\BankAccountController;
-use App\BankAndChequeModule\Controllers\BankController;
+use App\BankModule\Controllers\BankAccountController;
 use Illuminate\Support\Facades\Route;
 
 
 Route::middleware(['auth', 'verified'])->group(function () {
-
-    // ------------------------
-    // Banks
-    // ------------------------
-    Route::prefix('banks')->name('banks.')->group(function () {
-        Route::get('/', [BankController::class, 'index'])->name('index');
-        Route::get('/create', [BankController::class, 'create'])->name('create');
-        Route::post('/', [BankController::class, 'store'])->name('store');
-        Route::get('/{bank}/edit', [BankController::class, 'edit'])->name('edit');
-        Route::get('/{bank}', [BankController::class, 'show'])->name('show');
-        Route::put('/{bank}', [BankController::class, 'update'])->name('update');
-        Route::delete('/{bank}', [BankController::class, 'destroy'])->name('destroy');
-    });
-
-    // ------------------------
-    // Bank Accounts
-    // ------------------------
     Route::prefix('bank-accounts')->name('bank-accounts.')->group(function () {
         Route::get('/', [BankAccountController::class, 'index'])->name('index');
         Route::get('/create', [BankAccountController::class, 'create'])->name('create');

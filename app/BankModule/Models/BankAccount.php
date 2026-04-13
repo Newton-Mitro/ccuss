@@ -1,9 +1,7 @@
 <?php
 
-namespace App\BankAndChequeModule\Models;
+namespace App\BankModule\Models;
 
-use App\ChequeManagement\Models\BankCheque;
-use App\SystemAdministration\Models\User;
 use App\SystemAdministration\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,14 +12,12 @@ class BankAccount extends Model
     use HasFactory, SoftDeletes, Auditable;
 
     protected $fillable = [
-        'bank_id',
-        'bank_branch_id',
-        'account_name',
+        'bank_name',
+        'branch_name',
         'account_number',
         'iban',
-        'status',
-        'created_by',
-        'approved_by',
+        'swift_code',
+        'routing_number',
     ];
 
     protected $appends = [
@@ -30,43 +26,34 @@ class BankAccount extends Model
         'account_type_class',
     ];
 
-    public function getDisplayNameAttribute()
+    // ------------------------
+    // Accessors
+    // ------------------------
+
+    public function getDisplayNameAttribute(): string
     {
-        return "{$this->bank?->name} - {$this->account_number}";
+        return "{$this->bank_name} - {$this->account_number}";
     }
 
-    public function getAccountTypeLabelAttribute()
+    public function getAccountTypeLabelAttribute(): string
     {
         return 'Bank Account';
     }
 
-    public function getAccountTypeClassAttribute()
+    public function getAccountTypeClassAttribute(): string
     {
         return self::class;
     }
 
-    public function bank()
-    {
-        return $this->belongsTo(Bank::class);
-    }
+    // ------------------------
+    // Relationships
+    // ------------------------
 
-    public function branch()
+    /**
+     * Bank reconciliations for this account
+     */
+    public function reconciliations()
     {
-        return $this->belongsTo(BankBranch::class, 'bank_branch_id');
-    }
-
-    public function createdBy()
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function approvedBy()
-    {
-        return $this->belongsTo(User::class, 'approved_by');
-    }
-
-    public function cheques()
-    {
-        return $this->hasMany(BankCheque::class);
+        return $this->hasMany(BankReconciliation::class);
     }
 }
