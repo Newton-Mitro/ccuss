@@ -13,8 +13,6 @@ return new class extends Migration {
             $table->date('business_date');
             $table->timestamp('opened_at')->nullable();
             $table->timestamp('closed_at')->nullable();
-            $table->foreignId('opened_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('closed_by')->nullable()->constrained('users')->nullOnDelete();
             $table->enum('status', ['open', 'closed'])->default('open');
             $table->timestamps();
             $table->unique(['branch_id', 'business_date']);
@@ -32,19 +30,21 @@ return new class extends Migration {
         Schema::create('vaults', function (Blueprint $table) {
             $table->id();
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('account_id')->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->decimal('current_balance', 18, 2)->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
 
-        // Vault Denominations
+        // sum(denominations) == account.balance
         Schema::create('vault_denominations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('vault_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('account_id')->constrained()->cascadeOnDelete();
             $table->foreignId('denomination_id')->constrained()->cascadeOnDelete();
             $table->integer('count')->default(0);
             $table->timestamps();
+            $table->unique(['account_id', 'denomination_id']);
         });
 
         // Tellers
@@ -52,9 +52,9 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete(); // role: teller
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('account_id')->constrained()->cascadeOnDelete();
             $table->string('code', 20)->unique();
             $table->string('name');
-            $table->decimal('current_balance', 18, 2)->default(0);
             $table->decimal('max_cash_limit', 18, 2)->default(0);
             $table->decimal('max_transaction_limit', 18, 2)->default(0);
             $table->boolean('is_active')->default(true);
@@ -65,15 +65,28 @@ return new class extends Migration {
         Schema::create('teller_sessions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('teller_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             $table->foreignId('branch_day_id')->constrained()->cascadeOnDelete();
-            $table->decimal('opening_cash', 18, 2)->nullable();
-            $table->decimal('closing_cash', 18, 2)->nullable();
-            $table->decimal('current_balance', 18, 2)->default(0);
+            // 🔥 Critical: cash account used in this session
+            $table->foreignId('cash_account_id')->constrained('accounts')->cascadeOnDelete();
+            // Session lifecycle
             $table->timestamp('opened_at');
             $table->timestamp('closed_at')->nullable();
-            $table->enum('status', ['open', 'closed'])->default('open');
-            $table->foreignId('adjustment_voucher_id')->nullable();
+            $table->enum('status', ['open', 'closed', 'suspended'])->default('open');
+            // 💰 Cash tracking (SNAPSHOT VALUES)
+            $table->decimal('opening_cash', 18, 2)->default(0);
+            $table->decimal('closing_cash', 18, 2)->nullable();
+            // 🧮 System-calculated (from ledger)
+            $table->decimal('expected_balance', 18, 2)->nullable();
+            // ⚖️ Difference (closing - expected)
+            $table->decimal('difference', 18, 2)->nullable();
+            // 🔁 Adjustment handling
+            $table->foreignId('adjustment_transaction_id')->nullable()->constrained('transactions')->nullOnDelete();
+            // 📝 Optional notes
+            $table->text('remarks')->nullable();
             $table->timestamps();
+            // 🚫 One active session per teller
+            $table->unique(['teller_id', 'status'], 'unique_open_session_per_teller')->where('status', 'open');
         });
     }
 

@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             // polymorphic link
             $table->morphs('accountable');
+            $table->string('account_number')->unique();
             $table->string('name')->nullable();
             $table->enum('type', ['bank', 'deposit', 'loan', 'petty_cash', 'vendor', 'vault', 'teller', 'customer']); // optional but useful
             $table->decimal('balance', 18, 2)->default(0); // central balance
@@ -99,9 +100,9 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('account_balances');
+        Schema::dropIfExists('accounts');
         Schema::dropIfExists('account_nominees');
-        Schema::dropIfExists('account_holders');
+        Schema::dropIfExists('account_balances');
         Schema::dropIfExists('deposit_interest_accruals');
         Schema::dropIfExists('deposit_penalties');
         Schema::dropIfExists('deposit_account_fees');

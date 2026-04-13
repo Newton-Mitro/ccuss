@@ -13,29 +13,24 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class BranchDay extends Model
 {
     use HasFactory, Auditable;
+
     protected $fillable = [
         'branch_id',
         'business_date',
         'opened_at',
         'closed_at',
-        'opened_by',
-        'closed_by',
         'status'
+    ];
+
+    protected $casts = [
+        'business_date' => 'date',
+        'opened_at' => 'datetime',
+        'closed_at' => 'datetime',
     ];
 
     public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);
-    }
-
-    public function openedBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'opened_by');
-    }
-
-    public function closedBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'closed_by');
     }
 
     public function tellerSessions(): HasMany

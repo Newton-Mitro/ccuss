@@ -2,78 +2,61 @@
 
 namespace App\BranchTreasuryModule\Models;
 
+use App\SubledgerModule\Models\Account;
+use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Traits\Auditable;
+use App\VoucherEntryModule\Models\VoucherEntry;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TellerSession extends Model
 {
     use HasFactory, Auditable;
+
     protected $fillable = [
         'teller_id',
+        'branch_id',
         'branch_day_id',
-        'opening_cash',
-        'closing_cash',
+        'cash_account_id',
         'opened_at',
         'closed_at',
-        'status'
+        'status',
+        'opening_cash',
+        'closing_cash',
+        'expected_balance',
+        'difference',
+        'adjustment_voucher_id',
+        'remarks'
     ];
 
-    /**
-     * Teller linked to this session
-     */
+    protected $casts = [
+        'opened_at' => 'datetime',
+        'closed_at' => 'datetime',
+    ];
+
     public function teller(): BelongsTo
     {
         return $this->belongsTo(Teller::class);
     }
 
-    /**
-     * Branch day linked to this session
-     */
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
     public function branchDay(): BelongsTo
     {
         return $this->belongsTo(BranchDay::class);
     }
 
-    /**
-     * All cash voucher_entries for this session
-     */
-    public function cashTransactions(): HasMany
+    public function cashAccount(): BelongsTo
     {
-        return $this->hasMany(CashTransaction::class);
+        return $this->belongsTo(Account::class, 'cash_account_id');
     }
 
-    /**
-     * All cash adjustments for this session
-     */
-    public function cashAdjustments(): HasMany
+    public function adjustmentTransaction(): BelongsTo
     {
-        return $this->hasMany(CashAdjustment::class);
-    }
-
-    /**
-     * All cash balancings for this session
-     */
-    public function cashBalancings(): HasMany
-    {
-        return $this->hasMany(CashBalancing::class);
-    }
-
-    /**
-     * All audit logs for this session
-     */
-    public function cashAuditLogs(): HasMany
-    {
-        return $this->hasMany(CashAuditLog::class);
-    }
-
-    /**
-     * Vault transfers involving this session
-     */
-    public function vaultTransfers(): HasMany
-    {
-        return $this->hasMany(TellerVaultTransfer::class);
+        return $this->belongsTo(VoucherEntry::class, 'adjustment_voucher_id');
     }
 }

@@ -8,13 +8,6 @@ export const bankModuleMenu: SidebarItem[] = [
         permission: ['bank.view'],
         children: [
             {
-                name: 'Banks',
-                icon: <i className="fa-solid fa-building-columns" />,
-                permission: ['banks.view'],
-                path: '/banks',
-                match_path: 'banks',
-            },
-            {
                 name: 'Bank Accounts',
                 icon: <i className="fa-solid fa-wallet" />,
                 permission: ['bank_accounts.view'],

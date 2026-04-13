@@ -16,6 +16,7 @@ class BranchDayController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
+
             $query->where(function ($q) use ($search) {
                 $q->where('business_date', 'like', "%{$search}%")
                     ->orWhereHas('branch', function ($b) use ($search) {
@@ -52,6 +53,7 @@ class BranchDayController extends Controller
     public function create()
     {
         $authUserBranch = auth()->user()->branch;
+
         return Inertia::render('branch-cash-and-treasury/branch-days/open_branch_day_page', [
             'business_date' => now()->toDateString(),
             'branch' => $authUserBranch
@@ -66,32 +68,56 @@ class BranchDayController extends Controller
 
         $branchId = auth()->user()->branch_id;
 
-        // Check if there is any open branch day
+        // 🚫 Only one open branch day per branch
         $openBranchDay = BranchDay::where('branch_id', $branchId)
             ->where('status', 'open')
             ->first();
 
         if ($openBranchDay) {
-            return back()->withErrors('There is already an open branch day on ' . $openBranchDay->business_date);
+            return back()->withErrors([
+                'business_date' => 'There is already an open branch day on ' . $openBranchDay->business_date
+            ]);
         }
 
-        // Create the new branch day
+        // 🚫 Prevent duplicate business date (extra safety beyond DB unique)
+        $exists = BranchDay::where('branch_id', $branchId)
+            ->where('business_date', $request->business_date)
+            ->exists();
+
+        if ($exists) {
+            return back()->withErrors([
+                'business_date' => 'Branch day already exists for this date'
+            ]);
+        }
+
         BranchDay::create([
             'branch_id' => $branchId,
             'business_date' => $request->business_date,
             'opened_at' => now(),
-            'opened_by' => auth()->id(),
             'status' => 'open'
         ]);
 
-        return redirect()->route('branch-days.index')->with('success', 'Branch day opened successfully');
+        return redirect()
+            ->route('branch-days.index')
+            ->with('success', 'Branch day opened successfully');
     }
 
     public function closeBranchDay(BranchDay $branchDay)
     {
+        // 🔐 सुरक्षा: Ensure same branch
+        if ($branchDay->branch_id !== auth()->user()->branch_id) {
+            abort(403);
+        }
+
+        // 🚫 Already closed
+        if ($branchDay->status === 'closed') {
+            return back()->withErrors([
+                'status' => 'Branch day is already closed'
+            ]);
+        }
+
         $branchDay->update([
             'closed_at' => now(),
-            'closed_by' => auth()->id(),
             'status' => 'closed'
         ]);
 
@@ -100,8 +126,18 @@ class BranchDayController extends Controller
 
     public function show(BranchDay $branchDay)
     {
-        $branchDay = $branchDay->load(['branch', 'openedBy', 'closedBy']);
-        $sessions = $branchDay->tellerSessions()->with('teller')->get();
+        // 🔐 Branch isolation
+        if ($branchDay->branch_id !== auth()->user()->branch_id) {
+            abort(403);
+        }
+
+        $branchDay->load('branch');
+
+        $sessions = $branchDay->tellerSessions()
+            ->with('teller')
+            ->latest()
+            ->get();
+
         return Inertia::render('branch-cash-and-treasury/branch-days/branch_day_status_page', [
             'branch_day' => $branchDay,
             'sessions' => $sessions

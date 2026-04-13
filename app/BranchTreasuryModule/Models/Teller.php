@@ -2,6 +2,7 @@
 
 namespace App\BranchTreasuryModule\Models;
 
+use App\SubledgerModule\Models\Account;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\User;
 use App\SystemAdministration\Traits\Auditable;
@@ -13,22 +14,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Teller extends Model
 {
     use HasFactory, Auditable;
-    // ✅ Add new numeric fields to fillable
+
     protected $fillable = [
         'user_id',
         'branch_id',
+        'account_id',
         'code',
         'name',
         'max_cash_limit',
         'max_transaction_limit',
-        'is_active',
-    ];
-
-    // ✅ Cast numeric fields and boolean
-    protected $casts = [
-        'max_cash_limit' => 'float',
-        'max_transaction_limit' => 'float',
-        'is_active' => 'boolean',
+        'is_active'
     ];
 
     public function user(): BelongsTo
@@ -41,13 +36,13 @@ class Teller extends Model
         return $this->belongsTo(Branch::class);
     }
 
+    public function account(): BelongsTo
+    {
+        return $this->belongsTo(Account::class);
+    }
+
     public function sessions(): HasMany
     {
         return $this->hasMany(TellerSession::class);
-    }
-
-    public function limits(): HasMany
-    {
-        return $this->hasMany(TellerLimit::class);
     }
 }
