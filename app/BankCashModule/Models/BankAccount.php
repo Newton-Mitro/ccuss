@@ -1,6 +1,6 @@
 <?php
 
-namespace App\BankModule\Models;
+namespace App\BankCashModule\Models;
 
 use App\SubledgerModule\Models\Account;
 use App\SystemAdministration\Traits\Auditable;

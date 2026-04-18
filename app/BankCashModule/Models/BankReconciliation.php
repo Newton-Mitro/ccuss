@@ -1,6 +1,6 @@
 <?php
 
-namespace App\BankModule\Models;
+namespace App\BankCashModule\Models;
 
 use App\SystemAdministration\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

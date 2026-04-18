@@ -1,5 +1,5 @@
 import { SidebarItem } from '../../types';
-import { bankModuleMenu } from './bankModuleMenu';
+import { bankCashModuleMenu } from './bankCashModuleMenu';
 import { branchCashAndTreasuryMenu } from './branchCashAndTreasuryMenu';
 import { chequeManagementMenu } from './chequeManagementMenu';
 import { customerKycMenu } from './customerKycMenu';
@@ -15,7 +15,7 @@ export const sidebarMenu: SidebarItem[] = [
     ...depositModuleMenu,
     // ...loanManagementMenu,
     ...branchCashAndTreasuryMenu,
-    ...bankModuleMenu,
+    ...bankCashModuleMenu,
     ...pettyCashMenu,
     // ...procurementMenu,
     // ...fixedAssetMenu,

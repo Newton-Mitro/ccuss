@@ -1,7 +1,7 @@
 <?php
 
 
-use App\BankModule\Controllers\BankAccountController;
+use App\BankCashModule\Controllers\BankAccountController;
 use Illuminate\Support\Facades\Route;
 
 

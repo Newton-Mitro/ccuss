@@ -17,7 +17,6 @@ return new class extends Migration {
             $table->string('bank_name');
             $table->string('branch_name')->nullable();
             $table->string('account_number')->unique();
-            $table->string('iban')->nullable();
             $table->string('swift_code')->nullable();
             $table->string('routing_number')->nullable();
             $table->timestamps();

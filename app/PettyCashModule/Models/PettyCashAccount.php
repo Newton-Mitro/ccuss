@@ -2,28 +2,28 @@
 
 namespace App\PettyCashModule\Models;
 
+use App\FinanceAndAccounting\Models\LedgerAccount;
 use App\SystemAdministration\Models\Branch;
-use App\SystemAdministration\Models\User;
 use App\SystemAdministration\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PettyCashAccount extends Model
 {
-    use HasFactory, Auditable;
+    use HasFactory, Auditable, SoftDeletes;
 
     protected $fillable = [
-        'name',
         'branch_id',
-        'current_balance',
+        'name',
+        'upper_limit',
+        'ledger_account_id',
         'status',
-        'created_by',
-        'approved_by',
     ];
 
     protected $casts = [
-        'current_balance' => 'decimal:2',
-        'status' => 'string', // enum handled as string
+        'upper_limit' => 'decimal:2',
+        'status' => 'string',
     ];
 
     /*
@@ -37,18 +37,13 @@ class PettyCashAccount extends Model
         return $this->belongsTo(Branch::class);
     }
 
-    public function createdBy()
+    public function ledgerAccount()
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(LedgerAccount::class);
     }
 
-    public function approvedBy()
+    public function advanceAccounts()
     {
-        return $this->belongsTo(User::class, 'approved_by');
-    }
-
-    public function pettyCashAdvances()
-    {
-        return $this->hasMany(PettyCashAdvance::class);
+        return $this->hasMany(PettyCashAdvanceAccount::class);
     }
 }

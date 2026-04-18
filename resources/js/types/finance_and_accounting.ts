@@ -1,3 +1,5 @@
+import { Timestamped } from './base_types';
+
 // Fiscal Year
 export interface FiscalYear extends Timestamped {
     id: number;

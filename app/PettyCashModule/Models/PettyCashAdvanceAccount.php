@@ -2,33 +2,26 @@
 
 namespace App\PettyCashModule\Models;
 
-use App\PettyCashModule\Models\PettyCashAccount;
+use App\FinanceAndAccounting\Models\LedgerAccount;
 use App\SystemAdministration\Models\User;
 use App\SystemAdministration\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class PettyCashAdvance extends Model
+class PettyCashAdvanceAccount extends Model
 {
-    use HasFactory, Auditable;
+    use HasFactory, Auditable, SoftDeletes;
 
     protected $fillable = [
         'petty_cash_account_id',
         'employee_id',
-        'amount',
-        'advance_date',
-        'purpose',
+        'ledger_account_id',
         'status',
-        'approved_by',
-        'settled_at',
-        'remarks',
     ];
 
     protected $casts = [
-        'amount' => 'decimal:2',
-        'advance_date' => 'date',
-        'settled_at' => 'datetime',
-        'status' => 'string', // enum handled as string
+        'status' => 'string',
     ];
 
     /*
@@ -47,8 +40,8 @@ class PettyCashAdvance extends Model
         return $this->belongsTo(User::class, 'employee_id');
     }
 
-    public function approver()
+    public function ledgerAccount()
     {
-        return $this->belongsTo(User::class, 'approved_by');
+        return $this->belongsTo(LedgerAccount::class);
     }
 }

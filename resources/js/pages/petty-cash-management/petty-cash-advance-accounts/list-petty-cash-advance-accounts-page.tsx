@@ -15,16 +15,15 @@ import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
-import { formatDateTime } from '../../../lib/date_util';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import {
     PettyCashAccount,
-    PettyCashAdvance,
+    PettyCashAdvanceAccount,
 } from '../../../types/petty_cash_module';
 
 interface ListAdvanceExpensesPageProps extends SharedData {
     paginated_data: {
-        data: PettyCashAdvance[];
+        data: PettyCashAdvanceAccount[];
         links: { url: string | null; label: string; active: boolean }[];
     };
     pettyCashAccounts: PettyCashAccount[];
@@ -52,7 +51,7 @@ export default function ListAdvanceExpensesPage() {
     });
 
     const handleSearch = () => {
-        get(route('petty-cash-advances.index'), {
+        get(route('petty-cash-advance-accounts.index'), {
             preserveState: true,
         });
     };
@@ -79,7 +78,7 @@ export default function ListAdvanceExpensesPage() {
             })
             .then((result) => {
                 if (result.isConfirmed) {
-                    destroy(route('petty-cash-advances.destroy', id), {
+                    destroy(route('petty-cash-advance-accounts.destroy', id), {
                         preserveScroll: true,
                         preserveState: true,
                     });
@@ -89,25 +88,25 @@ export default function ListAdvanceExpensesPage() {
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Petty Cash Advances',
-            href: route('petty-cash-advances.index'),
+            title: 'Petty Cash Advance Accounts',
+            href: route('petty-cash-advance-accounts.index'),
         },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Petty Cash Advances" />
+            <Head title="Petty Cash Advance Accounts" />
 
             <div className="space-y-4 text-foreground">
                 {/* Header */}
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
-                        title="Petty Cash Advances"
+                        title="Petty Cash Advance Accounts"
                         description="Manage employee advance petty cash"
                     />
 
                     <Link
-                        href={route('petty-cash-advances.create')}
+                        href={route('petty-cash-advance-accounts.create')}
                         className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                     >
                         <Plus className="h-4 w-4" />
@@ -177,8 +176,6 @@ export default function ListAdvanceExpensesPage() {
                                 {[
                                     'Employee',
                                     'Petty Cash Account',
-                                    'Amount',
-                                    'Advance Date',
                                     'Status',
                                     'Actions',
                                 ].map((h) => (
@@ -207,14 +204,6 @@ export default function ListAdvanceExpensesPage() {
                                             {a.petty_cash_account?.name}
                                         </td>
 
-                                        <td className="px-2 py-1">
-                                            {Number(a.amount).toLocaleString()}
-                                        </td>
-
-                                        <td className="px-2 py-1">
-                                            {formatDateTime(a.advance_date)}
-                                        </td>
-
                                         <td className="px-2 py-1 capitalize">
                                             {a.status}
                                         </td>
@@ -227,7 +216,7 @@ export default function ListAdvanceExpensesPage() {
                                                         <TooltipTrigger asChild>
                                                             <Link
                                                                 href={route(
-                                                                    'petty-cash-advances.show',
+                                                                    'petty-cash-advance-accounts.show',
                                                                     a.id,
                                                                 )}
                                                             >
@@ -244,7 +233,7 @@ export default function ListAdvanceExpensesPage() {
                                                         <TooltipTrigger asChild>
                                                             <Link
                                                                 href={route(
-                                                                    'petty-cash-advances.edit',
+                                                                    'petty-cash-advance-accounts.edit',
                                                                     a.id,
                                                                 )}
                                                             >
@@ -288,7 +277,7 @@ export default function ListAdvanceExpensesPage() {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={6}
+                                        colSpan={4}
                                         className="py-6 text-center text-muted-foreground"
                                     >
                                         No advances found.

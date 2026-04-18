@@ -6,7 +6,6 @@ export interface BankAccount {
 
     account_number: string;
 
-    iban?: string;
     swift_code?: string;
     routing_number?: string;
 

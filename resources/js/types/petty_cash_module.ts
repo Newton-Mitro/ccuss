@@ -1,38 +1,35 @@
+import { Timestamped } from './base_types';
 import { Branch } from './branch';
+import { LedgerAccount } from './finance_and_accounting';
 import { User } from './user';
 
 export interface PettyCashAccount extends Timestamped {
     id: number;
     name: string;
 
-    branch_id: number;
-    created_by?: number | null;
-    approved_by?: number | null;
+    branch_id: number | null;
+    ledger_account_id: number;
 
+    upper_limit: string; // decimal from Laravel
     status: 'active' | 'inactive';
 
     // relations
     branch?: Branch;
-    creator?: User;
-    approver?: User;
-    advances?: PettyCashAdvance[];
+    ledger_account?: LedgerAccount; // replace with LedgerAccount type if available
+    employees?: PettyCashAdvanceAccount[];
 }
 
-export interface PettyCashAdvance extends Timestamped {
+export interface PettyCashAdvanceAccount extends Timestamped {
     id: number;
+
     petty_cash_account_id: number;
     employee_id: number;
+    ledger_account_id: number;
 
-    amount: string; // decimal as string from Laravel
-    advance_date: string; // ISO date string
-    purpose?: string | null;
-    status: 'pending' | 'approved' | 'settled' | 'rejected';
-    approved_by?: number | null;
-    settled_at?: string | null; // ISO datetime string
-    remarks?: string | null;
+    status: 'active' | 'inactive';
 
     // relations
     petty_cash_account?: PettyCashAccount;
     employee?: User;
-    approver?: User;
+    ledger_account?: LedgerAccount;
 }

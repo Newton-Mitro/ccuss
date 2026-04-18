@@ -1,9 +1,9 @@
 <?php
 
-namespace App\BankModule\Controllers;
+namespace App\BankCashModule\Controllers;
 
+use App\BankCashModule\Models\BankAccount;
 use App\Http\Controllers\Controller;
-use App\BankModule\Models\BankAccount;
 use App\SubledgerModule\Models\Account;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -34,7 +34,7 @@ class BankAccountController extends Controller
             ->paginate($request->input('per_page', 10))
             ->withQueryString();
 
-        return Inertia::render('bank-and-cheque/bank-accounts/list-bank-accounts-page', [
+        return Inertia::render('bank-cash/bank-accounts/list-bank-accounts-page', [
             'accounts' => $accounts,
             'filters' => $request->only(['search', 'per_page', 'page']),
         ]);
@@ -42,7 +42,7 @@ class BankAccountController extends Controller
 
     public function create()
     {
-        return Inertia::render('bank-and-cheque/bank-accounts/bank-account-form-page');
+        return Inertia::render('bank-cash/bank-accounts/bank-account-form-page');
     }
 
     public function store(Request $request)
@@ -58,7 +58,6 @@ class BankAccountController extends Controller
             // bank layer
             'bank_name' => 'required|string|max:255',
             'branch_name' => 'nullable|string|max:255',
-            'iban' => 'nullable|string|max:50',
             'swift_code' => 'nullable|string|max:50',
             'routing_number' => 'nullable|string|max:50',
         ]);
@@ -70,7 +69,6 @@ class BankAccountController extends Controller
                 'bank_name' => $data['bank_name'],
                 'branch_name' => $data['branch_name'] ?? null,
                 'account_number' => $data['account_number'],
-                'iban' => $data['iban'] ?? null,
                 'swift_code' => $data['swift_code'] ?? null,
                 'routing_number' => $data['routing_number'] ?? null,
             ]);
@@ -105,7 +103,7 @@ class BankAccountController extends Controller
     {
         $bankAccount->load('account');
 
-        return Inertia::render('bank-and-cheque/bank-accounts/show-bank-account-page', [
+        return Inertia::render('bank-cash/bank-accounts/show-bank-account-page', [
             'account' => $bankAccount,
         ]);
     }
@@ -114,7 +112,7 @@ class BankAccountController extends Controller
     {
         $bankAccount->load('account');
 
-        return Inertia::render('bank-and-cheque/bank-accounts/bank-account-form-page', [
+        return Inertia::render('bank-cash/bank-accounts/bank-account-form-page', [
             'account' => $bankAccount,
         ]);
     }

@@ -1,8 +1,8 @@
 import { SidebarItem } from '../../types';
 
-export const bankModuleMenu: SidebarItem[] = [
+export const bankCashModuleMenu: SidebarItem[] = [
     {
-        name: 'Bank & Accounts',
+        name: 'Bank Cash',
         icon: <i className="fa-solid fa-university" />,
         children_expanded: false,
         permission: ['bank.view'],

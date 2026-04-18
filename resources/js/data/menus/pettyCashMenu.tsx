@@ -15,11 +15,11 @@ export const pettyCashMenu: SidebarItem[] = [
                 match_path: 'petty-cash-accounts',
             },
             {
-                name: 'Petty Cash Advances',
+                name: 'Petty Cash Advance Accounts',
                 icon: <i className="fa-solid fa-hand-holding-dollar" />,
                 permission: ['petty_cash.accounts.view'],
-                path: '/petty-cash-advances',
-                match_path: 'petty-cash-advances',
+                path: '/petty-cash-advance-accounts',
+                match_path: 'petty-cash-advance-accounts',
             },
             {
                 name: 'Petty Cash Transactions',

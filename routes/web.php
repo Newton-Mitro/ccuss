@@ -33,7 +33,7 @@ require __DIR__ . '/customer_module_routes.php';
 require __DIR__ . '/deposit_module_routes.php';
 require __DIR__ . '/branch_cash_and_treasury_routes.php';
 require __DIR__ . '/petty_cash_module_routes.php';
-require __DIR__ . '/bank_module_routes.php';
+require __DIR__ . '/bank_cash_module_routes.php';
 require __DIR__ . '/cheque_management_routes.php';
 require __DIR__ . '/finance_and_accounting_routes.php';
 

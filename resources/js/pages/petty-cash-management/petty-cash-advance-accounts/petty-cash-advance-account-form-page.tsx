@@ -3,9 +3,7 @@ import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
-import AppDatePicker from '../../../components/ui/app_date_picker';
 import { Button } from '../../../components/ui/button';
-import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
@@ -13,12 +11,12 @@ import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import {
     PettyCashAccount,
-    PettyCashAdvance,
+    PettyCashAdvanceAccount,
 } from '../../../types/petty_cash_module';
 import { User } from '../../../types/user';
 
 interface AdvanceFormProps extends SharedData {
-    advance?: PettyCashAdvance;
+    advance?: PettyCashAdvanceAccount;
     employees: User[];
     pettyCashAccounts: PettyCashAccount[];
 }
@@ -35,29 +33,23 @@ const AdvanceExpenseForm = ({
     const { data, setData, post, put, processing, errors } = useForm({
         petty_cash_account_id: advance?.petty_cash_account_id || '',
         employee_id: advance?.employee_id || '',
-        amount: advance?.amount || '',
-        advance_date: advance?.advance_date?.split('T')[0] || '',
-        purpose: advance?.purpose || '',
         status: advance?.status || 'pending',
-        approved_by: advance?.approved_by || '',
-        settled_at: advance?.settled_at || '',
-        remarks: advance?.remarks || '',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
         if (isEdit) {
-            put(route('petty-cash-advances.update', advance!.id));
+            put(route('petty-cash-advance-accounts.update', advance!.id));
         } else {
-            post(route('petty-cash-advances.store'));
+            post(route('petty-cash-advance-accounts.store'));
         }
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Petty Cash Advances',
-            href: route('petty-cash-advances.index'),
+            title: 'Petty Cash Advance Accounts',
+            href: route('petty-cash-advance-accounts.index'),
         },
         { title: isEdit ? 'Edit' : 'Create', href: '' },
     ];
@@ -118,37 +110,6 @@ const AdvanceExpenseForm = ({
                         <InputError message={errors.employee_id} />
                     </div>
 
-                    {/* Amount */}
-                    <div>
-                        <Label className="text-xs">Amount</Label>
-                        <Input
-                            type="number"
-                            value={data.amount}
-                            onChange={(e) => setData('amount', e.target.value)}
-                        />
-                        <InputError message={errors.amount} />
-                    </div>
-
-                    {/* Advance Date */}
-                    <div>
-                        <Label className="text-xs">Advance Date</Label>
-                        <AppDatePicker
-                            value={data.advance_date}
-                            onChange={(value) => setData('advance_date', value)}
-                        />
-                        <InputError message={errors.advance_date} />
-                    </div>
-
-                    {/* Purpose */}
-                    <div className="sm:col-span-2">
-                        <Label className="text-xs">Purpose</Label>
-                        <Input
-                            value={data.purpose}
-                            onChange={(e) => setData('purpose', e.target.value)}
-                        />
-                        <InputError message={errors.purpose} />
-                    </div>
-
                     {/* Status */}
                     <div>
                         <Label className="text-xs">Status</Label>
@@ -172,16 +133,6 @@ const AdvanceExpenseForm = ({
                             ]}
                         />
                         <InputError message={errors.status} />
-                    </div>
-
-                    {/* Remarks */}
-                    <div className="sm:col-span-2">
-                        <Label className="text-xs">Remarks</Label>
-                        <Input
-                            value={data.remarks}
-                            onChange={(e) => setData('remarks', e.target.value)}
-                        />
-                        <InputError message={errors.remarks} />
                     </div>
                 </div>
 

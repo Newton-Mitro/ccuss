@@ -91,17 +91,6 @@ const PettyCashAccountForm = ({
                 className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6"
             >
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    {/* Name */}
-                    <div>
-                        <label className="text-xs">Account Name</label>
-                        <Input
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
-                            className="h-8 w-full border px-2 text-sm"
-                        />
-                        <InputError message={errors.name} />
-                    </div>
-
                     {/* Branch */}
                     <div>
                         <label className="text-xs">Branch</label>
@@ -117,6 +106,17 @@ const PettyCashAccountForm = ({
                             placeholder="Select Branch"
                         />
                         <InputError message={errors.branch_id} />
+                    </div>
+
+                    {/* Name */}
+                    <div>
+                        <label className="text-xs">Account Name</label>
+                        <Input
+                            value={data.name}
+                            onChange={(e) => setData('name', e.target.value)}
+                            className="h-8 w-full border px-2 text-sm"
+                        />
+                        <InputError message={errors.name} />
                     </div>
 
                     {/* Status */}

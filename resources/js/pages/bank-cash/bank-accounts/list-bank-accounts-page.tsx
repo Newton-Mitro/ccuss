@@ -10,7 +10,7 @@ import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem, SharedData } from '../../../types';
-import { BankAccount } from '../../../types/bank_and_cheques_module';
+import { BankAccount } from '../../../types/bank_cash_module';
 
 interface BankAccountPageProps extends SharedData {
     accounts: {
@@ -113,7 +113,6 @@ export default function Index() {
                                     'Bank',
                                     'Branch',
                                     'Account Number',
-                                    'IBAN',
                                     'SWIFT',
                                     'Routing',
                                     'Actions',
@@ -145,10 +144,6 @@ export default function Index() {
 
                                         <td className="px-2 py-1">
                                             {a.account_number}
-                                        </td>
-
-                                        <td className="px-2 py-1">
-                                            {a.iban || '-'}
                                         </td>
 
                                         <td className="px-2 py-1">
@@ -188,7 +183,7 @@ export default function Index() {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={7}
+                                        colSpan={6}
                                         className="px-4 py-6 text-center text-muted-foreground"
                                     >
                                         No bank accounts found.

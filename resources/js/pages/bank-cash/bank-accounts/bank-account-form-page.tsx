@@ -92,10 +92,7 @@ const BankAccountForm = ({ account }) => {
                         />
                         <InputError message={errors.branch_name} />
                     </div>
-                </div>
 
-                {/* ---------------- ACCOUNT INFO ---------------- */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <Label className="text-xs">Account Number</Label>
                         <Input
@@ -106,19 +103,6 @@ const BankAccountForm = ({ account }) => {
                         />
                         <InputError message={errors.account_number} />
                     </div>
-
-                    <div>
-                        <Label className="text-xs">IBAN</Label>
-                        <Input
-                            value={data.iban}
-                            onChange={(e) => setData('iban', e.target.value)}
-                        />
-                        <InputError message={errors.iban} />
-                    </div>
-                </div>
-
-                {/* ---------------- FINANCIAL IDENTIFIERS ---------------- */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <Label className="text-xs">SWIFT Code</Label>
                         <Input
