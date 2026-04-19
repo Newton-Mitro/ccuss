@@ -3,7 +3,7 @@ import { useState } from 'react';
 import HeadingSmall from '../../../components/heading-small';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 
 interface PLRow {
     ledger_account_id: number;
@@ -24,7 +24,7 @@ interface FiscalPeriod {
     period_name: string;
 }
 
-interface Props {
+interface Props extends SharedData {
     profitAndLoss: PLRow[];
     fiscalYears: FiscalYear[];
     fiscalPeriods: FiscalPeriod[];
@@ -39,7 +39,7 @@ export default function ProfitAndLossPage() {
         fiscalPeriods,
         selectedFiscalYear,
         selectedFiscalPeriod,
-    } = usePage().props as Props;
+    } = usePage<Props>().props;
 
     const [fiscalYear, setFiscalYear] = useState<number | ''>(
         selectedFiscalYear || '',
@@ -48,10 +48,8 @@ export default function ProfitAndLossPage() {
         selectedFiscalPeriod || '',
     );
 
-    const handleFiscalYearChange = (
-        e: React.ChangeEvent<HTMLSelectElement>,
-    ) => {
-        const year = e.target.value ? Number(e.target.value) : '';
+    const handleFiscalYearChange = (value) => {
+        const year = Number(value);
         setFiscalYear(year);
         router.get(
             '/reports/profit-loss',
@@ -60,10 +58,8 @@ export default function ProfitAndLossPage() {
         );
     };
 
-    const handleFiscalPeriodChange = (
-        e: React.ChangeEvent<HTMLSelectElement>,
-    ) => {
-        const period = e.target.value ? Number(e.target.value) : '';
+    const handleFiscalPeriodChange = (value) => {
+        const period = Number(value);
         setFiscalPeriod(period);
         router.get(
             '/reports/profit-loss',
@@ -100,25 +96,27 @@ export default function ProfitAndLossPage() {
                     />
 
                     <div className="flex items-center gap-2">
-                        <Select
-                            value={fiscalYear}
-                            onChange={handleFiscalYearChange}
-                            className="rounded border px-2 py-1 text-sm"
-                            options={fiscalYears.map((fy) => ({
-                                value: fy.id.toString(),
-                                label: fy.code,
-                            }))}
-                        />
+                        <div className="w-60">
+                            <Select
+                                value={fiscalYear.toString()}
+                                onChange={handleFiscalYearChange}
+                                options={fiscalYears.map((fy) => ({
+                                    value: fy.id.toString(),
+                                    label: fy.code,
+                                }))}
+                            />
+                        </div>
 
-                        <Select
-                            value={fiscalPeriod}
-                            onChange={handleFiscalPeriodChange}
-                            className="rounded border px-2 py-1 text-sm"
-                            options={fiscalPeriods.map((fy) => ({
-                                value: fy.id.toString(),
-                                label: fy.period_name,
-                            }))}
-                        />
+                        <div className="w-60">
+                            <Select
+                                value={fiscalPeriod.toString()}
+                                onChange={handleFiscalPeriodChange}
+                                options={fiscalPeriods.map((fy) => ({
+                                    value: fy.id.toString(),
+                                    label: fy.period_name,
+                                }))}
+                            />
+                        </div>
 
                         <button
                             type="button"

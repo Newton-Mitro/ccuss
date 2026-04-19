@@ -4,7 +4,7 @@ import HeadingSmall from '../../../components/heading-small';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 import {
     FiscalPeriod,
     FiscalYear,
@@ -19,7 +19,7 @@ interface CashFlowRow {
     net_cash: number;
 }
 
-interface Props {
+interface Props extends SharedData {
     cashFlows: CashFlowRow[];
     fiscalYears: FiscalYear[];
     fiscalPeriods: FiscalPeriod[];
@@ -36,7 +36,7 @@ export default function CashFlowStatementPage() {
         fiscalPeriods,
         selectedFiscalYear,
         selectedFiscalPeriod,
-    } = usePage().props as Props;
+    } = usePage<Props>().props;
 
     // State for filters
     const [fiscalYear, setFiscalYear] = useState<number>(
@@ -52,10 +52,8 @@ export default function CashFlowStatementPage() {
     )?.period_name;
 
     // Handle filter changes
-    const handleFiscalYearChange = (
-        e: React.ChangeEvent<HTMLSelectElement>,
-    ) => {
-        const year = Number(e.target.value);
+    const handleFiscalYearChange = (value) => {
+        const year = Number(value);
         setFiscalYear(year);
         router.get(
             '/reports/cash-flow',
@@ -67,10 +65,8 @@ export default function CashFlowStatementPage() {
         );
     };
 
-    const handleFiscalPeriodChange = (
-        e: React.ChangeEvent<HTMLSelectElement>,
-    ) => {
-        const period = Number(e.target.value);
+    const handleFiscalPeriodChange = (value) => {
+        const period = Number(value);
         setFiscalPeriod(period);
         router.get(
             '/reports/cash-flow',
@@ -118,28 +114,30 @@ export default function CashFlowStatementPage() {
                     />
 
                     <div className="flex items-center gap-2">
-                        <Select
-                            value={fiscalYear}
-                            onChange={handleFiscalYearChange}
-                            className="rounded border px-2 py-1 text-sm"
-                            options={fiscalYears.map((fy) => ({
-                                value: fy.id.toString(),
-                                label: fy.code,
-                            }))}
-                        />
+                        <div className="w-60">
+                            <Select
+                                value={fiscalYear.toString()}
+                                onChange={handleFiscalYearChange}
+                                options={fiscalYears.map((fy) => ({
+                                    value: fy.id.toString(),
+                                    label: fy.code,
+                                }))}
+                            />
+                        </div>
 
-                        <Select
-                            value={fiscalPeriod}
-                            onChange={handleFiscalPeriodChange}
-                            className="rounded border px-2 py-1 text-sm"
-                            options={[
-                                { value: '0', label: 'All Periods' },
-                                ...fiscalPeriods.map((fp) => ({
-                                    value: fp.id.toString(),
-                                    label: fp.period_name,
-                                })),
-                            ]}
-                        />
+                        <div className="w-60">
+                            <Select
+                                value={fiscalPeriod.toString()}
+                                onChange={handleFiscalPeriodChange}
+                                options={[
+                                    { value: '0', label: 'All Periods' },
+                                    ...fiscalPeriods.map((fp) => ({
+                                        value: fp.id.toString(),
+                                        label: fp.period_name,
+                                    })),
+                                ]}
+                            />
+                        </div>
 
                         <button
                             onClick={() => window.print()}

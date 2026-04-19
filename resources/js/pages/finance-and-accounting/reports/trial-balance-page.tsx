@@ -4,7 +4,7 @@ import HeadingSmall from '../../../components/heading-small';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 import {
     FiscalPeriod,
     FiscalYear,
@@ -26,7 +26,7 @@ interface TrialBalanceRow {
     balance: number;
 }
 
-interface Props {
+interface Props extends SharedData {
     trialBalance: TrialBalanceRow[];
     fiscalYears: FiscalYear[];
     fiscalPeriods: FiscalPeriod[];
@@ -43,7 +43,7 @@ export default function TrialBalancePage() {
         fiscalPeriods,
         selectedFiscalYear,
         selectedFiscalPeriod,
-    } = usePage().props as Props;
+    } = usePage<Props>().props;
 
     const [fiscalYear, setFiscalYear] = useState<number>(
         selectedFiscalYear || 0,
@@ -58,10 +58,8 @@ export default function TrialBalancePage() {
     )?.period_name;
 
     /* ---------------- Filter Handlers ---------------- */
-    const handleFiscalYearChange = (
-        e: React.ChangeEvent<HTMLSelectElement>,
-    ) => {
-        const year = Number(e.target.value);
+    const handleFiscalYearChange = (value) => {
+        const year = Number(value);
         setFiscalYear(year);
         router.get(
             '/reports/trial-balance',
@@ -70,10 +68,8 @@ export default function TrialBalancePage() {
         );
     };
 
-    const handleFiscalPeriodChange = (
-        e: React.ChangeEvent<HTMLSelectElement>,
-    ) => {
-        const period = Number(e.target.value);
+    const handleFiscalPeriodChange = (value) => {
+        const period = Number(value);
         setFiscalPeriod(period);
         router.get(
             '/reports/trial-balance',
@@ -130,25 +126,27 @@ export default function TrialBalancePage() {
                     />
 
                     <div className="flex items-center gap-2">
-                        <Select
-                            value={fiscalYear}
-                            onChange={handleFiscalYearChange}
-                            className="rounded border px-2 py-1 text-sm"
-                            options={fiscalYears.map((fy) => ({
-                                value: fy.id.toString(),
-                                label: fy.code,
-                            }))}
-                        />
+                        <div className="w-60">
+                            <Select
+                                value={fiscalYear.toString()}
+                                onChange={handleFiscalYearChange}
+                                options={fiscalYears.map((fy) => ({
+                                    value: fy.id.toString(),
+                                    label: fy.code,
+                                }))}
+                            />
+                        </div>
 
-                        <Select
-                            value={fiscalPeriod}
-                            onChange={handleFiscalPeriodChange}
-                            className="rounded border px-2 py-1 text-sm"
-                            options={fiscalPeriods.map((fp) => ({
-                                value: fp.id.toString(),
-                                label: fp.period_name,
-                            }))}
-                        />
+                        <div className="w-60">
+                            <Select
+                                value={fiscalPeriod.toString()}
+                                onChange={handleFiscalPeriodChange}
+                                options={fiscalPeriods.map((fp) => ({
+                                    value: fp.id.toString(),
+                                    label: fp.period_name,
+                                }))}
+                            />
+                        </div>
 
                         <button
                             onClick={() => window.print()}

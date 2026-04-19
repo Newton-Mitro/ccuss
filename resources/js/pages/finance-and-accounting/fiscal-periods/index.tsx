@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
+import { Input } from '../../../components/ui/input';
 import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
@@ -101,7 +102,7 @@ export default function FiscalPeriodIndex() {
 
                 {/* Filters */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <input
+                    <Input
                         type="text"
                         placeholder="Search fiscal period..."
                         value={data.search}
@@ -109,17 +110,19 @@ export default function FiscalPeriodIndex() {
                             setData('search', e.target.value);
                             setData('page', 1);
                         }}
-                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+                        className="w-60"
                     />
 
-                    <Select
-                        value={data.status}
-                        onChange={(value) => {
-                            setData('status', value);
-                            setData('page', 1);
-                        }}
-                        options={periodStatuses}
-                    />
+                    <div className="w-60">
+                        <Select
+                            value={data.status}
+                            onChange={(value) => {
+                                setData('status', value);
+                                setData('page', 1);
+                            }}
+                            options={periodStatuses}
+                        />
+                    </div>
                 </div>
 
                 {/* Table */}

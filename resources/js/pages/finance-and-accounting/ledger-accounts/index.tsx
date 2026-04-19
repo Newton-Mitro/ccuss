@@ -305,7 +305,7 @@ export default function GlAccountsIndex({
                     </Button>
 
                     <div className="flex gap-2">
-                        <div className="w-40">
+                        <div className="w-60">
                             <Select
                                 error={errors.fiscal_year_id}
                                 value={data.fiscal_year_id?.toString() || ''}
@@ -319,7 +319,7 @@ export default function GlAccountsIndex({
                                 }}
                             />
                         </div>
-                        <div className="w-40">
+                        <div className="w-60">
                             <Select
                                 error={errors.fiscal_period_id}
                                 value={data.fiscal_period_id?.toString() || ''}

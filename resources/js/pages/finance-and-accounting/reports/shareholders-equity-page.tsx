@@ -4,7 +4,7 @@ import HeadingSmall from '../../../components/heading-small';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
-import { BreadcrumbItem } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 import { FiscalYear } from '../../../types/finance_and_accounting';
 
 /* ---------------- Types ---------------- */
@@ -18,7 +18,7 @@ type EquityLine = {
     ending_balance: number | null;
 };
 
-interface Props {
+interface Props extends SharedData {
     equityStatement: EquityLine[];
     fiscalYears: FiscalYear[];
     selectedFiscalYear?: number;
@@ -27,8 +27,8 @@ interface Props {
 /* ---------------- Page ---------------- */
 
 export default function ShareholdersEquityPage() {
-    const { equityStatement, fiscalYears, selectedFiscalYear } = usePage()
-        .props as Props;
+    const { equityStatement, fiscalYears, selectedFiscalYear } =
+        usePage<Props>().props;
 
     const [fiscalYear, setFiscalYear] = useState<number>(
         selectedFiscalYear || 0,
@@ -38,10 +38,8 @@ export default function ShareholdersEquityPage() {
         (fy) => fy.id === Number(fiscalYear),
     )?.code;
 
-    const handleFiscalYearChange = (
-        e: React.ChangeEvent<HTMLSelectElement>,
-    ) => {
-        const year = Number(e.target.value);
+    const handleFiscalYearChange = (value) => {
+        const year = Number(value);
         setFiscalYear(year);
         router.get(
             '/reports/shareholders-equity',
@@ -106,15 +104,16 @@ export default function ShareholdersEquityPage() {
                     />
 
                     <div className="flex items-center gap-2">
-                        <Select
-                            value={fiscalYear}
-                            onChange={handleFiscalYearChange}
-                            className="rounded border px-2 py-1 text-sm"
-                            options={fiscalYears.map((fy) => ({
-                                value: fy.id.toString(),
-                                label: fy.code,
-                            }))}
-                        />
+                        <div className="w-60">
+                            <Select
+                                value={fiscalYear.toString()}
+                                onChange={handleFiscalYearChange}
+                                options={fiscalYears.map((fy) => ({
+                                    value: fy.id.toString(),
+                                    label: fy.code,
+                                }))}
+                            />
+                        </div>
 
                         <button
                             onClick={() => window.print()}
