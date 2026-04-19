@@ -169,7 +169,7 @@
     --warning: oklch(0.78 0.18 85);
     --warning-foreground: oklch(0.2 0.02 85);
 
-    --border: oklch(0.18 0.008 355.578);
+    --border: oklch(22.875% 0.00863 351.492);
     --input: oklch(0.17 0.008 355.578);
     --ring: var(--accent);
 

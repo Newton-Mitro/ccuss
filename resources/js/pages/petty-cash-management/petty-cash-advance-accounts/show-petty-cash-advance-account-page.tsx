@@ -4,45 +4,52 @@ import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { formatDateTime } from '../../../lib/date_util';
 import { SharedData } from '../../../types';
 import { PettyCashAdvanceAccount } from '../../../types/petty_cash_module';
 
 interface Props extends SharedData {
-    advance: PettyCashAdvanceAccount;
+    account: PettyCashAdvanceAccount;
 }
 
-const ShowAdvanceExpensePage = ({ advance }: Props) => {
+const ShowAdvanceExpensePage = ({ account }: Props) => {
+    console.log('Advance Account Data:', account);
     useFlashToastHandler();
 
-    console.log(advance);
+    const statusClasses: Record<string, string> = {
+        active: 'text-green-600',
+        inactive: 'text-gray-500',
+    };
 
     return (
         <CustomAuthLayout>
-            <Head title={`Advance #${advance.id}`} />
+            <Head title={`Advance Account #${account.id}`} />
 
             {/* Header */}
-            <div className="flex justify-between pb-4">
+            <div className="flex flex-col gap-3 pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <HeadingSmall
-                    title={`Advance #${advance.id}`}
-                    description="Petty cash advance details and lifecycle"
+                    title={`Advance Account #${account.id}`}
+                    description="Employee petty cash advance account details"
                 />
 
                 <div className="flex gap-2">
                     <button
                         onClick={() => window.history.back()}
-                        className="btn-muted"
+                        className="flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
                     >
-                        <ArrowLeft className="h-4 w-4" /> Back
+                        <ArrowLeft className="h-4 w-4" />
+                        Back
                     </button>
 
                     <Link
                         href={route(
                             'petty-cash-advance-accounts.edit',
-                            advance.id,
+                            account.id,
                         )}
-                        className="btn-primary"
+                        className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground hover:bg-primary/90"
                     >
-                        <Pencil className="h-4 w-4" /> Edit
+                        <Pencil className="h-4 w-4" />
+                        Edit
                     </Link>
                 </div>
             </div>
@@ -50,29 +57,74 @@ const ShowAdvanceExpensePage = ({ advance }: Props) => {
             {/* Summary Cards */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 {/* Employee */}
-                <div className="card">
+                <div className="rounded-md border bg-card p-4">
                     <div className="text-xs text-muted-foreground">
                         Employee
                     </div>
-                    <div>{advance.employee?.name || '-'}</div>
+                    <div className="text-sm font-medium">
+                        {account.employee?.name || '-'}
+                    </div>
                 </div>
 
                 {/* Status */}
-                <div className="card">
+                <div className="rounded-md border bg-card p-4">
                     <div className="text-xs text-muted-foreground">Status</div>
-                    <div className="capitalize">{advance.status}</div>
+                    <div
+                        className={`text-sm font-medium capitalize ${
+                            statusClasses[account.status] ||
+                            'text-muted-foreground'
+                        }`}
+                    >
+                        {account.status}
+                    </div>
+                </div>
+
+                {/* Created At */}
+                <div className="rounded-md border bg-card p-4">
+                    <div className="text-xs text-muted-foreground">
+                        Created At
+                    </div>
+                    <div className="text-sm font-medium">
+                        {formatDateTime(account.created_at)}
+                    </div>
                 </div>
             </div>
 
-            {/* Details */}
-            <div className="mt-6 rounded-md border p-4">
+            {/* Details Section */}
+            <div className="mt-6 rounded-md border bg-card p-4">
+                <div className="mb-4 text-sm font-semibold">
+                    Account Details
+                </div>
+
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {/* Petty Cash Account */}
                     <div>
                         <div className="text-xs text-muted-foreground">
                             Petty Cash Account
                         </div>
-                        <div>{advance.petty_cash_account?.name || '-'}</div>
+                        <div className="text-sm font-medium">
+                            {account.petty_cash_account?.name || '-'}
+                        </div>
+                    </div>
+
+                    {/* Ledger Account */}
+                    <div>
+                        <div className="text-xs text-muted-foreground">
+                            Ledger Account
+                        </div>
+                        <div className="text-sm font-medium">
+                            {account.ledger_account?.name || '-'}
+                        </div>
+                    </div>
+
+                    {/* Employee ID (optional debug/info) */}
+                    <div>
+                        <div className="text-xs text-muted-foreground">
+                            Employee ID
+                        </div>
+                        <div className="text-sm font-medium">
+                            {account.employee.name || '-'}
+                        </div>
                     </div>
                 </div>
             </div>

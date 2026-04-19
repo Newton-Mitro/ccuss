@@ -94,14 +94,14 @@ const Select: React.FC<SelectSearchProps> = ({
   }, [open]);
 
   return (
-    <div className="relative w-full" ref={ref}>
+    <div className="relative border border-border rounded-md w-full" ref={ref}>
       {/* Trigger */}
       <button
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setOpen((prev) => !prev)}
         className={cn(
-          "w-full rounded-md border px-2 text-left text-sm bg-background text-base shadow-sm-xs flex justify-between items-center transition-[color,box-shadow] outline-none h-8",
+          "w-full rounded-md border  px-2 text-left text-sm bg-background text-base shadow-sm-xs flex justify-between items-center transition-[color,box-shadow] outline-none h-8",
           error ? "border-destructive" : "border-input",
           "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
           "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
@@ -124,7 +124,7 @@ const Select: React.FC<SelectSearchProps> = ({
         <div
           ref={dropdownRef}
           className={cn(
-            "absolute z-50 w-full rounded-md border border-input bg-background shadow-sm-xs",
+            "absolute z-50 w-full rounded-md border border-border bg-background p-1 shadow-sm-xs",
             openUpward ? "bottom-full mb-1" : "top-full mt-1"
           )}
         >

@@ -9,12 +9,13 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { Head, useForm } from '@inertiajs/react';
 import { CheckCheck, Loader2 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import { Select } from '../../../components/ui/select';
 
 const CreateChequeBook = ({ accounts }) => {
     useFlashToastHandler();
 
     const { data, setData, post, processing, errors } = useForm({
-        deposit_account_id: '',
+        account_id: '',
         book_no: '',
         start_number: '',
         end_number: '',
@@ -23,7 +24,7 @@ const CreateChequeBook = ({ accounts }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(route('bank-cheque-books.store'));
+        post(route('cheque-books.store'));
     };
 
     return (
@@ -39,21 +40,16 @@ const CreateChequeBook = ({ accounts }) => {
                 <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-3">
                     <div>
                         <Label>Account</Label>
-                        <select
-                            value={data.deposit_account_id}
-                            onChange={(e) =>
-                                setData('deposit_account_id', e.target.value)
-                            }
-                            className="h-9 w-full rounded border"
-                        >
-                            <option value="">Select</option>
-                            {accounts.map((a) => (
-                                <option key={a.id} value={a.id}>
-                                    {a.name}
-                                </option>
-                            ))}
-                        </select>
-                        <InputError message={errors.deposit_account_id} />
+                        <Select
+                            value={data.account_id}
+                            onChange={(value) => setData('account_id', value)}
+                            options={accounts.map((account) => ({
+                                value: account.id,
+                                label: account.name,
+                            }))}
+                        />
+
+                        <InputError message={errors.account_id} />
                     </div>
 
                     <div>

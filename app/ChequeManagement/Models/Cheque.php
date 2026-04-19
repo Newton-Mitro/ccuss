@@ -2,27 +2,35 @@
 
 namespace App\ChequeManagement\Models;
 
-use App\ChequeManagement\Models\BankChequeBook;
-use App\SystemAdministration\Models\User;
+use App\ChequeManagement\Models\ChequeBook;
+use App\SubledgerModule\Models\Account;
 use App\SystemAdministration\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class BankCheque extends Model
+class Cheque extends Model
 {
     use HasFactory, Auditable;
 
+    protected $table = 'cheques';
+
     protected $fillable = [
-        'bank_cheque_book_id',
+        'cheque_book_id',
+        'issuer_account_id',
+
+        'issuer_bank_name',
+        'issuer_branch',
+
         'cheque_number',
         'cheque_date',
+
         'amount',
         'payee_name',
         'remarks',
+
         'status',
         'stop_payment',
-        'created_by',
-        'approved_by',
+
         'cleared_at',
         'bounced_at',
     ];
@@ -30,7 +38,9 @@ class BankCheque extends Model
     protected $casts = [
         'cheque_date' => 'date',
         'amount' => 'decimal:2',
+
         'stop_payment' => 'boolean',
+
         'cleared_at' => 'datetime',
         'bounced_at' => 'datetime',
     ];
@@ -55,17 +65,12 @@ class BankCheque extends Model
 
     public function chequeBook()
     {
-        return $this->belongsTo(BankChequeBook::class, 'bank_cheque_book_id');
+        return $this->belongsTo(ChequeBook::class);
     }
 
-    public function createdBy()
+    public function issuerAccount()
     {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function approvedBy()
-    {
-        return $this->belongsTo(User::class, 'approved_by');
+        return $this->belongsTo(Account::class, 'issuer_account_id');
     }
 
     /*
@@ -107,13 +112,18 @@ class BankCheque extends Model
 
     /*
     |--------------------------------------------------------------------------
-    | Domain Helpers
+    | State Checks
     |--------------------------------------------------------------------------
     */
 
     public function isIssued(): bool
     {
         return $this->status === self::STATUS_ISSUED;
+    }
+
+    public function isPresented(): bool
+    {
+        return $this->status === self::STATUS_PRESENTED;
     }
 
     public function isCleared(): bool
@@ -131,15 +141,43 @@ class BankCheque extends Model
         return $this->status === self::STATUS_CANCELLED;
     }
 
-    public function isPayable(): bool
+    public function isStopped(): bool
     {
-        return $this->isIssued() && !$this->stop_payment;
+        return (bool) $this->stop_payment;
     }
 
-    // Helpers
+    public function isPayable(): bool
+    {
+        return $this->isIssued() && !$this->isStopped();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Business Actions (Safe State Transitions)
+    |--------------------------------------------------------------------------
+    */
+
+    public function markPresented(): void
+    {
+        if ($this->isStopped())
+            return;
+
+        if (!$this->isIssued())
+            return;
+
+        $this->update([
+            'status' => self::STATUS_PRESENTED,
+        ]);
+    }
 
     public function markCleared(): void
     {
+        if ($this->isStopped())
+            return;
+
+        if (!$this->isPresented())
+            return;
+
         $this->update([
             'status' => self::STATUS_CLEARED,
             'cleared_at' => now(),
@@ -148,9 +186,22 @@ class BankCheque extends Model
 
     public function markBounced(): void
     {
+        if ($this->isCleared())
+            return;
+
         $this->update([
             'status' => self::STATUS_BOUNCED,
             'bounced_at' => now(),
+        ]);
+    }
+
+    public function stopPayment(): void
+    {
+        if ($this->isCleared())
+            return;
+
+        $this->update([
+            'stop_payment' => true,
         ]);
     }
 }

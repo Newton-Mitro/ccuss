@@ -2,22 +2,24 @@
 
 namespace App\ChequeManagement\Models;
 
-use App\ChequeManagement\Models\BankCheque;
-use App\SystemAdministration\Models\User;
+use App\ChequeManagement\Models\Cheque;
+use App\SubledgerModule\Models\Account;
 use App\SystemAdministration\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class BankChequeBook extends Model
+class ChequeBook extends Model
 {
     use HasFactory, Auditable;
 
+    protected $table = 'cheque_books';
+
     protected $fillable = [
+        'account_id',
         'book_no',
         'start_number',
         'end_number',
         'issued_at',
-        'issued_by',
     ];
 
     protected $casts = [
@@ -32,19 +34,19 @@ class BankChequeBook extends Model
     |--------------------------------------------------------------------------
     */
 
-    public function issuedBy()
+    public function account()
     {
-        return $this->belongsTo(User::class, 'issued_by');
+        return $this->belongsTo(Account::class);
     }
 
     public function cheques()
     {
-        return $this->hasMany(BankCheque::class, 'bank_cheque_book_id');
+        return $this->hasMany(Cheque::class, 'cheque_book_id');
     }
 
     /*
     |--------------------------------------------------------------------------
-    | Core Business Logic
+    | Business Logic
     |--------------------------------------------------------------------------
     */
 
@@ -61,10 +63,10 @@ class BankChequeBook extends Model
     {
         return $this->cheques()
             ->whereIn('status', [
-                BankCheque::STATUS_ISSUED,
-                BankCheque::STATUS_PRESENTED,
-                BankCheque::STATUS_CLEARED,
-                BankCheque::STATUS_BOUNCED,
+                Cheque::STATUS_ISSUED,
+                Cheque::STATUS_PRESENTED,
+                Cheque::STATUS_CLEARED,
+                Cheque::STATUS_BOUNCED,
             ])
             ->count();
     }
@@ -86,6 +88,12 @@ class BankChequeBook extends Model
             && $this->start_number <= $this->end_number;
     }
 
+    public function isChequeNumberValid(int $number): bool
+    {
+        return $number >= $this->start_number
+            && $number <= $this->end_number;
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Scopes
@@ -102,15 +110,27 @@ class BankChequeBook extends Model
         return $query->whereRaw('(end_number - start_number + 1) > 0');
     }
 
-    public function isChequeNumberValid(int $number): bool
+    /*
+    |--------------------------------------------------------------------------
+    | Convenience Collections
+    |--------------------------------------------------------------------------
+    */
+
+    public function issuedCheques()
     {
-        return $number >= $this->start_number
-            && $number <= $this->end_number;
+        return $this->hasMany(Cheque::class, 'cheque_book_id')
+            ->where('status', Cheque::STATUS_ISSUED);
     }
 
-    public function unusedCheques()
+    public function clearedCheques()
     {
-        return $this->hasMany(BankCheque::class, 'bank_cheque_book_id')
-            ->where('status', BankCheque::STATUS_ISSUED);
+        return $this->hasMany(Cheque::class, 'cheque_book_id')
+            ->where('status', Cheque::STATUS_CLEARED);
+    }
+
+    public function bouncedCheques()
+    {
+        return $this->hasMany(Cheque::class, 'cheque_book_id')
+            ->where('status', Cheque::STATUS_BOUNCED);
     }
 }

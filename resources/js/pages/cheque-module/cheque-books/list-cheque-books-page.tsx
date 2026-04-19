@@ -15,6 +15,7 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
+import { formatDateTime } from '../../../lib/date_util';
 
 interface Props extends SharedData {
     paginated_data: any;
@@ -34,22 +35,27 @@ export default function Index() {
 
     useEffect(() => {
         const delay = setTimeout(() => {
-            get(route('bank-cheque-books.index'), { preserveState: true });
-        }, 400);
+            get(route('cheque-books.index'), {
+                preserveState: true,
+                replace: true,
+            });
+        }, 350);
+
         return () => clearTimeout(delay);
     }, [data.search, data.per_page, data.page]);
 
-    const handleDelete = (id: number, name: string) => {
+    const handleDelete = (id: number, bookNo: string) => {
         appSwal
             .fire({
-                title: 'Are you sure?',
-                text: `Cheque Book "${name}" will be deleted!`,
+                title: 'Delete Cheque Book?',
+                text: `Book "${bookNo}" and all related cheques will be removed.`,
                 icon: 'warning',
                 showCancelButton: true,
+                confirmButtonText: 'Yes, delete it',
             })
-            .then((r) => {
-                if (r.isConfirmed) {
-                    router.delete(route('bank-cheque-books.destroy', id));
+            .then((res) => {
+                if (res.isConfirmed) {
+                    router.delete(route('cheque-books.destroy', id));
                 }
             });
     };
@@ -63,27 +69,26 @@ export default function Index() {
             <Head title="Cheque Books" />
 
             <div className="space-y-4">
-                {/* Header */}
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                {/* HEADER */}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <HeadingSmall
                         title="Cheque Books"
-                        description="Manage cheque book issuance"
+                        description="Manage cheque book issuance & lifecycle"
                     />
-                    <div className="flex gap-2">
-                        <Link
-                            href={route('bank-cheque-books.create')}
-                            className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition hover:bg-primary/90"
-                        >
-                            <Plus className="h-4 w-4" />
-                            Add Book
-                        </Link>
-                    </div>
+
+                    <Link
+                        href={route('cheque-books.create')}
+                        className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition hover:bg-primary/90"
+                    >
+                        <Plus className="h-4 w-4" />
+                        New Book
+                    </Link>
                 </div>
 
-                {/* Filters */}
-                <div className="w-60">
+                {/* FILTER */}
+                <div className="w-64">
                     <Input
-                        placeholder="Search book..."
+                        placeholder="Search by book number..."
                         value={data.search}
                         onChange={(e) => {
                             setData('search', e.target.value);
@@ -92,53 +97,66 @@ export default function Index() {
                     />
                 </div>
 
-                {/* Desktop Table */}
+                {/* TABLE (DESKTOP) */}
                 <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
                     <table className="w-full">
                         <thead className="sticky top-0 bg-muted">
                             <tr>
                                 {[
                                     'Book No',
-                                    'Account',
-                                    'Start',
-                                    'End',
+                                    'Start No',
+                                    'End No',
+                                    'Total Cheques',
                                     'Issued At',
                                     'Actions',
                                 ].map((h) => (
                                     <th
                                         key={h}
-                                        className="p-2 text-left text-sm"
+                                        className="p-2 text-left text-sm font-medium"
                                     >
                                         {h}
                                     </th>
                                 ))}
                             </tr>
                         </thead>
+
                         <tbody>
                             {paginated_data.data.map((b: any) => (
                                 <tr
                                     key={b.id}
                                     className="border-b even:bg-muted/30"
                                 >
-                                    <td className="px-2 py-1">{b.book_no}</td>
-                                    <td className="px-2 py-1">
-                                        {b.deposit_account?.name}
+                                    <td className="px-2 py-1 font-medium">
+                                        {b.book_no}
                                     </td>
+
                                     <td className="px-2 py-1">
                                         {b.start_number}
                                     </td>
+
                                     <td className="px-2 py-1">
                                         {b.end_number}
                                     </td>
-                                    <td className="px-2 py-1">{b.issued_at}</td>
+
+                                    <td className="px-2 py-1">
+                                        <span className="rounded bg-muted px-2 py-1 text-xs">
+                                            {b.cheques?.length ?? 0}
+                                        </span>
+                                    </td>
+
+                                    <td className="px-2 py-1">
+                                        {formatDateTime(b.issued_at)}
+                                    </td>
+
+                                    {/* ACTIONS */}
                                     <td className="px-2 py-1">
                                         <TooltipProvider>
-                                            <div className="flex gap-2">
+                                            <div className="flex gap-3">
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
                                                         <Link
                                                             href={route(
-                                                                'bank-cheque-books.show',
+                                                                'cheque-books.show',
                                                                 b.id,
                                                             )}
                                                         >
@@ -154,7 +172,7 @@ export default function Index() {
                                                     <TooltipTrigger asChild>
                                                         <Link
                                                             href={route(
-                                                                'bank-cheque-books.edit',
+                                                                'cheque-books.edit',
                                                                 b.id,
                                                             )}
                                                         >
@@ -192,35 +210,45 @@ export default function Index() {
                     </table>
                 </div>
 
-                {/* Mobile */}
+                {/* MOBILE */}
                 <div className="space-y-3 md:hidden">
                     {paginated_data.data.map((b: any) => (
                         <div
                             key={b.id}
                             className="rounded-md border bg-card p-3"
                         >
-                            <p className="font-medium">{b.book_no}</p>
+                            <p className="font-semibold">{b.book_no}</p>
+
                             <p className="text-xs text-muted-foreground">
-                                {b.deposit_account?.name}
-                            </p>
-                            <p className="text-xs">
-                                {b.start_number} → {b.end_number}
+                                Range: {b.start_number} → {b.end_number}
                             </p>
 
-                            <div className="flex justify-end gap-3 pt-2">
-                                <Eye />
-                                <Pencil />
-                                <Trash2
-                                    className="text-destructive"
+                            <p className="text-xs">
+                                Cheques: {b.cheques?.length ?? 0}
+                            </p>
+
+                            <div className="flex justify-end gap-4 pt-3">
+                                <Link href={route('cheque-books.show', b.id)}>
+                                    <Eye className="h-5 w-5" />
+                                </Link>
+
+                                <Link href={route('cheque-books.edit', b.id)}>
+                                    <Pencil className="h-5 w-5" />
+                                </Link>
+
+                                <button
                                     onClick={() =>
                                         handleDelete(b.id, b.book_no)
                                     }
-                                />
+                                >
+                                    <Trash2 className="h-5 w-5 text-destructive" />
+                                </button>
                             </div>
                         </div>
                     ))}
                 </div>
 
+                {/* PAGINATION */}
                 <DataTablePagination
                     perPage={paginated_data.per_page}
                     onPerPageChange={(v) => {

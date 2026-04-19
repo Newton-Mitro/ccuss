@@ -9,6 +9,7 @@ import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
+import { LedgerAccount } from '../../../types/finance_and_accounting';
 import {
     PettyCashAccount,
     PettyCashAdvanceAccount,
@@ -16,31 +17,34 @@ import {
 import { User } from '../../../types/user';
 
 interface AdvanceFormProps extends SharedData {
-    advance?: PettyCashAdvanceAccount;
+    account?: PettyCashAdvanceAccount;
     employees: User[];
     pettyCashAccounts: PettyCashAccount[];
+    ledgerAccounts: LedgerAccount[];
 }
 
 const AdvanceExpenseForm = ({
-    advance,
+    account,
     employees,
     pettyCashAccounts,
+    ledgerAccounts,
 }: AdvanceFormProps) => {
     useFlashToastHandler();
 
-    const isEdit = !!advance;
+    const isEdit = !!account;
 
     const { data, setData, post, put, processing, errors } = useForm({
-        petty_cash_account_id: advance?.petty_cash_account_id || '',
-        employee_id: advance?.employee_id || '',
-        status: advance?.status || 'pending',
+        petty_cash_account_id: account?.petty_cash_account_id || '',
+        ledger_account_id: account?.ledger_account_id || '',
+        employee_id: account?.employee_id || '',
+        status: account?.status || 'active',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
         if (isEdit) {
-            put(route('petty-cash-advance-accounts.update', advance!.id));
+            put(route('petty-cash-advance-accounts.update', account!.id));
         } else {
             post(route('petty-cash-advance-accounts.store'));
         }
@@ -94,6 +98,23 @@ const AdvanceExpenseForm = ({
                         <InputError message={errors.petty_cash_account_id} />
                     </div>
 
+                    {/* Ledger Account */}
+                    <div>
+                        <label className="text-xs">Ledger Account</label>
+                        <Select
+                            value={data.ledger_account_id.toString()}
+                            onChange={(val) =>
+                                setData('ledger_account_id', val)
+                            }
+                            options={ledgerAccounts.map((l) => ({
+                                value: l.id.toString(),
+                                label: l.name,
+                            }))}
+                            placeholder="Select Ledger"
+                        />
+                        <InputError message={errors.ledger_account_id} />
+                    </div>
+
                     {/* Employee */}
                     <div>
                         <Label className="text-xs">Employee</Label>
@@ -116,20 +137,11 @@ const AdvanceExpenseForm = ({
                         <Select
                             value={data.status}
                             onChange={(val) =>
-                                setData(
-                                    'status',
-                                    val as
-                                        | 'pending'
-                                        | 'approved'
-                                        | 'settled'
-                                        | 'rejected',
-                                )
+                                setData('status', val as 'active' | 'inactive')
                             }
                             options={[
-                                { value: 'pending', label: 'Pending' },
-                                { value: 'approved', label: 'Approved' },
-                                { value: 'settled', label: 'Settled' },
-                                { value: 'rejected', label: 'Rejected' },
+                                { value: 'active', label: 'Active' },
+                                { value: 'inactive', label: 'Inactive' },
                             ]}
                         />
                         <InputError message={errors.status} />

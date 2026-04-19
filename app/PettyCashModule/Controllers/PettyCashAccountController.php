@@ -72,7 +72,7 @@ class PettyCashAccountController extends Controller
             'name' => 'required|string|max:255',
             'branch_id' => 'required|exists:branches,id',
             'ledger_account_id' => 'required|exists:ledger_accounts,id',
-            'upper_limit' => 'nullable|numeric|min:0',
+            'upper_limit' => 'required|numeric|min:0',
             'status' => 'in:active,inactive',
         ]);
 
@@ -111,7 +111,7 @@ class PettyCashAccountController extends Controller
             'name' => 'required|string|max:255',
             'branch_id' => 'required|exists:branches,id',
             'ledger_account_id' => 'required|exists:ledger_accounts,id',
-            'upper_limit' => 'nullable|numeric|min:0',
+            'upper_limit' => 'required|numeric|min:0',
             'status' => 'in:active,inactive',
         ]);
 

@@ -11,24 +11,30 @@ import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Branch } from '../../../types/branch';
+import { LedgerAccount } from '../../../types/finance_and_accounting';
 import { PettyCashAccount } from '../../../types/petty_cash_module';
 
 interface PettyCashAccountFormPageProps extends SharedData {
     pettyCash?: PettyCashAccount;
     branches: Branch[];
+    ledgerAccounts: LedgerAccount[];
 }
 
 const PettyCashAccountForm = ({
     pettyCash,
     branches,
+    ledgerAccounts,
 }: PettyCashAccountFormPageProps) => {
     useFlashToastHandler();
+
     const handleBack = () => window.history.back();
     const isEdit = !!pettyCash;
 
     const { data, setData, post, put, processing, errors } = useForm({
         name: pettyCash?.name || '',
-        branch_id: pettyCash?.branch_id || '',
+        branch_id: pettyCash?.branch_id?.toString() || '',
+        ledger_account_id: pettyCash?.ledger_account_id?.toString() || '',
+        upper_limit: pettyCash?.upper_limit || '',
         status: pettyCash?.status || 'active',
     });
 
@@ -40,7 +46,9 @@ const PettyCashAccountForm = ({
                 preserveScroll: true,
             });
         } else {
-            post(route('petty-cash-accounts.store'), { preserveScroll: true });
+            post(route('petty-cash-accounts.store'), {
+                preserveScroll: true,
+            });
         }
     };
 
@@ -95,10 +103,20 @@ const PettyCashAccountForm = ({
                     <div>
                         <label className="text-xs">Branch</label>
                         <Select
-                            value={data.branch_id.toString()}
-                            onChange={(val) =>
-                                setData('branch_id', Number(val))
-                            }
+                            value={data.branch_id}
+                            onChange={(val) => {
+                                setData('branch_id', val);
+
+                                const branchName =
+                                    branches.find(
+                                        (b) => b.id.toString() === val,
+                                    )?.name || '';
+
+                                // Smart auto naming
+                                if (!isEdit) {
+                                    setData('name', `${branchName} Petty Cash`);
+                                }
+                            }}
                             options={branches.map((b) => ({
                                 value: b.id.toString(),
                                 label: b.name,
@@ -106,6 +124,23 @@ const PettyCashAccountForm = ({
                             placeholder="Select Branch"
                         />
                         <InputError message={errors.branch_id} />
+                    </div>
+
+                    {/* Ledger Account */}
+                    <div>
+                        <label className="text-xs">Ledger Account</label>
+                        <Select
+                            value={data.ledger_account_id}
+                            onChange={(val) =>
+                                setData('ledger_account_id', val)
+                            }
+                            options={ledgerAccounts.map((l) => ({
+                                value: l.id.toString(),
+                                label: l.name,
+                            }))}
+                            placeholder="Select Ledger"
+                        />
+                        <InputError message={errors.ledger_account_id} />
                     </div>
 
                     {/* Name */}
@@ -117,6 +152,21 @@ const PettyCashAccountForm = ({
                             className="h-8 w-full border px-2 text-sm"
                         />
                         <InputError message={errors.name} />
+                    </div>
+
+                    {/* Upper Limit */}
+                    <div>
+                        <label className="text-xs">Upper Limit</label>
+                        <Input
+                            type="number"
+                            value={data.upper_limit}
+                            onChange={(e) =>
+                                setData('upper_limit', e.target.value)
+                            }
+                            className="h-8 w-full border px-2 text-sm"
+                            placeholder="0.00"
+                        />
+                        <InputError message={errors.upper_limit} />
                     </div>
 
                     {/* Status */}

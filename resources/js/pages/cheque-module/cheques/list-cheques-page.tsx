@@ -17,6 +17,7 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
+import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 
 const statuses = [
     { value: '', label: 'All' },
@@ -24,6 +25,7 @@ const statuses = [
     { value: 'presented', label: 'Presented' },
     { value: 'cleared', label: 'Cleared' },
     { value: 'bounced', label: 'Bounced' },
+    { value: 'cancelled', label: 'Cancelled' },
 ];
 
 export default function Index() {
@@ -40,22 +42,27 @@ export default function Index() {
 
     useEffect(() => {
         const delay = setTimeout(() => {
-            get(route('bank-cheques.index'), { preserveState: true });
-        }, 400);
+            get(route('cheques.index'), {
+                preserveState: true,
+                replace: true,
+            });
+        }, 350);
+
         return () => clearTimeout(delay);
     }, [data.search, data.status, data.per_page, data.page]);
 
     const handleDelete = (id: number, no: string) => {
         appSwal
             .fire({
-                title: 'Delete?',
-                text: `Cheque ${no} will be deleted`,
+                title: 'Delete Cheque?',
+                text: `Cheque #${no} will be permanently removed.`,
                 icon: 'warning',
                 showCancelButton: true,
+                confirmButtonText: 'Yes, delete',
             })
             .then((r) => {
                 if (r.isConfirmed) {
-                    router.delete(route('bank-cheques.destroy', id));
+                    router.delete(route('cheques.destroy', id));
                 }
             });
     };
@@ -68,15 +75,15 @@ export default function Index() {
 
             <div className="space-y-4">
                 <HeadingSmall
-                    title="Cheques"
-                    description="Manage cheque lifecycle"
+                    title="Cheque Management"
+                    description="Track issuance, clearing & lifecycle status"
                 />
 
-                {/* Filters */}
+                {/* FILTER BAR */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
-                    <div className="w-60">
+                    <div className="w-64">
                         <Input
-                            placeholder="Search cheque..."
+                            placeholder="Search cheque / payee / book..."
                             value={data.search}
                             onChange={(e) => {
                                 setData('search', e.target.value);
@@ -97,7 +104,7 @@ export default function Index() {
                     </div>
                 </div>
 
-                {/* Desktop Table */}
+                {/* DESKTOP TABLE */}
                 <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
                     <table className="w-full">
                         <thead className="sticky top-0 bg-muted">
@@ -112,32 +119,40 @@ export default function Index() {
                                 ].map((h) => (
                                     <th
                                         key={h}
-                                        className="p-2 text-left text-sm"
+                                        className="p-2 text-left text-sm font-medium"
                                     >
                                         {h}
                                     </th>
                                 ))}
                             </tr>
                         </thead>
+
                         <tbody>
                             {paginated_data.data.map((c: any) => (
                                 <tr
                                     key={c.id}
                                     className="border-b even:bg-muted/30"
                                 >
-                                    <td className="px-2 py-1">
+                                    <td className="px-2 py-1 font-medium">
                                         {c.cheque_number}
                                     </td>
+
                                     <td className="px-2 py-1">
-                                        {c.cheque_book?.book_no}
+                                        {c.cheque_book?.book_no ?? '-'}
                                     </td>
-                                    <td className="px-2 py-1">{c.amount}</td>
+
+                                    <td className="px-2 py-1">
+                                        {formatBDTCurrency(c.amount)}
+                                    </td>
+
                                     <td className="px-2 py-1">
                                         <Badge text={c.status} />
                                     </td>
+
                                     <td className="px-2 py-1">
-                                        {c.payee_name}
+                                        {c.payee_name || '-'}
                                     </td>
+
                                     <td className="px-2 py-1">
                                         <TooltipProvider>
                                             <div className="flex gap-2">
@@ -145,7 +160,7 @@ export default function Index() {
                                                     <TooltipTrigger asChild>
                                                         <Link
                                                             href={route(
-                                                                'bank-cheques.show',
+                                                                'cheques.show',
                                                                 c.id,
                                                             )}
                                                         >
@@ -161,7 +176,7 @@ export default function Index() {
                                                     <TooltipTrigger asChild>
                                                         <Link
                                                             href={route(
-                                                                'bank-cheques.edit',
+                                                                'cheques.edit',
                                                                 c.id,
                                                             )}
                                                         >
@@ -199,33 +214,54 @@ export default function Index() {
                     </table>
                 </div>
 
-                {/* Mobile */}
+                {/* MOBILE */}
                 <div className="space-y-3 md:hidden">
                     {paginated_data.data.map((c: any) => (
                         <div
                             key={c.id}
                             className="rounded-md border bg-card p-3"
                         >
-                            <p className="font-medium">{c.cheque_number}</p>
-                            <p className="text-xs text-muted-foreground">
-                                {c.cheque_book?.book_no}
-                            </p>
-                            <Badge text={c.status} />
+                            <div className="flex items-center justify-between">
+                                <p className="font-semibold">
+                                    #{c.cheque_number}
+                                </p>
+                                <Badge text={c.status} />
+                            </div>
 
-                            <div className="flex justify-end gap-3 pt-2">
-                                <Eye />
-                                <Pencil />
-                                <Trash2
-                                    className="text-destructive"
+                            <p className="text-xs text-muted-foreground">
+                                Book: {c.cheque_book?.book_no ?? '-'}
+                            </p>
+
+                            <p className="text-sm">
+                                Amount: {formatBDTCurrency(c.amount)}
+                            </p>
+
+                            <p className="text-xs text-muted-foreground">
+                                Payee: {c.payee_name || '-'}
+                            </p>
+
+                            <div className="flex justify-end gap-4 pt-3">
+                                <Link href={route('cheques.show', c.id)}>
+                                    <Eye className="h-5 w-5" />
+                                </Link>
+
+                                <Link href={route('cheques.edit', c.id)}>
+                                    <Pencil className="h-5 w-5" />
+                                </Link>
+
+                                <button
                                     onClick={() =>
                                         handleDelete(c.id, c.cheque_number)
                                     }
-                                />
+                                >
+                                    <Trash2 className="h-5 w-5 text-destructive" />
+                                </button>
                             </div>
                         </div>
                     ))}
                 </div>
 
+                {/* PAGINATION */}
                 <DataTablePagination
                     perPage={paginated_data.per_page}
                     onPerPageChange={(v) => {

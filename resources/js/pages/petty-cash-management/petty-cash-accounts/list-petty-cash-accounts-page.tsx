@@ -48,12 +48,14 @@ export default function ListPettyCashAccountsPage() {
         page: Number(filters.page) || 1,
     });
 
-    const handleSearch = () => {
-        get(route('petty-cash-accounts.index'), { preserveState: true });
-    };
-
     useEffect(() => {
-        const delay = setTimeout(handleSearch, 400);
+        const delay = setTimeout(() => {
+            get(route('petty-cash-accounts.index'), {
+                preserveState: true,
+                replace: true,
+            });
+        }, 400);
+
         return () => clearTimeout(delay);
     }, [data.search, data.branch_id, data.status, data.per_page, data.page]);
 
@@ -70,7 +72,6 @@ export default function ListPettyCashAccountsPage() {
                 if (result.isConfirmed) {
                     destroy(route('petty-cash-accounts.destroy', id), {
                         preserveScroll: true,
-                        preserveState: true,
                     });
                 }
             });
@@ -106,7 +107,6 @@ export default function ListPettyCashAccountsPage() {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="w-60">
                         <Input
-                            type="text"
                             placeholder="Search accounts..."
                             value={data.search}
                             onChange={(e) => {
@@ -153,19 +153,24 @@ export default function ListPettyCashAccountsPage() {
 
                 {/* Table */}
                 <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border bg-card">
-                    <table className="w-full">
+                    <table className="w-full text-sm">
                         <thead className="sticky top-0 bg-muted">
                             <tr>
-                                {['Name', 'Branch', 'Status', 'Actions'].map(
-                                    (h) => (
-                                        <th
-                                            key={h}
-                                            className="border-b p-2 text-left text-sm text-muted-foreground"
-                                        >
-                                            {h}
-                                        </th>
-                                    ),
-                                )}
+                                {[
+                                    'Name',
+                                    'Branch',
+                                    'Ledger',
+                                    'Upper Limit',
+                                    'Status',
+                                    'Actions',
+                                ].map((h) => (
+                                    <th
+                                        key={h}
+                                        className="border-b p-2 text-left text-muted-foreground"
+                                    >
+                                        {h}
+                                    </th>
+                                ))}
                             </tr>
                         </thead>
 
@@ -176,14 +181,32 @@ export default function ListPettyCashAccountsPage() {
                                         key={a.id}
                                         className="border-b even:bg-muted/30"
                                     >
-                                        <td className="px-2 py-1">{a.name}</td>
-                                        <td className="px-2 py-1">
-                                            {a.branch?.name}
+                                        <td className="px-2 py-1 font-medium">
+                                            {a.name}
                                         </td>
+
                                         <td className="px-2 py-1">
-                                            {a.status === 'active'
-                                                ? 'Active'
-                                                : 'Inactive'}
+                                            {a.branch?.name || '-'}
+                                        </td>
+
+                                        <td className="px-2 py-1">
+                                            {a.ledger_account?.name || '-'}
+                                        </td>
+
+                                        <td className="px-2 py-1">
+                                            {a.upper_limit ?? 0}
+                                        </td>
+
+                                        <td className="px-2 py-1">
+                                            <span
+                                                className={`rounded px-2 py-0.5 text-xs font-medium capitalize ${
+                                                    a.status === 'active'
+                                                        ? 'bg-green-100 text-green-700'
+                                                        : 'bg-gray-200 text-gray-600'
+                                                }`}
+                                            >
+                                                {a.status}
+                                            </span>
                                         </td>
 
                                         <td className="px-2 py-1">
@@ -249,10 +272,10 @@ export default function ListPettyCashAccountsPage() {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={4}
-                                        className="py-6 text-center text-muted-foreground"
+                                        colSpan={6}
+                                        className="py-10 text-center text-muted-foreground"
                                     >
-                                        No accounts found.
+                                        No petty cash accounts found 🚫
                                     </td>
                                 </tr>
                             )}

@@ -29,7 +29,7 @@ export default function HomePage({
                             <img
                                 src={import.meta.env.VITE_LOGO_PATH}
                                 alt="Logo"
-                                className="w-28 bg-background object-contain p-2 md:w-56"
+                                className="w-28 bg-background object-contain p-4 md:w-48"
                             />
                         </div>
                     </div>

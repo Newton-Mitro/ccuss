@@ -11,6 +11,7 @@ export interface PettyCashAccount extends Timestamped {
     ledger_account_id: number;
 
     upper_limit: string; // decimal from Laravel
+    balance?: string; // future-ready field for current balance, decimal from Laravel
     status: 'active' | 'inactive';
 
     // relations
@@ -25,6 +26,7 @@ export interface PettyCashAdvanceAccount extends Timestamped {
     petty_cash_account_id: number;
     employee_id: number;
     ledger_account_id: number;
+    balance?: string; // future-ready field for current balance, decimal from Laravel
 
     status: 'active' | 'inactive';
 

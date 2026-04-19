@@ -2,6 +2,7 @@
 
 namespace App\PettyCashModule\Controllers;
 
+use App\FinanceAndAccounting\Models\LedgerAccount;
 use App\Http\Controllers\Controller;
 use App\PettyCashModule\Models\PettyCashAdvanceAccount;
 use App\PettyCashModule\Models\PettyCashAccount;
@@ -61,6 +62,7 @@ class PettyCashAdvanceAccountController extends Controller
             [
                 'pettyCashAccounts' => PettyCashAccount::select('id', 'name')->get(),
                 'employees' => User::select('id', 'name')->get(),
+                'ledgerAccounts' => LedgerAccount::select('id', 'name')->get(),
             ]
         );
     }
@@ -70,7 +72,7 @@ class PettyCashAdvanceAccountController extends Controller
         $data = $request->validate([
             'petty_cash_account_id' => 'required|exists:petty_cash_accounts,id',
             'employee_id' => 'required|exists:users,id',
-            'ledger_account_id' => 'nullable|exists:ledger_accounts,id',
+            'ledger_account_id' => 'required|exists:ledger_accounts,id',
             'status' => 'in:active,inactive',
         ]);
 
@@ -81,47 +83,48 @@ class PettyCashAdvanceAccountController extends Controller
             ->with('success', 'Employee Petty Cash Account created successfully');
     }
 
-    public function edit(PettyCashAdvanceAccount $employeePettyCashAccount)
+    public function edit(PettyCashAdvanceAccount $pettyCashAdvanceAccount)
     {
         return Inertia::render(
             'petty-cash-management/petty-cash-advance-accounts/petty-cash-advance-account-form-page',
             [
-                'account' => $employeePettyCashAccount->load(['employee', 'pettyCashAccount', 'ledgerAccount']),
+                'account' => $pettyCashAdvanceAccount->load(['employee', 'pettyCashAccount', 'ledgerAccount']),
                 'pettyCashAccounts' => PettyCashAccount::select('id', 'name')->get(),
                 'employees' => User::select('id', 'name')->get(),
+                'ledgerAccounts' => LedgerAccount::select('id', 'name')->get(),
             ]
         );
     }
 
-    public function show(PettyCashAdvanceAccount $employeePettyCashAccount)
+    public function show(PettyCashAdvanceAccount $pettyCashAdvanceAccount)
     {
         return Inertia::render(
             'petty-cash-management/petty-cash-advance-accounts/show-petty-cash-advance-account-page',
             [
-                'account' => $employeePettyCashAccount->load(['employee', 'pettyCashAccount', 'ledgerAccount']),
+                'account' => $pettyCashAdvanceAccount->load(['employee', 'pettyCashAccount', 'ledgerAccount']),
             ]
         );
     }
 
-    public function update(Request $request, PettyCashAdvanceAccount $employeePettyCashAccount)
+    public function update(Request $request, PettyCashAdvanceAccount $pettyCashAdvanceAccount)
     {
         $data = $request->validate([
             'petty_cash_account_id' => 'required|exists:petty_cash_accounts,id',
             'employee_id' => 'required|exists:users,id',
-            'ledger_account_id' => 'nullable|exists:ledger_accounts,id',
+            'ledger_account_id' => 'required|exists:ledger_accounts,id',
             'status' => 'in:active,inactive',
         ]);
 
-        $employeePettyCashAccount->update($data);
+        $pettyCashAdvanceAccount->update($data);
 
         return redirect()
             ->route('petty-cash-advance-accounts.index')
             ->with('success', 'Employee Petty Cash Account updated successfully');
     }
 
-    public function destroy(PettyCashAdvanceAccount $employeePettyCashAccount)
+    public function destroy(PettyCashAdvanceAccount $pettyCashAdvanceAccount)
     {
-        $employeePettyCashAccount->delete();
+        $pettyCashAdvanceAccount->delete();
 
         return back()->with('success', 'Deleted successfully');
     }

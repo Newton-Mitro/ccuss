@@ -50,14 +50,14 @@ export default function ListAdvanceExpensesPage() {
         page: Number(filters.page) || 1,
     });
 
-    const handleSearch = () => {
-        get(route('petty-cash-advance-accounts.index'), {
-            preserveState: true,
-        });
-    };
-
     useEffect(() => {
-        const delay = setTimeout(handleSearch, 400);
+        const delay = setTimeout(() => {
+            get(route('petty-cash-advance-accounts.index'), {
+                preserveState: true,
+                replace: true,
+            });
+        }, 400);
+
         return () => clearTimeout(delay);
     }, [
         data.search,
@@ -80,10 +80,15 @@ export default function ListAdvanceExpensesPage() {
                 if (result.isConfirmed) {
                     destroy(route('petty-cash-advance-accounts.destroy', id), {
                         preserveScroll: true,
-                        preserveState: true,
                     });
                 }
             });
+    };
+
+    // ✅ Updated status mapping
+    const statusClasses: Record<string, string> = {
+        active: 'bg-green-100 text-green-700',
+        inactive: 'bg-gray-200 text-gray-600',
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -102,7 +107,7 @@ export default function ListAdvanceExpensesPage() {
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
                         title="Petty Cash Advance Accounts"
-                        description="Manage employee advance petty cash"
+                        description="Manage employee advance petty cash accounts"
                     />
 
                     <Link
@@ -110,16 +115,14 @@ export default function ListAdvanceExpensesPage() {
                         className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                     >
                         <Plus className="h-4 w-4" />
-                        Add Advance
+                        Add Advance Account
                     </Link>
                 </div>
 
                 {/* Filters */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    {/* Search */}
                     <div className="w-64">
                         <Input
-                            type="text"
                             placeholder="Search employee or account..."
                             value={data.search}
                             onChange={(e) => {
@@ -158,10 +161,8 @@ export default function ListAdvanceExpensesPage() {
                                 }}
                                 options={[
                                     { value: '', label: 'All Status' },
-                                    { value: 'pending', label: 'Pending' },
-                                    { value: 'approved', label: 'Approved' },
-                                    { value: 'settled', label: 'Settled' },
-                                    { value: 'rejected', label: 'Rejected' },
+                                    { value: 'active', label: 'Active' },
+                                    { value: 'inactive', label: 'Inactive' },
                                 ]}
                             />
                         </div>
@@ -170,18 +171,19 @@ export default function ListAdvanceExpensesPage() {
 
                 {/* Table */}
                 <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border bg-card">
-                    <table className="w-full">
+                    <table className="w-full text-sm">
                         <thead className="sticky top-0 bg-muted">
                             <tr>
                                 {[
                                     'Employee',
                                     'Petty Cash Account',
+                                    'Ledger Account',
                                     'Status',
                                     'Actions',
                                 ].map((h) => (
                                     <th
                                         key={h}
-                                        className="border-b p-2 text-left text-sm text-muted-foreground"
+                                        className="border-b p-2 text-left text-muted-foreground"
                                     >
                                         {h}
                                     </th>
@@ -196,16 +198,28 @@ export default function ListAdvanceExpensesPage() {
                                         key={a.id}
                                         className="border-b even:bg-muted/30"
                                     >
-                                        <td className="px-2 py-1">
-                                            {a.employee?.name}
+                                        <td className="px-2 py-1 font-medium">
+                                            {a.employee?.name || 'N/A'}
                                         </td>
 
                                         <td className="px-2 py-1">
-                                            {a.petty_cash_account?.name}
+                                            {a.petty_cash_account?.name ||
+                                                'N/A'}
                                         </td>
 
-                                        <td className="px-2 py-1 capitalize">
-                                            {a.status}
+                                        <td className="px-2 py-1">
+                                            {a.ledger_account?.name || 'N/A'}
+                                        </td>
+
+                                        <td className="px-2 py-1">
+                                            <span
+                                                className={`rounded px-2 py-0.5 text-xs font-medium capitalize ${
+                                                    statusClasses[a.status] ||
+                                                    'bg-gray-200 text-gray-600'
+                                                }`}
+                                            >
+                                                {a.status}
+                                            </span>
                                         </td>
 
                                         <td className="px-2 py-1">
@@ -255,7 +269,7 @@ export default function ListAdvanceExpensesPage() {
                                                                         a
                                                                             .employee
                                                                             ?.name ||
-                                                                            'Advance',
+                                                                            'Advance Account',
                                                                     )
                                                                 }
                                                                 disabled={
@@ -277,10 +291,10 @@ export default function ListAdvanceExpensesPage() {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={4}
-                                        className="py-6 text-center text-muted-foreground"
+                                        colSpan={5}
+                                        className="py-10 text-center text-muted-foreground"
                                     >
-                                        No advances found.
+                                        No advance accounts found 🚫
                                     </td>
                                 </tr>
                             )}

@@ -1,17 +1,17 @@
 <?php
 
-use App\ChequeManagement\Controllers\BankChequeBookController;
-use App\ChequeManagement\Controllers\BankChequeController;
+use App\ChequeManagement\Controllers\ChequeBookController;
+use App\ChequeManagement\Controllers\ChequeController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('bank-cheque-books', BankChequeBookController::class);
-    Route::resource('bank-cheques', BankChequeController::class);
+    Route::resource('cheque-books', ChequeBookController::class);
+    Route::resource('cheques', ChequeController::class);
 
     // Business actions
-    Route::post('bank-cheques/{unionCheque}/present', [BankChequeController::class, 'markPresented']);
-    Route::post('bank-cheques/{unionCheque}/clear', [BankChequeController::class, 'markCleared']);
-    Route::post('bank-cheques/{unionCheque}/bounce', [BankChequeController::class, 'markBounced']);
-    Route::post('bank-cheques/{unionCheque}/stop-payment', [BankChequeController::class, 'stopPayment']);
+    Route::post('cheques/{unionCheque}/present', [ChequeController::class, 'markPresented']);
+    Route::post('cheques/{unionCheque}/clear', [ChequeController::class, 'markCleared']);
+    Route::post('cheques/{unionCheque}/bounce', [ChequeController::class, 'markBounced']);
+    Route::post('cheques/{unionCheque}/stop-payment', [ChequeController::class, 'stopPayment']);
 });
 

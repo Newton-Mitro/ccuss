@@ -41,7 +41,7 @@ export default function Login({
                 <img
                     src={import.meta.env.VITE_LOGO_PATH}
                     alt="Logo"
-                    className="w-60"
+                    className="w-48 p-4"
                 />
 
                 <div className="mt-3 text-center">

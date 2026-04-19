@@ -9,19 +9,22 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { Head, useForm } from '@inertiajs/react';
 import { CheckCheck, Loader2 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import { Select } from '../../../components/ui/select';
 
 const EditChequeBook = ({ chequeBook, accounts }) => {
     useFlashToastHandler();
 
     const { data, setData, put, processing, errors } = useForm({
-        deposit_account_id: chequeBook?.deposit_account_id || '',
+        account_id: chequeBook?.account_id || '',
         book_no: chequeBook.book_no || '',
-        issued_at: chequeBook.issued_at || '',
+        issued_at: chequeBook.issued_at
+            ? chequeBook.issued_at.split('T')[0]
+            : '',
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        put(route('bank-cheque-books.update', chequeBook.id));
+        put(route('cheque-books.update', chequeBook.id));
     };
 
     return (
@@ -37,21 +40,15 @@ const EditChequeBook = ({ chequeBook, accounts }) => {
                 <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-3">
                     <div>
                         <Label>Account</Label>
-                        <select
-                            value={data.deposit_account_id}
-                            onChange={(e) =>
-                                setData('deposit_account_id', e.target.value)
-                            }
-                            className="h-9 w-full rounded border"
-                        >
-                            <option value="">Select</option>
-                            {accounts.map((a) => (
-                                <option key={a.id} value={a.id}>
-                                    {a.name}
-                                </option>
-                            ))}
-                        </select>
-                        <InputError message={errors.deposit_account_id} />
+                        <Select
+                            value={data.account_id}
+                            onChange={(value) => setData('account_id', value)}
+                            options={accounts.map((account) => ({
+                                value: account.id,
+                                label: account.name,
+                            }))}
+                        />
+                        <InputError message={errors.account_id} />
                     </div>
 
                     <div>
