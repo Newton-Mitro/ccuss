@@ -247,7 +247,7 @@ const UserForm = ({
                                     className="h-32 w-32 rounded-full border object-cover sm:h-40 sm:w-40"
                                 />
                             ) : (
-                                <div className="flex h-32 w-32 items-center justify-center rounded-full border bg-muted sm:h-40 sm:w-40">
+                                <div className="flex h-32 w-32 items-center justify-center rounded-full border bg-background sm:h-40 sm:w-40">
                                     <span className="text-sm font-semibold text-muted-foreground">
                                         No Photo
                                     </span>
@@ -274,20 +274,25 @@ const UserForm = ({
 
                 {/* ROLES */}
                 <div>
-                    <Label className="text-xs">Roles</Label>
+                    <Label className="text-xs font-medium">Roles</Label>
+
                     <div className="mt-1 grid h-[calc(100vh-34rem)] grid-cols-1 gap-2 overflow-y-auto rounded-md border p-2 md:grid-cols-2 lg:grid-cols-3">
-                        {allRoles.map((role) => (
-                            <label
-                                key={role.id}
-                                className="rounded-md px-2 py-1.5 transition hover:bg-muted/80"
-                            >
-                                <div className="inline-flex items-center gap-4">
+                        {allRoles.map((role) => {
+                            const isChecked = data.roles.includes(role.id);
+
+                            return (
+                                <label
+                                    key={role.id}
+                                    className="flex cursor-pointer items-start gap-3 rounded-md px-2 py-2 transition hover:bg-muted/80"
+                                >
+                                    {/* Checkbox */}
                                     <input
                                         type="checkbox"
                                         value={role.id}
-                                        checked={data.roles.includes(role.id)}
+                                        checked={isChecked}
                                         onChange={(e) => {
                                             const roleId = role.id;
+
                                             if (e.target.checked) {
                                                 setData('roles', [
                                                     ...data.roles,
@@ -302,23 +307,26 @@ const UserForm = ({
                                                 );
                                             }
                                         }}
-                                        className="h-4 w-4 rounded border bg-background text-primary focus:ring-2 focus:ring-ring focus:outline-none"
+                                        className="mt-0.5 h-4 w-4 rounded border bg-background text-primary focus:ring-2 focus:ring-ring focus:outline-none"
                                     />
 
-                                    <div className="flex flex-col">
-                                        <span className="text-sm font-medium">
+                                    {/* Role Content */}
+                                    <div className="flex flex-col leading-tight">
+                                        <span className="text-sm font-medium text-foreground">
                                             {role.name}
                                         </span>
+
                                         {role.description && (
                                             <span className="text-xs text-muted-foreground">
                                                 {role.description}
                                             </span>
                                         )}
                                     </div>
-                                </div>
-                            </label>
-                        ))}
+                                </label>
+                            );
+                        })}
                     </div>
+
                     <InputError message={errors.roles} />
                 </div>
 

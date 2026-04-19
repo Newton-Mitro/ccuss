@@ -491,7 +491,7 @@ export default function EditDebitVoucherEntry({
                     {/* Table */}
                     <div className="hidden min-h-96 rounded-md border md:block">
                         <table className="w-full table-fixed border-collapse">
-                            <thead className="sticky top-0 bg-muted">
+                            <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
                                 <tr>
                                     <th className="w-7/12 border-b p-2 text-left text-sm font-medium text-muted-foreground">
                                         Ledger, Subledger and Particulars
@@ -517,7 +517,7 @@ export default function EditDebitVoucherEntry({
                                 {data.lines.map((line, index) => (
                                     <tr
                                         key={line.id}
-                                        className="border-b even:bg-muted/30"
+                                        className="border-b even:bg-muted/10"
                                     >
                                         <td className="px-2 py-1">
                                             <div className="flex flex-col gap-1">

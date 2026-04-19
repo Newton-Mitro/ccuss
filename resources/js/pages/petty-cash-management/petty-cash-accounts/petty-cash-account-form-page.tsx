@@ -98,7 +98,7 @@ const PettyCashAccountForm = ({
                 onSubmit={handleSubmit}
                 className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6"
             >
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     {/* Branch */}
                     <div>
                         <label className="text-xs">Branch</label>

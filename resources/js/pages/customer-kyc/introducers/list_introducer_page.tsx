@@ -108,7 +108,7 @@ export default function IntroducersIndex() {
                 {/* ================= Desktop Table ================= */}
                 <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
                     <table className="w-full">
-                        <thead className="sticky top-0 bg-muted">
+                        <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
                             <tr>
                                 {[
                                     'ID',
@@ -131,7 +131,7 @@ export default function IntroducersIndex() {
                             {paginated_data.data.map((i) => (
                                 <tr
                                     key={i.id}
-                                    className="border-b even:bg-muted/30"
+                                    className="border-b even:bg-muted/10"
                                 >
                                     <td className="px-2 py-1">{i.id}</td>
                                     <td className="px-2 py-1">

@@ -106,7 +106,7 @@ export default function Index() {
                 {/* ===================== */}
                 <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
                     <table className="w-full border-collapse">
-                        <thead className="sticky top-0 bg-muted">
+                        <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
                             <tr>
                                 {[
                                     'Name',
@@ -129,7 +129,7 @@ export default function Index() {
                                 users.data.map((u: User) => (
                                     <tr
                                         key={u.id}
-                                        className="border-b even:bg-muted/30"
+                                        className="border-b even:bg-muted/10"
                                     >
                                         <td className="px-2 py-1">{u.name}</td>
                                         <td className="px-2 py-1">{u.email}</td>

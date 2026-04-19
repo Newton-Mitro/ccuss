@@ -88,7 +88,7 @@ export default function BalanceSheetPage() {
                         />
                         <button
                             onClick={() => window.print()}
-                            className="hover:bg-primary/80 ml-2 rounded-md bg-primary px-3 py-1 text-sm font-medium text-primary-foreground"
+                            className="ml-2 rounded-md bg-primary px-3 py-1 text-sm font-medium text-primary-foreground hover:bg-primary/80"
                         >
                             Print
                         </button>
@@ -108,7 +108,7 @@ export default function BalanceSheetPage() {
                 {/* Table & Totals */}
                 <div className="print-area rounded-md border p-2 print:rounded-none print:border-none">
                     <table className="w-full border-collapse text-sm print:text-base">
-                        <thead className="sticky top-0 bg-muted print:bg-transparent">
+                        <thead className="sticky top-0 bg-muted/10 text-sm text-muted print:bg-transparent">
                             <tr>
                                 {['Category', 'Account Name', 'Balance'].map(
                                     (h) => (

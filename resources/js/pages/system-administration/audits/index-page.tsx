@@ -98,7 +98,7 @@ export default function Index() {
                 {/* Desktop Table */}
                 <div className="hidden h-[calc(100vh-360px)] overflow-auto rounded-md border bg-card md:block md:h-[calc(100vh-300px)]">
                     <table className="w-full min-w-150 border-collapse text-sm">
-                        <thead className="sticky top-0 bg-muted">
+                        <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
                             <tr>
                                 {[
                                     'Time',
@@ -123,7 +123,7 @@ export default function Index() {
                                 audits.data.map((a) => (
                                     <tr
                                         key={a.id}
-                                        className="border-b even:bg-muted/30"
+                                        className="border-b even:bg-muted/10"
                                     >
                                         <td className="px-2 py-2">
                                             {formatDateTime(a.created_at)}

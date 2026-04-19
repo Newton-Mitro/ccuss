@@ -5,6 +5,8 @@ namespace App\PettyCashModule\Controllers;
 use App\FinanceAndAccounting\Models\LedgerAccount;
 use App\Http\Controllers\Controller;
 use App\PettyCashModule\Models\PettyCashAccount;
+use App\SubledgerModule\Models\Account;
+use Illuminate\Support\Facades\DB;
 use App\SystemAdministration\Models\Branch;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -69,14 +71,48 @@ class PettyCashAccountController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name' => 'required|string|max:255',
+            // account layer
+            'name' => 'nullable|string|max:255',
+            'account_number' => 'required|string|unique:accounts,account_number',
+
+            'organization_id' => 'nullable|exists:organizations,id',
             'branch_id' => 'required|exists:branches,id',
-            'ledger_account_id' => 'required|exists:ledger_accounts,id',
+
+            // petty cash layer
             'upper_limit' => 'required|numeric|min:0',
             'status' => 'in:active,inactive',
         ]);
 
-        PettyCashAccount::create($data);
+        DB::transaction(function () use ($data) {
+
+            // 1. Create petty cash account
+            $pettyCash = PettyCashAccount::create([
+                'branch_id' => $data['branch_id'],
+                'name' => $data['name'] ?? 'Petty Cash',
+                'upper_limit' => $data['upper_limit'],
+                'status' => $data['status'] ?? 'active',
+            ]);
+
+            // 2. Create central account (IMPORTANT)
+            $account = Account::create([
+                'organization_id' => $data['organization_id'] ?? null,
+                'branch_id' => $data['branch_id'],
+                'account_number' => $data['account_number'],
+                'name' => ($data['name'] ?? 'Petty Cash') . ' (Petty Cash)',
+                'type' => 'petty_cash',
+                'balance' => 0,
+                'status' => 'active',
+
+                // polymorphic link
+                'accountable_type' => PettyCashAccount::class,
+                'accountable_id' => $pettyCash->id,
+            ]);
+
+            // 3. Optional reverse link (if needed)
+            $pettyCash->update([
+                'account_id' => $account->id,
+            ]);
+        });
 
         return redirect()
             ->route('petty-cash-accounts.index')
@@ -108,14 +144,27 @@ class PettyCashAccountController extends Controller
     public function update(Request $request, PettyCashAccount $pettyCashAccount)
     {
         $data = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'nullable|string|max:255',
             'branch_id' => 'required|exists:branches,id',
-            'ledger_account_id' => 'required|exists:ledger_accounts,id',
             'upper_limit' => 'required|numeric|min:0',
             'status' => 'in:active,inactive',
+            'account_number' => "required|string|unique:accounts,account_number,{$pettyCashAccount->account_id}",
         ]);
 
-        $pettyCashAccount->update($data);
+        DB::transaction(function () use ($data, $pettyCashAccount) {
+
+            $pettyCashAccount->update([
+                'name' => $data['name'] ?? 'Petty Cash',
+                'branch_id' => $data['branch_id'],
+                'upper_limit' => $data['upper_limit'],
+                'status' => $data['status'] ?? 'active',
+            ]);
+
+            $pettyCashAccount->account?->update([
+                'name' => ($data['name'] ?? 'Petty Cash') . ' (Petty Cash)',
+                'account_number' => $data['account_number'],
+            ]);
+        });
 
         return redirect()
             ->route('petty-cash-accounts.index')
@@ -124,7 +173,10 @@ class PettyCashAccountController extends Controller
 
     public function destroy(PettyCashAccount $pettyCashAccount)
     {
-        $pettyCashAccount->delete();
+        DB::transaction(function () use ($pettyCashAccount) {
+            $pettyCashAccount->account?->delete();
+            $pettyCashAccount->delete();
+        });
 
         return back()->with('success', 'Deleted successfully');
     }

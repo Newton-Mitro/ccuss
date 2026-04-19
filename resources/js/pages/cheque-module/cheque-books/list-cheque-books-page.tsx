@@ -100,7 +100,7 @@ export default function Index() {
                 {/* TABLE (DESKTOP) */}
                 <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
                     <table className="w-full">
-                        <thead className="sticky top-0 bg-muted">
+                        <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
                             <tr>
                                 {[
                                     'Book No',
@@ -124,7 +124,7 @@ export default function Index() {
                             {paginated_data.data.map((b: any) => (
                                 <tr
                                     key={b.id}
-                                    className="border-b even:bg-muted/30"
+                                    className="border-b even:bg-muted/10"
                                 >
                                     <td className="px-2 py-1 font-medium">
                                         {b.book_no}

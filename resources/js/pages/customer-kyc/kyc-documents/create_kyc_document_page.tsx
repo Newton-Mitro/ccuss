@@ -160,8 +160,8 @@ const CreateKycDocument = () => {
                         className="h-32 w-32 rounded-md border object-cover sm:h-40 sm:w-40"
                     />
                 ) : (
-                    <div className="h-32 w-32 rounded-md border bg-muted sm:h-40 sm:w-40">
-                        <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
+                    <div className="h-32 w-32 rounded-md border bg-background sm:h-40 sm:w-40">
+                        <div className="text-background-foreground flex h-full w-full items-center justify-center text-sm font-semibold">
                             No Photo
                         </div>
                     </div>

@@ -85,14 +85,20 @@ class TellerController extends Controller
         ]);
     }
 
+
+
+
     public function store(Request $request)
     {
         $branchId = Auth::user()->branch_id;
 
         $data = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'account_id' => 'nullable|exists:accounts,id',
+            // account layer
             'name' => 'required|string|max:255',
+            'account_number' => 'required|string|unique:accounts,account_number',
+
+            // teller layer
+            'user_id' => 'required|exists:users,id',
             'max_cash_limit' => 'required|numeric|min:0',
             'max_transaction_limit' => 'required|numeric|min:0',
             'is_active' => 'boolean',
@@ -100,10 +106,37 @@ class TellerController extends Controller
 
         return DB::transaction(function () use ($data, $branchId) {
 
-            $data['branch_id'] = $branchId;
-            $data['is_active'] = $data['is_active'] ?? true;
+            // 1. Create Teller
+            $teller = Teller::create([
+                'branch_id' => $branchId,
+                'user_id' => $data['user_id'],
+                'name' => $data['name'],
+                'max_cash_limit' => $data['max_cash_limit'],
+                'max_transaction_limit' => $data['max_transaction_limit'],
+                'is_active' => $data['is_active'] ?? true,
+            ]);
 
-            $teller = Teller::create($data);
+            // 2. Create Teller Cash Account (🔥 core)
+            $account = Account::create([
+                'organization_id' => null,
+                'branch_id' => $branchId,
+
+                'account_number' => $data['account_number'],
+                'name' => $data['name'] . ' (Teller Cash Drawer)',
+
+                'type' => 'teller_cash',
+                'balance' => 0,
+                'status' => 'active',
+
+                // polymorphic
+                'accountable_type' => Teller::class,
+                'accountable_id' => $teller->id,
+            ]);
+
+            // 3. Link back
+            $teller->update([
+                'account_id' => $account->id,
+            ]);
 
             return redirect()
                 ->route('tellers.index')
@@ -136,16 +169,30 @@ class TellerController extends Controller
 
         $data = $request->validate([
             'user_id' => 'required|exists:users,id',
-            'account_id' => 'nullable|exists:accounts,id',
             'name' => 'required|string|max:255',
+
+            'account_number' => "required|string|unique:accounts,account_number,{$teller->account_id}",
+
             'max_cash_limit' => 'required|numeric|min:0',
             'max_transaction_limit' => 'required|numeric|min:0',
             'is_active' => 'boolean',
         ]);
 
-        $data['branch_id'] = $teller->branch_id;
+        DB::transaction(function () use ($data, $teller) {
 
-        $teller->update($data);
+            $teller->update([
+                'user_id' => $data['user_id'],
+                'name' => $data['name'],
+                'max_cash_limit' => $data['max_cash_limit'],
+                'max_transaction_limit' => $data['max_transaction_limit'],
+                'is_active' => $data['is_active'] ?? true,
+            ]);
+
+            $teller->account?->update([
+                'name' => $data['name'] . ' (Teller Cash Drawer)',
+                'account_number' => $data['account_number'],
+            ]);
+        });
 
         return redirect()
             ->route('tellers.index')
@@ -175,7 +222,10 @@ class TellerController extends Controller
             ]);
         }
 
-        $teller->delete();
+        DB::transaction(function () use ($teller) {
+            $teller->account?->delete();
+            $teller->delete();
+        });
 
         return redirect()
             ->route('tellers.index')

@@ -51,83 +51,93 @@ export default function OpenTellerSession() {
                     onSubmit={handleSubmit}
                     className="w-full space-y-4 rounded-md border bg-card p-6 md:p-10"
                 >
-                    {/* Teller */}
-                    <div>
-                        <label className="mb-1 block text-sm font-medium">
-                            Teller
-                        </label>
-                        <Input value={teller?.name || ''} disabled />
-                        {errors.teller_id && (
-                            <p className="text-sm text-destructive">
-                                {errors.teller_id}
-                            </p>
-                        )}
-                    </div>
+                    <div className="grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2">
+                        {/* Teller */}
+                        <div>
+                            <label className="mb-1 block text-sm font-medium">
+                                Teller
+                            </label>
+                            <Input value={teller?.name || ''} disabled />
+                            {errors.teller_id && (
+                                <p className="text-sm text-destructive">
+                                    {errors.teller_id}
+                                </p>
+                            )}
+                        </div>
 
-                    {/* Branch Day */}
-                    <div>
-                        <label className="mb-1 block text-sm font-medium">
-                            Branch Day
-                        </label>
-                        <Input
-                            value={formatDate(branch_day?.business_date || '')}
-                            disabled
-                        />
-                        {errors.branch_day_id && (
-                            <p className="text-sm text-destructive">
-                                {errors.branch_day_id}
-                            </p>
-                        )}
-                    </div>
+                        {/* Branch Day */}
+                        <div>
+                            <label className="mb-1 block text-sm font-medium">
+                                Branch Day
+                            </label>
+                            <Input
+                                value={formatDate(
+                                    branch_day?.business_date || '',
+                                )}
+                                disabled
+                            />
+                            {errors.branch_day_id && (
+                                <p className="text-sm text-destructive">
+                                    {errors.branch_day_id}
+                                </p>
+                            )}
+                        </div>
 
-                    {/* 💰 Cash Account (NEW - CRITICAL) */}
-                    <div>
-                        <label className="mb-1 block text-sm font-medium">
-                            Cash Account
-                        </label>
+                        {/* 💰 Cash Account (NEW - CRITICAL) */}
+                        <div>
+                            <label className="mb-1 block text-sm font-medium">
+                                Cash Account
+                            </label>
 
-                        <Select
-                            value={data.cash_account_id}
-                            onChange={(val) => setData('cash_account_id', val)}
-                            options={cash_accounts.map((acc) => ({
-                                value: acc.id.toString(),
-                                label: acc.name,
-                            }))}
-                            placeholder="Select Cash Account"
-                        />
+                            <Select
+                                value={data.cash_account_id}
+                                onChange={(val) =>
+                                    setData('cash_account_id', val)
+                                }
+                                options={cash_accounts.map((acc) => ({
+                                    value: acc.id.toString(),
+                                    label: acc.name,
+                                }))}
+                                placeholder="Select Cash Account"
+                            />
 
-                        {errors.cash_account_id && (
-                            <p className="text-sm text-destructive">
-                                {errors.cash_account_id}
-                            </p>
-                        )}
-                    </div>
+                            {errors.cash_account_id && (
+                                <p className="text-sm text-destructive">
+                                    {errors.cash_account_id}
+                                </p>
+                            )}
+                        </div>
 
-                    {/* 📝 Remarks */}
-                    <div>
-                        <label className="mb-1 block text-sm font-medium">
-                            Remarks (Optional)
-                        </label>
-                        <Input
-                            value={data.remarks}
-                            onChange={(e) => setData('remarks', e.target.value)}
-                            placeholder="Enter remarks"
-                        />
-                        {errors.remarks && (
-                            <p className="text-sm text-destructive">
-                                {errors.remarks}
-                            </p>
-                        )}
+                        {/* 📝 Remarks */}
+                        <div>
+                            <label className="mb-1 block text-sm font-medium">
+                                Remarks (Optional)
+                            </label>
+                            <Input
+                                value={data.remarks}
+                                onChange={(e) =>
+                                    setData('remarks', e.target.value)
+                                }
+                                placeholder="Enter remarks"
+                            />
+                            {errors.remarks && (
+                                <p className="text-sm text-destructive">
+                                    {errors.remarks}
+                                </p>
+                            )}
+                        </div>
                     </div>
 
                     {/* Submit */}
-                    <button
-                        type="submit"
-                        disabled={processing}
-                        className="mt-4 w-full rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-                    >
-                        {processing ? 'Opening Session...' : 'Open Session'}
-                    </button>
+                    <div className="mt-4 flex justify-end">
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className="mt-4 rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                        >
+                            {processing ? 'Opening Session...' : 'Open Session'}
+                        </button>
+                    </div>
                 </form>
             </div>
         </CustomAuthLayout>

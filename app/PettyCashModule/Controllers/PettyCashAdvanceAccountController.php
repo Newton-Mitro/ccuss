@@ -6,7 +6,9 @@ use App\FinanceAndAccounting\Models\LedgerAccount;
 use App\Http\Controllers\Controller;
 use App\PettyCashModule\Models\PettyCashAdvanceAccount;
 use App\PettyCashModule\Models\PettyCashAccount;
+use App\SubledgerModule\Models\Account;
 use App\SystemAdministration\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -67,16 +69,55 @@ class PettyCashAdvanceAccountController extends Controller
         );
     }
 
+
+
+
     public function store(Request $request)
     {
         $data = $request->validate([
+            // account layer
+            'name' => 'nullable|string|max:255',
+            'account_number' => 'required|string|unique:accounts,account_number',
+
+            'organization_id' => 'nullable|exists:organizations,id',
+
+            // advance layer
             'petty_cash_account_id' => 'required|exists:petty_cash_accounts,id',
             'employee_id' => 'required|exists:users,id',
-            'ledger_account_id' => 'required|exists:ledger_accounts,id',
             'status' => 'in:active,inactive',
         ]);
 
-        PettyCashAdvanceAccount::create($data);
+        DB::transaction(function () use ($data) {
+
+            // 1. Create advance account
+            $advance = PettyCashAdvanceAccount::create([
+                'petty_cash_account_id' => $data['petty_cash_account_id'],
+                'employee_id' => $data['employee_id'],
+                'status' => $data['status'] ?? 'active',
+            ]);
+
+            // 2. Create central account
+            $account = Account::create([
+                'organization_id' => $data['organization_id'] ?? null,
+                'branch_id' => optional($advance->pettyCashAccount)->branch_id,
+
+                'account_number' => $data['account_number'],
+                'name' => ($data['name'] ?? 'Advance - Employee') . ' (Advance)',
+
+                'type' => 'employee_advance', // 🔥 important
+                'balance' => 0,
+                'status' => 'active',
+
+                // polymorphic link
+                'accountable_type' => PettyCashAdvanceAccount::class,
+                'accountable_id' => $advance->id,
+            ]);
+
+            // 3. Optional reverse link
+            $advance->update([
+                'account_id' => $account->id,
+            ]);
+        });
 
         return redirect()
             ->route('petty-cash-advance-accounts.index')
@@ -109,13 +150,27 @@ class PettyCashAdvanceAccountController extends Controller
     public function update(Request $request, PettyCashAdvanceAccount $pettyCashAdvanceAccount)
     {
         $data = $request->validate([
+            'name' => 'nullable|string|max:255',
+            'account_number' => "required|string|unique:accounts,account_number,{$pettyCashAdvanceAccount->account_id}",
+
             'petty_cash_account_id' => 'required|exists:petty_cash_accounts,id',
             'employee_id' => 'required|exists:users,id',
-            'ledger_account_id' => 'required|exists:ledger_accounts,id',
             'status' => 'in:active,inactive',
         ]);
 
-        $pettyCashAdvanceAccount->update($data);
+        DB::transaction(function () use ($data, $pettyCashAdvanceAccount) {
+
+            $pettyCashAdvanceAccount->update([
+                'petty_cash_account_id' => $data['petty_cash_account_id'],
+                'employee_id' => $data['employee_id'],
+                'status' => $data['status'] ?? 'active',
+            ]);
+
+            $pettyCashAdvanceAccount->account?->update([
+                'name' => ($data['name'] ?? 'Advance - Employee') . ' (Advance)',
+                'account_number' => $data['account_number'],
+            ]);
+        });
 
         return redirect()
             ->route('petty-cash-advance-accounts.index')
@@ -124,7 +179,10 @@ class PettyCashAdvanceAccountController extends Controller
 
     public function destroy(PettyCashAdvanceAccount $pettyCashAdvanceAccount)
     {
-        $pettyCashAdvanceAccount->delete();
+        DB::transaction(function () use ($pettyCashAdvanceAccount) {
+            $pettyCashAdvanceAccount->account?->delete();
+            $pettyCashAdvanceAccount->delete();
+        });
 
         return back()->with('success', 'Deleted successfully');
     }

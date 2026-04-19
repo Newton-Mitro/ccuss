@@ -146,7 +146,7 @@ export default function Index() {
                 {/* Desktop Table */}
                 <div className="hidden h-[calc(100vh-360px)] overflow-auto rounded-md border border-border bg-card md:block">
                     <table className="w-full border-collapse">
-                        <thead className="sticky top-0 bg-muted">
+                        <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
                             <tr>
                                 {[
                                     '#',
@@ -171,7 +171,7 @@ export default function Index() {
                                 branchDays.data.map((bd, idx) => (
                                     <tr
                                         key={bd.id}
-                                        className="border-b even:bg-muted/30"
+                                        className="border-b even:bg-muted/10"
                                     >
                                         <td className="px-2 py-1">{idx + 1}</td>
                                         <td className="px-2 py-1">

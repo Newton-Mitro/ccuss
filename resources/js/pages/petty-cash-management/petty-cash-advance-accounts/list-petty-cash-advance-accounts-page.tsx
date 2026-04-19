@@ -172,7 +172,7 @@ export default function ListAdvanceExpensesPage() {
                 {/* Table */}
                 <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border bg-card">
                     <table className="w-full text-sm">
-                        <thead className="sticky top-0 bg-muted">
+                        <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
                             <tr>
                                 {[
                                     'Employee',
@@ -196,7 +196,7 @@ export default function ListAdvanceExpensesPage() {
                                 paginated_data.data.map((a) => (
                                     <tr
                                         key={a.id}
-                                        className="border-b even:bg-muted/30"
+                                        className="border-b even:bg-muted/10"
                                     >
                                         <td className="px-2 py-1 font-medium">
                                             {a.employee?.name || 'N/A'}

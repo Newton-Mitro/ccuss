@@ -201,7 +201,7 @@ export default function VoucherView() {
                 {/* Voucher Lines Table */}
                 <div className="mt-4 overflow-auto rounded-md border">
                     <table className="w-full border-collapse">
-                        <thead className="sticky top-0 bg-muted">
+                        <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
                             <tr>
                                 {[
                                     'Ledger, Subledger, Reference Account',
@@ -228,7 +228,7 @@ export default function VoucherView() {
                                 voucher.lines.map((line) => (
                                     <tr
                                         key={line.id}
-                                        className="border-b even:bg-muted/30"
+                                        className="border-b even:bg-muted/10"
                                     >
                                         <td className="px-2 py-1">
                                             <div className="">

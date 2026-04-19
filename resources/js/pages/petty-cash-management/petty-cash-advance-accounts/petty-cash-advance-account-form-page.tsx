@@ -81,7 +81,7 @@ const AdvanceExpenseForm = ({
                 onSubmit={handleSubmit}
                 className="space-y-4 rounded-md border bg-card p-4"
             >
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     {/* Petty Cash Account */}
                     <div>
                         <Label className="text-xs">Petty Cash Account</Label>

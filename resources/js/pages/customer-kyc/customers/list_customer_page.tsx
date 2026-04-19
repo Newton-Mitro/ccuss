@@ -105,7 +105,7 @@ export default function Index() {
                         />
                     </div>
 
-                    <div className="w-48">
+                    <div className="w-60">
                         <Select
                             value={data.status}
                             onChange={(value) => {
@@ -122,7 +122,7 @@ export default function Index() {
                 {/* ===================== */}
                 <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
                     <table className="w-full border-collapse">
-                        <thead className="sticky top-0 bg-muted">
+                        <thead className="sticky top-0 bg-muted/10 text-sm text-muted/10">
                             <tr>
                                 {[
                                     'Customer Id',
@@ -147,7 +147,7 @@ export default function Index() {
                             {paginated_data.data.map((c: Customer) => (
                                 <tr
                                     key={c.id}
-                                    className="border-b even:bg-muted/30"
+                                    className="border-b even:bg-muted/10"
                                 >
                                     <td className="px-2 py-1">{c.id}</td>
                                     <td className="px-2 py-1">

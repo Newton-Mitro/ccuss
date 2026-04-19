@@ -64,22 +64,24 @@ const OpenBranchDay = ({ branch, business_date }: Props) => {
                 onSubmit={handleSubmit}
                 className="flex w-full flex-col gap-4 rounded-md border bg-card p-4 sm:p-6"
             >
-                {/* Branch Selection */}
-                <div>
-                    <Label className="text-xs">Select Branch</Label>
-                    <Input value={branch?.name} disabled></Input>
-                    <InputError message={errors.branch_id} />
-                </div>
+                <div className="grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2">
+                    {/* Branch Selection */}
+                    <div>
+                        <Label className="text-xs">Select Branch</Label>
+                        <Input value={branch?.name} disabled></Input>
+                        <InputError message={errors.branch_id} />
+                    </div>
 
-                {/* Business Date */}
-                <div>
-                    <Label className="text-xs">Business Date</Label>
-                    <AppDatePicker
-                        label=""
-                        value={data.business_date}
-                        onChange={(val) => setData('business_date', val)}
-                    />
-                    <InputError message={errors.business_date} />
+                    {/* Business Date */}
+                    <div>
+                        <Label className="text-xs">Business Date</Label>
+                        <AppDatePicker
+                            label=""
+                            value={data.business_date}
+                            onChange={(val) => setData('business_date', val)}
+                        />
+                        <InputError message={errors.business_date} />
+                    </div>
                 </div>
 
                 {/* Submit */}

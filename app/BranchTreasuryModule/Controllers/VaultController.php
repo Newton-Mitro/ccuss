@@ -8,6 +8,7 @@ use App\SubledgerModule\Models\Account;
 use App\SystemAdministration\Models\Branch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class VaultController extends Controller
@@ -70,21 +71,53 @@ class VaultController extends Controller
         ]);
     }
 
+
+
     public function store(Request $request)
     {
         $branchId = Auth::user()->branch_id;
 
-        $validated = $request->validate([
-            'account_id' => 'required|exists:accounts,id', // ✅ REQUIRED
-            'name' => 'required|string|max:255',
+        $data = $request->validate([
+            // account layer
+            'name' => 'nullable|string|max:255',
+            'account_number' => 'required|string|unique:accounts,account_number',
+            'organization_id' => 'nullable|exists:organizations,id',
+
+            // vault layer
             'is_active' => 'boolean',
         ]);
 
-        // 🔐 Force branch from auth
-        $validated['branch_id'] = $branchId;
-        $validated['is_active'] = $validated['is_active'] ?? true;
+        DB::transaction(function () use ($data, $branchId) {
 
-        Vault::create($validated);
+            // 1. Create Vault
+            $vault = Vault::create([
+                'branch_id' => $branchId,
+                'name' => $data['name'] ?? 'Main Vault',
+                'is_active' => $data['is_active'] ?? true,
+            ]);
+
+            // 2. Create Account (🔥 core part)
+            $account = Account::create([
+                'organization_id' => $data['organization_id'] ?? null,
+                'branch_id' => $branchId,
+
+                'account_number' => $data['account_number'],
+                'name' => ($data['name'] ?? 'Vault') . ' (Vault)',
+
+                'type' => 'vault', // 🔥 important
+                'balance' => 0,
+                'status' => 'active',
+
+                // polymorphic
+                'accountable_type' => Vault::class,
+                'accountable_id' => $vault->id,
+            ]);
+
+            // 3. Optional reverse link
+            $vault->update([
+                'account_id' => $account->id,
+            ]);
+        });
 
         return redirect()
             ->route('vaults.index')
@@ -123,16 +156,24 @@ class VaultController extends Controller
             abort(403);
         }
 
-        $validated = $request->validate([
-            'account_id' => 'required|exists:accounts,id', // ✅ REQUIRED
-            'name' => 'required|string|max:255',
+        $data = $request->validate([
+            'name' => 'nullable|string|max:255',
+            'account_number' => "required|string|unique:accounts,account_number,{$vault->account_id}",
             'is_active' => 'boolean',
         ]);
 
-        // 🔐 Prevent branch change
-        $validated['branch_id'] = $vault->branch_id;
+        DB::transaction(function () use ($data, $vault) {
 
-        $vault->update($validated);
+            $vault->update([
+                'name' => $data['name'] ?? 'Vault',
+                'is_active' => $data['is_active'] ?? true,
+            ]);
+
+            $vault->account?->update([
+                'name' => ($data['name'] ?? 'Vault') . ' (Vault)',
+                'account_number' => $data['account_number'],
+            ]);
+        });
 
         return redirect()
             ->route('vaults.index')
@@ -145,14 +186,16 @@ class VaultController extends Controller
             abort(403);
         }
 
-        // 🚫 Prevent delete if denominations exist
         if ($vault->denominations()->exists()) {
             return back()->withErrors([
                 'vault' => 'Cannot delete vault with existing denominations'
             ]);
         }
 
-        $vault->delete();
+        DB::transaction(function () use ($vault) {
+            $vault->account?->delete();
+            $vault->delete();
+        });
 
         return back()->with('success', 'Vault deleted successfully.');
     }

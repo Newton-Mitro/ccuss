@@ -399,7 +399,7 @@ function EditOrganization() {
 
                                 {/* Preview Box */}
                                 <div
-                                    className="group relative h-40 w-full cursor-pointer overflow-hidden rounded-md border bg-muted"
+                                    className="group relative h-40 w-full cursor-pointer overflow-hidden rounded-md border bg-background"
                                     onClick={() =>
                                         document
                                             .getElementById('photoInput')
