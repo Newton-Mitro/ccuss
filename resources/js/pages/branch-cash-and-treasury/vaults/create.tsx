@@ -15,19 +15,21 @@ import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Branch } from '../../../types/branch';
+import { Vault } from '../../../types/cash_treasury_module';
 
 interface VaultFormPageProps extends SharedData {
-    vault?: {
-        id: number;
-        name: string;
-        branch_id: number;
-        total_balance: number;
-        is_active: boolean;
-    };
+    vault?: Vault;
     branches: Branch[];
+    accounts: any[];
+    branch: Branch;
 }
 
-const VaultForm = ({ vault, branches }: VaultFormPageProps) => {
+const VaultForm = ({
+    vault,
+    branches,
+    accounts,
+    branch,
+}: VaultFormPageProps) => {
     useFlashToastHandler();
 
     const handleBack = () => window.history.back();
@@ -36,8 +38,8 @@ const VaultForm = ({ vault, branches }: VaultFormPageProps) => {
 
     const { data, setData, post, put, processing, errors } = useForm({
         name: vault?.name || '',
-        branch_id: vault?.branch_id || '',
-        total_balance: vault?.total_balance || 0,
+        branch_id: branch.id || '',
+        account_id: vault?.account_id || '',
         is_active: vault?.is_active ?? true,
     });
 
@@ -89,24 +91,39 @@ const VaultForm = ({ vault, branches }: VaultFormPageProps) => {
                 className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6"
             >
                 {/* Vault Info */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div>
-                        <Label className="text-xs">Vault Name</Label>
-                        <Input
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
-                            className="h-8 text-sm"
+                        <Label className="text-xs">Account</Label>
+
+                        <Select
+                            value={data.account_id.toString()}
+                            onChange={(val) => {
+                                setData('account_id', Number(val));
+                            }}
+                            options={accounts.map((b) => ({
+                                value: b.id.toString(),
+                                label: b.name,
+                            }))}
+                            placeholder="Select Account"
                         />
-                        <InputError message={errors.name} />
+                        <InputError message={errors.account_id} />
                     </div>
 
                     <div>
                         <Label className="text-xs">Branch</Label>
+
                         <Select
                             value={data.branch_id.toString()}
-                            onChange={(val) =>
-                                setData('branch_id', Number(val))
-                            }
+                            onChange={(val) => {
+                                setData('branch_id', Number(val));
+                                const selectedBranch = branches.find(
+                                    (b) => b.id === Number(val),
+                                );
+                                setData(
+                                    'name',
+                                    `${selectedBranch?.name} Vault`,
+                                );
+                            }}
                             options={branches.map((b) => ({
                                 value: b.id.toString(),
                                 label: b.name,
@@ -117,37 +134,35 @@ const VaultForm = ({ vault, branches }: VaultFormPageProps) => {
                     </div>
 
                     <div>
-                        <Label className="text-xs">Opening Balance</Label>
+                        <Label className="text-xs">Vault Name</Label>
                         <Input
-                            type="number"
-                            value={data.total_balance}
-                            onChange={(e) =>
-                                setData('total_balance', Number(e.target.value))
-                            }
+                            value={data.name}
+                            onChange={(e) => setData('name', e.target.value)}
                             className="h-8 text-sm"
                         />
-                        <InputError message={errors.total_balance} />
+                        <InputError message={errors.name} />
                     </div>
-                </div>
-                <div className="flex flex-col gap-2">
-                    <Label className="text-xs"></Label>
-                    <div className="">
-                        <ToggleGroup
-                            type="single" // single or multiple
-                            value={data.is_active ? 'true' : 'false'}
-                            onValueChange={(val) =>
-                                setData('is_active', val === 'true')
-                            }
-                            size="sm" // size variant: default, sm, lg
-                            variant="outline" // style variant: default, outline, etc.
-                        >
-                            <ToggleGroupItem value="true">
-                                Active
-                            </ToggleGroupItem>
-                            <ToggleGroupItem value="false">
-                                Inactive
-                            </ToggleGroupItem>
-                        </ToggleGroup>
+
+                    <div className="flex flex-col gap-1">
+                        <Label className="text-xs">Status</Label>
+                        <div className="">
+                            <ToggleGroup
+                                type="single" // single or multiple
+                                value={data.is_active ? 'true' : 'false'}
+                                onValueChange={(val) =>
+                                    setData('is_active', val === 'true')
+                                }
+                                size="sm" // size variant: default, sm, lg
+                                variant="outline" // style variant: default, outline, etc.
+                            >
+                                <ToggleGroupItem value="true">
+                                    Active
+                                </ToggleGroupItem>
+                                <ToggleGroupItem value="false">
+                                    Inactive
+                                </ToggleGroupItem>
+                            </ToggleGroup>
+                        </div>
                     </div>
                 </div>
 

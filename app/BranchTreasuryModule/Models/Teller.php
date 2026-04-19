@@ -19,7 +19,6 @@ class Teller extends Model
         'user_id',
         'branch_id',
         'account_id',
-        'code',
         'name',
         'max_cash_limit',
         'max_transaction_limit',

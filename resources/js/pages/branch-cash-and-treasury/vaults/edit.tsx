@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
 import React from 'react';
+
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
@@ -11,31 +12,31 @@ import {
     ToggleGroup,
     ToggleGroupItem,
 } from '../../../components/ui/toggle-group';
+
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Branch } from '../../../types/branch';
+import { Vault } from '../../../types/cash_treasury_module';
 
 interface VaultFormPageProps extends SharedData {
-    vault?: {
-        id: number;
-        name: string;
-        branch_id: number;
-        is_active: boolean;
-    };
+    vault?: Vault;
     branches: Branch[];
+    accounts?: any[];
 }
 
-const VaultForm = ({ vault, branches }: VaultFormPageProps) => {
+const VaultForm = ({ vault, branches, accounts = [] }: VaultFormPageProps) => {
     useFlashToastHandler();
 
-    const handleBack = () => window.history.back();
-
     const isEdit = !!vault;
+
+    const handleBack = () => window.history.back();
 
     const { data, setData, post, put, processing, errors } = useForm({
         name: vault?.name || '',
         branch_id: vault?.branch_id || '',
+        account_id: vault?.account_id || '',
         is_active: vault?.is_active ?? true,
     });
 
@@ -43,13 +44,9 @@ const VaultForm = ({ vault, branches }: VaultFormPageProps) => {
         e.preventDefault();
 
         if (isEdit) {
-            put(`/vaults/${vault.id}`, {
-                preserveScroll: true,
-            });
+            put(`/vaults/${vault.id}`, { preserveScroll: true });
         } else {
-            post('/vaults', {
-                preserveScroll: true,
-            });
+            post('/vaults', { preserveScroll: true });
         }
     };
 
@@ -73,37 +70,27 @@ const VaultForm = ({ vault, branches }: VaultFormPageProps) => {
                     title={
                         isEdit ? `Edit Vault: ${vault?.name}` : 'Create Vault'
                     }
-                    description="Manage vault details."
+                    description="Manage vault configuration with branch & account mapping."
                 />
-                <div className="flex flex-wrap gap-2">
-                    <button
-                        type="button"
-                        onClick={handleBack}
-                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                        <span className="hidden sm:inline">Back</span>
-                    </button>
-                </div>
+
+                <button
+                    type="button"
+                    onClick={handleBack}
+                    className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
+                >
+                    <ArrowLeft className="h-4 w-4" />
+                    <span className="hidden sm:inline">Back</span>
+                </button>
             </div>
 
             {/* Form */}
             <form
                 onSubmit={handleSubmit}
-                className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6"
+                className="space-y-6 rounded-md border bg-card p-4 sm:p-6"
             >
-                {/* Vault Info */}
+                {/* Core Fields */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <div>
-                        <Label className="text-xs">Vault Name</Label>
-                        <Input
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
-                            className="h-8 text-sm"
-                        />
-                        <InputError message={errors.name} />
-                    </div>
-
+                    {/* Branch */}
                     <div>
                         <Label className="text-xs">Branch</Label>
                         <Select
@@ -119,11 +106,40 @@ const VaultForm = ({ vault, branches }: VaultFormPageProps) => {
                         />
                         <InputError message={errors.branch_id} />
                     </div>
+
+                    {/* Account */}
+                    <div>
+                        <Label className="text-xs">Account</Label>
+                        <Select
+                            value={data.account_id?.toString() || ''}
+                            onChange={(val) =>
+                                setData('account_id', Number(val))
+                            }
+                            options={accounts.map((a) => ({
+                                value: a.id.toString(),
+                                label: a.name,
+                            }))}
+                            placeholder="Select Account"
+                        />
+                        <InputError message={errors.account_id} />
+                    </div>
+
+                    {/* Vault Name */}
+                    <div>
+                        <Label className="text-xs">Vault Name</Label>
+                        <Input
+                            value={data.name}
+                            onChange={(e) => setData('name', e.target.value)}
+                            className="h-8 text-sm"
+                        />
+                        <InputError message={errors.name} />
+                    </div>
                 </div>
 
-                {/* Active/Inactive Toggle */}
+                {/* Status */}
                 <div className="flex flex-col gap-2">
                     <Label className="text-xs">Status</Label>
+
                     <ToggleGroup
                         type="single"
                         value={data.is_active ? 'true' : 'false'}
@@ -143,6 +159,7 @@ const VaultForm = ({ vault, branches }: VaultFormPageProps) => {
                         >
                             Active
                         </ToggleGroupItem>
+
                         <ToggleGroupItem
                             value="false"
                             className={
@@ -156,21 +173,21 @@ const VaultForm = ({ vault, branches }: VaultFormPageProps) => {
                     </ToggleGroup>
                 </div>
 
-                {/* Submit Button */}
+                {/* Submit */}
                 <div className="flex justify-end">
                     <Button
                         type="submit"
                         disabled={processing}
-                        className="flex items-center justify-center rounded-md bg-primary px-6 py-2 font-medium text-primary-foreground hover:bg-primary/90"
+                        className="flex items-center gap-2"
                     >
                         {processing ? (
                             <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                <Loader2 className="h-4 w-4 animate-spin" />
                                 Saving...
                             </>
                         ) : (
                             <>
-                                <CheckCheck className="mr-2 h-4 w-4" />
+                                <CheckCheck className="h-4 w-4" />
                                 {isEdit ? 'Update Vault' : 'Create Vault'}
                             </>
                         )}

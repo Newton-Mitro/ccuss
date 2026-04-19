@@ -17,7 +17,6 @@ class BankAccount extends Model
         'bank_name',
         'branch_name',
         'account_number',
-        'iban',
         'swift_code',
         'routing_number',
     ];

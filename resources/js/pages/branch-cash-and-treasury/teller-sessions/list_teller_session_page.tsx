@@ -14,21 +14,15 @@ import { Input } from '../../../components/ui/input';
 import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
+import { formatDateTime } from '../../../lib/date_util';
 import { BreadcrumbItem, SharedData } from '../../../types';
+import { TellerSession } from '../../../types/cash_treasury_module';
 import { tellerSessionStatuses } from './data/teller_session_statuses';
 
 interface TellerSessionPageProps extends SharedData {
     sessions: {
-        data: {
-            id: number;
-            opening_cash: number;
-            closing_cash: number | null;
-            status: 'open' | 'closed';
-            opened_at: string;
-            closed_at: string | null;
-            teller: { id: number; name: string };
-            branch_day: { id: number; business_date: string };
-        }[];
+        data: TellerSession[];
         links: { url: string | null; label: string; active: boolean }[];
     };
     filters: Record<string, string>;
@@ -46,7 +40,6 @@ export default function TellerSessionsIndexPage() {
         page: Number(filters.page) || 1,
     });
 
-    // 🔹 Fetch sessions on filters/search change
     const handleSearch = () => {
         get(route('teller-sessions.index'), { preserveState: true });
     };
@@ -60,11 +53,29 @@ export default function TellerSessionsIndexPage() {
         { title: 'Teller Sessions', href: '#' },
     ];
 
+    const StatusBadge = ({ status }: { status: string }) => {
+        const map: Record<string, string> = {
+            open: 'bg-green-100 text-green-700',
+            closed: 'bg-gray-200 text-gray-700',
+            suspended: 'bg-red-100 text-red-600',
+        };
+
+        return (
+            <span
+                className={`rounded-full px-2 py-1 text-xs font-medium ${
+                    map[status] || 'bg-muted'
+                }`}
+            >
+                {status}
+            </span>
+        );
+    };
+
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Teller Sessions" />
 
-            <div className="space-y-4 p-2 text-foreground">
+            <div className="space-y-4 text-foreground">
                 {/* Header */}
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
@@ -93,7 +104,7 @@ export default function TellerSessionsIndexPage() {
                         />
                     </div>
 
-                    <div className="w-48">
+                    <div className="w-60">
                         <Select
                             value={data.status}
                             onChange={(value) => {
@@ -101,6 +112,7 @@ export default function TellerSessionsIndexPage() {
                                 setData('page', 1);
                             }}
                             options={tellerSessionStatuses}
+                            placeholder="All Status"
                         />
                     </div>
                 </div>
@@ -113,8 +125,10 @@ export default function TellerSessionsIndexPage() {
                                 {[
                                     'Teller',
                                     'Business Date',
-                                    'Opening Cash',
-                                    'Closing Cash',
+                                    'Cash Account',
+                                    'Expected',
+                                    'Closing',
+                                    'Difference',
                                     'Status',
                                     'Opened At',
                                     'Actions',
@@ -128,6 +142,7 @@ export default function TellerSessionsIndexPage() {
                                 ))}
                             </tr>
                         </thead>
+
                         <tbody>
                             {sessions.data.length > 0 ? (
                                 sessions.data.map((s) => (
@@ -136,28 +151,59 @@ export default function TellerSessionsIndexPage() {
                                         className="border-b even:bg-muted/30"
                                     >
                                         <td className="px-2 py-1">
-                                            {s.teller.name}
+                                            {s.teller?.name}
                                         </td>
+
                                         <td className="px-2 py-1">
-                                            {s.branch_day.business_date}
+                                            {formatDateTime(
+                                                s.branch_day?.business_date,
+                                            )}
                                         </td>
+
                                         <td className="px-2 py-1">
-                                            {Number(s.opening_cash).toFixed(2)}
+                                            {s.cash_account?.name || '—'}
                                         </td>
+
                                         <td className="px-2 py-1">
-                                            {s.closing_cash !== null
-                                                ? Number(
-                                                      s.closing_cash,
-                                                  ).toFixed(2)
+                                            {s.expected_balance !== null
+                                                ? formatBDTCurrency(
+                                                      s.expected_balance,
+                                                  )
                                                 : '—'}
                                         </td>
+
                                         <td className="px-2 py-1">
-                                            {s.status}
+                                            {s.closing_cash !== null
+                                                ? formatBDTCurrency(
+                                                      s.closing_cash,
+                                                  )
+                                                : '—'}
                                         </td>
+
                                         <td className="px-2 py-1">
-                                            {new Date(
-                                                s.opened_at,
-                                            ).toLocaleString()}
+                                            {s.difference !== null ? (
+                                                <span
+                                                    className={
+                                                        s.difference === 0
+                                                            ? 'text-green-600'
+                                                            : 'text-red-600'
+                                                    }
+                                                >
+                                                    {formatBDTCurrency(
+                                                        s.difference,
+                                                    )}
+                                                </span>
+                                            ) : (
+                                                '—'
+                                            )}
+                                        </td>
+
+                                        <td className="px-2 py-1 capitalize">
+                                            <StatusBadge status={s.status} />
+                                        </td>
+
+                                        <td className="px-2 py-1">
+                                            {formatDateTime(s.opened_at)}
                                         </td>
 
                                         <td className="px-2 py-1">
@@ -181,7 +227,7 @@ export default function TellerSessionsIndexPage() {
                                                         </TooltipContent>
                                                     </Tooltip>
 
-                                                    {/* Close Session */}
+                                                    {/* Close */}
                                                     {s.status === 'open' && (
                                                         <Tooltip>
                                                             <TooltipTrigger
@@ -210,7 +256,7 @@ export default function TellerSessionsIndexPage() {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={7}
+                                        colSpan={9}
                                         className="px-4 py-6 text-center text-muted-foreground"
                                     >
                                         No sessions found.
@@ -224,7 +270,7 @@ export default function TellerSessionsIndexPage() {
                 {/* Pagination */}
                 <DataTablePagination
                     perPage={data.per_page}
-                    onPerPageChange={function (value: number): void {
+                    onPerPageChange={(value: number) => {
                         setData('per_page', value);
                         setData('page', 1);
                     }}

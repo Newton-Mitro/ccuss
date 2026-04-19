@@ -4,6 +4,7 @@ namespace App\BranchTreasuryModule\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\BranchTreasuryModule\Models\Vault;
+use App\SubledgerModule\Models\Account;
 use App\SystemAdministration\Models\Branch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -63,6 +64,8 @@ class VaultController extends Controller
 
         return Inertia::render('branch-cash-and-treasury/vaults/create', [
             'branch' => $branch,
+            'branches' => Branch::select('id', 'name')->get(),
+            'accounts' => Account::all(),
             // 👉 you should pass accounts list filtered by branch
         ]);
     }
@@ -98,6 +101,8 @@ class VaultController extends Controller
         return Inertia::render('branch-cash-and-treasury/vaults/edit', [
             'vault' => $vault->load('account'),
             'branch' => Auth::user()->branch,
+            'branches' => Branch::select('id', 'name')->get(),
+            'accounts' => Account::all(),
         ]);
     }
 

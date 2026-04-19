@@ -32,12 +32,13 @@ export interface Vault {
     id: number;
     branch_id: number;
     name: string;
-    total_balance: number;
+    account_id: number;
     is_active: boolean;
     created_at: string;
     updated_at: string;
 
     branch?: Branch;
+    account?: any;
     vaultDenominations?: VaultDenomination[];
     voucher_entries?: VaultTransaction[];
 }
@@ -46,7 +47,6 @@ export interface Teller {
     id: number;
     user_id: number;
     branch_id: number;
-    code: string;
     name: string;
     current_balance: number;
     max_cash_limit: number;
@@ -91,19 +91,38 @@ export interface VaultTransaction {
 
 export interface TellerSession {
     id: number;
+
     teller_id: number;
+    branch_id: number;
     branch_day_id: number;
-    opening_cash: number;
-    closing_cash?: number;
+    cash_account_id?: number | null;
+
+    // 🕒 Lifecycle
     opened_at: string;
-    closed_at?: string;
-    status: 'open' | 'closed';
+    closed_at?: string | null;
+
+    // 📊 Status
+    status: 'open' | 'closed' | 'suspended';
+
+    // 💰 Cash Tracking
+    closing_cash?: number | null;
+    expected_balance?: number | null;
+    difference?: number | null;
+
+    // 📝 Optional
+    remarks?: string | null;
+
     created_at: string;
     updated_at: string;
 
+    // 🔗 Relations
     teller?: Teller;
     branch_day?: BranchDay;
+    cash_account?: any;
+
+    // 🔮 Future-ready (keep if you plan to use)
     cash_drawers?: CashDrawer[];
+    branch?: Branch;
     vault_transfers?: TellerVaultTransfer[];
 }
 

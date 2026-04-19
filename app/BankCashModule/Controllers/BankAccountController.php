@@ -127,7 +127,6 @@ class BankAccountController extends Controller
             'bank_name' => 'required|string|max:255',
             'branch_name' => 'nullable|string|max:255',
             'account_number' => "required|string|unique:bank_accounts,account_number,{$bankAccount->id}",
-            'iban' => 'nullable|string|max:50',
             'swift_code' => 'nullable|string|max:50',
             'routing_number' => 'nullable|string|max:50',
         ]);
@@ -138,7 +137,6 @@ class BankAccountController extends Controller
                 'bank_name' => $data['bank_name'],
                 'branch_name' => $data['branch_name'] ?? null,
                 'account_number' => $data['account_number'],
-                'iban' => $data['iban'] ?? null,
                 'swift_code' => $data['swift_code'] ?? null,
                 'routing_number' => $data['routing_number'] ?? null,
             ]);

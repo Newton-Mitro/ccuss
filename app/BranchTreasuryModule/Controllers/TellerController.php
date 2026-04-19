@@ -4,6 +4,7 @@ namespace App\BranchTreasuryModule\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\BranchTreasuryModule\Models\Teller;
+use App\SubledgerModule\Models\Account;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\User;
 use Illuminate\Http\Request;
@@ -25,11 +26,15 @@ class TellerController extends Controller
 
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('code', 'like', "%{$search}%")
                     ->orWhereHas(
                         'branch',
                         fn($b) =>
                         $b->where('name', 'like', "%{$search}%")
+                    )
+                    ->orWhereHas(
+                        'user',
+                        fn($u) =>
+                        $u->where('name', 'like', "%{$search}%")
                     );
             });
         }
@@ -39,9 +44,14 @@ class TellerController extends Controller
             $query->where('branch_id', $request->branch_id);
         }
 
-        // 📊 Status Filter
-        if ($request->filled('status')) {
-            $query->where('is_active', (bool) $request->status);
+        // 🏦 Account Filter (NEW - matches schema)
+        if ($request->filled('account_id')) {
+            $query->where('account_id', $request->account_id);
+        }
+
+        // 📊 Status Filter (is_active)
+        if ($request->filled('is_active')) {
+            $query->where('is_active', (bool) $request->is_active);
         }
 
         $tellers = $query->latest()
@@ -53,11 +63,13 @@ class TellerController extends Controller
             'filters' => $request->only([
                 'search',
                 'branch_id',
-                'status',
+                'account_id',
+                'is_active',
                 'per_page',
-                'page'
+                'page',
             ]),
             'branches' => Branch::select('id', 'name')->get(),
+            'accounts' => Account::select('id', 'name')->get(),
         ]);
     }
 
@@ -67,6 +79,7 @@ class TellerController extends Controller
 
         return Inertia::render('branch-cash-and-treasury/tellers/teller-form', [
             'users' => User::where('branch_id', $branch->id)->get(),
+            'accounts' => Account::where('branch_id', $branch->id)->get(),
             'branch' => $branch,
             'backUrl' => route('tellers.index'),
         ]);
@@ -78,7 +91,7 @@ class TellerController extends Controller
 
         $data = $request->validate([
             'user_id' => 'required|exists:users,id',
-            'account_id' => 'required|exists:accounts,id', // ✅ REQUIRED
+            'account_id' => 'nullable|exists:accounts,id',
             'name' => 'required|string|max:255',
             'max_cash_limit' => 'required|numeric|min:0',
             'max_transaction_limit' => 'required|numeric|min:0',
@@ -87,31 +100,19 @@ class TellerController extends Controller
 
         return DB::transaction(function () use ($data, $branchId) {
 
-            // 🔐 Force branch from auth (never trust frontend)
             $data['branch_id'] = $branchId;
-
-            // ⚠️ Safer code generation (still simple but wrapped in TX)
-            $lastId = Teller::lockForUpdate()->max('id') ?? 0;
-            $nextId = $lastId + 1;
-
-            $data['code'] = 'TLR-'
-                . str_pad($branchId, 3, '0', STR_PAD_LEFT)
-                . '-'
-                . str_pad($nextId, 5, '0', STR_PAD_LEFT);
-
             $data['is_active'] = $data['is_active'] ?? true;
 
             $teller = Teller::create($data);
 
             return redirect()
                 ->route('tellers.index')
-                ->with('success', 'Teller created: ' . $teller->code);
+                ->with('success', 'Teller created successfully.');
         });
     }
 
     public function edit(Teller $teller): Response
     {
-        // 🔐 Branch isolation
         if ($teller->branch_id !== Auth::user()->branch_id) {
             abort(403);
         }
@@ -120,7 +121,8 @@ class TellerController extends Controller
 
         return Inertia::render('branch-cash-and-treasury/tellers/teller-form', [
             'users' => User::where('branch_id', $branch->id)->get(),
-            'teller' => $teller->load('account'),
+            'accounts' => Account::where('branch_id', $branch->id)->get(),
+            'teller' => $teller->load(['account']),
             'branch' => $branch,
             'backUrl' => route('tellers.index'),
         ]);
@@ -134,14 +136,13 @@ class TellerController extends Controller
 
         $data = $request->validate([
             'user_id' => 'required|exists:users,id',
-            'account_id' => 'required|exists:accounts,id', // ✅ REQUIRED
+            'account_id' => 'nullable|exists:accounts,id',
             'name' => 'required|string|max:255',
             'max_cash_limit' => 'required|numeric|min:0',
             'max_transaction_limit' => 'required|numeric|min:0',
             'is_active' => 'boolean',
         ]);
 
-        // 🔐 Prevent branch tampering
         $data['branch_id'] = $teller->branch_id;
 
         $teller->update($data);
@@ -168,10 +169,9 @@ class TellerController extends Controller
             abort(403);
         }
 
-        // 🚫 Prevent delete if sessions exist
         if ($teller->sessions()->exists()) {
             return back()->withErrors([
-                'teller' => 'Cannot delete teller with existing sessions'
+                'teller' => 'Cannot delete teller with active sessions'
             ]);
         }
 

@@ -57,7 +57,6 @@ return new class extends Migration {
             $table->foreignId('user_id')->constrained()->cascadeOnDelete(); // role: teller
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             $table->foreignId('account_id')->nullable()->constrained('accounts')->nullOnDelete();
-            $table->string('code', 20)->unique();
             $table->string('name');
             $table->decimal('max_cash_limit', 18, 2)->default(0);
             $table->decimal('max_transaction_limit', 18, 2)->default(0);
@@ -79,7 +78,6 @@ return new class extends Migration {
             $table->timestamp('closed_at')->nullable();
             $table->enum('status', ['open', 'closed', 'suspended'])->default('open');
             // 💰 Cash tracking (SNAPSHOT VALUES)
-            $table->decimal('opening_cash', 18, 2)->default(0);
             $table->decimal('closing_cash', 18, 2)->nullable();
             // 🧮 System-calculated (from ledger)
             $table->decimal('expected_balance', 18, 2)->nullable();

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\BranchTreasuryModule\Models\TellerSession;
 use App\BranchTreasuryModule\Models\Teller;
 use App\BranchTreasuryModule\Models\BranchDay;
+use App\SubledgerModule\Models\Account;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +17,8 @@ class TellerSessionController extends Controller
     public function index(Request $request)
     {
         $query = TellerSession::query()
-            ->with(['teller', 'branchDay']);
+            ->with(['teller', 'branchDay'])
+            ->where('branch_id', Auth::user()->branch_id); // 🔐 Branch isolation
 
         // 🔍 Search
         if ($request->filled('search')) {
@@ -26,17 +28,16 @@ class TellerSessionController extends Controller
                 $q->where('status', 'like', "%{$search}%")
                     ->orWhereHas(
                         'teller',
-                        fn($t) =>
-                        $t->where('name', 'like', "%{$search}%")
+                        fn($t) => $t->where('name', 'like', "%{$search}%")
                     )
                     ->orWhereHas(
                         'branchDay',
-                        fn($b) =>
-                        $b->where('business_date', 'like', "%{$search}%")
+                        fn($b) => $b->where('business_date', 'like', "%{$search}%")
                     );
             });
         }
 
+        // 🎯 Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
@@ -60,6 +61,7 @@ class TellerSessionController extends Controller
         );
     }
 
+
     public function create()
     {
         $user = Auth::user();
@@ -72,11 +74,14 @@ class TellerSessionController extends Controller
             ->where('status', 'open')
             ->first();
 
+        $cashAccounts = Account::all();
+
         return Inertia::render(
             'branch-cash-and-treasury/teller-sessions/open_teller_session_page',
             [
                 'teller' => $teller,
-                'branch_day' => $branchDay
+                'branch_day' => $branchDay,
+                'cash_accounts' => $cashAccounts,
             ]
         );
     }
@@ -86,18 +91,33 @@ class TellerSessionController extends Controller
         $data = $request->validate([
             'teller_id' => 'required|exists:tellers,id',
             'branch_day_id' => 'required|exists:branch_days,id',
-            'cash_account_id' => 'required|exists:accounts,id',
-            'opening_cash' => 'required|numeric|min:0',
+            'cash_account_id' => 'nullable|exists:accounts,id',
             'remarks' => 'nullable|string'
         ]);
 
         return DB::transaction(function () use ($data) {
 
+            $user = Auth::user();
+
             $teller = Teller::findOrFail($data['teller_id']);
 
-            // 🔐 Ensure teller belongs to same branch as user
-            if ($teller->branch_id !== Auth::user()->branch_id) {
-                abort(403);
+            // 🔐 Teller must belong to same branch
+            if ($teller->branch_id !== $user->branch_id) {
+                abort(403, 'Unauthorized teller access');
+            }
+
+            $branchDay = BranchDay::findOrFail($data['branch_day_id']);
+
+            // 🔐 Branch day must match branch
+            if ($branchDay->branch_id !== $user->branch_id) {
+                abort(403, 'Invalid branch day');
+            }
+
+            // 🚫 Ensure branch day is open
+            if ($branchDay->status !== 'open') {
+                return back()->withErrors([
+                    'branch_day_id' => 'Branch day is closed'
+                ]);
             }
 
             // 🚫 Prevent multiple open sessions
@@ -111,29 +131,19 @@ class TellerSessionController extends Controller
                 ]);
             }
 
-            // 🚫 Ensure branch day is open
-            $branchDay = BranchDay::findOrFail($data['branch_day_id']);
-
-            if ($branchDay->status !== 'open') {
-                return back()->withErrors([
-                    'branch_day_id' => 'Branch day is closed'
-                ]);
-            }
-
             $session = TellerSession::create([
                 'teller_id' => $data['teller_id'],
-                'branch_id' => $teller->branch_id,
+                'branch_id' => $user->branch_id,
                 'branch_day_id' => $data['branch_day_id'],
                 'cash_account_id' => $data['cash_account_id'],
                 'opened_at' => now(),
                 'status' => 'open',
-                'opening_cash' => $data['opening_cash'],
                 'remarks' => $data['remarks'] ?? null,
             ]);
 
             return redirect()
                 ->route('teller-sessions.index')
-                ->with('success', 'Teller session opened');
+                ->with('success', 'Teller session opened successfully');
         });
     }
 
@@ -162,7 +172,8 @@ class TellerSessionController extends Controller
             [
                 'session' => $tellerSession->load([
                     'teller',
-                    'branchDay'
+                    'branchDay',
+                    'cashAccount'
                 ]),
             ]
         );
@@ -172,9 +183,9 @@ class TellerSessionController extends Controller
     {
         $this->authorizeAccess($tellerSession);
 
-        if ($tellerSession->status === 'closed') {
+        if ($tellerSession->status !== 'open') {
             return back()->withErrors([
-                'session' => 'Session already closed'
+                'session' => 'Only open sessions can be closed'
             ]);
         }
 
@@ -185,8 +196,8 @@ class TellerSessionController extends Controller
 
         return DB::transaction(function () use ($tellerSession, $data) {
 
-            // 🧮 Calculate expected balance (basic version)
-            $expected = $tellerSession->opening_cash; // later: + transactions - withdrawals
+            // 🧮 Calculate expected balance from ledger
+            $expected = $this->calculateExpectedBalance($tellerSession);
 
             $difference = $data['closing_cash'] - $expected;
 
@@ -199,14 +210,30 @@ class TellerSessionController extends Controller
                 'remarks' => $data['remarks'] ?? $tellerSession->remarks,
             ]);
 
-            return back()->with('success', 'Teller session closed');
+            return back()->with('success', 'Teller session closed successfully');
         });
     }
 
+    // 🧠 Ledger Engine Hook (Plug your accounting system here)
+    private function calculateExpectedBalance(TellerSession $session): float
+    {
+        if (!$session->cash_account_id) {
+            return 0;
+        }
+
+        // 🚀 Replace with real ledger logic
+        // Example:
+        // return LedgerEntry::where('account_id', $session->cash_account_id)
+        //     ->sum(DB::raw('debit - credit'));
+
+        return 0;
+    }
+
+    // 🔐 Authorization Layer
     private function authorizeAccess(TellerSession $session)
     {
         if ($session->branch_id !== Auth::user()->branch_id) {
-            abort(403);
+            abort(403, 'Unauthorized access to session');
         }
     }
 }

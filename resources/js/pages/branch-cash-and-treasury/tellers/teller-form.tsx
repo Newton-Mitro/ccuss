@@ -32,7 +32,6 @@ const TellerForm = ({ teller, branch, users }: TellerFormPageProps) => {
 
     const { data, setData, post, put, processing, errors } = useForm({
         name: teller?.name || '',
-        code: teller?.code || '',
         user_id: teller?.user_id || '',
         branch_id: teller?.branch_id || '',
         max_cash_limit: teller?.max_cash_limit || 0,
@@ -100,7 +99,30 @@ const TellerForm = ({ teller, branch, users }: TellerFormPageProps) => {
                 className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6"
             >
                 {/* Basic Info */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
+                    <div>
+                        <Label className="text-xs">User</Label>
+                        <Select
+                            value={data.user_id.toString()}
+                            onChange={(val) => {
+                                setData('user_id', Number(val));
+                                const selectedUser = users.find(
+                                    (u) => u.id === Number(val),
+                                );
+                                setData(
+                                    'name',
+                                    `Teller - ${selectedUser?.name}`,
+                                );
+                            }}
+                            options={users.map((b) => ({
+                                value: b.id.toString(),
+                                label: b.name,
+                            }))}
+                            placeholder="Select User"
+                        />
+                        <InputError message={errors.user_id} />
+                    </div>
+
                     <div>
                         <Label className="text-xs">Teller Name</Label>
                         <Input
@@ -109,29 +131,6 @@ const TellerForm = ({ teller, branch, users }: TellerFormPageProps) => {
                             className="h-8 text-sm"
                         />
                         <InputError message={errors.name} />
-                    </div>
-
-                    <div>
-                        <Label className="text-xs">Code</Label>
-                        <Input
-                            value={data.code}
-                            onChange={(e) => setData('code', e.target.value)}
-                            className="h-8 text-sm"
-                        />
-                        <InputError message={errors.code} />
-                    </div>
-                    <div>
-                        <Label className="text-xs">User</Label>
-                        <Select
-                            value={data.user_id.toString()}
-                            onChange={(val) => setData('user_id', Number(val))}
-                            options={users.map((b) => ({
-                                value: b.id.toString(),
-                                label: b.name,
-                            }))}
-                            placeholder="Select User"
-                        />
-                        <InputError message={errors.user_id} />
                     </div>
 
                     <div>
@@ -172,7 +171,7 @@ const TellerForm = ({ teller, branch, users }: TellerFormPageProps) => {
                         <InputError message={errors.max_transaction_limit} />
                     </div>
 
-                    <div className="mt-4">
+                    <div className="">
                         <Label className="text-xs">Status</Label>
                         <ToggleGroup
                             type="single"

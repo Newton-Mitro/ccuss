@@ -4,30 +4,28 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
+
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
 import { Input } from '../../../components/ui/input';
 import { Select } from '../../../components/ui/select';
+
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
+
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Branch } from '../../../types/branch';
-import { vaultStatuses } from './data/vault_status';
+import { Vault } from '../../../types/cash_treasury_module';
 
 interface VaultPageProps extends SharedData {
     vaults: {
-        data: {
-            id: number;
-            name: string;
-            total_balance: number;
-            is_active: boolean;
-            branch: Branch;
-        }[];
+        data: Vault[];
         links: { url: string | null; label: string; active: boolean }[];
     };
     branches: Branch[];
@@ -48,7 +46,8 @@ export default function Index() {
     } = useForm({
         search: filters.search || '',
         branch_id: filters.branch_id || '',
-        status: filters.status || '',
+        account_id: filters.account_id || '',
+        is_active: filters.is_active || '',
         per_page: Number(filters.per_page) || 10,
         page: Number(filters.page) || 1,
     });
@@ -60,7 +59,14 @@ export default function Index() {
     useEffect(() => {
         const delay = setTimeout(handleSearch, 400);
         return () => clearTimeout(delay);
-    }, [data.search, data.per_page, data.page, data.branch_id, data.status]);
+    }, [
+        data.search,
+        data.per_page,
+        data.page,
+        data.branch_id,
+        data.account_id,
+        data.is_active,
+    ]);
 
     const handleDelete = (id: number, name: string) => {
         appSwal
@@ -88,86 +94,101 @@ export default function Index() {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Vaults" />
-            <div className="space-y-4 p-2 text-foreground">
+
+            <div className="space-y-4 text-foreground">
                 {/* Header */}
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
                         title="Vaults"
-                        description="Manage branch vaults and their balances"
+                        description="Manage branch vaults linked with accounts"
                     />
+
                     <Link
                         href="/vaults/create"
-                        className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                        className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                     >
-                        <Plus className="h-4 w-4" /> Add Vault
+                        <Plus className="h-4 w-4" />
+                        Add Vault
                     </Link>
                 </div>
 
-                {/* Search */}
+                {/* Filters */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="w-60">
-                        <Input
-                            type="text"
-                            placeholder="Search vaults..."
-                            value={data.search}
-                            onChange={(e) => {
-                                setData('search', e.target.value);
-                                setData('page', 1);
-                            }}
-                        />
-                    </div>
+                    <Input
+                        type="text"
+                        placeholder="Search vaults..."
+                        value={data.search}
+                        onChange={(e) => {
+                            setData('search', e.target.value);
+                            setData('page', 1);
+                        }}
+                        className="w-60"
+                    />
 
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                        {/* Branch Filter */}
-                        <div className="w-44">
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                        {/* Branch */}
+                        <div className="w-60">
                             <Select
                                 value={data.branch_id}
                                 onChange={(value) => {
                                     setData('branch_id', value);
                                     setData('page', 1);
                                 }}
-                                options={branches.map((b) => ({
-                                    value: b.id.toString(),
-                                    label: b.name,
-                                }))}
+                                options={[
+                                    {
+                                        value: '',
+                                        label: 'All Branch',
+                                    },
+                                    ...branches.map((b) => ({
+                                        value: b.id.toString(),
+                                        label: b.name,
+                                    })),
+                                ]}
+                                placeholder="Select Branch"
                             />
                         </div>
 
-                        {/* Status Filter */}
-                        <div className="w-36">
+                        {/* Status (is_active) */}
+                        <div className="w-60">
                             <Select
-                                value={data.status}
+                                value={data.is_active}
                                 onChange={(value) => {
-                                    setData('status', value);
+                                    setData('is_active', value);
                                     setData('page', 1);
                                 }}
-                                options={vaultStatuses}
+                                options={[
+                                    { value: '', label: 'All Status' },
+                                    { value: '1', label: 'Active' },
+                                    { value: '0', label: 'Inactive' },
+                                ]}
+                                placeholder="Select Status"
                             />
                         </div>
                     </div>
                 </div>
 
                 {/* Table */}
-                <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border bg-card md:h-[calc(100vh-300px)]">
+                <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border bg-card">
                     <table className="w-full border-collapse">
                         <thead className="sticky top-0 bg-muted">
                             <tr>
                                 {[
                                     'Name',
                                     'Branch',
-                                    'Balance',
+                                    'Account',
                                     'Status',
                                     'Actions',
-                                ].map((header) => (
+                                ].map((h) => (
                                     <th
-                                        key={header}
+                                        key={h}
                                         className="border-b p-2 text-left text-sm font-medium text-muted-foreground"
                                     >
-                                        {header}
+                                        {h}
                                     </th>
                                 ))}
                             </tr>
                         </thead>
+
                         <tbody>
                             {vaults.data.length > 0 ? (
                                 vaults.data.map((v) => (
@@ -176,22 +197,24 @@ export default function Index() {
                                         className="border-b even:bg-muted/30"
                                     >
                                         <td className="px-2 py-1">{v.name}</td>
+
                                         <td className="px-2 py-1">
                                             {v.branch?.name}
                                         </td>
+
                                         <td className="px-2 py-1">
-                                            {(
-                                                Number(v.total_balance) || 0
-                                            ).toFixed(2)}
+                                            {v?.account?.name ?? '—'}
                                         </td>
+
                                         <td className="px-2 py-1">
                                             {v.is_active
                                                 ? 'Active'
                                                 : 'Inactive'}
                                         </td>
+
                                         <td className="px-2 py-1">
                                             <TooltipProvider>
-                                                <div className="flex space-x-2">
+                                                <div className="flex gap-2">
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link
@@ -199,7 +222,6 @@ export default function Index() {
                                                                     'vaults.show',
                                                                     v.id,
                                                                 )}
-                                                                className="text-info"
                                                             >
                                                                 <Eye className="h-5 w-5" />
                                                             </Link>
@@ -208,7 +230,7 @@ export default function Index() {
                                                             View
                                                         </TooltipContent>
                                                     </Tooltip>
-                                                    {/* Edit */}
+
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link
@@ -216,7 +238,6 @@ export default function Index() {
                                                                     'vaults.edit',
                                                                     v.id,
                                                                 )}
-                                                                className="text-success"
                                                             >
                                                                 <Pencil className="h-5 w-5" />
                                                             </Link>
@@ -226,21 +247,19 @@ export default function Index() {
                                                         </TooltipContent>
                                                     </Tooltip>
 
-                                                    {/* Delete */}
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <button
-                                                                type="button"
-                                                                disabled={
-                                                                    processing
-                                                                }
                                                                 onClick={() =>
                                                                     handleDelete(
                                                                         v.id,
                                                                         v.name,
                                                                     )
                                                                 }
-                                                                className="text-destructive hover:text-destructive/80 disabled:opacity-50"
+                                                                disabled={
+                                                                    processing
+                                                                }
+                                                                className="text-destructive"
                                                             >
                                                                 <Trash2 className="h-5 w-5" />
                                                             </button>
@@ -258,7 +277,7 @@ export default function Index() {
                                 <tr>
                                     <td
                                         colSpan={5}
-                                        className="px-4 py-6 text-center text-muted-foreground"
+                                        className="py-6 text-center text-muted-foreground"
                                     >
                                         No vaults found.
                                     </td>
@@ -271,7 +290,7 @@ export default function Index() {
                 {/* Pagination */}
                 <DataTablePagination
                     perPage={data.per_page}
-                    onPerPageChange={function (value: number): void {
+                    onPerPageChange={(value: number) => {
                         setData('per_page', value);
                         setData('page', 1);
                     }}

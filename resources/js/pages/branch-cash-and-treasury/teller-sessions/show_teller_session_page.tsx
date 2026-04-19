@@ -25,13 +25,18 @@ export default function ShowTellerSessionPage({ session }: Props) {
         if (!session) toast.error('Teller session not found');
     }, [session]);
 
-    // Inline badge classes
+    // 🔥 Enhanced status handling
     const getStatusClasses = (status: string) => {
-        return status === 'open'
-            ? 'bg-success text-success-foreground'
-            : status === 'closed'
-              ? 'bg-destructive text-destructive-foreground'
-              : 'bg-gray-100 text-gray-800';
+        switch (status) {
+            case 'open':
+                return 'bg-success text-success-foreground';
+            case 'closed':
+                return 'bg-destructive text-destructive-foreground';
+            case 'suspended':
+                return 'bg-yellow-100 text-yellow-800';
+            default:
+                return 'bg-gray-100 text-gray-800';
+        }
     };
 
     return (
@@ -41,7 +46,7 @@ export default function ShowTellerSessionPage({ session }: Props) {
             <div className="flex flex-col gap-3 pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <HeadingSmall
                     title="Teller Session Details"
-                    description="View teller session info, cash, and status"
+                    description="View teller session info, cash reconciliation, and status"
                 />
             </div>
 
@@ -52,6 +57,7 @@ export default function ShowTellerSessionPage({ session }: Props) {
                     </p>
                 ) : (
                     <div className="space-y-4">
+                        {/* Header */}
                         <div className="flex items-center justify-between">
                             <h3 className="text-lg font-semibold">
                                 Session Info
@@ -65,15 +71,29 @@ export default function ShowTellerSessionPage({ session }: Props) {
                             </span>
                         </div>
 
+                        {/* Info Grid */}
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            {/* Teller */}
                             <div>
                                 <p className="text-sm text-card-foreground">
                                     Teller
                                 </p>
                                 <p className="font-medium">
-                                    {session.teller?.name}
+                                    {session.teller?.name || '—'}
                                 </p>
                             </div>
+
+                            {/* Branch */}
+                            <div>
+                                <p className="text-sm text-card-foreground">
+                                    Branch
+                                </p>
+                                <p className="font-medium">
+                                    {session.branch?.name || '—'}
+                                </p>
+                            </div>
+
+                            {/* Branch Day */}
                             <div>
                                 <p className="text-sm text-card-foreground">
                                     Branch Day
@@ -86,26 +106,65 @@ export default function ShowTellerSessionPage({ session }: Props) {
                                         : '—'}
                                 </p>
                             </div>
+
+                            {/* Cash Account */}
                             <div>
                                 <p className="text-sm text-card-foreground">
-                                    Opening Cash
+                                    Cash Account
                                 </p>
                                 <p className="font-medium">
-                                    {formatBDTCurrency(session.opening_cash)}
+                                    {session.cash_account?.name || '—'}
                                 </p>
                             </div>
+
+                            {/* Expected Balance */}
+                            <div>
+                                <p className="text-sm text-card-foreground">
+                                    Expected Balance
+                                </p>
+                                <p className="font-medium">
+                                    {session.expected_balance != null
+                                        ? formatBDTCurrency(
+                                              session.expected_balance,
+                                          )
+                                        : '—'}
+                                </p>
+                            </div>
+
+                            {/* Closing Cash */}
                             <div>
                                 <p className="text-sm text-card-foreground">
                                     Closing Cash
                                 </p>
                                 <p className="font-medium">
-                                    {session.closing_cash !== null
+                                    {session.closing_cash != null
                                         ? formatBDTCurrency(
                                               session.closing_cash,
                                           )
                                         : '—'}
                                 </p>
                             </div>
+
+                            {/* Difference */}
+                            <div>
+                                <p className="text-sm text-card-foreground">
+                                    Difference
+                                </p>
+                                <p
+                                    className={`font-medium ${
+                                        session.difference &&
+                                        session.difference !== 0
+                                            ? 'text-destructive'
+                                            : ''
+                                    }`}
+                                >
+                                    {session.difference != null
+                                        ? formatBDTCurrency(session.difference)
+                                        : '—'}
+                                </p>
+                            </div>
+
+                            {/* Opened At */}
                             <div>
                                 <p className="text-sm text-card-foreground">
                                     Opened At
@@ -114,6 +173,8 @@ export default function ShowTellerSessionPage({ session }: Props) {
                                     {formatDateTime(session.opened_at)}
                                 </p>
                             </div>
+
+                            {/* Closed At */}
                             <div>
                                 <p className="text-sm text-card-foreground">
                                     Closed At
@@ -125,6 +186,16 @@ export default function ShowTellerSessionPage({ session }: Props) {
                                 </p>
                             </div>
                         </div>
+
+                        {/* Remarks */}
+                        {session.remarks && (
+                            <div>
+                                <p className="text-sm text-card-foreground">
+                                    Remarks
+                                </p>
+                                <p className="font-medium">{session.remarks}</p>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

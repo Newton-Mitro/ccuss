@@ -58,11 +58,6 @@ export default function ShowTellerPage({ teller }: Props) {
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div>
-                        <p className="text-sm text-card-foreground">Code</p>
-                        <p className="font-medium">{teller.code}</p>
-                    </div>
-
-                    <div>
                         <p className="text-sm text-card-foreground">Name</p>
                         <p className="font-medium">{teller.name}</p>
                     </div>

@@ -9,7 +9,6 @@ import { Eye, Plus, StopCircle } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
-import Heading from '../../../components/heading';
 import HeadingSmall from '../../../components/heading-small';
 import { Input } from '../../../components/ui/input';
 import { Select } from '../../../components/ui/select';
@@ -19,18 +18,12 @@ import { appSwal } from '../../../lib/appSwal';
 import { formatDate, formatDateTime } from '../../../lib/date_util';
 import { SharedData } from '../../../types';
 import { Branch } from '../../../types/branch';
+import { BranchDay } from '../../../types/cash_treasury_module';
 import { branchDayStatuses } from './data/branch_day_status';
 
 interface BranchDayPageProps extends SharedData {
     branchDays: {
-        data: {
-            id: number;
-            business_date: string;
-            opened_at: string | null;
-            closed_at: string | null;
-            status: 'open' | 'closed';
-            branch: Branch;
-        }[];
+        data: BranchDay[];
         links: { url: string | null; label: string; active: boolean }[];
     };
     filters: Record<string, string>;
@@ -87,9 +80,7 @@ export default function Index() {
                 { title: 'Branch Days', href: route('branch-days.index') },
             ]}
         >
-            <Heading title="Branch Days" />
-
-            <div className="space-y-4 p-2 text-foreground">
+            <div className="space-y-4 text-foreground">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <HeadingSmall
@@ -120,7 +111,7 @@ export default function Index() {
 
                     <div className="flex gap-2">
                         {/* Branch Filter */}
-                        <div className="w-48">
+                        <div className="w-60">
                             <Select
                                 value={data.branch_id}
                                 onChange={(value) => {
@@ -134,7 +125,7 @@ export default function Index() {
                             ></Select>
                         </div>
                         {/* Status Filter */}
-                        <div className="w-48">
+                        <div className="w-60">
                             <Select
                                 value={data.branch_id}
                                 onChange={(value) => {

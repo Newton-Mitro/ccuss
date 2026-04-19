@@ -16,19 +16,12 @@ import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem, SharedData } from '../../../types';
+import { Teller } from '../../../types/cash_treasury_module';
 import { tellerStatuses } from './data/teller_statuses';
 
 interface TellerPageProps extends SharedData {
     tellers: {
-        data: {
-            id: number;
-            code: string;
-            name: string;
-            max_cash_limit: number;
-            max_transaction_limit: number;
-            is_active: boolean;
-            branch: { id: number; name: string };
-        }[];
+        data: Teller[];
         links: { url: string | null; label: string; active: boolean }[];
     };
     filters: Record<string, string>;
@@ -89,7 +82,7 @@ export default function Index() {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Tellers" />
-            <div className="space-y-4 p-2 text-foreground">
+            <div className="space-y-4 text-foreground">
                 {/* Header */}
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
@@ -107,7 +100,6 @@ export default function Index() {
                 {/* Search */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="w-60">
-                        {' '}
                         <Input
                             type="text"
                             placeholder="Search tellers..."
@@ -122,7 +114,7 @@ export default function Index() {
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                             {/* Branch Filter */}
-                            <div className="w-48">
+                            <div className="w-60">
                                 <Select
                                     value={data.branch_id}
                                     onChange={(value) => {
@@ -137,7 +129,7 @@ export default function Index() {
                             </div>
 
                             {/* Status Filter */}
-                            <div className="w-48">
+                            <div className="w-60">
                                 <Select
                                     value={data.status}
                                     onChange={(value) => {
@@ -157,7 +149,6 @@ export default function Index() {
                         <thead className="sticky top-0 bg-muted">
                             <tr>
                                 {[
-                                    'Code',
                                     'Name',
                                     'Branch',
                                     'Max Cash Limit',
@@ -181,7 +172,6 @@ export default function Index() {
                                         key={t.id}
                                         className="border-b even:bg-muted/30"
                                     >
-                                        <td className="px-2 py-1">{t.code}</td>
                                         <td className="px-2 py-1">{t.name}</td>
                                         <td className="px-2 py-1">
                                             {t.branch?.name}
