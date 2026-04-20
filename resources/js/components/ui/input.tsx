@@ -44,8 +44,7 @@ function Input({
             "border-destructive text-destructive placeholder:text-destructive/70 focus-visible:ring-destructive/40",
 
           // disabled
-          "disabled:pointer-events-none disabled:cursor-not-allowed",
-          "disabled:bg-muted disabled:text-muted-foreground",
+          "disabled:pointer-events-none disabled:bg-border disabled:cursor-not-allowed disabled:opacity-50",
 
           className
         )}

@@ -184,7 +184,7 @@ export default function Index() {
                                             {a.account.account_number || '-'}
                                         </td>
 
-                                        <td className="px-2 py-1">
+                                        <td className="px-2 py-1 capitalize">
                                             {a.status}
                                         </td>
 
