@@ -42,7 +42,7 @@ const AppDatePicker = forwardRef<HTMLInputElement, AppDatePickerProps>(
             ref={combinedRef}
             onChange={(e) => onChange?.(e.target.value)}
             disabled={disabled}
-            className="h-9 text-sm pr-9 cursor-pointer"
+            className="h-8 text-sm pr-9 cursor-pointer"
           />
           <Calendar
             className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4 cursor-pointer transition-colors hover:text-accent-foreground"

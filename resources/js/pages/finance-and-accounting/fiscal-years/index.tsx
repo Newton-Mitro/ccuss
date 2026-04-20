@@ -43,6 +43,7 @@ export default function FiscalYearIndex() {
                 preserveState: true,
             });
         }, 400);
+
         return () => clearTimeout(delay);
     }, [data.search, data.per_page, data.page]);
 
@@ -74,11 +75,13 @@ export default function FiscalYearIndex() {
             <Head title="Fiscal Years" />
 
             <div className="space-y-4 p-2 text-foreground">
+                {/* Header */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <HeadingSmall
                         title="Fiscal Years"
                         description="Manage fiscal years"
                     />
+
                     <Link
                         href={route('fiscal-years.create')}
                         className="flex items-center gap-1 rounded bg-primary px-3 py-1.5 text-sm text-primary-foreground hover:bg-primary/90"
@@ -111,8 +114,7 @@ export default function FiscalYearIndex() {
                                     'Code',
                                     'Start Date',
                                     'End Date',
-                                    'Active',
-                                    'Closed',
+                                    'Status', // 🔥 replaced dual columns
                                     'Actions',
                                 ].map((h) => (
                                     <th
@@ -124,6 +126,7 @@ export default function FiscalYearIndex() {
                                 ))}
                             </tr>
                         </thead>
+
                         <tbody>
                             {fiscalYears.data.length > 0 ? (
                                 fiscalYears.data.map((fy) => (
@@ -132,22 +135,32 @@ export default function FiscalYearIndex() {
                                         className="border-b even:bg-muted/10"
                                     >
                                         <td className="px-2 py-1">{fy.code}</td>
+
                                         <td className="px-2 py-1">
                                             {new Date(
                                                 fy.start_date,
                                             ).toLocaleDateString()}
                                         </td>
+
                                         <td className="px-2 py-1">
                                             {new Date(
                                                 fy.end_date,
                                             ).toLocaleDateString()}
                                         </td>
+
+                                        {/* 🔥 Unified status */}
                                         <td className="px-2 py-1">
-                                            {fy.is_active ? 'Yes' : 'No'}
+                                            {fy.is_closed ? (
+                                                <span className="font-medium text-red-600">
+                                                    Closed
+                                                </span>
+                                            ) : (
+                                                <span className="font-medium text-green-600">
+                                                    Open
+                                                </span>
+                                            )}
                                         </td>
-                                        <td className="px-2 py-1">
-                                            {fy.is_closed ? 'Yes' : 'No'}
-                                        </td>
+
                                         <td className="flex gap-2 px-2 py-1">
                                             <Link
                                                 href={route(
@@ -158,6 +171,7 @@ export default function FiscalYearIndex() {
                                             >
                                                 <Pencil className="h-5 w-5" />
                                             </Link>
+
                                             <button
                                                 type="button"
                                                 disabled={processing}
@@ -174,7 +188,7 @@ export default function FiscalYearIndex() {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={6}
+                                        colSpan={5}
                                         className="px-4 py-6 text-center text-muted-foreground"
                                     >
                                         No fiscal years found.
@@ -185,10 +199,10 @@ export default function FiscalYearIndex() {
                     </table>
                 </div>
 
-                {/* Pagination + Records */}
+                {/* Pagination */}
                 <DataTablePagination
                     perPage={data.per_page}
-                    onPerPageChange={function (value: number): void {
+                    onPerPageChange={(value: number) => {
                         setData('per_page', Number(value));
                         setData('page', 1);
                     }}

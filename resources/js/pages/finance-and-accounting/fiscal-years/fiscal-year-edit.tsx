@@ -3,6 +3,7 @@ import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
 import React from 'react';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
+import AppDatePicker from '../../../components/ui/app_date_picker';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
@@ -20,8 +21,7 @@ interface FiscalYearProps extends SharedData {
         code: string;
         start_date: string;
         end_date: string;
-        is_active: boolean;
-        is_closed: boolean;
+        is_closed: boolean; // ✅ FIXED
     };
 }
 
@@ -34,18 +34,22 @@ export default function FiscalYearForm() {
 
     const { data, setData, post, put, processing, errors } = useForm({
         code: fiscalYear?.code || '',
-        start_date: fiscalYear?.start_date || '',
-        end_date: fiscalYear?.end_date || '',
-        is_active: fiscalYear?.is_active || false,
-        is_closed: fiscalYear?.is_closed || false,
+        start_date: fiscalYear?.start_date?.split('T')[0] || '',
+        end_date: fiscalYear?.end_date?.split('T')[0] || '',
+        is_closed: fiscalYear?.is_closed ?? false, // ✅ ONLY SOURCE OF TRUTH
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
         if (fiscalYear?.id) {
-            put(`/fiscal-years/${fiscalYear.id}`, { preserveScroll: true });
+            put(`/fiscal-years/${fiscalYear.id}`, {
+                preserveScroll: true,
+            });
         } else {
-            post('/fiscal-years', { preserveScroll: true });
+            post('/fiscal-years', {
+                preserveScroll: true,
+            });
         }
     };
 
@@ -61,6 +65,8 @@ export default function FiscalYearForm() {
                     fiscalYear?.id ? 'Edit Fiscal Year' : 'Create Fiscal Year'
                 }
             />
+
+            {/* Header */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <HeadingSmall
                     title={
@@ -70,21 +76,22 @@ export default function FiscalYearForm() {
                     }
                     description="Manage fiscal year details."
                 />
-                <div className="">
-                    <button
-                        onClick={handleBack}
-                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                        <span className="hidden sm:inline">Back</span>
-                    </button>
-                </div>
+
+                <button
+                    onClick={handleBack}
+                    className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
+                >
+                    <ArrowLeft className="h-4 w-4" />
+                    <span className="hidden sm:inline">Back</span>
+                </button>
             </div>
 
+            {/* Form */}
             <form
                 onSubmit={handleSubmit}
                 className="mt-4 max-w-md space-y-6 rounded-md border bg-card p-4 sm:p-6"
             >
+                {/* Code */}
                 <div>
                     <Label className="text-xs">Fiscal Year Code</Label>
                     <Input
@@ -95,69 +102,47 @@ export default function FiscalYearForm() {
                     <InputError message={errors.code} />
                 </div>
 
+                {/* Dates */}
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <Label className="text-xs">Start Date</Label>
-                        <Input
-                            type="date"
+                        <AppDatePicker
                             value={data.start_date}
-                            onChange={(e) =>
-                                setData('start_date', e.target.value)
-                            }
-                            className="h-8 text-sm"
+                            onChange={(value) => setData('start_date', value)}
                         />
                         <InputError message={errors.start_date} />
                     </div>
+
                     <div>
                         <Label className="text-xs">End Date</Label>
-                        <Input
-                            type="date"
+                        <AppDatePicker
                             value={data.end_date}
-                            onChange={(e) =>
-                                setData('end_date', e.target.value)
-                            }
-                            className="h-8 text-sm"
+                            onChange={(value) => setData('end_date', value)}
                         />
                         <InputError message={errors.end_date} />
                     </div>
-
-                    <div className="">
-                        <Label className="text-xs">Active</Label>
-                        <ToggleGroup
-                            type="single"
-                            value={data.is_active ? 'true' : 'false'}
-                            onValueChange={(val) =>
-                                setData('is_active', val === 'true')
-                            }
-                            size="sm"
-                            variant="outline"
-                        >
-                            <ToggleGroupItem value="true">True</ToggleGroupItem>
-                            <ToggleGroupItem value="false">
-                                False
-                            </ToggleGroupItem>
-                        </ToggleGroup>
-                    </div>
-
-                    <div className="">
-                        <Label className="text-xs">Closed</Label>
-                        <ToggleGroup
-                            type="single"
-                            value={data.is_closed ? 'true' : 'false'}
-                            onValueChange={(val) =>
-                                setData('is_closed', val === 'true')
-                            }
-                            size="sm"
-                            variant="outline"
-                        >
-                            <ToggleGroupItem value="true">True</ToggleGroupItem>
-                            <ToggleGroupItem value="false">
-                                False
-                            </ToggleGroupItem>
-                        </ToggleGroup>
-                    </div>
                 </div>
 
+                {/* 🔥 Status (ONLY ONE CONTROL NOW) */}
+                <div>
+                    <Label className="text-xs">Closed Status</Label>
+
+                    <ToggleGroup
+                        type="single"
+                        value={data.is_closed ? 'true' : 'false'}
+                        onValueChange={(val) =>
+                            setData('is_closed', val === 'true')
+                        }
+                        size="sm"
+                        variant="outline"
+                    >
+                        <ToggleGroupItem value="false">Open</ToggleGroupItem>
+
+                        <ToggleGroupItem value="true">Closed</ToggleGroupItem>
+                    </ToggleGroup>
+                </div>
+
+                {/* Submit */}
                 <Button
                     type="submit"
                     disabled={processing}

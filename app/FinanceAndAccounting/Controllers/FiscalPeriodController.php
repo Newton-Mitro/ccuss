@@ -14,18 +14,14 @@ class FiscalPeriodController
     {
         $query = FiscalPeriod::with('fiscalYear');
 
-        // Search by period name
+        // 🔍 Search
         if ($request->filled('search')) {
             $query->where('period_name', 'like', "%{$request->search}%");
         }
 
-        // Status filter
+        // ✅ Status filter (UPDATED)
         if ($request->filled('status') && $request->status !== 'all') {
-            if ($request->status === 'open') {
-                $query->where('is_open', true);
-            } elseif ($request->status === 'closed') {
-                $query->where('is_open', false);
-            }
+            $query->where('status', $request->status);
         }
 
         $perPage = $request->input('per_page', 10);
@@ -43,6 +39,7 @@ class FiscalPeriodController
     public function create(): Response
     {
         $fiscalYears = FiscalYear::orderBy('start_date')->get();
+
         return Inertia::render('finance-and-accounting/fiscal-periods/fiscal-period-edit', [
             'fiscalYears' => $fiscalYears,
         ]);
@@ -55,17 +52,29 @@ class FiscalPeriodController
             'period_name' => 'required|string|max:50',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'is_open' => 'boolean',
+            'status' => 'required|in:open,closed,locked', // ✅ FIXED
         ]);
+
+        // 🔥 Business Rule: prevent creating period in closed fiscal year
+        $fiscalYear = FiscalYear::findOrFail($validated['fiscal_year_id']);
+
+        if (!$fiscalYear->canPost()) {
+            return back()->withErrors([
+                'fiscal_year_id' => 'Cannot create period in a closed fiscal year.',
+            ]);
+        }
 
         FiscalPeriod::create($validated);
 
-        return redirect()->route('fiscal-periods.index')->with('success', 'Fiscal Period created.');
+        return redirect()
+            ->route('fiscal-periods.index')
+            ->with('success', 'Fiscal Period created.');
     }
 
     public function edit(FiscalPeriod $fiscalPeriod): Response
     {
         $fiscalYears = FiscalYear::orderBy('start_date')->get();
+
         return Inertia::render('finance-and-accounting/fiscal-periods/fiscal-period-edit', [
             'fiscalPeriod' => $fiscalPeriod,
             'fiscalYears' => $fiscalYears,
@@ -79,17 +88,36 @@ class FiscalPeriodController
             'period_name' => 'required|string|max:50',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'is_open' => 'boolean',
+            'status' => 'required|in:open,closed,locked', // ✅ FIXED
         ]);
+
+        // 🔥 Business Rule: prevent editing locked period
+        if ($fiscalPeriod->status === 'locked') {
+            return back()->withErrors([
+                'status' => 'Locked periods cannot be modified.',
+            ]);
+        }
 
         $fiscalPeriod->update($validated);
 
-        return redirect()->route('fiscal-periods.index')->with('success', 'Fiscal Period updated.');
+        return redirect()
+            ->route('fiscal-periods.index')
+            ->with('success', 'Fiscal Period updated.');
     }
 
     public function destroy(FiscalPeriod $fiscalPeriod)
     {
+        // 🔥 Business Rule: prevent deleting locked period
+        if ($fiscalPeriod->status === 'locked') {
+            return back()->withErrors([
+                'error' => 'Locked periods cannot be deleted.',
+            ]);
+        }
+
         $fiscalPeriod->delete();
-        return redirect()->route('fiscal-periods.index')->with('success', 'Fiscal Period deleted.');
+
+        return redirect()
+            ->route('fiscal-periods.index')
+            ->with('success', 'Fiscal Period deleted.');
     }
 }

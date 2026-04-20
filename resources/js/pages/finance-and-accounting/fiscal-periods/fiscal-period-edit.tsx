@@ -3,14 +3,11 @@ import { ArrowLeft, CheckCheck, ListFilter, Loader2 } from 'lucide-react';
 import React from 'react';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
+import AppDatePicker from '../../../components/ui/app_date_picker';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import { Select } from '../../../components/ui/select';
-import {
-    ToggleGroup,
-    ToggleGroupItem,
-} from '../../../components/ui/toggle-group';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
@@ -22,7 +19,7 @@ interface FiscalPeriodProps extends SharedData {
         fiscal_year_id: number;
         start_date: string;
         end_date: string;
-        is_open: boolean;
+        status: 'open' | 'closed' | 'locked'; // ✅ FIXED
     };
     fiscalYears: { id: number; code: string }[];
 }
@@ -37,23 +34,34 @@ export default function FiscalPeriodForm() {
     const { data, setData, post, put, processing, errors } = useForm({
         period_name: fiscalPeriod?.period_name || '',
         fiscal_year_id: fiscalPeriod?.fiscal_year_id || undefined,
-        start_date: fiscalPeriod?.start_date || '',
-        end_date: fiscalPeriod?.end_date || '',
-        is_open: fiscalPeriod?.is_open ?? true,
+        start_date: fiscalPeriod?.start_date?.split('T')[0] || '',
+        end_date: fiscalPeriod?.end_date?.split('T')[0] || '',
+        status: fiscalPeriod?.status || 'open', // ✅ FIXED
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
         if (fiscalPeriod?.id) {
-            put(`/fiscal-periods/${fiscalPeriod.id}`, { preserveScroll: true });
+            put(`/fiscal-periods/${fiscalPeriod.id}`, {
+                preserveScroll: true,
+            });
         } else {
-            post('/fiscal-periods', { preserveScroll: true });
+            post('/fiscal-periods', {
+                preserveScroll: true,
+            });
         }
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Fiscal Periods', href: '/fiscal-periods' },
         { title: fiscalPeriod?.id ? 'Edit' : 'Create', href: '' },
+    ];
+
+    const statusOptions = [
+        { value: 'open', label: 'Open' },
+        { value: 'closed', label: 'Closed' },
+        { value: 'locked', label: 'Locked' },
     ];
 
     return (
@@ -65,6 +73,8 @@ export default function FiscalPeriodForm() {
                         : 'Create Fiscal Period'
                 }
             />
+
+            {/* Header */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <HeadingSmall
                     title={
@@ -74,16 +84,15 @@ export default function FiscalPeriodForm() {
                     }
                     description="Manage fiscal period details."
                 />
+
                 <div className="flex flex-wrap gap-2">
-                    <div className="">
-                        <button
-                            onClick={handleBack}
-                            className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
-                        >
-                            <ArrowLeft className="h-4 w-4" />
-                            <span className="hidden sm:inline">Back</span>
-                        </button>
-                    </div>
+                    <button
+                        onClick={handleBack}
+                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        <span className="hidden sm:inline">Back</span>
+                    </button>
 
                     <Link
                         href="/fiscal-periods"
@@ -95,10 +104,12 @@ export default function FiscalPeriodForm() {
                 </div>
             </div>
 
+            {/* Form */}
             <form
                 onSubmit={handleSubmit}
                 className="mt-4 max-w-md space-y-6 rounded-md border bg-card p-4 sm:p-6"
             >
+                {/* Period Name */}
                 <div>
                     <Label className="text-xs">Period Name</Label>
                     <Input
@@ -109,6 +120,7 @@ export default function FiscalPeriodForm() {
                     <InputError message={errors.period_name} />
                 </div>
 
+                {/* Fiscal Year */}
                 <div>
                     <Label className="text-xs">Fiscal Year</Label>
                     <Select
@@ -116,62 +128,52 @@ export default function FiscalPeriodForm() {
                         onChange={(value) =>
                             setData('fiscal_year_id', Number(value))
                         }
-                        options={fiscalYears.map((fiscalYear) => ({
-                            value: fiscalYear.id.toString(),
-                            label: `${fiscalYear.code}`,
+                        options={fiscalYears.map((fy) => ({
+                            value: fy.id.toString(),
+                            label: fy.code,
                         }))}
                     />
-
                     <InputError message={errors.fiscal_year_id} />
                 </div>
 
+                {/* Dates */}
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <Label className="text-xs">Start Date</Label>
-                        <Input
-                            type="date"
+                        <AppDatePicker
                             value={data.start_date}
-                            onChange={(e) =>
-                                setData('start_date', e.target.value)
-                            }
-                            className="h-8 text-sm"
+                            onChange={(value) => setData('start_date', value)}
                         />
                         <InputError message={errors.start_date} />
                     </div>
+
                     <div>
                         <Label className="text-xs">End Date</Label>
-                        <Input
-                            type="date"
+                        <AppDatePicker
                             value={data.end_date}
-                            onChange={(e) =>
-                                setData('end_date', e.target.value)
-                            }
-                            className="h-8 text-sm"
+                            onChange={(value) => setData('end_date', value)}
                         />
                         <InputError message={errors.end_date} />
                     </div>
-
-                    <div className="">
-                        <Label className="text-xs">Closed</Label>
-                        <ToggleGroup
-                            type="single"
-                            value={data.is_open ? 'true' : 'false'}
-                            onValueChange={(val) =>
-                                setData('is_open', val === 'true')
-                            }
-                            size="sm"
-                            variant="outline"
-                        >
-                            <ToggleGroupItem value="true">
-                                False
-                            </ToggleGroupItem>
-                            <ToggleGroupItem value="false">
-                                True
-                            </ToggleGroupItem>
-                        </ToggleGroup>
-                    </div>
                 </div>
 
+                {/* 🔥 Status (NEW) */}
+                <div>
+                    <Label className="text-xs">Status</Label>
+                    <Select
+                        value={data.status}
+                        onChange={(value) =>
+                            setData(
+                                'status',
+                                value as 'open' | 'closed' | 'locked',
+                            )
+                        }
+                        options={statusOptions}
+                    />
+                    <InputError message={errors.status} />
+                </div>
+
+                {/* Submit */}
                 <Button
                     type="submit"
                     disabled={processing}

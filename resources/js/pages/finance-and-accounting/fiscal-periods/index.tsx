@@ -12,16 +12,18 @@ import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { periodStatuses } from './data/period_statuses';
 
+interface FiscalPeriod {
+    id: number;
+    period_name: string;
+    fiscal_year?: { code: string };
+    start_date: string;
+    end_date: string;
+    status: 'open' | 'closed' | 'locked'; // ✅ FIXED
+}
+
 interface FiscalPeriodPageProps extends SharedData {
     fiscalPeriods: {
-        data: {
-            id: number;
-            period_name: string;
-            fiscal_year?: { code: string };
-            start_date: string;
-            end_date: string;
-            is_open: boolean;
-        }[];
+        data: FiscalPeriod[];
         links: { url: string | null; label: string; active: boolean }[];
     };
     filters: Record<string, string>;
@@ -52,6 +54,7 @@ export default function FiscalPeriodIndex() {
                 preserveState: true,
             });
         }, 400);
+
         return () => clearTimeout(delay);
     }, [data.search, data.status, data.per_page, data.page]);
 
@@ -62,7 +65,6 @@ export default function FiscalPeriodIndex() {
                 text: `Fiscal Period "${periodName}" will be permanently deleted!`,
                 icon: 'warning',
                 showCancelButton: true,
-
                 confirmButtonText: 'Yes, delete it!',
             })
             .then((result) => {
@@ -79,16 +81,35 @@ export default function FiscalPeriodIndex() {
         { title: 'Fiscal Periods', href: '/fiscal-periods' },
     ];
 
+    // 🔥 Status badge (NEW)
+    const StatusBadge = ({ status }: { status: string }) => {
+        const styles: Record<string, string> = {
+            open: 'bg-green-100 text-green-700',
+            closed: 'bg-gray-100 text-gray-700',
+            locked: 'bg-red-100 text-red-700',
+        };
+
+        return (
+            <span
+                className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${styles[status]}`}
+            >
+                {status}
+            </span>
+        );
+    };
+
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Fiscal Periods" />
 
             <div className="space-y-4 p-2 text-foreground">
+                {/* Header */}
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <HeadingSmall
                         title="Fiscal Periods"
                         description="Manage fiscal periods"
                     />
+
                     <Link
                         href={route('fiscal-periods.create')}
                         className="flex items-center gap-1 rounded bg-primary px-3 py-1.5 text-sm text-primary-foreground hover:bg-primary/90"
@@ -135,7 +156,7 @@ export default function FiscalPeriodIndex() {
                                     'Fiscal Year',
                                     'Start Date',
                                     'End Date',
-                                    'Open',
+                                    'Status', // ✅ FIXED
                                     'Actions',
                                 ].map((h) => (
                                     <th
@@ -147,6 +168,7 @@ export default function FiscalPeriodIndex() {
                                 ))}
                             </tr>
                         </thead>
+
                         <tbody>
                             {fiscalPeriods.data.length > 0 ? (
                                 fiscalPeriods.data.map((fp) => (
@@ -157,22 +179,28 @@ export default function FiscalPeriodIndex() {
                                         <td className="px-2 py-1">
                                             {fp.period_name}
                                         </td>
+
                                         <td className="px-2 py-1">
                                             {fp.fiscal_year?.code || '-'}
                                         </td>
+
                                         <td className="px-2 py-1">
                                             {new Date(
                                                 fp.start_date,
                                             ).toLocaleDateString()}
                                         </td>
+
                                         <td className="px-2 py-1">
                                             {new Date(
                                                 fp.end_date,
                                             ).toLocaleDateString()}
                                         </td>
+
+                                        {/* 🔥 Status */}
                                         <td className="px-2 py-1">
-                                            {fp.is_open ? 'Yes' : 'No'}
+                                            <StatusBadge status={fp.status} />
                                         </td>
+
                                         <td className="flex gap-2 px-2 py-1">
                                             <Link
                                                 href={route(
@@ -183,6 +211,7 @@ export default function FiscalPeriodIndex() {
                                             >
                                                 <Pencil className="h-5 w-5" />
                                             </Link>
+
                                             <button
                                                 type="button"
                                                 disabled={processing}
@@ -213,10 +242,10 @@ export default function FiscalPeriodIndex() {
                     </table>
                 </div>
 
-                {/* Pagination + Records */}
+                {/* Pagination */}
                 <DataTablePagination
                     perPage={data.per_page}
-                    onPerPageChange={function (value: number): void {
+                    onPerPageChange={(value: number) => {
                         setData('per_page', Number(value));
                         setData('page', 1);
                     }}

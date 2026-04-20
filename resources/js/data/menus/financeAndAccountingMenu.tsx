@@ -27,8 +27,6 @@ export const financeAndAccountingMenu: SidebarItem[] = [
                 path: '/accounting/chart-of-accounts',
                 match_path: 'finance-and-accounting/chart-of-accounts',
                 permission: ['accounting.coa.view'],
-                description:
-                    'Define and manage all accounts (Assets, Liabilities, Equity, Revenue, Expenses).',
             },
             {
                 name: 'Voucher Entry',
@@ -43,8 +41,6 @@ export const financeAndAccountingMenu: SidebarItem[] = [
                         match_path:
                             'finance-and-accounting/voucher_entries/cash',
                         permission: ['accounting.voucher.cash.view'],
-                        description:
-                            'Record cash receipts or payments using voucher_entries.',
                     },
                     {
                         name: 'Bank Voucher',
@@ -53,8 +49,6 @@ export const financeAndAccountingMenu: SidebarItem[] = [
                         match_path:
                             'finance-and-accounting/voucher_entries/bank',
                         permission: ['accounting.voucher.bank.view'],
-                        description:
-                            'Record bank voucher_entries using voucher_entries.',
                     },
                     {
                         name: 'Journal Voucher',
@@ -63,8 +57,6 @@ export const financeAndAccountingMenu: SidebarItem[] = [
                         match_path:
                             'finance-and-accounting/voucher_entries/journal',
                         permission: ['accounting.voucher.journal.view'],
-                        description:
-                            'Record general journal entries via voucher_entries.',
                     },
                     {
                         name: 'Payment Voucher',
@@ -73,19 +65,15 @@ export const financeAndAccountingMenu: SidebarItem[] = [
                         match_path:
                             'finance-and-accounting/voucher_entries/payment',
                         permission: ['accounting.voucher.payment.view'],
-                        description:
-                            'Record payments to vendors or third parties.',
                     },
                 ],
             },
             {
-                name: 'Vouchers',
+                name: 'Voucher Entries',
                 icon: <i className="fa-solid fa-book-open-reader" />,
                 path: '/accounting/voucher_entries',
                 match_path: 'finance-and-accounting/voucher_entries',
                 permission: ['accounting.voucher_entries.view'],
-                description:
-                    'View and manage all voucher_entries (cash, bank, journal, payment).',
             },
             {
                 name: 'Trial Balance',
@@ -93,8 +81,6 @@ export const financeAndAccountingMenu: SidebarItem[] = [
                 path: '/accounting/trial-balance',
                 match_path: 'finance-and-accounting/trial-balance',
                 permission: ['accounting.trial.view'],
-                description:
-                    'Verify total debits equal total credits; catch errors before reports.',
             },
             {
                 name: 'Ledger Statement',
@@ -102,8 +88,6 @@ export const financeAndAccountingMenu: SidebarItem[] = [
                 path: '/accounting/ledger-statement',
                 match_path: 'finance-and-accounting/ledger-statement',
                 permission: ['accounting.trial.view'],
-                description:
-                    'Verify total debits equal total credits; catch errors before reports.',
             },
             {
                 name: 'Financial Reports',
@@ -118,8 +102,6 @@ export const financeAndAccountingMenu: SidebarItem[] = [
                         match_path:
                             'finance-and-accounting/financial-reports/profit-loss',
                         permission: ['accounting.profit_loss.view'],
-                        description:
-                            'Summarizes revenues and expenses to calculate net profit/loss.',
                     },
                     {
                         name: 'Balance Sheet',
@@ -128,8 +110,6 @@ export const financeAndAccountingMenu: SidebarItem[] = [
                         match_path:
                             'finance-and-accounting/financial-reports/balance-sheet',
                         permission: ['accounting.balance_sheet.view'],
-                        description:
-                            'Snapshot of assets, liabilities, and equity derived from posted voucher_entries.',
                     },
                     {
                         name: 'Shareholders Equity',
@@ -138,8 +118,6 @@ export const financeAndAccountingMenu: SidebarItem[] = [
                         match_path:
                             'finance-and-accounting/financial-reports/shareholders-equity',
                         permission: ['accounting.shareholders-equity.view'],
-                        description:
-                            'Track capital contributions, retained earnings, and equity movements from voucher_entries.',
                     },
                 ],
             },

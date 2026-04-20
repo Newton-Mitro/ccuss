@@ -16,15 +16,15 @@ class FiscalYearController
     {
         $query = FiscalYear::query();
 
-        // Search by code
+        // 🔍 Search
         if ($request->filled('search')) {
             $query->where('code', 'like', "%{$request->search}%");
         }
 
-        // Status filter
+        // ✅ Status filter (UPDATED)
         if ($request->filled('status') && $request->status !== 'all') {
-            if ($request->status === 'active') {
-                $query->where('is_active', true);
+            if ($request->status === 'open') {
+                $query->where('is_closed', false);
             } elseif ($request->status === 'closed') {
                 $query->where('is_closed', true);
             }
@@ -53,23 +53,24 @@ class FiscalYearController
             'code' => 'required|unique:fiscal_years,code',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'is_active' => 'boolean',
+            'is_closed' => 'boolean', // ✅ FIXED
         ]);
 
         DB::transaction(function () use ($validated) {
 
-            // Deactivate all other fiscal years if this one is active
-            if (!empty($validated['is_active'])) {
-                FiscalYear::where('is_active', true)->update(['is_active' => false]);
+            // 🔥 Only one active fiscal year allowed
+            if (empty($validated['is_closed'])) {
+                FiscalYear::where('is_closed', false)->update(['is_closed' => true]);
             }
 
             $fiscalYear = FiscalYear::create($validated);
 
-            // Auto-generate fiscal periods
+            // Auto-generate periods
             $this->generateFiscalPeriods($fiscalYear);
         });
 
-        return redirect()->route('fiscal-years.index')
+        return redirect()
+            ->route('fiscal-years.index')
             ->with('success', 'Fiscal Year created with periods.');
     }
 
@@ -86,30 +87,48 @@ class FiscalYearController
             'code' => 'required|unique:fiscal_years,code,' . $fiscalYear->id,
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'is_active' => 'boolean',
-            'is_closed' => 'boolean',
+            'is_closed' => 'boolean', // ✅ FIXED
         ]);
 
         DB::transaction(function () use ($validated, $fiscalYear) {
 
-            if (!empty($validated['is_active'])) {
+            // 🔥 Ensure only one open fiscal year
+            if (empty($validated['is_closed'])) {
                 FiscalYear::where('id', '!=', $fiscalYear->id)
-                    ->where('is_active', true)
-                    ->update(['is_active' => false]);
+                    ->where('is_closed', false)
+                    ->update(['is_closed' => true]);
             }
 
             $fiscalYear->update($validated);
+
+            // 🔥 Sync status with periods if needed
+            $this->syncPeriods($fiscalYear);
         });
 
-        return redirect()->route('fiscal-years.index')
+        return redirect()
+            ->route('fiscal-years.index')
             ->with('success', 'Fiscal Year updated.');
     }
 
     public function destroy(FiscalYear $fiscalYear)
     {
+        // 🔥 Safety rule: prevent deletion if periods exist
+        if ($fiscalYear->periods()->exists()) {
+            return back()->withErrors([
+                'error' => 'Cannot delete fiscal year with periods.',
+            ]);
+        }
+
         $fiscalYear->delete();
-        return redirect()->route('fiscal-years.index')->with('success', 'Fiscal Year deleted.');
+
+        return redirect()
+            ->route('fiscal-years.index')
+            ->with('success', 'Fiscal Year deleted.');
     }
+
+    // ------------------------
+    // 🔥 Generate Periods
+    // ------------------------
 
     protected function generateFiscalPeriods(FiscalYear $fiscalYear): void
     {
@@ -122,10 +141,23 @@ class FiscalYearController
                 'period_name' => strtoupper($start->format('M-Y')),
                 'start_date' => $start->copy()->startOfMonth(),
                 'end_date' => $start->copy()->endOfMonth(),
-                'is_open' => true,
+                'status' => 'open', // ✅ FIXED (was is_open)
             ]);
 
             $start->addMonth();
+        }
+    }
+
+    // ------------------------
+    // 🔥 Sync Period Status
+    // ------------------------
+
+    protected function syncPeriods(FiscalYear $fiscalYear): void
+    {
+        if ($fiscalYear->is_closed) {
+            $fiscalYear->periods()
+                ->where('status', 'open')
+                ->update(['status' => 'closed']);
         }
     }
 }
