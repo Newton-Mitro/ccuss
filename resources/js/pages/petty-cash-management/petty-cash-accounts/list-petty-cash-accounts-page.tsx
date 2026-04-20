@@ -117,7 +117,7 @@ export default function ListPettyCashAccountsPage() {
                     </div>
 
                     <div className="flex gap-2">
-                        <div className="w-44">
+                        <div className="w-60">
                             <Select
                                 value={data.branch_id}
                                 onChange={(value) => {
@@ -134,7 +134,7 @@ export default function ListPettyCashAccountsPage() {
                             />
                         </div>
 
-                        <div className="w-36">
+                        <div className="w-60">
                             <Select
                                 value={data.status}
                                 onChange={(value) => {

@@ -70,24 +70,22 @@ class PettyCashAccountController extends Controller
 
     public function store(Request $request)
     {
+
+        $organizationId = $request->user()->organization_id;
         $data = $request->validate([
-            // account layer
-            'name' => 'nullable|string|max:255',
-            'account_number' => 'required|string|unique:accounts,account_number',
-
-            'organization_id' => 'nullable|exists:organizations,id',
+            'name' => 'required|string|max:255',
             'branch_id' => 'required|exists:branches,id',
-
-            // petty cash layer
+            'ledger_account_id' => 'required|exists:ledger_accounts,id',
             'upper_limit' => 'required|numeric|min:0',
             'status' => 'in:active,inactive',
         ]);
 
-        DB::transaction(function () use ($data) {
+        DB::transaction(function () use ($data, $organizationId) {
 
             // 1. Create petty cash account
             $pettyCash = PettyCashAccount::create([
                 'branch_id' => $data['branch_id'],
+                'ledger_account_id' => $data['ledger_account_id'],
                 'name' => $data['name'] ?? 'Petty Cash',
                 'upper_limit' => $data['upper_limit'],
                 'status' => $data['status'] ?? 'active',
@@ -95,12 +93,11 @@ class PettyCashAccountController extends Controller
 
             // 2. Create central account (IMPORTANT)
             $account = Account::create([
-                'organization_id' => $data['organization_id'] ?? null,
+                'organization_id' => $organizationId ?? null,
                 'branch_id' => $data['branch_id'],
-                'account_number' => $data['account_number'],
+                'account_number' => 'PC-' . str_pad($pettyCash->id, 5, '0', STR_PAD_LEFT),
                 'name' => ($data['name'] ?? 'Petty Cash') . ' (Petty Cash)',
                 'type' => 'petty_cash',
-                'balance' => 0,
                 'status' => 'active',
 
                 // polymorphic link
@@ -146,23 +143,22 @@ class PettyCashAccountController extends Controller
         $data = $request->validate([
             'name' => 'nullable|string|max:255',
             'branch_id' => 'required|exists:branches,id',
+            'ledger_account_id' => 'required|exists:ledger_accounts,id',
             'upper_limit' => 'required|numeric|min:0',
             'status' => 'in:active,inactive',
-            'account_number' => "required|string|unique:accounts,account_number,{$pettyCashAccount->account_id}",
         ]);
 
         DB::transaction(function () use ($data, $pettyCashAccount) {
-
             $pettyCashAccount->update([
                 'name' => $data['name'] ?? 'Petty Cash',
                 'branch_id' => $data['branch_id'],
+                'ledger_account_id' => $data['ledger_account_id'],
                 'upper_limit' => $data['upper_limit'],
                 'status' => $data['status'] ?? 'active',
             ]);
 
             $pettyCashAccount->account?->update([
                 'name' => ($data['name'] ?? 'Petty Cash') . ' (Petty Cash)',
-                'account_number' => $data['account_number'],
             ]);
         });
 

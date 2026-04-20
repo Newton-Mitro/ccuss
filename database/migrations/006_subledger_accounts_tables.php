@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->morphs('accountable');
             $table->string('account_number')->unique();
             $table->string('name')->nullable();
-            $table->enum('type', ['bank', 'deposit', 'loan', 'petty_cash', 'vendor', 'vault', 'teller', 'customer']); // optional but useful
+            $table->enum('type', ['bank', 'deposit', 'loan', 'petty_cash', 'petty_cash_advance', 'vendor', 'vault', 'teller', 'customer']);
             $table->enum('status', ['pending', 'active', 'dormant', 'frozen', 'closed'])->default('pending');
             $table->timestamps();
             $table->softDeletes();

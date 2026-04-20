@@ -134,7 +134,7 @@ export default function ListAdvanceExpensesPage() {
 
                     <div className="flex gap-2">
                         {/* Petty Cash Account */}
-                        <div className="w-56">
+                        <div className="w-60">
                             <Select
                                 value={data.petty_cash_account_id}
                                 onChange={(value) => {
@@ -152,7 +152,7 @@ export default function ListAdvanceExpensesPage() {
                         </div>
 
                         {/* Status */}
-                        <div className="w-44">
+                        <div className="w-60">
                             <Select
                                 value={data.status}
                                 onChange={(value) => {

@@ -3,25 +3,21 @@
 namespace App\PettyCashModule\Models;
 
 use App\FinanceAndAccounting\Models\LedgerAccount;
+use App\SubledgerModule\Models\Account;
 use App\SystemAdministration\Models\User;
-use App\SystemAdministration\Traits\Auditable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PettyCashAdvanceAccount extends Model
 {
-    use HasFactory, Auditable, SoftDeletes;
+    use SoftDeletes;
 
     protected $fillable = [
         'petty_cash_account_id',
+        'link_account_id',
         'employee_id',
         'ledger_account_id',
         'status',
-    ];
-
-    protected $casts = [
-        'status' => 'string',
     ];
 
     /*
@@ -43,5 +39,10 @@ class PettyCashAdvanceAccount extends Model
     public function ledgerAccount()
     {
         return $this->belongsTo(LedgerAccount::class);
+    }
+
+    public function linkAccount()
+    {
+        return $this->belongsTo(Account::class, 'link_account_id');
     }
 }

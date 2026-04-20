@@ -36,8 +36,6 @@ class AccountFactory extends Factory
                 'customer',
             ]),
 
-            'balance' => $this->faker->randomFloat(2, 0, 100000),
-
             'status' => $this->faker->randomElement([
                 'pending',
                 'active',
@@ -53,7 +51,6 @@ class AccountFactory extends Factory
         return $this->state(fn() => [
             'type' => 'vault',
             'status' => 'active',
-            'balance' => 0,
         ]);
     }
 
@@ -62,7 +59,6 @@ class AccountFactory extends Factory
         return $this->state(fn() => [
             'type' => 'teller',
             'status' => 'active',
-            'balance' => 0,
         ]);
     }
 }

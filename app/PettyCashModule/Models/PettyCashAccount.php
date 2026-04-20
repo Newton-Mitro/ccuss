@@ -3,6 +3,7 @@
 namespace App\PettyCashModule\Models;
 
 use App\FinanceAndAccounting\Models\LedgerAccount;
+use App\SubledgerModule\Models\Account;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,6 +16,7 @@ class PettyCashAccount extends Model
 
     protected $fillable = [
         'branch_id',
+        'link_account_id', // ✅ added
         'name',
         'upper_limit',
         'ledger_account_id',
@@ -40,6 +42,12 @@ class PettyCashAccount extends Model
     public function ledgerAccount()
     {
         return $this->belongsTo(LedgerAccount::class);
+    }
+
+    // ✅ NEW: Link Account (Main Account reference)
+    public function linkAccount()
+    {
+        return $this->belongsTo(Account::class, 'link_account_id');
     }
 
     public function advanceAccounts()

@@ -39,7 +39,7 @@ const TellerForm = ({
     const { data, setData, post, put, processing, errors } = useForm({
         name: teller?.name || '',
         user_id: teller?.user_id || '',
-        branch_id: teller?.branch_id || '',
+        branch_id: teller?.branch_id || userBranch.id,
         max_cash_limit: teller?.max_cash_limit || 0,
         max_transaction_limit: teller?.max_transaction_limit || 0,
         is_active: teller?.is_active ?? true,
@@ -109,9 +109,9 @@ const TellerForm = ({
                     <div>
                         <Label className="text-xs">Branch</Label>
                         <Select
-                            value={userBranch?.id.toString()}
+                            value={data.branch_id.toString()}
                             onChange={(val) => {
-                                setData('branch_id', val);
+                                setData('branch_id', Number(val));
                             }}
                             options={branches.map((branch) => ({
                                 value: branch.id.toString(),

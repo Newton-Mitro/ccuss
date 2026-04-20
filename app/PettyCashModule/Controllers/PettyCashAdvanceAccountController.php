@@ -69,43 +69,35 @@ class PettyCashAdvanceAccountController extends Controller
         );
     }
 
-
-
-
     public function store(Request $request)
     {
         $data = $request->validate([
-            // account layer
             'name' => 'nullable|string|max:255',
-            'account_number' => 'required|string|unique:accounts,account_number',
-
-            'organization_id' => 'nullable|exists:organizations,id',
-
-            // advance layer
             'petty_cash_account_id' => 'required|exists:petty_cash_accounts,id',
+            'ledger_account_id' => 'required|exists:ledger_accounts,id',
             'employee_id' => 'required|exists:users,id',
             'status' => 'in:active,inactive',
         ]);
 
-        DB::transaction(function () use ($data) {
+        DB::transaction(function () use ($data, $request) {
 
             // 1. Create advance account
             $advance = PettyCashAdvanceAccount::create([
                 'petty_cash_account_id' => $data['petty_cash_account_id'],
+                'ledger_account_id' => $data['ledger_account_id'],
                 'employee_id' => $data['employee_id'],
                 'status' => $data['status'] ?? 'active',
             ]);
 
             // 2. Create central account
             $account = Account::create([
-                'organization_id' => $data['organization_id'] ?? null,
+                'organization_id' => $request->user()->organization_id ?? null,
                 'branch_id' => optional($advance->pettyCashAccount)->branch_id,
 
-                'account_number' => $data['account_number'],
+                'account_number' => 'PCA-' . str_pad($advance->id, 5, '0', STR_PAD_LEFT),
                 'name' => ($data['name'] ?? 'Advance - Employee') . ' (Advance)',
 
-                'type' => 'employee_advance', // 🔥 important
-                'balance' => 0,
+                'type' => 'petty_cash_advance',
                 'status' => 'active',
 
                 // polymorphic link

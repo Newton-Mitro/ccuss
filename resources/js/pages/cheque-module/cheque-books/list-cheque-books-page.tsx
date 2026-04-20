@@ -112,7 +112,7 @@ export default function Index() {
                                 ].map((h) => (
                                     <th
                                         key={h}
-                                        className="p-2 text-left text-sm font-medium"
+                                        className="border-b p-2 text-left text-sm font-medium text-muted-foreground"
                                     >
                                         {h}
                                     </th>

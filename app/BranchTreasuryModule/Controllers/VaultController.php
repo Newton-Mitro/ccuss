@@ -62,7 +62,7 @@ class VaultController extends Controller
     {
         $organization = Auth::user()->organization;
         $data = $request->validate([
-            'name' => 'nullable|string|max:255',
+            'name' => 'required|string|max:255',
             'branch_id' => 'required|exists:branches,id',
             'is_active' => 'boolean',
         ]);
@@ -78,10 +78,9 @@ class VaultController extends Controller
             $account = Account::create([
                 'organization_id' => $organization->id ?? null,
                 'branch_id' => $data['branch_id'],
-                'account_number' => 'V-' . $vault->id, // 🔥 link to vault id for uniqueness
+                'account_number' => 'V-' . str_pad($vault->id, 5, '0', STR_PAD_LEFT),
                 'name' => ($data['name'] ?? 'Vault') . ' (Vault)',
                 'type' => 'vault', // 🔥 important
-                'balance' => 0,
                 'status' => 'active',
                 // polymorphic
                 'accountable_type' => Vault::class,

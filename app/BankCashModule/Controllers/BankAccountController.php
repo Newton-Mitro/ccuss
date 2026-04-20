@@ -81,7 +81,6 @@ class BankAccountController extends Controller
                 'account_number' => $data['account_number'],
                 'name' => $data['name'] ?? $data['bank_name'],
                 'type' => 'bank',
-                'balance' => 0,
                 'status' => 'active',
                 // polymorphic link
                 'accountable_type' => BankAccount::class,

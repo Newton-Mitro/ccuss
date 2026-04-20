@@ -101,11 +101,10 @@ class TellerController extends Controller
                 'organization_id' => $organizationId,
                 'branch_id' => $data['branch_id'] ?? Auth::user()->branch_id,
 
-                'account_number' => 'T-' . $teller->id,
+                'account_number' => 'T-' . str_pad($teller->id, 5, '0', STR_PAD_LEFT),
                 'name' => $data['name'],
 
                 'type' => 'teller',
-                'balance' => 0,
                 'status' => 'active',
 
                 // polymorphic
