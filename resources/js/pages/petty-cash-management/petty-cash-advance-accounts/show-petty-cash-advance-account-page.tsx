@@ -21,6 +21,8 @@ const ShowAdvanceExpensePage = ({ account }: Props) => {
         inactive: 'text-gray-500',
     };
 
+    const handleBack = () => window.history.back();
+
     return (
         <CustomAuthLayout>
             <Head title={`Advance Account #${account.id}`} />
@@ -34,11 +36,11 @@ const ShowAdvanceExpensePage = ({ account }: Props) => {
 
                 <div className="flex gap-2">
                     <button
-                        onClick={() => window.history.back()}
-                        className="flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
+                        onClick={handleBack}
+                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
                     >
                         <ArrowLeft className="h-4 w-4" />
-                        Back
+                        <span className="hidden sm:inline">Back</span>
                     </button>
 
                     <Link

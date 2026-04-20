@@ -58,6 +58,8 @@ const AdvanceExpenseForm = ({
         { title: isEdit ? 'Edit' : 'Create', href: '' },
     ];
 
+    const handleBack = () => window.history.back();
+
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Petty Cash Advance" />
@@ -69,10 +71,11 @@ const AdvanceExpenseForm = ({
                     description="Manage petty cash advance for employee"
                 />
                 <button
-                    onClick={() => window.history.back()}
-                    className="btn-muted"
+                    onClick={handleBack}
+                    className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
                 >
-                    <ArrowLeft className="h-4 w-4" /> Back
+                    <ArrowLeft className="h-4 w-4" />
+                    <span className="hidden sm:inline">Back</span>
                 </button>
             </div>
 

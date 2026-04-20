@@ -7,10 +7,9 @@ import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { formatDate, formatDateTime } from '../../../lib/date_util';
 import { takaToText } from '../../../lib/taka_to_text';
 import { BreadcrumbItem, SharedData } from '../../../types';
-import { Voucher } from '../../../types/finance_and_accounting';
 
 interface VoucherViewProps extends SharedData {
-    voucher: Voucher;
+    voucher: any;
     flash: { success?: string; error?: string };
     backUrl: string;
 }
@@ -52,12 +51,11 @@ export default function VoucherView() {
                 />
                 <div className="flex gap-2">
                     <button
-                        type="button"
                         onClick={handleBack}
                         className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
                     >
                         <ArrowLeft className="h-4 w-4" />
-                        Back
+                        <span className="hidden sm:inline">Back</span>
                     </button>
 
                     <Link

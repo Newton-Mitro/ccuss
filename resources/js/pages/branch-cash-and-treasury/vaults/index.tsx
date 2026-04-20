@@ -281,7 +281,7 @@ export default function Index() {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={5}
+                                        colSpan={6}
                                         className="py-6 text-center text-muted-foreground"
                                     >
                                         No vaults found.

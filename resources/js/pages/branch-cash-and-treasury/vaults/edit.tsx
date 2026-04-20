@@ -23,7 +23,6 @@ interface VaultFormPageProps extends SharedData {
 }
 
 const VaultForm = ({ vault, branches }: VaultFormPageProps) => {
-    console.log('VaultFormPageProps:', { vault, branches });
     useFlashToastHandler();
 
     const isEdit = !!vault;
@@ -71,7 +70,6 @@ const VaultForm = ({ vault, branches }: VaultFormPageProps) => {
                 />
 
                 <button
-                    type="button"
                     onClick={handleBack}
                     className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
                 >

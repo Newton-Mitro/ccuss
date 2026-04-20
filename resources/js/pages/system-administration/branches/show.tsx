@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { ArrowLeft, Clock, Hash, MapPin } from 'lucide-react';
 import HeadingSmall from '../../../components/heading-small';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
@@ -20,6 +20,8 @@ export default function Show({ branch }: ShowProps) {
 
     const hasCoordinates = branch.latitude && branch.longitude;
 
+    const handleBack = () => window.history.back();
+
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Branch: ${branch.name}`} />
@@ -31,13 +33,13 @@ export default function Show({ branch }: ShowProps) {
                         title="Branch Details"
                         description="View and manage branch details."
                     />
-                    <Link
-                        href="/branches"
-                        className="flex items-center gap-1 rounded border bg-background px-2 py-0.5 hover:bg-muted/20"
+                    <button
+                        onClick={handleBack}
+                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
                     >
-                        <ArrowLeft className="h-3 w-3" />
-                        Back
-                    </Link>
+                        <ArrowLeft className="h-4 w-4" />
+                        <span className="hidden sm:inline">Back</span>
+                    </button>
                 </div>
 
                 {/* Overview Card */}

@@ -35,6 +35,13 @@ export const customerKycMenu: SidebarItem[] = [
                 match_path: 'kyc-documents',
                 permission: ['kyc-documents.view'],
             },
+            {
+                name: 'Customer Accounts',
+                icon: <i className="fa-solid fa-bank" />,
+                path: '/customer-accounts',
+                match_path: 'customer-accounts',
+                permission: ['customer-accounts.view'],
+            },
         ],
     },
 ];
