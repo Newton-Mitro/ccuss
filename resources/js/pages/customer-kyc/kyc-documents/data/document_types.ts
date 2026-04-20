@@ -1,5 +1,9 @@
 export const documentTypes = [
     {
+        label: 'All',
+        value: '',
+    },
+    {
         label: 'NID',
         value: 'national_identification_number',
     },

@@ -33,7 +33,7 @@ export default function Index() {
 
     const { data, setData, get } = useForm({
         search: filters.search || '',
-        status: filters.status || 'all',
+        kyc_status: filters.kyc_status || 'all',
         per_page: Number(filters.per_page) || 10,
         page: Number(filters.page) || 1,
     });
@@ -43,7 +43,7 @@ export default function Index() {
             get(route('customers.index'), { preserveState: true });
         }, 400);
         return () => clearTimeout(delay);
-    }, [data.search, data.status, data.per_page, data.page]);
+    }, [data.search, data.kyc_status, data.per_page, data.page]);
 
     const handleDelete = (id: number, name: string) => {
         appSwal
@@ -107,9 +107,9 @@ export default function Index() {
 
                     <div className="w-60">
                         <Select
-                            value={data.status}
+                            value={data.kyc_status}
                             onChange={(value) => {
-                                setData('status', value);
+                                setData('kyc_status', value);
                                 setData('page', 1);
                             }}
                             options={kycStatuses}

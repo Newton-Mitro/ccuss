@@ -127,7 +127,7 @@ export default function Index() {
                         {/* Status Filter */}
                         <div className="w-60">
                             <Select
-                                value={data.branch_id}
+                                value={data.status}
                                 onChange={(value) => {
                                     setData('status', value);
                                     setData('page', 1);

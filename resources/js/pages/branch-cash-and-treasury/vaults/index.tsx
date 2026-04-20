@@ -47,7 +47,7 @@ export default function Index() {
         search: filters.search || '',
         branch_id: filters.branch_id || '',
         account_id: filters.account_id || '',
-        is_active: filters.is_active || '',
+        status: filters.status || '',
         per_page: Number(filters.per_page) || 10,
         page: Number(filters.page) || 1,
     });
@@ -65,7 +65,7 @@ export default function Index() {
         data.page,
         data.branch_id,
         data.account_id,
-        data.is_active,
+        data.status,
     ]);
 
     const handleDelete = (id: number, name: string) => {
@@ -151,9 +151,9 @@ export default function Index() {
                         {/* Status (is_active) */}
                         <div className="w-60">
                             <Select
-                                value={data.is_active}
+                                value={data.status}
                                 onChange={(value) => {
-                                    setData('is_active', value);
+                                    setData('status', value);
                                     setData('page', 1);
                                 }}
                                 options={[

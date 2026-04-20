@@ -230,13 +230,15 @@ export default function EditDebitVoucherEntry({
                     title="Edit Debit / Payment Voucher"
                     description="Update voucher details"
                 />
-                <button
-                    onClick={handleBack}
-                    className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
-                >
-                    <ArrowLeft className="h-4 w-4" />
-                    <span className="hidden sm:inline">Back</span>
-                </button>
+                <div className="">
+                    <button
+                        onClick={handleBack}
+                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        <span className="hidden sm:inline">Back</span>
+                    </button>
+                </div>
             </div>
 
             {/* Form */}

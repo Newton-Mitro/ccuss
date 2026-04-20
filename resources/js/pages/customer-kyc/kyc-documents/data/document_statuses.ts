@@ -1,5 +1,9 @@
 export const documentStatuses = [
     {
+        label: 'All',
+        value: '',
+    },
+    {
         label: 'Pending',
         value: 'pending',
     },

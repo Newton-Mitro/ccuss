@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->string('account_number')->unique();
             $table->string('swift_code')->nullable();
             $table->string('routing_number')->nullable();
+            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
             $table->softDeletes();
         });

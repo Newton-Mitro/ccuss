@@ -61,7 +61,7 @@ const Create = () => {
                     description="Add new address for customer."
                 />
 
-                <div className="flex flex-wrap gap-2">
+                <div className="">
                     <button
                         onClick={handleBack}
                         className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"

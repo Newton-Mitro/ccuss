@@ -16,7 +16,7 @@ interface Props {
 }
 const recordPerPage = [
     {
-        value: -1,
+        value: 999999999,
         label: 'All',
     },
     {

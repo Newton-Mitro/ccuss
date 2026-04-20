@@ -145,7 +145,7 @@ export default function Index() {
                                         {formatBDTCurrency(c.amount)}
                                     </td>
 
-                                    <td className="px-2 py-1">
+                                    <td className="px-2 py-1 capitalize">
                                         <Badge text={c.status} />
                                     </td>
 

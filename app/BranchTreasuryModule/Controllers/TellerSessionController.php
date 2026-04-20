@@ -74,7 +74,9 @@ class TellerSessionController extends Controller
             ->where('status', 'open')
             ->first();
 
-        $cashAccounts = Account::all();
+        $cashAccounts = Account::where('type', 'teller')
+            ->where('branch_id', $user->branch_id)
+            ->get();
 
         return Inertia::render(
             'branch-cash-and-treasury/teller-sessions/open_teller_session_page',
@@ -91,7 +93,7 @@ class TellerSessionController extends Controller
         $data = $request->validate([
             'teller_id' => 'required|exists:tellers,id',
             'branch_day_id' => 'required|exists:branch_days,id',
-            'cash_account_id' => 'nullable|exists:accounts,id',
+            'cash_account_id' => 'required|exists:accounts,id',
             'remarks' => 'nullable|string'
         ]);
 

@@ -14,6 +14,8 @@ export interface BankAccount {
     updated_at: string;
     deleted_at?: string;
 
+    status: 'active' | 'inactive';
+
     // relations (optional, loaded via API)
     reconciliations?: BankReconciliation[];
     account?: any;

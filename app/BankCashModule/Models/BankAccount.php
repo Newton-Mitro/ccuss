@@ -19,6 +19,11 @@ class BankAccount extends Model
         'account_number',
         'swift_code',
         'routing_number',
+        'status', // ✅ added
+    ];
+
+    protected $casts = [
+        'status' => 'string', // or keep as string for enum
     ];
 
     protected $appends = [
@@ -49,6 +54,20 @@ class BankAccount extends Model
     }
 
     // ------------------------
+    // Scopes (🔥 Highly Recommended)
+    // ------------------------
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    public function scopeInactive($query)
+    {
+        return $query->where('status', 'inactive');
+    }
+
+    // ------------------------
     // Accessors
     // ------------------------
 
@@ -68,10 +87,18 @@ class BankAccount extends Model
     }
 
     /**
-     * Balance is now delegated to central accounts table
+     * Balance is delegated to central accounts table
      */
     public function getBalanceAttribute()
     {
         return $this->account?->balance ?? 0;
+    }
+
+    /**
+     * Optional: Human readable status (for UI)
+     */
+    public function getStatusLabelAttribute(): string
+    {
+        return ucfirst($this->status);
     }
 }

@@ -13,19 +13,17 @@ const BankAccountShow = ({ account }) => {
             {/* Header */}
             <div className="flex justify-between pb-4">
                 <HeadingSmall
-                    title={`Bank Account Details`}
+                    title="Bank Account Details"
                     description="View bank account configuration and metadata."
                 />
 
-                <div className="">
-                    <button
-                        onClick={handleBack}
-                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                        <span className="hidden sm:inline">Back</span>
-                    </button>
-                </div>
+                <button
+                    onClick={handleBack}
+                    className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
+                >
+                    <ArrowLeft className="h-4 w-4" />
+                    <span className="hidden sm:inline">Back</span>
+                </button>
             </div>
 
             {/* Content */}
@@ -55,9 +53,15 @@ const BankAccountShow = ({ account }) => {
                             value={account.routing_number}
                         />
                         <InfoItem label="IBAN" value={account.iban} />
+
                         <InfoItem
                             label="Link Account"
-                            value={account.account.account_number}
+                            value={account.account?.account_number}
+                        />
+
+                        <InfoItem
+                            label="Status"
+                            value={<StatusBadge status={account.status} />}
                         />
                     </div>
                 </div>
@@ -77,6 +81,25 @@ const InfoItem = ({ label, value }) => {
                 {value || <span className="text-muted-foreground">—</span>}
             </div>
         </div>
+    );
+};
+
+/**
+ * Status Badge (Reusable Across App)
+ */
+const StatusBadge = ({ status }) => {
+    const isActive = status === 'active';
+
+    return (
+        <span
+            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                isActive
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-red-100 text-red-700'
+            }`}
+        >
+            {isActive ? 'Active' : 'Inactive'}
+        </span>
     );
 };
 

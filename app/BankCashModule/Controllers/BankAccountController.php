@@ -15,8 +15,9 @@ class BankAccountController extends Controller
     public function index(Request $request)
     {
         $query = BankAccount::query()
-            ->with(['account']); // assumes relation exists
+            ->with(['account']);
 
+        // 🔍 Search
         if ($request->filled('search')) {
             $search = $request->search;
 
@@ -31,13 +32,18 @@ class BankAccountController extends Controller
             });
         }
 
+        // ✅ Status Filter (NEW)
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
         $accounts = $query->latest()
             ->paginate($request->input('per_page', 10))
             ->withQueryString();
 
         return Inertia::render('bank-cash/bank-accounts/list-bank-accounts-page', [
             'accounts' => $accounts,
-            'filters' => $request->only(['search', 'per_page', 'page']),
+            'filters' => $request->only(['search', 'status', 'per_page', 'page']),
         ]);
     }
 
@@ -50,10 +56,11 @@ class BankAccountController extends Controller
     {
         $organization = Auth::user()->organization;
         $branch = Auth::user()->branch;
+
         $data = $request->validate([
             // account layer
             'name' => 'nullable|string|max:255',
-            'account_number' => 'required|string|unique:accounts,account_number',
+            'account_number' => 'required|string|max:255|unique:accounts,account_number',
 
             'organization_id' => 'nullable|exists:organizations,id',
             'branch_id' => 'nullable|exists:branches,id',
@@ -63,18 +70,22 @@ class BankAccountController extends Controller
             'branch_name' => 'nullable|string|max:255',
             'swift_code' => 'nullable|string|max:50',
             'routing_number' => 'nullable|string|max:50',
+            'status' => 'nullable|in:active,inactive', // ✅ NEW
         ]);
 
         DB::transaction(function () use ($data, $organization, $branch) {
-            // 1. Create bank account first
+
+            // 1. Create bank account
             $bankAccount = BankAccount::create([
                 'bank_name' => $data['bank_name'],
                 'branch_name' => $data['branch_name'] ?? null,
                 'account_number' => $data['account_number'],
                 'swift_code' => $data['swift_code'] ?? null,
                 'routing_number' => $data['routing_number'] ?? null,
+                'status' => $data['status'] ?? 'active', // ✅ NEW
             ]);
-            // 2. Create central ledger/account
+
+            // 2. Create central ledger account
             $account = Account::create([
                 'organization_id' => $organization->id ?? null,
                 'branch_id' => $branch->id ?? null,
@@ -82,21 +93,25 @@ class BankAccountController extends Controller
                 'name' => $data['name'] ?? $data['bank_name'],
                 'type' => 'bank',
                 'status' => 'active',
-                // polymorphic link
                 'accountable_type' => BankAccount::class,
                 'accountable_id' => $bankAccount->id,
             ]);
-            // 3. Optional reverse link (ONLY if you need bidirectional access)
+
+            // 3. Link back
             $bankAccount->update([
                 'account_id' => $account->id,
             ]);
         });
-        return redirect()->route('bank-accounts.index')->with('success', 'Bank account created successfully!');
+
+        return redirect()
+            ->route('bank-accounts.index')
+            ->with('success', 'Bank account created successfully!');
     }
 
     public function show(BankAccount $bankAccount)
     {
         $bankAccount->load('account');
+
         return Inertia::render('bank-cash/bank-accounts/show-bank-account-page', [
             'account' => $bankAccount,
         ]);
@@ -105,6 +120,7 @@ class BankAccountController extends Controller
     public function edit(BankAccount $bankAccount)
     {
         $bankAccount->load('account');
+
         return Inertia::render('bank-cash/bank-accounts/bank-account-form-page', [
             'account' => $bankAccount,
         ]);
@@ -116,26 +132,32 @@ class BankAccountController extends Controller
             'name' => 'nullable|string|max:255',
             'bank_name' => 'required|string|max:255',
             'branch_name' => 'nullable|string|max:255',
-            'account_number' => "required|string|unique:bank_accounts,account_number,{$bankAccount->id}",
+            'account_number' => "required|string|max:255|unique:bank_accounts,account_number,{$bankAccount->id},id,deleted_at,NULL",
             'swift_code' => 'nullable|string|max:50',
             'routing_number' => 'nullable|string|max:50',
+            'status' => 'required|in:active,inactive', // ✅ NEW
         ]);
 
         DB::transaction(function () use ($data, $bankAccount) {
+
             $bankAccount->update([
                 'bank_name' => $data['bank_name'],
                 'branch_name' => $data['branch_name'] ?? null,
                 'account_number' => $data['account_number'],
                 'swift_code' => $data['swift_code'] ?? null,
                 'routing_number' => $data['routing_number'] ?? null,
+                'status' => $data['status'], // ✅ NEW
             ]);
+
             $bankAccount->account?->update([
                 'name' => $data['name'] ?? $data['bank_name'],
                 'account_number' => $data['account_number'],
             ]);
         });
 
-        return redirect()->route('bank-accounts.index')->with('success', 'Bank account updated successfully!');
+        return redirect()
+            ->route('bank-accounts.index')
+            ->with('success', 'Bank account updated successfully!');
     }
 
     public function destroy(BankAccount $bankAccount)
@@ -144,6 +166,9 @@ class BankAccountController extends Controller
             $bankAccount->account?->delete();
             $bankAccount->delete();
         });
-        return redirect()->route('bank-accounts.index')->with('success', 'Bank account deleted successfully!');
+
+        return redirect()
+            ->route('bank-accounts.index')
+            ->with('success', 'Bank account deleted successfully!');
     }
 }

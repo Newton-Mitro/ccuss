@@ -44,8 +44,8 @@ class TellerController extends Controller
             $query->where('account_id', $request->account_id);
         }
         // 📊 Status Filter (is_active)
-        if ($request->filled('is_active')) {
-            $query->where('is_active', (bool) $request->is_active);
+        if ($request->filled('status')) {
+            $query->where('is_active', $request->status);
         }
         $tellers = $query->latest()->paginate($request->input('per_page', 10))->withQueryString();
         return Inertia::render('branch-cash-and-treasury/tellers/index', [

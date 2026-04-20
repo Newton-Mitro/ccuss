@@ -6,6 +6,7 @@ import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
 import { Input } from '../../../components/ui/input';
+import { Select } from '../../../components/ui/select';
 import {
     Tooltip,
     TooltipContent,
@@ -41,6 +42,7 @@ export default function Index() {
         search: filters.search || '',
         per_page: Number(filters.per_page) || 10,
         page: Number(filters.page) || 1,
+        status: filters.status || '',
     });
 
     const handleSearch = () => {
@@ -50,7 +52,7 @@ export default function Index() {
     useEffect(() => {
         const delay = setTimeout(handleSearch, 400);
         return () => clearTimeout(delay);
-    }, [data.search, data.per_page, data.page]);
+    }, [data.search, data.per_page, data.page, data.status]);
 
     const handleDelete = (id: number, name: string) => {
         appSwal
@@ -108,6 +110,22 @@ export default function Index() {
                             }}
                         />
                     </div>
+
+                    {/* Status Filter */}
+                    <div className="w-60">
+                        <Select
+                            value={data.status}
+                            onChange={(value) => {
+                                setData('status', value);
+                                setData('page', 1);
+                            }}
+                            options={[
+                                { value: '', label: 'All' },
+                                { value: 'active', label: 'Active' },
+                                { value: 'inactive', label: 'Inactive' },
+                            ]}
+                        ></Select>
+                    </div>
                 </div>
 
                 {/* Table */}
@@ -122,6 +140,7 @@ export default function Index() {
                                     'SWIFT',
                                     'Routing',
                                     'Link Account',
+                                    'Status',
                                     'Actions',
                                 ].map((header) => (
                                     <th
@@ -163,6 +182,10 @@ export default function Index() {
 
                                         <td className="px-2 py-1">
                                             {a.account.account_number || '-'}
+                                        </td>
+
+                                        <td className="px-2 py-1">
+                                            {a.status}
                                         </td>
 
                                         <td className="flex space-x-2 px-2 py-1">

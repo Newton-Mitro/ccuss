@@ -31,9 +31,9 @@ class VaultController extends Controller
         if ($request->filled('branch_id')) {
             $query->where('branch_id', $request->branch_id);
         }
-        // 📊 Status Filter
+
         if ($request->filled('status')) {
-            $query->where('is_active', (bool) $request->status);
+            $query->where('is_active', $request->status);
         }
         $vaults = $query->latest()->paginate($request->input('per_page', 10))->withQueryString();
         return Inertia::render('branch-cash-and-treasury/vaults/index', [

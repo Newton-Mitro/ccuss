@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { Head, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
+import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 
 const BankAccountForm = ({ account }) => {
@@ -22,6 +23,7 @@ const BankAccountForm = ({ account }) => {
         iban: account?.iban || '',
         swift_code: account?.swift_code || '',
         routing_number: account?.routing_number || '',
+        status: account?.status || 'active',
     });
 
     const handleSubmit = (e) => {
@@ -125,6 +127,20 @@ const BankAccountForm = ({ account }) => {
                             }
                         />
                         <InputError message={errors.routing_number} />
+                    </div>
+
+                    <div>
+                        <Label className="text-xs">Status</Label>
+                        <Select
+                            value={data.status}
+                            onChange={(value) => setData('status', value)}
+                            options={[
+                                { value: '', label: 'None' },
+                                { value: 'active', label: 'Active' },
+                                { value: 'inactive', label: 'Inactive' },
+                            ]}
+                        />
+                        <InputError message={errors.status} />
                     </div>
                 </div>
 

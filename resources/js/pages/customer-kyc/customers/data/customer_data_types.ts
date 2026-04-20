@@ -11,6 +11,10 @@ export const customerTypes = [
 
 export const kycStatuses = [
     {
+        label: 'All',
+        value: '',
+    },
+    {
         label: 'Pending',
         value: 'pending',
     },
