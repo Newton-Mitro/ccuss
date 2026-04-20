@@ -17,13 +17,10 @@ class TellerController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Teller::query()
-            ->with(['branch', 'user', 'account']);
-
+        $query = Teller::query()->with(['branch', 'user', 'account']);
         // 🔍 Search
         if ($request->filled('search')) {
             $search = $request->search;
-
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhereHas(
@@ -38,26 +35,19 @@ class TellerController extends Controller
                     );
             });
         }
-
         // 🏢 Branch Filter
         if ($request->filled('branch_id')) {
             $query->where('branch_id', $request->branch_id);
         }
-
         // 🏦 Account Filter (NEW - matches schema)
         if ($request->filled('account_id')) {
             $query->where('account_id', $request->account_id);
         }
-
         // 📊 Status Filter (is_active)
         if ($request->filled('is_active')) {
             $query->where('is_active', (bool) $request->is_active);
         }
-
-        $tellers = $query->latest()
-            ->paginate($request->input('per_page', 10))
-            ->withQueryString();
-
+        $tellers = $query->latest()->paginate($request->input('per_page', 10))->withQueryString();
         return Inertia::render('branch-cash-and-treasury/tellers/index', [
             'tellers' => $tellers,
             'filters' => $request->only([
@@ -69,46 +59,36 @@ class TellerController extends Controller
                 'page',
             ]),
             'branches' => Branch::select('id', 'name')->get(),
-            'accounts' => Account::select('id', 'name')->get(),
         ]);
     }
 
     public function create(): Response
     {
         $branch = Auth::user()->branch;
-
         return Inertia::render('branch-cash-and-treasury/tellers/teller-form', [
             'users' => User::where('branch_id', $branch->id)->get(),
-            'accounts' => Account::where('branch_id', $branch->id)->get(),
-            'branch' => $branch,
-            'backUrl' => route('tellers.index'),
+            'userBranch' => $branch,
+            'branches' => Branch::select('id', 'name')->get(),
         ]);
     }
 
-
-
-
     public function store(Request $request)
     {
-        $branchId = Auth::user()->branch_id;
-
+        $organizationId = Auth::user()->organization_id;
         $data = $request->validate([
-            // account layer
+            'branch_id' => 'required|exists:branches,id',
             'name' => 'required|string|max:255',
-            'account_number' => 'required|string|unique:accounts,account_number',
-
-            // teller layer
             'user_id' => 'required|exists:users,id',
             'max_cash_limit' => 'required|numeric|min:0',
             'max_transaction_limit' => 'required|numeric|min:0',
             'is_active' => 'boolean',
         ]);
 
-        return DB::transaction(function () use ($data, $branchId) {
+        return DB::transaction(function () use ($data, $organizationId) {
 
             // 1. Create Teller
             $teller = Teller::create([
-                'branch_id' => $branchId,
+                'branch_id' => $data['branch_id'] ?? Auth::user()->branch_id,
                 'user_id' => $data['user_id'],
                 'name' => $data['name'],
                 'max_cash_limit' => $data['max_cash_limit'],
@@ -118,13 +98,13 @@ class TellerController extends Controller
 
             // 2. Create Teller Cash Account (🔥 core)
             $account = Account::create([
-                'organization_id' => null,
-                'branch_id' => $branchId,
+                'organization_id' => $organizationId,
+                'branch_id' => $data['branch_id'] ?? Auth::user()->branch_id,
 
-                'account_number' => $data['account_number'],
-                'name' => $data['name'] . ' (Teller Cash Drawer)',
+                'account_number' => 'T-' . $teller->id,
+                'name' => $data['name'],
 
-                'type' => 'teller_cash',
+                'type' => 'teller',
                 'balance' => 0,
                 'status' => 'active',
 
@@ -154,10 +134,9 @@ class TellerController extends Controller
 
         return Inertia::render('branch-cash-and-treasury/tellers/teller-form', [
             'users' => User::where('branch_id', $branch->id)->get(),
-            'accounts' => Account::where('branch_id', $branch->id)->get(),
             'teller' => $teller->load(['account']),
-            'branch' => $branch,
-            'backUrl' => route('tellers.index'),
+            'userBranch' => $branch,
+            'branches' => Branch::select('id', 'name')->get(),
         ]);
     }
 
@@ -170,9 +149,7 @@ class TellerController extends Controller
         $data = $request->validate([
             'user_id' => 'required|exists:users,id',
             'name' => 'required|string|max:255',
-
-            'account_number' => "required|string|unique:accounts,account_number,{$teller->account_id}",
-
+            'branch_id' => 'required|exists:branches,id',
             'max_cash_limit' => 'required|numeric|min:0',
             'max_transaction_limit' => 'required|numeric|min:0',
             'is_active' => 'boolean',
@@ -182,6 +159,7 @@ class TellerController extends Controller
 
             $teller->update([
                 'user_id' => $data['user_id'],
+                'branch_id' => $data['branch_id'] ?? Auth::user()->branch_id,
                 'name' => $data['name'],
                 'max_cash_limit' => $data['max_cash_limit'],
                 'max_transaction_limit' => $data['max_transaction_limit'],
@@ -189,8 +167,8 @@ class TellerController extends Controller
             ]);
 
             $teller->account?->update([
-                'name' => $data['name'] . ' (Teller Cash Drawer)',
-                'account_number' => $data['account_number'],
+                'branch_id' => $data['branch_id'] ?? Auth::user()->branch_id,
+                'name' => $data['name'],
             ]);
         });
 

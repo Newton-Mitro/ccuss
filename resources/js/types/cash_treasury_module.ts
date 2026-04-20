@@ -57,6 +57,7 @@ export interface Teller {
 
     user?: User;
     branch?: Branch;
+    account?: any;
     sessions?: TellerSession[];
     limits?: TellerLimit[];
 }

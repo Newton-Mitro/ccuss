@@ -11,6 +11,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/create', [BankAccountController::class, 'create'])->name('create');
         Route::post('/', [BankAccountController::class, 'store'])->name('store');
         Route::get('/{bankAccount}/edit', [BankAccountController::class, 'edit'])->name('edit');
+        Route::get('/{bankAccount}', [BankAccountController::class, 'show'])->name('show');
         Route::put('/{bankAccount}', [BankAccountController::class, 'update'])->name('update');
         Route::delete('/{bankAccount}', [BankAccountController::class, 'destroy'])->name('destroy');
     });

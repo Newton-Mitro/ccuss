@@ -22,10 +22,16 @@ import { User } from '../../../types/user';
 interface TellerFormPageProps extends SharedData {
     teller?: Teller;
     users: User[];
-    branch: Branch;
+    userBranch: Branch;
+    branches: Branch[];
 }
 
-const TellerForm = ({ teller, branch, users }: TellerFormPageProps) => {
+const TellerForm = ({
+    teller,
+    userBranch,
+    users,
+    branches,
+}: TellerFormPageProps) => {
     useFlashToastHandler();
 
     const isEdit = !!teller;
@@ -101,6 +107,21 @@ const TellerForm = ({ teller, branch, users }: TellerFormPageProps) => {
                 {/* Basic Info */}
                 <div className="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
                     <div>
+                        <Label className="text-xs">Branch</Label>
+                        <Select
+                            value={userBranch?.id.toString()}
+                            onChange={(val) => {
+                                setData('branch_id', val);
+                            }}
+                            options={branches.map((branch) => ({
+                                value: branch.id.toString(),
+                                label: branch.name,
+                            }))}
+                        />
+                        <InputError message={errors.branch_id} />
+                    </div>
+
+                    <div>
                         <Label className="text-xs">User</Label>
                         <Select
                             value={data.user_id.toString()}
@@ -131,12 +152,6 @@ const TellerForm = ({ teller, branch, users }: TellerFormPageProps) => {
                             className="h-8 text-sm"
                         />
                         <InputError message={errors.name} />
-                    </div>
-
-                    <div>
-                        <Label className="text-xs">Branch</Label>
-                        <Input value={branch?.name} disabled />
-                        <InputError message={errors.branch_id} />
                     </div>
 
                     <div>

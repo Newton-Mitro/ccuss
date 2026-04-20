@@ -66,6 +66,14 @@ export default function ShowVaultPage({ vault }: ShowVaultPageProps) {
 
                 {/* Grid Info */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {/* Branch */}
+                    <div>
+                        <p className="text-sm text-muted-foreground">Branch</p>
+                        <p className="font-medium">
+                            {vault.branch?.name ?? '—'}
+                        </p>
+                    </div>
+
                     {/* Vault Name */}
                     <div>
                         <p className="text-sm text-muted-foreground">
@@ -74,11 +82,13 @@ export default function ShowVaultPage({ vault }: ShowVaultPageProps) {
                         <p className="font-medium">{vault.name}</p>
                     </div>
 
-                    {/* Branch */}
+                    {/* Account */}
                     <div>
-                        <p className="text-sm text-muted-foreground">Branch</p>
+                        <p className="text-sm text-muted-foreground">
+                            Linked Account
+                        </p>
                         <p className="font-medium">
-                            {vault.branch?.name ?? '—'}
+                            {vault.account?.name ?? '—'}
                         </p>
                     </div>
 
@@ -89,6 +99,15 @@ export default function ShowVaultPage({ vault }: ShowVaultPageProps) {
                         </p>
                         <p className="font-medium">
                             {vault.account?.name ?? '—'}
+                        </p>
+                    </div>
+
+                    <div>
+                        <p className="text-sm text-muted-foreground">
+                            Linked Account Number
+                        </p>
+                        <p className="font-medium">
+                            {vault.account?.account_number ?? '—'}
                         </p>
                     </div>
 

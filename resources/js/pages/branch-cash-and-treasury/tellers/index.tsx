@@ -149,10 +149,11 @@ export default function Index() {
                         <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
                             <tr>
                                 {[
-                                    'Name',
                                     'Branch',
+                                    'Name',
                                     'Max Cash Limit',
                                     'Max Transaction Limit',
+                                    'Link Account Number',
                                     'Status',
                                     'Actions',
                                 ].map((header) => (
@@ -172,10 +173,10 @@ export default function Index() {
                                         key={t.id}
                                         className="border-b even:bg-muted/10"
                                     >
-                                        <td className="px-2 py-1">{t.name}</td>
                                         <td className="px-2 py-1">
                                             {t.branch?.name}
                                         </td>
+                                        <td className="px-2 py-1">{t.name}</td>
                                         <td className="px-2 py-1">
                                             {(
                                                 Number(t.max_cash_limit) || 0
@@ -187,6 +188,11 @@ export default function Index() {
                                                     t.max_transaction_limit,
                                                 ) || 0
                                             ).toFixed(2)}
+                                        </td>
+                                        <td className="px-2 py-1">
+                                            {t.account
+                                                ? t.account.account_number
+                                                : 'N/A'}
                                         </td>
                                         <td className="px-2 py-1">
                                             {t.is_active

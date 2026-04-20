@@ -58,8 +58,10 @@ export default function ShowTellerPage({ teller }: Props) {
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div>
-                        <p className="text-sm text-card-foreground">Name</p>
-                        <p className="font-medium">{teller.name}</p>
+                        <p className="text-sm text-card-foreground">Branch</p>
+                        <p className="font-medium">
+                            {teller.branch?.name ?? '—'}
+                        </p>
                     </div>
 
                     <div>
@@ -70,10 +72,8 @@ export default function ShowTellerPage({ teller }: Props) {
                     </div>
 
                     <div>
-                        <p className="text-sm text-card-foreground">Branch</p>
-                        <p className="font-medium">
-                            {teller.branch?.name ?? '—'}
-                        </p>
+                        <p className="text-sm text-card-foreground">Name</p>
+                        <p className="font-medium">{teller.name}</p>
                     </div>
 
                     <div>
@@ -91,6 +91,17 @@ export default function ShowTellerPage({ teller }: Props) {
                         </p>
                         <p className="font-medium">
                             {formatBDTCurrency(teller.max_transaction_limit)}
+                        </p>
+                    </div>
+
+                    <div>
+                        <p className="text-sm text-card-foreground">
+                            Link Account Number
+                        </p>
+                        <p className="font-medium">
+                            {teller.account
+                                ? teller.account.account_number
+                                : 'N/A'}
                         </p>
                     </div>
 

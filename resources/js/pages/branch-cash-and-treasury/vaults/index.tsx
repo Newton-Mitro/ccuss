@@ -173,8 +173,9 @@ export default function Index() {
                         <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
                             <tr>
                                 {[
-                                    'Name',
                                     'Branch',
+                                    'Name',
+                                    'Account Number',
                                     'Account',
                                     'Status',
                                     'Actions',
@@ -196,10 +197,14 @@ export default function Index() {
                                         key={v.id}
                                         className="border-b even:bg-muted/10"
                                     >
+                                        <td className="px-2 py-1">
+                                            {v.branch?.name}
+                                        </td>
+
                                         <td className="px-2 py-1">{v.name}</td>
 
                                         <td className="px-2 py-1">
-                                            {v.branch?.name}
+                                            {v.account?.account_number ?? '—'}
                                         </td>
 
                                         <td className="px-2 py-1">

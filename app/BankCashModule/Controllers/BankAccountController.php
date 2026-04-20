@@ -6,6 +6,7 @@ use App\BankCashModule\Models\BankAccount;
 use App\Http\Controllers\Controller;
 use App\SubledgerModule\Models\Account;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -47,6 +48,8 @@ class BankAccountController extends Controller
 
     public function store(Request $request)
     {
+        $organization = Auth::user()->organization;
+        $branch = Auth::user()->branch;
         $data = $request->validate([
             // account layer
             'name' => 'nullable|string|max:255',
@@ -62,8 +65,7 @@ class BankAccountController extends Controller
             'routing_number' => 'nullable|string|max:50',
         ]);
 
-        DB::transaction(function () use ($data) {
-
+        DB::transaction(function () use ($data, $organization, $branch) {
             // 1. Create bank account first
             $bankAccount = BankAccount::create([
                 'bank_name' => $data['bank_name'],
@@ -72,37 +74,30 @@ class BankAccountController extends Controller
                 'swift_code' => $data['swift_code'] ?? null,
                 'routing_number' => $data['routing_number'] ?? null,
             ]);
-
             // 2. Create central ledger/account
             $account = Account::create([
-                'organization_id' => $data['organization_id'] ?? null,
-                'branch_id' => $data['branch_id'] ?? null,
+                'organization_id' => $organization->id ?? null,
+                'branch_id' => $branch->id ?? null,
                 'account_number' => $data['account_number'],
                 'name' => $data['name'] ?? $data['bank_name'],
                 'type' => 'bank',
                 'balance' => 0,
                 'status' => 'active',
-
                 // polymorphic link
                 'accountable_type' => BankAccount::class,
                 'accountable_id' => $bankAccount->id,
             ]);
-
             // 3. Optional reverse link (ONLY if you need bidirectional access)
             $bankAccount->update([
                 'account_id' => $account->id,
             ]);
         });
-
-        return redirect()
-            ->route('bank-accounts.index')
-            ->with('success', 'Bank account created successfully!');
+        return redirect()->route('bank-accounts.index')->with('success', 'Bank account created successfully!');
     }
 
     public function show(BankAccount $bankAccount)
     {
         $bankAccount->load('account');
-
         return Inertia::render('bank-cash/bank-accounts/show-bank-account-page', [
             'account' => $bankAccount,
         ]);
@@ -111,7 +106,6 @@ class BankAccountController extends Controller
     public function edit(BankAccount $bankAccount)
     {
         $bankAccount->load('account');
-
         return Inertia::render('bank-cash/bank-accounts/bank-account-form-page', [
             'account' => $bankAccount,
         ]);
@@ -120,10 +114,7 @@ class BankAccountController extends Controller
     public function update(Request $request, BankAccount $bankAccount)
     {
         $data = $request->validate([
-            // account layer
             'name' => 'nullable|string|max:255',
-
-            // bank layer
             'bank_name' => 'required|string|max:255',
             'branch_name' => 'nullable|string|max:255',
             'account_number' => "required|string|unique:bank_accounts,account_number,{$bankAccount->id}",
@@ -132,7 +123,6 @@ class BankAccountController extends Controller
         ]);
 
         DB::transaction(function () use ($data, $bankAccount) {
-
             $bankAccount->update([
                 'bank_name' => $data['bank_name'],
                 'branch_name' => $data['branch_name'] ?? null,
@@ -140,16 +130,13 @@ class BankAccountController extends Controller
                 'swift_code' => $data['swift_code'] ?? null,
                 'routing_number' => $data['routing_number'] ?? null,
             ]);
-
             $bankAccount->account?->update([
                 'name' => $data['name'] ?? $data['bank_name'],
                 'account_number' => $data['account_number'],
             ]);
         });
 
-        return redirect()
-            ->route('bank-accounts.index')
-            ->with('success', 'Bank account updated successfully!');
+        return redirect()->route('bank-accounts.index')->with('success', 'Bank account updated successfully!');
     }
 
     public function destroy(BankAccount $bankAccount)
@@ -158,9 +145,6 @@ class BankAccountController extends Controller
             $bankAccount->account?->delete();
             $bankAccount->delete();
         });
-
-        return redirect()
-            ->route('bank-accounts.index')
-            ->with('success', 'Bank account deleted successfully!');
+        return redirect()->route('bank-accounts.index')->with('success', 'Bank account deleted successfully!');
     }
 }

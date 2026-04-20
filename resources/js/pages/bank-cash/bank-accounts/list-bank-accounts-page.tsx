@@ -1,11 +1,17 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
 import { Input } from '../../../components/ui/input';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '../../../components/ui/tooltip';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
@@ -66,7 +72,7 @@ export default function Index() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Bank Accounts', href: '/bank-accounts' },
+        { title: 'Bank Accounts', href: route('bank-accounts.index') },
     ];
 
     return (
@@ -110,11 +116,12 @@ export default function Index() {
                         <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
                             <tr>
                                 {[
-                                    'Bank',
                                     'Branch',
+                                    'Bank',
                                     'Account Number',
                                     'SWIFT',
                                     'Routing',
+                                    'Link Account',
                                     'Actions',
                                 ].map((header) => (
                                     <th
@@ -135,11 +142,11 @@ export default function Index() {
                                         className="border-b even:bg-muted/10"
                                     >
                                         <td className="px-2 py-1">
-                                            {a.bank_name}
+                                            {a.branch_name || '-'}
                                         </td>
 
                                         <td className="px-2 py-1">
-                                            {a.branch_name || '-'}
+                                            {a.bank_name}
                                         </td>
 
                                         <td className="px-2 py-1">
@@ -154,29 +161,68 @@ export default function Index() {
                                             {a.routing_number || '-'}
                                         </td>
 
-                                        <td className="flex space-x-2 px-2 py-1">
-                                            <Link
-                                                href={route(
-                                                    'bank-accounts.edit',
-                                                    a.id,
-                                                )}
-                                                className="text-success"
-                                            >
-                                                <Pencil className="h-5 w-5" />
-                                            </Link>
+                                        <td className="px-2 py-1">
+                                            {a.account.account_number || '-'}
+                                        </td>
 
-                                            <button
-                                                disabled={processing}
-                                                onClick={() =>
-                                                    handleDelete(
-                                                        a.id,
-                                                        a.bank_name,
-                                                    )
-                                                }
-                                                className="text-destructive hover:text-destructive/80 disabled:opacity-50"
-                                            >
-                                                <Trash2 className="h-5 w-5" />
-                                            </button>
+                                        <td className="flex space-x-2 px-2 py-1">
+                                            <TooltipProvider>
+                                                <div className="flex gap-2">
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Link
+                                                                href={route(
+                                                                    'bank-accounts.show',
+                                                                    a.id,
+                                                                )}
+                                                            >
+                                                                <Eye className="h-5 w-5" />
+                                                            </Link>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            View
+                                                        </TooltipContent>
+                                                    </Tooltip>
+
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Link
+                                                                href={route(
+                                                                    'bank-accounts.edit',
+                                                                    a.id,
+                                                                )}
+                                                            >
+                                                                <Pencil className="h-5 w-5" />
+                                                            </Link>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            Edit
+                                                        </TooltipContent>
+                                                    </Tooltip>
+
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <button
+                                                                onClick={() =>
+                                                                    handleDelete(
+                                                                        a.id,
+                                                                        a.bank_name,
+                                                                    )
+                                                                }
+                                                                disabled={
+                                                                    processing
+                                                                }
+                                                                className="text-destructive"
+                                                            >
+                                                                <Trash2 className="h-5 w-5" />
+                                                            </button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            Delete
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </div>
+                                            </TooltipProvider>
                                         </td>
                                     </tr>
                                 ))

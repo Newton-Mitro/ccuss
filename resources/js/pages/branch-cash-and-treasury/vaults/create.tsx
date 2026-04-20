@@ -20,16 +20,10 @@ import { Vault } from '../../../types/cash_treasury_module';
 interface VaultFormPageProps extends SharedData {
     vault?: Vault;
     branches: Branch[];
-    accounts: any[];
     branch: Branch;
 }
 
-const VaultForm = ({
-    vault,
-    branches,
-    accounts,
-    branch,
-}: VaultFormPageProps) => {
+const VaultForm = ({ vault, branches, branch }: VaultFormPageProps) => {
     useFlashToastHandler();
 
     const handleBack = () => window.history.back();
@@ -39,7 +33,6 @@ const VaultForm = ({
     const { data, setData, post, put, processing, errors } = useForm({
         name: vault?.name || '',
         branch_id: branch.id || '',
-        account_id: vault?.account_id || '',
         is_active: vault?.is_active ?? true,
     });
 
@@ -92,23 +85,6 @@ const VaultForm = ({
             >
                 {/* Vault Info */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <div>
-                        <Label className="text-xs">Account</Label>
-
-                        <Select
-                            value={data.account_id.toString()}
-                            onChange={(val) => {
-                                setData('account_id', Number(val));
-                            }}
-                            options={accounts.map((b) => ({
-                                value: b.id.toString(),
-                                label: b.name,
-                            }))}
-                            placeholder="Select Account"
-                        />
-                        <InputError message={errors.account_id} />
-                    </div>
-
                     <div>
                         <Label className="text-xs">Branch</Label>
 

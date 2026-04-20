@@ -3,6 +3,7 @@ export interface BankAccount {
 
     bank_name: string;
     branch_name?: string;
+    account_id?: string;
 
     account_number: string;
 
@@ -15,6 +16,7 @@ export interface BankAccount {
 
     // relations (optional, loaded via API)
     reconciliations?: BankReconciliation[];
+    account?: any;
 }
 
 export interface BankReconciliation {

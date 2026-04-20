@@ -1,7 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
 import React from 'react';
-
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
@@ -12,10 +11,8 @@ import {
     ToggleGroup,
     ToggleGroupItem,
 } from '../../../components/ui/toggle-group';
-
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Branch } from '../../../types/branch';
 import { Vault } from '../../../types/cash_treasury_module';
@@ -23,10 +20,10 @@ import { Vault } from '../../../types/cash_treasury_module';
 interface VaultFormPageProps extends SharedData {
     vault?: Vault;
     branches: Branch[];
-    accounts?: any[];
 }
 
-const VaultForm = ({ vault, branches, accounts = [] }: VaultFormPageProps) => {
+const VaultForm = ({ vault, branches }: VaultFormPageProps) => {
+    console.log('VaultFormPageProps:', { vault, branches });
     useFlashToastHandler();
 
     const isEdit = !!vault;
@@ -109,17 +106,11 @@ const VaultForm = ({ vault, branches, accounts = [] }: VaultFormPageProps) => {
 
                     {/* Account */}
                     <div>
-                        <Label className="text-xs">Account</Label>
-                        <Select
-                            value={data.account_id?.toString() || ''}
-                            onChange={(val) =>
-                                setData('account_id', Number(val))
-                            }
-                            options={accounts.map((a) => ({
-                                value: a.id.toString(),
-                                label: a.name,
-                            }))}
-                            placeholder="Select Account"
+                        <Label className="text-xs">Link Account</Label>
+                        <Input
+                            value={vault?.account?.name}
+                            disabled
+                            className="h-8 text-sm"
                         />
                         <InputError message={errors.account_id} />
                     </div>

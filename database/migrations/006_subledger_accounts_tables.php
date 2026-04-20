@@ -17,7 +17,6 @@ return new class extends Migration {
             $table->string('account_number')->unique();
             $table->string('name')->nullable();
             $table->enum('type', ['bank', 'deposit', 'loan', 'petty_cash', 'vendor', 'vault', 'teller', 'customer']); // optional but useful
-            $table->decimal('balance', 18, 2)->default(0); // central balance
             $table->enum('status', ['pending', 'active', 'dormant', 'frozen', 'closed'])->default('pending');
             $table->timestamps();
             $table->softDeletes();
