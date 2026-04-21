@@ -144,7 +144,13 @@ export default function KycDocumentsIndex() {
                                     key={i.id}
                                     className="border-b even:bg-muted/10"
                                 >
-                                    <td className="px-2 py-1">{i.id}</td>
+                                    <td className="px-2 py-1">
+                                        <img
+                                            src={i.url}
+                                            alt=""
+                                            className="h-8 w-8 rounded-full"
+                                        />
+                                    </td>
                                     <td className="px-2 py-1">
                                         {i.customer?.name ?? '—'}
                                     </td>

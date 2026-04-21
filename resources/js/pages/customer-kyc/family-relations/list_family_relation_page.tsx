@@ -121,7 +121,7 @@ export default function FamilyRelationIndex() {
                         <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
                             <tr>
                                 {[
-                                    '#',
+                                    'Relative Photo',
                                     'Customer',
                                     'Relative Name',
                                     'Phone',
@@ -145,7 +145,13 @@ export default function FamilyRelationIndex() {
                                         key={f.id}
                                         className="border-b even:bg-muted/10"
                                     >
-                                        <td className="px-2 py-1">{f.id}</td>
+                                        <td className="px-2 py-1">
+                                            <img
+                                                src={f.relative?.photo?.url}
+                                                alt=""
+                                                className="h-8 w-8 rounded-full"
+                                            />
+                                        </td>
                                         <td className="px-2 py-1">
                                             {f.customer?.name || '—'}
                                         </td>

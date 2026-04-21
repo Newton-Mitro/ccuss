@@ -29,7 +29,8 @@ class CustomerIntroducerController extends Controller
         $query = CustomerIntroducer::query()
             ->with([
                 'introducedCustomer:id,name,customer_no',
-                'introducer:id,name,customer_no',
+                'introducer',
+                'introducer.photo',
             ]);
 
         // 🔍 Search filter

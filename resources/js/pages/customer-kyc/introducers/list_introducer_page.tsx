@@ -111,7 +111,7 @@ export default function IntroducersIndex() {
                         <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
                             <tr>
                                 {[
-                                    'ID',
+                                    'Introducer Photo',
                                     'Introduced Customer',
                                     'Introducer',
                                     'Relationship',
@@ -133,7 +133,13 @@ export default function IntroducersIndex() {
                                     key={i.id}
                                     className="border-b even:bg-muted/10"
                                 >
-                                    <td className="px-2 py-1">{i.id}</td>
+                                    <td className="px-2 py-1">
+                                        <img
+                                            src={i.introducer?.photo?.url}
+                                            alt=""
+                                            className="h-8 w-8 rounded-full"
+                                        />
+                                    </td>
                                     <td className="px-2 py-1">
                                         {i.introduced_customer?.name ?? '—'}
                                     </td>

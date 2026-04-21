@@ -26,7 +26,7 @@ class CustomerFamilyRelationController extends Controller
     public function index(Request $request): Response
     {
         $query = CustomerFamilyRelation::query()
-            ->with(['customer', 'relative']);
+            ->with(['customer', 'relative', 'relative.photo']);
 
         // 🔍 Search filter
         if ($search = $request->string('search')->toString()) {
