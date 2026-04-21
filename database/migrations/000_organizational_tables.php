@@ -44,8 +44,6 @@ return new class extends Migration {
 
             $table->foreignId('organization_id')->constrained();
         });
-
-
     }
 
     public function down(): void

@@ -57,7 +57,7 @@ class ChequeBookController extends Controller
         return Inertia::render(
             'cheque-module/cheque-books/create-cheque-book-page',
             [
-                'accounts' => SubledgerAccount::select('id', 'name')->get(),
+                'subledger_accounts' => SubledgerAccount::select('id', 'name')->get(),
             ]
         );
     }
@@ -71,7 +71,7 @@ class ChequeBookController extends Controller
     {
         $validated = $request->validate([
             'book_no' => 'required|string|max:50|unique:cheque_books,book_no',
-            'subledger_account_id' => 'required|exists:accounts,id',
+            'subledger_account_id' => 'required|exists:subledger_accounts,id',
             'start_number' => 'required|integer|min:1',
             'end_number' => 'required|integer|gte:start_number',
             'issued_at' => 'nullable|date',
@@ -124,7 +124,7 @@ class ChequeBookController extends Controller
         return Inertia::render(
             'cheque-module/cheque-books/show-cheque-book-page',
             [
-                'book' => $chequeBook->load(['cheques', 'subledgerAccount']),
+                'cheque_book' => $chequeBook->load(['cheques', 'subledgerAccount']),
             ]
         );
     }
@@ -139,8 +139,8 @@ class ChequeBookController extends Controller
         return Inertia::render(
             'cheque-module/cheque-books/edit-cheque-book-page',
             [
-                'chequeBook' => $chequeBook->load('subledgerAccount'),
-                'accounts' => SubledgerAccount::select('id', 'name')->get(),
+                'cheque_book' => $chequeBook->load('subledgerAccount'),
+                'subledger_accounts' => SubledgerAccount::select('id', 'name')->get(),
             ]
         );
     }
@@ -153,7 +153,7 @@ class ChequeBookController extends Controller
     public function update(Request $request, ChequeBook $chequeBook)
     {
         $validated = $request->validate([
-            'subledger_account_id' => 'required|exists:accounts,id',
+            'subledger_account_id' => 'required|exists:subledger_accounts,id',
             'issued_at' => 'nullable|date',
         ]);
 

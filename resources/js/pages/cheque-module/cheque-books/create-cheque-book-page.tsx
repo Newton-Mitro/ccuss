@@ -11,7 +11,7 @@ import { CheckCheck, Loader2 } from 'lucide-react';
 import { route } from 'ziggy-js';
 import { Select } from '../../../components/ui/select';
 
-const CreateChequeBook = ({ accounts }) => {
+const CreateChequeBook = ({ subledger_accounts }) => {
     useFlashToastHandler();
 
     const { data, setData, post, processing, errors } = useForm({
@@ -39,13 +39,13 @@ const CreateChequeBook = ({ accounts }) => {
             >
                 <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-3">
                     <div>
-                        <Label>Account</Label>
+                        <Label>Subledger Account</Label>
                         <Select
                             value={data.subledger_account_id}
                             onChange={(value) =>
                                 setData('subledger_account_id', value)
                             }
-                            options={accounts.map((account) => ({
+                            options={subledger_accounts.map((account) => ({
                                 value: account.id,
                                 label: account.name,
                             }))}

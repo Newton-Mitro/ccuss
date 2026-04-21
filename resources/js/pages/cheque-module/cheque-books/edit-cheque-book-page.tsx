@@ -11,20 +11,20 @@ import { CheckCheck, Loader2 } from 'lucide-react';
 import { route } from 'ziggy-js';
 import { Select } from '../../../components/ui/select';
 
-const EditChequeBook = ({ chequeBook, accounts }) => {
+const EditChequeBook = ({ cheque_book, subledger_accounts }) => {
     useFlashToastHandler();
 
     const { data, setData, put, processing, errors } = useForm({
-        subledger_account_id: chequeBook?.subledger_account_id || '',
-        book_no: chequeBook.book_no || '',
-        issued_at: chequeBook.issued_at
-            ? chequeBook.issued_at.split('T')[0]
+        subledger_account_id: cheque_book?.subledger_account_id || '',
+        book_no: cheque_book.book_no || '',
+        issued_at: cheque_book.issued_at
+            ? cheque_book.issued_at.split('T')[0]
             : '',
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        put(route('cheque-books.update', chequeBook.id));
+        put(route('cheque-books.update', cheque_book.id));
     };
 
     return (
@@ -45,7 +45,7 @@ const EditChequeBook = ({ chequeBook, accounts }) => {
                             onChange={(value) =>
                                 setData('subledger_account_id', value)
                             }
-                            options={accounts.map((account) => ({
+                            options={subledger_accounts.map((account) => ({
                                 value: account.id,
                                 label: account.name,
                             }))}

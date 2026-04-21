@@ -60,7 +60,7 @@ class ChequeController extends Controller
             'cheque-module/cheques/create-cheque-page',
             [
                 'cheque_books' => ChequeBook::select('id', 'book_no')->get(),
-                'accounts' => SubledgerAccount::select('id', 'name')->get(),
+                'subledger_accounts' => SubledgerAccount::select('id', 'name')->get(),
             ]
         );
     }
@@ -74,7 +74,7 @@ class ChequeController extends Controller
     {
         $validated = $request->validate([
             'cheque_book_id' => 'nullable|exists:cheque_books,id',
-            'issuer_account_id' => 'nullable|exists:accounts,id',
+            'issuer_account_id' => 'nullable|exists:subledger_accounts,id',
 
             'issuer_bank_name' => 'nullable|string|max:255',
             'issuer_branch' => 'nullable|string|max:255',
@@ -108,10 +108,15 @@ class ChequeController extends Controller
     */
     public function show(Cheque $cheque)
     {
+        $cheque->load([
+            'chequeBook',
+            'issuerAccount',
+        ]);
+
         return Inertia::render(
             'cheque-module/cheques/show-cheque-page',
             [
-                'cheque' => $cheque->load(['chequeBook', 'issuerAccount']),
+                'cheque' => $cheque,
             ]
         );
     }
@@ -128,7 +133,7 @@ class ChequeController extends Controller
             [
                 'cheque' => $cheque,
                 'cheque_books' => ChequeBook::select('id', 'book_no')->get(),
-                'accounts' => SubledgerAccount::select('id', 'name')->get(),
+                'subledger_accounts' => SubledgerAccount::select('id', 'name')->get(),
             ]
         );
     }
@@ -142,7 +147,7 @@ class ChequeController extends Controller
     {
         $validated = $request->validate([
             'cheque_book_id' => 'nullable|exists:cheque_books,id',
-            'issuer_account_id' => 'nullable|exists:accounts,id',
+            'issuer_account_id' => 'nullable|exists:subledger_accounts,id',
 
             'issuer_bank_name' => 'nullable|string|max:255',
             'issuer_branch' => 'nullable|string|max:255',

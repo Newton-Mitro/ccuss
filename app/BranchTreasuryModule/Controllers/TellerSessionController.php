@@ -93,7 +93,7 @@ class TellerSessionController extends Controller
         $data = $request->validate([
             'teller_id' => 'required|exists:tellers,id',
             'branch_day_id' => 'required|exists:branch_days,id',
-            'cash_account_id' => 'required|exists:accounts,id',
+            'cash_account_id' => 'required|exists:subledger_accounts,id',
             'remarks' => 'nullable|string'
         ]);
 

@@ -139,7 +139,7 @@ export default function Index() {
                                     </td>
 
                                     <td className="px-2 py-1">
-                                        <span className="rounded bg-muted px-2 py-1 text-xs">
+                                        <span className="rounded bg-muted px-2 py-1 text-xs text-muted-foreground">
                                             {b.cheques?.length ?? 0}
                                         </span>
                                     </td>
