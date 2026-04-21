@@ -3,7 +3,7 @@
 namespace App\VoucherEntryModule\Models;
 
 use App\FinanceAndAccounting\Models\LedgerAccount;
-use App\SubledgerModule\Models\Account;
+use App\SubledgerModule\Models\SubledgerAccount;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,7 +18,7 @@ class VoucherEntryLine extends Model
     protected $fillable = [
         'voucher_entry_id',
         'ledger_account_id',
-        'account_id',
+        'subledger_account_id',
         'reference_type',
         'reference_id',
         'debit',
@@ -44,9 +44,9 @@ class VoucherEntryLine extends Model
         return $this->belongsTo(LedgerAccount::class);
     }
 
-    public function account(): BelongsTo
+    public function subledgerAccount(): BelongsTo
     {
-        return $this->belongsTo(Account::class);
+        return $this->belongsTo(SubledgerAccount::class);
     }
 
     public function branch(): BelongsTo

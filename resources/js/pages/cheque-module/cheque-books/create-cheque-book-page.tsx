@@ -15,7 +15,7 @@ const CreateChequeBook = ({ accounts }) => {
     useFlashToastHandler();
 
     const { data, setData, post, processing, errors } = useForm({
-        account_id: '',
+        subledger_account_id: '',
         book_no: '',
         start_number: '',
         end_number: '',
@@ -41,15 +41,17 @@ const CreateChequeBook = ({ accounts }) => {
                     <div>
                         <Label>Account</Label>
                         <Select
-                            value={data.account_id}
-                            onChange={(value) => setData('account_id', value)}
+                            value={data.subledger_account_id}
+                            onChange={(value) =>
+                                setData('subledger_account_id', value)
+                            }
                             options={accounts.map((account) => ({
                                 value: account.id,
                                 label: account.name,
                             }))}
                         />
 
-                        <InputError message={errors.account_id} />
+                        <InputError message={errors.subledger_account_id} />
                     </div>
 
                     <div>

@@ -9,28 +9,28 @@ import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
 import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 
-const BankAccountForm = ({ account }) => {
+const BankAccountForm = ({ bankAccount }) => {
     useFlashToastHandler();
 
-    const isEdit = !!account;
+    const isEdit = !!bankAccount;
 
     const handleBack = () => window.history.back();
 
     const { data, setData, post, put, processing, errors } = useForm({
-        bank_name: account?.bank_name || '',
-        branch_name: account?.branch_name || '',
-        account_number: account?.account_number || '',
-        iban: account?.iban || '',
-        swift_code: account?.swift_code || '',
-        routing_number: account?.routing_number || '',
-        status: account?.status || 'active',
+        bank_name: bankAccount?.bank_name || '',
+        branch_name: bankAccount?.branch_name || '',
+        account_number: bankAccount?.account_number || '',
+        iban: bankAccount?.iban || '',
+        swift_code: bankAccount?.swift_code || '',
+        routing_number: bankAccount?.routing_number || '',
+        status: bankAccount?.status || 'active',
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
         if (isEdit) {
-            put(`/bank-accounts/${account.id}`, {
+            put(`/bank-accounts/${bankAccount.id}`, {
                 preserveScroll: true,
             });
         } else {
@@ -51,7 +51,7 @@ const BankAccountForm = ({ account }) => {
                 <HeadingSmall
                     title={
                         isEdit
-                            ? `Edit: ${account?.bank_name}`
+                            ? `Edit: ${bankAccount?.bank_name}`
                             : 'Create Bank Account'
                     }
                     description="Manage bank account configuration."

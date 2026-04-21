@@ -153,7 +153,7 @@ export default function Index() {
                                     'Name',
                                     'Max Cash Limit',
                                     'Max Transaction Limit',
-                                    'Link Account Number',
+                                    'Subledger Account Number',
                                     'Status',
                                     'Actions',
                                 ].map((header) => (
@@ -190,8 +190,9 @@ export default function Index() {
                                             ).toFixed(2)}
                                         </td>
                                         <td className="px-2 py-1">
-                                            {t.account
-                                                ? t.account.account_number
+                                            {t.subledger_account
+                                                ? t.subledger_account
+                                                      .account_number
                                                 : 'N/A'}
                                         </td>
                                         <td className="px-2 py-1">

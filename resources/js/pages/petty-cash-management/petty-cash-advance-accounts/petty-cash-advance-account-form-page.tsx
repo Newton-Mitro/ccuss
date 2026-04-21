@@ -17,34 +17,40 @@ import {
 import { User } from '../../../types/user';
 
 interface AdvanceFormProps extends SharedData {
-    account?: PettyCashAdvanceAccount;
+    pettyCashAdvanceAccount?: PettyCashAdvanceAccount;
     employees: User[];
     pettyCashAccounts: PettyCashAccount[];
     ledgerAccounts: LedgerAccount[];
 }
 
 const AdvanceExpenseForm = ({
-    account,
+    pettyCashAdvanceAccount,
     employees,
     pettyCashAccounts,
     ledgerAccounts,
 }: AdvanceFormProps) => {
     useFlashToastHandler();
 
-    const isEdit = !!account;
+    const isEdit = !!pettyCashAdvanceAccount;
 
     const { data, setData, post, put, processing, errors } = useForm({
-        petty_cash_account_id: account?.petty_cash_account_id || '',
-        ledger_account_id: account?.ledger_account_id || '',
-        employee_id: account?.employee_id || '',
-        status: account?.status || 'active',
+        petty_cash_account_id:
+            pettyCashAdvanceAccount?.petty_cash_account_id || '',
+        ledger_account_id: pettyCashAdvanceAccount?.ledger_account_id || '',
+        employee_id: pettyCashAdvanceAccount?.employee_id || '',
+        status: pettyCashAdvanceAccount?.status || 'active',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
         if (isEdit) {
-            put(route('petty-cash-advance-accounts.update', account!.id));
+            put(
+                route(
+                    'petty-cash-advance-accounts.update',
+                    pettyCashAdvanceAccount!.id,
+                ),
+            );
         } else {
             post(route('petty-cash-advance-accounts.store'));
         }

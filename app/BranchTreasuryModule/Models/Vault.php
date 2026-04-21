@@ -2,7 +2,7 @@
 
 namespace App\BranchTreasuryModule\Models;
 
-use App\SubledgerModule\Models\Account;
+use App\SubledgerModule\Models\SubledgerAccount;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,7 +16,7 @@ class Vault extends Model
 
     protected $fillable = [
         'branch_id',
-        'account_id',
+        'subledger_account_id',
         'name',
         'is_active'
     ];
@@ -26,9 +26,9 @@ class Vault extends Model
         return $this->belongsTo(Branch::class);
     }
 
-    public function account(): BelongsTo
+    public function subledgerAccount(): BelongsTo
     {
-        return $this->belongsTo(Account::class);
+        return $this->belongsTo(SubledgerAccount::class);
     }
 
     public function denominations(): HasMany

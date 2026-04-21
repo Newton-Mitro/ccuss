@@ -14,7 +14,6 @@ return new class extends Migration {
             $table->string('auditable_type', 150);
             $table->unsignedBigInteger('auditable_id');
             $table->uuid('batch_id')->index();
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->enum('event', ['created', 'updated', 'deleted',]);
             $table->json('old_values')->nullable();
             $table->json('new_values')->nullable();
@@ -24,10 +23,12 @@ return new class extends Migration {
             $table->string('user_agent')->nullable();
             $table->timestamps();
             $table->softDeletes();
+
             // Indexes
             $table->index(['auditable_type', 'auditable_id'], 'idx_auditable');
             $table->index('user_id', 'idx_user');
             $table->index('event', 'idx_event');
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
         });
 
         Schema::create('database_backup_logs', function (Blueprint $table) {
@@ -42,12 +43,13 @@ return new class extends Migration {
             $table->integer('duration_seconds')->nullable();
             $table->text('message')->nullable();
             $table->text('error')->nullable();
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('started_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
+
             $table->index('status');
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
         });
     }
 

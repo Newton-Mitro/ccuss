@@ -3,12 +3,12 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { Head } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 
-const BankAccountShow = ({ account }) => {
+const BankAccountShow = ({ bankAccount }) => {
     const handleBack = () => window.history.back();
 
     return (
         <CustomAuthLayout>
-            <Head title={`Bank Account: ${account?.bank_name}`} />
+            <Head title={`Bank Account: ${bankAccount?.bank_name}`} />
 
             {/* Header */}
             <div className="flex justify-between pb-4">
@@ -37,33 +37,38 @@ const BankAccountShow = ({ account }) => {
                     </h3>
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                        <InfoItem label="Bank Name" value={account.bank_name} />
+                        <InfoItem
+                            label="Bank Name"
+                            value={bankAccount.bank_name}
+                        />
                         <InfoItem
                             label="Branch Name"
-                            value={account.branch_name}
+                            value={bankAccount.branch_name}
                         />
                         <InfoItem
                             label="Account Number"
-                            value={account.account_number}
+                            value={bankAccount.account_number}
                         />
                         <InfoItem
                             label="SWIFT Code"
-                            value={account.swift_code}
+                            value={bankAccount.swift_code}
                         />
                         <InfoItem
                             label="Routing Number"
-                            value={account.routing_number}
+                            value={bankAccount.routing_number}
                         />
-                        <InfoItem label="IBAN" value={account.iban} />
+                        <InfoItem label="IBAN" value={bankAccount.iban} />
 
                         <InfoItem
-                            label="Link Account"
-                            value={account.account?.account_number}
+                            label="Subledger Account"
+                            value={
+                                bankAccount.subledger_account?.account_number
+                            }
                         />
 
                         <InfoItem
                             label="Status"
-                            value={<StatusBadge status={account.status} />}
+                            value={<StatusBadge status={bankAccount.status} />}
                         />
                     </div>
                 </div>

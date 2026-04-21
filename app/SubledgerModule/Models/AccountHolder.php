@@ -14,7 +14,7 @@ class AccountHolder extends Model
     use HasFactory, Auditable;
 
     protected $fillable = [
-        'account_id',
+        'subledger_account_id',
         'customer_id',
         'holder_type',
         'ownership_percent',
@@ -26,9 +26,9 @@ class AccountHolder extends Model
         'ownership_percent' => 'decimal:2',
     ];
 
-    public function account(): BelongsTo
+    public function subledgerAccount(): BelongsTo
     {
-        return $this->belongsTo(Account::class);
+        return $this->belongsTo(SubledgerAccount::class);
     }
 
     public function customer(): BelongsTo

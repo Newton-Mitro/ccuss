@@ -24,7 +24,7 @@ Represents a physical/digital cheque book issued to an account.
 
 **Key Fields:**
 
-- `account_id`, `account_type` → polymorphic account owner
+- `subledger_account_id`, `account_type` → polymorphic account owner
 - `book_no` → unique per account
 - `start_number`, `end_number` → cheque range
 - `issued_at`, `issued_by`
@@ -240,7 +240,7 @@ $table->unique(['deposit_account_id', 'book_no']);
 ✅ Replace with:
 
 ```php
-$table->unique(['account_id', 'account_type', 'book_no']);
+$table->unique(['subledger_account_id', 'account_type', 'book_no']);
 ```
 
 ---
@@ -260,7 +260,7 @@ $table->foreignId('voucher_entry_id')
 
 ```php
 // cheque_books
-$table->index(['account_id', 'account_type']);
+$table->index(['subledger_account_id', 'account_type']);
 
 // cheques
 $table->index('status');

@@ -10,21 +10,12 @@ return new class extends Migration {
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->constrained();
-            $table->foreignId('branch_id')->constrained();
-
             $table->string('customer_no', 50)->unique()->comment('Unique customer number');
             $table->enum('type', ['individual', 'organization'])->comment('Customer type');
             $table->string('name', 150);
             $table->string('phone', 50)->nullable();
             $table->string('email', 100)->nullable();
-            $table->enum('identification_type', [
-                'national_identification_number',
-                'birth_registration_number',
-                'registration_no',
-                'passport',
-                'driving_license'
-            ]);
+            $table->enum('identification_type', ['national_identification_number', 'birth_registration_number', 'registration_no', 'passport', 'driving_license']);
             $table->string('identification_number', 50);
 
             $table->date('dob')->nullable();
@@ -39,11 +30,13 @@ return new class extends Migration {
             $table->enum('kyc_status', ['pending', 'verified', 'rejected'])->default('pending');
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreignId('organization_id')->constrained();
+            $table->foreignId('branch_id')->constrained();
         });
 
         Schema::create('customer_addresses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
             $table->string('line1', 255);
             $table->string('line2', 255)->nullable();
             $table->string('division', 100)->nullable();
@@ -57,38 +50,14 @@ return new class extends Migration {
             $table->softDeletes();
 
             // One address per type per customer
+            $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
+
             $table->unique(['customer_id', 'type'], 'uq_customer_address_type');
         });
 
         Schema::create('customer_family_relations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
-            $table->foreignId('relative_id')->constrained('customers');
-            $table->enum('relation_type', [
-                'father',
-                'mother',
-                'son',
-                'daughter',
-                'brother',
-                'sister',
-                'husband',
-                'wife',
-                'grandfather',
-                'grandmother',
-                'uncle',
-                'aunt',
-                'nephew',
-                'niece',
-                'father_in_law',
-                'mother_in_law',
-                'son_in_law',
-                'daughter_in_law',
-                'brother_in_law',
-                'sister_in_law'
-            ]);
-
-            // Prevent duplicate linkage
-            $table->unique(['customer_id', 'relative_id'], 'uq_customer_relative');
+            $table->enum('relation_type', ['father', 'mother', 'son', 'daughter', 'brother', 'sister', 'husband', 'wife', 'grandfather', 'grandmother', 'uncle', 'aunt', 'nephew', 'niece', 'father_in_law', 'mother_in_law', 'son_in_law', 'daughter_in_law', 'brother_in_law', 'sister_in_law']);
 
             // Verification
             $table->enum('verification_status', ['pending', 'verified', 'rejected'])->default('pending');
@@ -96,20 +65,26 @@ return new class extends Migration {
             $table->text('remarks')->nullable();
             $table->timestamps();
             $table->softDeletes();
+
+            // Prevent duplicate linkage
+            $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
+            $table->foreignId('relative_id')->constrained('customers');
+
+            $table->unique(['customer_id', 'relative_id'], 'uq_customer_relative');
         });
 
         Schema::create('kyc_profiles', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->enum('kyc_level', ['basic', 'full', 'enhanced'])->default('basic');
             $table->enum('risk_level', ['low', 'medium', 'high'])->default('low');
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
         });
 
         Schema::create('kyc_documents', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('customer_id')->constrained();
             $table->enum('document_type', [
                 'national_identification_number',
                 'smart_nid',
@@ -152,39 +127,28 @@ return new class extends Migration {
             $table->text('remarks')->nullable();
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreignId('customer_id')->constrained();
         });
 
         Schema::create('customer_introducers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('introduced_customer_id')
-                ->constrained('customers')
-                ->cascadeOnDelete();
-
-            $table->foreignId('introducer_customer_id')
-                ->constrained('customers');
-
-            $table->foreignId('introducer_account_id')->nullable();
-
-            $table->enum('relationship_type', [
-                'family',
-                'friend',
-                'business',
-                'colleague',
-                'other'
-            ])->default('other');
-
-            // Verification
+            $table->enum('relationship_type', ['family', 'friend', 'business', 'colleague', 'other'])->default('other');
             $table->enum('verification_status', ['pending', 'verified', 'rejected'])->default('pending');
             $table->timestamp('verified_at')->nullable();
             $table->text('remarks')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+
+            $table->foreignId('introduced_customer_id')->constrained('customers')->cascadeOnDelete();
+            $table->foreignId('introducer_customer_id')->constrained('customers');
+            $table->foreignId('introducer_account_id')->nullable();
 
             // Prevent duplicate introducers
             $table->unique(
                 ['introduced_customer_id', 'introducer_customer_id'],
                 'uq_customer_introducer'
             );
-            $table->timestamps();
-            $table->softDeletes();
         });
     }
 

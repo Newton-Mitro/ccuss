@@ -15,7 +15,7 @@ const EditChequeBook = ({ chequeBook, accounts }) => {
     useFlashToastHandler();
 
     const { data, setData, put, processing, errors } = useForm({
-        account_id: chequeBook?.account_id || '',
+        subledger_account_id: chequeBook?.subledger_account_id || '',
         book_no: chequeBook.book_no || '',
         issued_at: chequeBook.issued_at
             ? chequeBook.issued_at.split('T')[0]
@@ -41,14 +41,16 @@ const EditChequeBook = ({ chequeBook, accounts }) => {
                     <div>
                         <Label>Account</Label>
                         <Select
-                            value={data.account_id}
-                            onChange={(value) => setData('account_id', value)}
+                            value={data.subledger_account_id}
+                            onChange={(value) =>
+                                setData('subledger_account_id', value)
+                            }
                             options={accounts.map((account) => ({
                                 value: account.id,
                                 label: account.name,
                             }))}
                         />
-                        <InputError message={errors.account_id} />
+                        <InputError message={errors.subledger_account_id} />
                     </div>
 
                     <div>

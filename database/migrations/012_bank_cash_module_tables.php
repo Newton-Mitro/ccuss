@@ -13,7 +13,6 @@ return new class extends Migration {
         // ------------------------
         Schema::create('bank_accounts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('account_id')->nullable()->constrained()->nullOnDelete();
             $table->string('bank_name');
             $table->string('branch_name')->nullable();
             $table->string('account_number')->unique();
@@ -22,6 +21,8 @@ return new class extends Migration {
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreignId('subledger_account_id')->nullable()->constrained('subledger_accounts')->nullOnDelete();
         });
 
         // ------------------------
@@ -29,13 +30,14 @@ return new class extends Migration {
         // ------------------------
         Schema::create('bank_reconciliations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('bank_account_id')->constrained()->cascadeOnDelete();
             $table->date('reconcile_date');
             $table->decimal('statement_balance', 18, 2);
             $table->decimal('system_balance', 18, 2);
             $table->text('notes')->nullable();
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreignId('bank_account_id')->constrained()->cascadeOnDelete();
             $table->unique(['bank_account_id', 'reconcile_date']);
         });
     }

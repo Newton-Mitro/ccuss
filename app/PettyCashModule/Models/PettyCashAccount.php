@@ -3,7 +3,7 @@
 namespace App\PettyCashModule\Models;
 
 use App\FinanceAndAccounting\Models\LedgerAccount;
-use App\SubledgerModule\Models\Account;
+use App\SubledgerModule\Models\SubledgerAccount;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -47,7 +47,7 @@ class PettyCashAccount extends Model
     // ✅ NEW: Link Account (Main Account reference)
     public function linkAccount()
     {
-        return $this->belongsTo(Account::class, 'link_account_id');
+        return $this->belongsTo(SubledgerAccount::class, 'link_account_id');
     }
 
     public function advanceAccounts()

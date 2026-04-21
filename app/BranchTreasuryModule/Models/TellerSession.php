@@ -2,7 +2,7 @@
 
 namespace App\BranchTreasuryModule\Models;
 
-use App\SubledgerModule\Models\Account;
+use App\SubledgerModule\Models\SubledgerAccount;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Traits\Auditable;
 use App\VoucherEntryModule\Models\VoucherEntry;
@@ -52,7 +52,7 @@ class TellerSession extends Model
 
     public function cashAccount(): BelongsTo
     {
-        return $this->belongsTo(Account::class, 'cash_account_id');
+        return $this->belongsTo(SubledgerAccount::class, 'cash_account_id');
     }
 
     public function adjustmentTransaction(): BelongsTo

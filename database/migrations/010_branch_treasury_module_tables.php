@@ -9,13 +9,14 @@ return new class extends Migration {
         // Branch Days
         Schema::create('branch_days', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             $table->date('business_date');
             $table->timestamp('opened_at')->nullable();
             $table->timestamp('closed_at')->nullable();
             $table->enum('status', ['open', 'closed'])->default('open');
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             $table->unique(['branch_id', 'business_date']);
         });
 
@@ -31,48 +32,45 @@ return new class extends Migration {
         // Vaults
         Schema::create('vaults', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('account_id')->nullable()->constrained('accounts')->nullOnDelete();
             $table->string('name');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('subledger_account_id')->nullable()->constrained('subledger_accounts')->nullOnDelete();
         });
 
         // sum(denominations) == account.balance
         Schema::create('vault_denominations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('vault_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('account_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('denomination_id')->constrained()->cascadeOnDelete();
             $table->integer('count')->default(0);
             $table->timestamps();
             $table->softDeletes();
-            $table->unique(['account_id', 'denomination_id']);
+
+            $table->foreignId('vault_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('denomination_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('subledger_account_id')->nullable()->constrained('subledger_accounts')->nullOnDelete();
         });
 
         // Tellers
         Schema::create('tellers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete(); // role: teller
-            $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('account_id')->nullable()->constrained('accounts')->nullOnDelete();
             $table->string('name');
             $table->decimal('max_cash_limit', 18, 2)->default(0);
             $table->decimal('max_transaction_limit', 18, 2)->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete(); // role: teller
+            $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('subledger_account_id')->nullable()->constrained('subledger_accounts')->nullOnDelete();
         });
 
         // Teller Sessions
         Schema::create('teller_sessions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('teller_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('branch_day_id')->constrained()->cascadeOnDelete();
-            // 🔥 Critical: cash account used in this session
-            $table->foreignId('cash_account_id')->nullable()->constrained('accounts')->nullOnDelete();
             // Session lifecycle
             $table->timestamp('opened_at');
             $table->timestamp('closed_at')->nullable();
@@ -89,7 +87,13 @@ return new class extends Migration {
             $table->text('remarks')->nullable();
             $table->timestamps();
             $table->softDeletes();
+
             // 🚫 One active session per teller
+            $table->foreignId('teller_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('branch_day_id')->constrained()->cascadeOnDelete();
+            // 🔥 Critical: cash account used in this session
+            $table->foreignId('subledger_account_id')->nullable()->constrained('subledger_accounts')->nullOnDelete();
             $table->unique(['teller_id', 'status'], 'unique_open_session_per_teller')->where('status', 'open');
         });
     }

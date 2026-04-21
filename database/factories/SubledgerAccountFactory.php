@@ -2,15 +2,15 @@
 
 namespace Database\Factories;
 
-use App\SubledgerModule\Models\Account;
+use App\SubledgerModule\Models\SubledgerAccount;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
-class AccountFactory extends Factory
+class SubledgerAccountFactory extends Factory
 {
-    protected $model = Account::class;
+    protected $model = SubledgerAccount::class;
 
     public function definition(): array
     {

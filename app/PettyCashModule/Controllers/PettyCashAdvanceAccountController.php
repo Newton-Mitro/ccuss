@@ -6,7 +6,7 @@ use App\FinanceAndAccounting\Models\LedgerAccount;
 use App\Http\Controllers\Controller;
 use App\PettyCashModule\Models\PettyCashAdvanceAccount;
 use App\PettyCashModule\Models\PettyCashAccount;
-use App\SubledgerModule\Models\Account;
+use App\SubledgerModule\Models\SubledgerAccount;
 use App\SystemAdministration\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -90,7 +90,7 @@ class PettyCashAdvanceAccountController extends Controller
             ]);
 
             // 2. Create central account
-            $account = Account::create([
+            $subledgerAccount = SubledgerAccount::create([
                 'organization_id' => $request->user()->organization_id ?? null,
                 'branch_id' => optional($advance->pettyCashAccount)->branch_id,
 
@@ -107,7 +107,7 @@ class PettyCashAdvanceAccountController extends Controller
 
             // 3. Optional reverse link
             $advance->update([
-                'account_id' => $account->id,
+                'subledger_account_id' => $subledgerAccount->id,
             ]);
         });
 
@@ -121,7 +121,7 @@ class PettyCashAdvanceAccountController extends Controller
         return Inertia::render(
             'petty-cash-management/petty-cash-advance-accounts/petty-cash-advance-account-form-page',
             [
-                'account' => $pettyCashAdvanceAccount->load(['employee', 'pettyCashAccount', 'ledgerAccount']),
+                'pettyCashAdvanceAccount' => $pettyCashAdvanceAccount->load(['employee', 'pettyCashAccount', 'ledgerAccount']),
                 'pettyCashAccounts' => PettyCashAccount::select('id', 'name')->get(),
                 'employees' => User::select('id', 'name')->get(),
                 'ledgerAccounts' => LedgerAccount::select('id', 'name')->get(),
@@ -134,7 +134,7 @@ class PettyCashAdvanceAccountController extends Controller
         return Inertia::render(
             'petty-cash-management/petty-cash-advance-accounts/show-petty-cash-advance-account-page',
             [
-                'account' => $pettyCashAdvanceAccount->load(['employee', 'pettyCashAccount', 'ledgerAccount']),
+                'pettyCashAdvanceAccount' => $pettyCashAdvanceAccount->load(['employee', 'pettyCashAccount', 'ledgerAccount']),
             ]
         );
     }
@@ -143,7 +143,7 @@ class PettyCashAdvanceAccountController extends Controller
     {
         $data = $request->validate([
             'name' => 'nullable|string|max:255',
-            'account_number' => "required|string|unique:accounts,account_number,{$pettyCashAdvanceAccount->account_id}",
+            'account_number' => "required|string|unique:subledger_accounts,account_number,{$pettyCashAdvanceAccount->subledger_account_id}",
 
             'petty_cash_account_id' => 'required|exists:petty_cash_accounts,id',
             'employee_id' => 'required|exists:users,id',
@@ -172,7 +172,7 @@ class PettyCashAdvanceAccountController extends Controller
     public function destroy(PettyCashAdvanceAccount $pettyCashAdvanceAccount)
     {
         DB::transaction(function () use ($pettyCashAdvanceAccount) {
-            $pettyCashAdvanceAccount->account?->delete();
+            $pettyCashAdvanceAccount->subledgerAccount?->delete();
             $pettyCashAdvanceAccount->delete();
         });
 

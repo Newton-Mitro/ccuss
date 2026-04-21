@@ -15,7 +15,7 @@ class AccountBalance extends Model
 
     protected $fillable = [
         'organization_id',
-        'account_id',
+        'subledger_account_id',
         'fiscal_period_id',
         'opening_balance',
         'debit_total',
@@ -30,9 +30,9 @@ class AccountBalance extends Model
         'closing_balance' => 'decimal:2',
     ];
 
-    public function account(): BelongsTo
+    public function subledgerAccount(): BelongsTo
     {
-        return $this->belongsTo(Account::class);
+        return $this->belongsTo(SubledgerAccount::class);
     }
 
     public function fiscalPeriod(): BelongsTo

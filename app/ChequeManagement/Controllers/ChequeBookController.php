@@ -5,7 +5,7 @@ namespace App\ChequeManagement\Controllers;
 use App\ChequeManagement\Models\ChequeBook;
 use App\ChequeManagement\Models\Cheque;
 use App\Http\Controllers\Controller;
-use App\SubledgerModule\Models\Account;
+use App\SubledgerModule\Models\SubledgerAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -23,13 +23,13 @@ class ChequeBookController extends Controller
         $perPage = (int) $request->input('per_page', 10);
 
         $books = ChequeBook::query()
-            ->with(['cheques', 'account'])
+            ->with(['cheques', 'subledgerAccount'])
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('book_no', 'like', "%{$search}%")
                         ->orWhere('start_number', 'like', "%{$search}%")
                         ->orWhere('end_number', 'like', "%{$search}%")
-                        ->orWhereHas('account', function ($aq) use ($search) {
+                        ->orWhereHas('subledgerAccount', function ($aq) use ($search) {
                             $aq->where('name', 'like', "%{$search}%");
                         });
                 });
@@ -57,7 +57,7 @@ class ChequeBookController extends Controller
         return Inertia::render(
             'cheque-module/cheque-books/create-cheque-book-page',
             [
-                'accounts' => Account::select('id', 'name')->get(),
+                'accounts' => SubledgerAccount::select('id', 'name')->get(),
             ]
         );
     }
@@ -71,7 +71,7 @@ class ChequeBookController extends Controller
     {
         $validated = $request->validate([
             'book_no' => 'required|string|max:50|unique:cheque_books,book_no',
-            'account_id' => 'required|exists:accounts,id',
+            'subledger_account_id' => 'required|exists:accounts,id',
             'start_number' => 'required|integer|min:1',
             'end_number' => 'required|integer|gte:start_number',
             'issued_at' => 'nullable|date',
@@ -88,7 +88,7 @@ class ChequeBookController extends Controller
                     'cheque_book_id' => $book->id,
 
                     // issuer info not set here (belongs to cheque usage stage)
-                    'issuer_account_id' => $book->account_id,
+                    'issuer_account_id' => $book->subledger_account_id,
 
                     'cheque_number' => (string) $i,
                     'cheque_date' => null,
@@ -124,7 +124,7 @@ class ChequeBookController extends Controller
         return Inertia::render(
             'cheque-module/cheque-books/show-cheque-book-page',
             [
-                'book' => $chequeBook->load(['cheques', 'account']),
+                'book' => $chequeBook->load(['cheques', 'subledgerAccount']),
             ]
         );
     }
@@ -139,8 +139,8 @@ class ChequeBookController extends Controller
         return Inertia::render(
             'cheque-module/cheque-books/edit-cheque-book-page',
             [
-                'chequeBook' => $chequeBook->load('account'),
-                'accounts' => Account::select('id', 'name')->get(),
+                'chequeBook' => $chequeBook->load('subledgerAccount'),
+                'accounts' => SubledgerAccount::select('id', 'name')->get(),
             ]
         );
     }
@@ -153,7 +153,7 @@ class ChequeBookController extends Controller
     public function update(Request $request, ChequeBook $chequeBook)
     {
         $validated = $request->validate([
-            'account_id' => 'required|exists:accounts,id',
+            'subledger_account_id' => 'required|exists:accounts,id',
             'issued_at' => 'nullable|date',
         ]);
 

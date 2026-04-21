@@ -16,11 +16,12 @@ return new class extends Migration {
             // Authentication (optional if using users table)
             $table->string('password');
             // Employee-specific
-            $table->foreignId('branch_id')->nullable()->constrained('branches')->nullOnDelete();
             $table->enum('role', ['employee', 'manager', 'admin'])->default('employee');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreignId('branch_id')->nullable()->constrained('branches')->nullOnDelete();
         });
     }
 

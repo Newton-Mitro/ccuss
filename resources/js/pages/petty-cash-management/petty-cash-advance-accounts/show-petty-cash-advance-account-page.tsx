@@ -9,11 +9,11 @@ import { SharedData } from '../../../types';
 import { PettyCashAdvanceAccount } from '../../../types/petty_cash_module';
 
 interface Props extends SharedData {
-    account: PettyCashAdvanceAccount;
+    pettyCashAdvanceAccount: PettyCashAdvanceAccount;
 }
 
-const ShowAdvanceExpensePage = ({ account }: Props) => {
-    console.log('Advance Account Data:', account);
+const ShowAdvanceExpensePage = ({ pettyCashAdvanceAccount }: Props) => {
+    console.log('Advance Account Data:', pettyCashAdvanceAccount);
     useFlashToastHandler();
 
     const statusClasses: Record<string, string> = {
@@ -25,12 +25,12 @@ const ShowAdvanceExpensePage = ({ account }: Props) => {
 
     return (
         <CustomAuthLayout>
-            <Head title={`Advance Account #${account.id}`} />
+            <Head title={`Advance Account #${pettyCashAdvanceAccount.id}`} />
 
             {/* Header */}
             <div className="flex flex-col gap-3 pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <HeadingSmall
-                    title={`Advance Account #${account.id}`}
+                    title={`Advance Account #${pettyCashAdvanceAccount.id}`}
                     description="Employee petty cash advance account details"
                 />
 
@@ -48,7 +48,7 @@ const ShowAdvanceExpensePage = ({ account }: Props) => {
                     <Link
                         href={route(
                             'petty-cash-advance-accounts.edit',
-                            account.id,
+                            pettyCashAdvanceAccount.id,
                         )}
                         className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground hover:bg-primary/90"
                     >
@@ -66,7 +66,7 @@ const ShowAdvanceExpensePage = ({ account }: Props) => {
                         Employee
                     </div>
                     <div className="text-sm font-medium">
-                        {account.employee?.name || '-'}
+                        {pettyCashAdvanceAccount.employee?.name || '-'}
                     </div>
                 </div>
 
@@ -75,11 +75,11 @@ const ShowAdvanceExpensePage = ({ account }: Props) => {
                     <div className="text-xs text-muted-foreground">Status</div>
                     <div
                         className={`text-sm font-medium capitalize ${
-                            statusClasses[account.status] ||
+                            statusClasses[pettyCashAdvanceAccount.status] ||
                             'text-muted-foreground'
                         }`}
                     >
-                        {account.status}
+                        {pettyCashAdvanceAccount.status}
                     </div>
                 </div>
 
@@ -89,7 +89,7 @@ const ShowAdvanceExpensePage = ({ account }: Props) => {
                         Created At
                     </div>
                     <div className="text-sm font-medium">
-                        {formatDateTime(account.created_at)}
+                        {formatDateTime(pettyCashAdvanceAccount.created_at)}
                     </div>
                 </div>
             </div>
@@ -107,7 +107,8 @@ const ShowAdvanceExpensePage = ({ account }: Props) => {
                             Petty Cash Account
                         </div>
                         <div className="text-sm font-medium">
-                            {account.petty_cash_account?.name || '-'}
+                            {pettyCashAdvanceAccount.petty_cash_account?.name ||
+                                '-'}
                         </div>
                     </div>
 
@@ -117,7 +118,8 @@ const ShowAdvanceExpensePage = ({ account }: Props) => {
                             Ledger Account
                         </div>
                         <div className="text-sm font-medium">
-                            {account.ledger_account?.name || '-'}
+                            {pettyCashAdvanceAccount.ledger_account?.name ||
+                                '-'}
                         </div>
                     </div>
 
@@ -127,7 +129,7 @@ const ShowAdvanceExpensePage = ({ account }: Props) => {
                             Employee ID
                         </div>
                         <div className="text-sm font-medium">
-                            {account.employee.name || '-'}
+                            {pettyCashAdvanceAccount.employee.name || '-'}
                         </div>
                     </div>
                 </div>

@@ -3,7 +3,7 @@
 namespace App\ChequeManagement\Models;
 
 use App\ChequeManagement\Models\Cheque;
-use App\SubledgerModule\Models\Account;
+use App\SubledgerModule\Models\SubledgerAccount;
 use App\SystemAdministration\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +15,7 @@ class ChequeBook extends Model
     protected $table = 'cheque_books';
 
     protected $fillable = [
-        'account_id',
+        'subledger_account_id',
         'book_no',
         'start_number',
         'end_number',
@@ -34,9 +34,9 @@ class ChequeBook extends Model
     |--------------------------------------------------------------------------
     */
 
-    public function account()
+    public function subledgerAccount()
     {
-        return $this->belongsTo(Account::class);
+        return $this->belongsTo(SubledgerAccount::class);
     }
 
     public function cheques()

@@ -4,7 +4,7 @@ namespace App\BranchTreasuryModule\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\BranchTreasuryModule\Models\Vault;
-use App\SubledgerModule\Models\Account;
+use App\SubledgerModule\Models\SubledgerAccount;
 use App\SystemAdministration\Models\Branch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,7 +15,7 @@ class VaultController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Vault::query()->with(['branch', 'account']);
+        $query = Vault::query()->with(['branch', 'subledgerAccount']);
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -75,7 +75,7 @@ class VaultController extends Controller
                 'is_active' => $data['is_active'] ?? true,
             ]);
             // 2. Create Account (🔥 core part)
-            $account = Account::create([
+            $subledgerAccount = SubledgerAccount::create([
                 'organization_id' => $organization->id ?? null,
                 'branch_id' => $data['branch_id'],
                 'account_number' => 'V-' . str_pad($vault->id, 5, '0', STR_PAD_LEFT),
@@ -88,7 +88,7 @@ class VaultController extends Controller
             ]);
             // 3. Optional reverse link
             $vault->update([
-                'account_id' => $account->id,
+                'subledger_account_id' => $subledgerAccount->id,
             ]);
         });
 
@@ -103,7 +103,7 @@ class VaultController extends Controller
         }
 
         return Inertia::render('branch-cash-and-treasury/vaults/edit', [
-            'vault' => $vault->load('account'),
+            'vault' => $vault->load('subledgerAccount'),
             'branch' => Auth::user()->branch,
             'branches' => Branch::select('id', 'name')->get(),
         ]);
@@ -116,7 +116,7 @@ class VaultController extends Controller
         }
 
         return Inertia::render('branch-cash-and-treasury/vaults/show_vault_page', [
-            'vault' => $vault->load(['branch', 'account', 'denominations.denomination']),
+            'vault' => $vault->load(['branch', 'subledgerAccount', 'denominations.denomination']),
         ]);
     }
 
@@ -160,7 +160,7 @@ class VaultController extends Controller
         }
 
         DB::transaction(function () use ($vault) {
-            $vault->account?->delete();
+            $vault->subledgerAccount?->delete();
             $vault->delete();
         });
 

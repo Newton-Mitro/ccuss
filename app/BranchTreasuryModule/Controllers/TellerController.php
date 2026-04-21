@@ -4,7 +4,7 @@ namespace App\BranchTreasuryModule\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\BranchTreasuryModule\Models\Teller;
-use App\SubledgerModule\Models\Account;
+use App\SubledgerModule\Models\SubledgerAccount;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\User;
 use Illuminate\Http\Request;
@@ -17,7 +17,7 @@ class TellerController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Teller::query()->with(['branch', 'user', 'account']);
+        $query = Teller::query()->with(['branch', 'user', 'subledgerAccount']);
         // 🔍 Search
         if ($request->filled('search')) {
             $search = $request->search;
@@ -40,8 +40,8 @@ class TellerController extends Controller
             $query->where('branch_id', $request->branch_id);
         }
         // 🏦 Account Filter (NEW - matches schema)
-        if ($request->filled('account_id')) {
-            $query->where('account_id', $request->account_id);
+        if ($request->filled('subledger_account_id')) {
+            $query->where('subledger_account_id', $request->subledger_account_id);
         }
         // 📊 Status Filter (is_active)
         if ($request->filled('status')) {
@@ -53,7 +53,7 @@ class TellerController extends Controller
             'filters' => $request->only([
                 'search',
                 'branch_id',
-                'account_id',
+                'subledger_account_id',
                 'is_active',
                 'per_page',
                 'page',
@@ -97,7 +97,7 @@ class TellerController extends Controller
             ]);
 
             // 2. Create Teller Cash Account (🔥 core)
-            $account = Account::create([
+            $subledgerAccount = SubledgerAccount::create([
                 'organization_id' => $organizationId,
                 'branch_id' => $data['branch_id'] ?? Auth::user()->branch_id,
 
@@ -114,7 +114,7 @@ class TellerController extends Controller
 
             // 3. Link back
             $teller->update([
-                'account_id' => $account->id,
+                'subledger_account_id' => $subledgerAccount->id,
             ]);
 
             return redirect()
@@ -133,7 +133,7 @@ class TellerController extends Controller
 
         return Inertia::render('branch-cash-and-treasury/tellers/teller-form', [
             'users' => User::where('branch_id', $branch->id)->get(),
-            'teller' => $teller->load(['account']),
+            'teller' => $teller->load(['subledgerAccount']),
             'userBranch' => $branch,
             'branches' => Branch::select('id', 'name')->get(),
         ]);
@@ -183,7 +183,7 @@ class TellerController extends Controller
         }
 
         return Inertia::render('branch-cash-and-treasury/tellers/show_teller_page', [
-            'teller' => $teller->load(['branch', 'user', 'account']),
+            'teller' => $teller->load(['branch', 'user', 'subledgerAccount']),
         ]);
     }
 
@@ -200,7 +200,7 @@ class TellerController extends Controller
         }
 
         DB::transaction(function () use ($teller) {
-            $teller->account?->delete();
+            $teller->subledgerAccount?->delete();
             $teller->delete();
         });
 

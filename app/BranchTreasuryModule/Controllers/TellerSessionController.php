@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\BranchTreasuryModule\Models\TellerSession;
 use App\BranchTreasuryModule\Models\Teller;
 use App\BranchTreasuryModule\Models\BranchDay;
-use App\SubledgerModule\Models\Account;
+use App\SubledgerModule\Models\SubledgerAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -74,7 +74,7 @@ class TellerSessionController extends Controller
             ->where('status', 'open')
             ->first();
 
-        $cashAccounts = Account::where('type', 'teller')
+        $cashAccounts = SubledgerAccount::where('type', 'teller')
             ->where('branch_id', $user->branch_id)
             ->get();
 
@@ -225,7 +225,7 @@ class TellerSessionController extends Controller
 
         // 🚀 Replace with real ledger logic
         // Example:
-        // return LedgerEntry::where('account_id', $session->cash_account_id)
+        // return LedgerEntry::where('subledger_account_id', $session->cash_account_id)
         //     ->sum(DB::raw('debit - credit'));
 
         return 0;

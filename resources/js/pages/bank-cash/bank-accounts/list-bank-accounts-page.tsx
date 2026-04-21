@@ -20,7 +20,7 @@ import { BreadcrumbItem, SharedData } from '../../../types';
 import { BankAccount } from '../../../types/bank_cash_module';
 
 interface BankAccountPageProps extends SharedData {
-    accounts: {
+    paginatedData: {
         data: BankAccount[];
         links: { url: string | null; label: string; active: boolean }[];
     };
@@ -28,7 +28,7 @@ interface BankAccountPageProps extends SharedData {
 }
 
 export default function Index() {
-    const { accounts, filters } = usePage<BankAccountPageProps>().props;
+    const { paginatedData, filters } = usePage<BankAccountPageProps>().props;
 
     useFlashToastHandler();
 
@@ -139,7 +139,7 @@ export default function Index() {
                                     'Account Number',
                                     'SWIFT',
                                     'Routing',
-                                    'Link Account',
+                                    'Subledger Account',
                                     'Status',
                                     'Actions',
                                 ].map((header) => (
@@ -154,8 +154,8 @@ export default function Index() {
                         </thead>
 
                         <tbody>
-                            {accounts.data.length > 0 ? (
-                                accounts.data.map((a) => (
+                            {paginatedData.data.length > 0 ? (
+                                paginatedData.data.map((a) => (
                                     <tr
                                         key={a.id}
                                         className="border-b even:bg-muted/10"
@@ -181,7 +181,8 @@ export default function Index() {
                                         </td>
 
                                         <td className="px-2 py-1">
-                                            {a.account.account_number || '-'}
+                                            {a.subledger_account
+                                                ?.account_number || '-'}
                                         </td>
 
                                         <td className="px-2 py-1 capitalize">
@@ -270,7 +271,7 @@ export default function Index() {
                         setData('per_page', value);
                         setData('page', 1);
                     }}
-                    links={accounts.links}
+                    links={paginatedData.links}
                 />
             </div>
         </CustomAuthLayout>

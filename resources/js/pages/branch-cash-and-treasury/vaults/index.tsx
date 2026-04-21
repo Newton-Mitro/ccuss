@@ -46,7 +46,7 @@ export default function Index() {
     } = useForm({
         search: filters.search || '',
         branch_id: filters.branch_id || '',
-        account_id: filters.account_id || '',
+        subledger_account_id: filters.subledger_account_id || '',
         status: filters.status || '',
         per_page: Number(filters.per_page) || 10,
         page: Number(filters.page) || 1,
@@ -64,7 +64,7 @@ export default function Index() {
         data.per_page,
         data.page,
         data.branch_id,
-        data.account_id,
+        data.subledger_account_id,
         data.status,
     ]);
 
@@ -204,11 +204,12 @@ export default function Index() {
                                         <td className="px-2 py-1">{v.name}</td>
 
                                         <td className="px-2 py-1">
-                                            {v.account?.account_number ?? '—'}
+                                            {v.subledger_account
+                                                ?.account_number ?? '—'}
                                         </td>
 
                                         <td className="px-2 py-1">
-                                            {v?.account?.name ?? '—'}
+                                            {v.subledger_account?.name ?? '—'}
                                         </td>
 
                                         <td className="px-2 py-1">

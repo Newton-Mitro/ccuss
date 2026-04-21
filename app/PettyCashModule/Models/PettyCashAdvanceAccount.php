@@ -3,7 +3,7 @@
 namespace App\PettyCashModule\Models;
 
 use App\FinanceAndAccounting\Models\LedgerAccount;
-use App\SubledgerModule\Models\Account;
+use App\SubledgerModule\Models\SubledgerAccount;
 use App\SystemAdministration\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -43,6 +43,6 @@ class PettyCashAdvanceAccount extends Model
 
     public function linkAccount()
     {
-        return $this->belongsTo(Account::class, 'link_account_id');
+        return $this->belongsTo(SubledgerAccount::class, 'link_account_id');
     }
 }

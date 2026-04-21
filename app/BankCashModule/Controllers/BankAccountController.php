@@ -4,7 +4,7 @@ namespace App\BankCashModule\Controllers;
 
 use App\BankCashModule\Models\BankAccount;
 use App\Http\Controllers\Controller;
-use App\SubledgerModule\Models\Account;
+use App\SubledgerModule\Models\SubledgerAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +15,7 @@ class BankAccountController extends Controller
     public function index(Request $request)
     {
         $query = BankAccount::query()
-            ->with(['account']);
+            ->with(['subledgerAccount']);
 
         // 🔍 Search
         if ($request->filled('search')) {
@@ -25,7 +25,7 @@ class BankAccountController extends Controller
                 $q->where('bank_name', 'like', "%{$search}%")
                     ->orWhere('branch_name', 'like', "%{$search}%")
                     ->orWhere('account_number', 'like', "%{$search}%")
-                    ->orWhereHas('account', function ($aq) use ($search) {
+                    ->orWhereHas('subledgerAccount', function ($aq) use ($search) {
                         $aq->where('account_number', 'like', "%{$search}%")
                             ->orWhere('name', 'like', "%{$search}%");
                     });
@@ -37,12 +37,12 @@ class BankAccountController extends Controller
             $query->where('status', $request->status);
         }
 
-        $accounts = $query->latest()
+        $paginatedData = $query->latest()
             ->paginate($request->input('per_page', 10))
             ->withQueryString();
 
         return Inertia::render('bank-cash/bank-accounts/list-bank-accounts-page', [
-            'accounts' => $accounts,
+            'paginatedData' => $paginatedData,
             'filters' => $request->only(['search', 'status', 'per_page', 'page']),
         ]);
     }
@@ -60,7 +60,7 @@ class BankAccountController extends Controller
         $data = $request->validate([
             // account layer
             'name' => 'nullable|string|max:255',
-            'account_number' => 'required|string|max:255|unique:accounts,account_number',
+            'account_number' => 'required|string|max:255|unique:subledger_accounts,account_number',
 
             'organization_id' => 'nullable|exists:organizations,id',
             'branch_id' => 'nullable|exists:branches,id',
@@ -86,7 +86,7 @@ class BankAccountController extends Controller
             ]);
 
             // 2. Create central ledger account
-            $account = Account::create([
+            $subledger_account = SubledgerAccount::create([
                 'organization_id' => $organization->id ?? null,
                 'branch_id' => $branch->id ?? null,
                 'account_number' => $data['account_number'],
@@ -99,7 +99,7 @@ class BankAccountController extends Controller
 
             // 3. Link back
             $bankAccount->update([
-                'account_id' => $account->id,
+                'subledger_account_id' => $subledger_account->id,
             ]);
         });
 
@@ -110,19 +110,19 @@ class BankAccountController extends Controller
 
     public function show(BankAccount $bankAccount)
     {
-        $bankAccount->load('account');
+        $bankAccount->load('subledgerAccount');
 
         return Inertia::render('bank-cash/bank-accounts/show-bank-account-page', [
-            'account' => $bankAccount,
+            'bankAccount' => $bankAccount,
         ]);
     }
 
     public function edit(BankAccount $bankAccount)
     {
-        $bankAccount->load('account');
+        $bankAccount->load('subledgerAccount');
 
         return Inertia::render('bank-cash/bank-accounts/bank-account-form-page', [
-            'account' => $bankAccount,
+            'bankAccount' => $bankAccount,
         ]);
     }
 
@@ -163,7 +163,7 @@ class BankAccountController extends Controller
     public function destroy(BankAccount $bankAccount)
     {
         DB::transaction(function () use ($bankAccount) {
-            $bankAccount->account?->delete();
+            $bankAccount->subledgerAccount?->delete();
             $bankAccount->delete();
         });
 

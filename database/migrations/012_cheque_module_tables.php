@@ -10,24 +10,20 @@ return new class extends Migration {
     {
         Schema::create('cheque_books', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('account_id')->constrained()->cascadeOnDelete();
             $table->string('book_no')->unique();
             $table->integer('start_number');
             $table->integer('end_number');
             $table->date('issued_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreignId('subledger_account_id')->constrained('subledger_accounts')->cascadeOnDelete();
         });
 
         Schema::create('cheques', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('cheque_book_id')->nullable()->constrained()->nullOnDelete();
-            // issuer (internal account)
-            $table->foreignId('issuer_account_id')->nullable()->constrained('accounts')->nullOnDelete();
-
             $table->string('issuer_bank_name')->nullable();
             $table->string('issuer_branch')->nullable();
-
             $table->string('cheque_number');
             $table->date('cheque_date')->nullable();
             $table->decimal('amount', 18, 2);
@@ -39,18 +35,23 @@ return new class extends Migration {
             $table->timestamp('bounced_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreignId('cheque_book_id')->nullable()->constrained('cheque_books')->nullOnDelete();
+            // issuer (internal account)
+            $table->foreignId('issuer_account_id')->nullable()->constrained('subledger_accounts')->nullOnDelete();
         });
 
         Schema::create('cheque_deposits', function (Blueprint $table) {
             $table->id();
             // where money goes (must be accounts table)
-            $table->foreignId('deposit_account_id')->constrained('accounts')->cascadeOnDelete();
             $table->foreignId('cheque_id')->constrained()->cascadeOnDelete();
             $table->decimal('amount', 18, 2);
             $table->date('deposit_date');
             $table->enum('status', ['pending', 'sent_to_clearing', 'cleared', 'rejected'])->default('pending');
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreignId('deposit_account_id')->constrained('subledger_accounts')->cascadeOnDelete();
         });
 
         Schema::create('clearing_batches', function (Blueprint $table) {
@@ -64,12 +65,13 @@ return new class extends Migration {
 
         Schema::create('clearing_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('clearing_batch_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('cheque_id')->constrained()->cascadeOnDelete();
             $table->enum('status', ['sent', 'cleared', 'bounced'])->default('sent');
             $table->string('return_reason')->nullable();
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreignId('clearing_batch_id')->constrained('clearing_batches')->cascadeOnDelete();
+            $table->foreignId('cheque_id')->constrained('cheques')->cascadeOnDelete();
             $table->unique(['clearing_batch_id', 'cheque_id']);
         });
     }

@@ -67,9 +67,6 @@ return new class extends Migration {
 
         Schema::create('saving_accounts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('deposit_product_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('organization_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->string('account_no', 30)->unique();
             $table->string('account_name');
             $table->decimal('interest_rate', 5, 2)->nullable();
@@ -79,13 +76,14 @@ return new class extends Migration {
             $table->decimal('minimum_balance', 18, 2)->default(0);
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('subledger_id')->constrained('subledgers')->cascadeOnDelete();
+            $table->foreignId('organization_id')->nullable()->constrained()->nullOnDelete();
         });
 
         Schema::create('share_accounts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('deposit_product_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('organization_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->string('account_no', 30)->unique();
             $table->string('account_name');
             $table->decimal('interest_rate', 5, 2)->nullable();
@@ -96,13 +94,14 @@ return new class extends Migration {
             $table->boolean('voting_rights')->default(true);
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('organization_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('subledger_id')->constrained('subledgers')->cascadeOnDelete();
         });
 
         Schema::create('term_deposit_accounts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('deposit_product_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('organization_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->string('account_no', 30)->unique();
             $table->string('account_name');
             $table->decimal('interest_rate', 5, 2)->nullable();
@@ -114,13 +113,14 @@ return new class extends Migration {
             $table->enum('payout_mode', ['maturity', 'monthly'])->default('maturity');
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('organization_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('subledger_id')->constrained('subledgers')->cascadeOnDelete();
         });
 
         Schema::create('recurring_deposit_accounts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('deposit_product_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('organization_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->string('account_no', 30)->unique();
             $table->string('account_name');
             $table->decimal('interest_rate', 5, 2)->nullable();
@@ -136,6 +136,10 @@ return new class extends Migration {
             $table->decimal('maturity_amount', 15, 2)->default(0);
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('organization_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('subledger_id')->constrained('subledgers')->cascadeOnDelete();
         });
 
         Schema::create('recurring_deposit_installments', function (Blueprint $table) {
@@ -144,10 +148,6 @@ return new class extends Migration {
             $table->unsignedBigInteger('recurring_deposit_account_id');
 
             // ✅ SHORT FK NAME (avoids MySQL limit)
-            $table->foreign('recurring_deposit_account_id', 'rd_inst_account_fk')
-                ->references('id')
-                ->on('recurring_deposit_accounts')
-                ->cascadeOnDelete();
             $table->integer('installment_no');
             $table->date('due_date');
             $table->decimal('amount_due', 15, 2);
@@ -157,6 +157,8 @@ return new class extends Migration {
             // $table->decimal('penalty_amount', 15, 2)->default(0);
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreign('recurring_deposit_account_id', 'rd_inst_account_fk')->references('id')->on('recurring_deposit_accounts')->cascadeOnDelete();
         });
     }
 

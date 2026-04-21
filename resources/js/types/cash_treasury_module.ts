@@ -32,13 +32,13 @@ export interface Vault {
     id: number;
     branch_id: number;
     name: string;
-    account_id: number;
+    subledger_account_id: number;
     is_active: boolean;
     created_at: string;
     updated_at: string;
 
     branch?: Branch;
-    account?: any;
+    subledger_account?: any;
     vaultDenominations?: VaultDenomination[];
     voucher_entries?: VaultTransaction[];
 }
@@ -57,7 +57,7 @@ export interface Teller {
 
     user?: User;
     branch?: Branch;
-    account?: any;
+    subledger_account?: any;
     sessions?: TellerSession[];
     limits?: TellerLimit[];
 }

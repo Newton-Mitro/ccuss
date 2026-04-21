@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\SubledgerModule\Models\Account;
+use App\SubledgerModule\Models\SubledgerAccount;
 use App\SystemAdministration\Models\Branch;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -14,7 +14,7 @@ class VaultFactory extends Factory
     {
         return [
             'branch_id' => Branch::factory(),
-            'account_id' => Account::factory(),
+            'subledger_account_id' => SubledgerAccount::factory(),
             'name' => 'Vault ' . $this->faker->unique()->word(),
             'is_active' => $this->faker->boolean(90), // mostly active by default
         ];

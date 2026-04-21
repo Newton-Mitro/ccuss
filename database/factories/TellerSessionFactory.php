@@ -23,7 +23,7 @@ class TellerSessionFactory extends Factory
             ])->id,
 
             // 🔥 Critical: must match a real account
-            'cash_account_id' => $teller->account_id,
+            'cash_account_id' => $teller->subledger_account_id,
 
             // Session lifecycle
             'opened_at' => now(),

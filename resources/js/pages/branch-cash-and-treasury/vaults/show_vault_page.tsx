@@ -85,29 +85,29 @@ export default function ShowVaultPage({ vault }: ShowVaultPageProps) {
                     {/* Account */}
                     <div>
                         <p className="text-sm text-muted-foreground">
-                            Linked Account
+                            Subledger Account
                         </p>
                         <p className="font-medium">
-                            {vault.account?.name ?? '—'}
+                            {vault.subledger_account?.name ?? '—'}
                         </p>
                     </div>
 
                     {/* Account */}
                     <div>
                         <p className="text-sm text-muted-foreground">
-                            Linked Account
+                            Subledger Account
                         </p>
                         <p className="font-medium">
-                            {vault.account?.name ?? '—'}
+                            {vault.subledger_account?.name ?? '—'}
                         </p>
                     </div>
 
                     <div>
                         <p className="text-sm text-muted-foreground">
-                            Linked Account Number
+                            Subledger Account Number
                         </p>
                         <p className="font-medium">
-                            {vault.account?.account_number ?? '—'}
+                            {vault.subledger_account?.account_number ?? '—'}
                         </p>
                     </div>
 

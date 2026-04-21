@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\BranchTreasuryModule\Models\Teller;
-use App\SubledgerModule\Models\Account;
+use App\SubledgerModule\Models\SubledgerAccount;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -17,7 +17,7 @@ class TellerFactory extends Factory
         return [
             'user_id' => User::factory(),
             'branch_id' => Branch::factory(),
-            'account_id' => Account::factory(),
+            'subledger_account_id' => SubledgerAccount::factory(),
             'code' => strtoupper($this->faker->unique()->bothify('TLR###')),
             'name' => $this->faker->name(),
             'max_cash_limit' => 500000,

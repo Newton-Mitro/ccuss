@@ -2,7 +2,7 @@
 
 namespace App\BankCashModule\Models;
 
-use App\SubledgerModule\Models\Account;
+use App\SubledgerModule\Models\SubledgerAccount;
 use App\SystemAdministration\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +13,7 @@ class BankAccount extends Model
     use HasFactory, SoftDeletes, Auditable;
 
     protected $fillable = [
-        'account_id',
+        'subledger_account_id',
         'bank_name',
         'branch_name',
         'account_number',
@@ -40,9 +40,9 @@ class BankAccount extends Model
     /**
      * Core ledger account (single source of truth for balance)
      */
-    public function account()
+    public function subledgerAccount()
     {
-        return $this->belongsTo(Account::class);
+        return $this->belongsTo(SubledgerAccount::class);
     }
 
     /**
@@ -91,7 +91,7 @@ class BankAccount extends Model
      */
     public function getBalanceAttribute()
     {
-        return $this->account?->balance ?? 0;
+        return $this->subledgerAccount?->balance ?? 0;
     }
 
     /**

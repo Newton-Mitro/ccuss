@@ -40,11 +40,12 @@ return new class extends Migration {
         // -----------------------
         Schema::create('vouchers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
             $table->string('name'); // e.g. Sales Journal, Cash Journal
             $table->string('code')->unique();
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
         });
 
         // BANK | Bank Voucher      | Bank transactions
@@ -60,19 +61,11 @@ return new class extends Migration {
         // -----------------------
         Schema::create('voucher_entries', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('fiscal_year_id')->constrained();
-            $table->foreignId('fiscal_period_id')->constrained();
             $table->string('reference')->unique(); // receipt_no, payment_no, cheque_no, etc
-            $table->foreignId('voucher_id')->constrained();
             // source: who created the journal entry
             $table->enum('source_type', ['staff', 'customer', 'system', 'integration'])->default('system');
             // channel: where the journal entry was created
             $table->enum('channel', ['branch', 'mobile_app', 'internet_banking', 'atm', 'api'])->default('branch');
-            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('branch_day_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('teller_session_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('reversal_of')->nullable()->constrained('voucher_entries')->nullOnDelete();
             $table->boolean('is_reversed')->default(false);
             $table->boolean('is_adjustment')->default(false);
             $table->decimal('amount', 15, 2)->nullable();
@@ -81,15 +74,21 @@ return new class extends Migration {
             $table->enum('status', ['draft', 'cancelled', 'posted', 'reversed'])->default('draft');
             $table->timestamps();
             $table->softDeletes();
+
             $table->index(['branch_id', 'transaction_date']);
             $table->index(['source_type']);
+            $table->foreignId('voucher_id')->constrained('vouchers')->cascadeOnDelete();
+            $table->foreignId('fiscal_year_id')->constrained('fiscal_years')->cascadeOnDelete();
+            $table->foreignId('fiscal_period_id')->constrained('fiscal_periods')->cascadeOnDelete();
+            $table->foreignId('organization_id')->constrained('organizations')->cascadeOnDelete();
+            $table->foreignId('branch_id')->nullable()->constrained('branches')->nullOnDelete();
+            $table->foreignId('branch_day_id')->nullable()->constrained('branch_days')->nullOnDelete();
+            $table->foreignId('teller_session_id')->nullable()->constrained('teller_sessions')->nullOnDelete();
+            $table->foreignId('reversal_of')->nullable()->constrained('voucher_entries')->nullOnDelete();
         });
 
         Schema::create('voucher_entry_lines', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('voucher_entry_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('ledger_account_id')->constrained('ledger_accounts');
-            $table->foreignId('account_id')->constrained('accounts');
             $table->nullableMorphs('reference');
             $table->decimal('debit', 15, 2)->default(0);
             $table->decimal('credit', 15, 2)->default(0);
@@ -98,8 +97,12 @@ return new class extends Migration {
             $table->string('narration')->nullable();
             $table->timestamps();
             $table->softDeletes();
+
             $table->index(['voucher_entry_id']);
             $table->index(['ledger_account_id']);
+            $table->foreignId('voucher_entry_id')->constrained('voucher_entries')->cascadeOnDelete();
+            $table->foreignId('ledger_account_id')->constrained('ledger_accounts');
+            $table->foreignId('sub_account_id')->constrained('subledger_accounts');
         });
 
         // -----------------------

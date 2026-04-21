@@ -5,7 +5,7 @@ namespace App\PettyCashModule\Controllers;
 use App\FinanceAndAccounting\Models\LedgerAccount;
 use App\Http\Controllers\Controller;
 use App\PettyCashModule\Models\PettyCashAccount;
-use App\SubledgerModule\Models\Account;
+use App\SubledgerModule\Models\SubledgerAccount;
 use Illuminate\Support\Facades\DB;
 use App\SystemAdministration\Models\Branch;
 use Illuminate\Http\Request;
@@ -92,7 +92,7 @@ class PettyCashAccountController extends Controller
             ]);
 
             // 2. Create central account (IMPORTANT)
-            $account = Account::create([
+            $account = SubledgerAccount::create([
                 'organization_id' => $organizationId ?? null,
                 'branch_id' => $data['branch_id'],
                 'account_number' => 'PC-' . str_pad($pettyCash->id, 5, '0', STR_PAD_LEFT),
@@ -107,7 +107,7 @@ class PettyCashAccountController extends Controller
 
             // 3. Optional reverse link (if needed)
             $pettyCash->update([
-                'account_id' => $account->id,
+                'subledger_account_id' => $account->id,
             ]);
         });
 

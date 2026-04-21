@@ -32,7 +32,7 @@ const VaultForm = ({ vault, branches }: VaultFormPageProps) => {
     const { data, setData, post, put, processing, errors } = useForm({
         name: vault?.name || '',
         branch_id: vault?.branch_id || '',
-        account_id: vault?.account_id || '',
+        subledger_account_id: vault?.subledger_account_id || '',
         is_active: vault?.is_active ?? true,
     });
 
@@ -106,13 +106,13 @@ const VaultForm = ({ vault, branches }: VaultFormPageProps) => {
 
                     {/* Account */}
                     <div>
-                        <Label className="text-xs">Link Account</Label>
+                        <Label className="text-xs">Subledger Account</Label>
                         <Input
-                            value={vault?.account?.name}
+                            value={vault?.subledger_account?.name}
                             disabled
                             className="h-8 text-sm"
                         />
-                        <InputError message={errors.account_id} />
+                        <InputError message={errors.subledger_account_id} />
                     </div>
 
                     {/* Vault Name */}

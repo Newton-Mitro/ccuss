@@ -3,13 +3,13 @@
 namespace App\SubledgerModule\Models;
 
 use App\SystemAdministration\Traits\Auditable;
-use Database\Factories\AccountFactory;
+use Database\Factories\SubledgerAccountFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class Account extends Model
+class SubledgerAccount extends Model
 {
     use HasFactory, Auditable;
 
@@ -21,7 +21,6 @@ class Account extends Model
         'account_number',
         'name',
         'type',
-        'balance',
         'status',
     ];
 
@@ -49,8 +48,9 @@ class Account extends Model
         return $this->hasMany(AccountBalance::class);
     }
 
+
     protected static function newFactory()
     {
-        return AccountFactory::new();
+        return SubledgerAccountFactory::new();
     }
 }

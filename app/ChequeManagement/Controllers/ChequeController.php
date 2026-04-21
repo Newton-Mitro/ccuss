@@ -5,7 +5,7 @@ namespace App\ChequeManagement\Controllers;
 use App\ChequeManagement\Models\Cheque;
 use App\ChequeManagement\Models\ChequeBook;
 use App\Http\Controllers\Controller;
-use App\SubledgerModule\Models\Account;
+use App\SubledgerModule\Models\SubledgerAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -60,7 +60,7 @@ class ChequeController extends Controller
             'cheque-module/cheques/create-cheque-page',
             [
                 'cheque_books' => ChequeBook::select('id', 'book_no')->get(),
-                'accounts' => Account::select('id', 'name')->get(),
+                'accounts' => SubledgerAccount::select('id', 'name')->get(),
             ]
         );
     }
@@ -128,7 +128,7 @@ class ChequeController extends Controller
             [
                 'cheque' => $cheque,
                 'cheque_books' => ChequeBook::select('id', 'book_no')->get(),
-                'accounts' => Account::select('id', 'name')->get(),
+                'accounts' => SubledgerAccount::select('id', 'name')->get(),
             ]
         );
     }

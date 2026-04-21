@@ -96,11 +96,11 @@ export default function ShowTellerPage({ teller }: Props) {
 
                     <div>
                         <p className="text-sm text-card-foreground">
-                            Link Account Number
+                            Subledger Account Number
                         </p>
                         <p className="font-medium">
-                            {teller.account
-                                ? teller.account.account_number
+                            {teller.subledger_account
+                                ? teller.subledger_account.account_number
                                 : 'N/A'}
                         </p>
                     </div>

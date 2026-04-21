@@ -2,9 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\BranchTreasuryModule\Models\Teller;
-use App\BranchTreasuryModule\Models\Vault;
-use App\SubledgerModule\Models\Account;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Role;
@@ -61,12 +58,12 @@ class OrganizationStructureSeeder extends Seeder
         //         [
         //             'name' => $branch->name . ' Main Vault',
         //             'is_active' => true,
-        //             'account_id' => null, // temporary
+        //             'subledger_account_id' => null, // temporary
         //         ]
         //     );
 
         //     // ✅ Step 2: Create Account linked to Vault
-        //     $vaultAccount = Account::factory()
+        //     $vaultAccount = SubledgerAccount::factory()
         //         ->vault()
         //         ->create([
         //             'organization_id' => $organization->id,
@@ -76,9 +73,9 @@ class OrganizationStructureSeeder extends Seeder
         //             'accountable_type' => Vault::class,
         //         ]);
 
-        //     // ✅ Step 3: Update Vault with account_id
+        //     // ✅ Step 3: Update Vault with subledger_account_id
         //     $vault->update([
-        //         'account_id' => $vaultAccount->id,
+        //         'subledger_account_id' => $vaultAccount->id,
         //     ]);
         // }
 
@@ -120,7 +117,7 @@ class OrganizationStructureSeeder extends Seeder
             //     ],
             //     [
             //         'branch_id' => $mainBranch->id,
-            //         'account_id' => null, // temporary
+            //         'subledger_account_id' => null, // temporary
             //         'code' => 'TLR-' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
             //         'name' => $userData['name'],
             //         'max_cash_limit' => 500000,
@@ -130,7 +127,7 @@ class OrganizationStructureSeeder extends Seeder
             // );
 
             // // ✅ Step 2: Create Teller Account
-            // $tellerAccount = Account::factory()
+            // $tellerAccount = SubledgerAccount::factory()
             //     ->teller()
             //     ->create([
             //         'organization_id' => $organization->id,
@@ -142,7 +139,7 @@ class OrganizationStructureSeeder extends Seeder
 
             // // ✅ Step 3: Update Teller
             // $teller->update([
-            //     'account_id' => $tellerAccount->id,
+            //     'subledger_account_id' => $tellerAccount->id,
             // ]);
         }
 

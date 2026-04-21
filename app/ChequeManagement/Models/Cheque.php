@@ -3,7 +3,7 @@
 namespace App\ChequeManagement\Models;
 
 use App\ChequeManagement\Models\ChequeBook;
-use App\SubledgerModule\Models\Account;
+use App\SubledgerModule\Models\SubledgerAccount;
 use App\SystemAdministration\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -70,7 +70,7 @@ class Cheque extends Model
 
     public function issuerAccount()
     {
-        return $this->belongsTo(Account::class, 'issuer_account_id');
+        return $this->belongsTo(SubledgerAccount::class, 'issuer_account_id');
     }
 
     /*

@@ -9,10 +9,6 @@ return new class extends Migration {
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->nullable()->constrained();
-            $table->foreignId('branch_id')->nullable()->constrained();
-            $table->foreignId('customer_id')->nullable()->unique();
-            $table->foreignId('employee_id')->nullable()->unique();
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
@@ -25,6 +21,11 @@ return new class extends Migration {
             $table->enum('status', ['active', 'inactive'])->default('inactive');
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreignId('organization_id')->nullable()->constrained();
+            $table->foreignId('branch_id')->nullable()->constrained();
+            $table->foreignId('customer_id')->nullable()->unique();
+            $table->foreignId('employee_id')->nullable()->unique();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
