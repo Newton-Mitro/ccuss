@@ -176,4 +176,20 @@ class PettyCashAccountController extends Controller
 
         return back()->with('success', 'Deleted successfully');
     }
+
+    public function createPettyCashReplenishment()
+    {
+        return Inertia::render('petty-cash-management/petty-cash-transactions/petty-cash-replenishment-page', [
+            'pettyCashAccounts' => PettyCashAccount::all(),
+            'fundingAccounts' => LedgerAccount::select('id', 'name')->get(),
+        ]);
+    }
+
+    public function createPettyCashExpense()
+    {
+        return Inertia::render('petty-cash-management/petty-cash-transactions/petty-cash-expense-entry-page', [
+            'pettyCashAccounts' => PettyCashAccount::all(),
+            'expenseLedgers' => LedgerAccount::where('type', 'expense')->get(),
+        ]);
+    }
 }

@@ -178,4 +178,32 @@ class PettyCashAdvanceAccountController extends Controller
 
         return back()->with('success', 'Deleted successfully');
     }
+
+    public function createPettyCashAdvanceEntry()
+    {
+        return Inertia::render('petty-cash-management/petty-cash-transactions/petty-cash-advance-entry-page', [
+            'pettyCashAccounts' => PettyCashAccount::all(),
+            'employees' => User::select('id', 'name')->get(),
+        ]);
+    }
+
+    public function createPettyCashAdvanceReturn()
+    {
+        $advances = Advance::where('remaining_amount', '>', 0)
+            ->with('employee')
+            ->get()
+            ->map(function ($a) {
+                return [
+                    'id' => $a->id,
+                    'employee_name' => $a->employee->name,
+                    'amount' => $a->amount,
+                    'remaining_amount' => $a->remaining_amount,
+                ];
+            });
+
+        return inertia('AdvanceReturns/Create', [
+            'advances' => $advances,
+        ]);
+    }
+
 }

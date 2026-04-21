@@ -1,3 +1,4 @@
+import { route } from 'ziggy-js';
 import { SidebarItem } from '../../types';
 
 export const pettyCashMenu: SidebarItem[] = [
@@ -33,15 +34,15 @@ export const pettyCashMenu: SidebarItem[] = [
                             <i className="fa-solid fa-arrow-down-up-across-line" />
                         ),
                         permission: ['petty_cash.replenishment.view'],
-                        path: '/petty-cash-replenishment',
-                        match_path: 'petty-cash-replenishment',
+                        path: route('petty-cash-accounts.replenishment'),
+                        match_path: 'replenishment/create',
                     },
                     {
                         name: 'Expense Entry',
                         icon: <i className="fa-solid fa-receipt" />,
                         permission: ['petty_cash.voucher_entries.view'],
-                        path: '/petty-cash-voucher_entries',
-                        match_path: 'petty-cash-voucher_entries',
+                        path: route('petty-cash-accounts.expense'),
+                        match_path: 'expense/create',
                     },
                     {
                         name: 'Advance Payment Entry',
@@ -49,8 +50,10 @@ export const pettyCashMenu: SidebarItem[] = [
                             <i className="fa-solid fa-arrow-up-right-from-square" />
                         ),
                         permission: ['petty_cash.replenishment.view'],
-                        path: '/petty-cash-replenishment',
-                        match_path: 'petty-cash-replenishment',
+                        path: route(
+                            'petty-cash-advance-accounts.advance-entry',
+                        ),
+                        match_path: 'advance-entry/create',
                     },
                     {
                         name: 'Advance Return Entry',
