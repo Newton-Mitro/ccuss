@@ -123,13 +123,13 @@
 /* ================= Dark Theme ================= */
 .dark {
     /* 🌌 BASE BACKGROUND (deeper, cleaner, less gray noise) */
-    --background: oklch(0.075 0.004 355);
+    --background: oklch(21.779% 0.00002 271.152);
 
     /* 🧠 PRIMARY TEXT */
     --foreground: oklch(0.96 0.01 0);
 
     /* 🧱 CARD (slightly lifted from background for clear separation) */
-    --card: oklch(0.12 0.006 355);
+    --card: oklch(26.033% 0.00003 271.152);
 
     /* 🧠 card text stays readable but softer than main foreground */
     --card-foreground: oklch(0.93 0.01 0);
@@ -139,13 +139,13 @@
     --popover-foreground: oklch(0.95 0.01 0);
 
     /* 🔥 PRIMARY */
-    --primary: oklch(0.72 0.08 250);
+    --primary: oklch(38.257% 0.04062 248.962);
     --primary-foreground: oklch(0.1 0.01 250);
 
     --secondary: oklch(0.18 0.01 355);
     --secondary-foreground: oklch(0.9 0.01 0);
 
-    --accent: oklch(0.65 0.12 320);
+    --accent: oklch(25.803% 0.04064 319.014);
     --accent-foreground: oklch(0.98 0.01 320);
 
     --muted: oklch(0.15 0.008 355);
@@ -159,7 +159,7 @@
     --warning: oklch(0.8 0.18 85);
 
     /* 🧱 BORDER (slightly more visible for structure clarity) */
-    --border: oklch(23.425% 0.01003 355.637);
+    --border: oklch(26.924% 0.00622 0.228);
     --input: oklch(0.18 0.01 355);
 
     --ring: var(--primary);
@@ -171,7 +171,7 @@
     --chart-5: oklch(0.6 0.2 270);
 
     /* 🧭 SIDEBAR (slightly elevated from background, closer to card tone) */
-    --sidebar: oklch(0.1 0.005 355);
+    --sidebar: oklch(20.904% 0.00002 271.152);
     --sidebar-foreground: oklch(0.95 0.01 0);
     --sidebar-hover: oklch(0.16 0.01 355);
     --sidebar-active: var(--primary);
