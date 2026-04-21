@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
+import { route } from 'ziggy-js';
 import { Breadcrumbs } from '../components/breadcrumbs';
 import { SidebarMenuItem } from '../components/sidebar-menu-item';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
@@ -184,7 +185,10 @@ export default function CustomAuthLayout({
                 )}
             >
                 {/* Logo */}
-                <div className="flex h-16 items-center gap-2 border-b pl-3">
+                <Link
+                    href={route('auth.home')}
+                    className="flex h-16 items-center gap-2 border-b pl-3"
+                >
                     <img
                         src={import.meta.env.VITE_LOGO_PATH}
                         className="h-10 w-10 rounded-full border bg-card p-1"
@@ -209,7 +213,7 @@ export default function CustomAuthLayout({
                             </p>
                         </div>
                     </span>
-                </div>
+                </Link>
 
                 {/* Search + controls */}
                 <div
@@ -278,12 +282,12 @@ export default function CustomAuthLayout({
                             !sidebarOpen && 'justify-center',
                         )}
                     >
-                        <Avatar className="h-8 w-8 overflow-hidden rounded-full">
+                        <Avatar className="h-8 w-8 overflow-hidden rounded-full border border-border bg-card">
                             <AvatarImage
                                 src={auth?.user?.avatar}
                                 alt={auth?.user?.name}
                             />
-                            <AvatarFallback className="rounded-lg bg-card text-sm text-muted-foreground">
+                            <AvatarFallback className="rounded-lg text-sm text-muted-foreground">
                                 {getInitials(auth?.user?.name)}
                             </AvatarFallback>
                         </Avatar>
@@ -344,10 +348,10 @@ export default function CustomAuthLayout({
                         )}
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex items-center">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <button className="flex items-center gap-2 rounded px-2 py-1 transition-colors hover:bg-muted">
+                                <button className="flex h-8 w-8 items-center gap-2 rounded-full border border-border px-2 py-1 transition-colors hover:bg-muted">
                                     <Monitor size={18} />
                                 </button>
                             </DropdownMenuTrigger>
@@ -455,12 +459,12 @@ export default function CustomAuthLayout({
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <button className="flex items-center gap-2 rounded px-2 py-1">
-                                    <Avatar className="h-8 w-8 overflow-hidden rounded-full">
+                                    <Avatar className="h-8 w-8 overflow-hidden rounded-full border border-border bg-card">
                                         <AvatarImage
                                             src={auth?.user?.avatar}
                                             alt={auth?.user.name}
                                         />
-                                        <AvatarFallback className="rounded-lg bg-card text-sm text-muted-foreground">
+                                        <AvatarFallback className="rounded-lg text-sm text-muted-foreground">
                                             {getInitials(auth?.user.name)}
                                         </AvatarFallback>
                                     </Avatar>

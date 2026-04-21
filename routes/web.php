@@ -17,7 +17,7 @@ Route::get('/', function (Request $request) {
 
 Route::get('/dashboard', [DashboardController::class, 'home'])
     ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+    ->name('auth.home');
 
 
 Route::middleware(['auth', 'verified'])

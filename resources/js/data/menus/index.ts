@@ -1,26 +1,31 @@
 import { SidebarItem } from '../../types';
 import { bankCashModuleMenu } from './bankCashModuleMenu';
-import { branchCashAndTreasuryMenu } from './branchCashAndTreasuryMenu';
+import { cashAndTreasuryMenu } from './cashAndTreasuryMenu';
 import { chequeManagementMenu } from './chequeManagementMenu';
+import { customerAccountMenu } from './customerAccountMenu';
 import { customerKycMenu } from './customerKycMenu';
-import { dashboardMenu } from './dashboardMenu';
 import { depositModuleMenu } from './depositModuleMenu';
-import { financeAndAccountingMenu } from './financeAndAccountingMenu';
+import { generalAccountingMenu } from './generalAccountingMenu';
+import { homeMenu } from './homeMenu';
+import { loanManagementMenu } from './loanManagement';
 import { pettyCashMenu } from './pettyCashMenu';
+import { subledgerModuleMenu } from './subledgerModuleMenu';
 import { systemAdministrationMenu } from './systemAdministrationMenu';
 
 export const sidebarMenu: SidebarItem[] = [
-    ...dashboardMenu,
+    ...homeMenu,
     ...customerKycMenu,
+    ...subledgerModuleMenu,
     ...depositModuleMenu,
-    // ...loanManagementMenu,
-    ...branchCashAndTreasuryMenu,
+    ...loanManagementMenu,
+    ...cashAndTreasuryMenu,
     ...bankCashModuleMenu,
     ...pettyCashMenu,
+    ...customerAccountMenu,
     // ...procurementMenu,
     // ...fixedAssetMenu,
     ...chequeManagementMenu,
     // ...hrAndPayrollMenu,
-    ...financeAndAccountingMenu,
+    ...generalAccountingMenu,
     ...systemAdministrationMenu,
 ];

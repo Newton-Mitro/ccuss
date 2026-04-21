@@ -5,12 +5,13 @@ namespace App\PettyCashModule\Models;
 use App\FinanceAndAccounting\Models\LedgerAccount;
 use App\SubledgerModule\Models\SubledgerAccount;
 use App\SystemAdministration\Models\User;
+use App\SystemAdministration\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PettyCashAdvanceAccount extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Auditable, SoftDeletes;
 
     protected $fillable = [
         'petty_cash_account_id',

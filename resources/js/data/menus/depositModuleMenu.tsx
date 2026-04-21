@@ -11,41 +11,34 @@ export const depositModuleMenu: SidebarItem[] = [
             // Deposit Product Config
             // ===============================
             {
-                name: 'Deposit Product Config',
+                name: 'Deposit Config',
                 icon: <i className="fa-solid fa-cogs" />,
                 children_expanded: false,
                 permission: ['deposit.product.view'],
                 children: [
                     {
-                        name: 'Deposit Products',
-                        icon: <i className="fa-solid fa-money-bill-wave" />,
-                        path: '/deposit-products',
-                        match_path: 'deposit-products',
-                        permission: ['deposit.product.create'],
-                    },
-                    {
-                        name: 'Product Interest Rules',
+                        name: 'Interest Config',
                         icon: <i className="fa-solid fa-percent" />,
                         path: '/deposit-interest-rules',
                         match_path: 'deposit-interest-rules',
                         permission: ['deposit.interest.view'],
                     },
                     {
-                        name: 'Product Fees',
+                        name: 'Fees Config',
                         icon: <i className="fa-solid fa-coins" />,
                         path: '/deposit-fees',
                         match_path: 'deposit-fees',
                         permission: ['deposit.fees.view'],
                     },
                     {
-                        name: 'Product Charges',
+                        name: 'Charges Config',
                         icon: <i className="fa-solid fa-file-invoice-dollar" />,
                         path: '/deposit-charges',
                         match_path: 'deposit-charges',
                         permission: ['deposit.charges.view'],
                     },
                     {
-                        name: 'Product Eligibility',
+                        name: 'Eligibility Config',
                         icon: <i className="fa-solid fa-user-check" />,
                         path: '/deposit-eligibility',
                         match_path: 'deposit-eligibility',

@@ -1,8 +1,8 @@
 import { SidebarItem } from '../../types';
 
-export const financeAndAccountingMenu: SidebarItem[] = [
+export const generalAccountingMenu: SidebarItem[] = [
     {
-        name: 'Finance & Accounting',
+        name: 'General Accounting',
         icon: <i className="fa-solid fa-book-open" />,
         children_expanded: false,
         permission: ['accounting.view'],

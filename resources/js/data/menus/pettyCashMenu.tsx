@@ -2,7 +2,7 @@ import { SidebarItem } from '../../types';
 
 export const pettyCashMenu: SidebarItem[] = [
     {
-        name: 'Petty Cash Management',
+        name: 'Petty Cash',
         icon: <i className="fa-solid fa-wallet" />,
         children_expanded: false,
         permission: ['cash.branch.view'],

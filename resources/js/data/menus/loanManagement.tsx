@@ -11,48 +11,41 @@ export const loanManagementMenu: SidebarItem[] = [
             // Loan Product Config
             // ===============================
             {
-                name: 'Loan Product Config',
+                name: 'Loan Config',
                 icon: <i className="fa-solid fa-cogs" />, // configuration
                 children_expanded: false,
                 permission: ['loan.product.view'],
                 children: [
                     {
-                        name: 'Loan Products',
-                        icon: <i className="fa-solid fa-money-bill-wave" />,
-                        path: '/loan-products',
-                        match_path: 'loan-products',
-                        permission: ['loan.product.create'],
-                    },
-                    {
-                        name: 'Product Interest Rules',
+                        name: 'Interest Config',
                         icon: <i className="fa-solid fa-percent" />,
                         path: '/loan-interest-rules',
                         match_path: 'loan-interest-rules',
                         permission: ['loan.interest.view'],
                     },
                     {
-                        name: 'Product Fees',
+                        name: 'Fees Config',
                         icon: <i className="fa-solid fa-coins" />,
                         path: '/loan-fees',
                         match_path: 'loan-fees',
                         permission: ['loan.fees.view'],
                     },
                     {
-                        name: 'Product Charges',
+                        name: 'Charges Config',
                         icon: <i className="fa-solid fa-file-invoice-dollar" />,
                         path: '/loan-charges',
                         match_path: 'loan-charges',
                         permission: ['loan.charges.view'],
                     },
                     {
-                        name: 'Product Eligibility',
+                        name: 'Eligibility Config',
                         icon: <i className="fa-solid fa-user-check" />,
                         path: '/loan-eligibility',
                         match_path: 'loan-eligibility',
                         permission: ['loan.eligibility.view'],
                     },
                     {
-                        name: 'Prepayment / Early Closure Rules',
+                        name: 'Early Closure Config',
                         icon: (
                             <i className="fa-solid fa-arrow-right-from-bracket" />
                         ),
@@ -61,7 +54,7 @@ export const loanManagementMenu: SidebarItem[] = [
                         permission: ['loan.prepayment.view'],
                     },
                     {
-                        name: 'Penalties / Fine Rules',
+                        name: 'Penalties Config',
                         icon: <i className="fa-solid fa-gavel" />,
                         path: '/loan-fine-rules',
                         match_path: 'loan-fine-rules',
