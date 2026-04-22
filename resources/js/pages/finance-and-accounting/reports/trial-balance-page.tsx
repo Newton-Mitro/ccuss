@@ -129,6 +129,7 @@ export default function TrialBalancePage() {
                     <div className="flex items-center gap-2">
                         <div className="w-60">
                             <Select
+                                className="bg-card"
                                 value={fiscalYear.toString()}
                                 onChange={handleFiscalYearChange}
                                 options={fiscalYears.map((fy) => ({
@@ -140,6 +141,7 @@ export default function TrialBalancePage() {
 
                         <div className="w-60">
                             <Select
+                                className="bg-card"
                                 value={fiscalPeriod.toString()}
                                 onChange={handleFiscalPeriodChange}
                                 options={fiscalPeriods.map((fp) => ({

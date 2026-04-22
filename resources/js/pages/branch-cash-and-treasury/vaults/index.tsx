@@ -123,13 +123,14 @@ export default function Index() {
                             setData('search', e.target.value);
                             setData('page', 1);
                         }}
-                        className="w-60"
+                        className="w-60 bg-card"
                     />
 
                     <div className="flex flex-col gap-2 sm:flex-row">
                         {/* Branch */}
                         <div className="w-60">
                             <Select
+                                className="bg-card"
                                 value={data.branch_id}
                                 onChange={(value) => {
                                     setData('branch_id', value);
@@ -152,6 +153,7 @@ export default function Index() {
                         {/* Status (is_active) */}
                         <div className="w-60">
                             <Select
+                                className="bg-card"
                                 value={data.status}
                                 onChange={(value) => {
                                     setData('status', value);
@@ -196,7 +198,7 @@ export default function Index() {
                                 vaults.data.map((v) => (
                                     <tr
                                         key={v.id}
-                                        className="border-b even:bg-muted"
+                                        className="border-b transition-all even:bg-muted hover:scale-[1.01] hover:opacity-50"
                                     >
                                         <td className="px-2 py-1">
                                             {v.branch?.name}

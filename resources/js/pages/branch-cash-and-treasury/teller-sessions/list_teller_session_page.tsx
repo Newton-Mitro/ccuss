@@ -95,6 +95,7 @@ export default function TellerSessionsIndexPage() {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="w-60">
                         <Input
+                            className="bg-card"
                             type="text"
                             placeholder="Search teller sessions..."
                             value={data.search}
@@ -107,6 +108,7 @@ export default function TellerSessionsIndexPage() {
 
                     <div className="w-60">
                         <Select
+                            className="bg-card"
                             value={data.status}
                             onChange={(value) => {
                                 setData('status', value);
@@ -149,7 +151,7 @@ export default function TellerSessionsIndexPage() {
                                 sessions.data.map((s) => (
                                     <tr
                                         key={s.id}
-                                        className="border-b even:bg-muted"
+                                        className="border-b transition-all even:bg-muted hover:scale-[1.01] hover:opacity-50"
                                     >
                                         <td className="px-2 py-1">
                                             {s.teller?.name}

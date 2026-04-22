@@ -36,5 +36,6 @@ require __DIR__ . '/petty_cash_module_routes.php';
 require __DIR__ . '/bank_cash_module_routes.php';
 require __DIR__ . '/cheque_management_routes.php';
 require __DIR__ . '/finance_and_accounting_routes.php';
+require __DIR__ . '/subledger_moeule_routes.php';
 
 

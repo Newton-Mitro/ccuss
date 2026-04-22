@@ -308,6 +308,7 @@ export default function GlAccountsIndex({
                     <div className="flex gap-2">
                         <div className="w-60">
                             <Select
+                                className="bg-card"
                                 error={errors.fiscal_year_id}
                                 value={data.fiscal_year_id?.toString() || ''}
                                 options={fiscalYears.map((fy: any) => ({
@@ -322,6 +323,7 @@ export default function GlAccountsIndex({
                         </div>
                         <div className="w-60">
                             <Select
+                                className="bg-card"
                                 error={errors.fiscal_period_id}
                                 value={data.fiscal_period_id?.toString() || ''}
                                 options={fiscalPeriods

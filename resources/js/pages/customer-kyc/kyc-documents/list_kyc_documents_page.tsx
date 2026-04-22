@@ -87,6 +87,7 @@ export default function KycDocumentsIndex() {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="w-full lg:w-60">
                         <Input
+                            className="bg-card"
                             type="text"
                             placeholder="Search customer…"
                             value={data.search}
@@ -99,6 +100,7 @@ export default function KycDocumentsIndex() {
 
                     <div className="flex w-full flex-col gap-2 lg:w-96 lg:flex-row">
                         <Select
+                            className="bg-card"
                             value={data.document_type}
                             onChange={(value) => {
                                 setData('document_type', value);
@@ -108,6 +110,7 @@ export default function KycDocumentsIndex() {
                         />
 
                         <Select
+                            className="bg-card"
                             value={data.verification_status}
                             onChange={(value) => {
                                 setData('verification_status', value);
@@ -143,7 +146,7 @@ export default function KycDocumentsIndex() {
                             {paginated_data.data.map((i) => (
                                 <tr
                                     key={i.id}
-                                    className="border-b even:bg-muted"
+                                    className="border-b transition-all even:bg-muted hover:scale-[1.01] hover:opacity-50"
                                 >
                                     <td className="px-2 py-1">
                                         <img

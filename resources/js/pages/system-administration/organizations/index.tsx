@@ -100,6 +100,7 @@ export default function Index() {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="w-60">
                         <Input
+                            className="bg-card"
                             type="text"
                             placeholder="Search by name, code, email, or phone..."
                             value={data.search}
@@ -138,7 +139,7 @@ export default function Index() {
                                 organizations.data.map((organization, i) => (
                                     <tr
                                         key={organization.id}
-                                        className="border-b even:bg-muted"
+                                        className="border-b transition-all even:bg-muted hover:scale-[1.01] hover:opacity-50"
                                     >
                                         <td className="px-2 py-1">
                                             {(organizations.current_page - 1) *

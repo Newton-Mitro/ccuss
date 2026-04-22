@@ -99,6 +99,7 @@ export default function Index() {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="w-64">
                         <Input
+                            className="bg-card"
                             type="text"
                             placeholder="Search branches..."
                             value={data.search}
@@ -137,7 +138,7 @@ export default function Index() {
                                 branches.data.map((b) => (
                                     <tr
                                         key={b.id}
-                                        className="border-b even:bg-muted"
+                                        className="border-b transition-all even:bg-muted hover:scale-[1.01] hover:opacity-50"
                                     >
                                         <td className="px-2 py-1">{b.code}</td>
                                         <td className="px-2 py-1">{b.name}</td>

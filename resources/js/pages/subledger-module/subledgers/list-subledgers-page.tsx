@@ -8,29 +8,39 @@ import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-import DataTablePagination from '../../../components/data-table-pagination';
-import HeadingSmall from '../../../components/heading-small';
-import { Input } from '../../../components/ui/input';
-import { Select } from '../../../components/ui/select';
-import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
-import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { appSwal } from '../../../lib/appSwal';
-import { BreadcrumbItem, SharedData } from '../../../types';
-import { Branch } from '../../../types/branch';
-import { PettyCashAccount } from '../../../types/petty_cash_module';
 
-interface ListPettyCashAccountsPageProps extends SharedData {
-    accounts: {
-        data: PettyCashAccount[];
+import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
+import { Input } from '@/components/ui/input';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
+import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
+import { BreadcrumbItem, SharedData } from '@/types';
+
+interface Subledger {
+    id: number;
+    code: string;
+    name: string;
+    short_name?: string;
+    type: string;
+    sub_type: string;
+    is_active: boolean;
+    gl_account?: {
+        id: number;
+        name: string;
+    };
+}
+
+interface SubledgerPageProps extends SharedData {
+    subledgers: {
+        data: Subledger[];
         links: { url: string | null; label: string; active: boolean }[];
     };
-    branches: Branch[];
     filters: Record<string, string>;
 }
 
-export default function ListPettyCashAccountsPage() {
-    const { accounts, branches, filters } =
-        usePage<ListPettyCashAccountsPageProps>().props;
+export default function Index() {
+    const { subledgers, filters } = usePage<SubledgerPageProps>().props;
 
     useFlashToastHandler();
 
@@ -42,74 +52,70 @@ export default function ListPettyCashAccountsPage() {
         processing,
     } = useForm({
         search: filters.search || '',
-        branch_id: filters.branch_id || '',
-        status: filters.status || '',
         per_page: Number(filters.per_page) || 10,
         page: Number(filters.page) || 1,
     });
 
-    useEffect(() => {
-        const delay = setTimeout(() => {
-            get(route('petty-cash-accounts.index'), {
-                preserveState: true,
-                replace: true,
-            });
-        }, 400);
+    const handleSearch = () => {
+        get(route('subledgers.index'), { preserveState: true });
+    };
 
+    useEffect(() => {
+        const delay = setTimeout(handleSearch, 400);
         return () => clearTimeout(delay);
-    }, [data.search, data.branch_id, data.status, data.per_page, data.page]);
+    }, [data.search, data.per_page, data.page]);
 
     const handleDelete = (id: number, name: string) => {
         appSwal
             .fire({
                 title: 'Are you sure?',
-                text: `Account "${name}" will be permanently deleted!`,
+                text: `Subledger "${name}" will be deleted!`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Yes, delete it!',
             })
             .then((result) => {
                 if (result.isConfirmed) {
-                    destroy(route('petty-cash-accounts.destroy', id), {
+                    destroy(route('subledgers.destroy', id), {
                         preserveScroll: true,
+                        preserveState: true,
                     });
                 }
             });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Petty Cash', href: '' },
-        {
-            title: 'Petty Cash Accounts',
-            href: route('petty-cash-accounts.index'),
-        },
+        { title: 'Subledger Management', href: '' },
+        { title: 'Subledgers', href: route('subledgers.index') },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Petty Cash Accounts" />
+            <Head title="Subledgers" />
 
             <div className="space-y-4 text-foreground">
                 {/* Header */}
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
-                        title="Petty Cash Accounts"
-                        description="Manage petty cash balances and custodians"
+                        title="Subledgers"
+                        description="Manage subledger accounts and classifications"
                     />
+
                     <Link
-                        href={route('petty-cash-accounts.create')}
+                        href={route('subledgers.create')}
                         className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                     >
-                        <Plus className="h-4 w-4" /> Add Account
+                        <Plus className="h-4 w-4" /> Add Subledger
                     </Link>
                 </div>
 
-                {/* Filters */}
+                {/* Search */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="w-60">
+                    <div className="w-64">
                         <Input
                             className="bg-card"
-                            placeholder="Search accounts..."
+                            type="text"
+                            placeholder="Search subledgers..."
                             value={data.search}
                             onChange={(e) => {
                                 setData('search', e.target.value);
@@ -117,114 +123,76 @@ export default function ListPettyCashAccountsPage() {
                             }}
                         />
                     </div>
-
-                    <div className="flex gap-2">
-                        <div className="w-60">
-                            <Select
-                                className="bg-card"
-                                value={data.branch_id}
-                                onChange={(value) => {
-                                    setData('branch_id', value);
-                                    setData('page', 1);
-                                }}
-                                options={[
-                                    { value: '', label: 'All Branches' },
-                                    ...branches.map((b) => ({
-                                        value: b.id.toString(),
-                                        label: b.name,
-                                    })),
-                                ]}
-                            />
-                        </div>
-
-                        <div className="w-60">
-                            <Select
-                                className="bg-card"
-                                value={data.status}
-                                onChange={(value) => {
-                                    setData('status', value);
-                                    setData('page', 1);
-                                }}
-                                options={[
-                                    { value: '', label: 'All Status' },
-                                    { value: 'active', label: 'Active' },
-                                    { value: 'inactive', label: 'Inactive' },
-                                ]}
-                            />
-                        </div>
-                    </div>
                 </div>
 
                 {/* Table */}
-                <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border bg-card">
-                    <table className="w-full text-sm">
-                        <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
+                <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border bg-card md:h-[calc(100vh-300px)]">
+                    <table className="w-full border-collapse">
+                        <thead className="sticky top-0 bg-muted text-sm">
                             <tr>
                                 {[
+                                    'Code',
                                     'Name',
-                                    'Branch',
-                                    'Ledger',
-                                    'Upper Limit',
+                                    'Type',
+                                    'Sub Type',
+                                    'GL Account',
                                     'Status',
                                     'Actions',
-                                ].map((h) => (
+                                ].map((header) => (
                                     <th
-                                        key={h}
-                                        className="border-b p-2 text-left text-muted-foreground"
+                                        key={header}
+                                        className="border-b p-2 text-left text-sm font-medium text-muted-foreground"
                                     >
-                                        {h}
+                                        {header}
                                     </th>
                                 ))}
                             </tr>
                         </thead>
 
                         <tbody>
-                            {accounts.data.length ? (
-                                accounts.data.map((a) => (
+                            {subledgers.data.length > 0 ? (
+                                subledgers.data.map((s) => (
                                     <tr
-                                        key={a.id}
+                                        key={s.id}
                                         className="border-b transition-all even:bg-muted hover:scale-[1.01] hover:opacity-50"
                                     >
-                                        <td className="px-2 py-1 font-medium">
-                                            {a.name}
+                                        <td className="px-2 py-1">{s.code}</td>
+                                        <td className="px-2 py-1">{s.name}</td>
+                                        <td className="px-2 py-1 capitalize">
+                                            {s.type}
                                         </td>
-
-                                        <td className="px-2 py-1">
-                                            {a.branch?.name || '-'}
+                                        <td className="px-2 py-1 capitalize">
+                                            {s.sub_type}
                                         </td>
-
                                         <td className="px-2 py-1">
-                                            {a.ledger_account?.name || '-'}
+                                            {s.gl_account?.name}
                                         </td>
-
                                         <td className="px-2 py-1">
-                                            {a.upper_limit ?? 0}
-                                        </td>
-
-                                        <td className="px-2 py-1">
-                                            <span
-                                                className={`rounded px-2 py-0.5 text-xs font-medium capitalize ${
-                                                    a.status === 'active'
-                                                        ? 'bg-green-100 text-green-700'
-                                                        : 'bg-gray-200 text-gray-600'
-                                                }`}
-                                            >
-                                                {a.status}
-                                            </span>
+                                            {s.is_active ? (
+                                                <span className="text-green-600">
+                                                    Active
+                                                </span>
+                                            ) : (
+                                                <span className="text-destructive">
+                                                    Inactive
+                                                </span>
+                                            )}
                                         </td>
 
                                         <td className="px-2 py-1">
                                             <TooltipProvider>
                                                 <div className="flex space-x-2">
+                                                    {/* View */}
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link
                                                                 href={route(
-                                                                    'petty-cash-accounts.show',
-                                                                    a.id,
+                                                                    'subledgers.show',
+                                                                    s.id,
                                                                 )}
+                                                                className="text-info"
                                                             >
-                                                                <Eye className="h-5 w-5 text-info" />
+                                                                <Eye className="h-5 w-5" />
                                                             </Link>
                                                         </TooltipTrigger>
                                                         <TooltipContent>
@@ -232,15 +200,17 @@ export default function ListPettyCashAccountsPage() {
                                                         </TooltipContent>
                                                     </Tooltip>
 
+                                                    {/* Edit */}
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link
                                                                 href={route(
-                                                                    'petty-cash-accounts.edit',
-                                                                    a.id,
+                                                                    'subledgers.edit',
+                                                                    s.id,
                                                                 )}
+                                                                className="text-success"
                                                             >
-                                                                <Pencil className="h-5 w-5 text-success" />
+                                                                <Pencil className="h-5 w-5" />
                                                             </Link>
                                                         </TooltipTrigger>
                                                         <TooltipContent>
@@ -248,20 +218,23 @@ export default function ListPettyCashAccountsPage() {
                                                         </TooltipContent>
                                                     </Tooltip>
 
+                                                    {/* Delete */}
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <button
-                                                                onClick={() =>
-                                                                    handleDelete(
-                                                                        a.id,
-                                                                        a.name,
-                                                                    )
-                                                                }
+                                                                type="button"
                                                                 disabled={
                                                                     processing
                                                                 }
+                                                                onClick={() =>
+                                                                    handleDelete(
+                                                                        s.id,
+                                                                        s.name,
+                                                                    )
+                                                                }
+                                                                className="text-destructive hover:text-destructive/80 disabled:opacity-50"
                                                             >
-                                                                <Trash2 className="h-5 w-5 text-destructive" />
+                                                                <Trash2 className="h-5 w-5" />
                                                             </button>
                                                         </TooltipTrigger>
                                                         <TooltipContent>
@@ -276,10 +249,10 @@ export default function ListPettyCashAccountsPage() {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={6}
-                                        className="py-10 text-center text-muted-foreground"
+                                        colSpan={7}
+                                        className="px-4 py-6 text-center text-muted-foreground"
                                     >
-                                        No petty cash accounts found 🚫
+                                        No subledgers found.
                                     </td>
                                 </tr>
                             )}
@@ -290,11 +263,11 @@ export default function ListPettyCashAccountsPage() {
                 {/* Pagination */}
                 <DataTablePagination
                     perPage={data.per_page}
-                    onPerPageChange={(value) => {
+                    onPerPageChange={(value: number) => {
                         setData('per_page', value);
                         setData('page', 1);
                     }}
-                    links={accounts.links}
+                    links={subledgers.links}
                 />
             </div>
         </CustomAuthLayout>

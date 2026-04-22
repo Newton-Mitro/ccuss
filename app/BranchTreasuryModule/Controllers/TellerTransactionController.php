@@ -24,7 +24,7 @@ class TellerTransactionController extends Controller
         $voucher_entries = [];
 
         return Inertia::render('branch-cash-and-treasury/customer-cash-deposit/CustomerCashDepositPage', [
-            'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
+            'ledger_accounts' => LedgerAccount::where('is_leaf', true)->where('is_active', true)->get(),
             'fiscal_years' => FiscalYear::select('id', 'code')->get(),
             'fiscal_periods' => FiscalPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
             'branches' => Branch::select('id', 'name')->get(),
@@ -67,7 +67,7 @@ class TellerTransactionController extends Controller
         $voucher_entries = [];
 
         return Inertia::render('branch-cash-and-treasury/customer-cheque-withdrawal/CustomerCashWithdrawalPage', [
-            'ledger_accounts' => LedgerAccount::select('id', 'name')->get(),
+            'ledger_accounts' => LedgerAccount::where('is_leaf', true)->where('is_active', true)->get(),
             'fiscal_years' => FiscalYear::select('id', 'code')->get(),
             'fiscal_periods' => FiscalPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
             'branches' => Branch::select('id', 'name')->get(),

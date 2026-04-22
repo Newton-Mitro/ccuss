@@ -28,7 +28,7 @@ export default function Login({
     console.log(import.meta.env.VITE_LOGO_PATH);
 
     return (
-        <div className="flex min-h-screen bg-sidebar">
+        <div className="flex min-h-screen bg-card">
             <Head title="Log in" />
 
             {/* Left Branding Section */}

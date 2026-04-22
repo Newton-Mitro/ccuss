@@ -98,6 +98,7 @@ export default function Index() {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="w-60">
                         <Input
+                            className="bg-card"
                             type="text"
                             placeholder="Search customers..."
                             value={data.search}
@@ -110,6 +111,7 @@ export default function Index() {
 
                     <div className="w-60">
                         <Select
+                            className="bg-card"
                             value={data.kyc_status}
                             onChange={(value) => {
                                 setData('kyc_status', value);
@@ -150,7 +152,7 @@ export default function Index() {
                             {paginated_data.data.map((c: Customer) => (
                                 <tr
                                     key={c.id}
-                                    className="border-b transition-opacity even:bg-muted hover:opacity-50"
+                                    className="border-b transition-all even:bg-muted hover:scale-[1.01] hover:opacity-50"
                                 >
                                     <td className="px-2 py-1">
                                         <img

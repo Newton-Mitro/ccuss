@@ -60,6 +60,7 @@ const DataTablePagination: React.FC<Props> = ({
             {/* Per Page Selector */}
             <div className="w-24">
                 <Select
+                    className="bg-card"
                     value={perPage.toString()}
                     onChange={(value) => onPerPageChange(Number(value))}
                     options={perPageOptions.map((n) => ({

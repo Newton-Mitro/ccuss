@@ -52,7 +52,7 @@ class PettyCashAccountController extends Controller
                 'accounts' => $accounts,
                 'filters' => $request->only(['search', 'branch_id', 'status', 'per_page', 'page']),
                 'branches' => Branch::select('id', 'name')->get(),
-                'ledgerAccounts' => LedgerAccount::select('id', 'name')->get(),
+                'ledgerAccounts' => LedgerAccount::where('is_leaf', true)->where('is_active', true)->get(),
             ]
         );
     }
@@ -63,7 +63,7 @@ class PettyCashAccountController extends Controller
             'petty-cash-management/petty-cash-accounts/petty-cash-account-form-page',
             [
                 'branches' => Branch::select('id', 'name')->get(),
-                'ledgerAccounts' => LedgerAccount::select('id', 'name')->get(),
+                'ledgerAccounts' => LedgerAccount::where('is_leaf', true)->where('is_active', true)->get(),
             ]
         );
     }
@@ -123,7 +123,7 @@ class PettyCashAccountController extends Controller
             [
                 'pettyCash' => $pettyCashAccount->load(['branch', 'ledgerAccount']),
                 'branches' => Branch::select('id', 'name')->get(),
-                'ledgerAccounts' => LedgerAccount::select('id', 'name')->get(),
+                'ledgerAccounts' => LedgerAccount::where('is_leaf', true)->where('is_active', true)->get(),
             ]
         );
     }
@@ -181,7 +181,7 @@ class PettyCashAccountController extends Controller
     {
         return Inertia::render('petty-cash-management/petty-cash-transactions/petty-cash-replenishment-page', [
             'pettyCashAccounts' => PettyCashAccount::all(),
-            'fundingAccounts' => LedgerAccount::select('id', 'name')->get(),
+            'fundingAccounts' => LedgerAccount::where('is_leaf', true)->where('is_active', true)->get(),
         ]);
     }
 

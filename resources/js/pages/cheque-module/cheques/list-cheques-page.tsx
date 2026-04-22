@@ -86,6 +86,7 @@ export default function Index() {
                 <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
                     <div className="w-64">
                         <Input
+                            className="bg-card"
                             placeholder="Search cheque / payee / book..."
                             value={data.search}
                             onChange={(e) => {
@@ -97,6 +98,7 @@ export default function Index() {
 
                     <div className="w-48">
                         <Select
+                            className="bg-card"
                             value={data.status}
                             onChange={(v) => {
                                 setData('status', v);
@@ -134,7 +136,7 @@ export default function Index() {
                             {paginated_data.data.map((c: any) => (
                                 <tr
                                     key={c.id}
-                                    className="border-b even:bg-muted"
+                                    className="border-b transition-all even:bg-muted hover:scale-[1.01] hover:opacity-50"
                                 >
                                     <td className="px-2 py-1 font-medium">
                                         {c.cheque_number}

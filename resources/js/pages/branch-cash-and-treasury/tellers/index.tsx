@@ -102,6 +102,7 @@ export default function Index() {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="w-60">
                         <Input
+                            className="bg-card"
                             type="text"
                             placeholder="Search tellers..."
                             value={data.search}
@@ -117,6 +118,7 @@ export default function Index() {
                             {/* Branch Filter */}
                             <div className="w-60">
                                 <Select
+                                    className="bg-card"
                                     value={data.branch_id}
                                     onChange={(value) => {
                                         setData('branch_id', value);
@@ -132,6 +134,7 @@ export default function Index() {
                             {/* Status Filter */}
                             <div className="w-60">
                                 <Select
+                                    className="bg-card"
                                     value={data.status}
                                     onChange={(value) => {
                                         setData('status', value);
@@ -172,7 +175,7 @@ export default function Index() {
                                 tellers.data.map((t) => (
                                     <tr
                                         key={t.id}
-                                        className="border-b even:bg-muted"
+                                        className="border-b transition-all even:bg-muted hover:scale-[1.01] hover:opacity-50"
                                     >
                                         <td className="px-2 py-1">
                                             {t.branch?.name}

@@ -102,7 +102,7 @@ export default function FiscalYearIndex() {
                             setData('search', e.target.value);
                             setData('page', 1);
                         }}
-                        className="w-60"
+                        className="w-60 bg-card"
                     />
                 </div>
 
@@ -133,7 +133,7 @@ export default function FiscalYearIndex() {
                                 fiscalYears.data.map((fy) => (
                                     <tr
                                         key={fy.id}
-                                        className="border-b even:bg-muted"
+                                        className="border-b transition-all even:bg-muted hover:scale-[1.01] hover:opacity-50"
                                     >
                                         <td className="px-2 py-1">{fy.code}</td>
 

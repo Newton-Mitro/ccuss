@@ -49,6 +49,10 @@ class SubledgerAccount extends Model
         return $this->hasMany(AccountBalance::class);
     }
 
+    public function subledger()
+    {
+        return $this->belongsTo(Subledger::class);
+    }
 
     protected static function newFactory()
     {

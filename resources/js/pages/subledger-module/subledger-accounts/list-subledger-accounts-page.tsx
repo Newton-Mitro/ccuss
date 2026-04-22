@@ -5,32 +5,40 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-import DataTablePagination from '../../../components/data-table-pagination';
-import HeadingSmall from '../../../components/heading-small';
-import { Input } from '../../../components/ui/input';
-import { Select } from '../../../components/ui/select';
-import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
-import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { appSwal } from '../../../lib/appSwal';
-import { BreadcrumbItem, SharedData } from '../../../types';
-import { Branch } from '../../../types/branch';
-import { PettyCashAccount } from '../../../types/petty_cash_module';
 
-interface ListPettyCashAccountsPageProps extends SharedData {
+import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
+import { Input } from '@/components/ui/input';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
+import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
+import { BreadcrumbItem, SharedData } from '@/types';
+import { Select } from '../../../components/ui/select';
+
+interface Account {
+    id: number;
+    account_number: string;
+    name: string | null;
+    type: string;
+    status: string;
+    branch?: { name: string };
+    subledger?: { name: string };
+    accountable_type: string;
+}
+
+interface PageProps extends SharedData {
     accounts: {
-        data: PettyCashAccount[];
+        data: Account[];
         links: { url: string | null; label: string; active: boolean }[];
     };
-    branches: Branch[];
     filters: Record<string, string>;
 }
 
-export default function ListPettyCashAccountsPage() {
-    const { accounts, branches, filters } =
-        usePage<ListPettyCashAccountsPageProps>().props;
+export default function Index() {
+    const { accounts, filters } = usePage<PageProps>().props;
 
     useFlashToastHandler();
 
@@ -42,74 +50,70 @@ export default function ListPettyCashAccountsPage() {
         processing,
     } = useForm({
         search: filters.search || '',
-        branch_id: filters.branch_id || '',
+        type: filters.type || '',
         status: filters.status || '',
         per_page: Number(filters.per_page) || 10,
         page: Number(filters.page) || 1,
     });
 
-    useEffect(() => {
-        const delay = setTimeout(() => {
-            get(route('petty-cash-accounts.index'), {
-                preserveState: true,
-                replace: true,
-            });
-        }, 400);
+    const handleSearch = () => {
+        get(route('subledger-accounts.index'), {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
 
+    useEffect(() => {
+        const delay = setTimeout(handleSearch, 400);
         return () => clearTimeout(delay);
-    }, [data.search, data.branch_id, data.status, data.per_page, data.page]);
+    }, [data.search, data.type, data.status, data.per_page, data.page]);
 
     const handleDelete = (id: number, name: string) => {
         appSwal
             .fire({
                 title: 'Are you sure?',
-                text: `Account "${name}" will be permanently deleted!`,
+                text: `Account "${name}" will be deleted!`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Yes, delete it!',
             })
             .then((result) => {
                 if (result.isConfirmed) {
-                    destroy(route('petty-cash-accounts.destroy', id), {
+                    destroy(route('subledger-accounts.destroy', id), {
                         preserveScroll: true,
+                        preserveState: true,
                     });
                 }
             });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Petty Cash', href: '' },
+        { title: 'Subledger Management', href: '' },
         {
-            title: 'Petty Cash Accounts',
-            href: route('petty-cash-accounts.index'),
+            title: 'Subledger Accounts',
+            href: route('subledger-accounts.index'),
         },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Petty Cash Accounts" />
+            <Head title="Subledger Accounts" />
 
             <div className="space-y-4 text-foreground">
                 {/* Header */}
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
-                        title="Petty Cash Accounts"
-                        description="Manage petty cash balances and custodians"
+                        title="Subledger Accounts"
+                        description="Manage all customer, vendor, bank and internal accounts"
                     />
-                    <Link
-                        href={route('petty-cash-accounts.create')}
-                        className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-                    >
-                        <Plus className="h-4 w-4" /> Add Account
-                    </Link>
                 </div>
 
                 {/* Filters */}
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="w-60">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <div className="w-64">
                         <Input
+                            placeholder="Search account..."
                             className="bg-card"
-                            placeholder="Search accounts..."
                             value={data.search}
                             onChange={(e) => {
                                 setData('search', e.target.value);
@@ -118,59 +122,57 @@ export default function ListPettyCashAccountsPage() {
                         />
                     </div>
 
-                    <div className="flex gap-2">
-                        <div className="w-60">
-                            <Select
-                                className="bg-card"
-                                value={data.branch_id}
-                                onChange={(value) => {
-                                    setData('branch_id', value);
-                                    setData('page', 1);
-                                }}
-                                options={[
-                                    { value: '', label: 'All Branches' },
-                                    ...branches.map((b) => ({
-                                        value: b.id.toString(),
-                                        label: b.name,
-                                    })),
-                                ]}
-                            />
-                        </div>
+                    <div className="w-60">
+                        <Select
+                            className="bg-card"
+                            value={data.type}
+                            onChange={(value) => setData('type', value)}
+                            options={[
+                                { label: 'All Types', value: '' },
+                                { label: 'Bank', value: 'bank' },
+                                { label: 'Deposit', value: 'deposit' },
+                                { label: 'Loan', value: 'loan' },
+                                { label: 'Customer', value: 'customer' },
+                                { label: 'Vendor', value: 'vendor' },
+                                { label: 'Petty Cash', value: 'petty_cash' },
+                            ]}
+                        />
+                    </div>
 
-                        <div className="w-60">
-                            <Select
-                                className="bg-card"
-                                value={data.status}
-                                onChange={(value) => {
-                                    setData('status', value);
-                                    setData('page', 1);
-                                }}
-                                options={[
-                                    { value: '', label: 'All Status' },
-                                    { value: 'active', label: 'Active' },
-                                    { value: 'inactive', label: 'Inactive' },
-                                ]}
-                            />
-                        </div>
+                    <div className="w-60">
+                        <Select
+                            value={data.status}
+                            className="bg-card"
+                            onChange={(value) => setData('status', value)}
+                            options={[
+                                { label: 'All Status', value: '' },
+                                { label: 'Pending', value: 'pending' },
+                                { label: 'Active', value: 'active' },
+                                { label: 'Dormant', value: 'dormant' },
+                                { label: 'Frozen', value: 'frozen' },
+                                { label: 'Closed', value: 'closed' },
+                            ]}
+                        />
                     </div>
                 </div>
 
                 {/* Table */}
-                <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border bg-card">
-                    <table className="w-full text-sm">
-                        <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
+                <div className="h-[calc(100vh-340px)] overflow-auto rounded-md border bg-card">
+                    <table className="w-full border-collapse">
+                        <thead className="sticky top-0 bg-muted text-sm">
                             <tr>
                                 {[
+                                    'Account No',
                                     'Name',
-                                    'Branch',
-                                    'Ledger',
-                                    'Upper Limit',
+                                    'Type',
                                     'Status',
+                                    'Branch',
+                                    'Subledger',
                                     'Actions',
                                 ].map((h) => (
                                     <th
                                         key={h}
-                                        className="border-b p-2 text-left text-muted-foreground"
+                                        className="border-b p-2 text-left text-sm font-medium text-muted-foreground"
                                     >
                                         {h}
                                     </th>
@@ -179,52 +181,44 @@ export default function ListPettyCashAccountsPage() {
                         </thead>
 
                         <tbody>
-                            {accounts.data.length ? (
+                            {accounts.data.length > 0 ? (
                                 accounts.data.map((a) => (
                                     <tr
                                         key={a.id}
                                         className="border-b transition-all even:bg-muted hover:scale-[1.01] hover:opacity-50"
                                     >
-                                        <td className="px-2 py-1 font-medium">
-                                            {a.name}
+                                        <td className="px-2 py-1">
+                                            {a.account_number}
                                         </td>
-
+                                        <td className="px-2 py-1">
+                                            {a.name || '-'}
+                                        </td>
+                                        <td className="px-2 py-1 capitalize">
+                                            {a.type}
+                                        </td>
+                                        <td className="px-2 py-1 capitalize">
+                                            {a.status}
+                                        </td>
                                         <td className="px-2 py-1">
                                             {a.branch?.name || '-'}
                                         </td>
-
                                         <td className="px-2 py-1">
-                                            {a.ledger_account?.name || '-'}
-                                        </td>
-
-                                        <td className="px-2 py-1">
-                                            {a.upper_limit ?? 0}
-                                        </td>
-
-                                        <td className="px-2 py-1">
-                                            <span
-                                                className={`rounded px-2 py-0.5 text-xs font-medium capitalize ${
-                                                    a.status === 'active'
-                                                        ? 'bg-green-100 text-green-700'
-                                                        : 'bg-gray-200 text-gray-600'
-                                                }`}
-                                            >
-                                                {a.status}
-                                            </span>
+                                            {a.subledger?.name || '-'}
                                         </td>
 
                                         <td className="px-2 py-1">
                                             <TooltipProvider>
                                                 <div className="flex space-x-2">
+                                                    {/* View */}
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link
                                                                 href={route(
-                                                                    'petty-cash-accounts.show',
+                                                                    'subledger-accounts.show',
                                                                     a.id,
                                                                 )}
                                                             >
-                                                                <Eye className="h-5 w-5 text-info" />
+                                                                <Eye className="h-5 w-5" />
                                                             </Link>
                                                         </TooltipTrigger>
                                                         <TooltipContent>
@@ -232,15 +226,16 @@ export default function ListPettyCashAccountsPage() {
                                                         </TooltipContent>
                                                     </Tooltip>
 
+                                                    {/* Edit */}
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link
                                                                 href={route(
-                                                                    'petty-cash-accounts.edit',
+                                                                    'subledger-accounts.edit',
                                                                     a.id,
                                                                 )}
                                                             >
-                                                                <Pencil className="h-5 w-5 text-success" />
+                                                                <Pencil className="h-5 w-5" />
                                                             </Link>
                                                         </TooltipTrigger>
                                                         <TooltipContent>
@@ -248,13 +243,14 @@ export default function ListPettyCashAccountsPage() {
                                                         </TooltipContent>
                                                     </Tooltip>
 
+                                                    {/* Delete */}
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <button
                                                                 onClick={() =>
                                                                     handleDelete(
                                                                         a.id,
-                                                                        a.name,
+                                                                        a.account_number,
                                                                     )
                                                                 }
                                                                 disabled={
@@ -276,10 +272,10 @@ export default function ListPettyCashAccountsPage() {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={6}
-                                        className="py-10 text-center text-muted-foreground"
+                                        colSpan={7}
+                                        className="py-6 text-center text-muted-foreground"
                                     >
-                                        No petty cash accounts found 🚫
+                                        No accounts found.
                                     </td>
                                 </tr>
                             )}
@@ -290,7 +286,7 @@ export default function ListPettyCashAccountsPage() {
                 {/* Pagination */}
                 <DataTablePagination
                     perPage={data.per_page}
-                    onPerPageChange={(value) => {
+                    onPerPageChange={(value: number) => {
                         setData('per_page', value);
                         setData('page', 1);
                     }}

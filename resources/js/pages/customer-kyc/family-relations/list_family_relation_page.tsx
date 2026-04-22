@@ -91,6 +91,7 @@ export default function FamilyRelationIndex() {
                     {/* Search */}
                     <div className="w-60">
                         <Input
+                            className="bg-card"
                             type="text"
                             placeholder="Search by customer or relative name..."
                             value={data.search}
@@ -104,6 +105,7 @@ export default function FamilyRelationIndex() {
                     {/* Status Filter */}
                     <div className="w-48">
                         <Select
+                            className="bg-card"
                             value={data.verification_status as string}
                             onChange={(value) => {
                                 setData('verification_status', value);
@@ -144,7 +146,7 @@ export default function FamilyRelationIndex() {
                                 paginated_data.data.map((f) => (
                                     <tr
                                         key={f.id}
-                                        className="border-b even:bg-muted"
+                                        className="border-b transition-all even:bg-muted hover:scale-[1.01] hover:opacity-50"
                                     >
                                         <td className="px-2 py-1">
                                             <img

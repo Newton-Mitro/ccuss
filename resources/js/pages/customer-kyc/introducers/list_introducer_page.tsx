@@ -88,6 +88,7 @@ export default function IntroducersIndex() {
                         {' '}
                         <Input
                             type="text"
+                            className="bg-card"
                             placeholder="Search customer…"
                             value={data.search}
                             onChange={(e) => {
@@ -98,6 +99,7 @@ export default function IntroducersIndex() {
                     </div>
                     <div className="w-48">
                         <Select
+                            className="bg-card"
                             value={data.verification_status}
                             onChange={(value) => {
                                 setData('verification_status', value);
@@ -134,7 +136,7 @@ export default function IntroducersIndex() {
                             {paginated_data.data.map((i) => (
                                 <tr
                                     key={i.id}
-                                    className="border-b even:bg-muted"
+                                    className="border-b transition-all even:bg-muted hover:scale-[1.01] hover:opacity-50"
                                 >
                                     <td className="px-2 py-1">
                                         <img

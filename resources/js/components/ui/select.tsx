@@ -11,6 +11,7 @@ interface Option {
 
 interface SelectSearchProps {
   options: Option[];
+  className?: string;
   value?: string;
   onChange?: (value: string) => void;
   placeholder?: string;
@@ -25,6 +26,7 @@ const Select: React.FC<SelectSearchProps> = ({
   onChange,
   placeholder = "Select...",
   error,
+  className = "bg-background",
   showErrorText = false,
   disabled = false,
 }) => {
@@ -101,10 +103,11 @@ const Select: React.FC<SelectSearchProps> = ({
         disabled={disabled}
         onClick={() => !disabled && setOpen((prev) => !prev)}
         className={cn(
-          "w-full rounded-md border px-2 text-left bg-background text-base shadow-sm-xs flex justify-between items-center transition-[color,box-shadow] outline-none h-8",
+          "w-full rounded-md border px-2 text-left  text-base shadow-sm-xs flex justify-between items-center transition-[color,box-shadow] outline-none h-8",
           error ? "border-destructive" : "border-border",
           "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
-          "disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-background disabled:opacity-50"
+          "disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-background disabled:opacity-50",
+          className
         )}
       >
         <span className="truncate">

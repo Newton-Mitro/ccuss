@@ -89,6 +89,7 @@ export default function Index() {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="w-60">
                         <Select
+                            className="bg-card"
                             value={data.event}
                             onChange={(value) => setData('event', value)}
                             options={auditEvents}
@@ -124,7 +125,7 @@ export default function Index() {
                                 audits.data.map((a) => (
                                     <tr
                                         key={a.id}
-                                        className="border-b even:bg-muted"
+                                        className="border-b transition-all even:bg-muted hover:scale-[1.01] hover:opacity-50"
                                     >
                                         <td className="px-2 py-2">
                                             {formatDateTime(a.created_at)}

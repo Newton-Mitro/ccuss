@@ -64,7 +64,7 @@ class PettyCashAdvanceAccountController extends Controller
             [
                 'pettyCashAccounts' => PettyCashAccount::select('id', 'name')->get(),
                 'employees' => User::select('id', 'name')->get(),
-                'ledgerAccounts' => LedgerAccount::select('id', 'name')->get(),
+                'ledgerAccounts' => LedgerAccount::where('is_leaf', true)->where('is_active', true)->get(),
             ]
         );
     }
@@ -124,7 +124,7 @@ class PettyCashAdvanceAccountController extends Controller
                 'pettyCashAdvanceAccount' => $pettyCashAdvanceAccount->load(['employee', 'pettyCashAccount', 'ledgerAccount']),
                 'pettyCashAccounts' => PettyCashAccount::select('id', 'name')->get(),
                 'employees' => User::select('id', 'name')->get(),
-                'ledgerAccounts' => LedgerAccount::select('id', 'name')->get(),
+                'ledgerAccounts' => LedgerAccount::where('is_leaf', true)->where('is_active', true)->get(),
             ]
         );
     }

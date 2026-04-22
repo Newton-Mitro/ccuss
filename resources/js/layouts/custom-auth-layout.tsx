@@ -48,7 +48,14 @@ export default function CustomAuthLayout({
 }: CustomAuthLayoutProps) {
     const page = usePage<SharedData>();
 
-    const { auth, appNameFirst, appNameSecond, appShortTag } = page.props;
+    const {
+        auth,
+        appName,
+        appNameFirst,
+        appNameSecond,
+        appShortTag,
+        appVersion,
+    } = page.props;
     const cleanup = useMobileNavigation();
 
     /* ------------------------------------------------------------------
@@ -272,55 +279,48 @@ export default function CustomAuthLayout({
                 {sidebarOpen && (
                     <div
                         className={cn(
-                            'mt-auto flex flex-col border-t border-border bg-secondary px-4 py-3 transition-colors',
-                            !sidebarOpen && 'items-center',
+                            'mt-auto flex flex-col items-center justify-center border-t border-border bg-secondary px-4 py-3',
                         )}
                     >
                         {/* User Info */}
-                        <Link
-                            href={'/settings/profile'}
+                        <div
                             className={cn(
-                                'group flex w-full items-center justify-center gap-3 rounded p-2 transition-colors',
+                                'group flex w-full items-center justify-center rounded',
                                 !sidebarOpen && 'justify-center',
                             )}
                         >
                             {sidebarOpen && (
                                 <div className="flex flex-col items-center justify-center">
-                                    <span className="text-sm font-medium hover:underline">
-                                        {auth?.user?.name}
-                                    </span>
-                                    <span className="text-xs text-sidebar-foreground/70">
-                                        {auth?.user?.email}
-                                    </span>
-                                    <button
-                                        onClick={handleLogout}
-                                        className={cn(
-                                            'flex items-center gap-2 rounded text-destructive transition-colors hover:underline',
-                                            !sidebarOpen && 'justify-center',
-                                        )}
-                                        title="Logout"
+                                    <Link
+                                        href={'/settings/profile'}
+                                        className="flex flex-col items-center justify-center"
                                     >
-                                        <LogOut size={14} />
-                                        {sidebarOpen && (
-                                            <span className="text-xs">
-                                                Log out
-                                            </span>
-                                        )}
-                                    </button>
+                                        <span className="text-sm font-medium hover:underline">
+                                            {auth?.user?.name}
+                                        </span>
+                                    </Link>
                                 </div>
                             )}
-                        </Link>
+                        </div>
 
                         {/* Organization & Branch Info */}
                         {sidebarOpen && (
-                            <div className="flex flex-col items-center gap-0.5 px-2 text-xs text-sidebar-foreground/70">
-                                <span className="uppercase">
+                            <div className="flex flex-col items-center px-2 text-xs text-sidebar-foreground/70">
+                                <span className="text-xs">
                                     {auth?.user?.organization?.name || 'N/A'}
                                 </span>
-                                <div className="">
-                                    <span className="rounded-full bg-accent px-2 py-0.5">
+                                <div className="text-xs">
+                                    <span className="rounded-full bg-primary px-2 py-0.5">
                                         {auth?.user?.branch?.name || 'N/A'}
                                     </span>
+                                </div>
+                                <div className="pt-3 text-xs text-muted-foreground/70">
+                                    {`${appName as string}` +
+                                        ' | ' +
+                                        `${appVersion as string}`}
+                                </div>
+                                <div className="text-center text-[10px] text-muted-foreground/70">
+                                    {`© ${new Date().getFullYear()} Denton Studio. All rights reserved. Unauthorized use or duplication of this material without express permission is strictly prohibited.`}
                                 </div>
                             </div>
                         )}
