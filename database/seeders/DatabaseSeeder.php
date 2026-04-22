@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
                 CustomerModulePermissionSeeder::class,
                 CustomerModuleRolePermissionSeeder::class,
 
-                    // CustomerSeeder::class,
+                CustomerSeeder::class,
                 FiscalYearSeeder::class,
                 ChartOfAccountsSeeder::class,
                 // RealVoucherEntrySeeder::class
