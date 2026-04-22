@@ -1,4 +1,4 @@
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
 import React from 'react';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
@@ -16,7 +16,7 @@ interface Props extends SharedData {
 export default function CloseTellerSession() {
     const { session } = usePage<Props>().props;
 
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, processing, errors } = useForm({
         counted_balance: '',
         remarks: '',
     });
@@ -46,7 +46,7 @@ export default function CloseTellerSession() {
             return;
         }
 
-        post(route('teller-sessions.close', session.id), {
+        router.post(route('teller-sessions.close', session.id), {
             data: {
                 counted_balance: counted,
                 difference,
@@ -56,6 +56,7 @@ export default function CloseTellerSession() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Treasury & Cash', href: '' },
         { title: 'Teller Sessions', href: route('teller-sessions.index') },
         { title: 'Close Session', href: '' },
     ];

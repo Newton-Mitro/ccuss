@@ -33,6 +33,7 @@ export default function OpenTellerSession() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Treasury & Cash', href: '' },
         { title: 'Teller Sessions', href: route('teller-sessions.index') },
         { title: 'Open Session', href: '' },
     ];

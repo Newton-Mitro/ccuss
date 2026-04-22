@@ -1,4 +1,5 @@
 import { Head, usePage } from '@inertiajs/react';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import {
     Avatar,
@@ -18,7 +19,8 @@ function ShowUser() {
     const getInitials = useInitials();
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Users', href: '/users' },
+        { title: 'System Administration', href: '' },
+        { title: 'Users', href: route('users.index') },
         { title: 'User Details', href: '' },
     ];
 

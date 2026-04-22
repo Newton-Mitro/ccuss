@@ -2,12 +2,23 @@ import HeadingSmall from '@/components/heading-small';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { Head } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
+import { route } from 'ziggy-js';
+import { BreadcrumbItem } from '../../../types';
 
 const BankAccountShow = ({ bankAccount }) => {
     const handleBack = () => window.history.back();
 
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Bank Cash', href: '' },
+        { title: 'Bank Accounts', href: route('bank-accounts.index') },
+        {
+            title: `View: ${bankAccount?.bank_name || 'Bank Account'}`,
+            href: '',
+        },
+    ];
+
     return (
-        <CustomAuthLayout>
+        <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Bank Account: ${bankAccount?.bank_name}`} />
 
             {/* Header */}

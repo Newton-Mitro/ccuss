@@ -35,6 +35,7 @@ export default function ShowFamilyRelation() {
     const [rejection_reason, setReasonForRejection] = useState('');
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Customer & KYC', href: '' },
         { title: 'Family Relations', href: route('family-relations.index') },
         { title: `Relation #${familyRelation.id}`, href: '' },
     ];

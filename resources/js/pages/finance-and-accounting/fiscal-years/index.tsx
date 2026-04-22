@@ -67,7 +67,8 @@ export default function FiscalYearIndex() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Fiscal Years', href: '/fiscal-years' },
+        { title: 'General Accounting', href: '' },
+        { title: 'Fiscal Years', href: route('fiscal-years.index') },
     ];
 
     return (
@@ -108,7 +109,7 @@ export default function FiscalYearIndex() {
                 {/* Table */}
                 <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border bg-card md:h-[calc(100vh-300px)]">
                     <table className="w-full border-collapse">
-                        <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
+                        <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
                                 {[
                                     'Code',
@@ -132,7 +133,7 @@ export default function FiscalYearIndex() {
                                 fiscalYears.data.map((fy) => (
                                     <tr
                                         key={fy.id}
-                                        className="border-b even:bg-muted/10"
+                                        className="border-b even:bg-muted"
                                     >
                                         <td className="px-2 py-1">{fy.code}</td>
 

@@ -17,6 +17,7 @@ export default function ShowTellerPage({ teller }: Props) {
     useFlashToastHandler();
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Treasury & Cash', href: '' },
         { title: 'Tellers', href: route('tellers.index') },
         { title: 'Teller Details', href: '' },
     ];

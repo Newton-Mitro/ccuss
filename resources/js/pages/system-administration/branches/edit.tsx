@@ -1,5 +1,6 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
 import React from 'react';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
@@ -37,7 +38,8 @@ function Edit() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Branches', href: '/branches' },
+        { title: 'System Administration', href: '' },
+        { title: 'Branches', href: route('branches.index') },
         { title: 'Edit Branch', href: '' },
     ];
 

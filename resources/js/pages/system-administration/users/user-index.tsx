@@ -7,6 +7,7 @@ import {
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Trash2, UserPlus } from 'lucide-react';
 import { useEffect } from 'react';
+import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
 import { Input } from '../../../components/ui/input';
@@ -60,7 +61,10 @@ export default function Index() {
             });
     };
 
-    const breadcrumbs: BreadcrumbItem[] = [{ title: 'Users', href: '/users' }];
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'System Administration', href: '' },
+        { title: 'Users', href: route('users.index') },
+    ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
@@ -106,7 +110,7 @@ export default function Index() {
                 {/* ===================== */}
                 <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
                     <table className="w-full border-collapse">
-                        <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
+                        <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
                                 {[
                                     'Name',
@@ -129,7 +133,7 @@ export default function Index() {
                                 users.data.map((u: User) => (
                                     <tr
                                         key={u.id}
-                                        className="border-b even:bg-muted/10"
+                                        className="border-b even:bg-muted"
                                     >
                                         <td className="px-2 py-1">{u.name}</td>
                                         <td className="px-2 py-1">{u.email}</td>

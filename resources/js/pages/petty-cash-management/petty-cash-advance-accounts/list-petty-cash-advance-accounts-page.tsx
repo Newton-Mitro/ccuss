@@ -92,6 +92,7 @@ export default function ListAdvanceExpensesPage() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Petty Cash', href: '' },
         {
             title: 'Petty Cash Advance Accounts',
             href: route('petty-cash-advance-accounts.index'),
@@ -172,7 +173,7 @@ export default function ListAdvanceExpensesPage() {
                 {/* Table */}
                 <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border bg-card">
                     <table className="w-full text-sm">
-                        <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
+                        <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
                                 {[
                                     'Employee',
@@ -196,7 +197,7 @@ export default function ListAdvanceExpensesPage() {
                                 paginated_data.data.map((a) => (
                                     <tr
                                         key={a.id}
-                                        className="border-b even:bg-muted/10"
+                                        className="border-b even:bg-muted"
                                     >
                                         <td className="px-2 py-1 font-medium">
                                             {a.employee?.name || 'N/A'}

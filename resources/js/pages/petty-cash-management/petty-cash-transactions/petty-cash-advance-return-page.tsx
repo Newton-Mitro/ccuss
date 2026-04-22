@@ -50,6 +50,7 @@ export default function AdvanceReturn({ advances }: Props) {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Petty Cash', href: '' },
         {
             title: 'Advance Returns',
             href: route('advance-returns.index'),

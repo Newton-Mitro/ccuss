@@ -21,7 +21,7 @@ import DataTablePagination from '../../../components/data-table-pagination';
 import { Input } from '../../../components/ui/input';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import { appSwal } from '../../../lib/appSwal';
-import { SharedData } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 
 interface BackupLog {
     id: number;
@@ -93,13 +93,13 @@ export default function History() {
             });
     };
 
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'System Administration', href: '' },
+        { title: 'History', href: '' },
+    ];
+
     return (
-        <CustomAuthLayout
-            breadcrumbs={[
-                { title: 'System', href: '#' },
-                { title: 'Database Backups', href: '' },
-            ]}
-        >
+        <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Database Backup History" />
 
             <div className="flex items-center justify-between pb-4">
@@ -128,7 +128,7 @@ export default function History() {
                 {/* Table */}
                 <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
                     <table className="w-full border-collapse">
-                        <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
+                        <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
                                 {[
                                     'File',
@@ -153,7 +153,7 @@ export default function History() {
                                 logs.data.map((log) => (
                                     <tr
                                         key={log.id}
-                                        className="border-b even:bg-muted/10"
+                                        className="border-b even:bg-muted"
                                     >
                                         <td className="flex items-center gap-2 px-2 py-1">
                                             <DatabaseBackup size={16} />

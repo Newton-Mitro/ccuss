@@ -1,4 +1,5 @@
 import { Head, usePage } from '@inertiajs/react';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
@@ -11,7 +12,8 @@ function Show() {
     useFlashToastHandler();
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Organizations', href: '/organizations' },
+        { title: 'System Administration', href: '' },
+        { title: 'Organizations', href: route('organizations.index') },
         { title: 'Organization Details', href: '' },
     ];
 

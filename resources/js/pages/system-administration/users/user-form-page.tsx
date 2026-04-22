@@ -1,6 +1,7 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Key, Loader2 } from 'lucide-react';
 import React, { useState } from 'react';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
@@ -110,7 +111,8 @@ const UserForm = ({
     const allRoles = [...systemAdminRole, ...filteredRoles];
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Users', href: '/users' },
+        { title: 'System Administration', href: '' },
+        { title: 'Users', href: route('users.index') },
         { title: isEdit ? `Edit ${user.name}` : 'Create User', href: '' },
     ];
 

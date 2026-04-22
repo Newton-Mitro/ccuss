@@ -66,6 +66,7 @@ export default function KycDocumentsIndex() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Customer & KYC', href: '' },
         { title: 'KYC Documents', href: '' },
     ];
 
@@ -120,7 +121,7 @@ export default function KycDocumentsIndex() {
                 {/* ================= Desktop Table ================= */}
                 <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
                     <table className="w-full">
-                        <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
+                        <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
                                 {[
                                     'ID',
@@ -142,7 +143,7 @@ export default function KycDocumentsIndex() {
                             {paginated_data.data.map((i) => (
                                 <tr
                                     key={i.id}
-                                    className="border-b even:bg-muted/10"
+                                    className="border-b even:bg-muted"
                                 >
                                     <td className="px-2 py-1">
                                         <img

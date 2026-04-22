@@ -78,7 +78,8 @@ function EditOrganization() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Organizations', href: '/organizations' },
+        { title: 'System Administration', href: '' },
+        { title: 'Organizations', href: route('organizations.index') },
         { title: 'Edit Organization', href: '' },
     ];
 

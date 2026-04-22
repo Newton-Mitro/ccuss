@@ -28,6 +28,7 @@ const Show = () => {
     const handleBack = () => window.history.back();
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Customer & KYC', href: '' },
         { title: 'KYC Documents', href: route('kyc-documents.index') },
         { title: `Document #${document.id}`, href: '' },
     ];

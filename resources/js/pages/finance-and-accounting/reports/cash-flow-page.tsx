@@ -97,6 +97,7 @@ export default function CashFlowStatementPage() {
     );
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'General Accounting', href: '' },
         { title: 'Reports', href: '#' },
         { title: 'Cash Flow Statement', href: '/reports/cash-flow' },
     ];

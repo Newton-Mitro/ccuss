@@ -59,6 +59,7 @@ export default function BalanceSheetPage() {
     );
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'General Accounting', href: '' },
         { title: 'Reports', href: '#' },
         { title: 'Balance Sheet', href: '/reports/balance-sheet' },
     ];
@@ -107,7 +108,7 @@ export default function BalanceSheetPage() {
                 {/* Table & Totals */}
                 <div className="print-area rounded-md border p-2 print:rounded-none print:border-none">
                     <table className="w-full border-collapse text-sm print:text-base">
-                        <thead className="sticky top-0 bg-muted/10 text-sm text-muted print:bg-transparent">
+                        <thead className="sticky top-0 bg-muted text-sm text-muted-foreground print:bg-transparent">
                             <tr>
                                 {['Category', 'Account Name', 'Balance'].map(
                                     (h) => (

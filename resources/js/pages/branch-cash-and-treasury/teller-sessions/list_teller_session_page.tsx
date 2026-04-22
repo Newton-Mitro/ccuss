@@ -50,7 +50,8 @@ export default function TellerSessionsIndexPage() {
     }, [data.search, data.status, data.per_page, data.page]);
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Teller Sessions', href: '#' },
+        { title: 'Treasury & Cash', href: '' },
+        { title: 'Teller Sessions', href: route('teller-sessions.index') },
     ];
 
     const StatusBadge = ({ status }: { status: string }) => {
@@ -120,7 +121,7 @@ export default function TellerSessionsIndexPage() {
                 {/* Table */}
                 <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border bg-card md:h-[calc(100vh-300px)]">
                     <table className="w-full border-collapse">
-                        <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
+                        <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
                                 {[
                                     'Teller',
@@ -148,7 +149,7 @@ export default function TellerSessionsIndexPage() {
                                 sessions.data.map((s) => (
                                     <tr
                                         key={s.id}
-                                        className="border-b even:bg-muted/10"
+                                        className="border-b even:bg-muted"
                                     >
                                         <td className="px-2 py-1">
                                             {s.teller?.name}

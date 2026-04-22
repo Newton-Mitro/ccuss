@@ -16,7 +16,7 @@ import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { formatDate, formatDateTime } from '../../../lib/date_util';
-import { SharedData } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 import { Branch } from '../../../types/branch';
 import { BranchDay } from '../../../types/cash_treasury_module';
 import { branchDayStatuses } from './data/branch_day_status';
@@ -74,12 +74,13 @@ export default function Index() {
             });
     };
 
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Treasury & Cash', href: '' },
+        { title: 'Branch Days', href: '' },
+    ];
+
     return (
-        <CustomAuthLayout
-            breadcrumbs={[
-                { title: 'Branch Days', href: route('branch-days.index') },
-            ]}
-        >
+        <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <div className="space-y-4 text-foreground">
                 {/* Header */}
                 <div className="flex items-center justify-between">
@@ -146,7 +147,7 @@ export default function Index() {
                 {/* Desktop Table */}
                 <div className="hidden h-[calc(100vh-360px)] overflow-auto rounded-md border border-border bg-card md:block">
                     <table className="w-full border-collapse">
-                        <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
+                        <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
                                 {[
                                     '#',
@@ -171,7 +172,7 @@ export default function Index() {
                                 branchDays.data.map((bd, idx) => (
                                     <tr
                                         key={bd.id}
-                                        className="border-b even:bg-muted/10"
+                                        className="border-b even:bg-muted"
                                     >
                                         <td className="px-2 py-1">{idx + 1}</td>
                                         <td className="px-2 py-1">

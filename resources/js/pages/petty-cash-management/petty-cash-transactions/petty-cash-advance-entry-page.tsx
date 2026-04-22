@@ -56,6 +56,7 @@ export default function AdvanceEntry({ pettyCashAccounts, employees }: Props) {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Petty Cash', href: '' },
         {
             title: 'Advance Payments',
             href: route('petty-cash-advance-accounts.index'),

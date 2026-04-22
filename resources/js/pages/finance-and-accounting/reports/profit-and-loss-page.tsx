@@ -79,6 +79,7 @@ export default function ProfitAndLossPage() {
     const netProfit = totalIncome - totalExpense;
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'General Accounting', href: '' },
         { title: 'Reports', href: '#' },
         { title: 'Profit & Loss', href: '/reports/profit-loss' },
     ];

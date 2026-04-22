@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { ArrowLeft, Clock, Hash, MapPin } from 'lucide-react';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
@@ -14,7 +15,8 @@ export default function Show({ branch }: ShowProps) {
     useFlashToastHandler();
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Branches', href: '/branches' },
+        { title: 'System Administration', href: '' },
+        { title: 'Branches', href: route('branches.index') },
         { title: branch.name, href: '' },
     ];
 

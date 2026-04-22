@@ -36,6 +36,7 @@ const OpenBranchDay = ({ branch, business_date }: Props) => {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Treasury & Cash', href: '' },
         { title: 'Branch Days', href: route('branch-days.index') },
         { title: 'Open Branch Day', href: '' },
     ];

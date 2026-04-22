@@ -21,11 +21,12 @@ const ShowPettyCashExpensePage = ({
     const handleBack = () => window.history.back();
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Petty Cash', href: '' },
         {
             title: 'Petty Cash Accounts',
             href: route('petty-cash-accounts.index'),
         },
-        { title: pettyCash.name, href: '' },
+        { title: `View: ${pettyCash.name}`, href: '' },
     ];
 
     return (

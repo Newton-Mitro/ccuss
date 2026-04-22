@@ -47,6 +47,7 @@ const Create = () => {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Customer & KYC', href: '' },
         { title: 'Customers', href: route('customers.index') },
         { title: 'Add Address', href: '' },
     ];

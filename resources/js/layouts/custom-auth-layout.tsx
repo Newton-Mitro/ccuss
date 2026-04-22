@@ -218,7 +218,7 @@ export default function CustomAuthLayout({
                 {/* Search + controls */}
                 <div
                     className={cn(
-                        'my-3 flex items-center gap-2 px-4',
+                        'flex items-center gap-2 px-4 py-3',
                         !sidebarOpen && 'hidden',
                     )}
                 >
@@ -229,7 +229,7 @@ export default function CustomAuthLayout({
                             placeholder="Search menu..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full bg-transparent text-sm outline-none"
+                            className="w-full bg-background text-sm outline-none"
                         />
                     </div>
                     <div className="">
@@ -251,6 +251,7 @@ export default function CustomAuthLayout({
                 </div>
 
                 {/* Menu */}
+
                 <nav
                     ref={sidebarScrollRef}
                     className="flex-1 overflow-y-auto px-2 pb-4" // flex-1 takes remaining space
@@ -268,69 +269,63 @@ export default function CustomAuthLayout({
                 </nav>
 
                 {/* Footer */}
-                <div
-                    className={cn(
-                        'bg-sidebar-footer mt-auto flex flex-col border-t border-muted/20 px-4 py-3 transition-colors',
-                        !sidebarOpen && 'items-center',
-                    )}
-                >
-                    {/* User Info */}
-                    <Link
-                        href={'/settings/profile'}
+                {sidebarOpen && (
+                    <div
                         className={cn(
-                            'group flex w-full items-center gap-3 rounded p-2 transition-colors hover:bg-muted/20',
-                            !sidebarOpen && 'justify-center',
+                            'mt-auto flex flex-col border-t border-border bg-secondary px-4 py-3 transition-colors',
+                            !sidebarOpen && 'items-center',
                         )}
                     >
-                        <Avatar className="h-8 w-8 overflow-hidden rounded-full border border-border bg-card">
-                            <AvatarImage
-                                src={auth?.user?.avatar}
-                                alt={auth?.user?.name}
-                            />
-                            <AvatarFallback className="rounded-lg text-sm text-muted-foreground">
-                                {getInitials(auth?.user?.name)}
-                            </AvatarFallback>
-                        </Avatar>
-                        {sidebarOpen && (
-                            <div className="flex flex-col text-left">
-                                <span className="text-sm font-medium group-hover:underline">
-                                    {auth?.user?.name}
-                                </span>
-                                <span className="text-xs text-sidebar-foreground/70">
-                                    {auth?.user?.email}
-                                </span>
-                            </div>
-                        )}
-                    </Link>
-
-                    {/* Organization & Branch Info */}
-                    {sidebarOpen && (
-                        <div className="flex flex-col gap-0.5 px-2 text-xs text-sidebar-foreground/70">
-                            <span>
-                                Organization:{' '}
-                                {auth?.user?.organization?.name || 'N/A'}
-                            </span>
-                            <span>
-                                Branch: {auth?.user?.branch?.name || 'N/A'}
-                            </span>
-                        </div>
-                    )}
-
-                    {/* Settings & Logout */}
-                    <div className="mt-1 flex flex-col">
-                        <button
-                            onClick={handleLogout}
+                        {/* User Info */}
+                        <Link
+                            href={'/settings/profile'}
                             className={cn(
-                                'flex items-center gap-2 rounded p-2 text-destructive transition-colors hover:bg-destructive/10',
+                                'group flex w-full items-center justify-center gap-3 rounded p-2 transition-colors',
                                 !sidebarOpen && 'justify-center',
                             )}
-                            title="Logout"
                         >
-                            <LogOut size={16} />
-                            {sidebarOpen && <span>Log out</span>}
-                        </button>
+                            {sidebarOpen && (
+                                <div className="flex flex-col items-center justify-center">
+                                    <span className="text-sm font-medium hover:underline">
+                                        {auth?.user?.name}
+                                    </span>
+                                    <span className="text-xs text-sidebar-foreground/70">
+                                        {auth?.user?.email}
+                                    </span>
+                                    <button
+                                        onClick={handleLogout}
+                                        className={cn(
+                                            'flex items-center gap-2 rounded text-destructive transition-colors hover:underline',
+                                            !sidebarOpen && 'justify-center',
+                                        )}
+                                        title="Logout"
+                                    >
+                                        <LogOut size={14} />
+                                        {sidebarOpen && (
+                                            <span className="text-xs">
+                                                Log out
+                                            </span>
+                                        )}
+                                    </button>
+                                </div>
+                            )}
+                        </Link>
+
+                        {/* Organization & Branch Info */}
+                        {sidebarOpen && (
+                            <div className="flex flex-col items-center gap-0.5 px-2 text-xs text-sidebar-foreground/70">
+                                <span className="uppercase">
+                                    {auth?.user?.organization?.name || 'N/A'}
+                                </span>
+                                <div className="">
+                                    <span className="rounded-full bg-accent px-2 py-0.5">
+                                        {auth?.user?.branch?.name || 'N/A'}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
                     </div>
-                </div>
+                )}
             </aside>
 
             {/* Main */}

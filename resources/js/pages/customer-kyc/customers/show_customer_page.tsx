@@ -32,8 +32,9 @@ interface ShowProps extends SharedData {
 
 export default function Show({ customer }: ShowProps) {
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Customer & KYC', href: '' },
         { title: 'Customers', href: route('customers.index') },
-        { title: customer.name, href: '' },
+        { title: `View Customer: ${customer.name}`, href: '' },
     ];
 
     console.log(customer);
@@ -121,7 +122,7 @@ export default function Show({ customer }: ShowProps) {
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title={`Customer - ${customer.name}`} />
+            <Head title={`View Customer: ${customer.name}`} />
 
             {/* ================= Header ================= */}
 

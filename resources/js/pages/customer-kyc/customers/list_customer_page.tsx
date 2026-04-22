@@ -64,7 +64,10 @@ export default function Index() {
             });
     };
 
-    const breadcrumbs: BreadcrumbItem[] = [{ title: 'Customers', href: '#' }];
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Customer & KYC', href: '' },
+        { title: 'Customers', href: '#' },
+    ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
@@ -122,7 +125,7 @@ export default function Index() {
                 {/* ===================== */}
                 <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
                     <table className="w-full border-collapse">
-                        <thead className="sticky top-0 bg-muted/10 text-sm text-muted/10">
+                        <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
                                 {[
                                     'Photo',
@@ -147,7 +150,7 @@ export default function Index() {
                             {paginated_data.data.map((c: Customer) => (
                                 <tr
                                     key={c.id}
-                                    className="border-b even:bg-muted/10"
+                                    className="border-b transition-opacity even:bg-muted hover:opacity-50"
                                 >
                                     <td className="px-2 py-1">
                                         <img

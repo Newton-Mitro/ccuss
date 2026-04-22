@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatDateTime } from '../../../lib/date_util';
@@ -11,7 +12,8 @@ interface BatchPageProps {
 
 export default function Batch({ batch }: BatchPageProps) {
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Audit Logs', href: '/audits' },
+        { title: 'System Administration', href: '' },
+        { title: 'Audit Logs', href: route('audits.index') },
         { title: `Batch ${batch.batch_id}`, href: '#' },
     ];
 

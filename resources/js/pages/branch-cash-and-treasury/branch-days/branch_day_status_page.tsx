@@ -5,7 +5,7 @@ import { Button } from '../../../components/ui/button';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatDate, formatDateTime } from '../../../lib/date_util';
-import { SharedData } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 import { BranchDay, TellerSession } from '../../../types/cash_treasury_module';
 
 interface Props extends SharedData {
@@ -26,8 +26,14 @@ export default function BranchDayStatusPage({ branch_day, sessions }: Props) {
 
     const hasOpenSession = sessions.some((s) => s.status === 'open');
 
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Treasury & Cash', href: '' },
+        { title: 'Branch Days', href: route('branch-days.index') },
+        { title: 'Branch Day Status', href: '' },
+    ];
+
     return (
-        <CustomAuthLayout>
+        <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Branch Day Status" />
 
             {/* HEADER */}

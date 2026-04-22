@@ -10,6 +10,7 @@ import { Head, useForm } from '@inertiajs/react';
 import { CheckCheck, Loader2 } from 'lucide-react';
 import { route } from 'ziggy-js';
 import { Select } from '../../../components/ui/select';
+import { BreadcrumbItem } from '../../../types';
 
 const CreateChequeBook = ({ subledger_accounts }) => {
     useFlashToastHandler();
@@ -27,8 +28,14 @@ const CreateChequeBook = ({ subledger_accounts }) => {
         post(route('cheque-books.store'));
     };
 
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Cheque Management', href: '' },
+        { title: 'Cheque Books', href: route('cheque-books.index') },
+        { title: `Create Cheque Book`, href: '#' },
+    ];
+
     return (
-        <CustomAuthLayout>
+        <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Cheque Book" />
 
             <HeadingSmall title="Create Cheque Book" />

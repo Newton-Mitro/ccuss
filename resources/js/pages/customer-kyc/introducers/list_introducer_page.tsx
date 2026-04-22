@@ -64,7 +64,10 @@ export default function IntroducersIndex() {
             });
     };
 
-    const breadcrumbs: BreadcrumbItem[] = [{ title: 'Introducers', href: '#' }];
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Customer & KYC', href: '' },
+        { title: 'Introducers', href: '#' },
+    ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
@@ -108,7 +111,7 @@ export default function IntroducersIndex() {
                 {/* ================= Desktop Table ================= */}
                 <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
                     <table className="w-full">
-                        <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
+                        <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
                                 {[
                                     'Introducer Photo',
@@ -131,7 +134,7 @@ export default function IntroducersIndex() {
                             {paginated_data.data.map((i) => (
                                 <tr
                                     key={i.id}
-                                    className="border-b even:bg-muted/10"
+                                    className="border-b even:bg-muted"
                                 >
                                     <td className="px-2 py-1">
                                         <img

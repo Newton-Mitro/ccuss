@@ -74,6 +74,7 @@ export default function Index() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Bank Cash', href: '' },
         { title: 'Bank Accounts', href: route('bank-accounts.index') },
     ];
 
@@ -131,7 +132,7 @@ export default function Index() {
                 {/* Table */}
                 <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border bg-card">
                     <table className="w-full border-collapse">
-                        <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
+                        <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
                                 {[
                                     'Branch',
@@ -158,7 +159,7 @@ export default function Index() {
                                 paginatedData.data.map((a) => (
                                     <tr
                                         key={a.id}
-                                        className="border-b even:bg-muted/10"
+                                        className="border-b even:bg-muted"
                                     >
                                         <td className="px-2 py-1">
                                             {a.branch_name || '-'}

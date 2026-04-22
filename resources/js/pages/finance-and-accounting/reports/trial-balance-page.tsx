@@ -109,7 +109,8 @@ export default function TrialBalancePage() {
 
     /* ---------------- Breadcrumbs ---------------- */
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Reports', href: '/reports' },
+        { title: 'General Accounting', href: '' },
+        { title: 'Reports', href: '' },
         { title: 'Trial Balance', href: '/reports/trial-balance' },
     ];
 

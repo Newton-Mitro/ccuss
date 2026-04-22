@@ -69,6 +69,7 @@ export default function FamilyRelationIndex() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Customer & KYC', href: '' },
         { title: 'Family Relations', href: '#' },
     ];
 
@@ -118,7 +119,7 @@ export default function FamilyRelationIndex() {
                 {/* ===================== */}
                 <div className="hidden h-[calc(100vh-360px)] overflow-auto rounded-md border bg-card md:block">
                     <table className="w-full border-collapse">
-                        <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
+                        <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
                                 {[
                                     'Relative Photo',
@@ -143,7 +144,7 @@ export default function FamilyRelationIndex() {
                                 paginated_data.data.map((f) => (
                                     <tr
                                         key={f.id}
-                                        className="border-b even:bg-muted/10"
+                                        className="border-b even:bg-muted"
                                     >
                                         <td className="px-2 py-1">
                                             <img

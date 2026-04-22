@@ -5,7 +5,7 @@ import HeadingSmall from '../../../components/heading-small';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatDateTime } from '../../../lib/date_util';
-import { SharedData } from '../../../types';
+import { BreadcrumbItem, SharedData } from '../../../types';
 import { PettyCashAdvanceAccount } from '../../../types/petty_cash_module';
 
 interface Props extends SharedData {
@@ -23,8 +23,17 @@ const ShowAdvanceExpensePage = ({ pettyCashAdvanceAccount }: Props) => {
 
     const handleBack = () => window.history.back();
 
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Petty Cash', href: '' },
+        {
+            title: 'Petty Cash Advance Accounts',
+            href: route('petty-cash-advance-accounts.index'),
+        },
+        { title: `View: ${pettyCashAdvanceAccount.id}`, href: '' },
+    ];
+
     return (
-        <CustomAuthLayout>
+        <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Advance Account #${pettyCashAdvanceAccount.id}`} />
 
             {/* Header */}

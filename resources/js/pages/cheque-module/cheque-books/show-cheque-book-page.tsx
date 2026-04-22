@@ -10,8 +10,9 @@ export default function Show() {
     const { cheque_book } = usePage<any>().props;
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Cheque Management', href: '' },
         { title: 'Cheque Books', href: route('cheque-books.index') },
-        { title: cheque_book.book_no, href: '#' },
+        { title: `View Cheque Book #${cheque_book.book_no}`, href: '#' },
     ];
 
     const total = cheque_book.end_number - cheque_book.start_number + 1;

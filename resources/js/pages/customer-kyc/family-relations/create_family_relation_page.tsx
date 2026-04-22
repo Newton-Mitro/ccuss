@@ -39,6 +39,7 @@ const Create = () => {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Customer & KYC', href: '' },
         { title: 'Family Relations', href: route('family-relations.index') },
         { title: 'Add Relation', href: '' },
     ];

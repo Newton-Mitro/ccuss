@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
 import { CheckCheck, Loader2 } from 'lucide-react';
 import React, { useState } from 'react';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
@@ -65,7 +66,8 @@ function CreateOrganization() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Organizations', href: '/organizations' },
+        { title: 'System Administration', href: '' },
+        { title: 'Organizations', href: route('organizations.index') },
         { title: 'Add Organization', href: '' },
     ];
 

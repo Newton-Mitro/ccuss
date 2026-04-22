@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
 import React from 'react';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
@@ -47,7 +48,8 @@ const VaultForm = ({ vault, branches, branch }: VaultFormPageProps) => {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Vaults', href: '/vaults' },
+        { title: 'Treasury & Cash', href: '' },
+        { title: 'Vaults', href: route('vaults.index') },
         {
             title: isEdit ? `Edit Vault: ${vault?.name}` : 'Create Vault',
             href: '',

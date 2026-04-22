@@ -1,6 +1,7 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
 import React from 'react';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import AppDatePicker from '../../../components/ui/app_date_picker';
@@ -54,7 +55,8 @@ export default function FiscalYearForm() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Fiscal Years', href: '/fiscal-years' },
+        { title: 'General Accounting', href: '' },
+        { title: 'Fiscal Years', href: route('fiscal-years.index') },
         { title: fiscalYear?.id ? 'Edit' : 'Create', href: '' },
     ];
 

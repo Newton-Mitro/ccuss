@@ -19,6 +19,7 @@ export default function ShowVaultPage({ vault }: ShowVaultPageProps) {
     useFlashToastHandler();
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Treasury & Cash', href: '' },
         { title: 'Vaults', href: route('vaults.index') },
         { title: vault.name, href: '' },
     ];

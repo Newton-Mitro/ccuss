@@ -165,7 +165,7 @@ export default function Index() {
                 {/* Table */}
                 <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border md:h-[calc(100vh-300px)]">
                     <table className="w-full border-collapse">
-                        <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
+                        <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
                                 {[
                                     'Voucher Date',
@@ -204,7 +204,7 @@ export default function Index() {
                                     return (
                                         <tr
                                             key={v.id}
-                                            className="border-b even:bg-muted/10"
+                                            className="border-b even:bg-muted"
                                         >
                                             <td className="px-2 py-1">
                                                 {new Date(

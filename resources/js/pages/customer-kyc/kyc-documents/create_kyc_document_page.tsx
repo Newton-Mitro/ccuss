@@ -56,6 +56,7 @@ const CreateKycDocument = () => {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Customer & KYC', href: '' },
         { title: 'KYC Documents', href: route('kyc-documents.index') },
         { title: 'Upload Document', href: '' },
     ];

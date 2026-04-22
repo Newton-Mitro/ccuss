@@ -36,6 +36,7 @@ export default function ShowIntroducer() {
     const handleBack = () => window.history.back();
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Customer & KYC', href: '' },
         { title: 'Introducers', href: route('introducers.index') },
         { title: `Introducer #${introducer_request?.id}`, href: '' },
     ];

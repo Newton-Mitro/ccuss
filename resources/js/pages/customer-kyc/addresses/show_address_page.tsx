@@ -22,6 +22,7 @@ export default function ViewAddress({ address }: Props) {
     useFlashToastHandler();
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Customer & KYC', href: '' },
         { title: 'Customers', href: route('customers.index') },
         {
             title: `Address #${address.id}`,

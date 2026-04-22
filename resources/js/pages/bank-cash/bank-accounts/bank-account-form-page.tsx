@@ -6,8 +6,10 @@ import { Label } from '@/components/ui/label';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { Head, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
+import { route } from 'ziggy-js';
 import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
+import { BreadcrumbItem } from '../../../types';
 
 const BankAccountForm = ({ bankAccount }) => {
     useFlashToastHandler();
@@ -40,8 +42,19 @@ const BankAccountForm = ({ bankAccount }) => {
         }
     };
 
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Bank Cash', href: '' },
+        { title: 'Bank Accounts', href: route('bank-accounts.index') },
+        {
+            title: isEdit
+                ? `Edit: ${bankAccount?.bank_name}`
+                : 'Create Bank Account',
+            href: '',
+        },
+    ];
+
     return (
-        <CustomAuthLayout>
+        <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head
                 title={isEdit ? 'Edit Bank Account' : 'Create Bank Account'}
             />

@@ -27,9 +27,9 @@ export default function Edit() {
     });
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Cheque Management', href: '' },
         { title: 'Cheques', href: route('cheques.index') },
-        { title: cheque.cheque_number, href: route('cheques.show', cheque.id) },
-        { title: 'Edit', href: '#' },
+        { title: `Edit Cheque #${cheque.cheque_number}`, href: '#' },
     ];
 
     const submit = (e: any) => {

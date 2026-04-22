@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
@@ -17,7 +18,8 @@ export default function ShowTellerSessionPage({ session }: Props) {
     useFlashToastHandler();
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Teller Sessions', href: '/teller-sessions' },
+        { title: 'Treasury & Cash', href: '' },
+        { title: 'Teller Sessions', href: route('teller-sessions.index') },
         { title: 'Session Details', href: '' },
     ];
 

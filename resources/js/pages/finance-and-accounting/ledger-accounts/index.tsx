@@ -286,6 +286,7 @@ export default function GlAccountsIndex({
     return (
         <CustomAuthLayout
             breadcrumbs={[
+                { title: 'General Accounting', href: '' },
                 { title: 'General Ledger', href: '/ledger_accounts' },
                 { title: 'Chart of Accounts', href: '#' },
             ]}

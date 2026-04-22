@@ -87,6 +87,7 @@ export default function ShareholdersEquityPage() {
     }, [equityStatement]);
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'General Accounting', href: '' },
         { title: 'Reports', href: '#' },
         { title: 'Shareholders’ Equity', href: '/reports/shareholders-equity' },
     ];

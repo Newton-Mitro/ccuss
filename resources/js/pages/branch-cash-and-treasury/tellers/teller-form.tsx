@@ -2,6 +2,7 @@ import { Head, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
 import React from 'react';
 
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
@@ -64,7 +65,8 @@ const TellerForm = ({
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Tellers', href: '/tellers' },
+        { title: 'Treasury & Cash', href: '' },
+        { title: 'Tellers', href: route('tellers.index') },
         {
             title: isEdit ? `Edit Teller: ${teller?.name}` : 'Create Teller',
             href: '',

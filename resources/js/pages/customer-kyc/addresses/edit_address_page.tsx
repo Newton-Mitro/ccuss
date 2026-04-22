@@ -50,6 +50,7 @@ const Edit = () => {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Customer & KYC', href: '' },
         { title: 'Customers', href: route('customers.index') },
         { title: 'Edit Address', href: '' },
     ];

@@ -10,6 +10,7 @@ import { Head, useForm } from '@inertiajs/react';
 import { CheckCheck, Loader2 } from 'lucide-react';
 import { route } from 'ziggy-js';
 import { Select } from '../../../components/ui/select';
+import { BreadcrumbItem } from '../../../types';
 
 const EditChequeBook = ({ cheque_book, subledger_accounts }) => {
     useFlashToastHandler();
@@ -27,8 +28,14 @@ const EditChequeBook = ({ cheque_book, subledger_accounts }) => {
         put(route('cheque-books.update', cheque_book.id));
     };
 
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Cheque Management', href: '' },
+        { title: 'Cheque Books', href: route('cheque-books.index') },
+        { title: `Edit Cheque Book #${cheque_book.book_no}`, href: '#' },
+    ];
+
     return (
-        <CustomAuthLayout>
+        <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Edit Cheque Book" />
 
             <HeadingSmall title="Edit Cheque Book" />

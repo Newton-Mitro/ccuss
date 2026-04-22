@@ -58,6 +58,7 @@ export default function Replenishment({
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Petty Cash', href: '' },
         {
             title: 'Petty Cash Accounts',
             href: route('petty-cash-accounts.index'),

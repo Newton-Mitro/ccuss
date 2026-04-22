@@ -73,7 +73,8 @@ export default function Index() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Branches', href: '/branches' },
+        { title: 'System Administration', href: '' },
+        { title: 'Branches', href: route('branches.index') },
     ];
 
     return (
@@ -112,7 +113,7 @@ export default function Index() {
                 {/* Table */}
                 <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border bg-card md:h-[calc(100vh-300px)]">
                     <table className="w-full border-collapse">
-                        <thead className="sticky top-0 bg-muted/10 text-sm text-muted">
+                        <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
                                 {[
                                     'Code',
@@ -136,7 +137,7 @@ export default function Index() {
                                 branches.data.map((b) => (
                                     <tr
                                         key={b.id}
-                                        className="border-b even:bg-muted/10"
+                                        className="border-b even:bg-muted"
                                     >
                                         <td className="px-2 py-1">{b.code}</td>
                                         <td className="px-2 py-1">{b.name}</td>

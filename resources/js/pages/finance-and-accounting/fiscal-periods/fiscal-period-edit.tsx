@@ -1,6 +1,7 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, ListFilter, Loader2 } from 'lucide-react';
 import React from 'react';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import AppDatePicker from '../../../components/ui/app_date_picker';
@@ -54,7 +55,8 @@ export default function FiscalPeriodForm() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Fiscal Periods', href: '/fiscal-periods' },
+        { title: 'General Accounting', href: '' },
+        { title: 'Fiscal Periods', href: route('fiscal-periods.index') },
         { title: fiscalPeriod?.id ? 'Edit' : 'Create', href: '' },
     ];
 

@@ -10,8 +10,9 @@ export default function Show() {
     const { cheque } = usePage<any>().props;
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Cheque Management', href: '' },
         { title: 'Cheques', href: route('cheques.index') },
-        { title: cheque.cheque_number, href: '#' },
+        { title: `View Cheque #${cheque.cheque_number}`, href: '#' },
     ];
 
     return (

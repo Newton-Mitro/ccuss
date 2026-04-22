@@ -44,6 +44,7 @@ const Edit = () => {
     const relations = getRelations(customer?.gender, selectedRelative?.gender);
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Customer & KYC', href: '' },
         { title: 'Family Relations', href: route('family-relations.index') },
         { title: 'Edit Relation', href: '' },
     ];

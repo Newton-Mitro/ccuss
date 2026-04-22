@@ -18,7 +18,8 @@ export default function ModelHistory({
     batches,
 }: ModelHistoryProps) {
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Audit Logs', href: '/audits' },
+        { title: 'System Administration', href: '' },
+        { title: 'Audit Logs', href: route('audits.index') },
         { title: `${auditableType} #${auditableId}`, href: '#' },
     ];
 

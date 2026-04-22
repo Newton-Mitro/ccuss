@@ -125,13 +125,14 @@ const Edit = ({ customer }: EditProps) => {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Customer & KYC', href: '' },
         { title: 'Customers', href: route('customers.index') },
-        { title: `Edit ${customer.name}`, href: '' },
+        { title: `Edit Customer: ${customer.name}`, href: '' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title={`Edit Customer - ${customer.name}`} />
+            <Head title={`Edit Customer:  ${customer.name}`} />
 
             <div className="flex flex-col gap-3 pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <HeadingSmall
