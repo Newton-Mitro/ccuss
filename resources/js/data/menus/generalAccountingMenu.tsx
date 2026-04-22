@@ -25,7 +25,7 @@ export const generalAccountingMenu: SidebarItem[] = [
                 name: 'Chart of Accounts',
                 icon: <i className="fa-solid fa-list" />,
                 path: '/accounting/chart-of-accounts',
-                match_path: 'finance-and-accounting/chart-of-accounts',
+                match_path: 'accounting/chart-of-accounts',
                 permission: ['accounting.coa.view'],
             },
             {
@@ -79,14 +79,14 @@ export const generalAccountingMenu: SidebarItem[] = [
                 name: 'Trial Balance',
                 icon: <i className="fa-solid fa-scale-balanced" />,
                 path: '/accounting/trial-balance',
-                match_path: 'finance-and-accounting/trial-balance',
+                match_path: 'accounting/trial-balance',
                 permission: ['accounting.trial.view'],
             },
             {
                 name: 'Ledger Statement',
                 icon: <i className="fa-solid fa-scale-balanced" />,
                 path: '/accounting/ledger-statement',
-                match_path: 'finance-and-accounting/ledger-statement',
+                match_path: 'accounting/ledger-statement',
                 permission: ['accounting.trial.view'],
             },
             {
@@ -99,8 +99,7 @@ export const generalAccountingMenu: SidebarItem[] = [
                         name: 'Profit & Loss',
                         icon: <i className="fa-solid fa-chart-line" />,
                         path: '/accounting/financial-reports/profit-loss',
-                        match_path:
-                            'finance-and-accounting/financial-reports/profit-loss',
+                        match_path: 'accounting/financial-reports/profit-loss',
                         permission: ['accounting.profit_loss.view'],
                     },
                     {
@@ -108,7 +107,7 @@ export const generalAccountingMenu: SidebarItem[] = [
                         icon: <i className="fa-solid fa-file-invoice" />,
                         path: '/accounting/financial-reports/balance-sheet',
                         match_path:
-                            'finance-and-accounting/financial-reports/balance-sheet',
+                            'accounting/financial-reports/balance-sheet',
                         permission: ['accounting.balance_sheet.view'],
                     },
                     {
@@ -116,7 +115,7 @@ export const generalAccountingMenu: SidebarItem[] = [
                         icon: <i className="fa-solid fa-user-group" />,
                         path: '/accounting/financial-reports/shareholders-equity',
                         match_path:
-                            'finance-and-accounting/financial-reports/shareholders-equity',
+                            'accounting/financial-reports/shareholders-equity',
                         permission: ['accounting.shareholders-equity.view'],
                     },
                 ],
