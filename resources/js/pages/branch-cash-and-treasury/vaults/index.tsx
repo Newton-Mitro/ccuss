@@ -198,7 +198,7 @@ export default function Index() {
                                 vaults.data.map((v) => (
                                     <tr
                                         key={v.id}
-                                        className="border-b transition-all even:bg-muted hover:scale-[1.01] hover:opacity-50"
+                                        className="border-b transition-colors even:bg-muted hover:bg-accent/20"
                                     >
                                         <td className="px-2 py-1">
                                             {v.branch?.name}

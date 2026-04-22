@@ -310,7 +310,7 @@ export default function CustomAuthLayout({
                                     {auth?.user?.organization?.name || 'N/A'}
                                 </span>
                                 <div className="text-xs">
-                                    <span className="rounded-full bg-primary px-2 py-0.5">
+                                    <span className="rounded-full bg-primary px-2 py-0.5 text-primary-foreground">
                                         {auth?.user?.branch?.name || 'N/A'}
                                     </span>
                                 </div>

@@ -127,7 +127,7 @@ export default function KycDocumentsIndex() {
                         <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
                                 {[
-                                    'ID',
+                                    'Preview',
                                     'Customer',
                                     'Document Type',
                                     'Status',
@@ -146,13 +146,13 @@ export default function KycDocumentsIndex() {
                             {paginated_data.data.map((i) => (
                                 <tr
                                     key={i.id}
-                                    className="border-b transition-all even:bg-muted hover:scale-[1.01] hover:opacity-50"
+                                    className="border-b transition-colors even:bg-muted hover:bg-accent/20"
                                 >
                                     <td className="px-2 py-1">
                                         <img
                                             src={i.url}
                                             alt=""
-                                            className="h-8 w-8 rounded-full"
+                                            className="h-6 w-6 rounded-full"
                                         />
                                     </td>
                                     <td className="px-2 py-1">

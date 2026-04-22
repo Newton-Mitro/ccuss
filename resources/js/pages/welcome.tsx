@@ -46,6 +46,9 @@ export default function HomePage({
                     <p className="text-sm text-muted-foreground/80">
                         {appLongTag}
                     </p>
+                    <div className="text-center text-sm text-muted-foreground/80">
+                        {`© ${new Date().getFullYear()} Denton Studio. সর্বস্বত্ব সংরক্ষিত। লিখিত অনুমতি ছাড়া এই উপাদান সম্পূর্ণ বা আংশিকভাবে ব্যবহার বা কপি করা আইনত নিষিদ্ধ।`}
+                    </div>
                     <div className="mt-3 inline-block rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">
                         {appVersion}
                     </div>

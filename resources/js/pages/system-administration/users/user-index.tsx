@@ -134,7 +134,7 @@ export default function Index() {
                                 users.data.map((u: User) => (
                                     <tr
                                         key={u.id}
-                                        className="border-b transition-all even:bg-muted hover:scale-[1.01] hover:opacity-50"
+                                        className="border-b transition-colors even:bg-muted hover:bg-accent/20"
                                     >
                                         <td className="px-2 py-1">{u.name}</td>
                                         <td className="px-2 py-1">{u.email}</td>

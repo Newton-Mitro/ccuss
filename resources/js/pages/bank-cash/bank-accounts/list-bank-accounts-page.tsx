@@ -159,7 +159,7 @@ export default function Index() {
                                 paginatedData.data.map((a) => (
                                     <tr
                                         key={a.id}
-                                        className="border-b transition-all even:bg-muted hover:scale-[1.01] hover:opacity-50"
+                                        className="border-b transition-colors even:bg-muted hover:bg-accent/20"
                                     >
                                         <td className="px-2 py-1">
                                             {a.branch_name || '-'}

@@ -154,7 +154,7 @@ export default function History() {
                                 logs.data.map((log) => (
                                     <tr
                                         key={log.id}
-                                        className="border-b transition-all even:bg-muted hover:scale-[1.01] hover:opacity-50"
+                                        className="border-b transition-colors even:bg-muted hover:bg-accent/20"
                                     >
                                         <td className="flex items-center gap-2 px-2 py-1">
                                             <DatabaseBackup size={16} />

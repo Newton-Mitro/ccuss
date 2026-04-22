@@ -26,7 +26,7 @@ export default function AppearanceToggleTab({
     return (
         <div className={cn('space-y-4', className)} {...props}>
             {/* Mode Selector */}
-            <div className="inline-flex rounded-full bg-neutral-200 p-1 shadow-inner">
+            <div className="inline-flex rounded-full bg-secondary p-1 shadow-inner">
                 {modeTabs.map(({ value, icon: Icon, label }) => (
                     <button
                         key={value}
@@ -34,8 +34,8 @@ export default function AppearanceToggleTab({
                         className={cn(
                             'flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200',
                             mode === value
-                                ? 'bg-white text-black shadow'
-                                : 'text-neutral-600 hover:bg-white/30',
+                                ? 'bg-card text-card-foreground shadow'
+                                : 'text-secondary-foreground hover:bg-white/30',
                         )}
                     >
                         <Icon className="h-4 w-4" />
@@ -53,8 +53,8 @@ export default function AppearanceToggleTab({
                         className={cn(
                             'flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition-all duration-200',
                             color === value
-                                ? 'bg-white text-black shadow'
-                                : 'text-neutral-600 hover:bg-white/30',
+                                ? 'bg-card text-card-foreground shadow'
+                                : 'text-secondary-foreground hover:bg-white/30',
                         )}
                     >
                         <span className={`h-4 w-4 rounded-full border ${bg}`} />
