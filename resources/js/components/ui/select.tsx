@@ -104,7 +104,7 @@ const Select: React.FC<SelectSearchProps> = ({
           "w-full rounded-md border px-2 text-left bg-background text-base shadow-sm-xs flex justify-between items-center transition-[color,box-shadow] outline-none h-8",
           error ? "border-destructive" : "border-border",
           "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
-          "disabled:pointer-events-none disabled:bg-border disabled:cursor-not-allowed disabled:opacity-50"
+          "disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-background disabled:opacity-50"
         )}
       >
         <span className="truncate">
@@ -124,7 +124,7 @@ const Select: React.FC<SelectSearchProps> = ({
         <div
           ref={dropdownRef}
           className={cn(
-            "absolute z-50 w-full rounded-md border border-border bg-background p-1 shadow-sm-xs",
+            "absolute z-50 w-full rounded-md border border-border bg-card p-1 shadow-sm-xs",
             openUpward ? "bottom-full mb-1" : "top-full mt-1"
           )}
         >
@@ -134,7 +134,7 @@ const Select: React.FC<SelectSearchProps> = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search..."
-            className="w-full border-b border-input px-2 py-1 text-sm bg-background outline-none h-8"
+            className="w-full border border-input px-2 py-1 rounded-md text-sm bg-background/70 outline-none h-8"
           />
 
           {/* Options */}

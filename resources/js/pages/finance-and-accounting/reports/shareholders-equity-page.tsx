@@ -95,7 +95,7 @@ export default function ShareholdersEquityPage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Statement of Shareholders’ Equity" />
 
-            <div className="space-y-3 p-2 print:p-4 print:text-black">
+            <div className="space-y-3 print:p-4 print:text-black">
                 {/* Header */}
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
                     <HeadingSmall

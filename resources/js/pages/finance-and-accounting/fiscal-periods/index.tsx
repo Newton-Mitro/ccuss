@@ -102,7 +102,7 @@ export default function FiscalPeriodIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Fiscal Periods" />
 
-            <div className="space-y-4 p-2 text-foreground">
+            <div className="space-y-4 text-foreground">
                 {/* Header */}
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <HeadingSmall

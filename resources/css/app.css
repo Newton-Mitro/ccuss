@@ -70,10 +70,10 @@
 
 /* ================= Light Theme ================= */
 :root {
-    --background: oklch(96.5% 0.01 248);
+    --background: oklch(95.143% 0.0032 15.354);
     --foreground: oklch(0.15 0.02 250);
 
-    --card: oklch(1 0.005 250);
+    --card: oklch(100% 0.00011 271.152);
     --card-foreground: oklch(0.18 0.02 250);
 
     --popover: oklch(1 0.005 250);
@@ -111,7 +111,7 @@
     --chart-4: #fdf4e3;
     --chart-5: oklch(0.55 0.18 270);
 
-    --sidebar: oklch(0.96 0.015 250);
+    --sidebar: oklch(94.619% 0.00427 271.37);
     --sidebar-foreground: var(--foreground);
     --sidebar-hover: oklch(0.9 0.02 250);
     --sidebar-active: var(--primary);
@@ -120,16 +120,100 @@
     --sidebar-ring: var(--accent);
 }
 
+/* =========================================================
+   🌞 LIGHT THEMES
+========================================================= */
+
+/* ---------------- BLUE ---------------- */
+:root.theme-blue {
+    --primary: oklch(0.56 0.11 239);
+    --primary-foreground: oklch(1 0 0);
+
+    --popover: oklch(1 0.01 220);
+    --popover-foreground: var(--foreground);
+
+    --muted: oklch(0.94 0.01 220);
+    --muted-foreground: oklch(0.5 0.02 220);
+
+    --border: oklch(0.9 0.01 220);
+    --input: oklch(0.9 0.01 220);
+
+    --accent: oklch(0.7 0.16 30);
+    --accent-foreground: oklch(0.12 0.02 30);
+
+    /* 🧭 SIDEBAR */
+    --sidebar: oklch(0.95 0.015 220);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-hover: oklch(0.9 0.02 220);
+    --sidebar-active: var(--primary);
+    --sidebar-active-foreground: var(--primary-foreground);
+    --sidebar-border: var(--border);
+}
+
+/* ---------------- GREEN ---------------- */
+:root.theme-green {
+    --primary: oklch(0.43 0.1 140);
+    --primary-foreground: oklch(1 0 0);
+
+    --popover: oklch(1 0.01 140);
+
+    --muted: oklch(0.94 0.01 140);
+    --muted-foreground: oklch(0.5 0.02 140);
+
+    --border: oklch(0.9 0.01 140);
+
+    --accent: oklch(0.65 0.16 100);
+    --accent-foreground: oklch(0.12 0.02 100);
+
+    --sidebar: oklch(0.95 0.015 140);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-hover: oklch(0.9 0.02 140);
+    --sidebar-active: var(--primary);
+}
+
+/* ---------------- BROWN ---------------- */
+:root.theme-brown {
+    --primary: oklch(0.55 0.12 40);
+    --primary-foreground: oklch(1 0 0);
+
+    --border: oklch(0.9 0.01 40);
+
+    --accent: oklch(0.78 0.16 25);
+
+    --sidebar: oklch(0.95 0.015 40);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-hover: oklch(0.9 0.02 40);
+    --sidebar-active: var(--primary);
+}
+
+/* ---------------- VIOLET ---------------- */
+:root.theme-violet {
+    --primary: oklch(0.48 0.13 281);
+    --primary-foreground: oklch(1 0 0);
+
+    --border: oklch(0.9 0.01 280);
+
+    --accent: oklch(0.7 0.16 250);
+
+    --sidebar: oklch(0.95 0.015 280);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-hover: oklch(0.9 0.02 280);
+    --sidebar-active: var(--primary);
+}
+
+/* =========================================================
+   🌙 DARK THEMES
+========================================================= */
 /* ================= Dark Theme ================= */
 .dark {
     /* 🌌 BASE BACKGROUND (deeper, cleaner, less gray noise) */
-    --background: oklch(21.779% 0.00002 271.152);
+    --background: oklch(18.674% 0.00002 271.152);
 
     /* 🧠 PRIMARY TEXT */
     --foreground: oklch(0.96 0.01 0);
 
     /* 🧱 CARD (slightly lifted from background for clear separation) */
-    --card: oklch(26.033% 0.00003 271.152);
+    --card: oklch(23.075% 0.00003 271.152);
 
     /* 🧠 card text stays readable but softer than main foreground */
     --card-foreground: oklch(0.93 0.01 0);
@@ -171,7 +255,7 @@
     --chart-5: oklch(0.6 0.2 270);
 
     /* 🧭 SIDEBAR (slightly elevated from background, closer to card tone) */
-    --sidebar: oklch(20.904% 0.00002 271.152);
+    --sidebar: oklch(16.376% 0.00002 271.152);
     --sidebar-foreground: oklch(0.95 0.01 0);
     --sidebar-hover: oklch(0.16 0.01 355);
     --sidebar-active: var(--primary);
@@ -179,195 +263,57 @@
     --sidebar-border: var(--border);
     --sidebar-ring: var(--accent);
 }
-/* =========================================================
-   🌞 LIGHT THEMES
-========================================================= */
-
-/* ---------------- BLUE ---------------- */
-:root.theme-blue {
-    --background: oklch(0.98 0.01 220);
-    --foreground: oklch(0.12 0.02 230);
-
-    --primary: oklch(0.56 0.11 239);
-    --primary-foreground: oklch(1 0 0);
-
-    /* 🧱 SURFACES */
-    --card: oklch(0.96 0.015 220);
-    --card-hover: oklch(0.94 0.02 220);
-    --card-foreground: var(--foreground);
-
-    --popover: oklch(1 0.01 220);
-    --popover-foreground: var(--foreground);
-
-    --muted: oklch(0.94 0.01 220);
-    --muted-foreground: oklch(0.5 0.02 220);
-
-    --border: oklch(0.9 0.01 220);
-    --input: oklch(0.9 0.01 220);
-
-    --accent: oklch(0.7 0.16 30);
-    --accent-foreground: oklch(0.12 0.02 30);
-
-    /* 🧭 SIDEBAR */
-    --sidebar: oklch(0.95 0.015 220);
-    --sidebar-foreground: var(--foreground);
-    --sidebar-hover: oklch(0.9 0.02 220);
-    --sidebar-active: var(--primary);
-    --sidebar-active-foreground: var(--primary-foreground);
-    --sidebar-border: var(--border);
-}
-
-/* ---------------- GREEN ---------------- */
-:root.theme-green {
-    --background: oklch(0.98 0.01 140);
-    --foreground: oklch(0.12 0.02 140);
-
-    --primary: oklch(0.43 0.1 140);
-    --primary-foreground: oklch(1 0 0);
-
-    --card: oklch(0.96 0.015 140);
-    --card-hover: oklch(0.94 0.02 140);
-    --card-foreground: var(--foreground);
-
-    --popover: oklch(1 0.01 140);
-
-    --muted: oklch(0.94 0.01 140);
-    --muted-foreground: oklch(0.5 0.02 140);
-
-    --border: oklch(0.9 0.01 140);
-
-    --accent: oklch(0.65 0.16 100);
-    --accent-foreground: oklch(0.12 0.02 100);
-
-    --sidebar: oklch(0.95 0.015 140);
-    --sidebar-foreground: var(--foreground);
-    --sidebar-hover: oklch(0.9 0.02 140);
-    --sidebar-active: var(--primary);
-}
-
-/* ---------------- BROWN ---------------- */
-:root.theme-brown {
-    --background: oklch(0.98 0.01 40);
-    --foreground: oklch(0.12 0.02 40);
-
-    --primary: oklch(0.55 0.12 40);
-    --primary-foreground: oklch(1 0 0);
-
-    --card: oklch(0.96 0.015 40);
-    --card-hover: oklch(0.94 0.02 40);
-    --card-foreground: var(--foreground);
-
-    --border: oklch(0.9 0.01 40);
-
-    --accent: oklch(0.78 0.16 25);
-
-    --sidebar: oklch(0.95 0.015 40);
-    --sidebar-foreground: var(--foreground);
-    --sidebar-hover: oklch(0.9 0.02 40);
-    --sidebar-active: var(--primary);
-}
-
-/* ---------------- VIOLET ---------------- */
-:root.theme-violet {
-    --background: oklch(0.98 0.01 280);
-    --foreground: oklch(0.12 0.02 280);
-
-    --primary: oklch(0.48 0.13 281);
-    --primary-foreground: oklch(1 0 0);
-
-    --card: oklch(0.96 0.015 280);
-    --card-hover: oklch(0.94 0.02 280);
-    --card-foreground: var(--foreground);
-
-    --border: oklch(0.9 0.01 280);
-
-    --accent: oklch(0.7 0.16 250);
-
-    --sidebar: oklch(0.95 0.015 280);
-    --sidebar-foreground: var(--foreground);
-    --sidebar-hover: oklch(0.9 0.02 280);
-    --sidebar-active: var(--primary);
-}
-
-/* =========================================================
-   🌙 DARK THEMES
-========================================================= */
 
 /* ---------------- DARK BLUE ---------------- */
 .dark.theme-blue {
-    --background: oklch(0.08 0.02 240);
-    --foreground: oklch(0.95 0.01 0);
-
     --primary: oklch(0.56 0.11 239);
     --primary-foreground: oklch(0.05 0 0);
-
-    --card: oklch(0.12 0.02 240);
-    --card-hover: oklch(0.15 0.02 240);
-    --card-foreground: var(--foreground);
 
     --border: oklch(25.24% 0.02708 240.296);
 
     --accent: oklch(0.7 0.16 30);
 
-    --sidebar: oklch(0.1 0.02 240);
+    --sidebar: oklch(16.159% 0.03191 241.775);
     --sidebar-hover: oklch(0.14 0.02 240);
     --sidebar-active: var(--primary);
 }
 
 /* ---------------- DARK GREEN ---------------- */
 .dark.theme-green {
-    --background: oklch(0.08 0.02 140);
-    --foreground: oklch(0.95 0.01 0);
-
     --primary: oklch(0.43 0.1 140);
     --primary-foreground: oklch(0.05 0 0);
-
-    --card: oklch(0.12 0.02 140);
-    --card-hover: oklch(0.15 0.02 140);
 
     --border: oklch(23.112% 0.02294 142.27);
 
     --accent: oklch(0.65 0.16 100);
 
-    --sidebar: oklch(0.1 0.02 140);
+    --sidebar: oklch(15.829% 0.03952 143.447);
     --sidebar-hover: oklch(0.14 0.02 140);
 }
 
 /* ---------------- DARK BROWN ---------------- */
 .dark.theme-brown {
-    --background: oklch(0.08 0.02 40);
-    --foreground: oklch(0.95 0.01 0);
-
     --primary: oklch(0.55 0.12 40);
     --primary-foreground: oklch(0.05 0 0);
-
-    --card: oklch(0.12 0.02 40);
-    --card-hover: oklch(0.15 0.02 40);
 
     --border: oklch(24.77% 0.02625 42.683);
 
     --accent: oklch(0.78 0.16 25);
 
-    --sidebar: oklch(0.1 0.02 40);
+    --sidebar: oklch(15.999% 0.03582 33.866);
     --sidebar-hover: oklch(0.14 0.02 40);
 }
 
 /* ---------------- DARK VIOLET ---------------- */
 .dark.theme-violet {
-    --background: oklch(0.08 0.02 280);
-    --foreground: oklch(0.95 0.01 0);
-
     --primary: oklch(0.48 0.13 281);
     --primary-foreground: oklch(0.05 0 0);
-
-    --card: oklch(0.12 0.02 280);
-    --card-hover: oklch(0.15 0.02 280);
 
     --border: oklch(23.167% 0.02512 280.821);
 
     --accent: oklch(0.7 0.16 250);
 
-    --sidebar: oklch(0.1 0.02 280);
+    --sidebar: oklch(14.031% 0.06352 313.431);
     --sidebar-hover: oklch(0.14 0.02 280);
 }
 

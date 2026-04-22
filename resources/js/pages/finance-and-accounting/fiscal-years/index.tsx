@@ -74,7 +74,7 @@ export default function FiscalYearIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Fiscal Years" />
 
-            <div className="space-y-4 p-2 text-foreground">
+            <div className="space-y-4 text-foreground">
                 {/* Header */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <HeadingSmall

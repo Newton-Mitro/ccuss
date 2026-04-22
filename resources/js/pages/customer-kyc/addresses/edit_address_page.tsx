@@ -67,7 +67,7 @@ const Edit = () => {
                 <Link
                     type="button"
                     href={route('customers.show', customer.id)}
-                    className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
+                    className="flex items-center gap-1 rounded border border-border bg-card px-3 py-1.5 text-sm text-card-foreground transition-all hover:bg-card/50"
                 >
                     <Eye className="h-4 w-4" />
                     Show Customer

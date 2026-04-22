@@ -88,7 +88,7 @@ export default function FiscalPeriodForm() {
                 <div className="flex flex-wrap gap-2">
                     <button
                         onClick={handleBack}
-                        className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
+                        className="flex items-center gap-1 rounded border border-border bg-card px-3 py-1.5 text-sm text-card-foreground transition-all hover:bg-card/50"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         <span className="hidden sm:inline">Back</span>
@@ -96,7 +96,7 @@ export default function FiscalPeriodForm() {
 
                     <Link
                         href="/fiscal-periods"
-                        className="flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground hover:bg-secondary/90"
+                        className="flex items-center gap-1 rounded border border-border bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition-all hover:bg-secondary/50"
                     >
                         <ListFilter className="h-4 w-4" />
                         <span className="hidden sm:inline">Fiscal Periods</span>

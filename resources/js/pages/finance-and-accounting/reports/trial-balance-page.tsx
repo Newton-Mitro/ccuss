@@ -117,7 +117,7 @@ export default function TrialBalancePage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Trial Balance" />
 
-            <div className="space-y-3 p-2 print:p-4 print:text-black">
+            <div className="space-y-3 print:p-4 print:text-black">
                 {/* Header */}
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
                     <HeadingSmall

@@ -28,7 +28,7 @@ export default function Login({
     console.log(import.meta.env.VITE_LOGO_PATH);
 
     return (
-        <div className="flex min-h-screen bg-card/50">
+        <div className="flex min-h-screen bg-sidebar">
             <Head title="Log in" />
 
             {/* Left Branding Section */}
@@ -62,7 +62,7 @@ export default function Login({
 
             {/* Right Form Section */}
             <div className="mx-4 flex w-full flex-col items-center justify-center lg:w-4/12">
-                <div className="flex h-[calc(90vh)] w-full flex-col items-center justify-center rounded border bg-card p-6 shadow">
+                <div className="flex h-[calc(90vh)] w-full flex-col items-center justify-center rounded border bg-background p-6 shadow">
                     <div className="w-full md:px-10 lg:px-14 xl:px-20">
                         {/* Header */}
                         <div className="mb-6 text-center">

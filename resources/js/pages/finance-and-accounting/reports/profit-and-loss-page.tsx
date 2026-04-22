@@ -87,7 +87,7 @@ export default function ProfitAndLossPage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Profit & Loss Report" />
 
-            <div className="space-y-3 p-2 text-foreground print:p-4 print:text-black">
+            <div className="space-y-3 text-foreground print:p-4 print:text-black">
                 {/* Header + Fiscal Year/Period + Print */}
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
                     <HeadingSmall

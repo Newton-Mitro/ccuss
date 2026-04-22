@@ -94,7 +94,7 @@ export default function ShowFamilyRelation() {
                     <div className="">
                         <button
                             onClick={handleBack}
-                            className="flex items-center gap-1 rounded bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/90"
+                            className="flex items-center gap-1 rounded border border-border bg-card px-3 py-1.5 text-sm text-card-foreground transition-all hover:bg-card/50"
                         >
                             <ArrowLeft className="h-4 w-4" />
                             <span className="hidden sm:inline">Back</span>
@@ -103,14 +103,14 @@ export default function ShowFamilyRelation() {
 
                     <Link
                         href={route('family-relations.index')}
-                        className="flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground hover:bg-secondary/90"
+                        className="flex items-center gap-1 rounded border border-border bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition-all hover:bg-secondary/50"
                     >
                         Relations
                     </Link>
 
                     <Link
                         href={route('family-relations.edit', familyRelation.id)}
-                        className="flex items-center gap-1 rounded bg-accent px-3 py-1.5 text-sm text-accent-foreground hover:bg-accent/90"
+                        className="flex items-center gap-1 rounded border border-border bg-accent px-3 py-1.5 text-sm text-accent-foreground transition-all hover:bg-accent/50"
                     >
                         <CheckCheck className="h-4 w-4" />
                         Edit

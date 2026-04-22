@@ -105,7 +105,7 @@ export default function CashFlowStatementPage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Cash Flow Statement" />
 
-            <div className="space-y-3 p-2 print:p-4 print:text-black">
+            <div className="space-y-3 print:p-4 print:text-black">
                 {/* Header */}
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
                     <HeadingSmall

@@ -67,7 +67,7 @@ export default function BalanceSheetPage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Balance Sheet Report" />
 
-            <div className="space-y-3 p-2 text-foreground print:p-4 print:text-black">
+            <div className="space-y-3 text-foreground print:p-4 print:text-black">
                 {/* Screen Header + Fiscal Year + Print Button */}
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
                     <HeadingSmall

@@ -191,7 +191,7 @@ export default function CustomAuthLayout({
                 >
                     <img
                         src={import.meta.env.VITE_LOGO_PATH}
-                        className="h-10 w-10 rounded-full border bg-card p-1"
+                        className="h-10 w-10 rounded-full border border-border bg-card p-1"
                     />
                     <span
                         className={cn(
@@ -351,7 +351,7 @@ export default function CustomAuthLayout({
                     <div className="flex items-center">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <button className="flex h-8 w-8 items-center gap-2 rounded-full border border-border px-2 py-1 transition-colors hover:bg-muted">
+                                <button className="flex h-8 w-8 items-center gap-2 rounded-full border border-border bg-card px-2 py-1 transition-colors hover:bg-muted">
                                     <Monitor size={18} />
                                 </button>
                             </DropdownMenuTrigger>
