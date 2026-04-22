@@ -1,6 +1,5 @@
 import {
     Tooltip,
-    TooltipContent,
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
@@ -8,6 +7,7 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
+
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
 import { Input } from '../../../components/ui/input';
@@ -40,10 +40,13 @@ export default function KycDocumentsIndex() {
         page: Number(filters.page) || 1,
     });
 
+    const isEmpty = paginated_data.data.length === 0;
+
     useEffect(() => {
         const delay = setTimeout(() => {
             get(route('kyc-documents.index'), { preserveState: true });
         }, 400);
+
         return () => clearTimeout(delay);
     }, [data.search, data.document_type, data.verification_status, data.page]);
 
@@ -76,20 +79,17 @@ export default function KycDocumentsIndex() {
 
             <div className="space-y-4">
                 {/* Header */}
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <HeadingSmall
-                        title="KYC Documents"
-                        description="Manage customer verification documents."
-                    />
-                </div>
+                <HeadingSmall
+                    title="KYC Documents"
+                    description="Manage customer verification documents."
+                />
 
                 {/* Filters */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="w-full lg:w-60">
                         <Input
                             className="bg-card"
-                            type="text"
-                            placeholder="Search customer…"
+                            placeholder="Search customer..."
                             value={data.search}
                             onChange={(e) => {
                                 setData('search', e.target.value);
@@ -121,154 +121,180 @@ export default function KycDocumentsIndex() {
                     </div>
                 </div>
 
-                {/* ================= Desktop Table ================= */}
-                <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
-                    <table className="w-full">
-                        <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
-                            <tr>
-                                {[
-                                    'Preview',
-                                    'Customer',
-                                    'Document Type',
-                                    'Status',
-                                    'Actions',
-                                ].map((h) => (
-                                    <th
-                                        key={h}
-                                        className="border-b p-2 text-left text-sm text-muted-foreground"
-                                    >
-                                        {h}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {paginated_data.data.map((i) => (
-                                <tr
-                                    key={i.id}
-                                    className="border-b transition-colors even:bg-muted hover:bg-accent/20"
-                                >
-                                    <td className="px-2 py-1">
-                                        <img
-                                            src={i.url}
-                                            alt=""
-                                            className="h-6 w-6 rounded-full"
-                                        />
-                                    </td>
-                                    <td className="px-2 py-1">
-                                        {i.customer?.name ?? '—'}
-                                    </td>
-                                    <td className="px-2 py-1 capitalize">
-                                        {i.document_type.replace(/_/g, ' ')}
-                                    </td>
-                                    <td className="px-2 py-1">
-                                        <Badge text={i.verification_status} />
-                                    </td>
-                                    <td className="px-2 py-1">
-                                        <TooltipProvider>
-                                            <div className="flex gap-2">
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <Link
-                                                            href={route(
-                                                                'kyc-documents.show',
-                                                                i.id,
-                                                            )}
-                                                            className="text-info"
-                                                        >
-                                                            <Eye className="h-5 w-5" />
-                                                        </Link>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>
-                                                        View
-                                                    </TooltipContent>
-                                                </Tooltip>
+                {/* ================= EMPTY STATE ================= */}
+                {isEmpty ? (
+                    <div className="flex flex-col items-center justify-center rounded-md border bg-card py-16 text-center text-muted-foreground">
+                        <p className="text-base font-medium">
+                            No KYC documents found
+                        </p>
+                        <p className="text-xs">
+                            Try changing filters or upload new documents
+                        </p>
+                    </div>
+                ) : (
+                    <>
+                        {/* ================= Desktop Table ================= */}
+                        <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
+                            <table className="w-full">
+                                <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
+                                    <tr>
+                                        {[
+                                            'Preview',
+                                            'Customer',
+                                            'Document Type',
+                                            'Status',
+                                            'Actions',
+                                        ].map((h) => (
+                                            <th
+                                                key={h}
+                                                className="border-b p-2 text-left text-sm"
+                                            >
+                                                {h}
+                                            </th>
+                                        ))}
+                                    </tr>
+                                </thead>
 
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <button
-                                                            onClick={() =>
-                                                                handleDelete(
-                                                                    i.id,
-                                                                )
-                                                            }
-                                                            className="text-destructive"
-                                                        >
-                                                            <Trash2 className="h-5 w-5" />
-                                                        </button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>
-                                                        Delete
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </div>
-                                        </TooltipProvider>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                                <tbody>
+                                    {paginated_data.data.map((i) => (
+                                        <tr
+                                            key={i.id}
+                                            className="border-b even:bg-muted hover:bg-accent/20"
+                                        >
+                                            <td className="px-2 py-1">
+                                                <img
+                                                    src={i.url}
+                                                    className="h-6 w-6 rounded-full"
+                                                />
+                                            </td>
 
-                {/* ================= Mobile Cards ================= */}
-                <div className="space-y-3 md:hidden">
-                    {paginated_data.data.map((i) => (
-                        <div
-                            key={i.id}
-                            className="space-y-2 rounded-md border bg-card p-3"
-                        >
-                            <div className="flex justify-between">
-                                <div>
-                                    <p className="font-medium">
-                                        {i.customer?.name}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">
-                                        {i.document_type}
-                                    </p>
-                                </div>
-                                <span className="rounded-full bg-muted px-2 py-0.5 text-xs">
-                                    <Badge text={i.verification_status} />
-                                </span>
-                            </div>
+                                            <td className="px-2 py-1">
+                                                {i.customer?.name ?? '—'}
+                                            </td>
 
-                            <div className="flex items-center justify-between">
-                                <a
-                                    href={i.file_path}
-                                    target="_blank"
-                                    className="text-sm text-primary underline"
-                                >
-                                    View File
-                                </a>
+                                            <td className="px-2 py-1 capitalize">
+                                                {i.document_type.replace(
+                                                    /_/g,
+                                                    ' ',
+                                                )}
+                                            </td>
 
-                                <div className="flex gap-4">
-                                    <Link
-                                        href={route('kyc-documents.show', i.id)}
-                                        className="text-info"
-                                    >
-                                        <Eye className="h-5 w-5" />
-                                    </Link>
+                                            <td className="px-2 py-1">
+                                                <Badge
+                                                    text={i.verification_status}
+                                                />
+                                            </td>
 
-                                    <button
-                                        onClick={() => handleDelete(i.id)}
-                                        className="text-destructive"
-                                    >
-                                        <Trash2 className="h-5 w-5" />
-                                    </button>
-                                </div>
-                            </div>
+                                            <td className="px-2 py-1">
+                                                <TooltipProvider>
+                                                    <div className="flex gap-2">
+                                                        <Tooltip>
+                                                            <TooltipTrigger
+                                                                asChild
+                                                            >
+                                                                <Link
+                                                                    href={route(
+                                                                        'kyc-documents.show',
+                                                                        i.id,
+                                                                    )}
+                                                                >
+                                                                    <Eye className="h-5 w-5 text-info" />
+                                                                </Link>
+                                                            </TooltipTrigger>
+                                                        </Tooltip>
+
+                                                        <Tooltip>
+                                                            <TooltipTrigger
+                                                                asChild
+                                                            >
+                                                                <button
+                                                                    onClick={() =>
+                                                                        handleDelete(
+                                                                            i.id,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <Trash2 className="h-5 w-5 text-destructive" />
+                                                                </button>
+                                                            </TooltipTrigger>
+                                                        </Tooltip>
+                                                    </div>
+                                                </TooltipProvider>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
-                    ))}
-                </div>
 
-                {/* Pagination */}
-                <DataTablePagination
-                    perPage={data.per_page}
-                    onPerPageChange={function (value: number): void {
-                        setData('per_page', value);
-                        setData('page', 1);
-                    }}
-                    links={paginated_data.links}
-                />
+                        {/* ================= Mobile Cards ================= */}
+                        <div className="space-y-3 md:hidden">
+                            {paginated_data.data.map((i) => (
+                                <div
+                                    key={i.id}
+                                    className="space-y-2 rounded-md border bg-card p-3"
+                                >
+                                    <div className="flex justify-between">
+                                        <div>
+                                            <p className="font-medium">
+                                                {i.customer?.name}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground capitalize">
+                                                {i.document_type.replace(
+                                                    /_/g,
+                                                    ' ',
+                                                )}
+                                            </p>
+                                        </div>
+
+                                        <Badge text={i.verification_status} />
+                                    </div>
+
+                                    <div className="flex items-center justify-between">
+                                        <a
+                                            href={i.file_path}
+                                            target="_blank"
+                                            className="text-xs text-primary underline"
+                                        >
+                                            View File
+                                        </a>
+
+                                        <div className="flex gap-4">
+                                            <Link
+                                                href={route(
+                                                    'kyc-documents.show',
+                                                    i.id,
+                                                )}
+                                            >
+                                                <Eye className="h-5 w-5" />
+                                            </Link>
+
+                                            <button
+                                                onClick={() =>
+                                                    handleDelete(i.id)
+                                                }
+                                            >
+                                                <Trash2 className="h-5 w-5 text-destructive" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                )}
+
+                {/* ================= Pagination ================= */}
+                {!isEmpty && (
+                    <DataTablePagination
+                        perPage={data.per_page}
+                        onPerPageChange={(value: number) => {
+                            setData('per_page', value);
+                            setData('page', 1);
+                        }}
+                        links={paginated_data.links}
+                    />
+                )}
             </div>
         </CustomAuthLayout>
     );

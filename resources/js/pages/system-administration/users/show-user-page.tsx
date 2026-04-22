@@ -54,7 +54,7 @@ function ShowUser() {
                                     ? user.roles.map((role) => (
                                           <span
                                               key={role.id}
-                                              className="py-.5 rounded-full bg-warning px-2 text-xs font-medium text-warning-foreground"
+                                              className="py-.5 rounded-full bg-warning px-2 text-xs font-medium text-foreground"
                                           >
                                               {role.name}
                                           </span>
