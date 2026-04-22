@@ -320,7 +320,7 @@ export default function CustomAuthLayout({
                                         `${appVersion as string}`}
                                 </div>
                                 <div className="text-center text-[10px] text-muted-foreground/70">
-                                    {`© ${new Date().getFullYear()} Denton Studio. All rights reserved. Unauthorized use or duplication of this material without express permission is strictly prohibited.`}
+                                    {`© ${new Date().getFullYear()} Denton Studio. All rights reserved.`}
                                 </div>
                             </div>
                         )}
@@ -475,7 +475,43 @@ export default function CustomAuthLayout({
                                             className="flex gap-2"
                                         >
                                             <UserCircle size={16} />
-                                            Profile
+                                            User Profile
+                                        </Link>
+                                    </DropdownMenuItem>
+                                </DropdownMenuGroup>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuGroup>
+                                    <DropdownMenuItem asChild>
+                                        <Link
+                                            href={''}
+                                            preserveScroll
+                                            onClick={cleanup}
+                                            className="flex gap-2"
+                                        >
+                                            <UserCircle size={16} />
+                                            About
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
+                                        <Link
+                                            href={''}
+                                            preserveScroll
+                                            onClick={cleanup}
+                                            className="flex gap-2"
+                                        >
+                                            <UserCircle size={16} />
+                                            What's new?
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
+                                        <Link
+                                            href={''}
+                                            preserveScroll
+                                            onClick={cleanup}
+                                            className="flex gap-2"
+                                        >
+                                            <UserCircle size={16} />
+                                            Developer Profile
                                         </Link>
                                     </DropdownMenuItem>
                                 </DropdownMenuGroup>
