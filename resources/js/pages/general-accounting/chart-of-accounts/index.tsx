@@ -253,7 +253,12 @@ export default function GlAccountsIndex() {
                             />
                         </div>
 
-                        <Button size="sm" variant="outline" onClick={expandAll}>
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={expandAll}
+                            className="bg-card"
+                        >
                             <ChevronDownIcon className="h-4 w-4" />
                         </Button>
 
@@ -261,6 +266,7 @@ export default function GlAccountsIndex() {
                             size="sm"
                             variant="outline"
                             onClick={collapseAll}
+                            className="bg-card"
                         >
                             <ChevronUpIcon className="h-4 w-4" />
                         </Button>

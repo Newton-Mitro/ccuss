@@ -95,7 +95,7 @@ function EditOrganization() {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="mt-4 flex flex-col gap-6 rounded-xl border bg-card p-8 shadow-sm backdrop-blur-sm transition-all duration-300"
+                    className="mt-4 flex flex-col gap-6 rounded-xl border bg-card p-8 backdrop-blur-sm transition-all duration-300"
                 >
                     <div className="flex flex-col gap-6 lg:flex-row">
                         <div className="w-full space-y-4 lg:w-11/12">

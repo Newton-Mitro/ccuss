@@ -47,7 +47,7 @@ export default function Show({ branch }: ShowProps) {
                 </div>
 
                 {/* Overview Card */}
-                <div className="rounded-md border bg-card p-2 shadow-sm backdrop-blur-sm">
+                <div className="rounded-md border border-border bg-card p-2 backdrop-blur-sm">
                     <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h2 className="text-lg font-semibold text-info">
@@ -77,27 +77,27 @@ export default function Show({ branch }: ShowProps) {
 
                 {/* Info Grid */}
                 <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
-                    <div className="rounded-md border bg-card p-2 shadow-sm md:col-span-2 lg:col-span-3">
+                    <div className="rounded-md border border-border bg-card p-2 md:col-span-2 lg:col-span-3">
                         <div className="flex items-start gap-1">
                             <MapPin className="mt-0.5 h-3 w-3 text-info" />
                             <p>{branch.address}</p>
                         </div>
                     </div>
 
-                    <div className="rounded-md border bg-card p-2 shadow-sm">
+                    <div className="rounded-md border border-border bg-card p-2">
                         <p>Latitude: {branch.latitude ?? '-'}</p>
                     </div>
-                    <div className="rounded-md border bg-card p-2 shadow-sm">
+                    <div className="rounded-md border border-border bg-card p-2">
                         <p>Longitude: {branch.longitude ?? '-'}</p>
                     </div>
-                    <div className="rounded-md border bg-card p-2 shadow-sm">
+                    <div className="rounded-md border border-border bg-card p-2">
                         <p>Manager: {branch?.manager?.name ?? '-'}</p>
                     </div>
                 </div>
 
                 {/* Optional Map */}
                 {hasCoordinates && (
-                    <div className="shadow-sm-inner rounded-md border bg-card p-2">
+                    <div className="rounded-md border bg-card p-2">
                         <iframe
                             title="Branch Map"
                             src={`https://maps.google.com/maps?q=${branch.latitude},${branch.longitude}&z=15&output=embed`}

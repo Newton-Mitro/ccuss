@@ -70,7 +70,7 @@
 
 /* ================= Light Theme ================= */
 :root {
-    --background: oklch(95.143% 0.0032 15.354);
+    --background: oklch(96.416% 0.00011 271.152);
     --foreground: oklch(0.15 0.02 250);
 
     --card: oklch(100% 0.00011 271.152);

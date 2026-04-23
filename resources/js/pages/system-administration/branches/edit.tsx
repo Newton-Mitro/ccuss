@@ -55,7 +55,7 @@ function Edit() {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="mt-4 space-y-3 rounded-xl border bg-card p-8 shadow-sm backdrop-blur-sm transition-all duration-300"
+                    className="mt-4 space-y-3 rounded-xl border bg-card p-8 backdrop-blur-sm transition-all duration-300"
                 >
                     {/* 🔹 Basic Details */}
                     <div>

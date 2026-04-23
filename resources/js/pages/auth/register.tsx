@@ -14,7 +14,7 @@ export default function Register() {
         <div className="flex min-h-screen items-center justify-center bg-background p-6 font-mono">
             <Head title="Register" />
 
-            <div className="w-full max-w-md rounded-lg border bg-card p-6 shadow-sm md:p-10">
+            <div className="w-full max-w-md rounded-lg border bg-card p-6 md:p-10">
                 {/* Logo + Intro */}
                 <div className="mb-6 flex flex-col items-center text-center">
                     <AppLogoIcon className="h-32 w-32 fill-current text-accent" />

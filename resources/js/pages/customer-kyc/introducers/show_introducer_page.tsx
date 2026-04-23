@@ -191,7 +191,7 @@ export default function ShowIntroducer() {
 
                 {/* RIGHT: DETAILS */}
                 <div className="space-y-4">
-                    <div className="rounded-xl border bg-card p-5 shadow-sm">
+                    <div className="rounded-xl border bg-card p-5">
                         {/* Header */}
                         <div className="mb-4 flex items-center justify-between">
                             <p className="text-sm font-semibold">Audit Trail</p>
@@ -213,7 +213,7 @@ export default function ShowIntroducer() {
                                         )}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="group flex items-center justify-between rounded-md border bg-card px-3 py-2 text-xs transition hover:border-primary/40 hover:shadow-sm"
+                                        className="group hover: flex items-center justify-between rounded-md border bg-card px-3 py-2 text-xs transition hover:border-primary/40"
                                     >
                                         {/* Left: Event + User */}
                                         <div className="flex items-center gap-2 overflow-hidden">

@@ -215,7 +215,7 @@ const RolePermissionForm = ({
                                                                 key={perm.id}
                                                                 className={`group flex cursor-pointer items-center justify-between rounded-lg border px-3 py-2 text-sm transition-all ${
                                                                     checked
-                                                                        ? 'border-primary bg-primary/10 shadow-sm'
+                                                                        ? 'border-primary bg-primary/10'
                                                                         : 'hover:bg-muted/50'
                                                                 }`}
                                                             >

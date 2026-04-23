@@ -95,13 +95,13 @@ export const SubLedgerSearchInput: React.FC<SubLedgerSearchInputProps> = ({
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={placeholder || 'Search ledgers...'}
-                    className="focus:ring-primary/50 h-8 w-full rounded-md border bg-background px-3 pr-10 text-sm focus:outline-none focus:ring-2"
+                    className="h-8 w-full rounded-md border bg-background px-3 pr-10 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
                 />
 
                 <button
                     type="button"
                     onClick={searchLedgers}
-                    className="absolute right-1 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-primary"
+                    className="absolute top-1/2 right-1 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-primary"
                     title="Search"
                 >
                     {loading ? (
@@ -114,7 +114,7 @@ export const SubLedgerSearchInput: React.FC<SubLedgerSearchInputProps> = ({
 
             {/* DROPDOWN RESULTS */}
             {showDropdown && ledgers.length > 0 && (
-                <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-background shadow-sm">
+                <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-background">
                     {ledgers.map((ledger) => (
                         <li
                             key={ledger.id}

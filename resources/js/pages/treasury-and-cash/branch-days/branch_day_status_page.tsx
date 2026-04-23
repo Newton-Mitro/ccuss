@@ -64,7 +64,7 @@ export default function BranchDayStatusPage({ branch_day, sessions }: Props) {
             ) : (
                 <div className="space-y-4">
                     {/* STATUS STRIP */}
-                    <div className="flex items-center justify-between rounded-xl border bg-card px-4 py-3 shadow-sm">
+                    <div className="flex items-center justify-between rounded-xl border bg-card px-4 py-3">
                         <div className="flex items-center gap-3">
                             <StatusDot status={branch_day.status} />
                             <span className="text-sm font-medium">
@@ -210,7 +210,7 @@ const StatusDot = ({ status }: { status: string }) => {
 
 function Stat({ label, value }: { label: string; value?: string }) {
     return (
-        <div className="rounded-xl border bg-card px-3 py-2 shadow-sm">
+        <div className="rounded-xl border bg-card px-3 py-2">
             <p className="text-[10px] text-muted-foreground">{label}</p>
             <p className="truncate text-sm font-semibold">{value || '—'}</p>
         </div>

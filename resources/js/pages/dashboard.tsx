@@ -310,7 +310,7 @@ export default function DashboardPage() {
                         <div
                             key={idx}
                             onClick={() => router.visit(card.route)}
-                            className="flex cursor-pointer items-center rounded-xl border bg-card p-4 shadow-sm transition-all hover:scale-[1.02] hover:shadow-md"
+                            className="flex cursor-pointer items-center rounded-xl border bg-card p-4 transition-all hover:scale-[1.02] hover:shadow-md"
                             style={{
                                 backgroundColor: `${card.color}15`,
                                 borderColor: `${card.color}40`,
@@ -334,14 +334,14 @@ export default function DashboardPage() {
 
                 {/* Charts */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="rounded-xl border bg-card p-4 shadow-sm">
+                    <div className="rounded-xl border bg-card p-4">
                         <h2 className="mb-3 text-lg font-semibold">
                             Top Visited Routes
                         </h2>
                         <Bar data={routeVisitedData} options={chartOptions} />
                     </div>
 
-                    <div className="rounded-xl border bg-card p-4 shadow-sm">
+                    <div className="rounded-xl border bg-card p-4">
                         <h2 className="mb-3 text-lg font-semibold">
                             Monthly Visitors
                         </h2>
@@ -351,14 +351,14 @@ export default function DashboardPage() {
                         />
                     </div>
 
-                    <div className="rounded-xl border bg-card p-4 shadow-sm">
+                    <div className="rounded-xl border bg-card p-4">
                         <h2 className="mb-3 text-lg font-semibold">
                             Branches vs Customers
                         </h2>
                         <Doughnut data={doughnutData} options={chartOptions} />
                     </div>
 
-                    <div className="rounded-xl border bg-card p-4 shadow-sm">
+                    <div className="rounded-xl border bg-card p-4">
                         <h2 className="mb-3 text-lg font-semibold">
                             KPI Radar
                         </h2>
@@ -368,7 +368,7 @@ export default function DashboardPage() {
 
                 <div className="grid grid-cols-1 gap-4 bg-card md:grid-cols-2">
                     {/* 🧾 Audit Logs Section */}
-                    <div className="rounded-xl border p-4 shadow-sm">
+                    <div className="rounded-xl border p-4">
                         <h2 className="mb-3 text-lg font-semibold">
                             Audit Log Activity
                         </h2>
@@ -378,7 +378,7 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Audit Logs */}
-                    <div className="rounded-xl border p-4 shadow-sm">
+                    <div className="rounded-xl border p-4">
                         <h2 className="mb-3 text-lg font-semibold">
                             Recent Audit Logs
                         </h2>

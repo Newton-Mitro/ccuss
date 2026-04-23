@@ -210,7 +210,7 @@ export default function Index() {
                         audits.data.map((a) => (
                             <div
                                 key={a.id}
-                                className="rounded border bg-background p-3 shadow-sm"
+                                className="rounded border bg-background p-3"
                             >
                                 <div className="mb-2 flex items-center justify-between">
                                     <div className="text-sm font-medium">

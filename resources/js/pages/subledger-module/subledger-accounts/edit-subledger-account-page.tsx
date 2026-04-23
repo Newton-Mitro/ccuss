@@ -56,7 +56,7 @@ export default function Edit({ account, subledgers, types, statuses }: any) {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="mt-4 space-y-3 rounded-xl border bg-card p-8 shadow-sm"
+                    className="mt-4 space-y-3 rounded-xl border bg-card p-8"
                 >
                     {/* 🔹 Basic Info */}
                     <div>

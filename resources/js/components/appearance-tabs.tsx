@@ -26,7 +26,7 @@ export default function AppearanceToggleTab({
     return (
         <div className={cn('space-y-4', className)} {...props}>
             {/* Mode Selector */}
-            <div className="inline-flex rounded-full bg-secondary p-1 shadow-inner">
+            <div className="inline-flex rounded-full bg-secondary p-1">
                 {modeTabs.map(({ value, icon: Icon, label }) => (
                     <button
                         key={value}

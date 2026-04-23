@@ -35,7 +35,7 @@ function ShowUser() {
                 />
 
                 {/* 🔹 Header Card */}
-                <div className="flex items-center gap-4 rounded-lg border bg-card p-4 shadow-sm">
+                <div className="flex items-center gap-4 rounded-lg border bg-card p-4">
                     <Avatar className="h-18 w-18 overflow-hidden rounded-full">
                         <AvatarImage src={user?.avatar} alt={user?.name} />
                         <AvatarFallback className="rounded-lg bg-muted text-sm text-muted-foreground">
@@ -66,7 +66,7 @@ function ShowUser() {
                 </div>
 
                 {/* 🔹 Basic Info */}
-                <div className="rounded-lg border bg-card p-4 shadow-sm">
+                <div className="rounded-lg border bg-card p-4">
                     <h3 className="text-md mb-2 font-semibold text-info">
                         Basic Info
                     </h3>
@@ -89,7 +89,7 @@ function ShowUser() {
                 </div>
 
                 {/* 🔹 Permissions */}
-                <div className="rounded-lg border bg-card p-4 shadow-sm">
+                <div className="rounded-lg border bg-card p-4">
                     <h3 className="text-md mb-2 font-semibold text-info">
                         Permissions
                     </h3>

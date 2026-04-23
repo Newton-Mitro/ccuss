@@ -24,7 +24,7 @@ export default function Show({ subledger }: any) {
                     description="Detailed view of the selected subledger account."
                 />
 
-                <div className="mt-4 space-y-4 rounded-xl border bg-card p-8 shadow-sm">
+                <div className="mt-4 space-y-4 rounded-xl border bg-card p-8">
                     {/* 🔹 Basic Details */}
                     <div>
                         <h3 className="text-lg font-semibold text-info">

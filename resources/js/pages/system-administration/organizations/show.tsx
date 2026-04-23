@@ -28,7 +28,7 @@ function Show() {
                 />
 
                 {/* 🔹 Header Card */}
-                <div className="flex items-center gap-4 rounded-lg border bg-card p-4 shadow-sm">
+                <div className="flex items-center gap-4 rounded-lg border bg-card p-4">
                     {organization.logo_url ? (
                         <img
                             src={organization.logo_url}
@@ -53,7 +53,7 @@ function Show() {
                 </div>
 
                 {/* 🔹 Basic Details */}
-                <div className="rounded-lg border bg-card p-4 shadow-sm">
+                <div className="rounded-lg border bg-card p-4">
                     <h3 className="text-md mb-2 font-semibold text-info">
                         Basic Details
                     </h3>
@@ -74,7 +74,7 @@ function Show() {
                 </div>
 
                 {/* 🔹 Contact & Address */}
-                <div className="rounded-lg border bg-card p-4 shadow-sm">
+                <div className="rounded-lg border bg-card p-4">
                     <h3 className="text-md mb-2 font-semibold text-info">
                         Contact & Address
                     </h3>
@@ -106,7 +106,7 @@ function Show() {
                 </div>
 
                 {/* 🔹 Report Config */}
-                <div className="rounded-lg border bg-card p-4 shadow-sm">
+                <div className="rounded-lg border bg-card p-4">
                     <h3 className="text-md mb-2 font-semibold text-info">
                         Report Configuration
                     </h3>

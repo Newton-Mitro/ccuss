@@ -267,7 +267,7 @@ export default function Index() {
                     {branchDays.data.map((bd) => (
                         <div
                             key={bd.id}
-                            className="rounded-md border border-border bg-card p-3 shadow-sm"
+                            className="rounded-md border border-border bg-card p-3"
                         >
                             <div className="flex items-center justify-between">
                                 <div>

@@ -254,14 +254,14 @@ export default function Show({ customer }: ShowProps) {
                     title="KYC Profile"
                 >
                     <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
-                        <div className="rounded-md border bg-card px-4 py-2 shadow-sm hover:shadow-md">
+                        <div className="rounded-md border bg-card px-4 py-2 hover:shadow-md">
                             <InfoItem
                                 label="KYC Level"
                                 value={customer.kyc_profile.kyc_level}
                                 valueClassName="capitalize"
                             />
                         </div>
-                        <div className="rounded-md border bg-card px-4 py-2 shadow-sm hover:shadow-md">
+                        <div className="rounded-md border bg-card px-4 py-2 hover:shadow-md">
                             <InfoItem
                                 label="Risk Level"
                                 value={customer.kyc_profile.risk_level}
@@ -553,7 +553,7 @@ export default function Show({ customer }: ShowProps) {
                     title="Online Service Account"
                 >
                     <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
-                        <div className="flex items-center gap-2 rounded-md border bg-card p-4 shadow-sm hover:shadow-md">
+                        <div className="flex items-center gap-2 rounded-md border bg-card p-4 hover:shadow-md">
                             <UserInfo
                                 user={customer.online_service_client}
                                 showEmail
@@ -575,7 +575,7 @@ export default function Show({ customer }: ShowProps) {
                                 href={route('audits.batch', audit.batch_id)}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="group flex items-center justify-between rounded-md border bg-card px-3 py-2 text-xs transition hover:border-primary/40 hover:shadow-sm"
+                                className="group hover: flex items-center justify-between rounded-md border bg-card px-3 py-2 text-xs transition hover:border-primary/40"
                             >
                                 {/* Left: Event + User */}
                                 <div className="flex items-center gap-2 overflow-hidden">
@@ -644,7 +644,7 @@ const DataCard = ({
     onEdit?: () => void;
     onDelete?: () => void;
 }) => (
-    <div className="group relative rounded-md border bg-card p-3 shadow-sm transition hover:shadow-md">
+    <div className="group relative rounded-md border bg-card p-3 transition hover:shadow-md">
         {/* Edit/Delete buttons */}
         {(onEdit || onDelete || onShow) && (
             <div className="absolute top-1 right-1 flex gap-1 opacity-0 transition group-hover:opacity-100">
