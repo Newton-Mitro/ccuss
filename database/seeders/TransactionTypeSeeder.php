@@ -1,7 +1,7 @@
 <?php
 namespace Database\Seeders;
 
-use App\FinanceAndAccounting\Models\TransactionType;
+use App\GeneralAccounting\Models\TransactionType;
 use Illuminate\Database\Seeder;
 
 class TransactionTypeSeeder extends Seeder

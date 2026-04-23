@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use App\FinanceAndAccounting\Models\LedgerAccount;
+use App\GeneralAccounting\Models\LedgerAccount;
 use App\SystemAdministration\Models\Organization;
 
 class ChartOfAccountsSeeder extends Seeder

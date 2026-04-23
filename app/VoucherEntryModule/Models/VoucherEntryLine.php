@@ -2,7 +2,7 @@
 
 namespace App\VoucherEntryModule\Models;
 
-use App\FinanceAndAccounting\Models\LedgerAccount;
+use App\GeneralAccounting\Models\LedgerAccount;
 use App\SubledgerModule\Models\SubledgerAccount;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Traits\Auditable;

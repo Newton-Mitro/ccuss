@@ -5,13 +5,13 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-use App\FinanceAndAccounting\Models\LedgerAccount;
-use App\FinanceAndAccounting\Models\LedgerAccountBalance;
-use App\FinanceAndAccounting\Models\Voucher;
-use App\FinanceAndAccounting\Models\VoucherLine;
-use App\FinanceAndAccounting\Models\FiscalPeriod;
-use App\FinanceAndAccounting\Models\FiscalYear;
-use App\FinanceAndAccounting\Models\InstrumentType;
+use App\GeneralAccounting\Models\LedgerAccount;
+use App\GeneralAccounting\Models\LedgerAccountBalance;
+use App\GeneralAccounting\Models\Voucher;
+use App\GeneralAccounting\Models\VoucherLine;
+use App\GeneralAccounting\Models\FiscalPeriod;
+use App\GeneralAccounting\Models\FiscalYear;
+use App\GeneralAccounting\Models\InstrumentType;
 
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\User;

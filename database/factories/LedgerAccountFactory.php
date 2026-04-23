@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\FinanceAndAccounting\Models\LedgerAccount;
+use App\GeneralAccounting\Models\LedgerAccount;
 use App\SystemAdministration\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\Factory;
 

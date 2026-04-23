@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\FinanceAndAccounting\Models\FiscalPeriod;
-use App\FinanceAndAccounting\Models\FiscalYear;
+use App\GeneralAccounting\Models\FiscalPeriod;
+use App\GeneralAccounting\Models\FiscalYear;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Carbon\Carbon;
 

@@ -2,7 +2,7 @@
 
 namespace App\SubledgerModule\Controllers;
 
-use App\FinanceAndAccounting\Models\LedgerAccount;
+use App\GeneralAccounting\Models\LedgerAccount;
 use App\Http\Controllers\Controller;
 use App\SubledgerModule\Models\Subledger;
 use Illuminate\Http\Request;

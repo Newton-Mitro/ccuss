@@ -2,7 +2,7 @@
 
 namespace App\SubledgerModule\Models;
 
-use App\FinanceAndAccounting\Models\LedgerAccount;
+use App\GeneralAccounting\Models\LedgerAccount;
 use App\SystemAdministration\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

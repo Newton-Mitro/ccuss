@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\FinanceAndAccounting\Models\FiscalYear;
+use App\GeneralAccounting\Models\FiscalYear;
 use App\SystemAdministration\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Carbon\Carbon;

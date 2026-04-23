@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\FinanceAndAccounting\Models\FiscalPeriod;
-use App\FinanceAndAccounting\Models\FiscalYear;
+use App\GeneralAccounting\Models\FiscalPeriod;
+use App\GeneralAccounting\Models\FiscalYear;
 use App\SystemAdministration\Models\Organization;
 use Illuminate\Database\Seeder;
 use Carbon\Carbon;

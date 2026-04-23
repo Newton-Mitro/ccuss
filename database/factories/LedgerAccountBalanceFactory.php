@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\FinanceAndAccounting\Models\LedgerAccount;
-use App\FinanceAndAccounting\Models\LedgerAccountBalance;
-use App\FinanceAndAccounting\Models\FiscalPeriod;
+use App\GeneralAccounting\Models\LedgerAccount;
+use App\GeneralAccounting\Models\LedgerAccountBalance;
+use App\GeneralAccounting\Models\FiscalPeriod;
 use App\SystemAdministration\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\Factory;
 

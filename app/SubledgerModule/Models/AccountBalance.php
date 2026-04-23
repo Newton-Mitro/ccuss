@@ -2,7 +2,7 @@
 
 namespace App\SubledgerModule\Models;
 
-use App\FinanceAndAccounting\Models\FiscalPeriod;
+use App\GeneralAccounting\Models\FiscalPeriod;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

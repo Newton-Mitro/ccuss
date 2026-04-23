@@ -314,12 +314,12 @@ export default function CustomAuthLayout({
                                         {auth?.user?.branch?.name || 'N/A'}
                                     </span>
                                 </div>
-                                <div className="pt-3 text-xs text-muted-foreground/70">
+                                <div className="pt-3 text-xs text-muted-foreground/90">
                                     {`${appName as string}` +
                                         ' | ' +
                                         `${appVersion as string}`}
                                 </div>
-                                <div className="text-center text-[10px] text-muted-foreground/70">
+                                <div className="text-center text-[10px] text-muted-foreground/90">
                                     {`© ${new Date().getFullYear()} Denton Studio. All rights reserved.`}
                                 </div>
                             </div>
