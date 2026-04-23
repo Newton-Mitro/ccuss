@@ -108,7 +108,7 @@ class UserController extends Controller
         }
 
         return redirect()->route('users.index')
-            ->with('success', 'User created successfully.');
+            ->with('success', $user->name . ' User created successfully.');
     }
 
     /* ==========================
@@ -182,7 +182,7 @@ class UserController extends Controller
         }
 
         return redirect()->route('users.index')
-            ->with('success', 'User updated successfully.');
+            ->with('success', $user->name . ' User updated successfully.');
     }
 
     /* ==========================
@@ -198,6 +198,6 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('users.index')
-            ->with('success', 'User deleted successfully.');
+            ->with('success', $user->name . ' User deleted successfully.');
     }
 }

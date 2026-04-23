@@ -77,7 +77,7 @@ class ChequeBookController extends Controller
             'issued_at' => 'nullable|date',
         ]);
 
-        DB::transaction(function () use ($validated) {
+        $chequeBook = DB::transaction(function () use ($validated) {
 
             $book = ChequeBook::create($validated);
 
@@ -107,11 +107,13 @@ class ChequeBookController extends Controller
 
             // ⚡ Correct bulk insert
             Cheque::insert($cheques);
+
+            return $book;
         });
 
         return redirect()
             ->route('cheque-books.index')
-            ->with('success', 'Cheque book created successfully');
+            ->with('success', 'Cheque book ' . $chequeBook->book_no . ' created successfully');
     }
 
     /*
@@ -161,7 +163,7 @@ class ChequeBookController extends Controller
 
         return redirect()
             ->route('cheque-books.index')
-            ->with('success', 'Cheque book updated successfully');
+            ->with('success', 'Cheque book ' . $chequeBook->book_no . ' updated successfully');
     }
 
     /*
@@ -176,6 +178,6 @@ class ChequeBookController extends Controller
             $chequeBook->delete();
         });
 
-        return back()->with('success', 'Cheque book deleted successfully');
+        return back()->with('success', 'Cheque book ' . $chequeBook->book_no . ' deleted successfully');
     }
 }

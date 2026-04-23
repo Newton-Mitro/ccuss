@@ -16,8 +16,6 @@ class AccountingReportController
     | Trial Balance
     |--------------------------------------------------------------------------
     */
-
-
     public function trialBalance(Request $request): Response
     {
         $fiscalYearId = $request->integer('fiscal_year_id');

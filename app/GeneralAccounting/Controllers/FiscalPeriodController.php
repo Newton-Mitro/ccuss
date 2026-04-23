@@ -64,11 +64,11 @@ class FiscalPeriodController
             ]);
         }
 
-        FiscalPeriod::create($validated);
+        $fiscalPeriod = FiscalPeriod::create($validated);
 
         return redirect()
             ->route('fiscal-periods.index')
-            ->with('success', 'Fiscal Period created.');
+            ->with('success', $fiscalPeriod->period_name . ' Fiscal Period created.');
     }
 
     public function edit(FiscalPeriod $fiscalPeriod): Response
@@ -102,7 +102,7 @@ class FiscalPeriodController
 
         return redirect()
             ->route('fiscal-periods.index')
-            ->with('success', 'Fiscal Period updated.');
+            ->with('success', $fiscalPeriod->period_name . ' Fiscal Period updated.');
     }
 
     public function destroy(FiscalPeriod $fiscalPeriod)
@@ -118,6 +118,6 @@ class FiscalPeriodController
 
         return redirect()
             ->route('fiscal-periods.index')
-            ->with('success', 'Fiscal Period deleted.');
+            ->with('success', $fiscalPeriod->period_name . ' Fiscal Period deleted.');
     }
 }

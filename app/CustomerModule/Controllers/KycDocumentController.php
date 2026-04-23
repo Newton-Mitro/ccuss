@@ -81,7 +81,7 @@ class KycDocumentController extends Controller
         $file = $request->file('file');
         $path = $file->store('uploads/customers/' . $request->customer_id, 'public');
 
-        KycDocument::create([
+        $kycDocument = KycDocument::create([
             'customer_id' => $request->customer_id,
             'document_type' => $request->document_type,
             'file_name' => $file->getClientOriginalName(),
@@ -92,7 +92,7 @@ class KycDocumentController extends Controller
 
         return redirect()
             ->route('customers.show', $request->customer_id)
-            ->with('success', 'KYC document added successfully.');
+            ->with('success', $kycDocument->customer->name . ' KYC document added successfully.');
     }
 
     public function edit(KycDocument $kycDocument)
@@ -115,7 +115,7 @@ class KycDocumentController extends Controller
         $kycDocument->delete();
 
         return redirect()->back()->with([
-            'success' => 'KYC document deleted successfully.',
+            'success' => $kycDocument->customer->name . ' KYC document deleted successfully.',
         ]);
     }
 
@@ -132,7 +132,7 @@ class KycDocumentController extends Controller
             'rejection_reason' => null, // reset if previously rejected
         ]);
 
-        return redirect()->back()->with('success', 'Family relation verified successfully.');
+        return redirect()->back()->with('success', $kycDocument->customer->name . ' KYC document verified successfully.');
     }
 
     public function reject(Request $request, KycDocument $kycDocument)
@@ -152,6 +152,6 @@ class KycDocumentController extends Controller
             'rejection_reason' => $request->rejection_reason,
         ]);
 
-        return redirect()->back()->with('success', 'Family relation rejected successfully.');
+        return redirect()->back()->with('success', $kycDocument->customer->name . ' KYC document rejected successfully.');
     }
 }

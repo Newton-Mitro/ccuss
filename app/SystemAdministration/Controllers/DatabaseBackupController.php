@@ -71,7 +71,7 @@ class DatabaseBackupController extends Controller
             $log->delete();
             \Log::info("Deleted database log record for backup: {$log->file_path}");
 
-            return redirect()->back()->with('success', 'Backup deleted successfully.');
+            return redirect()->back()->with('success', $log->file_name . ' Backup deleted successfully.');
         } catch (\Exception $e) {
             \Log::error('Failed to delete backup: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Failed to delete the backup.');

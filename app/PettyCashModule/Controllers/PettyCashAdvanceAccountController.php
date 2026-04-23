@@ -79,7 +79,7 @@ class PettyCashAdvanceAccountController extends Controller
             'status' => 'in:active,inactive',
         ]);
 
-        DB::transaction(function () use ($data, $request) {
+        $advance = DB::transaction(function () use ($data, $request) {
 
             // 1. Create advance account
             $advance = PettyCashAdvanceAccount::create([
@@ -109,11 +109,13 @@ class PettyCashAdvanceAccountController extends Controller
             $advance->update([
                 'subledger_account_id' => $subledgerAccount->id,
             ]);
+
+            return $advance;
         });
 
         return redirect()
             ->route('petty-cash-advance-accounts.index')
-            ->with('success', 'Employee Petty Cash Account created successfully');
+            ->with('success', $advance->name . ' Employee Petty Cash Account created successfully');
     }
 
     public function edit(PettyCashAdvanceAccount $pettyCashAdvanceAccount)
@@ -150,7 +152,7 @@ class PettyCashAdvanceAccountController extends Controller
             'status' => 'in:active,inactive',
         ]);
 
-        DB::transaction(function () use ($data, $pettyCashAdvanceAccount) {
+        $advance = DB::transaction(function () use ($data, $pettyCashAdvanceAccount) {
 
             $pettyCashAdvanceAccount->update([
                 'petty_cash_account_id' => $data['petty_cash_account_id'],
@@ -162,21 +164,24 @@ class PettyCashAdvanceAccountController extends Controller
                 'name' => ($data['name'] ?? 'Advance - Employee') . ' (Advance)',
                 'account_number' => $data['account_number'],
             ]);
+
+            return $pettyCashAdvanceAccount;
         });
 
         return redirect()
             ->route('petty-cash-advance-accounts.index')
-            ->with('success', 'Employee Petty Cash Account updated successfully');
+            ->with('success', $advance->name . ' Employee Petty Cash Account updated successfully');
     }
 
     public function destroy(PettyCashAdvanceAccount $pettyCashAdvanceAccount)
     {
-        DB::transaction(function () use ($pettyCashAdvanceAccount) {
+        $advance = DB::transaction(function () use ($pettyCashAdvanceAccount) {
             $pettyCashAdvanceAccount->subledgerAccount?->delete();
             $pettyCashAdvanceAccount->delete();
+            return $pettyCashAdvanceAccount;
         });
 
-        return back()->with('success', 'Deleted successfully');
+        return back()->with('success', $advance->name . ' Employee Petty Cash Account deleted successfully');
     }
 
     public function createPettyCashAdvanceEntry()

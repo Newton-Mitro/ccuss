@@ -119,7 +119,7 @@ class TellerController extends Controller
 
             return redirect()
                 ->route('tellers.index')
-                ->with('success', 'Teller created successfully.');
+                ->with('success', $teller->name . ' Teller created successfully.');
         });
     }
 
@@ -173,7 +173,7 @@ class TellerController extends Controller
 
         return redirect()
             ->route('tellers.index')
-            ->with('success', 'Teller updated successfully.');
+            ->with('success', $teller->name . ' Teller updated successfully.');
     }
 
     public function show(Teller $teller)
@@ -206,6 +206,6 @@ class TellerController extends Controller
 
         return redirect()
             ->route('tellers.index')
-            ->with('success', 'Teller deleted successfully.');
+            ->with('success', $teller->name . ' Teller deleted successfully.');
     }
 }

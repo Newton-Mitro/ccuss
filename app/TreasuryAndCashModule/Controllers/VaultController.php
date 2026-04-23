@@ -67,7 +67,7 @@ class VaultController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        DB::transaction(function () use ($data, $organization) {
+        $vault = DB::transaction(function () use ($data, $organization) {
             // 1. Create Vault
             $vault = Vault::create([
                 'branch_id' => $data['branch_id'],
@@ -90,9 +90,11 @@ class VaultController extends Controller
             $vault->update([
                 'subledger_account_id' => $subledgerAccount->id,
             ]);
+
+            return $vault;
         });
 
-        return redirect()->route('vaults.index')->with('success', 'Vault created successfully!');
+        return redirect()->route('vaults.index')->with('success', $vault->name . ' Vault created successfully!');
     }
 
     public function edit(Vault $vault)
@@ -144,7 +146,7 @@ class VaultController extends Controller
             ]);
         });
 
-        return redirect()->route('vaults.index')->with('success', 'Vault updated successfully.');
+        return redirect()->route('vaults.index')->with('success', $vault->name . ' Vault updated successfully.');
     }
 
     public function destroy(Vault $vault)
@@ -164,6 +166,6 @@ class VaultController extends Controller
             $vault->delete();
         });
 
-        return back()->with('success', 'Vault deleted successfully.');
+        return back()->with('success', $vault->name . ' Vault deleted successfully.');
     }
 }

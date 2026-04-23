@@ -160,7 +160,7 @@ class CustomerIntroducerController extends Controller
 
         return redirect()
             ->route('customers.show', $data['introduced_customer_id'])
-            ->with('success', 'Introducer added successfully.');
+            ->with('success', $introducer->introducer->name . ' added as introducer successfully.');
     }
 
     public function update(
@@ -182,7 +182,7 @@ class CustomerIntroducerController extends Controller
 
         return redirect()
             ->route('customers.show', $introducer->introduced_customer_id)
-            ->with('success', 'Introducer updated successfully.');
+            ->with('success', $introducer->introducer->name . ' introducer updated successfully.');
     }
 
     public function verify(
@@ -213,7 +213,7 @@ class CustomerIntroducerController extends Controller
     {
         $introducer->delete();
         return redirect()->back()->with([
-            'success' => 'Introducer deleted successfully.',
+            'success' => $introducer->introducer->name . ' introducer deleted successfully.',
         ]);
     }
 
@@ -230,7 +230,7 @@ class CustomerIntroducerController extends Controller
             'rejection_reason' => null, // reset if previously rejected
         ]);
 
-        return redirect()->back()->with('success', 'Family relation verified successfully.');
+        return redirect()->back()->with('success', $introducer->introducer->name . ' introducer verified successfully.');
     }
 
     public function reject(Request $request, CustomerIntroducer $introducer)
@@ -250,6 +250,6 @@ class CustomerIntroducerController extends Controller
             'rejection_reason' => $request->rejection_reason,
         ]);
 
-        return redirect()->back()->with('success', 'Family relation rejected successfully.');
+        return redirect()->back()->with('success', $introducer->introducer->name . ' introducer rejected successfully.');
     }
 }

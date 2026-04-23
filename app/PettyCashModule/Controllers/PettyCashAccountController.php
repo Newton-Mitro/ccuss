@@ -70,7 +70,6 @@ class PettyCashAccountController extends Controller
 
     public function store(Request $request)
     {
-
         $organizationId = $request->user()->organization_id;
         $data = $request->validate([
             'name' => 'required|string|max:255',
@@ -80,7 +79,7 @@ class PettyCashAccountController extends Controller
             'status' => 'in:active,inactive',
         ]);
 
-        DB::transaction(function () use ($data, $organizationId) {
+        $pettyCash = DB::transaction(function () use ($data, $organizationId) {
 
             // 1. Create petty cash account
             $pettyCash = PettyCashAccount::create([
@@ -109,11 +108,13 @@ class PettyCashAccountController extends Controller
             $pettyCash->update([
                 'subledger_account_id' => $account->id,
             ]);
+
+            return $pettyCash;
         });
 
         return redirect()
             ->route('petty-cash-accounts.index')
-            ->with('success', 'Petty Cash Account created successfully');
+            ->with('success', $pettyCash->name . ' Petty Cash Account created successfully');
     }
 
     public function edit(PettyCashAccount $pettyCashAccount)
@@ -164,7 +165,7 @@ class PettyCashAccountController extends Controller
 
         return redirect()
             ->route('petty-cash-accounts.index')
-            ->with('success', 'Updated successfully');
+            ->with('success', $pettyCashAccount->name . ' Petty Cash Account updated successfully');
     }
 
     public function destroy(PettyCashAccount $pettyCashAccount)
@@ -174,7 +175,7 @@ class PettyCashAccountController extends Controller
             $pettyCashAccount->delete();
         });
 
-        return back()->with('success', 'Deleted successfully');
+        return back()->with('success', $pettyCashAccount->name . ' Petty Cash Account deleted successfully');
     }
 
     public function createPettyCashReplenishment()

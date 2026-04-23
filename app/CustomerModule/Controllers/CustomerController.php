@@ -171,7 +171,7 @@ class CustomerController extends Controller
         });
 
         return redirect()->route('customers.show', $customer->id)
-            ->with('success', 'Customer created successfully.');
+            ->with('success', 'Customer ' . $customer->name . ' created successfully.');
     }
 
     /* ==========================
@@ -289,7 +289,7 @@ class CustomerController extends Controller
         });
 
         return redirect()->route('customers.show', $customer->id)
-            ->with('success', 'Customer updated successfully.');
+            ->with('success', 'Customer ' . $customer->name . ' updated successfully.');
     }
 
     /* ==========================
@@ -300,6 +300,6 @@ class CustomerController extends Controller
         $customer->delete();
 
         return redirect()->route('customers.index')
-            ->with('success', 'Customer deleted successfully.');
+            ->with('success', 'Customer ' . $customer->name . ' deleted successfully.');
     }
 }

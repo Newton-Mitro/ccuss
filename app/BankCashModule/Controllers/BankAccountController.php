@@ -54,8 +54,7 @@ class BankAccountController extends Controller
 
     public function store(Request $request)
     {
-        $organization = Auth::user()->organization;
-        $branch = Auth::user()->branch;
+        $user = Auth::user();
 
         $data = $request->validate([
             // account layer
@@ -70,25 +69,29 @@ class BankAccountController extends Controller
             'branch_name' => 'nullable|string|max:255',
             'swift_code' => 'nullable|string|max:50',
             'routing_number' => 'nullable|string|max:50',
-            'status' => 'nullable|in:active,inactive', // ✅ NEW
+            'status' => 'nullable|in:active,inactive',
         ]);
 
-        DB::transaction(function () use ($data, $organization, $branch) {
+        $bankAccount = DB::transaction(function () use ($data, $user) {
 
-            // 1. Create bank account
+            /* ---------------------------------------------
+            | 1. Create Bank Account
+            --------------------------------------------- */
             $bankAccount = BankAccount::create([
                 'bank_name' => $data['bank_name'],
                 'branch_name' => $data['branch_name'] ?? null,
                 'account_number' => $data['account_number'],
                 'swift_code' => $data['swift_code'] ?? null,
                 'routing_number' => $data['routing_number'] ?? null,
-                'status' => $data['status'] ?? 'active', // ✅ NEW
+                'status' => $data['status'] ?? 'active',
             ]);
 
-            // 2. Create central ledger account
-            $subledger_account = SubledgerAccount::create([
-                'organization_id' => $organization->id ?? null,
-                'branch_id' => $branch->id ?? null,
+            /* ---------------------------------------------
+            | 2. Create Subledger Account
+            --------------------------------------------- */
+            $subledgerAccount = SubledgerAccount::create([
+                'organization_id' => $user->organization_id ?? null,
+                'branch_id' => $user->branch_id ?? null,
                 'account_number' => $data['account_number'],
                 'name' => $data['name'] ?? $data['bank_name'],
                 'type' => 'bank',
@@ -97,15 +100,19 @@ class BankAccountController extends Controller
                 'accountable_id' => $bankAccount->id,
             ]);
 
-            // 3. Link back
+            /* ---------------------------------------------
+            | 3. Link Back (bi-directional consistency)
+            --------------------------------------------- */
             $bankAccount->update([
-                'subledger_account_id' => $subledger_account->id,
+                'subledger_account_id' => $subledgerAccount->id,
             ]);
+
+            return $bankAccount;
         });
 
         return redirect()
             ->route('bank-accounts.index')
-            ->with('success', 'Bank account created successfully!');
+            ->with('success', "{$bankAccount->bank_name} bank account created successfully!");
     }
 
     public function show(BankAccount $bankAccount)
@@ -157,7 +164,7 @@ class BankAccountController extends Controller
 
         return redirect()
             ->route('bank-accounts.index')
-            ->with('success', 'Bank account updated successfully!');
+            ->with('success', $bankAccount->bank_name . ' Bank account updated successfully!');
     }
 
     public function destroy(BankAccount $bankAccount)
@@ -169,6 +176,6 @@ class BankAccountController extends Controller
 
         return redirect()
             ->route('bank-accounts.index')
-            ->with('success', 'Bank account deleted successfully!');
+            ->with('success', $bankAccount->bank_name . ' Bank account deleted successfully!');
     }
 }

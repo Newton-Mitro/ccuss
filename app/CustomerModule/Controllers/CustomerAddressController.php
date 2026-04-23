@@ -62,7 +62,7 @@ class CustomerAddressController extends Controller
 
         return redirect()
             ->route('customers.show', $data['customer_id'])
-            ->with('success', 'Address created successfully.');
+            ->with('success', $address->type . ' address added successfully.');
     }
 
     public function update(UpdateAddressRequest $request, CustomerAddress $address)
@@ -84,7 +84,7 @@ class CustomerAddressController extends Controller
 
         return redirect()
             ->route('customers.show', $data['customer_id'])
-            ->with('success', 'Address updated successfully.');
+            ->with('success', $address->type . ' address updated successfully.');
     }
 
     public function destroy(CustomerAddress $address)
@@ -92,7 +92,7 @@ class CustomerAddressController extends Controller
         $address->delete();
 
         return redirect()->back()->with([
-            'success' => 'Address deleted successfully.',
+            'success' => $address->type . ' address deleted successfully.',
         ]);
     }
 }

@@ -145,7 +145,7 @@ class TellerSessionController extends Controller
 
             return redirect()
                 ->route('teller-sessions.index')
-                ->with('success', 'Teller session opened successfully');
+                ->with('success', $teller->name . ' Teller session opened successfully');
         });
     }
 
@@ -212,7 +212,7 @@ class TellerSessionController extends Controller
                 'remarks' => $data['remarks'] ?? $tellerSession->remarks,
             ]);
 
-            return back()->with('success', 'Teller session closed successfully');
+            return back()->with('success', $tellerSession->teller->name . ' Teller session closed successfully');
         });
     }
 

@@ -56,7 +56,7 @@ class FiscalYearController
             'is_closed' => 'boolean', // ✅ FIXED
         ]);
 
-        DB::transaction(function () use ($validated) {
+        $fiscalYear = DB::transaction(function () use ($validated) {
 
             // 🔥 Only one active fiscal year allowed
             if (empty($validated['is_closed'])) {
@@ -67,11 +67,12 @@ class FiscalYearController
 
             // Auto-generate periods
             $this->generateFiscalPeriods($fiscalYear);
+            return $fiscalYear;
         });
 
         return redirect()
             ->route('fiscal-years.index')
-            ->with('success', 'Fiscal Year created with periods.');
+            ->with('success', $fiscalYear->code . ' Fiscal Year created with periods.');
     }
 
     public function edit(FiscalYear $fiscalYear): Response
@@ -107,7 +108,7 @@ class FiscalYearController
 
         return redirect()
             ->route('fiscal-years.index')
-            ->with('success', 'Fiscal Year updated.');
+            ->with('success', $fiscalYear->code . ' Fiscal Year updated.');
     }
 
     public function destroy(FiscalYear $fiscalYear)
@@ -123,7 +124,7 @@ class FiscalYearController
 
         return redirect()
             ->route('fiscal-years.index')
-            ->with('success', 'Fiscal Year deleted.');
+            ->with('success', $fiscalYear->code . ' Fiscal Year deleted.');
     }
 
     // ------------------------

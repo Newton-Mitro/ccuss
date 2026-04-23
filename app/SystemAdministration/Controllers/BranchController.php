@@ -40,11 +40,11 @@ class BranchController extends Controller
 
     public function store(StoreBranchRequest $request)
     {
-        Branch::create($request->validated());
+        $branch = Branch::create($request->validated());
 
         return redirect()
             ->route('branches.index')
-            ->with('success', 'Branch created successfully.');
+            ->with('success', $branch->name . ' Branch created successfully.');
     }
 
     public function show(Branch $branch): Response
@@ -67,7 +67,7 @@ class BranchController extends Controller
 
         return redirect()
             ->route('branches.index')
-            ->with('success', 'Branch updated successfully.');
+            ->with('success', $branch->name . ' Branch updated successfully.');
     }
 
     public function destroy(Branch $branch)
@@ -76,6 +76,6 @@ class BranchController extends Controller
 
         return redirect()
             ->route('branches.index')
-            ->with('success', 'Branch deleted successfully.');
+            ->with('success', $branch->name . ' Branch deleted successfully.');
     }
 }

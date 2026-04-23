@@ -54,11 +54,11 @@ class OrganizationController extends Controller
             $data['logo_path'] = $request->file('logo')->store('uploads/organizations', 'public');
         }
 
-        Organization::create($data);
+        $organization = Organization::create($data);
 
         return redirect()
             ->route('organizations.index')
-            ->with('success', 'Organization created successfully!');
+            ->with('success', $organization->name . ' Organization created successfully!');
     }
 
     /**
@@ -102,7 +102,7 @@ class OrganizationController extends Controller
 
         return redirect()
             ->route('organizations.index')
-            ->with('success', 'Organization updated successfully!');
+            ->with('success', $organization->name . ' Organization updated successfully!');
     }
 
     /**
@@ -119,7 +119,7 @@ class OrganizationController extends Controller
 
         return redirect()
             ->route('organizations.index')
-            ->with('success', 'Organization deleted!');
+            ->with('success', $organization->name . ' Organization deleted!');
     }
 
     /**

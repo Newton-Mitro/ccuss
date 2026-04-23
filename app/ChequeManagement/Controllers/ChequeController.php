@@ -88,17 +88,19 @@ class ChequeController extends Controller
             'remarks' => 'nullable|string',
         ]);
 
-        DB::transaction(function () use ($validated) {
-            Cheque::create([
+        $cheque = DB::transaction(function () use ($validated) {
+            $cheque = Cheque::create([
                 ...$validated,
                 'status' => Cheque::STATUS_ISSUED,
                 'stop_payment' => false,
             ]);
+
+            return $cheque;
         });
 
         return redirect()
             ->route('cheques.index')
-            ->with('success', 'Cheque created successfully');
+            ->with('success', 'Cheque ' . $cheque->cheque_number . ' created successfully');
     }
 
     /*
@@ -165,7 +167,7 @@ class ChequeController extends Controller
 
         return redirect()
             ->route('cheques.index')
-            ->with('success', 'Cheque updated successfully');
+            ->with('success', 'Cheque ' . $cheque->cheque_number . ' updated successfully');
     }
 
     /*
@@ -177,7 +179,7 @@ class ChequeController extends Controller
     {
         $cheque->delete();
 
-        return back()->with('success', 'Cheque deleted successfully');
+        return back()->with('success', 'Cheque ' . $cheque->cheque_number . ' deleted successfully');
     }
 
     /*
@@ -200,7 +202,7 @@ class ChequeController extends Controller
             'status' => Cheque::STATUS_PRESENTED,
         ]);
 
-        return back()->with('success', 'Cheque marked as presented');
+        return back()->with('success', 'Cheque ' . $cheque->cheque_number . ' marked as presented');
     }
 
     public function markCleared(Cheque $cheque)
@@ -222,7 +224,7 @@ class ChequeController extends Controller
             // 🔥 Future upgrade: ledger posting (debit/credit)
         });
 
-        return back()->with('success', 'Cheque cleared successfully');
+        return back()->with('success', 'Cheque ' . $cheque->cheque_number . ' cleared successfully');
     }
 
     public function markBounced(Cheque $cheque)
@@ -236,7 +238,7 @@ class ChequeController extends Controller
             'bounced_at' => now(),
         ]);
 
-        return back()->with('success', 'Cheque marked as bounced');
+        return back()->with('success', 'Cheque ' . $cheque->cheque_number . ' marked as bounced');
     }
 
     public function stopPayment(Cheque $cheque)
@@ -249,6 +251,6 @@ class ChequeController extends Controller
             'stop_payment' => true,
         ]);
 
-        return back()->with('success', 'Stop payment applied successfully');
+        return back()->with('success', 'Cheque ' . $cheque->cheque_number . ' stop payment applied successfully');
     }
 }

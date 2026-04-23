@@ -90,7 +90,7 @@ class BranchDayController extends Controller
             ]);
         }
 
-        BranchDay::create([
+        $branchDay = BranchDay::create([
             'branch_id' => $branchId,
             'business_date' => $request->business_date,
             'opened_at' => now(),
@@ -99,7 +99,7 @@ class BranchDayController extends Controller
 
         return redirect()
             ->route('branch-days.index')
-            ->with('success', 'Branch day opened successfully');
+            ->with('success', $branchDay->business_date . ' Branch day opened successfully');
     }
 
     public function closeBranchDay(BranchDay $branchDay)
@@ -121,7 +121,7 @@ class BranchDayController extends Controller
             'status' => 'closed'
         ]);
 
-        return back()->with('success', 'Branch day closed');
+        return back()->with('success', $branchDay->business_date . ' Branch day closed');
     }
 
     public function show(BranchDay $branchDay)

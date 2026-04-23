@@ -71,11 +71,11 @@ class SubledgerController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        Subledger::create($validated);
+        $subledger = Subledger::create($validated);
 
         return redirect()
             ->route('subledgers.index')
-            ->with('success', 'Subledger created successfully.');
+            ->with('success', $subledger->name . ' Subledger created successfully.');
     }
 
     public function edit(Subledger $subledger)
@@ -111,7 +111,7 @@ class SubledgerController extends Controller
 
         return redirect()
             ->route('subledgers.index')
-            ->with('success', 'Subledger updated successfully.');
+            ->with('success', $subledger->name . ' Subledger updated successfully.');
     }
 
     public function destroy(Subledger $subledger)
@@ -120,7 +120,7 @@ class SubledgerController extends Controller
 
         return redirect()
             ->back()
-            ->with('success', 'Subledger deleted successfully.');
+            ->with('success', $subledger->name . ' Subledger deleted successfully.');
     }
 
     private function types()

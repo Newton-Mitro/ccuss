@@ -100,11 +100,11 @@ class SubledgerAccountController extends Controller
             'branch_id' => 'nullable|exists:branches,id',
         ]);
 
-        SubledgerAccount::create($validated);
+        $subledgerAccount = SubledgerAccount::create($validated);
 
         return redirect()
             ->route('subledger-accounts.index')
-            ->with('success', 'Account created successfully.');
+            ->with('success', $subledgerAccount->name . ' Account created successfully.');
     }
 
     public function show(SubledgerAccount $subledgerAccount): Response
@@ -165,7 +165,7 @@ class SubledgerAccountController extends Controller
 
         return redirect()
             ->route('subledger-accounts.index')
-            ->with('success', 'Account updated successfully.');
+            ->with('success', $subledgerAccount->name . ' Account updated successfully.');
     }
 
     public function destroy(SubledgerAccount $subledgerAccount)
@@ -174,6 +174,6 @@ class SubledgerAccountController extends Controller
 
         return redirect()
             ->back()
-            ->with('success', 'Account deleted successfully.');
+            ->with('success', $subledgerAccount->name . ' Account deleted successfully.');
     }
 }

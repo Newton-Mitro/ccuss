@@ -43,6 +43,6 @@ class RolePermissionController extends Controller
 
         return redirect()
             ->back()
-            ->with('success', 'Permissions updated successfully!');
+            ->with('success', $role->name . ' Permissions updated successfully!');
     }
 }
