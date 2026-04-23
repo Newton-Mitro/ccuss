@@ -274,7 +274,7 @@ export default function GlAccountsIndex() {
                 </div>
 
                 {/* TREE */}
-                <Card className="h-[calc(100vh-300px)] overflow-y-auto p-6">
+                <Card className="overflow-y-auto p-6">
                     {renderTree(glAccounts)}
                 </Card>
             </div>
