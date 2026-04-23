@@ -108,7 +108,7 @@ class CustomerFamilyRelationController extends Controller
 
         return redirect()
             ->route('customers.show', $data['customer_id'])
-            ->with('success', $relation->relative->name . ' added as family relation successfully.');
+            ->with('success', 'Family relation added successfully.');
     }
 
     public function update(
@@ -134,7 +134,7 @@ class CustomerFamilyRelationController extends Controller
 
         return redirect()
             ->route('customers.show', $data['customer_id'])
-            ->with('success', $familyRelation->relative->name . ' family relation updated successfully.');
+            ->with('success', 'Family relation updated successfully.');
     }
 
     public function destroy(CustomerFamilyRelation $familyRelation)
@@ -142,7 +142,7 @@ class CustomerFamilyRelationController extends Controller
         $familyRelation->delete();
 
         return redirect()->back()->with([
-            'success' => $familyRelation->relative->name . ' family relation deleted successfully.',
+            'success' => 'Family relation deleted successfully.',
         ]);
     }
 
@@ -159,7 +159,7 @@ class CustomerFamilyRelationController extends Controller
             'rejection_reason' => null, // reset if previously rejected
         ]);
 
-        return redirect()->back()->with('success', $familyRelation->relative->name . ' family relation verified successfully.');
+        return redirect()->back()->with('success', 'Family relation approved successfully.');
     }
 
     public function reject(Request $request, CustomerFamilyRelation $familyRelation)
@@ -179,6 +179,6 @@ class CustomerFamilyRelationController extends Controller
             'rejection_reason' => $request->rejection_reason,
         ]);
 
-        return redirect()->back()->with('success', $familyRelation->relative->name . ' family relation rejected successfully.');
+        return redirect()->back()->with('success', 'Family relation rejected successfully.');
     }
 }

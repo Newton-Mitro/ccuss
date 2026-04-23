@@ -92,7 +92,7 @@ class KycDocumentController extends Controller
 
         return redirect()
             ->route('customers.show', $request->customer_id)
-            ->with('success', $kycDocument->customer->name . ' KYC document added successfully.');
+            ->with('success', 'KYC document added successfully.');
     }
 
     public function edit(KycDocument $kycDocument)
@@ -115,7 +115,7 @@ class KycDocumentController extends Controller
         $kycDocument->delete();
 
         return redirect()->back()->with([
-            'success' => $kycDocument->customer->name . ' KYC document deleted successfully.',
+            'success' => 'KYC document deleted successfully.',
         ]);
     }
 
@@ -132,7 +132,7 @@ class KycDocumentController extends Controller
             'rejection_reason' => null, // reset if previously rejected
         ]);
 
-        return redirect()->back()->with('success', $kycDocument->customer->name . ' KYC document verified successfully.');
+        return redirect()->back()->with('success', 'KYC document verified successfully.');
     }
 
     public function reject(Request $request, KycDocument $kycDocument)
@@ -152,6 +152,6 @@ class KycDocumentController extends Controller
             'rejection_reason' => $request->rejection_reason,
         ]);
 
-        return redirect()->back()->with('success', $kycDocument->customer->name . ' KYC document rejected successfully.');
+        return redirect()->back()->with('success', 'KYC document rejected successfully.');
     }
 }

@@ -31,8 +31,8 @@ return new class extends Migration {
             $table->timestamps();
             $table->softDeletes();
 
-            $table->foreignId('organization_id')->constrained();
-            $table->foreignId('branch_id')->constrained();
+            $table->foreignId('organization_id')->constrained()->restrictOnDelete();
+            $table->foreignId('branch_id')->constrained()->restrictOnDelete();
         });
 
         Schema::create('customer_addresses', function (Blueprint $table) {
@@ -68,7 +68,7 @@ return new class extends Migration {
 
             // Prevent duplicate linkage
             $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
-            $table->foreignId('relative_id')->constrained('customers');
+            $table->foreignId('relative_id')->constrained('customers')->cascadeOnDelete();
 
             $table->unique(['customer_id', 'relative_id'], 'uq_customer_relative');
         });
@@ -80,7 +80,7 @@ return new class extends Migration {
             $table->timestamps();
             $table->softDeletes();
 
-            $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('customer_id')->constrained('customers')->restrictOnDelete();
         });
 
         Schema::create('kyc_documents', function (Blueprint $table) {
@@ -128,7 +128,7 @@ return new class extends Migration {
             $table->timestamps();
             $table->softDeletes();
 
-            $table->foreignId('customer_id')->constrained();
+            $table->foreignId('customer_id')->constrained('customers')->restrictOnDelete();
         });
 
         Schema::create('customer_introducers', function (Blueprint $table) {
@@ -141,8 +141,8 @@ return new class extends Migration {
             $table->softDeletes();
 
             $table->foreignId('introduced_customer_id')->constrained('customers')->cascadeOnDelete();
-            $table->foreignId('introducer_customer_id')->constrained('customers');
-            $table->foreignId('introducer_account_id')->nullable();
+            $table->foreignId('introducer_customer_id')->nullable()->constrained('customers')->nullOnDelete();
+            $table->foreignId('introducer_account_id')->nullable()->nullOnDelete();
 
             // Prevent duplicate introducers
             $table->unique(
