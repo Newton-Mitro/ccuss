@@ -31,11 +31,11 @@ require __DIR__ . '/system_administration_routes.php';
 require __DIR__ . '/settings_routes.php';
 require __DIR__ . '/customer_module_routes.php';
 require __DIR__ . '/deposit_module_routes.php';
-require __DIR__ . '/branch_cash_and_treasury_routes.php';
+require __DIR__ . '/treasury_and_cash_routes.php';
 require __DIR__ . '/petty_cash_module_routes.php';
 require __DIR__ . '/bank_cash_module_routes.php';
 require __DIR__ . '/cheque_management_routes.php';
-require __DIR__ . '/finance_and_accounting_routes.php';
-require __DIR__ . '/subledger_moeule_routes.php';
+require __DIR__ . '/general_accounting_routes.php';
+require __DIR__ . '/subledger_module_routes.php';
 
 

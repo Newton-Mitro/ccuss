@@ -36,6 +36,14 @@ return new class extends Migration {
             $table->foreignId('gl_account_id')->constrained('ledger_accounts');
         });
 
+        Schema::create('subledger_mappings', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('subledger_id')->constrained('subledgers')->cascadeOnDelete();
+            $table->foreignId('gl_account_id')->constrained('ledger_accounts');
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
         Schema::create('subledger_accounts', function (Blueprint $table) {
             $table->id();
             $table->morphs('accountable');

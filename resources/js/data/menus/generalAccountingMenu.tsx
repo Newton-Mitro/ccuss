@@ -38,16 +38,14 @@ export const generalAccountingMenu: SidebarItem[] = [
                         name: 'Cash Voucher',
                         icon: <i className="fa-solid fa-money-bill-wave" />,
                         path: '/accounting/voucher_entries/cash',
-                        match_path:
-                            'finance-and-accounting/voucher_entries/cash',
+                        match_path: 'general-accounting/voucher_entries/cash',
                         permission: ['accounting.voucher.cash.view'],
                     },
                     {
                         name: 'Bank Voucher',
                         icon: <i className="fa-solid fa-university" />,
                         path: '/accounting/voucher_entries/bank',
-                        match_path:
-                            'finance-and-accounting/voucher_entries/bank',
+                        match_path: 'general-accounting/voucher_entries/bank',
                         permission: ['accounting.voucher.bank.view'],
                     },
                     {
@@ -55,7 +53,7 @@ export const generalAccountingMenu: SidebarItem[] = [
                         icon: <i className="fa-solid fa-book" />,
                         path: '/accounting/voucher_entries/journal',
                         match_path:
-                            'finance-and-accounting/voucher_entries/journal',
+                            'general-accounting/voucher_entries/journal',
                         permission: ['accounting.voucher.journal.view'],
                     },
                     {
@@ -63,7 +61,7 @@ export const generalAccountingMenu: SidebarItem[] = [
                         icon: <i className="fa-solid fa-credit-card" />,
                         path: '/accounting/voucher_entries/payment',
                         match_path:
-                            'finance-and-accounting/voucher_entries/payment',
+                            'general-accounting/voucher_entries/payment',
                         permission: ['accounting.voucher.payment.view'],
                     },
                 ],
@@ -72,7 +70,7 @@ export const generalAccountingMenu: SidebarItem[] = [
                 name: 'Voucher Entries',
                 icon: <i className="fa-solid fa-book-open-reader" />,
                 path: '/accounting/voucher_entries',
-                match_path: 'finance-and-accounting/voucher_entries',
+                match_path: 'general-accounting/voucher_entries',
                 permission: ['accounting.voucher_entries.view'],
             },
             {
