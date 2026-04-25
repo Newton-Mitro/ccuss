@@ -32,7 +32,7 @@ const VaultForm = ({ vault, branches, branch }: VaultFormPageProps) => {
     const isEdit = !!vault;
 
     const { data, setData, post, put, processing, errors } = useForm({
-        name: vault?.name || '',
+        name: vault?.name || `${branch.name} Vault`,
         branch_id: branch.id || '',
         is_active: vault?.is_active ?? true,
     });

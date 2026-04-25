@@ -54,7 +54,7 @@ function Show() {
 
                 {/* 🔹 Basic Details */}
                 <div className="rounded-lg border bg-card p-4">
-                    <h3 className="text-md mb-2 font-semibold text-info">
+                    <h3 className="text-md mb-2 font-semibold text-muted-foreground">
                         Basic Details
                     </h3>
 
@@ -75,7 +75,7 @@ function Show() {
 
                 {/* 🔹 Contact & Address */}
                 <div className="rounded-lg border bg-card p-4">
-                    <h3 className="text-md mb-2 font-semibold text-info">
+                    <h3 className="text-md mb-2 font-semibold text-muted-foreground">
                         Contact & Address
                     </h3>
 
@@ -107,7 +107,7 @@ function Show() {
 
                 {/* 🔹 Report Config */}
                 <div className="rounded-lg border bg-card p-4">
-                    <h3 className="text-md mb-2 font-semibold text-info">
+                    <h3 className="text-md mb-2 font-semibold text-muted-foreground">
                         Report Configuration
                     </h3>
 

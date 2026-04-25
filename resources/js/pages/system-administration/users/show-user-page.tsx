@@ -67,7 +67,7 @@ function ShowUser() {
 
                 {/* 🔹 Basic Info */}
                 <div className="rounded-lg border bg-card p-4">
-                    <h3 className="text-md mb-2 font-semibold text-info">
+                    <h3 className="text-md mb-2 font-semibold text-muted-foreground">
                         Basic Info
                     </h3>
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -90,7 +90,7 @@ function ShowUser() {
 
                 {/* 🔹 Permissions */}
                 <div className="rounded-lg border bg-card p-4">
-                    <h3 className="text-md mb-2 font-semibold text-info">
+                    <h3 className="text-md mb-2 font-semibold text-muted-foreground">
                         Permissions
                     </h3>
                     <div className="flex flex-wrap gap-2">

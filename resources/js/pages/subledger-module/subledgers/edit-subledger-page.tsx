@@ -56,7 +56,7 @@ export default function Edit({ subledger, glAccounts }: any) {
                 >
                     {/* 🔹 Basic Details */}
                     <div>
-                        <h3 className="text-lg font-semibold text-info">
+                        <h3 className="text-lg font-semibold text-muted-foreground">
                             Basic Details
                         </h3>
 
@@ -101,7 +101,7 @@ export default function Edit({ subledger, glAccounts }: any) {
 
                     {/* 🔹 Classification */}
                     <div>
-                        <h3 className="text-lg font-semibold text-info">
+                        <h3 className="text-lg font-semibold text-muted-foreground">
                             Classification
                         </h3>
 

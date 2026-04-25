@@ -54,7 +54,7 @@ function Create() {
                 >
                     {/* 🔹 Basic Details */}
                     <div>
-                        <h3 className="text-lg font-semibold text-info">
+                        <h3 className="text-lg font-semibold text-muted-foreground">
                             Basic Details
                         </h3>
 
@@ -89,7 +89,7 @@ function Create() {
 
                     {/* 🔹 Address & Location */}
                     <div>
-                        <h3 className="text-lg font-semibold text-info">
+                        <h3 className="text-lg font-semibold text-muted-foreground">
                             Address & Location
                         </h3>
 
@@ -141,7 +141,7 @@ function Create() {
 
                     {/* 🔹 Management */}
                     <div>
-                        <h3 className="text-lg font-semibold text-info">
+                        <h3 className="text-lg font-semibold text-muted-foreground">
                             Management
                         </h3>
 

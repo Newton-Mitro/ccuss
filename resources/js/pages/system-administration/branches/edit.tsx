@@ -59,7 +59,7 @@ function Edit() {
                 >
                     {/* 🔹 Basic Details */}
                     <div>
-                        <h3 className="text-lg font-semibold text-info">
+                        <h3 className="text-lg font-semibold text-muted-foreground">
                             Basic Details
                         </h3>
 
@@ -92,7 +92,7 @@ function Edit() {
 
                     {/* 🔹 Address & Location */}
                     <div>
-                        <h3 className="text-lg font-semibold text-info">
+                        <h3 className="text-lg font-semibold text-muted-foreground">
                             Address & Location
                         </h3>
 
@@ -141,7 +141,7 @@ function Edit() {
 
                     {/* 🔹 Management */}
                     <div>
-                        <h3 className="text-lg font-semibold text-info">
+                        <h3 className="text-lg font-semibold text-muted-foreground">
                             Management
                         </h3>
 

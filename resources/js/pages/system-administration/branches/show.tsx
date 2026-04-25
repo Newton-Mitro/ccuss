@@ -50,7 +50,7 @@ export default function Show({ branch }: ShowProps) {
                 <div className="rounded-md border border-border bg-card p-2 backdrop-blur-sm">
                     <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <h2 className="text-lg font-semibold text-info">
+                            <h2 className="text-lg font-semibold text-muted-foreground">
                                 {branch.name}
                             </h2>
                             <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">

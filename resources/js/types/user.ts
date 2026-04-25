@@ -28,6 +28,7 @@ export interface User {
     id: number;
     name: string;
     email: string;
+    phone?: string | null;
     organization_id: number;
     branch_id: number;
     organization?: Organization;
@@ -36,6 +37,7 @@ export interface User {
     permissions?: Permission[];
     email_verified_at?: string | null;
     avatar?: string | null;
+    status?: string | null;
     created_at?: string;
     updated_at?: string;
 }

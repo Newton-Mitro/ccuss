@@ -101,7 +101,7 @@ function EditOrganization() {
                         <div className="w-full space-y-4 lg:w-11/12">
                             {/* Basic Details */}
                             <div>
-                                <h3 className="text-lg font-semibold text-info">
+                                <h3 className="text-lg font-semibold text-muted-foreground">
                                     Basic Details
                                 </h3>
                                 <div className="grid grid-cols-1 gap-x-5 gap-y-2 md:grid-cols-3">
@@ -187,7 +187,7 @@ function EditOrganization() {
 
                             {/* Contact & Address */}
                             <div>
-                                <h3 className="text-lg font-semibold text-info">
+                                <h3 className="text-lg font-semibold text-muted-foreground">
                                     Contact & Address
                                 </h3>
                                 <div className="grid grid-cols-1 gap-x-5 gap-y-2 md:grid-cols-4">
@@ -333,7 +333,7 @@ function EditOrganization() {
 
                             {/* Report Header/Footer */}
                             <div>
-                                <h3 className="text-lg font-semibold text-info">
+                                <h3 className="text-lg font-semibold text-muted-foreground">
                                     Report Header/Footer
                                 </h3>
                                 <div className="grid grid-cols-1 gap-x-5 gap-y-2 md:grid-cols-4">

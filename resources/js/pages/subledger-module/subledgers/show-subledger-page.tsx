@@ -27,7 +27,7 @@ export default function Show({ subledger }: any) {
                 <div className="mt-4 space-y-4 rounded-xl border bg-card p-8">
                     {/* 🔹 Basic Details */}
                     <div>
-                        <h3 className="text-lg font-semibold text-info">
+                        <h3 className="text-lg font-semibold text-muted-foreground">
                             Basic Details
                         </h3>
 
@@ -53,7 +53,7 @@ export default function Show({ subledger }: any) {
 
                     {/* 🔹 Classification */}
                     <div>
-                        <h3 className="text-lg font-semibold text-info">
+                        <h3 className="text-lg font-semibold text-muted-foreground">
                             Classification
                         </h3>
 
@@ -94,7 +94,7 @@ export default function Show({ subledger }: any) {
 
                     {/* 🔹 Meta Info (Optional but Pro) */}
                     <div>
-                        <h3 className="text-lg font-semibold text-info">
+                        <h3 className="text-lg font-semibold text-muted-foreground">
                             Metadata
                         </h3>
 

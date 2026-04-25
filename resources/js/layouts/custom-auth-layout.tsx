@@ -180,7 +180,7 @@ export default function CustomAuthLayout({
             {/* Sidebar */}
             <aside
                 className={cn(
-                    'flex flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-300 print:hidden', // flex-col for vertical layout
+                    'flex flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-300 print:hidden',
                     sidebarOpen ? 'w-72' : 'w-16',
                 )}
             >
