@@ -53,9 +53,7 @@ class SubledgerController extends Controller
     public function create()
     {
         return Inertia::render('subledger-module/subledgers/create-subledger-page', [
-            'glAccounts' => LedgerAccount::where('is_leaf', true)->where('is_active', true)->get(),
-            'types' => $this->types(),
-            'subTypes' => $this->subTypes(),
+            'glAccounts' => LedgerAccount::where('is_control_account', true)->where('is_active', true)->get(),
         ]);
     }
 
@@ -64,7 +62,7 @@ class SubledgerController extends Controller
         $validated = $request->validate([
             'code' => 'required|string|max:20|unique:subledgers,code',
             'name' => 'required|string|max:255',
-            'short_name' => 'nullable|string|max:100',
+            'short_name' => 'required|string|max:100',
             'type' => 'required|in:deposit,loan,cash,payable,receivable',
             'sub_type' => 'required|string',
             'gl_account_id' => 'required|exists:ledger_accounts,id',
@@ -82,9 +80,7 @@ class SubledgerController extends Controller
     {
         return Inertia::render('subledger-module/subledgers/edit-subledger-page', [
             'subledger' => $subledger,
-            'glAccounts' => LedgerAccount::where('is_leaf', true)->where('is_active', true)->get(),
-            'types' => $this->types(),
-            'subTypes' => $this->subTypes(),
+            'glAccounts' => LedgerAccount::where('is_control_account', true)->where('is_active', true)->get(),
         ]);
     }
 
@@ -100,7 +96,7 @@ class SubledgerController extends Controller
         $validated = $request->validate([
             'code' => 'required|string|max:20|unique:subledgers,code,' . $subledger->id,
             'name' => 'required|string|max:255',
-            'short_name' => 'nullable|string|max:100',
+            'short_name' => 'required|string|max:100',
             'type' => 'required|in:deposit,loan,cash,payable,receivable',
             'sub_type' => 'required|string',
             'gl_account_id' => 'required|exists:ledger_accounts,id',
@@ -121,35 +117,5 @@ class SubledgerController extends Controller
         return redirect()
             ->back()
             ->with('success', $subledger->name . ' Subledger deleted successfully.');
-    }
-
-    private function types()
-    {
-        return [
-            'deposit',
-            'loan',
-            'cash',
-            'payable',
-            'receivable',
-        ];
-    }
-
-    private function subTypes()
-    {
-        return [
-            'saving deposit',
-            'term deposit',
-            'recurring deposit',
-            'share_deposit',
-            'membr_loan',
-            'vehicle_loan',
-            'home_loan',
-            'smb_loan',
-            'educational_loan',
-            'agri_loan',
-            'cash_at_hand',
-            'cash_at_bank',
-            'petty_cash',
-        ];
     }
 }

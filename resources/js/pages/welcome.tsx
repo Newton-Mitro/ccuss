@@ -3,12 +3,7 @@ import { motion } from 'framer-motion';
 import CustomAuthLayout from '../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../types';
 
-export default function HomePage({
-    appNameFirst,
-    appNameSecond,
-    appVersion,
-    appLongTag,
-}) {
+export default function HomePage() {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Home', href: '/dashboard' },
     ];
@@ -38,19 +33,21 @@ export default function HomePage({
                 {/* Footer Hint */}
                 <div className="flex flex-col items-center justify-center">
                     <h1 className="text-3xl font-semibold">
-                        <span className="text-primary"> {appNameFirst} </span>
+                        <span className="text-primary">
+                            {import.meta.env.VITE_APP_NAME_FIRST}
+                        </span>
                         <span className="text-foreground/90">
-                            {appNameSecond}
+                            {import.meta.env.VITE_APP_NAME_SECOND}
                         </span>
                     </h1>
                     <p className="text-sm text-muted-foreground/80">
-                        {appLongTag}
+                        {import.meta.env.VITE_APP_LONG_TAG}
                     </p>
                     <div className="text-center text-sm text-muted-foreground/80">
-                        {`© ${new Date().getFullYear()} Denton Studio. সর্বস্বত্ব সংরক্ষিত। লিখিত অনুমতি ছাড়া এই উপাদান সম্পূর্ণ বা আংশিকভাবে ব্যবহার বা কপি করা আইনত নিষিদ্ধ।`}
+                        {`© ${new Date().getFullYear()} Denton Studio. ${import.meta.env.VITE_APP_COPYRIGHT}`}
                     </div>
                     <div className="mt-3 inline-block rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">
-                        {appVersion}
+                        {import.meta.env.VITE_APP_VERSION}
                     </div>
                 </div>
             </motion.div>

@@ -81,7 +81,7 @@ class LedgerAccountController extends Controller
         $parent = $ledgerAccount->parent;
         $ledgerAccount->delete();
         if ($parent && $parent->children()->count() === 0) {
-            $parent->update(['is_leaf' => true]);
+            $parent->update(['is_control_account' => true]);
         }
         return back()->with('success', $ledgerAccount->code . ' Account deleted successfully.');
     }

@@ -48,14 +48,7 @@ export default function CustomAuthLayout({
 }: CustomAuthLayoutProps) {
     const page = usePage<SharedData>();
 
-    const {
-        auth,
-        appName,
-        appNameFirst,
-        appNameSecond,
-        appShortTag,
-        appVersion,
-    } = page.props;
+    const { auth } = page.props;
     const cleanup = useMobileNavigation();
 
     /* ------------------------------------------------------------------
@@ -209,14 +202,14 @@ export default function CustomAuthLayout({
                         <div className="">
                             <h1 className="-mb-1 text-lg font-semibold">
                                 <span className="text-primary">
-                                    {appNameFirst as string}{' '}
+                                    {import.meta.env.VITE_APP_NAME_FIRST}
                                 </span>
                                 <span className="text-sidebar-foreground/90">
-                                    {appNameSecond as string}
+                                    {import.meta.env.VITE_APP_NAME_SECOND}
                                 </span>
                             </h1>
                             <p className="text-xs font-light text-sidebar-foreground/70">
-                                {appShortTag as string}
+                                {import.meta.env.VITE_APP_SHORT_TAG}
                             </p>
                         </div>
                     </span>
@@ -315,9 +308,9 @@ export default function CustomAuthLayout({
                                     </span>
                                 </div>
                                 <div className="pt-3 text-xs text-muted-foreground/90">
-                                    {`${appName as string}` +
+                                    {`${import.meta.env.VITE_APP_NAME}` +
                                         ' | ' +
-                                        `${appVersion as string}`}
+                                        `${import.meta.env.VITE_APP_VERSION}`}
                                 </div>
                                 <div className="text-center text-[10px] text-muted-foreground/90">
                                     {`© ${new Date().getFullYear()} Denton Studio. All rights reserved.`}

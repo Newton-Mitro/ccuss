@@ -12,15 +12,7 @@ import { Form, Head } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { useEffect } from 'react';
 
-export default function Login({
-    status,
-    canResetPassword,
-    canRegister,
-    appNameFirst,
-    appVersion,
-    appNameSecond,
-    appLongTag,
-}) {
+export default function Login({ status, canResetPassword, canRegister }) {
     useEffect(() => {
         localStorage.clear();
     }, []);
@@ -28,7 +20,7 @@ export default function Login({
     console.log(import.meta.env.VITE_LOGO_PATH);
 
     return (
-        <div className="flex min-h-screen bg-card">
+        <div className="flex min-h-screen bg-background">
             <Head title="Log in" />
 
             {/* Left Branding Section */}
@@ -46,26 +38,28 @@ export default function Login({
 
                 <div className="mt-3 text-center">
                     <h1 className="text-4xl font-bold tracking-tight">
-                        <span className="text-primary">{appNameFirst}</span>{' '}
+                        <span className="text-primary">
+                            {import.meta.env.VITE_APP_NAME_FIRST}
+                        </span>
                         <span className="text-foreground/90">
-                            {appNameSecond}
+                            {import.meta.env.VITE_APP_NAME_SECOND}
                         </span>
                     </h1>
                     <p className="max-w-sm text-sm text-muted-foreground">
-                        {appLongTag}
+                        {import.meta.env.VITE_APP_LONG_TAG}
                     </p>
                     <div className="text-center text-sm text-muted-foreground">
-                        {`© ${new Date().getFullYear()} Denton Studio. সর্বস্বত্ব সংরক্ষিত। লিখিত অনুমতি ছাড়া এই উপাদান সম্পূর্ণ বা আংশিকভাবে ব্যবহার বা কপি করা আইনত নিষিদ্ধ।`}
+                        {`© ${new Date().getFullYear()} Denton Studio. ${import.meta.env.VITE_APP_COPYRIGHT}`}
                     </div>
                     <div className="mt-3 inline-block rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">
-                        {appVersion}
+                        {import.meta.env.VITE_APP_VERSION}
                     </div>
                 </div>
             </motion.div>
 
             {/* Right Form Section */}
             <div className="mx-4 flex w-full flex-col items-center justify-center lg:w-4/12">
-                <div className="flex h-[calc(90vh)] w-full flex-col items-center justify-center rounded border bg-background p-6 shadow">
+                <div className="flex h-[calc(90vh)] w-full flex-col items-center justify-center rounded border bg-card p-6 shadow">
                     <div className="w-full md:px-10 lg:px-14 xl:px-20">
                         {/* Header */}
                         <div className="mb-6 text-center">
@@ -75,10 +69,10 @@ export default function Login({
                             </h2>
                             <h1 className="text-xl font-bold tracking-tight">
                                 <span className="text-primary">
-                                    {appNameFirst}
-                                </span>{' '}
+                                    {import.meta.env.VITE_APP_NAME_FIRST}
+                                </span>
                                 <span className="text-foreground/90">
-                                    {appNameSecond}
+                                    {import.meta.env.VITE_APP_NAME_SECOND}
                                 </span>
                             </h1>
                             <p className="text-xs text-muted-foreground">

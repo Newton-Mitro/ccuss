@@ -11,16 +11,17 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
 import { Select } from '../../../components/ui/select';
+import { subledgerSubTypes, subledgerTypes } from './data/type-sub-type';
 
-export default function Create({ glAccounts, types, subTypes }: any) {
+export default function Create({ glAccounts }: any) {
     useFlashToastHandler();
 
     const { data, setData, post, processing, errors } = useForm({
         code: '',
         name: '',
         short_name: '',
-        type: types[0] || '',
-        sub_type: subTypes[0] || '',
+        type: subledgerTypes[0]?.value || '',
+        sub_type: subledgerSubTypes[0]?.value || '',
         gl_account_id: '',
         is_active: true,
     });
@@ -112,9 +113,9 @@ export default function Create({ glAccounts, types, subTypes }: any) {
                                 <Select
                                     value={data.type}
                                     onChange={(value) => setData('type', value)}
-                                    options={types.map((t) => ({
-                                        value: t,
-                                        label: t,
+                                    options={subledgerTypes.map((t) => ({
+                                        value: t.value,
+                                        label: t.label,
                                     }))}
                                 />
                                 <InputError message={errors.type} />
@@ -127,9 +128,9 @@ export default function Create({ glAccounts, types, subTypes }: any) {
                                     onChange={(value) =>
                                         setData('sub_type', value)
                                     }
-                                    options={subTypes.map((st) => ({
-                                        value: st,
-                                        label: st,
+                                    options={subledgerSubTypes.map((st) => ({
+                                        value: st.value,
+                                        label: st.label,
                                     }))}
                                 />
 

@@ -11,16 +11,17 @@ import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
+import { subledgerSubTypes, subledgerTypes } from './data/type-sub-type';
 
-export default function Edit({ subledger, glAccounts, types, subTypes }: any) {
+export default function Edit({ subledger, glAccounts }: any) {
     useFlashToastHandler();
 
     const { data, setData, put, processing, errors } = useForm({
         code: subledger.code || '',
         name: subledger.name || '',
         short_name: subledger.short_name || '',
-        type: subledger.type || types[0] || '',
-        sub_type: subledger.sub_type || subTypes[0] || '',
+        type: subledger.type || subledgerTypes[0]?.value || '',
+        sub_type: subledger.sub_type || subledgerSubTypes[0]?.value || '',
         gl_account_id: subledger.gl_account_id || '',
         is_active: subledger.is_active ?? true,
     });
@@ -110,9 +111,9 @@ export default function Edit({ subledger, glAccounts, types, subTypes }: any) {
                                 <Select
                                     value={data.type}
                                     onChange={(value) => setData('type', value)}
-                                    options={types.map((t: string) => ({
-                                        value: t,
-                                        label: t,
+                                    options={subledgerTypes.map((t) => ({
+                                        value: t.value,
+                                        label: t.label,
                                     }))}
                                 />
                                 <InputError message={errors.type} />
@@ -125,9 +126,9 @@ export default function Edit({ subledger, glAccounts, types, subTypes }: any) {
                                     onChange={(value) =>
                                         setData('sub_type', value)
                                     }
-                                    options={subTypes.map((st: string) => ({
-                                        value: st,
-                                        label: st,
+                                    options={subledgerSubTypes.map((st) => ({
+                                        value: st.value,
+                                        label: st.label,
                                     }))}
                                 />
                                 <InputError message={errors.sub_type} />
