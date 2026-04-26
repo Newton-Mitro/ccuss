@@ -5,6 +5,7 @@ import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
+import { InfoItem } from '../../../components/info-block';
 
 export default function Show({ ledger }: any) {
     const breadcrumbs: BreadcrumbItem[] = [
@@ -31,10 +32,10 @@ export default function Show({ ledger }: any) {
                         </h3>
 
                         <div className="mt-2 grid gap-4 md:grid-cols-4">
-                            <Info label="Code" value={ledger.code} />
-                            <Info label="Name" value={ledger.name} />
-                            <Info label="Type" value={ledger.type} />
-                            <Info
+                            <InfoItem label="Code" value={ledger.code} />
+                            <InfoItem label="Name" value={ledger.name} />
+                            <InfoItem label="Type" value={ledger.type} />
+                            <InfoItem
                                 label="Status"
                                 value={ledger.is_active ? 'Active' : 'Inactive'}
                             />
@@ -48,7 +49,7 @@ export default function Show({ ledger }: any) {
                         </h3>
 
                         <div className="mt-2 grid gap-4 md:grid-cols-3">
-                            <Info
+                            <InfoItem
                                 label="Parent Account"
                                 value={
                                     ledger.parent
@@ -57,7 +58,7 @@ export default function Show({ ledger }: any) {
                                 }
                             />
 
-                            <Info
+                            <InfoItem
                                 label="Account Nature"
                                 value={
                                     ledger.is_group
@@ -66,7 +67,7 @@ export default function Show({ ledger }: any) {
                                 }
                             />
 
-                            <Info
+                            <InfoItem
                                 label="Children Count"
                                 value={ledger.children?.length || 0}
                             />
@@ -80,17 +81,17 @@ export default function Show({ ledger }: any) {
                         </h3>
 
                         <div className="mt-2 grid gap-4 md:grid-cols-3">
-                            <Info
+                            <InfoItem
                                 label="Control Account"
                                 value={ledger.is_control_account ? 'Yes' : 'No'}
                             />
 
-                            <Info
+                            <InfoItem
                                 label="Subledger Type"
                                 value={ledger.subledger_type || 'None'}
                             />
 
-                            <Info
+                            <InfoItem
                                 label="Subledger Sub Type"
                                 value={ledger.subledger_sub_type || 'None'}
                             />
@@ -136,15 +137,5 @@ export default function Show({ ledger }: any) {
                 </div>
             </div>
         </CustomAuthLayout>
-    );
-}
-
-/* 🔹 Reusable Info Component */
-function Info({ label, value }: { label: string; value: any }) {
-    return (
-        <div className="rounded-md border bg-muted/30 p-3">
-            <p className="text-xs text-muted-foreground">{label}</p>
-            <p className="text-sm font-medium">{value}</p>
-        </div>
     );
 }

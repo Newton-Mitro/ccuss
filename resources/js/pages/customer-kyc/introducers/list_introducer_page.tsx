@@ -15,6 +15,7 @@ import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
+import formatUndersoreString from '../../../lib/formatUnderscoreString';
 import { Badge } from '../../../lib/statusConfig';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { CustomerIntroducer } from '../../../types/customer_kyc_module';
@@ -239,7 +240,9 @@ export default function IntroducersIndex() {
                                     </div>
 
                                     <p className="text-xs text-muted-foreground capitalize">
-                                        {i.relationship_type.replace(/_/g, ' ')}
+                                        {formatUndersoreString(
+                                            i.relationship_type,
+                                        )}
                                     </p>
 
                                     <div className="flex justify-end gap-4">

@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
+import { InfoItem } from '../../../components/info-block';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
@@ -114,13 +115,19 @@ const Edit = () => {
                             </p>
 
                             <div className="grid grid-cols-1 gap-1 text-xs md:grid-cols-4">
-                                <Info label="Phone" value={customer.phone} />
-                                <Info label="Email" value={customer.email} />
-                                <Info
+                                <InfoItem
+                                    label="Phone"
+                                    value={customer.phone}
+                                />
+                                <InfoItem
+                                    label="Email"
+                                    value={customer.email}
+                                />
+                                <InfoItem
                                     label="ID Type"
                                     value={customer.identification_type}
                                 />
-                                <Info
+                                <InfoItem
                                     label="ID Number"
                                     value={customer.identification_number}
                                 />
@@ -188,13 +195,3 @@ const Edit = () => {
 };
 
 export default Edit;
-
-/* INFO COMPONENT */
-function Info({ label, value }: { label: string; value: string }) {
-    return (
-        <div>
-            <span className="text-muted-foreground">{label}</span>
-            <p className="font-medium">{value}</p>
-        </div>
-    );
-}

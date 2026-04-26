@@ -16,11 +16,13 @@ import {
     X,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import { InfoItem } from '../../../components/info-block';
 import { UserInfo } from '../../../components/user-info';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { formatDate, formatDateTime } from '../../../lib/date_util';
+import formatUndersoreString from '../../../lib/formatUnderscoreString';
 import kycDocumentStatusConfig from '../../../lib/kycDocumentStatusConfig';
 import statusConfig, { Status } from '../../../lib/statusConfig';
 import { BreadcrumbItem, SharedData } from '../../../types';
@@ -192,37 +194,37 @@ export default function Show({ customer }: ShowProps) {
                             <InfoItem
                                 label="Gender"
                                 value={customer.gender}
-                                valueClassName="capitalize"
+                                className="capitalize"
                             />
                             <InfoItem
                                 label="Religion"
                                 value={customer.religion}
-                                valueClassName="capitalize"
+                                className="capitalize"
                             />
                             <InfoItem
                                 label="Marital Status"
                                 value={customer.marital_status}
-                                valueClassName="capitalize"
+                                className="capitalize"
                             />
                             <InfoItem
                                 label="Blood Group"
                                 value={customer.blood_group}
-                                valueClassName="capitalize"
+                                className="capitalize"
                             />
                             <InfoItem
                                 label="Nationality"
                                 value={customer.nationality}
-                                valueClassName="capitalize"
+                                className="capitalize"
                             />
                             <InfoItem
                                 label="Occupation"
                                 value={customer.occupation}
-                                valueClassName="capitalize"
+                                className="capitalize"
                             />
                             <InfoItem
                                 label="Education"
                                 value={customer.education}
-                                valueClassName="capitalize"
+                                className="capitalize"
                             />
                         </>
                     )}
@@ -236,8 +238,7 @@ export default function Show({ customer }: ShowProps) {
 
                     <InfoItem
                         label="ID Type"
-                        value={customer.identification_type.replace(/_/g, ' ')}
-                        valueClassName="capitalize"
+                        value={customer.identification_type}
                     />
 
                     <InfoItem
@@ -258,14 +259,14 @@ export default function Show({ customer }: ShowProps) {
                             <InfoItem
                                 label="KYC Level"
                                 value={customer.kyc_profile.kyc_level}
-                                valueClassName="capitalize"
+                                className="capitalize"
                             />
                         </div>
                         <div className="rounded-md border bg-card px-4 py-2 hover:shadow-md">
                             <InfoItem
                                 label="Risk Level"
                                 value={customer.kyc_profile.risk_level}
-                                valueClassName="capitalize"
+                                className="capitalize"
                             />
                         </div>
                     </div>
@@ -537,7 +538,9 @@ export default function Show({ customer }: ShowProps) {
                                     status={doc.verification_status}
                                 />
                                 <div className="text-sm font-semibold">
-                                    {doc.document_type.replace(/_/g, ' ')}
+                                    {formatUndersoreString(
+                                        doc.document_type || '—',
+                                    )}
                                 </div>
                             </div>
                         </DataCard>
@@ -625,13 +628,6 @@ const ActionButton = ({ children, icon, as = 'button', ...props }: any) =>
             {icon} {children}
         </Link>
     );
-
-const InfoItem = ({ label, value, valueClassName }: any) => (
-    <div className="flex flex-col">
-        <span className="text-[10px] text-foreground">{label}</span>
-        <span className={`text-sm ${valueClassName}`}>{value || '—'}</span>
-    </div>
-);
 
 const DataCard = ({
     children,

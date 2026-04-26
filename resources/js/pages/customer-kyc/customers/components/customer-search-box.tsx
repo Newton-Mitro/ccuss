@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Search } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { route } from 'ziggy-js';
+import { InfoItem } from '../../../../components/info-block';
 import { Label } from '../../../../components/ui/label';
 import { Customer } from '../../../../types/customer_kyc_module';
 
@@ -193,13 +194,13 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
                         </div>
 
                         <div className="grid grid-cols-1 gap-1 text-xs md:grid-cols-4">
-                            <Info label="Phone" value={customer.phone} />
-                            <Info label="Email" value={customer.email} />
-                            <Info
+                            <InfoItem label="Phone" value={customer.phone} />
+                            <InfoItem label="Email" value={customer.email} />
+                            <InfoItem
                                 label="Identification Type"
                                 value={customer.identification_type}
                             />
-                            <Info
+                            <InfoItem
                                 label="Identification Number"
                                 value={customer.identification_number}
                             />
@@ -237,12 +238,3 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
         </div>
     );
 };
-
-function Info({ label, value }: { label: string; value: string }) {
-    return (
-        <div>
-            <span className="text-muted-foreground">{label}</span>
-            <p className="font-medium">{value}</p>
-        </div>
-    );
-}

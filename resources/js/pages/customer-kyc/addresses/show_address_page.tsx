@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
+import { InfoItem } from '../../../components/info-block';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
@@ -101,7 +102,7 @@ export default function ViewAddress({ address }: Props) {
 
                             <div className="flex-1 space-y-2">
                                 <div>
-                                    <Info
+                                    <InfoItem
                                         label=""
                                         value={
                                             address.customer ? (
@@ -141,53 +142,42 @@ export default function ViewAddress({ address }: Props) {
                         </div>
 
                         <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                            <Info
+                            <InfoItem
                                 label="Address Line 1"
                                 value={address.line1}
                             />
-                            <Info
+                            <InfoItem
                                 label="Address Line 2"
                                 value={address.line2}
                             />
-                            <Info label="Division" value={address.division} />
-                            <Info label="District" value={address.district} />
-                            <Info label="Upazila" value={address.upazila} />
-                            <Info
+                            <InfoItem
+                                label="Division"
+                                value={address.division}
+                            />
+                            <InfoItem
+                                label="District"
+                                value={address.district}
+                            />
+                            <InfoItem label="Upazila" value={address.upazila} />
+                            <InfoItem
                                 label="Union/Ward"
                                 value={address.union_ward}
                             />
-                            <Info
+                            <InfoItem
                                 label="Postal Code"
                                 value={address.postal_code}
                             />
-                            <Info label="Country" value={address.country} />
-                            <Info label="Type" value={address.type} />
-                            <Info
+                            <InfoItem label="Country" value={address.country} />
+                            <InfoItem label="Type" value={address.type} />
+                            <InfoItem
                                 label="Verification Status"
                                 value={address.verification_status}
                             />
-                            <Info label="Remarks" value={address.remarks} />
+                            <InfoItem label="Remarks" value={address.remarks} />
                         </div>
                     </div>
                 </section>
             </div>
         </CustomAuthLayout>
-    );
-}
-
-function Info({
-    label,
-    value,
-}: {
-    label: string;
-    value?: React.ReactNode | null;
-}) {
-    return (
-        <div>
-            <p className="text-[10px] font-medium text-muted-foreground uppercase">
-                {label}
-            </p>
-            <p className="text-sm">{value || '—'}</p>
-        </div>
     );
 }

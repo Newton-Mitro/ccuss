@@ -12,6 +12,7 @@ import { useState } from 'react';
 
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
+import { InfoItem } from '../../../components/info-block';
 import InputError from '../../../components/input-error';
 import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
@@ -176,7 +177,7 @@ export default function ShowIntroducer() {
                                 <ShieldCheck className="h-4 w-4" /> Relationship
                                 Info
                             </p>
-                            <Info
+                            <InfoItem
                                 label="Relationship Type"
                                 value={introducer_request.relationship_type}
                             />
@@ -320,15 +321,6 @@ function CustomerDetails({ customer }: { customer?: any }) {
             <p className="text-xs text-muted-foreground">
                 {customer?.customer_no} • {customer?.email} • {customer?.phone}
             </p>
-        </div>
-    );
-}
-
-function Info({ label, value }: { label: string; value?: string | null }) {
-    return (
-        <div className="flex flex-col gap-0.5">
-            <span className="text-xs text-muted-foreground">{label}</span>
-            <span className="text-sm font-medium">{value || '—'}</span>
         </div>
     );
 }

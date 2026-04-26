@@ -4,6 +4,7 @@ import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
 import React from 'react';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
+import { InfoItem } from '../../../components/info-block';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
@@ -111,13 +112,13 @@ const Create = () => {
                         </div>
 
                         <div className="grid grid-cols-1 gap-1 text-xs md:grid-cols-4">
-                            <Info label="Phone" value={customer.phone} />
-                            <Info label="Email" value={customer.email} />
-                            <Info
+                            <InfoItem label="Phone" value={customer.phone} />
+                            <InfoItem label="Email" value={customer.email} />
+                            <InfoItem
                                 label="Identification Type"
                                 value={customer.identification_type}
                             />
-                            <Info
+                            <InfoItem
                                 label="Identification Number"
                                 value={customer.identification_number}
                             />
@@ -261,12 +262,3 @@ const Create = () => {
 };
 
 export default Create;
-
-function Info({ label, value }: { label: string; value: string }) {
-    return (
-        <div>
-            <span className="text-muted-foreground">{label}</span>
-            <p className="font-medium">{value}</p>
-        </div>
-    );
-}
