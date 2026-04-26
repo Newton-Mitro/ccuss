@@ -25,8 +25,9 @@ export default defineConfig({
         jsx: 'automatic',
     },
     server: {
-        host: '0.0.0.0', // VERY IMPORTANT for Docker
+        host: true,
         port: 5173,
+        cors: true,
         watch: { usePolling: true },
     },
 });

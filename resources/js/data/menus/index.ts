@@ -6,6 +6,7 @@ import { customerKycMenu } from './customerKycMenu';
 import { depositModuleMenu } from './depositModuleMenu';
 import { generalAccountingMenu } from './generalAccountingMenu';
 import { homeMenu } from './homeMenu';
+import { hrAndPayrollMenu } from './hrAndPayrollMenu';
 import { loanManagementMenu } from './loanManagement';
 import { pettyCashMenu } from './pettyCashMenu';
 import { subledgerModuleMenu } from './subledgerModuleMenu';
@@ -23,7 +24,7 @@ export const sidebarMenu: SidebarItem[] = [
     // ...procurementMenu,
     // ...fixedAssetMenu,
     ...chequeManagementMenu,
-    // ...hrAndPayrollMenu,
+    ...hrAndPayrollMenu,
     ...generalAccountingMenu,
     ...systemAdministrationMenu,
 ];
