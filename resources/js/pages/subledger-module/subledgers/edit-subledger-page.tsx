@@ -126,10 +126,12 @@ export default function Edit({ subledger, glAccounts }: any) {
                                     onChange={(value) =>
                                         setData('sub_type', value)
                                     }
-                                    options={subledgerSubTypes.map((st) => ({
-                                        value: st.value,
-                                        label: st.label,
-                                    }))}
+                                    options={[
+                                        { value: null, label: 'None' },
+                                        ...subledgerSubTypes.filter((t) => {
+                                            return t.type === data.type;
+                                        }),
+                                    ]}
                                 />
                                 <InputError message={errors.sub_type} />
                             </div>

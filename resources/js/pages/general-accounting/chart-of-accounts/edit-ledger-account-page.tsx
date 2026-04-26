@@ -165,13 +165,16 @@ export default function Edit({ ledger, parents }: any) {
                                 <input
                                     type="checkbox"
                                     checked={data.is_control_account}
-                                    onChange={(e) =>
-                                        setData(
-                                            'is_control_account',
-                                            e.target.checked,
-                                        )
-                                    }
-                                    disabled={data.is_group}
+                                    onChange={(e) => {
+                                        const checked = e.target.checked;
+                                        setData('is_control_account', checked);
+
+                                        if (checked) {
+                                            setData('is_group', false);
+                                            setData('subledger_type', '');
+                                            setData('subledger_sub_type', '');
+                                        }
+                                    }}
                                 />
                                 <Label>Control Account</Label>
                             </div>
@@ -222,8 +225,13 @@ export default function Edit({ ledger, parents }: any) {
                                             setData('subledger_sub_type', value)
                                         }
                                         options={[
-                                            { value: '', label: 'None' },
-                                            ...subledgerSubTypes,
+                                            { value: null, label: 'None' },
+                                            ...subledgerSubTypes.filter((t) => {
+                                                return (
+                                                    t.type ===
+                                                    data.subledger_type
+                                                );
+                                            }),
                                         ]}
                                     />
                                     <InputError

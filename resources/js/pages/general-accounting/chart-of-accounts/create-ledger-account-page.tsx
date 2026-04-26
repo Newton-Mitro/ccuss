@@ -140,9 +140,20 @@ export default function Create({ parents }: any) {
                                 <input
                                     type="checkbox"
                                     checked={data.is_group}
-                                    onChange={(e) =>
-                                        setData('is_group', e.target.checked)
-                                    }
+                                    onChange={(e) => {
+                                        const checked = e.target.checked;
+                                        setData('is_group', checked);
+
+                                        // 🔒 enforce rule
+                                        if (checked) {
+                                            setData(
+                                                'is_control_account',
+                                                false,
+                                            );
+                                            setData('subledger_type', '');
+                                            setData('subledger_sub_type', '');
+                                        }
+                                    }}
                                 />
                                 <Label>Group Account</Label>
                             </div>
@@ -151,13 +162,16 @@ export default function Create({ parents }: any) {
                                 <input
                                     type="checkbox"
                                     checked={data.is_control_account}
-                                    onChange={(e) =>
-                                        setData(
-                                            'is_control_account',
-                                            e.target.checked,
-                                        )
-                                    }
-                                    disabled={data.is_group}
+                                    onChange={(e) => {
+                                        const checked = e.target.checked;
+                                        setData('is_control_account', checked);
+
+                                        if (checked) {
+                                            setData('is_group', false);
+                                            setData('subledger_type', '');
+                                            setData('subledger_sub_type', '');
+                                        }
+                                    }}
                                 />
                                 <Label>Control Account</Label>
                             </div>
@@ -209,7 +223,12 @@ export default function Create({ parents }: any) {
                                         }
                                         options={[
                                             { value: null, label: 'None' },
-                                            ...subledgerSubTypes,
+                                            ...subledgerSubTypes.filter((t) => {
+                                                return (
+                                                    t.type ===
+                                                    data.subledger_type
+                                                );
+                                            }),
                                         ]}
                                     />
                                     <InputError

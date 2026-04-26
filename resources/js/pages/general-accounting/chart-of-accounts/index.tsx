@@ -259,10 +259,14 @@ export default function GlAccountsIndex() {
                                 className="bg-card"
                                 error={errors.fiscal_year_id}
                                 value={data.fiscal_year_id?.toString() || ''}
-                                options={fiscalYears.map((fy) => ({
-                                    value: fy.id.toString(),
-                                    label: fy.code,
-                                }))}
+                                placeholder="Fiscal Year"
+                                options={[
+                                    { value: '', label: 'All Fiscal Years' },
+                                    ...fiscalYears.map((fy) => ({
+                                        value: fy.id.toString(),
+                                        label: fy.code,
+                                    })),
+                                ]}
                                 onChange={(value) => {
                                     setData('fiscal_year_id', Number(value));
                                     setData('fiscal_period_id', null);
@@ -275,16 +279,20 @@ export default function GlAccountsIndex() {
                                 className="bg-card"
                                 error={errors.fiscal_period_id}
                                 value={data.fiscal_period_id?.toString() || ''}
-                                options={fiscalPeriods
-                                    .filter(
-                                        (fp) =>
-                                            fp.fiscal_year_id ==
-                                            data.fiscal_year_id,
-                                    )
-                                    .map((fp) => ({
-                                        value: fp.id.toString(),
-                                        label: fp.period_name,
-                                    }))}
+                                placeholder="Fiscal Period"
+                                options={[
+                                    { value: '', label: 'All Fiscal Periods' },
+                                    ...fiscalPeriods
+                                        .filter(
+                                            (fp) =>
+                                                fp.fiscal_year_id ==
+                                                data.fiscal_year_id,
+                                        )
+                                        .map((fp) => ({
+                                            value: fp.id.toString(),
+                                            label: fp.period_name,
+                                        })),
+                                ]}
                                 onChange={(value) =>
                                     setData('fiscal_period_id', Number(value))
                                 }

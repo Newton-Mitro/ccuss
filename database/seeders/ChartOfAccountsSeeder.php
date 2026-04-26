@@ -64,44 +64,44 @@ class ChartOfAccountsSeeder extends Seeder
                 'parent_id' => $cash->id,
                 'description' => 'Cash held in bank accounts',
                 'is_control_account' => true,
-                'subledger_type' => 'cash',
+                'subledger_type' => 'cash_and_cash_equivalents',
                 'subledger_sub_type' => 'bank_accounts',
             ]);
 
             LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '1113',
-                'name' => 'Petty Cash',
+                'name' => 'Petty Cashes',
                 'type' => 'asset',
                 'parent_id' => $cash->id,
                 'description' => 'Small cash for daily operational expenses',
                 'is_control_account' => true,
-                'subledger_type' => 'cash',
-                'subledger_sub_type' => 'petty_cash',
+                'subledger_type' => 'cash_and_cash_equivalents',
+                'subledger_sub_type' => 'petty_cashes',
             ]);
 
             LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '1114',
-                'name' => 'Vault Cash',
+                'name' => 'Vault Cashes',
                 'type' => 'asset',
                 'parent_id' => $cash->id,
                 'description' => 'Cash stored securely in vault',
                 'is_control_account' => true,
-                'subledger_type' => 'cash',
-                'subledger_sub_type' => 'vault_cash',
+                'subledger_type' => 'cash_and_cash_equivalents',
+                'subledger_sub_type' => 'vault_cashes',
             ]);
 
             LedgerAccount::create([
                 'organization_id' => $organization->id,
                 'code' => '1115',
-                'name' => 'Teller Cash',
+                'name' => 'Teller Cashes',
                 'type' => 'asset',
                 'parent_id' => $cash->id,
                 'description' => 'Cash held by teller for transactions',
                 'is_control_account' => true,
-                'subledger_type' => 'cash',
-                'subledger_sub_type' => 'teller_cash',
+                'subledger_type' => 'cash_and_cash_equivalents',
+                'subledger_sub_type' => 'teller_cashes',
             ]);
 
             // ----------------------------
@@ -356,6 +356,30 @@ class ChartOfAccountsSeeder extends Seeder
                 'subledger_sub_type' => 'sme_loans',
             ]);
 
+            LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '1145',
+                'name' => 'Vehicle Loans',
+                'type' => 'asset',
+                'parent_id' => $loans->id,
+                'description' => 'Loans provided for vehicle purchases',
+                'is_control_account' => true,
+                'subledger_type' => 'loans',
+                'subledger_sub_type' => 'vehicle_loans',
+            ]);
+
+            LedgerAccount::create([
+                'organization_id' => $organization->id,
+                'code' => '1146',
+                'name' => 'Agricultural Loans',
+                'type' => 'asset',
+                'parent_id' => $loans->id,
+                'description' => 'Loans provided for agricultural purposes',
+                'is_control_account' => true,
+                'subledger_type' => 'loans',
+                'subledger_sub_type' => 'agricultural_loans',
+            ]);
+
             // Fixed Assets
             LedgerAccount::create([
                 'organization_id' => $organization->id,
@@ -437,24 +461,24 @@ class ChartOfAccountsSeeder extends Seeder
                 [
                     'organization_id' => $organization->id,
                     'code' => '2012',
-                    'name' => 'Fixed Deposits',
+                    'name' => 'Term Deposits',
                     'type' => 'liability',
                     'parent_id' => $memberDeposits->id,
                     'description' => 'Time-bound fixed deposits from members',
                     'is_control_account' => true,
                     'subledger_type' => 'member_deposits',
-                    'subledger_sub_type' => 'fixed_deposits',
+                    'subledger_sub_type' => 'term_deposits',
                 ],
                 [
                     'organization_id' => $organization->id,
                     'code' => '2013',
-                    'name' => 'Term Deposits',
+                    'name' => 'Recurring Deposits',
                     'type' => 'liability',
                     'parent_id' => $memberDeposits->id,
-                    'description' => 'Deposits held for a specific term duration',
+                    'description' => 'Recurring deposits from members',
                     'is_control_account' => true,
                     'subledger_type' => 'member_deposits',
-                    'subledger_sub_type' => 'term_deposits',
+                    'subledger_sub_type' => 'recurring_deposits',
                 ],
                 [
                     'organization_id' => $organization->id,

@@ -1,15 +1,19 @@
 export const subledgerTypes = [
     {
-        label: 'Deposit',
-        value: 'deposit',
+        label: 'Cash and Cash Equivalents',
+        value: 'cash_and_cash_equivalents',
     },
     {
-        label: 'Loan',
-        value: 'loan',
+        label: 'Employee Advances',
+        value: 'employee_advances',
     },
     {
-        label: 'Cash',
-        value: 'cash',
+        label: 'Member Deposits',
+        value: 'member_deposits',
+    },
+    {
+        label: 'Loans',
+        value: 'loans',
     },
     {
         label: 'Payable',
@@ -22,44 +26,83 @@ export const subledgerTypes = [
 ];
 
 export const subledgerSubTypes = [
+    // Cash and Cash Equivalents
     {
-        label: 'Saving Deposit',
-        value: 'saving_deposit',
+        type: 'cash_and_cash_equivalents',
+        label: 'Bank Accounts',
+        value: 'bank_accounts',
     },
     {
-        label: 'Term Deposit',
-        value: 'term_deposit',
+        type: 'cash_and_cash_equivalents',
+        label: 'Petty Cashes',
+        value: 'petty_cashes',
     },
     {
-        label: 'Recurring Deposit',
-        value: 'recurring_deposit',
+        type: 'cash_and_cash_equivalents',
+        label: 'Vault Cashes',
+        value: 'vault_cashes',
     },
     {
-        label: 'Share Deposit',
-        value: 'share_deposit',
+        type: 'cash_and_cash_equivalents',
+        label: 'Teller Cashes',
+        value: 'teller_cashes',
+    },
+    // Employee Advances
+    {
+        type: 'employee_advances',
+        label: 'Petty Cash Advances',
+        value: 'petty_cash_advances',
     },
     {
-        label: 'Member Loan',
-        value: 'member_loan',
+        type: 'employee_advances',
+        label: 'Advance Salaries',
+        value: 'advance_salaries',
+    },
+    // Member Deposits
+    {
+        type: 'member_deposits',
+        label: 'Saving Deposits',
+        value: 'saving_deposits',
     },
     {
-        label: 'Vehicle Loan',
-        value: 'vehicle_loan',
+        type: 'member_deposits',
+        label: 'Term Deposits',
+        value: 'term_deposits',
     },
     {
-        label: 'Home Loan',
-        value: 'home_loan',
+        type: 'member_deposits',
+        label: 'Recurring Deposits',
+        value: 'recurring_deposits',
+    },
+    // Loans
+    {
+        type: 'loans',
+        label: 'General Loans',
+        value: 'general_loans',
     },
     {
-        label: 'SMB Loan',
-        value: 'smb_loan',
+        type: 'loans',
+        label: 'Vehicle Loans',
+        value: 'vehicle_loans',
     },
     {
-        label: 'Educational Loan',
-        value: 'educational_loan',
+        type: 'loans',
+        label: 'Housing Loans',
+        value: 'housing_loans',
     },
     {
-        label: 'Agri Loan',
-        value: 'agri_loan',
+        type: 'loans',
+        label: 'SME Loans',
+        value: 'sme_loans',
+    },
+    {
+        type: 'loans',
+        label: 'Education Loans',
+        value: 'education_loans',
+    },
+    {
+        type: 'loans',
+        label: 'Agricultural Loans',
+        value: 'agricultural_loans',
     },
 ];

@@ -130,7 +130,9 @@ export default function Create({ glAccounts }: any) {
                                     }
                                     options={[
                                         { value: null, label: 'None' },
-                                        ...subledgerSubTypes,
+                                        ...subledgerSubTypes.filter((t) => {
+                                            return t.type === data.type;
+                                        }),
                                     ]}
                                 />
                                 <InputError message={errors.sub_type} />
