@@ -1,3 +1,4 @@
+import { route } from 'ziggy-js';
 import { SidebarItem } from '../../types';
 
 export const generalAccountingMenu: SidebarItem[] = [
@@ -10,22 +11,22 @@ export const generalAccountingMenu: SidebarItem[] = [
             {
                 name: 'Fiscal Years',
                 icon: <i className="fa-solid fa-calendar" />,
-                path: '/fiscal-years',
+                path: route('fiscal-years.index'),
                 match_path: 'fiscal-years',
                 permission: ['settings.fiscal_year.view'],
             },
             {
                 name: 'Fiscal Periods',
                 icon: <i className="fa-solid fa-calendar-days" />,
-                path: '/fiscal-periods',
+                path: route('fiscal-periods.index'),
                 match_path: 'fiscal-periods',
                 permission: ['settings.fiscal.view'],
             },
             {
                 name: 'Chart of Accounts',
                 icon: <i className="fa-solid fa-list" />,
-                path: '/accounting/chart-of-accounts',
-                match_path: 'accounting/chart-of-accounts',
+                path: route('ledger-accounts.index'),
+                match_path: 'ledger-accounts',
                 permission: ['accounting.coa.view'],
             },
             {
@@ -76,17 +77,11 @@ export const generalAccountingMenu: SidebarItem[] = [
             {
                 name: 'Trial Balance',
                 icon: <i className="fa-solid fa-scale-balanced" />,
-                path: '/accounting/trial-balance',
+                path: route('financial-reports.trial-balance'),
                 match_path: 'accounting/trial-balance',
                 permission: ['accounting.trial.view'],
             },
-            {
-                name: 'Ledger Statement',
-                icon: <i className="fa-solid fa-scale-balanced" />,
-                path: '/accounting/ledger-statement',
-                match_path: 'accounting/ledger-statement',
-                permission: ['accounting.trial.view'],
-            },
+
             {
                 name: 'Financial Reports',
                 icon: <i className="fa-solid fa-file-invoice-dollar" />,
@@ -96,14 +91,14 @@ export const generalAccountingMenu: SidebarItem[] = [
                     {
                         name: 'Profit & Loss',
                         icon: <i className="fa-solid fa-chart-line" />,
-                        path: '/accounting/financial-reports/profit-loss',
+                        path: route('financial-reports.profit-loss'),
                         match_path: 'accounting/financial-reports/profit-loss',
                         permission: ['accounting.profit_loss.view'],
                     },
                     {
                         name: 'Balance Sheet',
                         icon: <i className="fa-solid fa-file-invoice" />,
-                        path: '/accounting/financial-reports/balance-sheet',
+                        path: route('financial-reports.balance-sheet'),
                         match_path:
                             'accounting/financial-reports/balance-sheet',
                         permission: ['accounting.balance_sheet.view'],
@@ -111,10 +106,17 @@ export const generalAccountingMenu: SidebarItem[] = [
                     {
                         name: 'Shareholders Equity',
                         icon: <i className="fa-solid fa-user-group" />,
-                        path: '/accounting/financial-reports/shareholders-equity',
+                        path: route('financial-reports.shareholders-equity'),
                         match_path:
                             'accounting/financial-reports/shareholders-equity',
                         permission: ['accounting.shareholders-equity.view'],
+                    },
+                    {
+                        name: 'Cash Flow Statement',
+                        icon: <i className="fa-solid fa-scale-balanced" />,
+                        path: route('financial-reports.cash-flow'),
+                        match_path: 'accounting/financial-reports/cash-flow',
+                        permission: ['accounting.cash_flow.view'],
                     },
                 ],
             },

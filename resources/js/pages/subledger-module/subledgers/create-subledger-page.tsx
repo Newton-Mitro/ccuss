@@ -109,14 +109,14 @@ export default function Create({ glAccounts }: any) {
 
                         <div className="grid grid-cols-1 gap-x-5 gap-y-2 md:grid-cols-4">
                             <div>
-                                <Label>Type</Label>
+                                <Label>Subledger Type</Label>
                                 <Select
                                     value={data.type}
                                     onChange={(value) => setData('type', value)}
-                                    options={subledgerTypes.map((t) => ({
-                                        value: t.value,
-                                        label: t.label,
-                                    }))}
+                                    options={[
+                                        { value: null, label: 'None' },
+                                        ...subledgerTypes,
+                                    ]}
                                 />
                                 <InputError message={errors.type} />
                             </div>
@@ -128,15 +128,13 @@ export default function Create({ glAccounts }: any) {
                                     onChange={(value) =>
                                         setData('sub_type', value)
                                     }
-                                    options={subledgerSubTypes.map((st) => ({
-                                        value: st.value,
-                                        label: st.label,
-                                    }))}
+                                    options={[
+                                        { value: null, label: 'None' },
+                                        ...subledgerSubTypes,
+                                    ]}
                                 />
-
                                 <InputError message={errors.sub_type} />
                             </div>
-
                             <div>
                                 <Label>GL Account</Label>
                                 <Select

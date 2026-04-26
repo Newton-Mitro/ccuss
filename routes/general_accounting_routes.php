@@ -31,22 +31,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/api/search-ledger', [LedgerAccountController::class, 'ledgerSearch'])->name('ledger_accounts.search');
-    Route::get('/api/get-cash-ledgers', [LedgerAccountController::class, 'cashLedgerList'])->name('ledger_accounts.cash-ledger-list');
+    Route::resource('ledger-accounts', LedgerAccountController::class);
+    Route::get('/api/search-ledger', [LedgerAccountController::class, 'ledgerSearch'])->name('ledger-accounts.search');
+    Route::get('/api/get-cash-ledgers', [LedgerAccountController::class, 'cashLedgerList'])->name('ledger-accounts.cash-ledger-list');
 });
 
-
-Route::prefix('accounting')->middleware(['auth', 'verified'])->group(function () {
-    Route::get('/chart-of-accounts', [LedgerAccountController::class, 'index'])->name('ledger_accounts.index');
-    Route::post('/ledger_accounts', [LedgerAccountController::class, 'store'])->name('ledger_accounts.store');
-    Route::put('/ledger_accounts/{gl_account}', [LedgerAccountController::class, 'update'])->name('ledger_accounts.update');
-    Route::delete('/ledger_accounts/{gl_account}', [LedgerAccountController::class, 'destroy'])->name('ledger_accounts.destroy');
-
-    Route::get('/trial-balance', [AccountingReportController::class, 'trialBalance'])->name('reports.trial-balance');
-    Route::get('/financial-reports/profit-loss', [AccountingReportController::class, 'profitAndLoss'])->name('reports.profit-loss');
-    Route::get('/financial-reports/balance-sheet', [AccountingReportController::class, 'balanceSheet'])->name('reports.balance-sheet');
-    Route::get('/financial-reports/cash-flow', [AccountingReportController::class, 'cashFlow'])->name('reports.cash-flow');
-    Route::get('/financial-reports/shareholders-equity', [AccountingReportController::class, 'shareholdersEquity'])->name('reports.shareholders-equity');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/trial-balance', [AccountingReportController::class, 'trialBalance'])->name('financial-reports.trial-balance');
+    Route::get('/financial-reports/profit-loss', [AccountingReportController::class, 'profitAndLoss'])->name('financial-reports.profit-loss');
+    Route::get('/financial-reports/balance-sheet', [AccountingReportController::class, 'balanceSheet'])->name('financial-reports.balance-sheet');
+    Route::get('/financial-reports/cash-flow', [AccountingReportController::class, 'cashFlow'])->name('financial-reports.cash-flow');
+    Route::get('/financial-reports/shareholders-equity', [AccountingReportController::class, 'shareholdersEquity'])->name('financial-reports.shareholders-equity');
 });
+
 
 

@@ -48,9 +48,10 @@ return new class extends Migration {
             $table->enum('type', ['asset', 'liability', 'equity', 'income', 'expense']);
             $table->string('description')->nullable();
             $table->boolean('is_control_account')->default(false);
-            $table->boolean('requires_subledger')->default(false);
+            $table->boolean('is_group')->default(false);
             $table->boolean('is_active')->default(true);
-            $table->boolean('is_leaf')->default(true);
+            $table->string('subledger_type', 150)->nullable();
+            $table->string('subledger_sub_type', 150)->nullable();
             $table->timestamps();
             $table->softDeletes();
 

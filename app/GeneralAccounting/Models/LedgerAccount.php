@@ -20,18 +20,19 @@ class LedgerAccount extends Model
         'code',
         'name',
         'type',
+        'description',
         'is_control_account',
-        'requires_subledger',
+        'is_group',
         'is_active',
-        'is_leaf',
+        'subledger_type',
+        'subledger_sub_type',
         'parent_id',
     ];
 
     protected $casts = [
         'is_control_account' => 'boolean',
-        'requires_subledger' => 'boolean',
+        'is_group' => 'boolean',
         'is_active' => 'boolean',
-        'is_leaf' => 'boolean',
     ];
 
     /*
@@ -55,9 +56,48 @@ class LedgerAccount extends Model
         return $this->hasMany(LedgerAccount::class, 'parent_id');
     }
 
-    public function childrenRecursive()
+    public function childrenRecursive(): HasMany
     {
         return $this->children()->with('childrenRecursive');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors (Derived Logic)
+    |--------------------------------------------------------------------------
+    */
+
+    // A leaf node = no children
+    public function getIsLeafAttribute(): bool
+    {
+        return !$this->is_group;
+    }
+
+    // Requires subledger if type exists
+    public function getRequiresSubledgerAttribute(): bool
+    {
+        return !is_null($this->subledger_type);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes (Pro-level querying 🚀)
+    |--------------------------------------------------------------------------
+    */
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeGroups($query)
+    {
+        return $query->where('is_group', true);
+    }
+
+    public function scopeLeaf($query)
+    {
+        return $query->where('is_group', false);
     }
 
     protected static function newFactory(): LedgerAccountFactory

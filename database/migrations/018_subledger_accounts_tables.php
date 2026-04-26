@@ -13,22 +13,8 @@ return new class extends Migration {
             $table->string('code', 20)->unique();
             $table->string('name');
             $table->string('short_name')->nullable();
-            $table->enum('type', ['deposit', 'loan', 'cash', 'payable', 'receivable'])->default('deposit');
-            $table->enum('sub_type', [
-                'saving deposit',
-                'term deposit',
-                'recurring deposit',
-                'share_deposit',
-                'membr_loan',
-                'vehicle_loan',
-                'home_loan',
-                'smb_loan',
-                'educational_loan',
-                'agri_loan',
-                'cash_at_hand',
-                'cash_at_bank',
-                'petty_cash'
-            ])->default('saving deposit');
+            $table->string('subledger_type', 150)->nullable();
+            $table->string('subledger_sub_type', 150)->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->softDeletes();

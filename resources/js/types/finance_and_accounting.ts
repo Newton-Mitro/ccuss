@@ -23,13 +23,26 @@ export interface FiscalPeriod extends Timestamped {
 // Account
 export interface LedgerAccount extends Timestamped {
     id: number;
+    organization_id: number;
+
     code: string;
     name: string;
+    description?: string | null;
+
     type: 'asset' | 'liability' | 'equity' | 'income' | 'expense';
+
+    is_group: boolean;
     is_control_account: boolean;
     is_active: boolean;
-    is_leaf: boolean;
+
+    subledger_type?: string | null;
+    subledger_sub_type?: string | null;
+
     parent_id?: number | null;
+
+    // 🔹 Relationships (optional when loaded)
+    parent?: LedgerAccount | null;
+    children?: LedgerAccount[];
 }
 
 // Account Balance

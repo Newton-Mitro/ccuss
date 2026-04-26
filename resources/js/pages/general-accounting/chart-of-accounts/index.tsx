@@ -2,12 +2,15 @@ import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
     ChevronDownIcon,
     ChevronRightIcon,
     ChevronUpIcon,
     FileIcon,
+    PenSquare,
+    Plus,
+    ScanEye,
     Trash2,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -16,13 +19,14 @@ import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import { appSwal } from '../../../lib/appSwal';
 import { SharedData } from '../../../types';
+import { LedgerAccount } from '../../../types/finance_and_accounting';
 import { TYPE_COLORS } from './utils';
 
 /* ---------------------------------------------
 | Types
 --------------------------------------------- */
 interface GlAccountsIndexProps extends SharedData {
-    glAccounts: any[];
+    glAccounts: LedgerAccount[];
     fiscalYears: any[];
     fiscalPeriods: any[];
     fiscal_year_id: number | null;
@@ -116,7 +120,7 @@ export default function GlAccountsIndex() {
             .then((res) => {
                 if (!res.isConfirmed) return;
 
-                router.delete(route('ledger_accounts.destroy', id), {
+                router.delete(route('ledger-accounts.destroy', id), {
                     preserveScroll: true,
                 });
             });
@@ -129,12 +133,16 @@ export default function GlAccountsIndex() {
         return (
             <ul className="space-y-1">
                 {nodes.map((acc) => {
+                    console.log(`${acc.name} - ${acc.is_group}`);
                     const children = acc.children_recursive || [];
                     const isExpanded = expandedIds.includes(acc.id);
                     const hasChildren = children.length > 0;
 
                     return (
-                        <li key={acc.id}>
+                        <li
+                            key={acc.id}
+                            className={`${acc.is_control_account && 'text-warning'} ${acc.is_group ? 'font-bold text-info' : 'text-card-foreground'}`}
+                        >
                             <div
                                 className="flex cursor-pointer items-center justify-between rounded-lg px-3 py-1 hover:bg-accent/10"
                                 style={{ marginLeft: `${level * 1.5}rem` }}
@@ -159,7 +167,7 @@ export default function GlAccountsIndex() {
                                     </span>
 
                                     <span
-                                        className={`ml-2 rounded px-2 py-0.5 text-xs ${
+                                        className={`ml-2 rounded px-2 py-0.5 text-xs capitalize ${
                                             TYPE_COLORS[acc.type]
                                         }`}
                                     >
@@ -169,6 +177,27 @@ export default function GlAccountsIndex() {
 
                                 {/* RIGHT SIDE */}
                                 <div className="flex items-center gap-2">
+                                    <Link
+                                        href={route(
+                                            'ledger-accounts.show',
+                                            acc.id,
+                                        )}
+                                        className="text-info"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <ScanEye className="h-4 w-4" />
+                                    </Link>
+                                    <Link
+                                        href={route(
+                                            'ledger-accounts.edit',
+                                            acc.id,
+                                        )}
+                                        className="text-warning"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <PenSquare className="h-4 w-4" />
+                                    </Link>
+
                                     {!hasChildren && (
                                         <button
                                             onClick={(e) => {
@@ -208,10 +237,19 @@ export default function GlAccountsIndex() {
             <Head title="Chart of Accounts" />
 
             <div className="space-y-4">
-                <HeadingSmall
-                    title="Chart of Accounts"
-                    description="Manage your ledger hierarchy"
-                />
+                <div className="flex items-center justify-between">
+                    <HeadingSmall
+                        title="Chart of Accounts"
+                        description="Manage your ledger hierarchy"
+                    />
+
+                    <Link
+                        href={route('ledger-accounts.create')}
+                        className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                    >
+                        <Plus className="h-4 w-4" /> Add Ledger
+                    </Link>
+                </div>
 
                 {/* FILTER BAR */}
                 <div className="flex justify-between">

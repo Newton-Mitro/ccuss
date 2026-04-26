@@ -1,9 +1,5 @@
 export const subledgerTypes = [
     {
-        label: 'None',
-        value: '',
-    },
-    {
         label: 'Deposit',
         value: 'deposit',
     },
@@ -26,10 +22,6 @@ export const subledgerTypes = [
 ];
 
 export const subledgerSubTypes = [
-    {
-        label: 'None',
-        value: '',
-    },
     {
         label: 'Saving Deposit',
         value: 'saving_deposit',
