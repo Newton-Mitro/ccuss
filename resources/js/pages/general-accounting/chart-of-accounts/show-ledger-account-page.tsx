@@ -85,7 +85,7 @@ export default function Show({ ledger }: any) {
                             <BorderInfoBox
                                 label="Children Count"
                                 className="bg-muted/30"
-                                value={ledger.children?.length || 0}
+                                value={ledger.children?.length || '0'}
                             />
                         </div>
                     </div>
