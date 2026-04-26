@@ -80,7 +80,6 @@ class VaultController extends Controller
                 'branch_id' => $data['branch_id'],
                 'account_number' => 'V-' . str_pad($vault->id, 5, '0', STR_PAD_LEFT),
                 'name' => ($data['name'] ?? 'Vault') . ' (Vault)',
-                'type' => 'vault', // 🔥 important
                 'status' => 'active',
                 // polymorphic
                 'accountable_type' => Vault::class,

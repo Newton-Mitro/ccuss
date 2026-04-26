@@ -96,7 +96,6 @@ class PettyCashAccountController extends Controller
                 'branch_id' => $data['branch_id'],
                 'account_number' => 'PC-' . str_pad($pettyCash->id, 5, '0', STR_PAD_LEFT),
                 'name' => ($data['name'] ?? 'Petty Cash') . ' (Petty Cash)',
-                'type' => 'petty_cash',
                 'status' => 'active',
 
                 // polymorphic link

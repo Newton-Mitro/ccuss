@@ -21,7 +21,6 @@ class SubledgerAccount extends Model
         'accountable_id',
         'account_number',
         'name',
-        'type',
         'status',
     ];
 

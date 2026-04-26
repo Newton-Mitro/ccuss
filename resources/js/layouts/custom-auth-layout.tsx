@@ -12,8 +12,10 @@ import { cn } from '@/lib/utils';
 import { logout } from '@/routes';
 import { Link, router, usePage } from '@inertiajs/react';
 import {
+    Building2,
     ChevronsDown,
     ChevronsUp,
+    InfoIcon,
     LogOut,
     Menu,
     Monitor,
@@ -467,7 +469,10 @@ export default function CustomAuthLayout({
                                             onClick={cleanup}
                                             className="flex gap-2"
                                         >
-                                            <UserCircle size={16} />
+                                            <UserCircle
+                                                size={16}
+                                                className="text-card-foreground hover:text-primary-foreground"
+                                            />
                                             User Profile
                                         </Link>
                                     </DropdownMenuItem>
@@ -481,7 +486,10 @@ export default function CustomAuthLayout({
                                             onClick={cleanup}
                                             className="flex gap-2"
                                         >
-                                            <UserCircle size={16} />
+                                            <InfoIcon
+                                                size={16}
+                                                className="text-card-foreground hover:text-primary-foreground"
+                                            />
                                             About
                                         </Link>
                                     </DropdownMenuItem>
@@ -492,7 +500,10 @@ export default function CustomAuthLayout({
                                             onClick={cleanup}
                                             className="flex gap-2"
                                         >
-                                            <UserCircle size={16} />
+                                            <InfoIcon
+                                                size={16}
+                                                className="text-card-foreground hover:text-primary-foreground"
+                                            />
                                             What's new?
                                         </Link>
                                     </DropdownMenuItem>
@@ -503,7 +514,10 @@ export default function CustomAuthLayout({
                                             onClick={cleanup}
                                             className="flex gap-2"
                                         >
-                                            <UserCircle size={16} />
+                                            <Building2
+                                                size={16}
+                                                className="text-card-foreground hover:text-primary-foreground"
+                                            />
                                             Developer Profile
                                         </Link>
                                     </DropdownMenuItem>

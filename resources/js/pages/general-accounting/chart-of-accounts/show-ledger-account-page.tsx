@@ -5,7 +5,7 @@ import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
-import { InfoItem } from '../../../components/info-block';
+import { BorderInfoBox } from '../../../components/border-info-box';
 
 export default function Show({ ledger }: any) {
     const breadcrumbs: BreadcrumbItem[] = [
@@ -32,10 +32,23 @@ export default function Show({ ledger }: any) {
                         </h3>
 
                         <div className="mt-2 grid gap-4 md:grid-cols-4">
-                            <InfoItem label="Code" value={ledger.code} />
-                            <InfoItem label="Name" value={ledger.name} />
-                            <InfoItem label="Type" value={ledger.type} />
-                            <InfoItem
+                            <BorderInfoBox
+                                className="bg-muted/30"
+                                label="Code"
+                                value={ledger.code}
+                            />
+                            <BorderInfoBox
+                                className="bg-muted/30"
+                                label="Name"
+                                value={ledger.name}
+                            />
+                            <BorderInfoBox
+                                className="bg-muted/30"
+                                label="Type"
+                                value={ledger.type}
+                            />
+                            <BorderInfoBox
+                                className="bg-muted/30"
                                 label="Status"
                                 value={ledger.is_active ? 'Active' : 'Inactive'}
                             />
@@ -49,8 +62,9 @@ export default function Show({ ledger }: any) {
                         </h3>
 
                         <div className="mt-2 grid gap-4 md:grid-cols-3">
-                            <InfoItem
+                            <BorderInfoBox
                                 label="Parent Account"
+                                className="bg-muted/30"
                                 value={
                                     ledger.parent
                                         ? `${ledger.parent.code} - ${ledger.parent.name}`
@@ -58,8 +72,9 @@ export default function Show({ ledger }: any) {
                                 }
                             />
 
-                            <InfoItem
+                            <BorderInfoBox
                                 label="Account Nature"
+                                className="bg-muted/30"
                                 value={
                                     ledger.is_group
                                         ? 'Group Account'
@@ -67,8 +82,9 @@ export default function Show({ ledger }: any) {
                                 }
                             />
 
-                            <InfoItem
+                            <BorderInfoBox
                                 label="Children Count"
+                                className="bg-muted/30"
                                 value={ledger.children?.length || 0}
                             />
                         </div>
@@ -81,18 +97,21 @@ export default function Show({ ledger }: any) {
                         </h3>
 
                         <div className="mt-2 grid gap-4 md:grid-cols-3">
-                            <InfoItem
+                            <BorderInfoBox
                                 label="Control Account"
+                                className="bg-muted/30"
                                 value={ledger.is_control_account ? 'Yes' : 'No'}
                             />
 
-                            <InfoItem
+                            <BorderInfoBox
                                 label="Subledger Type"
+                                className="bg-muted/30"
                                 value={ledger.subledger_type || 'None'}
                             />
 
-                            <InfoItem
+                            <BorderInfoBox
                                 label="Subledger Sub Type"
+                                className="bg-muted/30"
                                 value={ledger.subledger_sub_type || 'None'}
                             />
                         </div>

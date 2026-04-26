@@ -1,5 +1,6 @@
 import { Head, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
+import BolderLessInfoBox from '../../../components/borderless-info-box';
 import HeadingSmall from '../../../components/heading-small';
 import {
     Avatar,
@@ -10,7 +11,6 @@ import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import { useInitials } from '../../../hooks/use-initials';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-import InfoItem from '../organizations/info-item';
 
 function ShowUser() {
     const { user } = usePage<any>().props;
@@ -71,17 +71,17 @@ function ShowUser() {
                         Basic Info
                     </h3>
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                        <InfoItem label="Name" value={user.name} />
-                        <InfoItem label="Email" value={user.email} />
-                        <InfoItem
+                        <BolderLessInfoBox label="Name" value={user.name} />
+                        <BolderLessInfoBox label="Email" value={user.email} />
+                        <BolderLessInfoBox
                             label="Email Verified"
                             value={user.email_verified_at ? 'Yes' : 'No'}
                         />
-                        <InfoItem
+                        <BolderLessInfoBox
                             label="Organization"
                             value={user.organization?.name || '-'}
                         />
-                        <InfoItem
+                        <BolderLessInfoBox
                             label="Branch"
                             value={user.branch?.name || '-'}
                         />

@@ -2,8 +2,8 @@ import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, ListFilter, Loader2 } from 'lucide-react';
 import React, { useState } from 'react';
 import { route } from 'ziggy-js';
+import BolderLessInfoBox from '../../../components/borderless-info-box';
 import HeadingSmall from '../../../components/heading-small';
-import { InfoItem } from '../../../components/info-block';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
@@ -128,19 +128,19 @@ const CreateKycDocument = () => {
                                 {customer.kyc_status} • {customer.type}
                             </p>
                             <div className="grid grid-cols-1 gap-1 text-xs md:grid-cols-4">
-                                <InfoItem
+                                <BolderLessInfoBox
                                     label="Phone"
                                     value={customer.phone}
                                 />
-                                <InfoItem
+                                <BolderLessInfoBox
                                     label="Email"
                                     value={customer.email}
                                 />
-                                <InfoItem
+                                <BolderLessInfoBox
                                     label="ID Type"
                                     value={customer.identification_type}
                                 />
-                                <InfoItem
+                                <BolderLessInfoBox
                                     label="ID Number"
                                     value={customer.identification_number}
                                 />

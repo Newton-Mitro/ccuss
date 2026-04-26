@@ -11,8 +11,8 @@ import {
 import { useState } from 'react';
 
 import { route } from 'ziggy-js';
+import { BorderInfoBox } from '../../../components/border-info-box';
 import HeadingSmall from '../../../components/heading-small';
-import { InfoItem } from '../../../components/info-block';
 import InputError from '../../../components/input-error';
 import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
@@ -169,7 +169,7 @@ export default function ShowFamilyRelation() {
                                 <ShieldCheck className="h-4 w-4" /> Relation
                                 Info
                             </p>
-                            <InfoItem
+                            <BorderInfoBox
                                 label="Relation Type"
                                 value={familyRelation.relation_type.replaceAll(
                                     '_',

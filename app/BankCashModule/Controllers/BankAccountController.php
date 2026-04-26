@@ -94,7 +94,6 @@ class BankAccountController extends Controller
                 'branch_id' => $user->branch_id ?? null,
                 'account_number' => $data['account_number'],
                 'name' => $data['name'] ?? $data['bank_name'],
-                'type' => 'bank',
                 'status' => 'active',
                 'accountable_type' => BankAccount::class,
                 'accountable_id' => $bankAccount->id,

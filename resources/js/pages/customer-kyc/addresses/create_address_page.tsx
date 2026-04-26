@@ -3,8 +3,8 @@ import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
 
 import React from 'react';
 import { route } from 'ziggy-js';
+import BolderLessInfoBox from '../../../components/borderless-info-box';
 import HeadingSmall from '../../../components/heading-small';
-import { InfoItem } from '../../../components/info-block';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
@@ -112,13 +112,19 @@ const Create = () => {
                         </div>
 
                         <div className="grid grid-cols-1 gap-1 text-xs md:grid-cols-4">
-                            <InfoItem label="Phone" value={customer.phone} />
-                            <InfoItem label="Email" value={customer.email} />
-                            <InfoItem
+                            <BolderLessInfoBox
+                                label="Phone"
+                                value={customer.phone}
+                            />
+                            <BolderLessInfoBox
+                                label="Email"
+                                value={customer.email}
+                            />
+                            <BolderLessInfoBox
                                 label="Identification Type"
                                 value={customer.identification_type}
                             />
-                            <InfoItem
+                            <BolderLessInfoBox
                                 label="Identification Number"
                                 value={customer.identification_number}
                             />

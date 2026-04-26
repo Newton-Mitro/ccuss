@@ -1,16 +1,18 @@
 import formatUndersoreString from '../lib/formatUnderscoreString';
 
-export function InfoItem({
+export function BorderInfoBox({
     label,
     value,
-    className,
+    className = 'bg-card',
 }: {
     label: string;
     value: string;
     className?: string;
 }) {
     return (
-        <div className={`rounded-md border bg-muted/30 p-3 ${className || ''}`}>
+        <div
+            className={`rounded-md border border-border p-3 ${className || ''}`}
+        >
             <p className="text-xs text-muted-foreground">{label}</p>
             <p className="text-sm font-medium">
                 {formatUndersoreString(value || '—')}

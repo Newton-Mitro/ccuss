@@ -16,7 +16,7 @@ import {
     X,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import { InfoItem } from '../../../components/info-block';
+import { BorderInfoBox } from '../../../components/border-info-box';
 import { UserInfo } from '../../../components/user-info';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
@@ -186,62 +186,58 @@ export default function Show({ customer }: ShowProps) {
                 <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
                     {isIndividual && (
                         <>
-                            <InfoItem
+                            <BorderInfoBox
                                 label="Date of Birth"
                                 value={formatDate(customer.dob)}
                             />
 
-                            <InfoItem
+                            <BorderInfoBox
                                 label="Gender"
                                 value={customer.gender}
-                                className="capitalize"
                             />
-                            <InfoItem
+                            <BorderInfoBox
                                 label="Religion"
                                 value={customer.religion}
-                                className="capitalize"
                             />
-                            <InfoItem
+                            <BorderInfoBox
                                 label="Marital Status"
                                 value={customer.marital_status}
-                                className="capitalize"
                             />
-                            <InfoItem
+                            <BorderInfoBox
                                 label="Blood Group"
                                 value={customer.blood_group}
-                                className="capitalize"
                             />
-                            <InfoItem
+                            <BorderInfoBox
                                 label="Nationality"
                                 value={customer.nationality}
-                                className="capitalize"
                             />
-                            <InfoItem
+                            <BorderInfoBox
                                 label="Occupation"
                                 value={customer.occupation}
-                                className="capitalize"
                             />
-                            <InfoItem
+                            <BorderInfoBox
                                 label="Education"
                                 value={customer.education}
-                                className="capitalize"
                             />
                         </>
                     )}
 
                     {isOrganization && (
-                        <InfoItem label="Organization" value={customer.name} />
+                        <BorderInfoBox
+                            label="Organization"
+                            value={customer.name}
+                        />
                     )}
 
-                    <InfoItem label="Phone" value={customer.phone} />
-                    <InfoItem label="Email" value={customer.email} />
+                    <BorderInfoBox label="Phone" value={customer.phone} />
+                    <BorderInfoBox label="Email" value={customer.email} />
 
-                    <InfoItem
+                    <BorderInfoBox
                         label="ID Type"
                         value={customer.identification_type}
                     />
 
-                    <InfoItem
+                    <BorderInfoBox
                         label="ID Number"
                         value={customer.identification_number}
                     />
@@ -255,20 +251,14 @@ export default function Show({ customer }: ShowProps) {
                     title="KYC Profile"
                 >
                     <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
-                        <div className="rounded-md border bg-card px-4 py-2 hover:shadow-md">
-                            <InfoItem
-                                label="KYC Level"
-                                value={customer.kyc_profile.kyc_level}
-                                className="capitalize"
-                            />
-                        </div>
-                        <div className="rounded-md border bg-card px-4 py-2 hover:shadow-md">
-                            <InfoItem
-                                label="Risk Level"
-                                value={customer.kyc_profile.risk_level}
-                                className="capitalize"
-                            />
-                        </div>
+                        <BorderInfoBox
+                            label="KYC Level"
+                            value={customer.kyc_profile.kyc_level}
+                        />
+                        <BorderInfoBox
+                            label="Risk Level"
+                            value={customer.kyc_profile.risk_level}
+                        />
                     </div>
                 </SectionHeader>
             )}

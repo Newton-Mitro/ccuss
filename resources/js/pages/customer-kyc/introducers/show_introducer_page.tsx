@@ -11,8 +11,8 @@ import {
 import { useState } from 'react';
 
 import { route } from 'ziggy-js';
+import { BorderInfoBox } from '../../../components/border-info-box';
 import HeadingSmall from '../../../components/heading-small';
-import { InfoItem } from '../../../components/info-block';
 import InputError from '../../../components/input-error';
 import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
@@ -177,7 +177,7 @@ export default function ShowIntroducer() {
                                 <ShieldCheck className="h-4 w-4" /> Relationship
                                 Info
                             </p>
-                            <InfoItem
+                            <BorderInfoBox
                                 label="Relationship Type"
                                 value={introducer_request.relationship_type}
                             />

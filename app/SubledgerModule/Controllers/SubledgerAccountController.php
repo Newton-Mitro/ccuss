@@ -26,11 +26,6 @@ class SubledgerAccountController extends Controller
             });
         }
 
-        // 🎯 Filter by type
-        if ($type = $request->input('type')) {
-            $query->where('type', $type);
-        }
-
         // 🎯 Filter by status
         if ($status = $request->input('status')) {
             $query->where('status', $status);
@@ -50,7 +45,6 @@ class SubledgerAccountController extends Controller
             'accounts' => $accounts,
             'filters' => $request->only([
                 'search',
-                'type',
                 'status',
                 'branch_id',
                 'per_page',
@@ -63,19 +57,6 @@ class SubledgerAccountController extends Controller
     {
         return Inertia::render('subledger-module/subledger-accounts/create', [
             'subledgers' => Subledger::select('id', 'name')->get(),
-
-            'types' => [
-                'bank',
-                'deposit',
-                'loan',
-                'petty_cash',
-                'petty_cash_advance',
-                'vendor',
-                'vault',
-                'teller',
-                'customer',
-            ],
-
             'statuses' => [
                 'pending',
                 'active',
@@ -91,7 +72,6 @@ class SubledgerAccountController extends Controller
         $validated = $request->validate([
             'account_number' => 'required|string|unique:subledger_accounts,account_number',
             'name' => 'nullable|string|max:255',
-            'type' => 'required|string',
             'status' => 'required|string',
             'accountable_type' => 'required|string',
             'accountable_id' => 'required|integer',
@@ -124,19 +104,6 @@ class SubledgerAccountController extends Controller
         return Inertia::render('subledger-module/subledger-accounts/edit-subledger-account-page', [
             'account' => $subledgerAccount,
             'subledgers' => Subledger::select('id', 'name')->get(),
-
-            'types' => [
-                'bank',
-                'deposit',
-                'loan',
-                'petty_cash',
-                'petty_cash_advance',
-                'vendor',
-                'vault',
-                'teller',
-                'customer',
-            ],
-
             'statuses' => [
                 'pending',
                 'active',
@@ -152,7 +119,6 @@ class SubledgerAccountController extends Controller
         $validated = $request->validate([
             'account_number' => 'required|string|unique:subledger_accounts,account_number,' . $subledgerAccount->id,
             'name' => 'nullable|string|max:255',
-            'type' => 'required|string',
             'status' => 'required|string',
             'accountable_type' => 'required|string',
             'accountable_id' => 'required|integer',

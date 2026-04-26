@@ -8,8 +8,8 @@ import {
     X,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import { BorderInfoBox } from '../../../components/border-info-box';
 import HeadingSmall from '../../../components/heading-small';
-import { InfoItem } from '../../../components/info-block';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
@@ -102,7 +102,7 @@ export default function ViewAddress({ address }: Props) {
 
                             <div className="flex-1 space-y-2">
                                 <div>
-                                    <InfoItem
+                                    <BorderInfoBox
                                         label=""
                                         value={
                                             address.customer ? (
@@ -142,38 +142,47 @@ export default function ViewAddress({ address }: Props) {
                         </div>
 
                         <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                            <InfoItem
+                            <BorderInfoBox
                                 label="Address Line 1"
                                 value={address.line1}
                             />
-                            <InfoItem
+                            <BorderInfoBox
                                 label="Address Line 2"
                                 value={address.line2}
                             />
-                            <InfoItem
+                            <BorderInfoBox
                                 label="Division"
                                 value={address.division}
                             />
-                            <InfoItem
+                            <BorderInfoBox
                                 label="District"
                                 value={address.district}
                             />
-                            <InfoItem label="Upazila" value={address.upazila} />
-                            <InfoItem
+                            <BorderInfoBox
+                                label="Upazila"
+                                value={address.upazila}
+                            />
+                            <BorderInfoBox
                                 label="Union/Ward"
                                 value={address.union_ward}
                             />
-                            <InfoItem
+                            <BorderInfoBox
                                 label="Postal Code"
                                 value={address.postal_code}
                             />
-                            <InfoItem label="Country" value={address.country} />
-                            <InfoItem label="Type" value={address.type} />
-                            <InfoItem
+                            <BorderInfoBox
+                                label="Country"
+                                value={address.country}
+                            />
+                            <BorderInfoBox label="Type" value={address.type} />
+                            <BorderInfoBox
                                 label="Verification Status"
                                 value={address.verification_status}
                             />
-                            <InfoItem label="Remarks" value={address.remarks} />
+                            <BorderInfoBox
+                                label="Remarks"
+                                value={address.remarks}
+                            />
                         </div>
                     </div>
                 </section>

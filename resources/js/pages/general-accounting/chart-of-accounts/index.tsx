@@ -2,7 +2,7 @@ import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     ChevronDownIcon,
     ChevronRightIcon,
@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { route } from 'ziggy-js';
-import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import { appSwal } from '../../../lib/appSwal';
 import { SharedData } from '../../../types';
@@ -37,23 +36,9 @@ interface GlAccountsIndexProps extends SharedData {
 | Component
 --------------------------------------------- */
 export default function GlAccountsIndex() {
-    const {
-        glAccounts,
-        fiscalYears,
-        fiscalPeriods,
-        fiscal_year_id,
-        fiscal_period_id,
-    } = usePage<GlAccountsIndexProps>().props;
+    const { glAccounts } = usePage<GlAccountsIndexProps>().props;
 
     useFlashToastHandler();
-
-    /* ---------------------------------------------
-    | Form state
-    --------------------------------------------- */
-    const { data, setData, errors } = useForm({
-        fiscal_year_id: fiscal_year_id ?? null,
-        fiscal_period_id: fiscal_period_id ?? null,
-    });
 
     /* ---------------------------------------------
     | Collect expandable (control) nodes
@@ -242,63 +227,8 @@ export default function GlAccountsIndex() {
                         title="Chart of Accounts"
                         description="Manage your ledger hierarchy"
                     />
-
-                    <Link
-                        href={route('ledger-accounts.create')}
-                        className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-                    >
-                        <Plus className="h-4 w-4" /> Add Ledger
-                    </Link>
-                </div>
-
-                {/* FILTER BAR */}
-                <div className="flex justify-between">
+                    {/* FILTER BAR */}
                     <div className="flex gap-2">
-                        <div className="w-60">
-                            <Select
-                                className="bg-card"
-                                error={errors.fiscal_year_id}
-                                value={data.fiscal_year_id?.toString() || ''}
-                                placeholder="Fiscal Year"
-                                options={[
-                                    { value: '', label: 'All Fiscal Years' },
-                                    ...fiscalYears.map((fy) => ({
-                                        value: fy.id.toString(),
-                                        label: fy.code,
-                                    })),
-                                ]}
-                                onChange={(value) => {
-                                    setData('fiscal_year_id', Number(value));
-                                    setData('fiscal_period_id', null);
-                                }}
-                            />
-                        </div>
-
-                        <div className="w-60">
-                            <Select
-                                className="bg-card"
-                                error={errors.fiscal_period_id}
-                                value={data.fiscal_period_id?.toString() || ''}
-                                placeholder="Fiscal Period"
-                                options={[
-                                    { value: '', label: 'All Fiscal Periods' },
-                                    ...fiscalPeriods
-                                        .filter(
-                                            (fp) =>
-                                                fp.fiscal_year_id ==
-                                                data.fiscal_year_id,
-                                        )
-                                        .map((fp) => ({
-                                            value: fp.id.toString(),
-                                            label: fp.period_name,
-                                        })),
-                                ]}
-                                onChange={(value) =>
-                                    setData('fiscal_period_id', Number(value))
-                                }
-                            />
-                        </div>
-
                         <Button
                             size="sm"
                             variant="outline"
@@ -316,6 +246,13 @@ export default function GlAccountsIndex() {
                         >
                             <ChevronUpIcon className="h-4 w-4" />
                         </Button>
+
+                        <Link
+                            href={route('ledger-accounts.create')}
+                            className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                        >
+                            <Plus className="h-4 w-4" /> Add Ledger
+                        </Link>
                     </div>
                 </div>
 

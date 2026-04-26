@@ -77,8 +77,6 @@ class LedgerAccountController extends Controller
     */
     public function index(Request $request): Response
     {
-        $fiscal_year_id = $request->input('fiscal_year_id');
-
         $glAccounts = LedgerAccount::query()
             ->whereNull('parent_id')
             ->where('is_active', true)
@@ -86,24 +84,8 @@ class LedgerAccountController extends Controller
             ->orderBy('code')
             ->get();
 
-        $fiscalYears = FiscalYear::query()
-            ->orderBy('code', 'desc')
-            ->get(['id', 'code']);
-
-        $fiscalPeriods = FiscalPeriod::query()
-            ->when(
-                $fiscal_year_id,
-                fn($q) =>
-                $q->where('fiscal_year_id', $fiscal_year_id)
-            )
-            ->orderBy('period_name', 'desc')
-            ->get();
-
         return Inertia::render('general-accounting/chart-of-accounts/index', [
             'glAccounts' => $glAccounts,
-            'fiscalYears' => $fiscalYears,
-            'fiscalPeriods' => $fiscalPeriods,
-            'fiscal_year_id' => $fiscal_year_id,
         ]);
     }
 

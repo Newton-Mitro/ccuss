@@ -104,7 +104,6 @@ class TellerController extends Controller
                 'account_number' => 'T-' . str_pad($teller->id, 5, '0', STR_PAD_LEFT),
                 'name' => $data['name'],
 
-                'type' => 'teller',
                 'status' => 'active',
 
                 // polymorphic

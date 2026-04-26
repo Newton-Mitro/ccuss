@@ -25,17 +25,6 @@ class SubledgerAccountFactory extends Factory
             'account_number' => strtoupper('ACC-' . Str::random(10)),
             'name' => $this->faker->words(3, true),
 
-            'type' => $this->faker->randomElement([
-                'bank',
-                'deposit',
-                'loan',
-                'petty_cash',
-                'vendor',
-                'vault',
-                'teller',
-                'customer',
-            ]),
-
             'status' => $this->faker->randomElement([
                 'pending',
                 'active',
@@ -44,21 +33,5 @@ class SubledgerAccountFactory extends Factory
                 'closed',
             ]),
         ];
-    }
-
-    public function vault(): static
-    {
-        return $this->state(fn() => [
-            'type' => 'vault',
-            'status' => 'active',
-        ]);
-    }
-
-    public function teller(): static
-    {
-        return $this->state(fn() => [
-            'type' => 'teller',
-            'status' => 'active',
-        ]);
     }
 }

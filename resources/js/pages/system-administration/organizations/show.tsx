@@ -1,10 +1,10 @@
 import { Head, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
+import BolderLessInfoBox from '../../../components/borderless-info-box';
 import HeadingSmall from '../../../components/heading-small';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-import InfoItem from './info-item';
 
 function Show() {
     const { organization } = usePage<any>().props;
@@ -59,17 +59,26 @@ function Show() {
                     </h3>
 
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                        <InfoItem label="Code" value={organization.code} />
-                        <InfoItem label="Name" value={organization.name} />
-                        <InfoItem
+                        <BolderLessInfoBox
+                            label="Code"
+                            value={organization.code}
+                        />
+                        <BolderLessInfoBox
+                            label="Name"
+                            value={organization.name}
+                        />
+                        <BolderLessInfoBox
                             label="Short Name"
                             value={organization.short_name}
                         />
-                        <InfoItem
+                        <BolderLessInfoBox
                             label="Registration No"
                             value={organization.registration_no}
                         />
-                        <InfoItem label="Tax ID" value={organization.tax_id} />
+                        <BolderLessInfoBox
+                            label="Tax ID"
+                            value={organization.tax_id}
+                        />
                     </div>
                 </div>
 
@@ -80,25 +89,31 @@ function Show() {
                     </h3>
 
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                        <InfoItem label="Phone" value={organization.phone} />
-                        <InfoItem label="Email" value={organization.email} />
-                        <InfoItem
+                        <BolderLessInfoBox
+                            label="Phone"
+                            value={organization.phone}
+                        />
+                        <BolderLessInfoBox
+                            label="Email"
+                            value={organization.email}
+                        />
+                        <BolderLessInfoBox
                             label="Website"
                             value={organization.website}
                         />
-                        <InfoItem
+                        <BolderLessInfoBox
                             label="Address"
                             value={`${organization.address_line1} ${organization.address_line2}`}
                         />
-                        <InfoItem
+                        <BolderLessInfoBox
                             label="City/State"
                             value={`${organization.city}, ${organization.state}`}
                         />
-                        <InfoItem
+                        <BolderLessInfoBox
                             label="Postal Code"
                             value={organization.postal_code}
                         />
-                        <InfoItem
+                        <BolderLessInfoBox
                             label="Country"
                             value={organization.country}
                         />
@@ -112,15 +127,15 @@ function Show() {
                     </h3>
 
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                        <InfoItem
+                        <BolderLessInfoBox
                             label="Header Line 1"
                             value={organization.report_header_line1}
                         />
-                        <InfoItem
+                        <BolderLessInfoBox
                             label="Header Line 2"
                             value={organization.report_header_line2}
                         />
-                        <InfoItem
+                        <BolderLessInfoBox
                             label="Footer"
                             value={organization.report_footer}
                         />

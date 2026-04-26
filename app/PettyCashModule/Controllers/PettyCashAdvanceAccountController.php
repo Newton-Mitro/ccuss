@@ -97,7 +97,6 @@ class PettyCashAdvanceAccountController extends Controller
                 'account_number' => 'PCA-' . str_pad($advance->id, 5, '0', STR_PAD_LEFT),
                 'name' => ($data['name'] ?? 'Advance - Employee') . ' (Advance)',
 
-                'type' => 'petty_cash_advance',
                 'status' => 'active',
 
                 // polymorphic link

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Search } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { route } from 'ziggy-js';
-import { InfoItem } from '../../../../components/info-block';
+import { BorderInfoBox } from '../../../../components/border-info-box';
 import { Label } from '../../../../components/ui/label';
 import { User } from '../../../../types/user';
 
@@ -193,8 +193,8 @@ export const UserSearchBox: React.FC<UserSearchBoxProps> = ({
                         </div>
 
                         <div className="grid grid-cols-1 gap-1 text-xs md:grid-cols-4">
-                            <InfoItem label="Phone" value={user.phone} />
-                            <InfoItem label="Email" value={user.email} />
+                            <BorderInfoBox label="Phone" value={user.phone} />
+                            <BorderInfoBox label="Email" value={user.email} />
                         </div>
                     </div>
                 </div>
