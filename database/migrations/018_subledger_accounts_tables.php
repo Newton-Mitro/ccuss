@@ -41,7 +41,7 @@ return new class extends Migration {
 
             $table->foreignId('organization_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('subledger_id')->nullable()->constrained('subledgers')->nullOnDelete();
+            $table->foreignId('subledger_id')->constrained('subledgers')->cascadeOnDelete();
         });
 
         Schema::create('account_holders', function (Blueprint $table) {

@@ -109,37 +109,39 @@ export default function FiscalPeriodForm() {
             {/* Form */}
             <form
                 onSubmit={handleSubmit}
-                className="mt-4 max-w-md space-y-6 rounded-md border bg-card p-4 sm:p-6"
+                className="mt-4 space-y-6 rounded-md border bg-card p-4 sm:p-6"
             >
-                {/* Period Name */}
-                <div>
-                    <Label className="text-xs">Period Name</Label>
-                    <Input
-                        value={data.period_name}
-                        onChange={(e) => setData('period_name', e.target.value)}
-                        className="h-8 text-sm"
-                    />
-                    <InputError message={errors.period_name} />
-                </div>
-
-                {/* Fiscal Year */}
-                <div>
-                    <Label className="text-xs">Fiscal Year</Label>
-                    <Select
-                        value={data.fiscal_year_id?.toString()}
-                        onChange={(value) =>
-                            setData('fiscal_year_id', Number(value))
-                        }
-                        options={fiscalYears.map((fy) => ({
-                            value: fy.id.toString(),
-                            label: fy.code,
-                        }))}
-                    />
-                    <InputError message={errors.fiscal_year_id} />
-                </div>
-
                 {/* Dates */}
                 <div className="grid grid-cols-2 gap-4">
+                    {/* Period Name */}
+                    <div>
+                        <Label className="text-xs">Period Name</Label>
+                        <Input
+                            value={data.period_name}
+                            onChange={(e) =>
+                                setData('period_name', e.target.value)
+                            }
+                            className="h-8 text-sm"
+                        />
+                        <InputError message={errors.period_name} />
+                    </div>
+
+                    {/* Fiscal Year */}
+                    <div>
+                        <Label className="text-xs">Fiscal Year</Label>
+                        <Select
+                            value={data.fiscal_year_id?.toString()}
+                            onChange={(value) =>
+                                setData('fiscal_year_id', Number(value))
+                            }
+                            options={fiscalYears.map((fy) => ({
+                                value: fy.id.toString(),
+                                label: fy.code,
+                            }))}
+                        />
+                        <InputError message={errors.fiscal_year_id} />
+                    </div>
+
                     <div>
                         <Label className="text-xs">Start Date</Label>
                         <AppDatePicker
@@ -157,22 +159,22 @@ export default function FiscalPeriodForm() {
                         />
                         <InputError message={errors.end_date} />
                     </div>
-                </div>
 
-                {/* 🔥 Status (NEW) */}
-                <div>
-                    <Label className="text-xs">Status</Label>
-                    <Select
-                        value={data.status}
-                        onChange={(value) =>
-                            setData(
-                                'status',
-                                value as 'open' | 'closed' | 'locked',
-                            )
-                        }
-                        options={statusOptions}
-                    />
-                    <InputError message={errors.status} />
+                    {/* 🔥 Status (NEW) */}
+                    <div>
+                        <Label className="text-xs">Status</Label>
+                        <Select
+                            value={data.status}
+                            onChange={(value) =>
+                                setData(
+                                    'status',
+                                    value as 'open' | 'closed' | 'locked',
+                                )
+                            }
+                            options={statusOptions}
+                        />
+                        <InputError message={errors.status} />
+                    </div>
                 </div>
 
                 {/* Submit */}

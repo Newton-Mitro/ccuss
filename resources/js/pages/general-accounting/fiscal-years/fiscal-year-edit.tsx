@@ -91,21 +91,21 @@ export default function FiscalYearForm() {
             {/* Form */}
             <form
                 onSubmit={handleSubmit}
-                className="mt-4 max-w-md space-y-6 rounded-md border bg-card p-4 sm:p-6"
+                className="mt-4 space-y-6 rounded-md border bg-card p-4 sm:p-6"
             >
-                {/* Code */}
-                <div>
-                    <Label className="text-xs">Fiscal Year Code</Label>
-                    <Input
-                        value={data.code}
-                        onChange={(e) => setData('code', e.target.value)}
-                        className="h-8 text-sm"
-                    />
-                    <InputError message={errors.code} />
-                </div>
-
                 {/* Dates */}
                 <div className="grid grid-cols-2 gap-4">
+                    {/* Code */}
+                    <div>
+                        <Label className="text-xs">Fiscal Year Code</Label>
+                        <Input
+                            value={data.code}
+                            onChange={(e) => setData('code', e.target.value)}
+                            className="h-8 text-sm"
+                        />
+                        <InputError message={errors.code} />
+                    </div>
+
                     <div>
                         <Label className="text-xs">Start Date</Label>
                         <AppDatePicker
@@ -123,35 +123,35 @@ export default function FiscalYearForm() {
                         />
                         <InputError message={errors.end_date} />
                     </div>
-                </div>
 
-                {/* 🔥 Status (ONLY ONE CONTROL NOW) */}
-                <div>
-                    <Label className="text-xs">Closed Status</Label>
+                    {/* 🔥 Status (ONLY ONE CONTROL NOW) */}
+                    <div>
+                        <Label className="text-xs">Closed Status</Label>
 
-                    <ToggleGroup
-                        type="single"
-                        value={data.is_closed ? 'true' : 'false'}
-                        onValueChange={(val) =>
-                            setData('is_closed', val === 'true')
-                        }
-                        size="sm"
-                        variant="outline"
-                    >
-                        <ToggleGroupItem
-                            value="false"
-                            className="border-2 border-border"
+                        <ToggleGroup
+                            type="single"
+                            value={data.is_closed ? 'true' : 'false'}
+                            onValueChange={(val) =>
+                                setData('is_closed', val === 'true')
+                            }
+                            size="sm"
+                            variant="outline"
                         >
-                            Open
-                        </ToggleGroupItem>
+                            <ToggleGroupItem
+                                value="false"
+                                className="border-2 border-border"
+                            >
+                                Open
+                            </ToggleGroupItem>
 
-                        <ToggleGroupItem
-                            value="true"
-                            className="border-2 border-border"
-                        >
-                            Closed
-                        </ToggleGroupItem>
-                    </ToggleGroup>
+                            <ToggleGroupItem
+                                value="true"
+                                className="border-2 border-border"
+                            >
+                                Closed
+                            </ToggleGroupItem>
+                        </ToggleGroup>
+                    </div>
                 </div>
 
                 {/* Submit */}

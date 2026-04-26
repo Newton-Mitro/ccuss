@@ -15,7 +15,7 @@ export function BorderInfoBox({
         >
             <p className="text-xs text-muted-foreground">{label}</p>
             <p className="text-sm font-medium">
-                {formatUndersoreString(value.toString() || '—')}
+                {formatUndersoreString(value?.toString() || '—')}
             </p>
         </div>
     );

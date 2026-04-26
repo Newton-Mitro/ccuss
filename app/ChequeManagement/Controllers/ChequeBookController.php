@@ -54,9 +54,14 @@ class ChequeBookController extends Controller
     */
     public function create()
     {
-        $subledger_accounts = SubledgerAccount::where('status', 'active')
-            ->where('type', 'bank')
-            ->select('id', 'name')->get();
+        $subledger_accounts = SubledgerAccount::query()
+            ->where('status', 'active')
+            ->whereHas('subledger', function ($q) {
+                $q->where('subledger_sub_type', 'bank_accounts');
+            })
+            ->with('subledger:id,subledger_sub_type')
+            ->select('id', 'name', 'subledger_id')
+            ->get();
         return Inertia::render(
             'cheque-module/cheque-books/create-cheque-book-page',
             [

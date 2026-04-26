@@ -18,7 +18,7 @@ class TellerSessionController extends Controller
     {
         $query = TellerSession::query()
             ->with(['teller', 'branchDay'])
-            ->where('branch_id', Auth::user()->branch_id); // 🔐 Branch isolation
+            ->where('branch_id', Auth::user()->branch_id);
 
         // 🔍 Search
         if ($request->filled('search')) {
@@ -65,18 +65,9 @@ class TellerSessionController extends Controller
     public function create()
     {
         $user = Auth::user();
-
-        $teller = Teller::where('user_id', $user->id)
-            ->where('is_active', true)
-            ->first();
-
-        $branchDay = BranchDay::where('branch_id', $user->branch_id)
-            ->where('status', 'open')
-            ->first();
-
-        $cashAccounts = SubledgerAccount::where('type', 'teller')
-            ->where('branch_id', $user->branch_id)
-            ->get();
+        $teller = Teller::where('user_id', $user->id)->where('is_active', true)->first();
+        $branchDay = BranchDay::where('branch_id', $user->branch_id)->where('status', 'open')->first();
+        $cashAccounts = SubledgerAccount::where('branch_id', $user->branch_id)->get();
 
         return Inertia::render(
             'treasury-and-cash/teller-sessions/open_teller_session_page',
