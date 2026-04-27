@@ -139,7 +139,7 @@ export default function Edit({ ledger, parents }: any) {
                         </h3>
 
                         <div className="grid gap-4 md:grid-cols-4">
-                            <div className="flex items-center gap-2 pt-6">
+                            <div className="flex items-center gap-2">
                                 <input
                                     type="checkbox"
                                     checked={data.is_group}
@@ -161,7 +161,7 @@ export default function Edit({ ledger, parents }: any) {
                                 <Label>Group Account</Label>
                             </div>
 
-                            <div className="flex items-center gap-2 pt-6">
+                            <div className="flex items-center gap-2">
                                 <input
                                     type="checkbox"
                                     checked={data.is_control_account}
@@ -179,7 +179,7 @@ export default function Edit({ ledger, parents }: any) {
                                 <Label>Control Account</Label>
                             </div>
 
-                            <div className="flex items-center gap-2 pt-6">
+                            <div className="flex items-center gap-2 pt-4">
                                 <input
                                     type="checkbox"
                                     checked={data.is_active}
