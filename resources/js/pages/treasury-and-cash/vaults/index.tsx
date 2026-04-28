@@ -177,9 +177,8 @@ export default function Index() {
                             <tr>
                                 {[
                                     'Branch',
-                                    'Name',
-                                    'Account Number',
-                                    'Account',
+                                    'Vault Name',
+                                    'Subledger Account',
                                     'Status',
                                     'Actions',
                                 ].map((h) => (
@@ -207,12 +206,7 @@ export default function Index() {
                                         <td className="px-2 py-1">{v.name}</td>
 
                                         <td className="px-2 py-1">
-                                            {v.subledger_account
-                                                ?.account_number ?? '—'}
-                                        </td>
-
-                                        <td className="px-2 py-1">
-                                            {v.subledger_account?.name ?? '—'}
+                                            {`${v.subledger_account?.account_number} - ${v.subledger_account?.name}`}
                                         </td>
 
                                         <td className="px-2 py-1">
@@ -285,7 +279,7 @@ export default function Index() {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={6}
+                                        colSpan={5}
                                         className="py-6 text-center text-muted-foreground"
                                     >
                                         No vaults found.

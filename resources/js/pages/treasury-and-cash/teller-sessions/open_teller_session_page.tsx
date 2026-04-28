@@ -3,7 +3,6 @@ import React from 'react';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import { Input } from '../../../components/ui/input';
-import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatDate } from '../../../lib/date_util';
@@ -13,15 +12,13 @@ import { BranchDay, Teller } from '../../../types/cash_treasury_module';
 interface Props extends SharedData {
     teller: Teller;
     branch_day: BranchDay;
-    cash_accounts: any[];
 }
 export default function OpenTellerSession() {
-    const { branch_day, teller, cash_accounts } = usePage<Props>().props;
+    const { branch_day, teller } = usePage<Props>().props;
 
     const { data, setData, post, processing, errors } = useForm({
         teller_id: teller?.id || '',
         branch_day_id: branch_day?.id || '',
-        cash_account_id: '',
         remarks: '',
     });
 
@@ -80,31 +77,6 @@ export default function OpenTellerSession() {
                             {errors.branch_day_id && (
                                 <p className="text-sm text-destructive">
                                     {errors.branch_day_id}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* 💰 Cash Account (NEW - CRITICAL) */}
-                        <div>
-                            <label className="mb-1 block text-sm font-medium">
-                                Cash Account
-                            </label>
-
-                            <Select
-                                value={data.cash_account_id}
-                                onChange={(val) =>
-                                    setData('cash_account_id', val)
-                                }
-                                options={cash_accounts.map((acc) => ({
-                                    value: acc.id.toString(),
-                                    label: acc.name,
-                                }))}
-                                placeholder="Select Cash Account"
-                            />
-
-                            {errors.cash_account_id && (
-                                <p className="text-sm text-destructive">
-                                    {errors.cash_account_id}
                                 </p>
                             )}
                         </div>

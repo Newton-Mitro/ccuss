@@ -48,13 +48,6 @@ export default function Show({ account }: any) {
                             </div>
 
                             <div>
-                                <Label>Type</Label>
-                                <p className="text-sm capitalize">
-                                    {account.type}
-                                </p>
-                            </div>
-
-                            <div>
                                 <Label>Status</Label>
                                 <p className="text-sm">
                                     {account.status === 'active' ? (

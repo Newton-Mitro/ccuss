@@ -3,6 +3,7 @@
 namespace App\TreasuryAndCashModule\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\SubledgerModule\Models\Subledger;
 use App\SubledgerModule\Models\SubledgerAccount;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\User;
@@ -84,7 +85,14 @@ class TellerController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        return DB::transaction(function () use ($data, $organizationId) {
+        $subledger = Subledger::where('subledger_sub_type', 'teller_cashes')
+            ->first();
+
+        if (!$subledger) {
+            abort(403);
+        }
+
+        return DB::transaction(function () use ($data, $organizationId, $subledger) {
 
             // 1. Create Teller
             $teller = Teller::create([
@@ -94,6 +102,7 @@ class TellerController extends Controller
                 'max_cash_limit' => $data['max_cash_limit'],
                 'max_transaction_limit' => $data['max_transaction_limit'],
                 'is_active' => $data['is_active'] ?? true,
+                'subledger_id' => $subledger->id,
             ]);
 
             // 2. Create Teller Cash Account (🔥 core)
@@ -109,6 +118,7 @@ class TellerController extends Controller
                 // polymorphic
                 'accountable_type' => Teller::class,
                 'accountable_id' => $teller->id,
+                'subledger_id' => $subledger->id,
             ]);
 
             // 3. Link back
@@ -164,7 +174,7 @@ class TellerController extends Controller
                 'is_active' => $data['is_active'] ?? true,
             ]);
 
-            $teller->account?->update([
+            $teller->subledgerAccount?->update([
                 'branch_id' => $data['branch_id'] ?? Auth::user()->branch_id,
                 'name' => $data['name'],
             ]);

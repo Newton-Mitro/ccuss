@@ -67,14 +67,12 @@ class TellerSessionController extends Controller
         $user = Auth::user();
         $teller = Teller::where('user_id', $user->id)->where('is_active', true)->first();
         $branchDay = BranchDay::where('branch_id', $user->branch_id)->where('status', 'open')->first();
-        $cashAccounts = SubledgerAccount::where('branch_id', $user->branch_id)->get();
 
         return Inertia::render(
             'treasury-and-cash/teller-sessions/open_teller_session_page',
             [
                 'teller' => $teller,
                 'branch_day' => $branchDay,
-                'cash_accounts' => $cashAccounts,
             ]
         );
     }
@@ -84,7 +82,6 @@ class TellerSessionController extends Controller
         $data = $request->validate([
             'teller_id' => 'required|exists:tellers,id',
             'branch_day_id' => 'required|exists:branch_days,id',
-            'cash_account_id' => 'required|exists:subledger_accounts,id',
             'remarks' => 'nullable|string'
         ]);
 
@@ -128,7 +125,7 @@ class TellerSessionController extends Controller
                 'teller_id' => $data['teller_id'],
                 'branch_id' => $user->branch_id,
                 'branch_day_id' => $data['branch_day_id'],
-                'cash_account_id' => $data['cash_account_id'],
+                'cash_account_id' => $teller->subledger_account_id,
                 'opened_at' => now(),
                 'status' => 'open',
                 'remarks' => $data['remarks'] ?? null,

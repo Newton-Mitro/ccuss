@@ -19,7 +19,7 @@ class TellerSession extends Model
         'teller_id',
         'branch_id',
         'branch_day_id',
-        'cash_account_id',
+        'subledger_account_id',
         'opened_at',
         'closed_at',
         'status',
@@ -53,7 +53,7 @@ class TellerSession extends Model
 
     public function cashAccount(): BelongsTo
     {
-        return $this->belongsTo(SubledgerAccount::class, 'cash_account_id');
+        return $this->belongsTo(SubledgerAccount::class, 'subledger_account_id');
     }
 
     public function adjustmentTransaction(): BelongsTo

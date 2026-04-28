@@ -124,23 +124,6 @@ export default function Index() {
 
                     <div className="w-60">
                         <Select
-                            className="bg-card"
-                            value={data.type}
-                            onChange={(value) => setData('type', value)}
-                            options={[
-                                { label: 'All Types', value: '' },
-                                { label: 'Bank', value: 'bank' },
-                                { label: 'Deposit', value: 'deposit' },
-                                { label: 'Loan', value: 'loan' },
-                                { label: 'Customer', value: 'customer' },
-                                { label: 'Vendor', value: 'vendor' },
-                                { label: 'Petty Cash', value: 'petty_cash' },
-                            ]}
-                        />
-                    </div>
-
-                    <div className="w-60">
-                        <Select
                             value={data.status}
                             className="bg-card"
                             onChange={(value) => setData('status', value)}
@@ -164,7 +147,6 @@ export default function Index() {
                                 {[
                                     'Account No',
                                     'Name',
-                                    'Type',
                                     'Status',
                                     'Branch',
                                     'Subledger',
@@ -192,9 +174,6 @@ export default function Index() {
                                         </td>
                                         <td className="px-2 py-1">
                                             {a.name || '-'}
-                                        </td>
-                                        <td className="px-2 py-1 capitalize">
-                                            {a.type}
                                         </td>
                                         <td className="px-2 py-1 capitalize">
                                             {a.status}
@@ -272,7 +251,7 @@ export default function Index() {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={7}
+                                        colSpan={6}
                                         className="py-6 text-center text-muted-foreground"
                                     >
                                         No accounts found.

@@ -16,20 +16,8 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem, SharedData } from '@/types';
-
-interface Subledger {
-    id: number;
-    code: string;
-    name: string;
-    short_name?: string;
-    type: string;
-    sub_type: string;
-    is_active: boolean;
-    gl_account?: {
-        id: number;
-        name: string;
-    };
-}
+import formatUndersoreString from '../../../lib/formatUnderscoreString';
+import { Subledger } from '../../../types/subledger_module';
 
 interface SubledgerPageProps extends SharedData {
     subledgers: {
@@ -159,10 +147,14 @@ export default function Index() {
                                         <td className="px-2 py-1">{s.code}</td>
                                         <td className="px-2 py-1">{s.name}</td>
                                         <td className="px-2 py-1 capitalize">
-                                            {s.type}
+                                            {formatUndersoreString(
+                                                s.subledger_type,
+                                            )}
                                         </td>
                                         <td className="px-2 py-1 capitalize">
-                                            {s.sub_type}
+                                            {formatUndersoreString(
+                                                s.subledger_sub_type,
+                                            )}
                                         </td>
                                         <td className="px-2 py-1">
                                             {s.gl_account?.name}

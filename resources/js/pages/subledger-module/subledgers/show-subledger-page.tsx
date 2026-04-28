@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
+import formatUndersoreString from '../../../lib/formatUnderscoreString';
 
 export default function Show({ subledger }: any) {
     const breadcrumbs: BreadcrumbItem[] = [
@@ -60,12 +61,20 @@ export default function Show({ subledger }: any) {
                         <div className="grid grid-cols-1 gap-x-5 gap-y-3 md:grid-cols-4">
                             <div>
                                 <Label>Type</Label>
-                                <p className="text-sm">{subledger.type}</p>
+                                <p className="text-sm">
+                                    {formatUndersoreString(
+                                        subledger.subledger_type,
+                                    )}
+                                </p>
                             </div>
 
                             <div>
                                 <Label>Sub Type</Label>
-                                <p className="text-sm">{subledger.sub_type}</p>
+                                <p className="text-sm">
+                                    {formatUndersoreString(
+                                        subledger.subledger_sub_type,
+                                    )}
+                                </p>
                             </div>
 
                             <div>

@@ -11,14 +11,14 @@ import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
+import formatUndersoreString from '../../../lib/formatUnderscoreString';
 
-export default function Edit({ account, subledgers, types, statuses }: any) {
+export default function Edit({ account, subledgers, statuses }: any) {
     useFlashToastHandler();
 
     const { data, setData, put, processing, errors } = useForm({
         account_number: account.account_number || '',
         name: account.name || '',
-        type: account.type || '',
         status: account.status || 'pending',
         accountable_type: account.accountable_type || '',
         accountable_id: account.accountable_id || '',
@@ -102,19 +102,6 @@ export default function Edit({ account, subledgers, types, statuses }: any) {
 
                         <div className="grid grid-cols-1 gap-5 md:grid-cols-4">
                             <div>
-                                <Label>Type</Label>
-                                <Select
-                                    value={data.type}
-                                    onChange={(value) => setData('type', value)}
-                                    options={types.map((t: string) => ({
-                                        value: t,
-                                        label: t,
-                                    }))}
-                                />
-                                <InputError message={errors.type} />
-                            </div>
-
-                            <div>
                                 <Label>Status</Label>
                                 <Select
                                     value={data.status}
@@ -123,7 +110,7 @@ export default function Edit({ account, subledgers, types, statuses }: any) {
                                     }
                                     options={statuses.map((s: string) => ({
                                         value: s,
-                                        label: s,
+                                        label: formatUndersoreString(s),
                                     }))}
                                 />
                                 <InputError message={errors.status} />

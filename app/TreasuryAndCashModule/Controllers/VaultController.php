@@ -3,6 +3,7 @@
 namespace App\TreasuryAndCashModule\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\SubledgerModule\Models\Subledger;
 use App\SubledgerModule\Models\SubledgerAccount;
 use App\SystemAdministration\Models\Branch;
 use App\TreasuryAndCashModule\Models\Vault;
@@ -67,23 +68,32 @@ class VaultController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        $vault = DB::transaction(function () use ($data, $organization) {
+        $subledger = Subledger::where('subledger_sub_type', 'vault_cashes')
+            ->first();
+
+        if (!$subledger) {
+            abort(403);
+        }
+
+        $vault = DB::transaction(function () use ($data, $organization, $subledger) {
             // 1. Create Vault
             $vault = Vault::create([
                 'branch_id' => $data['branch_id'],
                 'name' => $data['name'] ?? 'Main Vault',
                 'is_active' => $data['is_active'] ?? true,
+                'subledger_id' => $subledger->id
             ]);
             // 2. Create Account (🔥 core part)
             $subledgerAccount = SubledgerAccount::create([
                 'organization_id' => $organization->id ?? null,
                 'branch_id' => $data['branch_id'],
                 'account_number' => 'V-' . str_pad($vault->id, 5, '0', STR_PAD_LEFT),
-                'name' => ($data['name'] ?? 'Vault') . ' (Vault)',
+                'name' => ($data['name'] ?? 'Vault'),
                 'status' => 'active',
                 // polymorphic
                 'accountable_type' => Vault::class,
                 'accountable_id' => $vault->id,
+                'subledger_id' => $subledger->id,
             ]);
             // 3. Optional reverse link
             $vault->update([
@@ -139,8 +149,8 @@ class VaultController extends Controller
                 'branch_id' => $data['branch_id'],
                 'is_active' => $data['is_active'] ?? true,
             ]);
-            $vault->account?->update([
-                'name' => ($data['name'] ?? 'Vault') . ' (Vault)',
+            $vault->subledgerAccount?->update([
+                'name' => ($data['name'] ?? 'Vault'),
                 'branch_id' => $data['branch_id'],
             ]);
         });

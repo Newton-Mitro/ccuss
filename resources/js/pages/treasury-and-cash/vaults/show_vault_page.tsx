@@ -93,16 +93,6 @@ export default function ShowVaultPage({ vault }: ShowVaultPageProps) {
                         </p>
                     </div>
 
-                    {/* Account */}
-                    <div>
-                        <p className="text-sm text-muted-foreground">
-                            Subledger Account
-                        </p>
-                        <p className="font-medium">
-                            {vault.subledger_account?.name ?? '—'}
-                        </p>
-                    </div>
-
                     <div>
                         <p className="text-sm text-muted-foreground">
                             Subledger Account Number
