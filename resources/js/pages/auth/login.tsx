@@ -58,7 +58,7 @@ export default function Login({ status, canResetPassword, canRegister }) {
             </motion.div>
 
             {/* Right Form Section */}
-            <div className="mx-4 flex w-full flex-col items-center justify-center lg:w-4/12">
+            <div className="mx-6 flex w-full flex-col items-center justify-center md:mx-24 lg:mx-32 lg:w-5/12">
                 <div className="flex h-[calc(90vh)] w-full flex-col items-center justify-center rounded border bg-card p-6 shadow">
                     <div className="w-full md:px-10 lg:px-14 xl:px-20">
                         {/* Header */}
@@ -122,7 +122,7 @@ export default function Login({ status, canResetPassword, canRegister }) {
                                             {canResetPassword && (
                                                 <TextLink
                                                     href={request()}
-                                                    className="text-xs text-accent hover:underline"
+                                                    className="text-xs text-muted-foreground hover:underline"
                                                 >
                                                     Forgot?
                                                 </TextLink>
@@ -146,6 +146,7 @@ export default function Login({ status, canResetPassword, canRegister }) {
                                         <Checkbox
                                             id="remember"
                                             name="remember"
+                                            className="border-muted-foreground/30"
                                         />
                                         <Label
                                             htmlFor="remember"
