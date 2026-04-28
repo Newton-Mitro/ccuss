@@ -9,7 +9,6 @@ import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
-import { LedgerAccount } from '../../../types/finance_and_accounting';
 import {
     PettyCashAccount,
     PettyCashAdvanceAccount,
@@ -20,14 +19,12 @@ interface AdvanceFormProps extends SharedData {
     pettyCashAdvanceAccount?: PettyCashAdvanceAccount;
     employees: User[];
     pettyCashAccounts: PettyCashAccount[];
-    ledgerAccounts: LedgerAccount[];
 }
 
 const AdvanceExpenseForm = ({
     pettyCashAdvanceAccount,
     employees,
     pettyCashAccounts,
-    ledgerAccounts,
 }: AdvanceFormProps) => {
     useFlashToastHandler();
 
@@ -36,7 +33,6 @@ const AdvanceExpenseForm = ({
     const { data, setData, post, put, processing, errors } = useForm({
         petty_cash_account_id:
             pettyCashAdvanceAccount?.petty_cash_account_id || '',
-        ledger_account_id: pettyCashAdvanceAccount?.ledger_account_id || '',
         employee_id: pettyCashAdvanceAccount?.employee_id || '',
         status: pettyCashAdvanceAccount?.status || 'active',
     });
@@ -110,31 +106,14 @@ const AdvanceExpenseForm = ({
                         <InputError message={errors.petty_cash_account_id} />
                     </div>
 
-                    {/* Ledger Account */}
-                    <div>
-                        <label className="text-xs">Ledger Account</label>
-                        <Select
-                            value={data.ledger_account_id.toString()}
-                            onChange={(val) =>
-                                setData('ledger_account_id', val)
-                            }
-                            options={ledgerAccounts.map((l) => ({
-                                value: l.id.toString(),
-                                label: l.name,
-                            }))}
-                            placeholder="Select Ledger"
-                        />
-                        <InputError message={errors.ledger_account_id} />
-                    </div>
-
                     {/* Employee */}
                     <div>
                         <Label className="text-xs">Employee</Label>
                         <Select
                             value={data.employee_id.toString()}
-                            onChange={(val) =>
-                                setData('employee_id', Number(val))
-                            }
+                            onChange={(val) => {
+                                setData('employee_id', Number(val));
+                            }}
                             options={employees.map((u) => ({
                                 value: u.id.toString(),
                                 label: u.name,

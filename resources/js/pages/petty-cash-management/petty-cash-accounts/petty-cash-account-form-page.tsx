@@ -11,19 +11,18 @@ import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Branch } from '../../../types/branch';
-import { LedgerAccount } from '../../../types/finance_and_accounting';
 import { PettyCashAccount } from '../../../types/petty_cash_module';
 
 interface PettyCashAccountFormPageProps extends SharedData {
     pettyCash?: PettyCashAccount;
+    userBranch?: Branch;
     branches: Branch[];
-    ledgerAccounts: LedgerAccount[];
 }
 
 const PettyCashAccountForm = ({
     pettyCash,
+    userBranch,
     branches,
-    ledgerAccounts,
 }: PettyCashAccountFormPageProps) => {
     useFlashToastHandler();
 
@@ -31,9 +30,11 @@ const PettyCashAccountForm = ({
     const isEdit = !!pettyCash;
 
     const { data, setData, post, put, processing, errors } = useForm({
-        name: pettyCash?.name || '',
-        branch_id: pettyCash?.branch_id?.toString() || '',
-        ledger_account_id: pettyCash?.ledger_account_id?.toString() || '',
+        name: pettyCash?.name || `${userBranch?.name} - Petty Cash`,
+        branch_id:
+            pettyCash?.branch_id?.toString() ||
+            userBranch?.id?.toString() ||
+            '',
         upper_limit: pettyCash?.upper_limit || '',
         status: pettyCash?.status || 'active',
     });
@@ -116,7 +117,10 @@ const PettyCashAccountForm = ({
 
                                 // Smart auto naming
                                 if (!isEdit) {
-                                    setData('name', `${branchName} Petty Cash`);
+                                    setData(
+                                        'name',
+                                        `${branchName} - Petty Cash`,
+                                    );
                                 }
                             }}
                             options={branches.map((b) => ({
@@ -126,23 +130,6 @@ const PettyCashAccountForm = ({
                             placeholder="Select Branch"
                         />
                         <InputError message={errors.branch_id} />
-                    </div>
-
-                    {/* Ledger Account */}
-                    <div>
-                        <label className="text-xs">Ledger Account</label>
-                        <Select
-                            value={data.ledger_account_id}
-                            onChange={(val) =>
-                                setData('ledger_account_id', val)
-                            }
-                            options={ledgerAccounts.map((l) => ({
-                                value: l.id.toString(),
-                                label: l.name,
-                            }))}
-                            placeholder="Select Ledger"
-                        />
-                        <InputError message={errors.ledger_account_id} />
                     </div>
 
                     {/* Name */}

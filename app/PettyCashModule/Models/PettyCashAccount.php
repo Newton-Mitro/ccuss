@@ -16,10 +16,9 @@ class PettyCashAccount extends Model
 
     protected $fillable = [
         'branch_id',
-        'link_account_id', // ✅ added
+        'subledger_account_id',
         'name',
         'upper_limit',
-        'ledger_account_id',
         'status',
     ];
 
@@ -45,9 +44,9 @@ class PettyCashAccount extends Model
     }
 
     // ✅ NEW: Link Account (Main Account reference)
-    public function linkAccount()
+    public function subledgerAccount()
     {
-        return $this->belongsTo(SubledgerAccount::class, 'link_account_id');
+        return $this->belongsTo(SubledgerAccount::class, 'subledger_account_id');
     }
 
     public function advanceAccounts()

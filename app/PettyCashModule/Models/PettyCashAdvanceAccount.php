@@ -15,9 +15,8 @@ class PettyCashAdvanceAccount extends Model
 
     protected $fillable = [
         'petty_cash_account_id',
-        'link_account_id',
+        'subledger_account_id',
         'employee_id',
-        'ledger_account_id',
         'status',
     ];
 
@@ -37,13 +36,8 @@ class PettyCashAdvanceAccount extends Model
         return $this->belongsTo(User::class, 'employee_id');
     }
 
-    public function ledgerAccount()
+    public function subledgerAccount()
     {
-        return $this->belongsTo(LedgerAccount::class);
-    }
-
-    public function linkAccount()
-    {
-        return $this->belongsTo(SubledgerAccount::class, 'link_account_id');
+        return $this->belongsTo(SubledgerAccount::class, 'subledger_account_id');
     }
 }

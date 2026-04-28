@@ -3,9 +3,10 @@ import { route } from 'ziggy-js';
 
 import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
+import { BorderInfoBox } from '../../../components/border-info-box';
+import { formatDateTime } from '../../../lib/date_util';
 
 export default function Show({ account }: any) {
     const breadcrumbs: BreadcrumbItem[] = [
@@ -30,97 +31,73 @@ export default function Show({ account }: any) {
                 <div className="mt-4 space-y-6 rounded-xl border bg-card p-8">
                     {/* 🔹 Basic Info */}
                     <div>
-                        <h3 className="text-lg font-semibold text-info">
+                        <h3 className="text-lg font-semibold text-muted-foreground">
                             Basic Information
                         </h3>
 
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                            <div>
-                                <Label>Account Number</Label>
-                                <p className="text-sm font-medium">
-                                    {account.account_number}
-                                </p>
-                            </div>
+                            <BorderInfoBox
+                                label="Account Number"
+                                value={account.account_number}
+                                className="bg-muted/30"
+                            />
 
-                            <div>
-                                <Label>Name</Label>
-                                <p className="text-sm">{account.name || '-'}</p>
-                            </div>
+                            <BorderInfoBox
+                                label="Name"
+                                value={account.name || '-'}
+                                className="bg-muted/30"
+                            />
 
-                            <div>
-                                <Label>Status</Label>
-                                <p className="text-sm">
-                                    {account.status === 'active' ? (
-                                        <span className="font-medium text-green-600">
-                                            Active
-                                        </span>
-                                    ) : account.status === 'frozen' ? (
-                                        <span className="font-medium text-red-600">
-                                            Frozen
-                                        </span>
-                                    ) : (
-                                        <span className="font-medium text-yellow-600 capitalize">
-                                            {account.status}
-                                        </span>
-                                    )}
-                                </p>
-                            </div>
+                            <BorderInfoBox
+                                label="Status"
+                                value={account.status}
+                                className="bg-muted/30"
+                            />
                         </div>
                     </div>
 
                     {/* 🔹 Relationships */}
                     <div>
-                        <h3 className="text-lg font-semibold text-info">
+                        <h3 className="text-lg font-semibold text-muted-foreground">
                             Relationships
                         </h3>
 
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                            <div>
-                                <Label>Subledger</Label>
-                                <p className="text-sm">
-                                    {account.subledger?.name || '-'}
-                                </p>
-                            </div>
+                            <BorderInfoBox
+                                label="Subledger"
+                                value={account.subledger?.name || '-'}
+                                className="bg-muted/30"
+                            />
 
-                            <div>
-                                <Label>Accountable Type</Label>
-                                <p className="text-sm capitalize">
-                                    {account.accountable_type}
-                                </p>
-                            </div>
+                            <BorderInfoBox
+                                label="Accountable Type"
+                                value={account.accountable_type || '-'}
+                                className="bg-muted/30"
+                            />
 
-                            <div>
-                                <Label>Branch</Label>
-                                <p className="text-sm">
-                                    {account.branch?.name || '-'}
-                                </p>
-                            </div>
+                            <BorderInfoBox
+                                label="Branch"
+                                value={account.branch?.name || '-'}
+                                className="bg-muted/30"
+                            />
 
-                            <div>
-                                <Label>Organization</Label>
-                                <p className="text-sm">
-                                    {account.organization_id || '-'}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                            <BorderInfoBox
+                                label="Organization"
+                                value={account.Organization || '-'}
+                                className="bg-muted/30"
+                            />
 
-                    {/* 🔹 Metadata */}
-                    <div>
-                        <h3 className="text-lg font-semibold text-info">
-                            Metadata
-                        </h3>
+                            <BorderInfoBox
+                                label="Created At"
+                                value={formatDateTime(account.created_at)}
+                                className="bg-muted/30"
+                            />
 
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                            <div>
-                                <Label>Created At</Label>
-                                <p className="text-sm">{account.created_at}</p>
-                            </div>
-
-                            <div>
-                                <Label>Updated At</Label>
-                                <p className="text-sm">{account.updated_at}</p>
-                            </div>
+                            <BorderInfoBox
+                                label="Created At"
+                                value={formatDateTime(account.updated_at)}
+                                className="bg-muted/30"
+                            />
                         </div>
                     </div>
 

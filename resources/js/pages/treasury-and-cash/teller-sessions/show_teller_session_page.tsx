@@ -2,6 +2,7 @@ import { Head } from '@inertiajs/react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
+import { BorderInfoBox } from '../../../components/border-info-box';
 import HeadingSmall from '../../../components/heading-small';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
@@ -15,6 +16,7 @@ interface Props extends SharedData {
 }
 
 export default function ShowTellerSessionPage({ session }: Props) {
+    console.log(session);
     useFlashToastHandler();
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -76,127 +78,107 @@ export default function ShowTellerSessionPage({ session }: Props) {
                         {/* Info Grid */}
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             {/* Teller */}
-                            <div>
-                                <p className="text-sm text-card-foreground">
-                                    Teller
-                                </p>
-                                <p className="font-medium">
-                                    {session.teller?.name || '—'}
-                                </p>
-                            </div>
+                            <BorderInfoBox
+                                label="Teller"
+                                value={session.teller?.name || '—'}
+                                className="bg-muted/30"
+                            />
 
                             {/* Branch */}
-                            <div>
-                                <p className="text-sm text-card-foreground">
-                                    Branch
-                                </p>
-                                <p className="font-medium">
-                                    {session.branch?.name || '—'}
-                                </p>
-                            </div>
+                            <BorderInfoBox
+                                label="Branch"
+                                value={session.branch?.name || '—'}
+                                className="bg-muted/30"
+                            />
 
                             {/* Branch Day */}
-                            <div>
-                                <p className="text-sm text-card-foreground">
-                                    Branch Day
-                                </p>
-                                <p className="font-medium">
-                                    {session.branch_day?.business_date
+                            <BorderInfoBox
+                                label="Branch Day"
+                                value={
+                                    session.branch_day?.business_date
                                         ? formatDate(
                                               session.branch_day.business_date,
                                           )
-                                        : '—'}
-                                </p>
-                            </div>
+                                        : '—'
+                                }
+                                className="bg-muted/30"
+                            />
 
                             {/* Cash Account */}
-                            <div>
-                                <p className="text-sm text-card-foreground">
-                                    Cash Account
-                                </p>
-                                <p className="font-medium">
-                                    {session.cash_account?.name || '—'}
-                                </p>
-                            </div>
+                            <BorderInfoBox
+                                label="Subledger Account"
+                                value={`${session.subledger_account?.name} (${session.subledger_account?.account_number})`}
+                                className="bg-muted/30"
+                            />
 
                             {/* Expected Balance */}
-                            <div>
-                                <p className="text-sm text-card-foreground">
-                                    Expected Balance
-                                </p>
-                                <p className="font-medium">
-                                    {session.expected_balance != null
+                            <BorderInfoBox
+                                label="Expected Balance"
+                                value={
+                                    session.expected_balance != null
                                         ? formatBDTCurrency(
                                               session.expected_balance,
                                           )
-                                        : '—'}
-                                </p>
-                            </div>
+                                        : '—'
+                                }
+                                className="bg-muted/30"
+                            />
 
                             {/* Closing Cash */}
-                            <div>
-                                <p className="text-sm text-card-foreground">
-                                    Closing Cash
-                                </p>
-                                <p className="font-medium">
-                                    {session.closing_cash != null
+                            <BorderInfoBox
+                                label="Closing Cash"
+                                value={
+                                    session.closing_cash != null
                                         ? formatBDTCurrency(
                                               session.closing_cash,
                                           )
-                                        : '—'}
-                                </p>
-                            </div>
+                                        : '—'
+                                }
+                                className="bg-muted/30"
+                            />
 
                             {/* Difference */}
-                            <div>
-                                <p className="text-sm text-card-foreground">
-                                    Difference
-                                </p>
-                                <p
-                                    className={`font-medium ${
-                                        session.difference &&
-                                        session.difference !== 0
-                                            ? 'text-destructive'
-                                            : ''
-                                    }`}
-                                >
-                                    {session.difference != null
+                            <BorderInfoBox
+                                label="Difference"
+                                value={
+                                    session.difference != null
                                         ? formatBDTCurrency(session.difference)
-                                        : '—'}
-                                </p>
-                            </div>
+                                        : '—'
+                                }
+                                className={`bg-muted/30 font-medium ${
+                                    session.difference &&
+                                    session.difference !== 0
+                                        ? 'text-destructive'
+                                        : ''
+                                }`}
+                            />
 
                             {/* Opened At */}
-                            <div>
-                                <p className="text-sm text-card-foreground">
-                                    Opened At
-                                </p>
-                                <p className="font-medium">
-                                    {formatDateTime(session.opened_at)}
-                                </p>
-                            </div>
+                            <BorderInfoBox
+                                label="Opened At"
+                                value={formatDateTime(session.opened_at)}
+                                className="bg-muted/30"
+                            />
 
                             {/* Closed At */}
-                            <div>
-                                <p className="text-sm text-card-foreground">
-                                    Closed At
-                                </p>
-                                <p className="font-medium">
-                                    {session.closed_at
+                            <BorderInfoBox
+                                label="Closed At"
+                                value={
+                                    session.closed_at
                                         ? formatDateTime(session.closed_at)
-                                        : '—'}
-                                </p>
-                            </div>
+                                        : '—'
+                                }
+                                className="bg-muted/30"
+                            />
                         </div>
 
                         {/* Remarks */}
                         {session.remarks && (
-                            <div>
-                                <p className="text-sm text-card-foreground">
-                                    Remarks
-                                </p>
-                                <p className="font-medium">{session.remarks}</p>
-                            </div>
+                            <BorderInfoBox
+                                label="Remarks"
+                                value={session.remarks}
+                                className="bg-muted/30"
+                            />
                         )}
                     </div>
                 )}

@@ -3,9 +3,10 @@ import { route } from 'ziggy-js';
 
 import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
+import { BorderInfoBox } from '../../../components/border-info-box';
+import { formatDateTime } from '../../../lib/date_util';
 import formatUndersoreString from '../../../lib/formatUnderscoreString';
 
 export default function Show({ subledger }: any) {
@@ -33,22 +34,23 @@ export default function Show({ subledger }: any) {
                         </h3>
 
                         <div className="grid grid-cols-1 gap-x-5 gap-y-3 md:grid-cols-4">
-                            <div>
-                                <Label>Code</Label>
-                                <p className="text-sm">{subledger.code}</p>
-                            </div>
+                            <BorderInfoBox
+                                label="Code"
+                                value={subledger.code}
+                                className="bg-muted/30"
+                            />
 
-                            <div>
-                                <Label>Name</Label>
-                                <p className="text-sm">{subledger.name}</p>
-                            </div>
+                            <BorderInfoBox
+                                label="Name"
+                                value={subledger.name}
+                                className="bg-muted/30"
+                            />
 
-                            <div>
-                                <Label>Short Name</Label>
-                                <p className="text-sm">
-                                    {subledger.short_name || '-'}
-                                </p>
-                            </div>
+                            <BorderInfoBox
+                                label="Short Name"
+                                value={subledger.short_name || '-'}
+                                className="bg-muted/30"
+                            />
                         </div>
                     </div>
 
@@ -59,68 +61,49 @@ export default function Show({ subledger }: any) {
                         </h3>
 
                         <div className="grid grid-cols-1 gap-x-5 gap-y-3 md:grid-cols-4">
-                            <div>
-                                <Label>Type</Label>
-                                <p className="text-sm">
-                                    {formatUndersoreString(
-                                        subledger.subledger_type,
-                                    )}
-                                </p>
-                            </div>
+                            <BorderInfoBox
+                                label="Type"
+                                value={formatUndersoreString(
+                                    subledger.subledger_type,
+                                )}
+                                className="bg-muted/30"
+                            />
 
-                            <div>
-                                <Label>Sub Type</Label>
-                                <p className="text-sm">
-                                    {formatUndersoreString(
-                                        subledger.subledger_sub_type,
-                                    )}
-                                </p>
-                            </div>
+                            <BorderInfoBox
+                                label="Sub Type"
+                                value={formatUndersoreString(
+                                    subledger.subledger_sub_type,
+                                )}
+                                className="bg-muted/30"
+                            />
 
-                            <div>
-                                <Label>GL Account</Label>
-                                <p className="text-sm">
-                                    {subledger.gl_account?.name || '-'}
-                                </p>
-                            </div>
+                            <BorderInfoBox
+                                label="GL Account"
+                                value={formatUndersoreString(
+                                    subledger.gl_account?.name || '-',
+                                )}
+                                className="bg-muted/30"
+                            />
 
-                            <div>
-                                <Label>Status</Label>
-                                <p className="text-sm">
-                                    {subledger.is_active ? (
-                                        <span className="font-medium text-green-600">
-                                            Active
-                                        </span>
-                                    ) : (
-                                        <span className="font-medium text-red-600">
-                                            Inactive
-                                        </span>
-                                    )}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                            <BorderInfoBox
+                                label="Status"
+                                value={formatUndersoreString(
+                                    subledger.is_active ? 'Active' : 'Inactive',
+                                )}
+                                className="bg-muted/30"
+                            />
 
-                    {/* 🔹 Meta Info (Optional but Pro) */}
-                    <div>
-                        <h3 className="text-lg font-semibold text-muted-foreground">
-                            Metadata
-                        </h3>
+                            <BorderInfoBox
+                                label="Created At"
+                                value={formatDateTime(subledger.created_at)}
+                                className="bg-muted/30"
+                            />
 
-                        <div className="grid grid-cols-1 gap-x-5 gap-y-3 md:grid-cols-4">
-                            <div>
-                                <Label>Created At</Label>
-                                <p className="text-sm">
-                                    {subledger.created_at}
-                                </p>
-                            </div>
-
-                            <div>
-                                <Label>Last Updated</Label>
-                                <p className="text-sm">
-                                    {subledger.updated_at}
-                                </p>
-                            </div>
+                            <BorderInfoBox
+                                label="Created At"
+                                value={formatDateTime(subledger.updated_at)}
+                                className="bg-muted/30"
+                            />
                         </div>
                     </div>
 

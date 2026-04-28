@@ -161,9 +161,9 @@ export default function ListPettyCashAccountsPage() {
                         <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
                                 {[
-                                    'Name',
                                     'Branch',
-                                    'Ledger',
+                                    'Name',
+                                    'Subledger Account',
                                     'Upper Limit',
                                     'Status',
                                     'Actions',
@@ -185,16 +185,16 @@ export default function ListPettyCashAccountsPage() {
                                         key={a.id}
                                         className="border-b transition-colors even:bg-muted hover:bg-accent/20"
                                     >
+                                        <td className="px-2 py-1">
+                                            {a.branch?.name || '-'}
+                                        </td>
+
                                         <td className="px-2 py-1 font-medium">
                                             {a.name}
                                         </td>
 
                                         <td className="px-2 py-1">
-                                            {a.branch?.name || '-'}
-                                        </td>
-
-                                        <td className="px-2 py-1">
-                                            {a.ledger_account?.name || '-'}
+                                            {`${a.subledger_account?.name} - (${a.subledger_account?.account_number})`}
                                         </td>
 
                                         <td className="px-2 py-1">

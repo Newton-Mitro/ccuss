@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { route } from 'ziggy-js';
+import { BorderInfoBox } from '../../../components/border-info-box';
 import HeadingSmall from '../../../components/heading-small';
 import { Button } from '../../../components/ui/button';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
@@ -58,69 +59,53 @@ export default function ShowTellerPage({ teller }: Props) {
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <div>
-                        <p className="text-sm text-card-foreground">Branch</p>
-                        <p className="font-medium">
-                            {teller.branch?.name ?? '—'}
-                        </p>
-                    </div>
+                    <BorderInfoBox
+                        label="Branch"
+                        value={teller.branch?.name ?? '—'}
+                        className="bg-muted/30"
+                    />
 
-                    <div>
-                        <p className="text-sm text-card-foreground">User</p>
-                        <p className="font-medium">
-                            {teller.user?.name ?? '—'}
-                        </p>
-                    </div>
+                    <BorderInfoBox
+                        label="User"
+                        value={teller.user?.name ?? '—'}
+                        className="bg-muted/30"
+                    />
 
-                    <div>
-                        <p className="text-sm text-card-foreground">Name</p>
-                        <p className="font-medium">{teller.name}</p>
-                    </div>
+                    <BorderInfoBox
+                        label="Name"
+                        value={teller.name}
+                        className="bg-muted/30"
+                    />
 
-                    <div>
-                        <p className="text-sm text-card-foreground">
-                            Max Cash Limit
-                        </p>
-                        <p className="font-medium">
-                            {formatBDTCurrency(teller.max_cash_limit)}
-                        </p>
-                    </div>
+                    <BorderInfoBox
+                        label="Max Cash Limit"
+                        value={formatBDTCurrency(teller.max_cash_limit)}
+                        className="bg-muted/30"
+                    />
 
-                    <div>
-                        <p className="text-sm text-card-foreground">
-                            Max Transaction Limit
-                        </p>
-                        <p className="font-medium">
-                            {formatBDTCurrency(teller.max_transaction_limit)}
-                        </p>
-                    </div>
+                    <BorderInfoBox
+                        label="Max Transaction Limit"
+                        value={formatBDTCurrency(teller.max_transaction_limit)}
+                        className="bg-muted/30"
+                    />
 
-                    <div>
-                        <p className="text-sm text-card-foreground">
-                            Subledger Account
-                        </p>
-                        <p className="font-medium">
-                            {`${teller.subledger_account.account_number} - ${teller.subledger_account.name}`}
-                        </p>
-                    </div>
+                    <BorderInfoBox
+                        label="Subledger Account"
+                        value={`${teller.subledger_account.account_number} - ${teller.subledger_account.name}`}
+                        className="bg-muted/30"
+                    />
 
-                    <div>
-                        <p className="text-sm text-card-foreground">
-                            Created At
-                        </p>
-                        <p className="font-medium">
-                            {formatDateTime(teller.created_at)}
-                        </p>
-                    </div>
+                    <BorderInfoBox
+                        label="Created At"
+                        value={formatDateTime(teller.created_at)}
+                        className="bg-muted/30"
+                    />
 
-                    <div>
-                        <p className="text-sm text-card-foreground">
-                            Last Updated
-                        </p>
-                        <p className="font-medium">
-                            {formatDateTime(teller.updated_at)}
-                        </p>
-                    </div>
+                    <BorderInfoBox
+                        label="Created At"
+                        value={formatDateTime(teller.updated_at)}
+                        className="bg-muted/30"
+                    />
                 </div>
             </div>
         </CustomAuthLayout>

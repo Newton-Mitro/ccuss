@@ -7,6 +7,7 @@ import { Button } from '../../../components/ui/button';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 
+import { BorderInfoBox } from '../../../components/border-info-box';
 import { formatDateTime } from '../../../lib/date_util';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Vault } from '../../../types/cash_treasury_module';
@@ -58,7 +59,7 @@ export default function ShowVaultPage({ vault }: ShowVaultPageProps) {
             <div className="space-y-6 rounded-md border bg-card p-6 sm:p-8">
                 {/* Top Status Row */}
                 <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-info">
+                    <h3 className="text-lg font-semibold text-muted-foreground">
                         Vault Overview
                     </h3>
 
@@ -68,59 +69,37 @@ export default function ShowVaultPage({ vault }: ShowVaultPageProps) {
                 {/* Grid Info */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {/* Branch */}
-                    <div>
-                        <p className="text-sm text-muted-foreground">Branch</p>
-                        <p className="font-medium">
-                            {vault.branch?.name ?? '—'}
-                        </p>
-                    </div>
+                    <BorderInfoBox
+                        label="Branch"
+                        value={vault.branch?.name ?? '—'}
+                        className="bg-muted/30"
+                    />
 
                     {/* Vault Name */}
-                    <div>
-                        <p className="text-sm text-muted-foreground">
-                            Vault Name
-                        </p>
-                        <p className="font-medium">{vault.name}</p>
-                    </div>
+                    <BorderInfoBox
+                        label="Vault Name"
+                        value={vault.name ?? '—'}
+                        className="bg-muted/30"
+                    />
 
                     {/* Account */}
-                    <div>
-                        <p className="text-sm text-muted-foreground">
-                            Subledger Account
-                        </p>
-                        <p className="font-medium">
-                            {vault.subledger_account?.name ?? '—'}
-                        </p>
-                    </div>
+                    <BorderInfoBox
+                        label="Subledger Account"
+                        value={`${vault.subledger_account?.account_number} - ${vault.subledger_account?.name ?? '—'}`}
+                        className="bg-muted/30"
+                    />
 
-                    <div>
-                        <p className="text-sm text-muted-foreground">
-                            Subledger Account Number
-                        </p>
-                        <p className="font-medium">
-                            {vault.subledger_account?.account_number ?? '—'}
-                        </p>
-                    </div>
+                    <BorderInfoBox
+                        label="Created At"
+                        value={formatDateTime(vault.created_at)}
+                        className="bg-muted/30"
+                    />
 
-                    {/* Created At */}
-                    <div>
-                        <p className="text-sm text-muted-foreground">
-                            Created At
-                        </p>
-                        <p className="font-medium">
-                            {formatDateTime(vault.created_at)}
-                        </p>
-                    </div>
-
-                    {/* Updated At */}
-                    <div>
-                        <p className="text-sm text-muted-foreground">
-                            Last Updated
-                        </p>
-                        <p className="font-medium">
-                            {formatDateTime(vault.updated_at)}
-                        </p>
-                    </div>
+                    <BorderInfoBox
+                        label="Created At"
+                        value={formatDateTime(vault.updated_at)}
+                        className="bg-muted/30"
+                    />
                 </div>
             </div>
         </CustomAuthLayout>

@@ -3,7 +3,6 @@
 namespace App\TreasuryAndCashModule\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\SubledgerModule\Models\SubledgerAccount;
 use App\TreasuryAndCashModule\Models\BranchDay;
 use App\TreasuryAndCashModule\Models\Teller;
 use App\TreasuryAndCashModule\Models\TellerSession;
@@ -17,7 +16,7 @@ class TellerSessionController extends Controller
     public function index(Request $request)
     {
         $query = TellerSession::query()
-            ->with(['teller', 'branchDay'])
+            ->with(['teller', 'branchDay', 'subledgerAccount'])
             ->where('branch_id', Auth::user()->branch_id);
 
         // 🔍 Search
@@ -125,7 +124,7 @@ class TellerSessionController extends Controller
                 'teller_id' => $data['teller_id'],
                 'branch_id' => $user->branch_id,
                 'branch_day_id' => $data['branch_day_id'],
-                'cash_account_id' => $teller->subledger_account_id,
+                'subledger_account_id' => $teller->subledger_account_id,
                 'opened_at' => now(),
                 'status' => 'open',
                 'remarks' => $data['remarks'] ?? null,
@@ -146,8 +145,9 @@ class TellerSessionController extends Controller
             [
                 'session' => $tellerSession->load([
                     'teller',
+                    'branch',
                     'branchDay',
-                    'cashAccount'
+                    'subledgerAccount'
                 ]),
             ]
         );
@@ -163,7 +163,7 @@ class TellerSessionController extends Controller
                 'session' => $tellerSession->load([
                     'teller',
                     'branchDay',
-                    'cashAccount'
+                    'subledgerAccount'
                 ]),
             ]
         );

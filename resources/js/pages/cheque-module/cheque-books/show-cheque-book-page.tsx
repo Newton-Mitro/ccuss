@@ -63,9 +63,9 @@ export default function Show() {
 
                 {/* ================= ACCOUNT ================= */}
                 <div className="rounded-md border bg-card p-4">
-                    <h3 className="mb-3 font-medium">Linked Account</h3>
+                    <h3 className="mb-3 font-medium">Subledger Account</h3>
 
-                    <p>{cheque_book.subledger_account?.name ?? 'N/A'}</p>
+                    <p>{`${cheque_book.subledger_account?.name} • ${cheque_book.subledger_account?.account_number}`}</p>
                 </div>
 
                 {/* ================= CHEQUES LIST ================= */}

@@ -128,7 +128,7 @@ export default function TellerSessionsIndexPage() {
                                 {[
                                     'Teller',
                                     'Business Date',
-                                    'Cash Account',
+                                    'Subledger Account',
                                     'Expected',
                                     'Closing',
                                     'Difference',
@@ -164,7 +164,7 @@ export default function TellerSessionsIndexPage() {
                                         </td>
 
                                         <td className="px-2 py-1">
-                                            {s.cash_account?.name || '—'}
+                                            {`${s.subledger_account?.name} (${s.subledger_account?.account_number})`}
                                         </td>
 
                                         <td className="px-2 py-1">

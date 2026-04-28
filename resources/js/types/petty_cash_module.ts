@@ -1,6 +1,5 @@
 import { Timestamped } from './base_types';
 import { Branch } from './branch';
-import { LedgerAccount } from './finance_and_accounting';
 import { User } from './user';
 
 export interface PettyCashAccount extends Timestamped {
@@ -8,7 +7,7 @@ export interface PettyCashAccount extends Timestamped {
     name: string;
 
     branch_id: number | null;
-    ledger_account_id: number;
+    subledger_account_id: number;
 
     upper_limit: string; // decimal from Laravel
     balance?: string; // future-ready field for current balance, decimal from Laravel
@@ -16,7 +15,7 @@ export interface PettyCashAccount extends Timestamped {
 
     // relations
     branch?: Branch;
-    ledger_account?: LedgerAccount; // replace with LedgerAccount type if available
+    subledger_account?: any; // replace with LedgerAccount type if available
     employees?: PettyCashAdvanceAccount[];
 }
 
@@ -25,7 +24,7 @@ export interface PettyCashAdvanceAccount extends Timestamped {
 
     petty_cash_account_id: number;
     employee_id: number;
-    ledger_account_id: number;
+    subledger_account_id: number;
     balance?: string; // future-ready field for current balance, decimal from Laravel
 
     status: 'active' | 'inactive';
@@ -33,5 +32,5 @@ export interface PettyCashAdvanceAccount extends Timestamped {
     // relations
     petty_cash_account?: PettyCashAccount;
     employee?: User;
-    ledger_account?: LedgerAccount;
+    subledger_account?: any;
 }

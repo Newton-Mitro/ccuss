@@ -51,7 +51,7 @@ class TellerSession extends Model
         return $this->belongsTo(BranchDay::class);
     }
 
-    public function cashAccount(): BelongsTo
+    public function subledgerAccount(): BelongsTo
     {
         return $this->belongsTo(SubledgerAccount::class, 'subledger_account_id');
     }

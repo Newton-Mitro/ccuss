@@ -2,10 +2,10 @@
 
 namespace App\PettyCashModule\Controllers;
 
-use App\GeneralAccounting\Models\LedgerAccount;
 use App\Http\Controllers\Controller;
 use App\PettyCashModule\Models\PettyCashAdvanceAccount;
 use App\PettyCashModule\Models\PettyCashAccount;
+use App\SubledgerModule\Models\Subledger;
 use App\SubledgerModule\Models\SubledgerAccount;
 use App\SystemAdministration\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +17,7 @@ class PettyCashAdvanceAccountController extends Controller
     public function index(Request $request)
     {
         $query = PettyCashAdvanceAccount::query()
-            ->with(['employee', 'pettyCashAccount', 'ledgerAccount']);
+            ->with(['employee', 'pettyCashAccount', 'subledgerAccount']);
 
         // 🔍 Search
         if ($request->filled('search')) {
@@ -64,7 +64,6 @@ class PettyCashAdvanceAccountController extends Controller
             [
                 'pettyCashAccounts' => PettyCashAccount::select('id', 'name')->get(),
                 'employees' => User::select('id', 'name')->get(),
-                'ledgerAccounts' => LedgerAccount::where('is_control_account', true)->where('is_active', true)->get(),
             ]
         );
     }
@@ -74,19 +73,31 @@ class PettyCashAdvanceAccountController extends Controller
         $data = $request->validate([
             'name' => 'nullable|string|max:255',
             'petty_cash_account_id' => 'required|exists:petty_cash_accounts,id',
-            'ledger_account_id' => 'required|exists:ledger_accounts,id',
             'employee_id' => 'required|exists:users,id',
             'status' => 'in:active,inactive',
         ]);
 
-        $advance = DB::transaction(function () use ($data, $request) {
+        $subledger = Subledger::where('subledger_sub_type', 'petty_cash_advances')
+            ->first();
+
+        if (!$subledger) {
+            abort(403);
+        }
+
+        $employee = User::find($data['employee_id']);
+
+        if (!$employee) {
+            abort(403);
+        }
+
+        $advance = DB::transaction(function () use ($data, $request, $subledger, $employee) {
 
             // 1. Create advance account
             $advance = PettyCashAdvanceAccount::create([
                 'petty_cash_account_id' => $data['petty_cash_account_id'],
-                'ledger_account_id' => $data['ledger_account_id'],
                 'employee_id' => $data['employee_id'],
                 'status' => $data['status'] ?? 'active',
+                'subledger_id' => $subledger->id,
             ]);
 
             // 2. Create central account
@@ -95,13 +106,14 @@ class PettyCashAdvanceAccountController extends Controller
                 'branch_id' => optional($advance->pettyCashAccount)->branch_id,
 
                 'account_number' => 'PCA-' . str_pad($advance->id, 5, '0', STR_PAD_LEFT),
-                'name' => ($data['name'] ?? 'Advance - Employee') . ' (Advance)',
+                'name' => $employee->name . ' - Advance Petty Cash',
 
                 'status' => 'active',
 
                 // polymorphic link
                 'accountable_type' => PettyCashAdvanceAccount::class,
                 'accountable_id' => $advance->id,
+                'subledger_id' => $subledger->id,
             ]);
 
             // 3. Optional reverse link
@@ -122,10 +134,9 @@ class PettyCashAdvanceAccountController extends Controller
         return Inertia::render(
             'petty-cash-management/petty-cash-advance-accounts/petty-cash-advance-account-form-page',
             [
-                'pettyCashAdvanceAccount' => $pettyCashAdvanceAccount->load(['employee', 'pettyCashAccount', 'ledgerAccount']),
+                'pettyCashAdvanceAccount' => $pettyCashAdvanceAccount->load(['employee', 'pettyCashAccount', 'subledgerAccount']),
                 'pettyCashAccounts' => PettyCashAccount::select('id', 'name')->get(),
                 'employees' => User::select('id', 'name')->get(),
-                'ledgerAccounts' => LedgerAccount::where('is_control_account', true)->where('is_active', true)->get(),
             ]
         );
     }
@@ -135,7 +146,7 @@ class PettyCashAdvanceAccountController extends Controller
         return Inertia::render(
             'petty-cash-management/petty-cash-advance-accounts/show-petty-cash-advance-account-page',
             [
-                'pettyCashAdvanceAccount' => $pettyCashAdvanceAccount->load(['employee', 'pettyCashAccount', 'ledgerAccount']),
+                'pettyCashAdvanceAccount' => $pettyCashAdvanceAccount->load(['employee', 'pettyCashAccount', 'subledgerAccount']),
             ]
         );
     }

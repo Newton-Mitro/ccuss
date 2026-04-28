@@ -3,6 +3,7 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { Head } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import { route } from 'ziggy-js';
+import { BorderInfoBox } from '../../../components/border-info-box';
 import { BreadcrumbItem } from '../../../types';
 
 const BankAccountShow = ({ bankAccount }) => {
@@ -48,76 +49,54 @@ const BankAccountShow = ({ bankAccount }) => {
                     </h3>
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                        <InfoItem
+                        <BorderInfoBox
                             label="Bank Name"
                             value={bankAccount.bank_name}
+                            className="bg-muted/30"
                         />
-                        <InfoItem
+                        <BorderInfoBox
                             label="Branch Name"
                             value={bankAccount.branch_name}
+                            className="bg-muted/30"
                         />
-                        <InfoItem
+                        <BorderInfoBox
                             label="Account Number"
                             value={bankAccount.account_number}
+                            className="bg-muted/30"
                         />
-                        <InfoItem
+                        <BorderInfoBox
                             label="SWIFT Code"
                             value={bankAccount.swift_code}
+                            className="bg-muted/30"
                         />
-                        <InfoItem
+                        <BorderInfoBox
                             label="Routing Number"
                             value={bankAccount.routing_number}
+                            className="bg-muted/30"
                         />
-                        <InfoItem label="IBAN" value={bankAccount.iban} />
+                        <BorderInfoBox
+                            label="IBAN"
+                            value={bankAccount.iban}
+                            className="bg-muted/30"
+                        />
 
-                        <InfoItem
+                        <BorderInfoBox
                             label="Subledger Account"
                             value={
                                 bankAccount.subledger_account?.account_number
                             }
+                            className="bg-muted/30"
                         />
 
-                        <InfoItem
+                        <BorderInfoBox
                             label="Status"
-                            value={<StatusBadge status={bankAccount.status} />}
+                            value={bankAccount.status}
+                            className="bg-muted/30"
                         />
                     </div>
                 </div>
             </div>
         </CustomAuthLayout>
-    );
-};
-
-/**
- * Reusable Info Display Component
- */
-const InfoItem = ({ label, value }) => {
-    return (
-        <div className="rounded-md border p-3">
-            <div className="text-xs text-muted-foreground">{label}</div>
-            <div className="text-sm font-medium">
-                {value || <span className="text-muted-foreground">—</span>}
-            </div>
-        </div>
-    );
-};
-
-/**
- * Status Badge (Reusable Across App)
- */
-const StatusBadge = ({ status }) => {
-    const isActive = status === 'active';
-
-    return (
-        <span
-            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                isActive
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-red-100 text-red-700'
-            }`}
-        >
-            {isActive ? 'Active' : 'Inactive'}
-        </span>
     );
 };
 

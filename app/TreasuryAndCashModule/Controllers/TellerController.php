@@ -164,7 +164,6 @@ class TellerController extends Controller
         ]);
 
         DB::transaction(function () use ($data, $teller) {
-
             $teller->update([
                 'user_id' => $data['user_id'],
                 'branch_id' => $data['branch_id'] ?? Auth::user()->branch_id,

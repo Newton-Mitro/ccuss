@@ -182,8 +182,10 @@ export default function Index() {
                                         </td>
 
                                         <td className="px-2 py-1">
-                                            {a.subledger_account
-                                                ?.account_number || '-'}
+                                            {`${a.subledger_account?.name} (${
+                                                a.subledger_account
+                                                    ?.account_number
+                                            })`}
                                         </td>
 
                                         <td className="px-2 py-1 capitalize">

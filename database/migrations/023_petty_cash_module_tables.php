@@ -16,7 +16,6 @@ return new class extends Migration {
             $table->timestamps();
             $table->softDeletes();
 
-            $table->foreignId('ledger_account_id')->constrained('ledger_accounts')->cascadeOnDelete();
             $table->foreignId('branch_id')->nullable()->constrained('branches')->nullOnDelete();
             $table->foreignId('subledger_account_id')->nullable()->constrained('subledger_accounts')->nullOnDelete();
         });
@@ -30,7 +29,6 @@ return new class extends Migration {
             $table->foreignId('petty_cash_account_id')->constrained('petty_cash_accounts')->cascadeOnDelete();
             $table->foreignId('subledger_account_id')->nullable()->constrained('subledger_accounts')->nullOnDelete();
             $table->foreignId('employee_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('ledger_account_id')->constrained('ledger_accounts')->cascadeOnDelete();
             $table->unique(['employee_id']);
         });
     }

@@ -96,7 +96,7 @@ export interface TellerSession {
     teller_id: number;
     branch_id: number;
     branch_day_id: number;
-    cash_account_id?: number | null;
+    subledger_account_id?: number | null;
 
     // 🕒 Lifecycle
     opened_at: string;
@@ -119,7 +119,7 @@ export interface TellerSession {
     // 🔗 Relations
     teller?: Teller;
     branch_day?: BranchDay;
-    cash_account?: any;
+    subledger_account?: any;
 
     // 🔮 Future-ready (keep if you plan to use)
     cash_drawers?: CashDrawer[];

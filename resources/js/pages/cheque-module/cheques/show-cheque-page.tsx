@@ -91,7 +91,7 @@ export default function Show() {
 
                         <div>
                             <p className="text-sm text-muted-foreground">
-                                Account
+                                Account Name
                             </p>
                             <p>{cheque.issuer_account?.name || 'External'}</p>
                         </div>

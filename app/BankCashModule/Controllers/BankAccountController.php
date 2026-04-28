@@ -4,6 +4,7 @@ namespace App\BankCashModule\Controllers;
 
 use App\BankCashModule\Models\BankAccount;
 use App\Http\Controllers\Controller;
+use App\SubledgerModule\Models\Subledger;
 use App\SubledgerModule\Models\SubledgerAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -72,7 +73,14 @@ class BankAccountController extends Controller
             'status' => 'nullable|in:active,inactive',
         ]);
 
-        $bankAccount = DB::transaction(function () use ($data, $user) {
+        $subledger = Subledger::where('subledger_sub_type', 'bank_accounts')
+            ->first();
+
+        if (!$subledger) {
+            abort(403);
+        }
+
+        $bankAccount = DB::transaction(function () use ($data, $user, $subledger) {
 
             /* ---------------------------------------------
             | 1. Create Bank Account
@@ -84,6 +92,7 @@ class BankAccountController extends Controller
                 'swift_code' => $data['swift_code'] ?? null,
                 'routing_number' => $data['routing_number'] ?? null,
                 'status' => $data['status'] ?? 'active',
+                'subledger_id' => $subledger->id,
             ]);
 
             /* ---------------------------------------------
@@ -97,6 +106,7 @@ class BankAccountController extends Controller
                 'status' => 'active',
                 'accountable_type' => BankAccount::class,
                 'accountable_id' => $bankAccount->id,
+                'subledger_id' => $subledger->id,
             ]);
 
             /* ---------------------------------------------

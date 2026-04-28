@@ -5,6 +5,7 @@ namespace App\PettyCashModule\Controllers;
 use App\GeneralAccounting\Models\LedgerAccount;
 use App\Http\Controllers\Controller;
 use App\PettyCashModule\Models\PettyCashAccount;
+use App\SubledgerModule\Models\Subledger;
 use App\SubledgerModule\Models\SubledgerAccount;
 use Illuminate\Support\Facades\DB;
 use App\SystemAdministration\Models\Branch;
@@ -16,7 +17,7 @@ class PettyCashAccountController extends Controller
     public function index(Request $request)
     {
         $query = PettyCashAccount::query()
-            ->with(['branch', 'ledgerAccount']);
+            ->with(['branch', 'subledgerAccount']);
 
         // 🔍 Search (name + branch)
         if ($request->filled('search')) {
@@ -52,18 +53,18 @@ class PettyCashAccountController extends Controller
                 'accounts' => $accounts,
                 'filters' => $request->only(['search', 'branch_id', 'status', 'per_page', 'page']),
                 'branches' => Branch::select('id', 'name')->get(),
-                'ledgerAccounts' => LedgerAccount::where('is_control_account', true)->where('is_active', true)->get(),
             ]
         );
     }
 
     public function create()
     {
+        $authUserBranch = auth()->user()->branch;
         return Inertia::render(
             'petty-cash-management/petty-cash-accounts/petty-cash-account-form-page',
             [
+                'userBranch' => $authUserBranch,
                 'branches' => Branch::select('id', 'name')->get(),
-                'ledgerAccounts' => LedgerAccount::where('is_control_account', true)->where('is_active', true)->get(),
             ]
         );
     }
@@ -74,20 +75,26 @@ class PettyCashAccountController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'branch_id' => 'required|exists:branches,id',
-            'ledger_account_id' => 'required|exists:ledger_accounts,id',
             'upper_limit' => 'required|numeric|min:0',
             'status' => 'in:active,inactive',
         ]);
 
-        $pettyCash = DB::transaction(function () use ($data, $organizationId) {
+        $subledger = Subledger::where('subledger_sub_type', 'petty_cashes')
+            ->first();
+
+        if (!$subledger) {
+            abort(403);
+        }
+
+        $pettyCash = DB::transaction(function () use ($data, $organizationId, $subledger) {
 
             // 1. Create petty cash account
             $pettyCash = PettyCashAccount::create([
                 'branch_id' => $data['branch_id'],
-                'ledger_account_id' => $data['ledger_account_id'],
                 'name' => $data['name'] ?? 'Petty Cash',
                 'upper_limit' => $data['upper_limit'],
                 'status' => $data['status'] ?? 'active',
+                'subledger_id' => $subledger->id,
             ]);
 
             // 2. Create central account (IMPORTANT)
@@ -95,12 +102,13 @@ class PettyCashAccountController extends Controller
                 'organization_id' => $organizationId ?? null,
                 'branch_id' => $data['branch_id'],
                 'account_number' => 'PC-' . str_pad($pettyCash->id, 5, '0', STR_PAD_LEFT),
-                'name' => ($data['name'] ?? 'Petty Cash') . ' (Petty Cash)',
+                'name' => ($data['name'] ?? 'Petty Cash'),
                 'status' => 'active',
 
                 // polymorphic link
                 'accountable_type' => PettyCashAccount::class,
                 'accountable_id' => $pettyCash->id,
+                'subledger_id' => $subledger->id,
             ]);
 
             // 3. Optional reverse link (if needed)
@@ -121,9 +129,8 @@ class PettyCashAccountController extends Controller
         return Inertia::render(
             'petty-cash-management/petty-cash-accounts/petty-cash-account-form-page',
             [
-                'pettyCash' => $pettyCashAccount->load(['branch', 'ledgerAccount']),
+                'pettyCash' => $pettyCashAccount->load(['branch', 'subledgerAccount']),
                 'branches' => Branch::select('id', 'name')->get(),
-                'ledgerAccounts' => LedgerAccount::where('is_control_account', true)->where('is_active', true)->get(),
             ]
         );
     }
@@ -133,7 +140,7 @@ class PettyCashAccountController extends Controller
         return Inertia::render(
             'petty-cash-management/petty-cash-accounts/show-petty-cash-account-page',
             [
-                'pettyCash' => $pettyCashAccount->load(['branch', 'ledgerAccount']),
+                'pettyCash' => $pettyCashAccount->load(['branch', 'subledgerAccount']),
             ]
         );
     }
@@ -143,7 +150,6 @@ class PettyCashAccountController extends Controller
         $data = $request->validate([
             'name' => 'nullable|string|max:255',
             'branch_id' => 'required|exists:branches,id',
-            'ledger_account_id' => 'required|exists:ledger_accounts,id',
             'upper_limit' => 'required|numeric|min:0',
             'status' => 'in:active,inactive',
         ]);
@@ -152,13 +158,12 @@ class PettyCashAccountController extends Controller
             $pettyCashAccount->update([
                 'name' => $data['name'] ?? 'Petty Cash',
                 'branch_id' => $data['branch_id'],
-                'ledger_account_id' => $data['ledger_account_id'],
                 'upper_limit' => $data['upper_limit'],
                 'status' => $data['status'] ?? 'active',
             ]);
 
             $pettyCashAccount->account?->update([
-                'name' => ($data['name'] ?? 'Petty Cash') . ' (Petty Cash)',
+                'name' => ($data['name'] ?? 'Petty Cash'),
             ]);
         });
 

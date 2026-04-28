@@ -124,21 +124,20 @@ const ShowAdvanceExpensePage = ({ pettyCashAdvanceAccount }: Props) => {
                     {/* Ledger Account */}
                     <div>
                         <div className="text-xs text-muted-foreground">
-                            Ledger Account
+                            Subledger Account
                         </div>
                         <div className="text-sm font-medium">
-                            {pettyCashAdvanceAccount.ledger_account?.name ||
-                                '-'}
+                            {`${pettyCashAdvanceAccount.subledger_account?.name} (${pettyCashAdvanceAccount.subledger_account?.account_number})`}
                         </div>
                     </div>
 
                     {/* Employee ID (optional debug/info) */}
                     <div>
                         <div className="text-xs text-muted-foreground">
-                            Employee ID
+                            Employee
                         </div>
                         <div className="text-sm font-medium">
-                            {pettyCashAdvanceAccount.employee.name || '-'}
+                            {`${pettyCashAdvanceAccount.employee.name} -  (# ${pettyCashAdvanceAccount.employee.id})`}
                         </div>
                     </div>
                 </div>
