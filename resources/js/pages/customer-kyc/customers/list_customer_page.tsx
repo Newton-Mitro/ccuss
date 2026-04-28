@@ -198,7 +198,7 @@ export default function Index() {
                                                 {c.email}
                                             </td>
                                             <td className="px-2 py-1">
-                                                <Badge text={c.kyc_status} />
+                                                <Badge text={c.status} />
                                             </td>
                                             <td className="px-2 py-1">
                                                 <TooltipProvider>
@@ -285,7 +285,7 @@ export default function Index() {
                                                 {c.customer_no} · {c.type}
                                             </p>
                                         </div>
-                                        <Badge text={c.kyc_status} />
+                                        <Badge text={c.status} />
                                     </div>
 
                                     <div className="text-xs text-muted-foreground">

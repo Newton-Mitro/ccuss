@@ -3,17 +3,29 @@ const statusConfig = {
         label: 'Pending',
         class: 'bg-warning text-warning-foreground',
     },
-    verified: {
-        label: 'Verified',
-        class: 'bg-info text-info-foreground',
+    active: {
+        label: 'active',
+        class: 'bg-success text-success-foreground',
     },
-    approved: {
-        label: 'Approved',
+    inactive: {
+        label: 'inactive',
+        class: 'bg-destructive text-destructive-foreground',
+    },
+    suspended: {
+        label: 'suspended',
+        class: 'bg-destructive text-destructive-foreground',
+    },
+    closed: {
+        label: 'closed',
+        class: 'bg-destructive text-destructive-foreground',
+    },
+    verified: {
+        label: 'verified',
         class: 'bg-success text-success-foreground',
     },
     rejected: {
-        label: 'Rejected',
-        class: 'bg-destructive text-destructive-foreground',
+        label: 'rejected',
+        class: 'bg-success text-success-foreground',
     },
 };
 

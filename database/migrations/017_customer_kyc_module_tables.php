@@ -27,7 +27,7 @@ return new class extends Migration {
             $table->string('education', 100)->nullable();
             $table->enum('religion', ['christianity', 'islam', 'hinduism', 'buddhism', 'other'])->nullable();
 
-            $table->enum('kyc_status', ['pending', 'verified', 'rejected'])->default('pending');
+            $table->enum('status', ['pending', 'active', 'inactive', 'suspended', 'closed'])->default('pending');
             $table->timestamps();
             $table->softDeletes();
 
@@ -75,7 +75,14 @@ return new class extends Migration {
 
         Schema::create('kyc_profiles', function (Blueprint $table) {
             $table->id();
-            $table->enum('kyc_level', ['basic', 'full', 'enhanced'])->default('basic');
+            $table->enum('kyc_status', ['pending', 'verified', 'rejected'])->default('pending');
+            $table->enum('kyc_level', [
+                'minimal',     // very limited info (e.g., phone only)
+                'basic',       // NID + basic identity
+                'standard',    // identity + address verification
+                'full',        // full document verification + face match
+                'enhanced'     // EDD (Enhanced Due Diligence)
+            ])->default('minimal');
             $table->enum('risk_level', ['low', 'medium', 'high'])->default('low');
             $table->timestamps();
             $table->softDeletes();

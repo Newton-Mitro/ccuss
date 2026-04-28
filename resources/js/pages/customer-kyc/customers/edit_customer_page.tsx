@@ -14,19 +14,19 @@ import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import {
     Customer,
+    CustomerStatus,
     CustomerType,
     Gender,
     IdentificationType,
-    KycStatus,
     Religion,
 } from '../../../types/customer_kyc_module';
 import {
     bloodGroups,
+    customerStatuses,
     customerTypes,
     educations,
     genders,
     individualIdentificationTypes,
-    kycStatuses,
     maritalStatuses,
     nationalities,
     occupations,
@@ -60,7 +60,7 @@ const Edit = ({ customer }: EditProps) => {
         identification_type: customer.identification_type,
         identification_number: customer.identification_number,
         photo: null as File | null,
-        kyc_status: customer.kyc_status || 'pending',
+        status: customer.status || 'pending',
     });
 
     console.log(data);
@@ -378,20 +378,20 @@ const Edit = ({ customer }: EditProps) => {
                         {/* KYC STATUS */}
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             <div>
-                                <Label className="text-xs">KYC Status</Label>
+                                <Label className="text-xs">Status</Label>
                                 <Select
-                                    value={data.kyc_status}
+                                    value={data.status}
                                     disabled
                                     onChange={(value) =>
                                         setData(
-                                            'kyc_status',
-                                            value as KycStatus,
+                                            'status',
+                                            value as CustomerStatus,
                                         )
                                     }
-                                    options={kycStatuses}
+                                    options={customerStatuses}
                                 />
 
-                                <InputError message={errors.kyc_status} />
+                                <InputError message={errors.status} />
                             </div>
                         </div>
                     </div>

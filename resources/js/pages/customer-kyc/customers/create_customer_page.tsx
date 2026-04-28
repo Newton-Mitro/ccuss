@@ -14,11 +14,11 @@ import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 import {
     bloodGroups,
+    customerStatuses,
     customerTypes,
     educations,
     genders,
     individualIdentificationTypes,
-    kycStatuses,
     maritalStatuses,
     nationalities,
     occupations,
@@ -48,7 +48,7 @@ const Create = () => {
         identification_type: '',
         identification_number: '',
         photo: null as File | null,
-        kyc_status: 'pending',
+        status: 'pending',
     });
 
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -353,17 +353,17 @@ const Create = () => {
                         {/* KYC STATUS */}
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             <div>
-                                <Label className="text-xs">KYC Status</Label>
+                                <Label className="text-xs">Status</Label>
                                 <Select
-                                    value={data.kyc_status}
+                                    value={data.status}
                                     disabled
                                     onChange={(value) =>
-                                        setData('kyc_status', value)
+                                        setData('status', value)
                                     }
-                                    options={kycStatuses}
+                                    options={customerStatuses}
                                 />
 
-                                <InputError message={errors.kyc_status} />
+                                <InputError message={errors.status} />
                             </div>
                         </div>
                     </div>

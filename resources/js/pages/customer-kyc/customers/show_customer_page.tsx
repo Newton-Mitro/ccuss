@@ -152,7 +152,7 @@ export default function Show({ customer }: ShowProps) {
                         </p>
 
                         <div className="">
-                            <Badge text={customer.kyc_status} />
+                            <Badge text={customer.status} />
                         </div>
                     </div>
                 </div>

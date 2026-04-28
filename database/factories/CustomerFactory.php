@@ -37,7 +37,6 @@ class CustomerFactory extends Factory
         // Pick a random organization and branch
         $organization = Organization::inRandomOrder()->first();
         $branch = $organization ? $organization->branches()->inRandomOrder()->first() : null;
-        $creator = User::inRandomOrder()->first();
 
         return [
             'organization_id' => $organization->id ?? null,
@@ -59,7 +58,7 @@ class CustomerFactory extends Factory
                 ? fake()->randomElement($individualIds)
                 : fake()->randomElement($organizationIds),
             'identification_number' => strtoupper(Str::random(12)),
-            'kyc_status' => 'pending',
+            'status' => 'pending',
         ];
     }
 

@@ -30,6 +30,12 @@ export type AddressType =
 export type VerificationStatus = 'pending' | 'verified' | 'rejected';
 export type KycLevel = 'basic' | 'full' | 'enhanced';
 export type RiskLevel = 'low' | 'medium' | 'high';
+export type CustomerStatus =
+    | 'pending'
+    | 'active'
+    | 'inactive'
+    | 'suspended'
+    | 'closed';
 
 /* ===========================
  * Customer
@@ -58,9 +64,7 @@ export interface Customer extends Timestamped {
     identification_type: IdentificationType;
     identification_number: string;
 
-    // KYC
-    kyc_status: KycStatus;
-    kyc_verified_at?: Timestamp | null;
+    status: CustomerStatus;
 
     // Files
     photo?: KycDocument | null;
@@ -202,6 +206,7 @@ export interface KycProfile extends Timestamped {
     customer_id: ID;
     customer?: Customer | null;
 
+    kyc_status: KycStatus;
     kyc_level: KycLevel;
     risk_level: RiskLevel;
 

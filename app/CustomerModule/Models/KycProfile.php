@@ -15,17 +15,34 @@ class KycProfile extends Model
 
     protected $fillable = [
         'customer_id',
+        'kyc_status',
         'kyc_level',
         'risk_level',
+    ];
+
+    protected $casts = [
+        'kyc_status' => 'string',
+        'kyc_level' => 'string',
+        'risk_level' => 'string',
     ];
 
     /* ========================
      * Constants (Enums)
      * ======================== */
+
+    // KYC Status
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_VERIFIED = 'verified';
+    public const STATUS_REJECTED = 'rejected';
+
+    // KYC Levels
+    public const LEVEL_MINIMAL = 'minimal';
     public const LEVEL_BASIC = 'basic';
+    public const LEVEL_STANDARD = 'standard';
     public const LEVEL_FULL = 'full';
     public const LEVEL_ENHANCED = 'enhanced';
 
+    // Risk Levels
     public const RISK_LOW = 'low';
     public const RISK_MEDIUM = 'medium';
     public const RISK_HIGH = 'high';
@@ -33,17 +50,48 @@ class KycProfile extends Model
     /* ========================
      * Relationships
      * ======================== */
+
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
     /* ========================
+     * Helpers - Status
+     * ======================== */
+
+    public function isPending(): bool
+    {
+        return $this->kyc_status === self::STATUS_PENDING;
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->kyc_status === self::STATUS_VERIFIED;
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->kyc_status === self::STATUS_REJECTED;
+    }
+
+    /* ========================
      * Helpers - Level
      * ======================== */
+
+    public function isMinimal(): bool
+    {
+        return $this->kyc_level === self::LEVEL_MINIMAL;
+    }
+
     public function isBasic(): bool
     {
         return $this->kyc_level === self::LEVEL_BASIC;
+    }
+
+    public function isStandard(): bool
+    {
+        return $this->kyc_level === self::LEVEL_STANDARD;
     }
 
     public function isFull(): bool
@@ -59,6 +107,7 @@ class KycProfile extends Model
     /* ========================
      * Helpers - Risk
      * ======================== */
+
     public function isLowRisk(): bool
     {
         return $this->risk_level === self::RISK_LOW;
@@ -73,6 +122,16 @@ class KycProfile extends Model
     {
         return $this->risk_level === self::RISK_HIGH;
     }
+
+    /* ========================
+     * Business Logic Helpers
+     * ======================== */
+
+    public function canTransact(): bool
+    {
+        return $this->isVerified();
+    }
+
     protected static function newFactory()
     {
         return KycProfileFactory::new();

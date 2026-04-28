@@ -41,12 +41,18 @@ class Customer extends Model
         'education',
         'religion',
 
-        'kyc_status',
+        'status',
     ];
 
     protected $casts = [
         'dob' => 'date:Y-m-d',
     ];
+
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_ACTIVE = 'active';
+    public const STATUS_INACTIVE = 'inactive';
+    public const STATUS_SUSPENDED = 'suspended';
+    public const STATUS_CLOSED = 'closed';
 
     /* ========================
      * Core Relationships
@@ -128,6 +134,21 @@ class Customer extends Model
     public function onlineServiceClient(): HasOne
     {
         return $this->hasOne(User::class);
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === self::STATUS_ACTIVE;
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->status === self::STATUS_SUSPENDED;
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', self::STATUS_ACTIVE);
     }
 
     protected static function newFactory()

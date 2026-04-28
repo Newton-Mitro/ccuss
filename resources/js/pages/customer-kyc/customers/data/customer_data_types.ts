@@ -9,6 +9,33 @@ export const customerTypes = [
     },
 ];
 
+export const customerStatuses = [
+    {
+        label: 'All',
+        value: '',
+    },
+    {
+        label: 'Pending',
+        value: 'pending',
+    },
+    {
+        label: 'Active',
+        value: 'active',
+    },
+    {
+        label: 'Inactive',
+        value: 'inactive',
+    },
+    {
+        label: 'Suspended',
+        value: 'suspended',
+    },
+    {
+        label: 'Closed',
+        value: 'closed',
+    },
+];
+
 export const kycStatuses = [
     {
         label: 'All',
