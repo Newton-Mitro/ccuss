@@ -16,12 +16,24 @@ export const subledgerTypes = [
         value: 'loans',
     },
     {
-        label: 'Payable',
-        value: 'payable',
+        label: 'Payables',
+        value: 'payables',
     },
     {
         label: 'Receivable',
         value: 'receivable',
+    },
+    {
+        label: 'Loan Receivables',
+        value: 'loan_receivables',
+    },
+    {
+        label: 'Equity',
+        value: 'equity',
+    },
+    {
+        label: 'Loan Incomes',
+        value: 'loan_incomes',
     },
 ];
 
@@ -104,5 +116,60 @@ export const subledgerSubTypes = [
         type: 'loans',
         label: 'Agricultural Loans',
         value: 'agricultural_loans',
+    },
+    // Loan Receivables
+    {
+        type: 'loan_receivables',
+        label: 'Interest Receivables',
+        value: 'interest_receivables',
+    },
+
+    // Payables
+    {
+        type: 'payables',
+        label: 'Vendor Payables',
+        value: 'vendor_payables',
+    },
+    {
+        type: 'payables',
+        label: 'Salaries and Benefits Payables',
+        value: 'salaries_benefits_payables',
+    },
+    {
+        type: 'payables',
+        label: 'Tax Payables',
+        value: 'tax_payables',
+    },
+    {
+        type: 'payables',
+        label: 'Accrued Expenses Other Payables',
+        value: 'accrued_expenses_other_payables',
+    },
+    // Equity
+    {
+        type: 'equity',
+        label: 'Share Capitals',
+        value: 'share_capitals',
+    },
+    // Loan Incomes
+    {
+        type: 'loan_incomes',
+        label: 'Loan Interest Incomes',
+        value: 'loan_interest_incomes',
+    },
+    {
+        type: 'loan_incomes',
+        label: 'Late Payment Fines',
+        value: 'late_payment_fines',
+    },
+    {
+        type: 'loan_incomes',
+        label: 'Loan Insurance Fees',
+        value: 'loan_insurance_fees',
+    },
+    {
+        type: 'loan_incomes',
+        label: 'Insurance Renewal Fees',
+        value: 'insurance_renewal_fees',
     },
 ];
