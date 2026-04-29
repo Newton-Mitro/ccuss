@@ -33,12 +33,12 @@ trait Auditable
         $old = $old ? array_diff_key($old, array_flip($ignored)) : null;
         $new = $new ? array_diff_key($new, array_flip($ignored)) : null;
 
-        if (empty($old) && empty($new)) {
+        // ✅ Always log created
+        if ($event !== 'created' && empty($old) && empty($new)) {
             return;
         }
 
         AuditLog::create([
-            // ✅ SAFE fallback
             'batch_id' => app()->bound('audit.batch_id')
                 ? app('audit.batch_id')
                 : (string) Str::uuid(),

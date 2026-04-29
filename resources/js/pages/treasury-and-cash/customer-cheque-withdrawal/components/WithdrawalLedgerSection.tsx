@@ -163,7 +163,7 @@ function WithdrawalLedgerSection({
                                 {[...Array(4)].map((_, idx) => (
                                     <div
                                         key={idx}
-                                        className="h-4 w-full animate-pulse rounded bg-muted/30"
+                                        className="h-4 w-full rounded bg-muted/30"
                                     />
                                 ))}
                             </div>
@@ -185,6 +185,7 @@ function WithdrawalLedgerSection({
                                     }))}
                                 />
                             </div>
+
                             <div className="">
                                 <Label className="text-xs font-medium">
                                     Instrument Date
@@ -213,13 +214,13 @@ function WithdrawalLedgerSection({
                                 />
                             </div>
 
-                            <div className="mt-2 rounded-md bg-muted/30 p-2">
-                                <div className="flex items-center justify-between text-sm">
+                            <div className="mt-1 rounded-md border bg-muted/30 p-2">
+                                <div className="flex flex-col text-sm">
                                     <span className="text-muted-foreground">
                                         In Words:
                                     </span>
-                                    <span className="font-semibold text-red-600">
-                                        {takaToText(withdrawalAmount)}
+                                    <span className="text-destructive capitalize">
+                                        {takaToText(withdrawalAmount)}.
                                     </span>
                                 </div>
                             </div>

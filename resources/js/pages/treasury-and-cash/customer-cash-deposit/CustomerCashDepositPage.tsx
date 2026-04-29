@@ -51,8 +51,12 @@ export default function CustomerCashDepositPage() {
                 route('teller-transactions.get-collection-ledgers'),
             );
             const newCreditLines = res.data || [];
-
-            console.log(newCreditLines);
+            newCreditLines.forEach((line: any) => {
+                line.customer_id = customer.id;
+                line.customer_no = customer.customer_no;
+                line.customer_name = customer.name;
+                line.is_selected = true;
+            });
 
             setData('lines', [...newCreditLines]);
             setData(

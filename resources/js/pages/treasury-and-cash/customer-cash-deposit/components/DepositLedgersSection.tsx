@@ -58,7 +58,7 @@ function DepositLedgersSection({
                         <div className="rounded-tl-md rounded-tr-md border-b bg-sidebar px-2">
                             <table className="w-full table-fixed border-collapse">
                                 <thead>
-                                    <tr>
+                                    <tr className="">
                                         <th className="w-1/12 p-2 text-center text-sm font-medium text-muted-foreground">
                                             <div className="flex items-center justify-center">
                                                 <Checkbox
@@ -69,8 +69,8 @@ function DepositLedgersSection({
                                                 />
                                             </div>
                                         </th>
-                                        <th className="w-8/12 p-2 text-left text-sm font-medium text-muted-foreground">
-                                            Ledger, Subledger and Particulars
+                                        <th className="w-8/12 border-x border-border px-2 py-3 text-left text-sm font-medium text-muted-foreground">
+                                            Particulars
                                         </th>
                                         <th className="w-3/12 p-2 text-left text-sm font-medium text-muted-foreground">
                                             Amount
@@ -114,33 +114,38 @@ function DepositLedgersSection({
 
                                                 {/* Ledger Info */}
                                                 <td className="w-8/12 border-x border-muted align-middle">
-                                                    <div className="-mt-1 flex items-center justify-end px-2 py-1">
-                                                        <div className="flex">
-                                                            <span className="text-xs text-muted-foreground hover:cursor-pointer hover:underline">
-                                                                {`• ${line.subledger.name} (${line.subledger.code})`}
-                                                            </span>
-                                                            <span className="text-xs text-muted-foreground hover:cursor-pointer hover:underline">
-                                                                {`• ${
-                                                                    line.name
-                                                                } (${line.account_number})`}
-                                                            </span>
+                                                    <div className="">
+                                                        <div className="flex items-center justify-end px-2">
+                                                            <div className="flex text-xs font-bold text-muted-foreground">
+                                                                <span className="hover:cursor-pointer hover:underline">
+                                                                    {`• ${line.subledger.name} (${line.subledger.code})`}
+                                                                </span>
+                                                                <span className="hover:cursor-pointer hover:underline">
+                                                                    {`• ${
+                                                                        line.name
+                                                                    } (${line.account_number})`}
+                                                                </span>
+                                                            </div>
                                                         </div>
+                                                        {line.particulars && (
+                                                            <div className="-mt-1 flex items-center justify-end px-2">
+                                                                <span className="text-xs text-muted-foreground/80">
+                                                                    {
+                                                                        line.particulars
+                                                                    }
+                                                                </span>
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                    {line.particulars && (
-                                                        <div className="-mt-1 flex items-center justify-end px-2">
-                                                            <span className="text-xs text-muted-foreground">
-                                                                {
-                                                                    line.particulars
-                                                                }
-                                                            </span>
-                                                        </div>
-                                                    )}
                                                 </td>
 
                                                 {/* Amount */}
-                                                <td className="w-3/12 px-1 align-middle">
+                                                <td className="w-3/12 px-1 py-0.5 align-middle">
                                                     <Input
                                                         type="number"
+                                                        disabled={
+                                                            !line.is_selected
+                                                        }
                                                         value={
                                                             line.credit || ''
                                                         }
@@ -154,7 +159,7 @@ function DepositLedgersSection({
                                                                 ),
                                                             );
                                                         }}
-                                                        className="h-8 rounded-none text-sm"
+                                                        className="h-8 rounded-none text-sm font-bold"
                                                     />
                                                 </td>
                                             </tr>
@@ -167,12 +172,15 @@ function DepositLedgersSection({
                         {/* Footer */}
                         <table className="w-full table-fixed border-collapse rounded-br-md rounded-bl-md border-t bg-sidebar">
                             <tfoot>
-                                <tr className="font-medium">
-                                    <td className="w-9/12 p-2" colSpan={2}>
-                                        <div className="text-sm text-destructive"></div>
-                                    </td>
-                                    <td className="w-3/12 p-2">{`Total: ${formatBDTCurrency(totalCredit)}`}</td>
-                                </tr>
+                                <th className="w-1/12 p-2 text-center text-sm font-bold text-muted-foreground">
+                                    <div className="flex items-center justify-center"></div>
+                                </th>
+                                <th className="w-8/12 px-2 py-3 text-right text-sm font-bold text-muted-foreground">
+                                    Total
+                                </th>
+                                <th className="w-3/12 p-2 text-left text-sm font-bold text-muted-foreground">
+                                    {formatBDTCurrency(totalCredit)}
+                                </th>
                             </tfoot>
                         </table>
                     </div>

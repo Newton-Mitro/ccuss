@@ -31,11 +31,11 @@ export default function Batch({ batch }: BatchPageProps) {
                 </div>
 
                 {/* Changes */}
-                <div className="space-y-4">
+                <div className="h-[calc(80vh)] space-y-4 overflow-auto">
                     {batch.changes.map((c, idx) => (
                         <div
                             key={idx}
-                            className="rounded-md border bg-background p-4"
+                            className="rounded-md border bg-card p-4"
                         >
                             <div className="mb-2 text-sm font-medium">
                                 {c.model} –{' '}
@@ -48,7 +48,7 @@ export default function Batch({ batch }: BatchPageProps) {
                                     <div className="mb-1 font-semibold text-muted-foreground">
                                         Old
                                     </div>
-                                    <pre className="h-[calc(90vh-200px)] overflow-auto rounded-md border bg-muted/20 p-2 text-xs">
+                                    <pre className="overflow-auto rounded-md border bg-muted/30 p-2 text-xs">
                                         {JSON.stringify(c.old, null, 2)}
                                     </pre>
                                 </div>
@@ -58,7 +58,7 @@ export default function Batch({ batch }: BatchPageProps) {
                                     <div className="mb-1 font-semibold text-muted-foreground">
                                         New
                                     </div>
-                                    <pre className="h-[calc(90vh-200px)] overflow-auto rounded-md border bg-muted/20 p-2 text-xs">
+                                    <pre className="overflow-auto rounded-md border bg-muted/30 p-2 text-xs">
                                         {JSON.stringify(c.new, null, 2)}
                                     </pre>
                                 </div>

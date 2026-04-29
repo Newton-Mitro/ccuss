@@ -277,14 +277,14 @@ const UserForm = ({
                 <div>
                     <Label className="text-xs font-medium">Roles</Label>
 
-                    <div className="mt-1 grid h-[calc(100vh-34rem)] grid-cols-1 gap-2 overflow-y-auto rounded-md border p-2 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="mt-1 grid grid-cols-3 gap-2 overflow-y-auto rounded-md border p-2">
                         {allRoles.map((role) => {
                             const isChecked = data.roles.includes(role.id);
 
                             return (
-                                <label
+                                <div
                                     key={role.id}
-                                    className="flex cursor-pointer items-start gap-3 rounded-md px-2 py-2 transition hover:bg-muted/80"
+                                    className="flex items-center gap-3 rounded-md border p-2 hover:bg-accent/30"
                                 >
                                     {/* Checkbox */}
                                     <input
@@ -312,7 +312,7 @@ const UserForm = ({
                                     />
 
                                     {/* Role Content */}
-                                    <div className="flex flex-col leading-tight">
+                                    <div className="flex flex-col">
                                         <span className="text-sm font-medium text-foreground">
                                             {role.name}
                                         </span>
@@ -323,7 +323,7 @@ const UserForm = ({
                                             </span>
                                         )}
                                     </div>
-                                </label>
+                                </div>
                             );
                         })}
                     </div>
