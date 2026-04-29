@@ -39,8 +39,6 @@ export default function Show({ customer }: ShowProps) {
         { title: `View Customer: ${customer.name}`, href: '' },
     ];
 
-    console.log(customer);
-
     useFlashToastHandler();
 
     const isIndividual = customer.type === 'individual';

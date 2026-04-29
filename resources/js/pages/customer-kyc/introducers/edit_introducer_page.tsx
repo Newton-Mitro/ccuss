@@ -20,7 +20,6 @@ import { relationshipTypes } from './data/relationship_types';
 const Edit = () => {
     const { introducer } = usePage().props as any;
     const customer = introducer?.introduced_customer;
-    console.log(introducer);
 
     const [selectedIntroducer, setSelectedIntroducer] =
         useState<Customer | null>(introducer?.introducer || null);

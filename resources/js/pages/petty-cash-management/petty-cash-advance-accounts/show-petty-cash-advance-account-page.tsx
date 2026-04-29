@@ -13,7 +13,6 @@ interface Props extends SharedData {
 }
 
 const ShowAdvanceExpensePage = ({ pettyCashAdvanceAccount }: Props) => {
-    console.log('Advance Account Data:', pettyCashAdvanceAccount);
     useFlashToastHandler();
 
     const statusClasses: Record<string, string> = {

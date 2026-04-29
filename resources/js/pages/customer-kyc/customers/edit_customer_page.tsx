@@ -63,8 +63,6 @@ const Edit = ({ customer }: EditProps) => {
         status: customer.status || 'pending',
     });
 
-    console.log(data);
-
     const [photoPreview, setPhotoPreview] = useState<string | null>(
         customer.photo?.url || null,
     );

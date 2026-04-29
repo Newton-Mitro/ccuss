@@ -3,17 +3,11 @@ import { Label } from '../../../../components/ui/label';
 import { Select } from '../../../../components/ui/select';
 import { formatDate } from '../../../../lib/date_util';
 import { Branch } from '../../../../types/branch';
-import {
-    FiscalPeriod,
-    FiscalYear,
-} from '../../../../types/finance_and_accounting';
 
 interface VoucherHeaderSectionProps {
     data: any;
     errors: any;
     setData: (key: string, value: any) => void;
-    fiscal_years: FiscalYear[];
-    fiscal_periods: FiscalPeriod[];
     branches: Branch[];
 }
 
@@ -21,8 +15,6 @@ function VoucherHeaderSection({
     data,
     errors,
     setData,
-    fiscal_years,
-    fiscal_periods,
     branches,
 }: VoucherHeaderSectionProps) {
     return (
@@ -63,49 +55,7 @@ function VoucherHeaderSection({
                             { value: 'CREDIT_NOTE', label: 'Credit Note' },
                             { value: 'CONTRA', label: 'Contra' },
                         ]}
-                        onChange={(e) =>
-                            setData('voucher_type', e.target.value)
-                        }
-                    />
-                </div>
-
-                {/* Fiscal Year */}
-                <div>
-                    <Label className="text-xs">Fiscal Year</Label>
-                    <Select
-                        disabled
-                        error={errors?.fiscal_year_id}
-                        value={data.fiscal_year_id?.toString() || ''}
-                        options={fiscal_years.map((fy) => ({
-                            value: fy.id.toString(),
-                            label: fy.code,
-                        }))}
-                        onChange={(e) => {
-                            setData('fiscal_year_id', Number(e.target.value));
-                            setData('fiscal_period_id', null);
-                        }}
-                    />
-                </div>
-
-                {/* Fiscal Period */}
-                <div>
-                    <Label className="text-xs">Fiscal Period</Label>
-                    <Select
-                        disabled
-                        error={errors?.fiscal_period_id}
-                        value={data.fiscal_period_id?.toString() || ''}
-                        options={fiscal_periods
-                            .filter(
-                                (fp) =>
-                                    fp.fiscal_year_id === data.fiscal_year_id,
-                            )
-                            .map((fp) => ({
-                                value: fp.id.toString(),
-                                label: fp.period_name,
-                            }))}
-                        onChange={(e) =>
-                            setData('fiscal_period_id', Number(e.target.value))
-                        }
+                        onChange={(value) => setData('voucher_type', value)}
                     />
                 </div>
 
@@ -120,9 +70,25 @@ function VoucherHeaderSection({
                             value: b.id.toString(),
                             label: b.name,
                         }))}
-                        onChange={(e) =>
-                            setData('branch_id', Number(e.target.value))
+                        onChange={(value) =>
+                            setData('branch_id', Number(value))
                         }
+                    />
+                </div>
+
+                <div>
+                    <Label className="text-xs">Ledger Account</Label>
+                    <Select
+                        disabled
+                        error={''}
+                        value={''}
+                        options={[]}
+                        onChange={(value) => {
+                            setData(
+                                'ledger_account_id',
+                                value ? Number(value) : null,
+                            );
+                        }}
                     />
                 </div>
 
@@ -138,7 +104,7 @@ function VoucherHeaderSection({
                 </div>
 
                 {/* Narration */}
-                <div>
+                <div className="md:col-span-2">
                     <Label className="text-xs">Narration</Label>
                     <Input
                         disabled

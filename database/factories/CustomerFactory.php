@@ -4,8 +4,6 @@ namespace Database\Factories;
 
 use App\CustomerModule\Models\Customer;
 use App\SystemAdministration\Models\Organization;
-use App\SystemAdministration\Models\Branch;
-use App\SystemAdministration\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -45,7 +43,7 @@ class CustomerFactory extends Factory
             'customer_no' => sprintf('%s-%05d', $prefix, fake()->unique()->numberBetween(1, 99999)),
             'type' => $type,
             'name' => $name,
-            'phone' => fake()->phoneNumber(),
+            'phone' => fake()->numerify('+88-01704-######'),
             'email' => fake()->safeEmail(),
             'dob' => $type === 'individual'
                 ? fake()->dateTimeBetween('-65 years', '-18 years')->format('Y-m-d')

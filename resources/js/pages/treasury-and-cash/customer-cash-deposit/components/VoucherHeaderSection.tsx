@@ -3,17 +3,11 @@ import { Label } from '../../../../components/ui/label';
 import { Select } from '../../../../components/ui/select';
 import { formatDate } from '../../../../lib/date_util';
 import { Branch } from '../../../../types/branch';
-import {
-    FiscalPeriod,
-    FiscalYear,
-} from '../../../../types/finance_and_accounting';
-
 interface VoucherHeaderSectionProps {
     data: any;
     errors: any;
     setData: (key: string, value: any) => void;
-    fiscal_years: FiscalYear[];
-    fiscal_periods: FiscalPeriod[];
+    cash_subledger_accounts: any[];
     branches: Branch[];
 }
 
@@ -21,13 +15,13 @@ function VoucherHeaderSection({
     data,
     errors,
     setData,
-    fiscal_years,
-    fiscal_periods,
+    cash_subledger_accounts,
     branches,
 }: VoucherHeaderSectionProps) {
+    console.log(cash_subledger_accounts);
     return (
         <div className="rounded-md border bg-card md:col-span-6">
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-muted/30 px-4 py-3">
+            <div className="sticky top-0 z-10 flex items-center justify-between rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-3">
                 <h2 className="text-sm font-medium text-card-foreground">
                     Voucher Header
                 </h2>
@@ -36,7 +30,7 @@ function VoucherHeaderSection({
                 </span>
             </div>
 
-            <div className="grid grid-cols-1 gap-x-3 p-3 sm:grid-cols-2 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-x-3 p-3 sm:grid-cols-2 md:grid-cols-2">
                 {/* Voucher Type */}
                 <div>
                     <Label className="text-xs">Voucher Type</Label>
@@ -67,46 +61,6 @@ function VoucherHeaderSection({
                     />
                 </div>
 
-                {/* Fiscal Year */}
-                <div>
-                    <Label className="text-xs">Fiscal Year</Label>
-                    <Select
-                        disabled
-                        error={errors?.fiscal_year_id}
-                        value={data.fiscal_year_id?.toString() || ''}
-                        options={fiscal_years.map((fy) => ({
-                            value: fy.id.toString(),
-                            label: fy.code,
-                        }))}
-                        onChange={(value) => {
-                            setData('fiscal_year_id', Number(value));
-                            setData('fiscal_period_id', null);
-                        }}
-                    />
-                </div>
-
-                {/* Fiscal Period */}
-                <div>
-                    <Label className="text-xs">Fiscal Period</Label>
-                    <Select
-                        disabled
-                        error={errors?.fiscal_period_id}
-                        value={data.fiscal_period_id?.toString() || ''}
-                        options={fiscal_periods
-                            .filter(
-                                (fp) =>
-                                    fp.fiscal_year_id === data.fiscal_year_id,
-                            )
-                            .map((fp) => ({
-                                value: fp.id.toString(),
-                                label: fp.period_name,
-                            }))}
-                        onChange={(value) =>
-                            setData('fiscal_period_id', Number(value))
-                        }
-                    />
-                </div>
-
                 {/* Branch */}
                 <div>
                     <Label className="text-xs">Branch</Label>
@@ -124,6 +78,21 @@ function VoucherHeaderSection({
                     />
                 </div>
 
+                <div>
+                    <Label className="text-xs">Cash Account</Label>
+                    <Select
+                        error={errors?.cash_subledger_account_id}
+                        value={data.cash_subledger_account_id?.toString() || ''}
+                        options={cash_subledger_accounts?.map((fp) => ({
+                            value: fp.id.toString(),
+                            label: fp.name,
+                        }))}
+                        onChange={(value) =>
+                            setData('cash_subledger_account_id', Number(value))
+                        }
+                    />
+                </div>
+
                 {/* Reference */}
                 <div>
                     <Label className="text-xs">Deposit Slip Reference</Label>
@@ -136,7 +105,7 @@ function VoucherHeaderSection({
                 </div>
 
                 {/* Narration */}
-                <div>
+                <div className="md:col-span-2">
                     <Label className="text-xs">Narration</Label>
                     <Input
                         disabled

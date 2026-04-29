@@ -17,8 +17,6 @@ export default function Login({ status, canResetPassword, canRegister }) {
         localStorage.clear();
     }, []);
 
-    console.log(import.meta.env.VITE_LOGO_PATH);
-
     return (
         <div className="flex min-h-screen bg-background">
             <Head title="Log in" />

@@ -26,8 +26,6 @@ export const UserSearchBox: React.FC<UserSearchBoxProps> = ({
     const [loading, setLoading] = useState(false);
     const [query, setQuery] = useState('');
 
-    console.log(users);
-
     const dropdownRef = useRef<HTMLDivElement | null>(null);
 
     // ----------------------- API SEARCH

@@ -3,10 +3,9 @@ import { useMemo, useState } from 'react';
 import { Input } from '../../../../components/ui/input';
 import { formatBDTCurrency } from '../../../../lib/bdtCurrencyFormatter';
 import { formatDate } from '../../../../lib/date_util';
-import { Voucher } from '../../../../types/finance_and_accounting';
 
 interface Props {
-    voucher_entries: Voucher[];
+    voucher_entries: any[];
     onView: (id: number) => void;
     voucherCollectNowHandler: (id: number) => void;
     cancelVoucherHandler: (id: number) => void;
@@ -53,7 +52,7 @@ function VoucherQueueSection({
         <div className="flex flex-col gap-4 bg-card">
             <div className="flex h-[calc(100vh/2-42px)] flex-col overflow-hidden rounded-md border">
                 {/* Header */}
-                <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-muted/30 px-4 py-3">
+                <div className="sticky top-0 z-10 flex items-center justify-between rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-3">
                     <h2 className="text-sm font-medium text-card-foreground">
                         Voucher Queue
                     </h2>
@@ -64,7 +63,7 @@ function VoucherQueueSection({
 
                 {/* Voucher List */}
                 <div className="flex-1 divide-y overflow-y-auto">
-                    {voucher_entries.map((voucher: Voucher) => {
+                    {voucher_entries.map((voucher: any) => {
                         // Determine if this is the last updated voucher
                         const isLastUpdated =
                             Math.max(
@@ -157,7 +156,7 @@ function VoucherQueueSection({
                 </div>
 
                 {/* Footer */}
-                <div className="sticky bottom-0 z-20 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+                <div className="sticky bottom-0 z-20 border-t bg-sidebar">
                     <div className="flex items-center justify-between gap-4 px-4 py-2">
                         {/* 🔹 Left Section — Totals */}
                         <div className="flex flex-col items-center gap-1 text-sm">

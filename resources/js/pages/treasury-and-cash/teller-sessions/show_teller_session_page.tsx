@@ -16,7 +16,6 @@ interface Props extends SharedData {
 }
 
 export default function ShowTellerSessionPage({ session }: Props) {
-    console.log(session);
     useFlashToastHandler();
 
     const breadcrumbs: BreadcrumbItem[] = [

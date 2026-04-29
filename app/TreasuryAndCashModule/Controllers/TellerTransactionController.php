@@ -6,7 +6,9 @@ use App\GeneralAccounting\Models\FiscalPeriod;
 use App\GeneralAccounting\Models\FiscalYear;
 use App\GeneralAccounting\Models\LedgerAccount;
 use App\Http\Controllers\Controller;
+use App\SubledgerModule\Models\SubledgerAccount;
 use App\SystemAdministration\Models\Branch;
+use App\VoucherEntryModule\Models\VoucherEntry;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -15,30 +17,28 @@ class TellerTransactionController extends Controller
 {
     public function customerCashReceipt(Request $request)
     {
-        $cashLedger = LedgerAccount::where('name', 'Cash & Bank')
-            ->where('is_active', true)
-            ->first();
+        $cash_subledger_accounts = SubledgerAccount::with([
+            'accountable',
+            'subledger',
+            'subledger.glAccount',
+        ])
+            ->whereHas('subledger', function ($query) {
+                $query->where('subledger_sub_type', 'teller_cashes');
+            })
+            ->get();
 
-        $cashSubledgers = [];
+        $collection_ledgers = SubledgerAccount::all();
 
-        $voucher_entries = [];
+
+        $voucher_entries = VoucherEntry::all();
 
         return Inertia::render('treasury-and-cash/customer-cash-deposit/CustomerCashDepositPage', [
             'ledger_accounts' => LedgerAccount::where('is_control_account', true)->where('is_active', true)->get(),
-            'fiscal_years' => FiscalYear::select('id', 'code')->get(),
-            'fiscal_periods' => FiscalPeriod::select('id', 'period_name', 'fiscal_year_id')->get(),
             'branches' => Branch::select('id', 'name')->get(),
-            'cash_subledgers' => $cashSubledgers,
-            'lines' => [],
+            'cash_subledger_accounts' => $cash_subledger_accounts,
+            'lines' => $collection_ledgers,
             'voucher_entries' => $voucher_entries,
             'user_branch_id' => auth()->user()->branch_id,
-            'fiscal_year_id' => optional(FiscalYear::where('is_closed', false)->first())->id,
-            'fiscal_period_id' => optional(
-                FiscalPeriod::where('status', 'open')
-                    ->whereMonth('start_date', Carbon::now()->month)
-                    ->whereYear('start_date', Carbon::now()->year)
-                    ->first()
-            )->id,
         ]);
     }
 
@@ -105,60 +105,14 @@ class TellerTransactionController extends Controller
 
     public function getCustomerCollectionLedgers(Request $request)
     {
-        $loanInterestLedger = LedgerAccount::where('name', 'Loan Interest Income')->first();
-        $savingDepositLedger = LedgerAccount::where('name', 'Savings Deposit')->first();
-        $termDepositLedger = LedgerAccount::where('name', 'Term Deposit')->first();
+        $collection_ledgers = SubledgerAccount::with([
+            'accountable',
+            'subledger',
+            'subledger.glAccount',
+        ])->get();
 
-        return response()->json([
-            [
-                'id' => 2,
-                'voucher_entry_id' => 0,
-                'ledger_account_id' => $savingDepositLedger?->id,
-                'ledger_account' => $savingDepositLedger,
-                'subledger_id' => null,
-                'subledger_type' => null,
-                'subledger' => null,
-                'instrument_type_id' => 1,
-                'instrument_id' => null,
-                'debit' => 0,
-                'credit' => 500,
-                'particulars' => 'tk. 500 cash deposited for savings deposit',
-                'dr_cr' => 'CR',
-                'is_selected' => true
-            ],
-            [
-                'id' => 3,
-                'voucher_entry_id' => 0,
-                'ledger_account_id' => $termDepositLedger?->id,
-                'ledger_account' => $termDepositLedger,
-                'subledger_id' => null,
-                'subledger_type' => null,
-                'subledger' => null,
-                'instrument_type_id' => 1,
-                'instrument_id' => null,
-                'debit' => 0,
-                'credit' => 1500,
-                'particulars' => 'tk. 1500 cash deposited for term deposit',
-                'dr_cr' => 'CR',
-                'is_selected' => true
-            ],
-            [
-                'id' => 4,
-                'voucher_entry_id' => 0,
-                'ledger_account_id' => $loanInterestLedger?->id,
-                'ledger_account' => $loanInterestLedger,
-                'subledger_id' => null,
-                'subledger_type' => null,
-                'subledger' => null,
-                'instrument_type_id' => 1,
-                'instrument_id' => null,
-                'debit' => 0,
-                'credit' => 100,
-                'particulars' => 'tk. 100 cash deposited for loan interest',
-                'dr_cr' => 'CR',
-                'is_selected' => true
-            ],
-        ]);
+
+        return response()->json($collection_ledgers);
     }
 
     public function getWithdrawableAccounts(Request $request)

@@ -4,6 +4,7 @@ import { Search } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { route } from 'ziggy-js';
 import { Label } from '../../../../components/ui/label';
+import formatUndersoreString from '../../../../lib/formatUnderscoreString';
 import { Customer } from '../../../../types/customer_kyc_module';
 
 interface CustomerSearchBoxProps {
@@ -24,8 +25,6 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
     const [showDropdown, setShowDropdown] = useState(false);
     const [loading, setLoading] = useState(false);
     const [query, setQuery] = useState('');
-
-    console.log(customers);
 
     const dropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -75,7 +74,7 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
 
     return (
         <div
-            className="relative w-full rounded-md border bg-card p-4"
+            className="relative w-full rounded-md border bg-muted/30 p-4"
             ref={dropdownRef}
         >
             {/* INPUT + SEARCH BUTTON */}
@@ -105,7 +104,7 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
 
             {/* RESULTS */}
             {showDropdown && customers.length > 0 && (
-                <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-background shadow-sm">
+                <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-card shadow-sm">
                     {customers.map((customer) => (
                         <li
                             key={customer.id}
@@ -139,9 +138,9 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
 
                             {/* Customer No */}
                             {customer.customer_no && (
-                                <span className="text-muted-foreground">
+                                <span className="text-muted-foreground capitalize">
                                     | {customer.customer_no} | {customer.type} |{' '}
-                                    {customer.kyc_status}
+                                    {customer.status}
                                 </span>
                             )}
                         </li>
@@ -151,7 +150,7 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
 
             {/* EMPTY STATE */}
             {showDropdown && !loading && query && customers.length === 0 && (
-                <div className="absolute z-10 mt-1 w-full rounded-md border bg-background px-3 py-2 text-xs text-info">
+                <div className="absolute z-10 mt-1 w-full rounded-md border bg-card px-3 py-2 text-xs text-info">
                     No customers found.
                 </div>
             )}
@@ -159,7 +158,7 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
             {/* CUSTOMER DETAILS / SKELETON */}
             {customer?.id ? (
                 // Loaded customer
-                <div className="mt-3 flex flex-col gap-4 rounded-md border bg-background/60 p-3 md:flex-row">
+                <div className="mt-3 flex flex-col gap-4 rounded-md border bg-card p-3 md:flex-row">
                     <div className="flex items-center justify-center">
                         {/* Avatar */}
                         <div className="h-20 w-20 overflow-hidden rounded-full border bg-muted">
@@ -187,17 +186,18 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
                             >
                                 {`${customer.name} • ${customer.customer_no}`}
                             </Link>
-                            <p className="text-xs text-muted-foreground">
-                                {customer.kyc_status} • {customer.type}
+                            <p className="text-xs text-muted-foreground capitalize">
+                                {customer.status} • {customer.type}
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-1 text-xs md:grid-cols-4">
+                        <div className="grid grid-cols-1 gap-1 text-xs md:grid-cols-3">
                             <Info label="Phone" value={customer.phone} />
-                            <Info label="Email" value={customer.email} />
                             <Info
                                 label="Identification Type"
-                                value={customer.identification_type}
+                                value={formatUndersoreString(
+                                    customer.identification_type,
+                                )}
                             />
                             <Info
                                 label="Identification Number"
@@ -225,8 +225,7 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
                         </div>
 
                         {/* Grid info row */}
-                        <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-4">
-                            <div className="h-8 w-full rounded bg-muted" />
+                        <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-3">
                             <div className="h-8 w-full rounded bg-muted" />
                             <div className="h-8 w-full rounded bg-muted" />
                             <div className="h-8 w-full rounded bg-muted" />

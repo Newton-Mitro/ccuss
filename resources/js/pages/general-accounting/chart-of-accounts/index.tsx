@@ -118,7 +118,6 @@ export default function GlAccountsIndex() {
         return (
             <ul className="space-y-1">
                 {nodes.map((acc) => {
-                    console.log(`${acc.name} - ${acc.is_group}`);
                     const children = acc.children_recursive || [];
                     const isExpanded = expandedIds.includes(acc.id);
                     const hasChildren = children.length > 0;

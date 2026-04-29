@@ -2,10 +2,9 @@ import { Eye } from 'lucide-react';
 import { useMemo } from 'react';
 import { formatBDTCurrency } from '../../../../lib/bdtCurrencyFormatter';
 import { formatDate } from '../../../../lib/date_util';
-import { Voucher } from '../../../../types/finance_and_accounting';
 
 interface Props {
-    voucher_entries: Voucher[];
+    voucher_entries: any[];
     handleVoucherView: (id: number) => void;
     handleVoucherCancel: (id: number) => void;
 }
@@ -35,7 +34,7 @@ function VoucherQueueSection({
     }, [voucher_entries]);
 
     return (
-        <div className="flex h-[calc(100vh/3+18px)] flex-col overflow-hidden rounded-md border">
+        <div className="flex h-[calc(100vh/3+18px)] flex-col overflow-hidden rounded-md border bg-card">
             {/* Header */}
             <div className="flex items-center justify-between border-b bg-destructive/5 px-4 py-3">
                 <h2 className="text-sm font-medium text-card-foreground">
@@ -48,7 +47,7 @@ function VoucherQueueSection({
 
             {/* Voucher List */}
             <div className="flex-1 divide-y overflow-y-auto">
-                {voucher_entries.map((voucher: Voucher) => {
+                {voucher_entries.map((voucher: any) => {
                     const isLastUpdated =
                         Math.max(
                             ...voucher_entries.map((v) =>
@@ -58,7 +57,7 @@ function VoucherQueueSection({
                     return (
                         <div
                             key={voucher.id}
-                            className="grid grid-cols-[2fr_1fr_1fr_auto] items-center gap-3 bg-background px-3 py-1 transition odd:bg-primary/10 even:bg-accent/10 hover:bg-muted/40"
+                            className="grid grid-cols-[2fr_1fr_1fr_auto] items-center gap-3 px-3 py-1 transition odd:bg-primary/10 even:bg-accent/10 hover:bg-muted/40"
                         >
                             {/* Info */}
                             <div className="min-w-0">
@@ -133,7 +132,7 @@ function VoucherQueueSection({
             </div>
 
             {/* Footer */}
-            <div className="sticky bottom-0 flex flex-wrap items-center justify-center gap-4 border-t bg-muted/30 px-4 py-3 text-sm">
+            <div className="sticky bottom-0 flex flex-wrap items-center justify-center gap-4 border-t bg-destructive/5 px-4 py-3 text-sm">
                 <div className="flex items-center gap-2">
                     <span className="text-muted-foreground">
                         {`Total pending amount ${formatBDTCurrency(pendingAmount)} ,and posted ${formatBDTCurrency(

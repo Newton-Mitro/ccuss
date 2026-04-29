@@ -4,12 +4,9 @@ import { useMemo } from 'react';
 import { route } from 'ziggy-js';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { normalizeErrors } from '../../../lib/normalize_errors';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Customer } from '../../../types/customer_kyc_module';
-import { VoucherLine } from '../../../types/finance_and_accounting';
-import CashLedgerSection from './components/CashLedgerSection';
 import VoucherHeaderSection from './components/VoucherHeaderSection';
 import VoucherQueueSection from './components/VoucherQueueSection';
 import WithdrawalLedgerSection from './components/WithdrawalLedgerSection';
@@ -18,43 +15,29 @@ interface VoucherFormData extends SharedData {
     voucher_no: string;
     voucher_date: string;
     voucher_type: string;
-    fiscal_year_id?: number;
-    fiscal_period_id?: number;
-
+    branches: any[];
+    voucher_entries: any[];
     branch_id?: number;
+    user_branch_id?: number;
     status: string;
     reference?: string;
     narration: string;
-    lines: VoucherLine[];
+    lines: any[];
 }
 
 export default function CustomerCashWithdrawalPage() {
-    const {
-        fiscal_years,
-        fiscal_periods,
-        branches,
-        cash_ledgers,
-        cash_subledgers,
-        instrument_types,
-        lines,
-        voucher_entries,
-        user_branch_id,
-        fiscal_year_id,
-        fiscal_period_id,
-    } = usePage<VoucherFormData>().props;
+    const { branches, lines, voucher_entries, user_branch_id } =
+        usePage<VoucherFormData>().props;
 
     const {
         data,
         setData,
-        post,
         processing,
         errors: rawErrors,
-    } = useForm<VoucherFormData>({
+    } = useForm({
         voucher_no: '',
         voucher_date: new Date().toISOString().split('T')[0],
         voucher_type: 'DEBIT_OR_PAYMENT',
-        fiscal_year_id: fiscal_year_id || 0,
-        fiscal_period_id: fiscal_period_id || 0,
         branch_id: user_branch_id || branches[0]?.id,
         status: 'DRAFT',
         reference: '',
@@ -72,28 +55,14 @@ export default function CustomerCashWithdrawalPage() {
         [data.lines],
     );
 
-    const debitLines = useMemo(
-        () =>
-            data.lines.filter(
-                (line) =>
-                    line.debit > 0 || line.ledger_account?.code === '1111',
-            ),
-        [data.lines],
-    );
-
     const onCustomerSelected = async (customer: Customer) => {
         try {
-            const res = await axios.get('/get-withdrawable-accounts');
-            const _newDebitLines = res.data || [];
-            const _newCreditLines = [
-                {
-                    ...debitLines[0],
-                    credit: 0,
-                    debit: _newDebitLines.reduce((a, b) => a + b.credit, 0),
-                },
-            ];
+            const res2 = await axios.get(
+                route('teller-transactions.get-collection-ledgers'),
+            );
+            const _newCreditLines = res2.data || [];
 
-            setData('lines', [..._newCreditLines, ..._newDebitLines]);
+            setData('lines', _newCreditLines);
             setData(
                 'narration',
                 `${customer.name} (${customer.customer_no}) withdrew from his/her accounts via cash counter.`,
@@ -103,38 +72,9 @@ export default function CustomerCashWithdrawalPage() {
         }
     };
 
-    const handleCreditLineChange = (
-        id: number,
-        field: keyof VoucherLine,
-        value: any,
-    ) => {
-        let creditLineUpdate = [];
-        if (field === 'credit') {
-            creditLineUpdate = data.lines.map((line) =>
-                line.id === id
-                    ? {
-                          ...line,
-                          [field]: value,
-                          particulars: `${formatBDTCurrency(value)} cash deposited to ${line.ledger_account?.name}`,
-                      }
-                    : line,
-            );
-        } else {
-            creditLineUpdate = data.lines.map((line) =>
-                line.id === id ? { ...line, [field]: value } : line,
-            );
-        }
-
-        const totalDebit = creditLineUpdate.reduce((a, b) => a + b.credit, 0);
-        const debitLineUpdate = creditLineUpdate.map((line) =>
-            line.id === 1 ? { ...line, debit: totalDebit } : line,
-        );
-        setData('lines', debitLineUpdate);
-    };
-
     const handleDebitLineChange = (
         id: number,
-        field: keyof VoucherLine,
+        field: keyof any,
         value: any,
     ) => {
         const updated = data.lines.map((line) =>
@@ -142,11 +82,6 @@ export default function CustomerCashWithdrawalPage() {
         );
         setData('lines', updated);
     };
-
-    const collectNowHandler = () =>
-        post('/voucher_entries', {
-            preserveScroll: true,
-        });
 
     const viewVoucherHandler = (voucherId: number) => {
         window.open(
@@ -192,19 +127,7 @@ export default function CustomerCashWithdrawalPage() {
                         data={data}
                         errors={errors}
                         setData={setData}
-                        fiscal_years={fiscal_years}
-                        fiscal_periods={fiscal_periods}
                         branches={branches}
-                    />
-
-                    {/* Cash Ledger Section */}
-                    <CashLedgerSection
-                        data={creditLines.length > 0 ? creditLines[0] : data}
-                        errors={errors}
-                        cash_ledgers={cash_ledgers}
-                        cash_subledgers={cash_subledgers}
-                        instrument_types={instrument_types}
-                        handleCashLedgerLineChange={handleCreditLineChange}
                     />
 
                     {/* Voucher Queue Section */}
