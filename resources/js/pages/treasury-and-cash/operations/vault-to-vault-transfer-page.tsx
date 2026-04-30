@@ -5,6 +5,7 @@ import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 
 const DENOMINATIONS = [1000, 500, 200, 100, 50, 20, 10];
 
@@ -213,7 +214,12 @@ export default function VaultToVaultTransferPage() {
 
                             <div className="mt-4 font-bold">
                                 Total:{' '}
-                                {denoms.reduce((sum, d) => sum + d.amount, 0)}
+                                {formatBDTCurrency(
+                                    denoms.reduce(
+                                        (sum, d) => sum + d.amount,
+                                        0,
+                                    ),
+                                )}
                             </div>
                         </div>
 
@@ -223,9 +229,7 @@ export default function VaultToVaultTransferPage() {
                             disabled={processing}
                             className="rounded bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/80"
                         >
-                            {processing
-                                ? 'Processing...'
-                                : 'Transfer Vault Cash'}
+                            {processing ? 'Processing...' : 'Transfer Cash'}
                         </Button>
                     </div>
 

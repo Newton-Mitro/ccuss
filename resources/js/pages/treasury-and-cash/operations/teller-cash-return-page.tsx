@@ -1,6 +1,11 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import HeadingSmall from '../../../components/heading-small';
+import { Button } from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
+import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 
 const DENOMINATIONS = [1000, 500, 200, 100, 50, 20, 10];
 
@@ -95,129 +100,160 @@ export default function TellerToVaultTransferPage() {
         <CustomAuthLayout>
             <Head title="Teller to Vault Transfer" />
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
-                {/* LEFT */}
-                <div className="space-y-6 md:col-span-8">
-                    {/* Selection */}
-                    <div className="rounded-xl border p-6">
-                        <h2 className="mb-4 font-semibold">
-                            Teller → Vault Transfer
-                        </h2>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            {/* Teller */}
-                            <select
-                                className="rounded border p-2"
-                                onChange={(e) =>
-                                    setTeller(
-                                        teller_subledger_accounts.find(
-                                            (t: any) => t.id == e.target.value,
-                                        ),
-                                    )
-                                }
-                            >
-                                <option>Select Teller</option>
-                                {teller_subledger_accounts.map((t: any) => (
-                                    <option key={t.id} value={t.id}>
-                                        {t.name}
-                                    </option>
-                                ))}
-                            </select>
-
-                            {/* Vault */}
-                            <select
-                                className="rounded border p-2"
-                                onChange={(e) =>
-                                    setVault(
-                                        vault_subledger_accounts.find(
-                                            (v: any) => v.id == e.target.value,
-                                        ),
-                                    )
-                                }
-                            >
-                                <option>Select Vault</option>
-                                {vault_subledger_accounts.map((v: any) => (
-                                    <option key={v.id} value={v.id}>
-                                        {v.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-
-                    {/* Denomination */}
-                    <div className="rounded-xl border p-6">
-                        <h3 className="mb-4 font-semibold">
-                            Denomination Entry
-                        </h3>
-
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr>
-                                    <th>Note</th>
-                                    <th>Qty</th>
-                                    <th>Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {denoms.map((d, i) => (
-                                    <tr key={i}>
-                                        <td>{d.note}</td>
-                                        <td>
-                                            <input
-                                                type="number"
-                                                className="w-full border p-1"
-                                                value={d.qty}
-                                                onChange={(e) =>
-                                                    handleDenomChange(
-                                                        i,
-                                                        Number(e.target.value),
-                                                    )
-                                                }
-                                            />
-                                        </td>
-                                        <td>{d.amount}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-
-                        <div className="mt-4 font-bold">
-                            Total:{' '}
-                            {denoms.reduce((sum, d) => sum + d.amount, 0)}
-                        </div>
-                    </div>
-
-                    {/* Submit */}
-                    <button
-                        onClick={submitTransfer}
-                        disabled={processing}
-                        className="rounded bg-blue-600 px-4 py-2 text-white"
-                    >
-                        {processing ? 'Processing...' : 'Transfer Cash'}
-                    </button>
+            <div className="space-y-4 text-foreground">
+                {/* Header */}
+                <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
+                    <HeadingSmall
+                        title="Teller to Vault Transfer"
+                        description="Transfer cash from teller to vault"
+                    />
                 </div>
 
-                {/* RIGHT */}
-                <div className="space-y-6 md:col-span-4">
-                    {/* Preview */}
-                    <div className="rounded border p-4">
-                        <h3 className="mb-2 font-semibold">Voucher Preview</h3>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
+                    {/* LEFT */}
+                    <div className="space-y-6 md:col-span-8">
+                        {/* Selection */}
+                        <div className="rounded-xl border bg-card p-6">
+                            <h2 className="mb-4 font-semibold">
+                                Teller → Vault Transfer
+                            </h2>
 
-                        {data.lines.map((l: any, i: number) => (
-                            <div key={i} className="text-sm">
-                                {l.name} → Debit: {l.debit} | Credit: {l.credit}
+                            <div className="grid grid-cols-2 gap-4">
+                                {/* Teller */}
+                                <Select
+                                    onChange={(value) =>
+                                        setTeller(
+                                            teller_subledger_accounts.find(
+                                                (t: any) => t.id == value,
+                                            ),
+                                        )
+                                    }
+                                    options={teller_subledger_accounts.map(
+                                        (t: any) => ({
+                                            value: t.id,
+                                            label: t.name,
+                                        }),
+                                    )}
+                                />
+
+                                {/* Vault */}
+                                <Select
+                                    onChange={(value) =>
+                                        setVault(
+                                            vault_subledger_accounts.find(
+                                                (v: any) => v.id == value,
+                                            ),
+                                        )
+                                    }
+                                    options={vault_subledger_accounts.map(
+                                        (v: any) => ({
+                                            value: v.id,
+                                            label: v.name,
+                                        }),
+                                    )}
+                                />
                             </div>
-                        ))}
+                        </div>
+
+                        {/* Denomination Table */}
+                        <div className="rounded-xl border bg-card p-6">
+                            <h3 className="mb-4 font-semibold">
+                                Denominations
+                            </h3>
+
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr>
+                                        <th className="p-2 text-left">Note</th>
+                                        <th className="p-2 text-left">Qty</th>
+                                        <th className="p-2 text-left">
+                                            Amount
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {denoms.map((d, i) => (
+                                        <tr key={i}>
+                                            <td className="pr-2 text-left">
+                                                <Input
+                                                    type="number"
+                                                    disabled
+                                                    value={d.note}
+                                                />
+                                            </td>
+                                            <td className="px-2 text-left">
+                                                <Input
+                                                    type="number"
+                                                    value={d.qty}
+                                                    onChange={(e) =>
+                                                        handleDenomChange(
+                                                            i,
+                                                            Number(
+                                                                e.target.value,
+                                                            ),
+                                                        )
+                                                    }
+                                                />
+                                            </td>
+                                            <td className="px-2 text-left">
+                                                <Input
+                                                    type="number"
+                                                    disabled
+                                                    value={d.amount}
+                                                />
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+
+                            <div className="mt-4 font-bold">
+                                Total:{' '}
+                                {formatBDTCurrency(
+                                    denoms.reduce(
+                                        (sum, d) => sum + d.amount,
+                                        0,
+                                    ),
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Submit */}
+                        <Button
+                            onClick={submitTransfer}
+                            disabled={processing}
+                            className="rounded bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/80"
+                        >
+                            {processing ? 'Processing...' : 'Transfer Cash'}
+                        </Button>
                     </div>
 
-                    {/* Narration */}
-                    <textarea
-                        className="w-full rounded border p-2"
-                        placeholder="Narration"
-                        value={data.narration}
-                        onChange={(e) => setData('narration', e.target.value)}
-                    />
+                    {/* RIGHT */}
+                    <div className="space-y-6 md:col-span-4">
+                        {/* Preview */}
+                        <div className="rounded border p-4">
+                            <h3 className="mb-2 font-semibold">
+                                Voucher Preview
+                            </h3>
+
+                            {data.lines.map((l: any, i: number) => (
+                                <div key={i} className="text-sm">
+                                    {l.name} → Debit: {l.debit} | Credit:{' '}
+                                    {l.credit}
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Narration */}
+                        <textarea
+                            className="w-full rounded border p-2"
+                            placeholder="Narration"
+                            value={data.narration}
+                            onChange={(e) =>
+                                setData('narration', e.target.value)
+                            }
+                        />
+                    </div>
                 </div>
             </div>
         </CustomAuthLayout>
