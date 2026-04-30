@@ -40,6 +40,18 @@ Route::middleware(['auth', 'verified'])->prefix('teller-transactions')->group(fu
     Route::get('/withdrawal', [TellerTransactionController::class, 'customerCashPayment'])
         ->name('teller-transactions.withdrawal');
 
+    Route::get('/teller-to-teller-transfer', [TellerTransactionController::class, 'tellerToTellerTransfer'])
+        ->name('teller-transactions.teller-to-teller-transfer');
+
+    Route::get('/vault-to-vault-transfer', [TellerTransactionController::class, 'vaultToVaultTransfer'])
+        ->name('teller-transactions.vault-to-vault-transfer');
+
+    Route::get('/vault-to-teller-transfer', [TellerTransactionController::class, 'vaultToTellerTransfer'])
+        ->name('teller-transactions.vault-to-teller-transfer');
+
+    Route::get('/teller-to-vault-transfer', [TellerTransactionController::class, 'tellerToVaultTransfer'])
+        ->name('teller-transactions.teller-to-vault-transfer');
+
     Route::get('/customer-collection-ledgers', [TellerTransactionController::class, 'getCustomerCollectionLedgers'])
         ->name('teller-transactions.get-collection-ledgers');
 

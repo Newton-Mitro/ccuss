@@ -57,13 +57,6 @@ export const cashAndTreasuryMenu: SidebarItem[] = [
                         match_path: 'teller-transactions/withdrawal',
                         permission: ['transaction.withdraw.create'],
                     },
-                    {
-                        name: 'Teller to Teller Transfer',
-                        icon: <i className="fa-solid fa-cash-register" />,
-                        path: '/cash-transfers/teller-to-vault',
-                        match_path: 'cash-transfers/teller-to-vault',
-                        permission: ['teller_to_vault.create'],
-                    },
                 ],
             },
             {
@@ -100,10 +93,23 @@ export const cashAndTreasuryMenu: SidebarItem[] = [
                 children_expanded: false,
                 children: [
                     {
+                        name: 'Teller to Teller Transfer',
+                        icon: <i className="fa-solid fa-cash-register" />,
+                        path: route(
+                            'teller-transactions.teller-to-teller-transfer',
+                        ),
+                        match_path:
+                            'teller-transactions/teller-to-teller-transfer',
+                        permission: ['teller_to_vault.create'],
+                    },
+                    {
                         name: 'Vault to Vault Transfer',
                         icon: <i className="fa-solid fa-vault" />,
-                        path: '/cash-transfers/approve',
-                        match_path: 'cash-transfers/approve',
+                        path: route(
+                            'teller-transactions.vault-to-vault-transfer',
+                        ),
+                        match_path:
+                            'teller-transactions/vault-to-vault-transfer',
                         permission: ['cash_transfer.approve'],
                     },
                     {
@@ -116,15 +122,19 @@ export const cashAndTreasuryMenu: SidebarItem[] = [
                     {
                         name: 'Teller Cash Funding',
                         icon: <i className="fa-solid fa-vault" />,
-                        path: '/cash-transfers/vault-to-teller',
-                        match_path: 'cash-transfers/vault-to-teller',
+                        path: route(
+                            'teller-transactions.vault-to-teller-transfer',
+                        ),
+                        match_path: 'cash-transfers/vault-to-teller-transfer',
                         permission: ['vault_to_teller.create'],
                     },
                     {
                         name: 'Teller Cash Return',
                         icon: <i className="fa-solid fa-cash-register" />,
-                        path: '/cash-transfers/teller-to-vault',
-                        match_path: 'cash-transfers/teller-to-vault',
+                        path: route(
+                            'teller-transactions.teller-to-vault-transfer',
+                        ),
+                        match_path: 'cash-transfers/teller-to-vault-transfer',
                         permission: ['teller_to_vault.create'],
                     },
                 ],
