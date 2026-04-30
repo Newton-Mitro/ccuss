@@ -11,8 +11,8 @@ import { formatDate } from '../../../lib/date_util';
 
 const DENOMINATIONS = [1000, 500, 200, 100, 50, 20, 10];
 
-export default function TellerToVaultTransferPage() {
-    const { teller_subledger_accounts, vault_subledger_accounts, branches } =
+export default function BankToVaultTransferPage() {
+    const { bank_subledger_accounts, vault_subledger_accounts, branches } =
         usePage().props as any;
 
     const { data, setData, post, processing } = useForm({
@@ -24,7 +24,7 @@ export default function TellerToVaultTransferPage() {
         denominations: [],
     });
 
-    const [teller, setTeller] = useState<any>(null);
+    const [bank, setBank] = useState<any>(null);
     const [vault, setVault] = useState<any>(null);
 
     const [denoms, setDenoms] = useState(
@@ -54,7 +54,7 @@ export default function TellerToVaultTransferPage() {
      * Sync voucher lines
      */
     const syncVoucher = (total: number, denomsData: any[]) => {
-        if (!teller || !vault || total <= 0) return;
+        if (!bank || !vault || total <= 0) return;
 
         const lines = [
             {
@@ -64,8 +64,8 @@ export default function TellerToVaultTransferPage() {
                 credit: 0,
             },
             {
-                subledger_id: teller.id,
-                name: teller.name,
+                subledger_id: bank.id,
+                name: bank.name,
                 debit: 0,
                 credit: total,
             },
@@ -75,7 +75,7 @@ export default function TellerToVaultTransferPage() {
         setData('denominations', denomsData);
         setData(
             'narration',
-            `Cash transferred from teller ${teller.name} to vault ${vault.name}`,
+            `Cash withdrawn from bank ${bank.name} to vault ${vault.name}`,
         );
     };
 
@@ -85,8 +85,8 @@ export default function TellerToVaultTransferPage() {
     const submitTransfer = () => {
         const total = denoms.reduce((sum, d) => sum + d.amount, 0);
 
-        if (!teller || !vault) {
-            alert('Select teller and vault');
+        if (!bank || !vault) {
+            alert('Select bank and vault');
             return;
         }
 
@@ -100,14 +100,14 @@ export default function TellerToVaultTransferPage() {
 
     return (
         <CustomAuthLayout>
-            <Head title="Teller to Vault Transfer" />
+            <Head title="Bank to Vault Transfer" />
 
             <div className="space-y-4 text-foreground">
                 {/* Header */}
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
-                        title="Teller to Vault Transfer"
-                        description="Transfer cash from teller to vault"
+                        title="Bank to Vault Transfer"
+                        description="Withdraw cash from bank to vault"
                     />
                 </div>
 
@@ -117,23 +117,23 @@ export default function TellerToVaultTransferPage() {
                         {/* Selection */}
                         <div className="rounded-xl border bg-card p-6">
                             <h2 className="mb-4 font-semibold">
-                                Teller → Vault Transfer
+                                Bank → Vault Transfer
                             </h2>
 
                             <div className="grid grid-cols-2 gap-4">
-                                {/* Teller */}
+                                {/* Bank */}
                                 <Select
                                     onChange={(value) =>
-                                        setTeller(
-                                            teller_subledger_accounts.find(
-                                                (t: any) => t.id == value,
+                                        setBank(
+                                            bank_subledger_accounts.find(
+                                                (b: any) => b.id == value,
                                             ),
                                         )
                                     }
-                                    options={teller_subledger_accounts.map(
-                                        (t: any) => ({
-                                            value: t.id,
-                                            label: t.name,
+                                    options={bank_subledger_accounts.map(
+                                        (b: any) => ({
+                                            value: b.id,
+                                            label: b.name,
                                         }),
                                     )}
                                 />
@@ -176,14 +176,13 @@ export default function TellerToVaultTransferPage() {
                                 <tbody>
                                     {denoms.map((d, i) => (
                                         <tr key={i}>
-                                            <td className="pr-2 text-left">
+                                            <td className="pr-2">
                                                 <Input
-                                                    type="number"
                                                     disabled
                                                     value={d.note}
                                                 />
                                             </td>
-                                            <td className="px-2 text-left">
+                                            <td className="px-2">
                                                 <Input
                                                     type="number"
                                                     value={d.qty}
@@ -197,9 +196,8 @@ export default function TellerToVaultTransferPage() {
                                                     }
                                                 />
                                             </td>
-                                            <td className="px-2 text-left">
+                                            <td className="px-2">
                                                 <Input
-                                                    type="number"
                                                     disabled
                                                     value={d.amount}
                                                 />
@@ -226,7 +224,7 @@ export default function TellerToVaultTransferPage() {
                             disabled={processing}
                             className="rounded bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/80"
                         >
-                            {processing ? 'Processing...' : 'Transfer Cash'}
+                            {processing ? 'Processing...' : 'Withdraw Cash'}
                         </Button>
                     </div>
 

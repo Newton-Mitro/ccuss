@@ -105,15 +105,21 @@ export const cashAndTreasuryMenu: SidebarItem[] = [
                     {
                         name: 'Vault to Bank Transfer',
                         icon: <i className="fa-solid fa-vault" />,
-                        path: '/cash-transactions/approve',
-                        match_path: 'cash-transactions/approve',
+                        path: route(
+                            'teller-transactions.vault-to-bank-transfer',
+                        ),
+                        match_path:
+                            'teller-transactions/vault-to-bank-transfer',
                         permission: ['cash_transfer.approve'],
                     },
                     {
                         name: 'Bank to Vault Transfer',
                         icon: <i className="fa-solid fa-vault" />,
-                        path: '/cash-transactions/approve',
-                        match_path: 'cash-transactions/approve',
+                        path: route(
+                            'teller-transactions.bank-to-vault-transfer',
+                        ),
+                        match_path:
+                            'teller-transactions/bank-to-vault-transfer',
                         permission: ['cash_transfer.approve'],
                     },
                     {

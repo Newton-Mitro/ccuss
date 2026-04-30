@@ -3,9 +3,11 @@ import { useState } from 'react';
 import HeadingSmall from '../../../components/heading-small';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
+import { formatDate } from '../../../lib/date_util';
 
 const DENOMINATIONS = [1000, 500, 200, 100, 50, 20, 10];
 
@@ -235,6 +237,108 @@ export default function VaultToVaultTransferPage() {
 
                     {/* RIGHT */}
                     <div className="space-y-6 md:col-span-4">
+                        {/* Voucher Header */}
+                        <div className="rounded-md border bg-card md:col-span-4">
+                            <div className="sticky top-0 z-10 flex items-center justify-between rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-3">
+                                <h2 className="text-sm font-medium text-card-foreground">
+                                    Voucher Header
+                                </h2>
+                                <span className="text-xs text-muted-foreground">
+                                    {data.voucher_date &&
+                                        formatDate(data.voucher_date)}
+                                </span>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-x-3 p-3 sm:grid-cols-2 md:grid-cols-2">
+                                {/* Voucher Type */}
+                                <div>
+                                    <Label className="text-xs">
+                                        Voucher Type
+                                    </Label>
+                                    <Select
+                                        disabled
+                                        value={data.voucher_type || ''}
+                                        options={[
+                                            {
+                                                value: 'CREDIT_OR_RECEIPT',
+                                                label: 'Credit/Receipt',
+                                            },
+                                            {
+                                                value: 'DEBIT_OR_PAYMENT',
+                                                label: 'Debit/Payment',
+                                            },
+                                            {
+                                                value: 'JOURNAL_OR_NON_CASH',
+                                                label: 'Journal/Non-Cash',
+                                            },
+                                            {
+                                                value: 'PURCHASE',
+                                                label: 'Purchase',
+                                            },
+                                            { value: 'SALE', label: 'Sale' },
+                                            {
+                                                value: 'DEBIT_NOTE',
+                                                label: 'Debit Note',
+                                            },
+                                            {
+                                                value: 'CREDIT_NOTE',
+                                                label: 'Credit Note',
+                                            },
+                                            {
+                                                value: 'CONTRA',
+                                                label: 'Contra',
+                                            },
+                                        ]}
+                                        onChange={(value) =>
+                                            setData('voucher_type', value)
+                                        }
+                                    />
+                                </div>
+
+                                {/* Branch */}
+                                <div>
+                                    <Label className="text-xs">Branch</Label>
+                                    <Select
+                                        disabled
+                                        value={data.branch_id?.toString() || ''}
+                                        options={branches.map((b) => ({
+                                            value: b.id.toString(),
+                                            label: b.name,
+                                        }))}
+                                        onChange={(value) =>
+                                            setData('branch_id', Number(value))
+                                        }
+                                    />
+                                </div>
+
+                                {/* Reference */}
+                                <div>
+                                    <Label className="text-xs">
+                                        Deposit Slip Reference
+                                    </Label>
+                                    <Input
+                                        value={''}
+                                        className="h-8 text-sm"
+                                        onChange={(e) =>
+                                            setData('reference', e.target.value)
+                                        }
+                                    />
+                                </div>
+
+                                {/* Narration */}
+                                <div className="md:col-span-2">
+                                    <Label className="text-xs">Narration</Label>
+                                    <Input
+                                        disabled
+                                        value={data.narration || ''}
+                                        onChange={(e) =>
+                                            setData('narration', e.target.value)
+                                        }
+                                        className="h-8 text-sm"
+                                    />
+                                </div>
+                            </div>
+                        </div>
                         {/* Preview */}
                         <div className="rounded border p-4">
                             <h3 className="mb-2 font-semibold">

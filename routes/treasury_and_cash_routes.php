@@ -52,6 +52,13 @@ Route::middleware(['auth', 'verified'])->prefix('teller-transactions')->group(fu
     Route::get('/teller-to-vault-transfer', [TellerTransactionController::class, 'tellerToVaultTransfer'])
         ->name('teller-transactions.teller-to-vault-transfer');
 
+    Route::get('/bank-to-vault-transfer', [TellerTransactionController::class, 'bankToVaultTransfer'])
+        ->name('teller-transactions.bank-to-vault-transfer');
+
+    Route::get('/vault-to-bank-transfer', [TellerTransactionController::class, 'vaultToBankTransfer'])
+        ->name('teller-transactions.vault-to-bank-transfer');
+
+    // Get collection ledgers
     Route::get('/customer-collection-ledgers', [TellerTransactionController::class, 'getCustomerCollectionLedgers'])
         ->name('teller-transactions.get-collection-ledgers');
 
