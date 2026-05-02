@@ -266,7 +266,7 @@ export default function VaultToBankTransferPage() {
                             </div>
                             <div className="flex gap-4 px-4 py-3">
                                 {/* NOTES */}
-                                <div className="rounded-xl border bg-muted/30">
+                                <div className="rounded-md border bg-muted/30">
                                     <h3 className="rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-2 text-sm font-semibold text-card-foreground">
                                         Notes
                                     </h3>
@@ -311,7 +311,7 @@ export default function VaultToBankTransferPage() {
                                 </div>
 
                                 {/* COINS */}
-                                <div className="rounded-xl border bg-muted/30">
+                                <div className="rounded-md border bg-muted/30">
                                     <h3 className="rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-2 text-sm font-semibold text-card-foreground">
                                         Coins
                                     </h3>

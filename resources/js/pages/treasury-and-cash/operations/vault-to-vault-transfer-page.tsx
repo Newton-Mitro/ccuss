@@ -207,16 +207,18 @@ export default function VaultToVaultTransferPage() {
                                         From Vault Account
                                     </Label>
                                     <Select
+                                        value={fromVault?.toString() || ''}
                                         onChange={(v) =>
                                             setFromVault(
                                                 vault_subledger_accounts.find(
-                                                    (x: any) => x.id == v,
+                                                    (x: any) =>
+                                                        x.id.toString() == v,
                                                 ),
                                             )
                                         }
                                         options={vault_subledger_accounts.map(
                                             (v: any) => ({
-                                                value: v.id,
+                                                value: v.id.toString(),
                                                 label: v.name,
                                             }),
                                         )}
@@ -227,16 +229,18 @@ export default function VaultToVaultTransferPage() {
                                         To Vault Account
                                     </Label>
                                     <Select
+                                        value={toVault?.toString() || ''}
                                         onChange={(v) =>
                                             setToVault(
                                                 vault_subledger_accounts.find(
-                                                    (x: any) => x.id == v,
+                                                    (x: any) =>
+                                                        x.id.toString() == v,
                                                 ),
                                             )
                                         }
                                         options={vault_subledger_accounts.map(
                                             (b: any) => ({
-                                                value: b.id,
+                                                value: b.id.toString(),
                                                 label: b.name,
                                             }),
                                         )}
@@ -265,7 +269,7 @@ export default function VaultToVaultTransferPage() {
                             </div>
                             <div className="flex gap-4 px-4 py-3">
                                 {/* NOTES */}
-                                <div className="rounded-xl border bg-muted/30">
+                                <div className="rounded-md border bg-muted/30">
                                     <h3 className="rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-2 text-sm font-semibold text-card-foreground">
                                         Notes
                                     </h3>
@@ -310,7 +314,7 @@ export default function VaultToVaultTransferPage() {
                                 </div>
 
                                 {/* COINS */}
-                                <div className="rounded-xl border bg-muted/30">
+                                <div className="rounded-md border bg-muted/30">
                                     <h3 className="rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-2 text-sm font-semibold text-card-foreground">
                                         Coins
                                     </h3>

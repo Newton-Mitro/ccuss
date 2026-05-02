@@ -32,8 +32,8 @@ export default function VaultToBankTransferPage() {
         denominations: [],
     });
 
-    const [bank, setBank] = useState<any>(null);
-    const [vault, setVault] = useState<any>(null);
+    const [toBank, setToBank] = useState<any>(null);
+    const [fromVault, setFromVault] = useState<any>(null);
 
     const [denoms, setDenoms] = useState<Denom[]>([
         ...NOTES.map((v) => ({
@@ -66,18 +66,18 @@ export default function VaultToBankTransferPage() {
     };
 
     const syncVoucher = (total: number, denomsData: Denom[]) => {
-        if (!bank || !vault || total <= 0) return;
+        if (!toBank || !fromVault || total <= 0) return;
 
         const lines = [
             {
-                subledger_id: bank.id,
-                name: bank.name,
+                subledger_id: toBank.id,
+                name: toBank.name,
                 debit: total,
                 credit: 0,
             },
             {
-                subledger_id: vault.id,
-                name: vault.name,
+                subledger_id: fromVault.id,
+                name: fromVault.name,
                 debit: 0,
                 credit: total,
             },
@@ -88,14 +88,14 @@ export default function VaultToBankTransferPage() {
 
         setData(
             'narration',
-            `Cash deposited from vault ${vault.name} to bank ${bank.name}`,
+            `Cash deposited from vault ${fromVault.name} to bank ${toBank.name}`,
         );
     };
 
     const submitTransfer = () => {
         const total = denoms.reduce((sum, d) => sum + d.amount, 0);
 
-        if (!bank || !vault) {
+        if (!toBank || !fromVault) {
             alert('Select vault and bank');
             return;
         }
@@ -206,16 +206,18 @@ export default function VaultToBankTransferPage() {
                                         From Vault Account
                                     </Label>
                                     <Select
+                                        value={fromVault?.id?.toString() || ''}
                                         onChange={(v) =>
-                                            setVault(
+                                            setFromVault(
                                                 vault_subledger_accounts.find(
-                                                    (x: any) => x.id == v,
+                                                    (x: any) =>
+                                                        x.id.toString() == v,
                                                 ),
                                             )
                                         }
                                         options={vault_subledger_accounts.map(
                                             (v: any) => ({
-                                                value: v.id,
+                                                value: v.id.toString(),
                                                 label: v.name,
                                             }),
                                         )}
@@ -226,16 +228,18 @@ export default function VaultToBankTransferPage() {
                                         To Bank Account
                                     </Label>
                                     <Select
+                                        value={toBank?.id?.toString() || ''}
                                         onChange={(v) =>
-                                            setBank(
+                                            setToBank(
                                                 bank_subledger_accounts.find(
-                                                    (x: any) => x.id == v,
+                                                    (x: any) =>
+                                                        x.id.toString() == v,
                                                 ),
                                             )
                                         }
                                         options={bank_subledger_accounts.map(
                                             (b: any) => ({
-                                                value: b.id,
+                                                value: b.id.toString(),
                                                 label: b.name,
                                             }),
                                         )}
@@ -263,7 +267,7 @@ export default function VaultToBankTransferPage() {
                             </div>
                             <div className="flex gap-4 px-4 py-3">
                                 {/* NOTES */}
-                                <div className="rounded-xl border bg-muted/30">
+                                <div className="rounded-md border bg-muted/30">
                                     <h3 className="rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-2 text-sm font-semibold text-card-foreground">
                                         Notes
                                     </h3>
@@ -308,7 +312,7 @@ export default function VaultToBankTransferPage() {
                                 </div>
 
                                 {/* COINS */}
-                                <div className="rounded-xl border bg-muted/30">
+                                <div className="rounded-md border bg-muted/30">
                                     <h3 className="rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-2 text-sm font-semibold text-card-foreground">
                                         Coins
                                     </h3>
