@@ -1,6 +1,5 @@
-import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import HeadingSmall from '../../../components/heading-small';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
@@ -22,12 +21,8 @@ interface VoucherFormData {
 }
 
 export default function TellerToTellerTransferPage() {
-    const {
-        teller_subledger_accounts,
-        branches,
-        voucher_entries,
-        user_branch_id,
-    } = usePage().props as any;
+    const { teller_subledger_accounts, branches, user_branch_id } = usePage()
+        .props as any;
 
     const { data, setData, post, processing, errors } =
         useForm<VoucherFormData>({
@@ -47,9 +42,6 @@ export default function TellerToTellerTransferPage() {
     const [toTeller, setToTeller] = useState<any>(null);
     const [amount, setAmount] = useState<number>(0);
 
-    /**
-     * Initialize lines when both tellers selected
-     */
     const initializeLines = (from: any, to: any, amt: number) => {
         if (!from || !to || !amt) return;
 
@@ -72,9 +64,6 @@ export default function TellerToTellerTransferPage() {
         setData('narration', `Cash transfer from ${from.name} to ${to.name}`);
     };
 
-    /**
-     * Handle teller selection
-     */
     const handleFromChange = (id: string) => {
         const teller = teller_subledger_accounts.find(
             (t: any) => t.id === Number(id),
@@ -91,17 +80,11 @@ export default function TellerToTellerTransferPage() {
         initializeLines(fromTeller, teller, amount);
     };
 
-    /**
-     * Handle amount
-     */
     const handleAmountChange = (val: number) => {
         setAmount(val);
         initializeLines(fromTeller, toTeller, val);
     };
 
-    /**
-     * Validation + Submit
-     */
     const submitTransfer = () => {
         if (!fromTeller || !toTeller) {
             alert('Select both tellers');
@@ -132,85 +115,210 @@ export default function TellerToTellerTransferPage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Teller to Teller Transfer" />
             <div className="space-y-4 text-foreground">
-                {/* Header */}
-                <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
-                    <HeadingSmall
-                        title="Teller to Teller Transfer"
-                        description="Transfer cash from one teller to another"
-                    />
-                </div>
-
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
                     {/* LEFT SIDE */}
                     <div className="space-y-6 md:col-span-8">
-                        <div className="space-y-4 rounded-xl border bg-card p-6">
-                            <h2 className="text-lg font-semibold">
-                                Teller Transfer
-                            </h2>
-
-                            {/* FROM & TO */}
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <Select
-                                    value={fromTeller?.id.toString()}
-                                    onChange={(value) =>
-                                        handleFromChange(value)
-                                    }
-                                    options={teller_subledger_accounts.map(
-                                        (t: any) => ({
-                                            value: t.id.toString(),
-                                            label: t.name,
-                                        }),
-                                    )}
-                                />
-
-                                <Select
-                                    value={toTeller?.id.toString()}
-                                    onChange={(value) => handleToChange(value)}
-                                    options={teller_subledger_accounts.map(
-                                        (t: any) => ({
-                                            value: t.id.toString(),
-                                            label: t.name,
-                                        }),
-                                    )}
-                                />
+                        <div className="rounded-md border bg-card">
+                            <div className="rounded-tl-md rounded-tr-md border-b bg-sidebar text-card-foreground">
+                                <h3 className="px-4 py-3 text-sm font-semibold">
+                                    Teller to Teller Transfer
+                                </h3>
                             </div>
-
-                            {/* AMOUNT */}
-                            <Input
-                                type="number"
-                                className="w-full rounded border p-2"
-                                placeholder="Enter amount"
-                                onChange={(e) =>
-                                    handleAmountChange(Number(e.target.value))
-                                }
-                            />
-
-                            {/* PREVIEW */}
-                            <div className="rounded border bg-muted/30 p-4">
-                                <h3 className="mb-2 font-medium">Preview</h3>
-
-                                {data.lines.length === 0 && (
-                                    <p className="text-sm text-gray-500">
-                                        No data yet
-                                    </p>
-                                )}
-
-                                {data.lines.map((line, index) => (
-                                    <div key={index} className="text-sm">
-                                        {line.name} → Debit: {line.debit} |
-                                        Credit: {line.credit}
+                            <div className="space-y-2 p-4">
+                                {/* FROM & TO */}
+                                <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 lg:grid-cols-3">
+                                    <div>
+                                        <Label className="text-xs">
+                                            Voucher Type
+                                        </Label>
+                                        <Select
+                                            disabled
+                                            error={errors?.voucher_type}
+                                            value={data.voucher_type || ''}
+                                            options={[
+                                                {
+                                                    value: 'CREDIT_OR_RECEIPT',
+                                                    label: 'Credit/Receipt',
+                                                },
+                                                {
+                                                    value: 'DEBIT_OR_PAYMENT',
+                                                    label: 'Debit/Payment',
+                                                },
+                                                {
+                                                    value: 'JOURNAL_OR_NON_CASH',
+                                                    label: 'Journal/Non-Cash',
+                                                },
+                                                {
+                                                    value: 'PURCHASE',
+                                                    label: 'Purchase',
+                                                },
+                                                {
+                                                    value: 'SALE',
+                                                    label: 'Sale',
+                                                },
+                                                {
+                                                    value: 'DEBIT_NOTE',
+                                                    label: 'Debit Note',
+                                                },
+                                                {
+                                                    value: 'CREDIT_NOTE',
+                                                    label: 'Credit Note',
+                                                },
+                                                {
+                                                    value: 'CONTRA',
+                                                    label: 'Contra',
+                                                },
+                                            ]}
+                                            onChange={(value) =>
+                                                setData('voucher_type', value)
+                                            }
+                                        />
                                     </div>
-                                ))}
-                            </div>
 
-                            {/* ACTION */}
-                            <Button
-                                onClick={submitTransfer}
-                                disabled={processing}
-                                className="rounded bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/80"
-                            >
-                                {processing ? 'Processing...' : 'Transfer Now'}
-                            </Button>
+                                    {/* Branch */}
+                                    <div>
+                                        <Label className="text-xs">
+                                            Branch
+                                        </Label>
+                                        <Select
+                                            disabled
+                                            error={errors?.branch_id}
+                                            value={
+                                                data.branch_id?.toString() || ''
+                                            }
+                                            options={branches.map((b) => ({
+                                                value: b.id.toString(),
+                                                label: b.name,
+                                            }))}
+                                            onChange={(value) =>
+                                                setData(
+                                                    'branch_id',
+                                                    Number(value),
+                                                )
+                                            }
+                                        />
+                                    </div>
+
+                                    {/* Reference */}
+                                    <div>
+                                        <Label className="text-xs">
+                                            Deposit Slip Reference
+                                        </Label>
+                                        <Input
+                                            error={errors?.reference}
+                                            value={data.reference}
+                                            className="h-8 text-sm"
+                                            onChange={(e) =>
+                                                setData(
+                                                    'reference',
+                                                    e.target.value,
+                                                )
+                                            }
+                                        />
+                                    </div>
+
+                                    <div className="">
+                                        <Label className="text-xs">
+                                            From Teller Account
+                                        </Label>
+                                        <Select
+                                            value={fromTeller?.id.toString()}
+                                            onChange={(value) =>
+                                                handleFromChange(value)
+                                            }
+                                            options={teller_subledger_accounts.map(
+                                                (t: any) => ({
+                                                    value: t.id.toString(),
+                                                    label: t.name,
+                                                }),
+                                            )}
+                                        />
+                                    </div>
+
+                                    <div className="">
+                                        <Label className="text-xs">
+                                            To Teller Account
+                                        </Label>
+                                        <Select
+                                            value={toTeller?.id.toString()}
+                                            onChange={(value) =>
+                                                handleToChange(value)
+                                            }
+                                            options={teller_subledger_accounts.map(
+                                                (t: any) => ({
+                                                    value: t.id.toString(),
+                                                    label: t.name,
+                                                }),
+                                            )}
+                                        />
+                                    </div>
+
+                                    {/* Narration */}
+                                    <div className="">
+                                        <Label className="text-xs">
+                                            Narration
+                                        </Label>
+                                        <Input
+                                            disabled
+                                            error={errors?.narration}
+                                            value={data.narration || ''}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'narration',
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="h-8 text-sm"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="">
+                                    <Label className="text-xs">Amount</Label>
+                                    {/* AMOUNT */}
+                                    <Input
+                                        type="number"
+                                        className="w-full rounded border p-2"
+                                        placeholder="Enter amount"
+                                        onChange={(e) =>
+                                            handleAmountChange(
+                                                Number(e.target.value),
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                {/* PREVIEW */}
+                                <div className="rounded border bg-muted/30 p-4">
+                                    <h3 className="mb-2 font-medium">
+                                        Preview
+                                    </h3>
+
+                                    {data.lines.length === 0 && (
+                                        <p className="text-sm text-gray-500">
+                                            No data yet
+                                        </p>
+                                    )}
+
+                                    {data.lines.map((line, index) => (
+                                        <div key={index} className="text-sm">
+                                            {line.name} → Debit: {line.debit} |
+                                            Credit: {line.credit}
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* ACTION */}
+                                <Button
+                                    onClick={submitTransfer}
+                                    disabled={processing}
+                                    className="mt-2 rounded bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/80"
+                                >
+                                    {processing
+                                        ? 'Processing...'
+                                        : 'Transfer Now'}
+                                </Button>
+                            </div>
                         </div>
                     </div>
 
@@ -220,7 +328,7 @@ export default function TellerToTellerTransferPage() {
                         <div className="rounded-md border bg-card md:col-span-4">
                             <div className="sticky top-0 z-10 flex items-center justify-between rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-3">
                                 <h2 className="text-sm font-medium text-card-foreground">
-                                    Voucher Header
+                                    Recent Voucher Entries
                                 </h2>
                                 <span className="text-xs text-muted-foreground">
                                     {data.voucher_date &&
@@ -230,123 +338,7 @@ export default function TellerToTellerTransferPage() {
 
                             <div className="grid grid-cols-1 gap-x-3 p-3 sm:grid-cols-2 md:grid-cols-2">
                                 {/* Voucher Type */}
-                                <div>
-                                    <Label className="text-xs">
-                                        Voucher Type
-                                    </Label>
-                                    <Select
-                                        disabled
-                                        error={errors?.voucher_type}
-                                        value={data.voucher_type || ''}
-                                        options={[
-                                            {
-                                                value: 'CREDIT_OR_RECEIPT',
-                                                label: 'Credit/Receipt',
-                                            },
-                                            {
-                                                value: 'DEBIT_OR_PAYMENT',
-                                                label: 'Debit/Payment',
-                                            },
-                                            {
-                                                value: 'JOURNAL_OR_NON_CASH',
-                                                label: 'Journal/Non-Cash',
-                                            },
-                                            {
-                                                value: 'PURCHASE',
-                                                label: 'Purchase',
-                                            },
-                                            { value: 'SALE', label: 'Sale' },
-                                            {
-                                                value: 'DEBIT_NOTE',
-                                                label: 'Debit Note',
-                                            },
-                                            {
-                                                value: 'CREDIT_NOTE',
-                                                label: 'Credit Note',
-                                            },
-                                            {
-                                                value: 'CONTRA',
-                                                label: 'Contra',
-                                            },
-                                        ]}
-                                        onChange={(value) =>
-                                            setData('voucher_type', value)
-                                        }
-                                    />
-                                </div>
-
-                                {/* Branch */}
-                                <div>
-                                    <Label className="text-xs">Branch</Label>
-                                    <Select
-                                        disabled
-                                        error={errors?.branch_id}
-                                        value={data.branch_id?.toString() || ''}
-                                        options={branches.map((b) => ({
-                                            value: b.id.toString(),
-                                            label: b.name,
-                                        }))}
-                                        onChange={(value) =>
-                                            setData('branch_id', Number(value))
-                                        }
-                                    />
-                                </div>
-
-                                {/* Reference */}
-                                <div>
-                                    <Label className="text-xs">
-                                        Deposit Slip Reference
-                                    </Label>
-                                    <Input
-                                        error={errors?.reference}
-                                        value={data.reference}
-                                        className="h-8 text-sm"
-                                        onChange={(e) =>
-                                            setData('reference', e.target.value)
-                                        }
-                                    />
-                                </div>
-
-                                {/* Narration */}
-                                <div className="md:col-span-2">
-                                    <Label className="text-xs">Narration</Label>
-                                    <Input
-                                        disabled
-                                        error={errors?.narration}
-                                        value={data.narration || ''}
-                                        onChange={(e) =>
-                                            setData('narration', e.target.value)
-                                        }
-                                        className="h-8 text-sm"
-                                    />
-                                </div>
                             </div>
-                        </div>
-
-                        {/* Queue */}
-                        <div className="rounded border p-4">
-                            <h3 className="mb-2 font-semibold">
-                                Recent Vouchers
-                            </h3>
-
-                            {voucher_entries?.map((v: any) => (
-                                <div
-                                    key={v.id}
-                                    className="flex justify-between border-b py-1 text-sm"
-                                >
-                                    <span>{v.voucher_no}</span>
-                                    <button
-                                        onClick={() =>
-                                            router.get(
-                                                `/voucher_entries/${v.id}`,
-                                            )
-                                        }
-                                        className="text-blue-500"
-                                    >
-                                        View
-                                    </button>
-                                </div>
-                            ))}
                         </div>
                     </div>
                 </div>

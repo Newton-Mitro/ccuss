@@ -1,6 +1,5 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import HeadingSmall from '../../../components/heading-small';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
@@ -24,10 +23,11 @@ export default function VaultToBankTransferPage() {
         usePage().props as any;
 
     const { data, setData, post, processing } = useForm({
-        voucher_type: 'JOURNAL',
+        voucher_type: 'CONTRA',
         voucher_date: new Date().toISOString().split('T')[0],
         branch_id: branches[0]?.id,
         narration: '',
+        reference: '',
         lines: [],
         denominations: [],
     });
@@ -50,9 +50,6 @@ export default function VaultToBankTransferPage() {
         })),
     ]);
 
-    /**
-     * Handle denomination input
-     */
     const handleDenomChange = (index: number, qty: number) => {
         let safeQty = isNaN(qty) ? 0 : qty;
         if (safeQty < 0) safeQty = 0;
@@ -68,9 +65,6 @@ export default function VaultToBankTransferPage() {
         syncVoucher(total, updated);
     };
 
-    /**
-     * Sync voucher lines
-     */
     const syncVoucher = (total: number, denomsData: Denom[]) => {
         if (!bank || !vault || total <= 0) return;
 
@@ -98,9 +92,6 @@ export default function VaultToBankTransferPage() {
         );
     };
 
-    /**
-     * Submit
-     */
     const submitTransfer = () => {
         const total = denoms.reduce((sum, d) => sum + d.amount, 0);
 
@@ -124,181 +115,17 @@ export default function VaultToBankTransferPage() {
             <Head title="Vault to Bank Transfer" />
 
             <div className="space-y-4">
-                <HeadingSmall
-                    title="Vault to Bank Transfer"
-                    description="Deposit cash (notes & coins) from vault to bank"
-                />
-
                 <div className="grid gap-6 md:grid-cols-12">
                     {/* LEFT */}
-                    <div className="space-y-6 md:col-span-8">
+                    <div className="space-y-4 md:col-span-8">
                         {/* Selection */}
-                        <div className="rounded-xl border bg-card p-6">
-                            <div className="grid grid-cols-2 gap-4">
-                                <Select
-                                    onChange={(v) =>
-                                        setVault(
-                                            vault_subledger_accounts.find(
-                                                (x: any) => x.id == v,
-                                            ),
-                                        )
-                                    }
-                                    options={vault_subledger_accounts.map(
-                                        (v: any) => ({
-                                            value: v.id,
-                                            label: v.name,
-                                        }),
-                                    )}
-                                />
-
-                                <Select
-                                    onChange={(v) =>
-                                        setBank(
-                                            bank_subledger_accounts.find(
-                                                (x: any) => x.id == v,
-                                            ),
-                                        )
-                                    }
-                                    options={bank_subledger_accounts.map(
-                                        (b: any) => ({
-                                            value: b.id,
-                                            label: b.name,
-                                        }),
-                                    )}
-                                />
-                            </div>
-                        </div>
-
                         <div className="rounded-md border bg-card">
-                            <div className="rounded-tl-md rounded-tr-md border-b bg-sidebar px-6 py-3 text-sm font-medium text-card-foreground">
-                                Denomination
+                            <div className="rounded-tl-md rounded-tr-md border-b bg-sidebar text-card-foreground">
+                                <h3 className="px-4 py-3 text-sm font-semibold">
+                                    Vault to Bank Transfer
+                                </h3>
                             </div>
-                            <div className="flex gap-4 p-4">
-                                {/* NOTES */}
-                                <div className="rounded-xl border bg-muted/30">
-                                    <h3 className="rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-3 text-sm font-semibold text-card-foreground">
-                                        Notes
-                                    </h3>
-
-                                    <div className="px-4 py-4">
-                                        {denoms
-                                            .filter((d) => d.type === 'note')
-                                            .map((d) => {
-                                                const index = denoms.findIndex(
-                                                    (x) => x === d,
-                                                );
-                                                return (
-                                                    <div
-                                                        key={index}
-                                                        className="mb-2 grid grid-cols-3 gap-2"
-                                                    >
-                                                        <Input
-                                                            disabled
-                                                            value={d.value}
-                                                        />
-                                                        <Input
-                                                            type="number"
-                                                            value={d.qty}
-                                                            onChange={(e) =>
-                                                                handleDenomChange(
-                                                                    index,
-                                                                    Number(
-                                                                        e.target
-                                                                            .value,
-                                                                    ),
-                                                                )
-                                                            }
-                                                        />
-                                                        <Input
-                                                            disabled
-                                                            value={d.amount}
-                                                        />
-                                                    </div>
-                                                );
-                                            })}
-                                    </div>
-                                </div>
-
-                                {/* COINS */}
-                                <div className="rounded-xl border bg-muted/30">
-                                    <h3 className="rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-3 text-sm font-semibold text-card-foreground">
-                                        Coins
-                                    </h3>
-
-                                    <div className="px-4 py-4">
-                                        {denoms
-                                            .filter((d) => d.type === 'coin')
-                                            .map((d) => {
-                                                const index = denoms.findIndex(
-                                                    (x) => x === d,
-                                                );
-                                                return (
-                                                    <div
-                                                        key={index}
-                                                        className="mb-2 grid grid-cols-3 gap-2"
-                                                    >
-                                                        <Input
-                                                            disabled
-                                                            value={d.value}
-                                                        />
-                                                        <Input
-                                                            type="number"
-                                                            value={d.qty}
-                                                            onChange={(e) =>
-                                                                handleDenomChange(
-                                                                    index,
-                                                                    Number(
-                                                                        e.target
-                                                                            .value,
-                                                                    ),
-                                                                )
-                                                            }
-                                                        />
-                                                        <Input
-                                                            disabled
-                                                            value={d.amount}
-                                                        />
-                                                    </div>
-                                                );
-                                            })}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            {/* TOTAL */}
-                            <div className="text-lg font-bold">
-                                Total: {formatBDTCurrency(totalAmount)}
-                            </div>
-
-                            {/* SUBMIT */}
-                            <Button
-                                onClick={submitTransfer}
-                                disabled={processing}
-                            >
-                                {processing
-                                    ? 'Processing...'
-                                    : 'Deposit to Bank'}
-                            </Button>
-                        </div>
-                    </div>
-
-                    {/* RIGHT */}
-                    <div className="space-y-4 md:col-span-4">
-                        {/* Voucher Header */}
-                        <div className="rounded-md border bg-card md:col-span-4">
-                            <div className="sticky top-0 z-10 flex items-center justify-between rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-3">
-                                <h2 className="text-sm font-medium text-card-foreground">
-                                    Voucher Header
-                                </h2>
-                                <span className="text-xs text-muted-foreground">
-                                    {data.voucher_date &&
-                                        formatDate(data.voucher_date)}
-                                </span>
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-x-3 p-3 sm:grid-cols-2 md:grid-cols-2">
+                            <div className="grid gap-2 px-4 py-3 md:grid-cols-2 lg:grid-cols-3">
                                 {/* Voucher Type */}
                                 <div>
                                     <Label className="text-xs">
@@ -374,8 +201,49 @@ export default function VaultToBankTransferPage() {
                                     />
                                 </div>
 
+                                <div className="">
+                                    <Label className="text-xs">
+                                        From Vault Account
+                                    </Label>
+                                    <Select
+                                        onChange={(v) =>
+                                            setVault(
+                                                vault_subledger_accounts.find(
+                                                    (x: any) => x.id == v,
+                                                ),
+                                            )
+                                        }
+                                        options={vault_subledger_accounts.map(
+                                            (v: any) => ({
+                                                value: v.id,
+                                                label: v.name,
+                                            }),
+                                        )}
+                                    />
+                                </div>
+                                <div className="">
+                                    <Label className="text-xs">
+                                        To Bank Account
+                                    </Label>
+                                    <Select
+                                        onChange={(v) =>
+                                            setBank(
+                                                bank_subledger_accounts.find(
+                                                    (x: any) => x.id == v,
+                                                ),
+                                            )
+                                        }
+                                        options={bank_subledger_accounts.map(
+                                            (b: any) => ({
+                                                value: b.id,
+                                                label: b.name,
+                                            }),
+                                        )}
+                                    />
+                                </div>
+
                                 {/* Narration */}
-                                <div className="md:col-span-2">
+                                <div className="">
                                     <Label className="text-xs">Narration</Label>
                                     <Input
                                         disabled
@@ -389,25 +257,136 @@ export default function VaultToBankTransferPage() {
                             </div>
                         </div>
 
-                        {/* Preview */}
-                        <div className="rounded border p-4">
-                            <h3 className="mb-2 font-semibold">Voucher</h3>
+                        <div className="rounded-md border bg-card">
+                            <div className="rounded-tl-md rounded-tr-md border-b bg-sidebar px-6 py-3 text-sm font-medium text-card-foreground">
+                                Denomination
+                            </div>
+                            <div className="flex gap-4 px-4 py-3">
+                                {/* NOTES */}
+                                <div className="rounded-xl border bg-muted/30">
+                                    <h3 className="rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-2 text-sm font-semibold text-card-foreground">
+                                        Notes
+                                    </h3>
 
-                            {data.lines.map((l: any, i: number) => (
-                                <div key={i}>
-                                    {l.name} → D:{l.debit} | C:{l.credit}
+                                    <div className="px-4 py-2">
+                                        {denoms
+                                            .filter((d) => d.type === 'note')
+                                            .map((d) => {
+                                                const index = denoms.findIndex(
+                                                    (x) => x === d,
+                                                );
+                                                return (
+                                                    <div
+                                                        key={index}
+                                                        className="mb-0.5 grid grid-cols-3 gap-2"
+                                                    >
+                                                        <Input
+                                                            disabled
+                                                            value={d.value}
+                                                        />
+                                                        <Input
+                                                            type="number"
+                                                            value={d.qty}
+                                                            onChange={(e) =>
+                                                                handleDenomChange(
+                                                                    index,
+                                                                    Number(
+                                                                        e.target
+                                                                            .value,
+                                                                    ),
+                                                                )
+                                                            }
+                                                        />
+                                                        <Input
+                                                            disabled
+                                                            value={d.amount}
+                                                        />
+                                                    </div>
+                                                );
+                                            })}
+                                    </div>
                                 </div>
-                            ))}
+
+                                {/* COINS */}
+                                <div className="rounded-xl border bg-muted/30">
+                                    <h3 className="rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-2 text-sm font-semibold text-card-foreground">
+                                        Coins
+                                    </h3>
+
+                                    <div className="px-4 py-2">
+                                        {denoms
+                                            .filter((d) => d.type === 'coin')
+                                            .map((d) => {
+                                                const index = denoms.findIndex(
+                                                    (x) => x === d,
+                                                );
+                                                return (
+                                                    <div
+                                                        key={index}
+                                                        className="mb-0.5 grid grid-cols-3 gap-2"
+                                                    >
+                                                        <Input
+                                                            disabled
+                                                            value={d.value}
+                                                        />
+                                                        <Input
+                                                            type="number"
+                                                            value={d.qty}
+                                                            onChange={(e) =>
+                                                                handleDenomChange(
+                                                                    index,
+                                                                    Number(
+                                                                        e.target
+                                                                            .value,
+                                                                    ),
+                                                                )
+                                                            }
+                                                        />
+                                                        <Input
+                                                            disabled
+                                                            value={d.amount}
+                                                        />
+                                                    </div>
+                                                );
+                                            })}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mx-8 mb-4 font-bold">
+                                Total: {formatBDTCurrency(totalAmount)}
+                            </div>
                         </div>
 
-                        {/* Narration */}
-                        <textarea
-                            className="w-full rounded border p-2"
-                            value={data.narration}
-                            onChange={(e) =>
-                                setData('narration', e.target.value)
-                            }
-                        />
+                        <div className="space-y-2">
+                            {/* SUBMIT */}
+                            <Button
+                                onClick={submitTransfer}
+                                disabled={processing}
+                            >
+                                {processing
+                                    ? 'Processing...'
+                                    : 'Deposit to Bank'}
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* RIGHT */}
+                    <div className="space-y-4 md:col-span-4">
+                        {/* Voucher Header */}
+                        <div className="rounded-md border bg-card md:col-span-4">
+                            <div className="sticky top-0 z-10 flex items-center justify-between rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-3">
+                                <h2 className="text-sm font-medium text-card-foreground">
+                                    Voucher Entries
+                                </h2>
+                                <span className="text-xs text-muted-foreground">
+                                    {data.voucher_date &&
+                                        formatDate(data.voucher_date)}
+                                </span>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-x-3 p-3 sm:grid-cols-2 md:grid-cols-2"></div>
+                        </div>
                     </div>
                 </div>
             </div>

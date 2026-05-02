@@ -1,6 +1,5 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import HeadingSmall from '../../../components/heading-small';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
@@ -9,63 +8,76 @@ import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { formatDate } from '../../../lib/date_util';
 
-const DENOMINATIONS = [1000, 500, 200, 100, 50, 20, 10];
+const NOTES = [1000, 500, 200, 100, 50, 20, 10, 5, 2, 1];
+const COINS = [5, 2, 1]; // extend later if needed (e.g. 0.5)
 
-export default function BankToVaultTransferPage() {
+type Denom = {
+    type: 'note' | 'coin';
+    value: number;
+    qty: number;
+    amount: number;
+};
+
+export default function VaultToBankTransferPage() {
     const { bank_subledger_accounts, vault_subledger_accounts, branches } =
         usePage().props as any;
 
     const { data, setData, post, processing } = useForm({
-        voucher_type: 'JOURNAL',
+        voucher_type: 'CONTRA',
         voucher_date: new Date().toISOString().split('T')[0],
         branch_id: branches[0]?.id,
         narration: '',
+        reference: '',
         lines: [],
         denominations: [],
     });
 
-    const [bank, setBank] = useState<any>(null);
-    const [vault, setVault] = useState<any>(null);
+    const [fromBank, setFromBank] = useState<any>(null);
+    const [toVault, setToVault] = useState<any>(null);
 
-    const [denoms, setDenoms] = useState(
-        DENOMINATIONS.map((d) => ({
-            note: d,
+    const [denoms, setDenoms] = useState<Denom[]>([
+        ...NOTES.map((v) => ({
+            type: 'note' as const,
+            value: v,
             qty: 0,
             amount: 0,
         })),
-    );
+        ...COINS.map((v) => ({
+            type: 'coin' as const,
+            value: v,
+            qty: 0,
+            amount: 0,
+        })),
+    ]);
 
-    /**
-     * Handle denomination input
-     */
     const handleDenomChange = (index: number, qty: number) => {
+        let safeQty = isNaN(qty) ? 0 : qty;
+        if (safeQty < 0) safeQty = 0;
+        if (safeQty > 10000) safeQty = 10000;
+
         const updated = [...denoms];
-        updated[index].qty = qty;
-        updated[index].amount = qty * updated[index].note;
+        updated[index].qty = safeQty;
+        updated[index].amount = safeQty * updated[index].value;
 
         setDenoms(updated);
 
         const total = updated.reduce((sum, d) => sum + d.amount, 0);
-
         syncVoucher(total, updated);
     };
 
-    /**
-     * Sync voucher lines
-     */
-    const syncVoucher = (total: number, denomsData: any[]) => {
-        if (!bank || !vault || total <= 0) return;
+    const syncVoucher = (total: number, denomsData: Denom[]) => {
+        if (!fromBank || !toVault || total <= 0) return;
 
         const lines = [
             {
-                subledger_id: vault.id,
-                name: vault.name,
+                subledger_id: fromBank.id,
+                name: fromBank.name,
                 debit: total,
                 credit: 0,
             },
             {
-                subledger_id: bank.id,
-                name: bank.name,
+                subledger_id: toVault.id,
+                name: toVault.name,
                 debit: 0,
                 credit: total,
             },
@@ -73,20 +85,18 @@ export default function BankToVaultTransferPage() {
 
         setData('lines', lines);
         setData('denominations', denomsData);
+
         setData(
             'narration',
-            `Cash withdrawn from bank ${bank.name} to vault ${vault.name}`,
+            `Cash deposited from vault ${toVault.name} to bank ${fromBank.name}`,
         );
     };
 
-    /**
-     * Submit handler
-     */
     const submitTransfer = () => {
         const total = denoms.reduce((sum, d) => sum + d.amount, 0);
 
-        if (!bank || !vault) {
-            alert('Select bank and vault');
+        if (!fromBank || !toVault) {
+            alert('Select vault and bank');
             return;
         }
 
@@ -98,151 +108,24 @@ export default function BankToVaultTransferPage() {
         post('/voucher_entries');
     };
 
+    const totalAmount = denoms.reduce((sum, d) => sum + d.amount, 0);
+
     return (
         <CustomAuthLayout>
-            <Head title="Bank to Vault Transfer" />
+            <Head title="Vault to Bank Transfer" />
 
-            <div className="space-y-4 text-foreground">
-                {/* Header */}
-                <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
-                    <HeadingSmall
-                        title="Bank to Vault Transfer"
-                        description="Withdraw cash from bank to vault"
-                    />
-                </div>
-
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
+            <div className="space-y-4">
+                <div className="grid gap-6 md:grid-cols-12">
                     {/* LEFT */}
-                    <div className="space-y-6 md:col-span-8">
+                    <div className="space-y-4 md:col-span-8">
                         {/* Selection */}
-                        <div className="rounded-xl border bg-card p-6">
-                            <h2 className="mb-4 font-semibold">
-                                Bank → Vault Transfer
-                            </h2>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                {/* Bank */}
-                                <Select
-                                    onChange={(value) =>
-                                        setBank(
-                                            bank_subledger_accounts.find(
-                                                (b: any) => b.id == value,
-                                            ),
-                                        )
-                                    }
-                                    options={bank_subledger_accounts.map(
-                                        (b: any) => ({
-                                            value: b.id,
-                                            label: b.name,
-                                        }),
-                                    )}
-                                />
-
-                                {/* Vault */}
-                                <Select
-                                    onChange={(value) =>
-                                        setVault(
-                                            vault_subledger_accounts.find(
-                                                (v: any) => v.id == value,
-                                            ),
-                                        )
-                                    }
-                                    options={vault_subledger_accounts.map(
-                                        (v: any) => ({
-                                            value: v.id,
-                                            label: v.name,
-                                        }),
-                                    )}
-                                />
+                        <div className="rounded-md border bg-card">
+                            <div className="rounded-tl-md rounded-tr-md border-b bg-sidebar text-card-foreground">
+                                <h3 className="px-4 py-3 text-sm font-semibold">
+                                    Bank to Vault Transfer
+                                </h3>
                             </div>
-                        </div>
-
-                        {/* Denomination Table */}
-                        <div className="rounded-xl border bg-card p-6">
-                            <h3 className="mb-4 font-semibold">
-                                Denominations
-                            </h3>
-
-                            <table className="w-full text-sm">
-                                <thead>
-                                    <tr>
-                                        <th className="p-2 text-left">Note</th>
-                                        <th className="p-2 text-left">Qty</th>
-                                        <th className="p-2 text-left">
-                                            Amount
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {denoms.map((d, i) => (
-                                        <tr key={i}>
-                                            <td className="pr-2">
-                                                <Input
-                                                    disabled
-                                                    value={d.note}
-                                                />
-                                            </td>
-                                            <td className="px-2">
-                                                <Input
-                                                    type="number"
-                                                    value={d.qty}
-                                                    onChange={(e) =>
-                                                        handleDenomChange(
-                                                            i,
-                                                            Number(
-                                                                e.target.value,
-                                                            ),
-                                                        )
-                                                    }
-                                                />
-                                            </td>
-                                            <td className="px-2">
-                                                <Input
-                                                    disabled
-                                                    value={d.amount}
-                                                />
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-
-                            <div className="mt-4 font-bold">
-                                Total:{' '}
-                                {formatBDTCurrency(
-                                    denoms.reduce(
-                                        (sum, d) => sum + d.amount,
-                                        0,
-                                    ),
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Submit */}
-                        <Button
-                            onClick={submitTransfer}
-                            disabled={processing}
-                            className="rounded bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/80"
-                        >
-                            {processing ? 'Processing...' : 'Withdraw Cash'}
-                        </Button>
-                    </div>
-
-                    {/* RIGHT */}
-                    <div className="space-y-6 md:col-span-4">
-                        {/* Voucher Header */}
-                        <div className="rounded-md border bg-card md:col-span-4">
-                            <div className="sticky top-0 z-10 flex items-center justify-between rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-3">
-                                <h2 className="text-sm font-medium text-card-foreground">
-                                    Voucher Header
-                                </h2>
-                                <span className="text-xs text-muted-foreground">
-                                    {data.voucher_date &&
-                                        formatDate(data.voucher_date)}
-                                </span>
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-x-3 p-3 sm:grid-cols-2 md:grid-cols-2">
+                            <div className="grid gap-2 px-4 py-3 md:grid-cols-2 lg:grid-cols-3">
                                 {/* Voucher Type */}
                                 <div>
                                     <Label className="text-xs">
@@ -318,8 +201,52 @@ export default function BankToVaultTransferPage() {
                                     />
                                 </div>
 
+                                <div className="">
+                                    <Label className="text-xs">
+                                        From Bank Account
+                                    </Label>
+                                    <Select
+                                        value={fromBank?.id?.toString() || ''}
+                                        onChange={(v) =>
+                                            setFromBank(
+                                                bank_subledger_accounts.find(
+                                                    (x: any) => x.id == v,
+                                                ),
+                                            )
+                                        }
+                                        options={bank_subledger_accounts.map(
+                                            (b: any) => ({
+                                                value: b.id.toString(),
+                                                label: b.name,
+                                            }),
+                                        )}
+                                    />
+                                </div>
+
+                                <div className="">
+                                    <Label className="text-xs">
+                                        To Vault Account
+                                    </Label>
+                                    <Select
+                                        value={toVault?.id?.toString() || ''}
+                                        onChange={(v) =>
+                                            setToVault(
+                                                vault_subledger_accounts.find(
+                                                    (x: any) => x.id == v,
+                                                ),
+                                            )
+                                        }
+                                        options={vault_subledger_accounts.map(
+                                            (v: any) => ({
+                                                value: v.id.toString(),
+                                                label: v.name,
+                                            }),
+                                        )}
+                                    />
+                                </div>
+
                                 {/* Narration */}
-                                <div className="md:col-span-2">
+                                <div className="">
                                     <Label className="text-xs">Narration</Label>
                                     <Input
                                         disabled
@@ -333,29 +260,136 @@ export default function BankToVaultTransferPage() {
                             </div>
                         </div>
 
-                        {/* Preview */}
-                        <div className="rounded border p-4">
-                            <h3 className="mb-2 font-semibold">
-                                Voucher Preview
-                            </h3>
+                        <div className="rounded-md border bg-card">
+                            <div className="rounded-tl-md rounded-tr-md border-b bg-sidebar px-6 py-3 text-sm font-medium text-card-foreground">
+                                Denomination
+                            </div>
+                            <div className="flex gap-4 px-4 py-3">
+                                {/* NOTES */}
+                                <div className="rounded-xl border bg-muted/30">
+                                    <h3 className="rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-2 text-sm font-semibold text-card-foreground">
+                                        Notes
+                                    </h3>
 
-                            {data.lines.map((l: any, i: number) => (
-                                <div key={i} className="text-sm">
-                                    {l.name} → Debit: {l.debit} | Credit:{' '}
-                                    {l.credit}
+                                    <div className="px-4 py-2">
+                                        {denoms
+                                            .filter((d) => d.type === 'note')
+                                            .map((d) => {
+                                                const index = denoms.findIndex(
+                                                    (x) => x === d,
+                                                );
+                                                return (
+                                                    <div
+                                                        key={index}
+                                                        className="mb-0.5 grid grid-cols-3 gap-2"
+                                                    >
+                                                        <Input
+                                                            disabled
+                                                            value={d.value}
+                                                        />
+                                                        <Input
+                                                            type="number"
+                                                            value={d.qty}
+                                                            onChange={(e) =>
+                                                                handleDenomChange(
+                                                                    index,
+                                                                    Number(
+                                                                        e.target
+                                                                            .value,
+                                                                    ),
+                                                                )
+                                                            }
+                                                        />
+                                                        <Input
+                                                            disabled
+                                                            value={d.amount}
+                                                        />
+                                                    </div>
+                                                );
+                                            })}
+                                    </div>
                                 </div>
-                            ))}
+
+                                {/* COINS */}
+                                <div className="rounded-xl border bg-muted/30">
+                                    <h3 className="rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-2 text-sm font-semibold text-card-foreground">
+                                        Coins
+                                    </h3>
+
+                                    <div className="px-4 py-2">
+                                        {denoms
+                                            .filter((d) => d.type === 'coin')
+                                            .map((d) => {
+                                                const index = denoms.findIndex(
+                                                    (x) => x === d,
+                                                );
+                                                return (
+                                                    <div
+                                                        key={index}
+                                                        className="mb-0.5 grid grid-cols-3 gap-2"
+                                                    >
+                                                        <Input
+                                                            disabled
+                                                            value={d.value}
+                                                        />
+                                                        <Input
+                                                            type="number"
+                                                            value={d.qty}
+                                                            onChange={(e) =>
+                                                                handleDenomChange(
+                                                                    index,
+                                                                    Number(
+                                                                        e.target
+                                                                            .value,
+                                                                    ),
+                                                                )
+                                                            }
+                                                        />
+                                                        <Input
+                                                            disabled
+                                                            value={d.amount}
+                                                        />
+                                                    </div>
+                                                );
+                                            })}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mx-8 mb-4 font-bold">
+                                Total: {formatBDTCurrency(totalAmount)}
+                            </div>
                         </div>
 
-                        {/* Narration */}
-                        <textarea
-                            className="w-full rounded border p-2"
-                            placeholder="Narration"
-                            value={data.narration}
-                            onChange={(e) =>
-                                setData('narration', e.target.value)
-                            }
-                        />
+                        <div className="space-y-2">
+                            {/* SUBMIT */}
+                            <Button
+                                onClick={submitTransfer}
+                                disabled={processing}
+                            >
+                                {processing
+                                    ? 'Processing...'
+                                    : 'Deposit to Bank'}
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* RIGHT */}
+                    <div className="space-y-4 md:col-span-4">
+                        {/* Voucher Header */}
+                        <div className="rounded-md border bg-card md:col-span-4">
+                            <div className="sticky top-0 z-10 flex items-center justify-between rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-3">
+                                <h2 className="text-sm font-medium text-card-foreground">
+                                    Voucher Entries
+                                </h2>
+                                <span className="text-xs text-muted-foreground">
+                                    {data.voucher_date &&
+                                        formatDate(data.voucher_date)}
+                                </span>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-x-3 p-3 sm:grid-cols-2 md:grid-cols-2"></div>
+                        </div>
                     </div>
                 </div>
             </div>
