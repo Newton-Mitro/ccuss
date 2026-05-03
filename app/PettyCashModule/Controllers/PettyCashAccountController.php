@@ -44,7 +44,7 @@ class PettyCashAccountController extends Controller
         }
 
         $accounts = $query->latest()
-            ->paginate($request->input('per_page', 10))
+            ->paginate($request->input('per_page', 18))
             ->withQueryString();
 
         return Inertia::render(

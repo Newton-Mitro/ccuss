@@ -20,7 +20,7 @@ class ChequeBookController extends Controller
     public function index(Request $request)
     {
         $search = trim($request->input('search'));
-        $perPage = (int) $request->input('per_page', 10);
+        $perPage = (int) $request->input('per_page', 18);
 
         $books = ChequeBook::query()
             ->with(['cheques', 'subledgerAccount'])

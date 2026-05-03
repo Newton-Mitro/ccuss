@@ -16,7 +16,7 @@ class DatabaseBackupController extends Controller
     {
         // Get filters from query parameters
         $search = $request->input('search');
-        $perPage = $request->input('per_page', 10);
+        $perPage = $request->input('per_page', 18);
 
         // Build query
         $query = DatabaseBackupLog::query();

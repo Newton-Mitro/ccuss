@@ -14,7 +14,7 @@ class AuditLogController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->input('per_page', 10);
+        $perPage = $request->input('per_page', 18);
 
         $audits = AuditLog::query()
             ->with('user')

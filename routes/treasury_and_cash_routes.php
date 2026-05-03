@@ -1,6 +1,8 @@
 <?php
 
 use App\TreasuryAndCashModule\Controllers\BranchDayController;
+use App\TreasuryAndCashModule\Controllers\CashAdjustmentController;
+use App\TreasuryAndCashModule\Controllers\CashMovementController;
 use App\TreasuryAndCashModule\Controllers\TellerController;
 use App\TreasuryAndCashModule\Controllers\TellerSessionController;
 use App\TreasuryAndCashModule\Controllers\TellerTransactionController;
@@ -29,8 +31,13 @@ Route::middleware(['auth', 'verified'])->prefix('branch-days')->name('branch-day
     Route::put('/{branchDay}/close', [BranchDayController::class, 'closeBranchDay'])->name('close');
 });
 
-Route::middleware(['auth', 'verified'])->prefix('branch-cash')->group(function () {
+Route::middleware(['auth', 'verified'])->prefix('api')->group(function () {
+    // Get collection ledgers
+    Route::get('/customer-collection-ledgers', [TellerTransactionController::class, 'getCustomerCollectionLedgers'])
+        ->name('teller-transactions.get-collection-ledgers');
 
+    Route::get('/get-withdrawable-accounts', [TellerTransactionController::class, 'getWithdrawableAccounts'])
+        ->name('teller-transactions.get-withdrawable-accounts');
 });
 
 Route::middleware(['auth', 'verified'])->prefix('teller-transactions')->group(function () {
@@ -39,29 +46,29 @@ Route::middleware(['auth', 'verified'])->prefix('teller-transactions')->group(fu
 
     Route::get('/withdrawal', [TellerTransactionController::class, 'customerCashPayment'])
         ->name('teller-transactions.withdrawal');
+});
 
-    Route::get('/teller-to-teller-transfer', [TellerTransactionController::class, 'tellerToTellerTransfer'])
+Route::middleware(['auth', 'verified'])->prefix('cash-movements')->group(function () {
+    Route::get('/teller-to-teller-transfer', [CashMovementController::class, 'tellerToTellerTransfer'])
         ->name('teller-transactions.teller-to-teller-transfer');
 
-    Route::get('/vault-to-vault-transfer', [TellerTransactionController::class, 'vaultToVaultTransfer'])
+    Route::get('/vault-to-vault-transfer', [CashMovementController::class, 'vaultToVaultTransfer'])
         ->name('teller-transactions.vault-to-vault-transfer');
 
-    Route::get('/vault-to-teller-transfer', [TellerTransactionController::class, 'vaultToTellerTransfer'])
+    Route::get('/vault-to-teller-transfer', [CashMovementController::class, 'vaultToTellerTransfer'])
         ->name('teller-transactions.vault-to-teller-transfer');
 
-    Route::get('/teller-to-vault-transfer', [TellerTransactionController::class, 'tellerToVaultTransfer'])
+    Route::get('/teller-to-vault-transfer', [CashMovementController::class, 'tellerToVaultTransfer'])
         ->name('teller-transactions.teller-to-vault-transfer');
 
-    Route::get('/bank-to-vault-transfer', [TellerTransactionController::class, 'bankToVaultTransfer'])
+    Route::get('/bank-to-vault-transfer', [CashMovementController::class, 'bankToVaultTransfer'])
         ->name('teller-transactions.bank-to-vault-transfer');
 
-    Route::get('/vault-to-bank-transfer', [TellerTransactionController::class, 'vaultToBankTransfer'])
+    Route::get('/vault-to-bank-transfer', [CashMovementController::class, 'vaultToBankTransfer'])
         ->name('teller-transactions.vault-to-bank-transfer');
+});
 
-    // Get collection ledgers
-    Route::get('/customer-collection-ledgers', [TellerTransactionController::class, 'getCustomerCollectionLedgers'])
-        ->name('teller-transactions.get-collection-ledgers');
-
-    Route::get('/get-withdrawable-accounts', [TellerTransactionController::class, 'getWithdrawableAccounts'])
-        ->name('teller-transactions.get-withdrawable-accounts');
+Route::middleware(['auth', 'verified'])->prefix('cash-adjustments')->group(function () {
+    Route::get('/teller-cash-adjustment', [CashAdjustmentController::class, 'tellerCashAdjustmentPage'])
+        ->name('cash-adjustment.create');
 });

@@ -35,7 +35,7 @@ export default function IntroducersIndex() {
     const { data, setData, get } = useForm({
         search: filters.search || '',
         verification_status: filters.verification_status || 'all',
-        per_page: Number(filters.per_page) || 10,
+        per_page: Number(filters.per_page) || 18,
         page: Number(filters.page) || 1,
     });
 

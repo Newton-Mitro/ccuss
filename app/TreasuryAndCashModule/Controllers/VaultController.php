@@ -36,7 +36,7 @@ class VaultController extends Controller
         if ($request->filled('status')) {
             $query->where('is_active', $request->status);
         }
-        $vaults = $query->latest()->paginate($request->input('per_page', 10))->withQueryString();
+        $vaults = $query->latest()->paginate($request->input('per_page', 18))->withQueryString();
         return Inertia::render('treasury-and-cash/vaults/index', [
             'vaults' => $vaults,
             'filters' => $request->only([

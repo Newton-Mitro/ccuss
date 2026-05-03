@@ -48,7 +48,7 @@ class TellerController extends Controller
         if ($request->filled('status')) {
             $query->where('is_active', $request->status);
         }
-        $tellers = $query->latest()->paginate($request->input('per_page', 10))->withQueryString();
+        $tellers = $query->latest()->paginate($request->input('per_page', 18))->withQueryString();
         return Inertia::render('treasury-and-cash/tellers/index', [
             'tellers' => $tellers,
             'filters' => $request->only([

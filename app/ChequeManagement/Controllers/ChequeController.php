@@ -21,7 +21,7 @@ class ChequeController extends Controller
     {
         $search = $request->input('search');
         $status = $request->input('status');
-        $perPage = $request->input('per_page', 10);
+        $perPage = $request->input('per_page', 18);
 
         $cheques = Cheque::query()
             ->with(['chequeBook', 'issuerAccount'])

@@ -36,7 +36,7 @@ export default function KycDocumentsIndex() {
         search: filters.search || '',
         document_type: filters.document_type || 'all',
         verification_status: filters.verification_status || 'all',
-        per_page: Number(filters.per_page) || 10,
+        per_page: Number(filters.per_page) || 18,
         page: Number(filters.page) || 1,
     });
 

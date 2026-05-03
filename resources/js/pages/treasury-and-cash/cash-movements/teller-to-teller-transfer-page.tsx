@@ -107,8 +107,9 @@ export default function TellerToTellerTransferPage() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Cash Counter', href: '#' },
-        { title: 'Teller Transfer', href: '' },
+        { title: 'Treasury and Cash', href: '#' },
+        { title: 'Cash Movements', href: '' },
+        { title: 'Teller To Teller Transfer', href: '' },
     ];
 
     return (

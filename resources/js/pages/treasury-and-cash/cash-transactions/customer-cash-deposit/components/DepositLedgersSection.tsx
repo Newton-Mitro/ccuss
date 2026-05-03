@@ -1,10 +1,10 @@
 import { CheckCircle2, Clock, Loader2 } from 'lucide-react';
-import { Button } from '../../../../components/ui/button';
-import { Checkbox } from '../../../../components/ui/checkbox';
-import { Input } from '../../../../components/ui/input';
-import { formatBDTCurrency } from '../../../../lib/bdtCurrencyFormatter';
-import { Customer } from '../../../../types/customer_kyc_module';
-import { CustomerSearchBox } from '../../../customer-kyc/customers/components/customer-search-box';
+import { Button } from '../../../../../components/ui/button';
+import { Checkbox } from '../../../../../components/ui/checkbox';
+import { Input } from '../../../../../components/ui/input';
+import { formatBDTCurrency } from '../../../../../lib/bdtCurrencyFormatter';
+import { Customer } from '../../../../../types/customer_kyc_module';
+import { CustomerSearchBox } from '../../../../customer-kyc/customers/components/customer-search-box';
 
 interface CollectionLedgersSectionProps {
     errors: any;

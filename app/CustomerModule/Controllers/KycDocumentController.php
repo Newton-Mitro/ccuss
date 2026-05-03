@@ -47,7 +47,7 @@ class KycDocumentController extends Controller
 
         $documents = $query
             ->latest()
-            ->paginate($request->integer('per_page', 10))
+            ->paginate($request->integer('per_page', 18))
             ->withQueryString();
 
         return Inertia::render('customer-kyc/kyc-documents/list_kyc_documents_page', [

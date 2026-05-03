@@ -48,7 +48,7 @@ class CustomerFamilyRelationController extends Controller
 
         $relations = $query
             ->latest()
-            ->paginate($request->integer('per_page', 10))
+            ->paginate($request->integer('per_page', 18))
             ->withQueryString();
 
         return Inertia::render('customer-kyc/family-relations/list_family_relation_page', [

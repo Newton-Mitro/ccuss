@@ -7,6 +7,7 @@ import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { formatDate } from '../../../lib/date_util';
+import { BreadcrumbItem } from '../../../types';
 
 const NOTES = [1000, 500, 200, 100, 50, 20, 10, 5, 2, 1];
 const COINS = [5, 2, 1]; // extend later if needed (e.g. 0.5)
@@ -113,8 +114,14 @@ export default function VaultToVaultTransferPage() {
         post('/voucher_entries');
     };
 
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Treasury and Cash', href: '#' },
+        { title: 'Cash Movements', href: '' },
+        { title: 'Teller To Vault Transfer', href: '' },
+    ];
+
     return (
-        <CustomAuthLayout>
+        <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Vault Transfer with Denomination" />
             <div className="space-y-4 text-foreground">
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
@@ -208,7 +215,7 @@ export default function VaultToVaultTransferPage() {
                                         From Teller Account
                                     </Label>
                                     <Select
-                                        value={fromTeller?.toString() || ''}
+                                        value={fromTeller?.id.toString() || ''}
                                         onChange={(v) =>
                                             setFromTeller(
                                                 teller_subledger_accounts.find(
@@ -229,7 +236,7 @@ export default function VaultToVaultTransferPage() {
                                         To Vault Account
                                     </Label>
                                     <Select
-                                        value={toVault?.toString() || ''}
+                                        value={toVault?.id.toString() || ''}
                                         onChange={(v) =>
                                             setToVault(
                                                 vault_subledger_accounts.find(

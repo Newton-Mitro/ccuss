@@ -36,7 +36,7 @@ export default function Index() {
 
     const { data, setData, get } = useForm({
         search: filters.search || '',
-        per_page: Number(filters.per_page) || 10,
+        per_page: Number(filters.per_page) || 18,
         page: Number(filters.page) || 1,
     });
 

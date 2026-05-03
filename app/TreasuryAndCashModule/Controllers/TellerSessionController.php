@@ -43,7 +43,7 @@ class TellerSessionController extends Controller
 
         $sessions = $query
             ->latest()
-            ->paginate($request->per_page ?? 10)
+            ->paginate($request->per_page ?? 18)
             ->withQueryString();
 
         return Inertia::render(

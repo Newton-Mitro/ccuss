@@ -48,7 +48,7 @@ export default function Index() {
         branch_id: filters.branch_id || '',
         subledger_account_id: filters.subledger_account_id || '',
         status: filters.status || '',
-        per_page: Number(filters.per_page) || 10,
+        per_page: Number(filters.per_page) || 18,
         page: Number(filters.page) || 1,
     });
 

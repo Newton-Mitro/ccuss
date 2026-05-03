@@ -30,7 +30,7 @@ class UserController extends Controller
                     ->orWhere('email', 'like', "%{$search}%");
             })
             ->latest()
-            ->limit(20)
+            ->limit(18)
             ->get();
 
         return response()->json(['data' => $users]);
@@ -42,7 +42,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $filters = $request->only(['search', 'per_page', 'page']);
-        $perPage = $filters['per_page'] ?? 10;
+        $perPage = $filters['per_page'] ?? 18;
 
         $users = User::with(['organization', 'branch'])
             ->when($filters['search'] ?? null, function ($query, $search) {

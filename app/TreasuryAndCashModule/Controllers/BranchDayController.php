@@ -34,7 +34,7 @@ class BranchDayController extends Controller
         }
 
         $branchDays = $query->latest('business_date')
-            ->paginate($request->per_page ?? 10)
+            ->paginate($request->per_page ?? 18)
             ->withQueryString();
 
         return Inertia::render('treasury-and-cash/branch-days/list_branch_day_page', [

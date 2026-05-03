@@ -39,7 +39,7 @@ export default function Index() {
     const { data, setData } = useForm({
         event: filters.event || '',
         page: filters.page || 1,
-        per_page: filters.per_page || 10,
+        per_page: filters.per_page || 18,
     });
 
     const handleFilterChange = () => {

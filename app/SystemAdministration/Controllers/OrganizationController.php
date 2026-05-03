@@ -25,7 +25,7 @@ class OrganizationController extends Controller
                 });
             })
             ->orderBy('name')
-            ->paginate($request->input('per_page', 10))
+            ->paginate($request->input('per_page', 18))
             ->withQueryString();
 
         return Inertia::render('system-administration/organizations/index', [

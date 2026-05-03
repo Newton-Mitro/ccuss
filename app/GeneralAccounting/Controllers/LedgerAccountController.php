@@ -36,7 +36,7 @@ class LedgerAccountController extends Controller
                     ->orWhere('code', 'like', "%{$search}%");
             })
             ->orderBy('code')
-            ->limit(20)
+            ->limit(18)
             ->get();
 
         return response()->json($ledgers);

@@ -24,7 +24,7 @@ class FiscalPeriodController
             $query->where('status', $request->status);
         }
 
-        $perPage = $request->input('per_page', 10);
+        $perPage = $request->input('per_page', 18);
 
         $fiscalPeriods = $query->latest()
             ->paginate($perPage)

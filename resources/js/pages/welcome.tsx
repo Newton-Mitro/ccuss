@@ -4,12 +4,10 @@ import CustomAuthLayout from '../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../types';
 
 export default function HomePage() {
-    const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Home', href: '/dashboard' },
-    ];
+    const breadcrumbs: BreadcrumbItem[] = [{ title: 'User Home', href: '#' }];
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Home" />
+            <Head title="User Home" />
 
             <motion.div
                 initial={{ scale: 0.2, opacity: 0 }}

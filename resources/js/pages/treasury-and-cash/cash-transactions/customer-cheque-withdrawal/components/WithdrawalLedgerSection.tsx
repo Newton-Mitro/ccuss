@@ -1,15 +1,15 @@
 import { CheckCircle2, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import ReactPanZoom from 'react-image-pan-zoom-rotate';
-import AppDatePicker from '../../../../components/ui/app_date_picker';
-import { Button } from '../../../../components/ui/button';
-import { Input } from '../../../../components/ui/input';
-import { Label } from '../../../../components/ui/label';
-import { Select } from '../../../../components/ui/select';
-import { formatBDTCurrency } from '../../../../lib/bdtCurrencyFormatter';
-import { takaToText } from '../../../../lib/taka_to_text';
-import { Customer } from '../../../../types/customer_kyc_module';
-import { CustomerSearchBox } from '../../../customer-kyc/customers/components/customer-search-box';
+import AppDatePicker from '../../../../../components/ui/app_date_picker';
+import { Button } from '../../../../../components/ui/button';
+import { Input } from '../../../../../components/ui/input';
+import { Label } from '../../../../../components/ui/label';
+import { Select } from '../../../../../components/ui/select';
+import { formatBDTCurrency } from '../../../../../lib/bdtCurrencyFormatter';
+import { takaToText } from '../../../../../lib/taka_to_text';
+import { Customer } from '../../../../../types/customer_kyc_module';
+import { CustomerSearchBox } from '../../../../customer-kyc/customers/components/customer-search-box';
 
 const holders = [
     {

@@ -67,8 +67,8 @@ export const cashAndTreasuryMenu: SidebarItem[] = [
                     {
                         name: 'Record Adjustment',
                         icon: <i className="fa-solid fa-plus" />,
-                        path: '/cash-adjustments/create',
-                        match_path: 'cash-adjustments/create',
+                        path: route('cash-adjustment.create'),
+                        match_path: 'cash-adjustments/teller-cash-adjustment',
                         permission: ['cash_adjustment.create'],
                     },
                     {
@@ -98,8 +98,7 @@ export const cashAndTreasuryMenu: SidebarItem[] = [
                         path: route(
                             'teller-transactions.vault-to-vault-transfer',
                         ),
-                        match_path:
-                            'teller-transactions/vault-to-vault-transfer',
+                        match_path: 'cash-movements/vault-to-vault-transfer',
                         permission: ['cash_transfer.approve'],
                     },
                     {
@@ -108,8 +107,7 @@ export const cashAndTreasuryMenu: SidebarItem[] = [
                         path: route(
                             'teller-transactions.vault-to-bank-transfer',
                         ),
-                        match_path:
-                            'teller-transactions/vault-to-bank-transfer',
+                        match_path: 'cash-movements/vault-to-bank-transfer',
                         permission: ['cash_transfer.approve'],
                     },
                     {
@@ -118,8 +116,7 @@ export const cashAndTreasuryMenu: SidebarItem[] = [
                         path: route(
                             'teller-transactions.bank-to-vault-transfer',
                         ),
-                        match_path:
-                            'teller-transactions/bank-to-vault-transfer',
+                        match_path: 'cash-movements/bank-to-vault-transfer',
                         permission: ['cash_transfer.approve'],
                     },
                     {
@@ -128,8 +125,7 @@ export const cashAndTreasuryMenu: SidebarItem[] = [
                         path: route(
                             'teller-transactions.vault-to-teller-transfer',
                         ),
-                        match_path:
-                            'teller-transactions/vault-to-teller-transfer',
+                        match_path: 'cash-movements/vault-to-teller-transfer',
                         permission: ['vault_to_teller.create'],
                     },
                     {
@@ -138,8 +134,7 @@ export const cashAndTreasuryMenu: SidebarItem[] = [
                         path: route(
                             'teller-transactions.teller-to-teller-transfer',
                         ),
-                        match_path:
-                            'teller-transactions/teller-to-teller-transfer',
+                        match_path: 'cash-movements/teller-to-teller-transfer',
                         permission: ['teller_to_vault.create'],
                     },
                     {
@@ -148,8 +143,7 @@ export const cashAndTreasuryMenu: SidebarItem[] = [
                         path: route(
                             'teller-transactions.teller-to-vault-transfer',
                         ),
-                        match_path:
-                            'teller-transactions/teller-to-vault-transfer',
+                        match_path: 'cash-movements/teller-to-vault-transfer',
                         permission: ['teller_to_vault.create'],
                     },
                 ],

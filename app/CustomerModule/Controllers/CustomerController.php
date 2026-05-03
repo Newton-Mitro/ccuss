@@ -52,7 +52,7 @@ class CustomerController extends Controller
         }
 
         return response()->json(
-            $query->latest()->limit(20)->get()
+            $query->latest()->limit(18)->get()
         );
     }
 
@@ -80,7 +80,7 @@ class CustomerController extends Controller
         }
 
         $customers = $query->latest()
-            ->paginate($request->input('per_page', 10))
+            ->paginate($request->input('per_page', 18))
             ->withQueryString();
 
         return Inertia::render('customer-kyc/customers/list_customer_page', [

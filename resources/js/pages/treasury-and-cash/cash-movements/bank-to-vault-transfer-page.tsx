@@ -7,6 +7,7 @@ import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { formatDate } from '../../../lib/date_util';
+import { BreadcrumbItem } from '../../../types';
 
 const NOTES = [1000, 500, 200, 100, 50, 20, 10, 5, 2, 1];
 const COINS = [5, 2, 1]; // extend later if needed (e.g. 0.5)
@@ -18,8 +19,8 @@ type Denom = {
     amount: number;
 };
 
-export default function VaultToVaultTransferPage() {
-    const { vault_subledger_accounts, teller_subledger_accounts, branches } =
+export default function VaultToBankTransferPage() {
+    const { bank_subledger_accounts, vault_subledger_accounts, branches } =
         usePage().props as any;
 
     const { data, setData, post, processing } = useForm({
@@ -32,8 +33,8 @@ export default function VaultToVaultTransferPage() {
         denominations: [],
     });
 
-    const [fromVault, setFromVault] = useState<any>(null);
-    const [toTeller, setToTeller] = useState<any>(null);
+    const [fromBank, setFromBank] = useState<any>(null);
+    const [toVault, setToVault] = useState<any>(null);
 
     const [denoms, setDenoms] = useState<Denom[]>([
         ...NOTES.map((v) => ({
@@ -66,18 +67,18 @@ export default function VaultToVaultTransferPage() {
     };
 
     const syncVoucher = (total: number, denomsData: Denom[]) => {
-        if (!fromVault || !toTeller || total <= 0) return;
+        if (!fromBank || !toVault || total <= 0) return;
 
         const lines = [
             {
-                subledger_id: fromVault.id,
-                name: fromVault.name,
+                subledger_id: fromBank.id,
+                name: fromBank.name,
                 debit: total,
                 credit: 0,
             },
             {
-                subledger_id: toTeller.id,
-                name: toTeller.name,
+                subledger_id: toVault.id,
+                name: toVault.name,
                 debit: 0,
                 credit: total,
             },
@@ -88,43 +89,47 @@ export default function VaultToVaultTransferPage() {
 
         setData(
             'narration',
-            `Cash deposited from vault ${fromVault.name} to bank ${toTeller.name}`,
+            `Cash deposited from vault ${toVault.name} to bank ${fromBank.name}`,
         );
     };
 
     const submitTransfer = () => {
         const total = denoms.reduce((sum, d) => sum + d.amount, 0);
 
-        if (!fromVault || !toTeller) {
-            alert('Select vaults');
-            return;
-        }
-
-        if (fromVault.id === toTeller.id) {
-            alert('Vault cannot be same');
+        if (!fromBank || !toVault) {
+            alert('Select vault and bank');
             return;
         }
 
         if (total <= 0) {
-            alert('Enter denominations');
+            alert('Enter valid denomination');
             return;
         }
 
         post('/voucher_entries');
     };
 
+    const totalAmount = denoms.reduce((sum, d) => sum + d.amount, 0);
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Treasury and Cash', href: '#' },
+        { title: 'Cash Movements', href: '' },
+        { title: 'Bank to Vault Transfer', href: '' },
+    ];
+
     return (
-        <CustomAuthLayout>
-            <Head title="Vault Transfer with Denomination" />
-            <div className="space-y-4 text-foreground">
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
+        <CustomAuthLayout breadcrumbs={breadcrumbs}>
+            <Head title="Vault to Bank Transfer" />
+
+            <div className="space-y-4">
+                <div className="grid gap-6 md:grid-cols-12">
                     {/* LEFT */}
                     <div className="space-y-4 md:col-span-8">
-                        {/* Vault Selection */}
+                        {/* Selection */}
                         <div className="rounded-md border bg-card">
                             <div className="rounded-tl-md rounded-tr-md border-b bg-sidebar text-card-foreground">
                                 <h3 className="px-4 py-3 text-sm font-semibold">
-                                    Vault to Vault Transfer
+                                    Bank to Vault Transfer
                                 </h3>
                             </div>
                             <div className="grid gap-2 px-4 py-3 md:grid-cols-2 lg:grid-cols-3">
@@ -205,12 +210,34 @@ export default function VaultToVaultTransferPage() {
 
                                 <div className="">
                                     <Label className="text-xs">
-                                        From Vault Account
+                                        From Bank Account
                                     </Label>
                                     <Select
-                                        value={fromVault?.id?.toString() || ''}
+                                        value={fromBank?.id?.toString() || ''}
                                         onChange={(v) =>
-                                            setFromVault(
+                                            setFromBank(
+                                                bank_subledger_accounts.find(
+                                                    (x: any) => x.id == v,
+                                                ),
+                                            )
+                                        }
+                                        options={bank_subledger_accounts.map(
+                                            (b: any) => ({
+                                                value: b.id.toString(),
+                                                label: b.name,
+                                            }),
+                                        )}
+                                    />
+                                </div>
+
+                                <div className="">
+                                    <Label className="text-xs">
+                                        To Vault Account
+                                    </Label>
+                                    <Select
+                                        value={toVault?.id?.toString() || ''}
+                                        onChange={(v) =>
+                                            setToVault(
                                                 vault_subledger_accounts.find(
                                                     (x: any) => x.id == v,
                                                 ),
@@ -220,27 +247,6 @@ export default function VaultToVaultTransferPage() {
                                             (v: any) => ({
                                                 value: v.id.toString(),
                                                 label: v.name,
-                                            }),
-                                        )}
-                                    />
-                                </div>
-                                <div className="">
-                                    <Label className="text-xs">
-                                        To Teller Account
-                                    </Label>
-                                    <Select
-                                        value={toTeller?.id?.toString() || ''}
-                                        onChange={(v) =>
-                                            setToTeller(
-                                                teller_subledger_accounts.find(
-                                                    (x: any) => x.id == v,
-                                                ),
-                                            )
-                                        }
-                                        options={teller_subledger_accounts.map(
-                                            (b: any) => ({
-                                                value: b.id.toString(),
-                                                label: b.name,
                                             }),
                                         )}
                                     />
@@ -261,7 +267,6 @@ export default function VaultToVaultTransferPage() {
                             </div>
                         </div>
 
-                        {/* Denomination Table */}
                         <div className="rounded-md border bg-card">
                             <div className="rounded-tl-md rounded-tr-md border-b bg-sidebar px-6 py-3 text-sm font-medium text-card-foreground">
                                 Denomination
@@ -359,28 +364,25 @@ export default function VaultToVaultTransferPage() {
                             </div>
 
                             <div className="mx-8 mb-4 font-bold">
-                                Total:{' '}
-                                {formatBDTCurrency(
-                                    denoms.reduce(
-                                        (sum, d) => sum + d.amount,
-                                        0,
-                                    ),
-                                )}
+                                Total: {formatBDTCurrency(totalAmount)}
                             </div>
                         </div>
 
-                        {/* Submit */}
-                        <Button
-                            onClick={submitTransfer}
-                            disabled={processing}
-                            className="rounded bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/80"
-                        >
-                            {processing ? 'Processing...' : 'Transfer Cash'}
-                        </Button>
+                        <div className="space-y-2">
+                            {/* SUBMIT */}
+                            <Button
+                                onClick={submitTransfer}
+                                disabled={processing}
+                            >
+                                {processing
+                                    ? 'Processing...'
+                                    : 'Deposit to Bank'}
+                            </Button>
+                        </div>
                     </div>
 
                     {/* RIGHT */}
-                    <div className="space-y-6 md:col-span-4">
+                    <div className="space-y-4 md:col-span-4">
                         {/* Voucher Header */}
                         <div className="rounded-md border bg-card md:col-span-4">
                             <div className="sticky top-0 z-10 flex items-center justify-between rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-3">

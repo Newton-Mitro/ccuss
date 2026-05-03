@@ -7,6 +7,7 @@ import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { formatDate } from '../../../lib/date_util';
+import { BreadcrumbItem } from '../../../types';
 
 const NOTES = [1000, 500, 200, 100, 50, 20, 10, 5, 2, 1];
 const COINS = [5, 2, 1]; // extend later if needed (e.g. 0.5)
@@ -19,7 +20,8 @@ type Denom = {
 };
 
 export default function VaultToVaultTransferPage() {
-    const { vault_subledger_accounts, branches } = usePage().props as any;
+    const { vault_subledger_accounts, teller_subledger_accounts, branches } =
+        usePage().props as any;
 
     const { data, setData, post, processing } = useForm({
         voucher_type: 'CONTRA',
@@ -32,7 +34,7 @@ export default function VaultToVaultTransferPage() {
     });
 
     const [fromVault, setFromVault] = useState<any>(null);
-    const [toVault, setToVault] = useState<any>(null);
+    const [toTeller, setToTeller] = useState<any>(null);
 
     const [denoms, setDenoms] = useState<Denom[]>([
         ...NOTES.map((v) => ({
@@ -65,7 +67,7 @@ export default function VaultToVaultTransferPage() {
     };
 
     const syncVoucher = (total: number, denomsData: Denom[]) => {
-        if (!fromVault || !toVault || total <= 0) return;
+        if (!fromVault || !toTeller || total <= 0) return;
 
         const lines = [
             {
@@ -75,8 +77,8 @@ export default function VaultToVaultTransferPage() {
                 credit: 0,
             },
             {
-                subledger_id: toVault.id,
-                name: toVault.name,
+                subledger_id: toTeller.id,
+                name: toTeller.name,
                 debit: 0,
                 credit: total,
             },
@@ -87,19 +89,19 @@ export default function VaultToVaultTransferPage() {
 
         setData(
             'narration',
-            `Cash deposited from vault ${fromVault.name} to bank ${toVault.name}`,
+            `Cash deposited from vault ${fromVault.name} to bank ${toTeller.name}`,
         );
     };
 
     const submitTransfer = () => {
         const total = denoms.reduce((sum, d) => sum + d.amount, 0);
 
-        if (!fromVault || !toVault) {
+        if (!fromVault || !toTeller) {
             alert('Select vaults');
             return;
         }
 
-        if (fromVault.id === toVault.id) {
+        if (fromVault.id === toTeller.id) {
             alert('Vault cannot be same');
             return;
         }
@@ -112,8 +114,14 @@ export default function VaultToVaultTransferPage() {
         post('/voucher_entries');
     };
 
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Treasury and Cash', href: '#' },
+        { title: 'Cash Movements', href: '' },
+        { title: 'Vault To Teller Transfer', href: '' },
+    ];
+
     return (
-        <CustomAuthLayout>
+        <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Vault Transfer with Denomination" />
             <div className="space-y-4 text-foreground">
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
@@ -207,12 +215,11 @@ export default function VaultToVaultTransferPage() {
                                         From Vault Account
                                     </Label>
                                     <Select
-                                        value={fromVault?.toString() || ''}
+                                        value={fromVault?.id?.toString() || ''}
                                         onChange={(v) =>
                                             setFromVault(
                                                 vault_subledger_accounts.find(
-                                                    (x: any) =>
-                                                        x.id.toString() == v,
+                                                    (x: any) => x.id == v,
                                                 ),
                                             )
                                         }
@@ -226,19 +233,18 @@ export default function VaultToVaultTransferPage() {
                                 </div>
                                 <div className="">
                                     <Label className="text-xs">
-                                        To Vault Account
+                                        To Teller Account
                                     </Label>
                                     <Select
-                                        value={toVault?.toString() || ''}
+                                        value={toTeller?.id?.toString() || ''}
                                         onChange={(v) =>
-                                            setToVault(
-                                                vault_subledger_accounts.find(
-                                                    (x: any) =>
-                                                        x.id.toString() == v,
+                                            setToTeller(
+                                                teller_subledger_accounts.find(
+                                                    (x: any) => x.id == v,
                                                 ),
                                             )
                                         }
-                                        options={vault_subledger_accounts.map(
+                                        options={teller_subledger_accounts.map(
                                             (b: any) => ({
                                                 value: b.id.toString(),
                                                 label: b.name,

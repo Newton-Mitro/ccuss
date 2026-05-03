@@ -24,7 +24,7 @@ class BranchController extends Controller
 
         $branches = $query->latest()
             ->paginate(
-                $request->input('per_page', 10)
+                $request->input('per_page', 18)
             )->withQueryString();
 
         return Inertia::render('system-administration/branches/index', [

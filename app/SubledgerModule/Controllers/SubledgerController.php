@@ -46,7 +46,7 @@ class SubledgerController extends Controller
 
         $subledgers = $query
             ->latest()
-            ->paginate($request->input('per_page', 10))
+            ->paginate($request->input('per_page', 18))
             ->withQueryString();
 
         return Inertia::render('subledger-module/subledgers/list-subledgers-page', [

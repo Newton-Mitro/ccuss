@@ -49,7 +49,7 @@ export default function History() {
 
     const { data, setData, get } = useForm({
         search: filters.search || '',
-        per_page: filters.per_page || 10,
+        per_page: filters.per_page || 18,
         page: filters.page || 1,
     });
 

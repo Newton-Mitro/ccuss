@@ -1,13 +1,13 @@
-import { Input } from '../../../../components/ui/input';
-import { Label } from '../../../../components/ui/label';
-import { Select } from '../../../../components/ui/select';
-import { formatDate } from '../../../../lib/date_util';
-import { Branch } from '../../../../types/branch';
+import { Input } from '../../../../../components/ui/input';
+import { Label } from '../../../../../components/ui/label';
+import { Select } from '../../../../../components/ui/select';
+import { formatDate } from '../../../../../lib/date_util';
+import { Branch } from '../../../../../types/branch';
+
 interface VoucherHeaderSectionProps {
     data: any;
     errors: any;
     setData: (key: string, value: any) => void;
-    cash_subledger_accounts: any[];
     branches: Branch[];
 }
 
@@ -15,13 +15,11 @@ function VoucherHeaderSection({
     data,
     errors,
     setData,
-    cash_subledger_accounts,
     branches,
 }: VoucherHeaderSectionProps) {
-    console.log(cash_subledger_accounts);
     return (
-        <div className="rounded-md border bg-card md:col-span-6">
-            <div className="sticky top-0 z-10 flex items-center justify-between rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-3">
+        <div className="rounded-md border bg-card">
+            <div className="flex items-center justify-between border-b bg-destructive/5 px-4 py-3">
                 <h2 className="text-sm font-medium text-card-foreground">
                     Voucher Header
                 </h2>
@@ -79,17 +77,18 @@ function VoucherHeaderSection({
                 </div>
 
                 <div>
-                    <Label className="text-xs">Cash Account</Label>
+                    <Label className="text-xs">Ledger Account</Label>
                     <Select
-                        error={errors?.cash_subledger_account_id}
-                        value={data.cash_subledger_account_id?.toString() || ''}
-                        options={cash_subledger_accounts?.map((fp) => ({
-                            value: fp.id.toString(),
-                            label: fp.name,
-                        }))}
-                        onChange={(value) =>
-                            setData('cash_subledger_account_id', Number(value))
-                        }
+                        disabled
+                        error={''}
+                        value={''}
+                        options={[]}
+                        onChange={(value) => {
+                            setData(
+                                'ledger_account_id',
+                                value ? Number(value) : null,
+                            );
+                        }}
                     />
                 </div>
 

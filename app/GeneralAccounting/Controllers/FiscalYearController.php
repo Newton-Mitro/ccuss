@@ -30,7 +30,7 @@ class FiscalYearController
             }
         }
 
-        $perPage = $request->input('per_page', 20);
+        $perPage = $request->input('per_page', 18);
 
         $fiscalYears = $query->latest()
             ->paginate($perPage)

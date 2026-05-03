@@ -39,7 +39,7 @@ class BankAccountController extends Controller
         }
 
         $paginatedData = $query->latest()
-            ->paginate($request->input('per_page', 10))
+            ->paginate($request->input('per_page', 18))
             ->withQueryString();
 
         return Inertia::render('bank-cash/bank-accounts/list-bank-accounts-page', [
