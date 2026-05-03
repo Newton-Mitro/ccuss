@@ -58,7 +58,7 @@ const DataTablePagination: React.FC<Props> = ({
     return (
         <div className="flex items-center justify-between">
             {/* Per Page Selector */}
-            <div className="w-24">
+            <div className="w-32">
                 <Select
                     className="bg-card"
                     value={perPage.toString()}
