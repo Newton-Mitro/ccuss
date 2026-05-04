@@ -14,6 +14,7 @@ interface Props {
     links: LinkItem[];
     perPageOptions?: number[];
 }
+
 const recordPerPage = [
     {
         value: 999999999,
