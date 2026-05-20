@@ -131,7 +131,7 @@ export default function VaultToVaultTransferPage() {
                         <div className="rounded-md border bg-card">
                             <div className="rounded-tl-md rounded-tr-md border-b bg-sidebar text-card-foreground">
                                 <h3 className="px-4 py-3 text-sm font-semibold">
-                                    Vault to Vault Transfer
+                                    Vault To Teller Transfer
                                 </h3>
                             </div>
                             <div className="grid gap-2 px-4 py-3 md:grid-cols-2 lg:grid-cols-3">
@@ -298,7 +298,7 @@ export default function VaultToVaultTransferPage() {
                                                         />
                                                         <Input
                                                             type="number"
-                                                            value={d.qty}
+                                                            value={d.qty || ''}
                                                             onChange={(e) =>
                                                                 handleDenomChange(
                                                                     index,
@@ -343,7 +343,7 @@ export default function VaultToVaultTransferPage() {
                                                         />
                                                         <Input
                                                             type="number"
-                                                            value={d.qty}
+                                                            value={d.qty || ''}
                                                             onChange={(e) =>
                                                                 handleDenomChange(
                                                                     index,

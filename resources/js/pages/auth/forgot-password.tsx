@@ -1,4 +1,3 @@
-import AppLogoIcon from '@/components/app-logo-icon';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { login } from '@/routes';
 import { email } from '@/routes/password';
 import { Form, Head } from '@inertiajs/react';
+import AppLogo from '../../components/app-logo';
 
 export default function ForgotPassword({ status }: { status?: string }) {
     return (
@@ -17,7 +17,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
             <div className="w-full max-w-md rounded-lg border bg-card p-6 md:p-10">
                 {/* Logo + Intro */}
                 <div className="mb-6 flex flex-col items-center text-center">
-                    <AppLogoIcon className="mb-3 h-20 w-20 fill-current text-primary" />
+                    <AppLogo className="mb-3 h-20 w-20 fill-current text-primary" />
                     <div className="text-sm font-medium text-primary">
                         Forgot your{' '}
                         <span className="text-foreground">password?</span>

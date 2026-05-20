@@ -297,7 +297,7 @@ export default function VaultToBankTransferPage() {
                                                         />
                                                         <Input
                                                             type="number"
-                                                            value={d.qty}
+                                                            value={d.qty || ''}
                                                             onChange={(e) =>
                                                                 handleDenomChange(
                                                                     index,
@@ -342,7 +342,7 @@ export default function VaultToBankTransferPage() {
                                                         />
                                                         <Input
                                                             type="number"
-                                                            value={d.qty}
+                                                            value={d.qty || ''}
                                                             onChange={(e) =>
                                                                 handleDenomChange(
                                                                     index,

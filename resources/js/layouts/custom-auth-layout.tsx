@@ -27,6 +27,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { route } from 'ziggy-js';
+import AppLogo from '../components/app-logo';
 import { Breadcrumbs } from '../components/breadcrumbs';
 import { SidebarMenuItem } from '../components/sidebar-menu-item';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
@@ -191,10 +192,8 @@ export default function CustomAuthLayout({
                     href={route('auth.home')}
                     className="flex h-16 items-center gap-2 border-b pl-3"
                 >
-                    <img
-                        src={import.meta.env.VITE_LOGO_PATH}
-                        className="h-10 w-10 rounded-full border border-border bg-card p-1"
-                    />
+                    <AppLogo className="h-10 w-10 rounded-full border border-border p-1" />
+
                     <span
                         className={cn(
                             'font-semibold transition-opacity',

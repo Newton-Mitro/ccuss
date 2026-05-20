@@ -1,4 +1,3 @@
-import AppLogoIcon from '@/components/app-logo-icon';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { store } from '@/routes/password/confirm';
 import { Form, Head } from '@inertiajs/react';
+import AppLogo from '../../components/app-logo';
 
 export default function ConfirmPassword() {
     return (
@@ -15,7 +15,7 @@ export default function ConfirmPassword() {
             <div className="w-full max-w-md rounded-lg border bg-card p-6 md:p-10">
                 {/* Logo + Intro */}
                 <div className="mb-6 flex flex-col items-center text-center">
-                    <AppLogoIcon className="mb-3 h-20 w-20 fill-current text-primary" />
+                    <AppLogo className="mb-3 h-20 w-20 fill-current text-primary" />
                     <div className="text-sm font-medium text-primary">
                         Confirm your{' '}
                         <span className="text-foreground">password</span>

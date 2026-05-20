@@ -1,4 +1,3 @@
-import AppLogoIcon from '@/components/app-logo-icon';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,7 @@ import { request } from '@/routes/password';
 import { Form, Head } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { useEffect } from 'react';
+import AppLogo from '../../components/app-logo';
 
 export default function Login({ status, canResetPassword, canRegister }) {
     useEffect(() => {
@@ -28,11 +28,9 @@ export default function Login({ status, canResetPassword, canRegister }) {
                 transition={{ duration: 1 }}
                 className="hidden w-7/12 flex-col items-center justify-center lg:flex"
             >
-                <img
-                    src={import.meta.env.VITE_LOGO_PATH}
-                    alt="Logo"
-                    className="w-48 p-4"
-                />
+                <div className="">
+                    <AppLogo />
+                </div>
 
                 <div className="mt-3 text-center">
                     <h1 className="text-4xl font-bold tracking-tight">
@@ -61,7 +59,9 @@ export default function Login({ status, canResetPassword, canRegister }) {
                     <div className="w-full md:px-10 lg:px-14 xl:px-20">
                         {/* Header */}
                         <div className="mb-6 text-center">
-                            <AppLogoIcon className="mx-auto w-28 text-accent" />
+                            <div className="flex items-center justify-center">
+                                <AppLogo />
+                            </div>
                             <h2 className="mt-3 text-sm text-muted-foreground">
                                 Welcome back to
                             </h2>

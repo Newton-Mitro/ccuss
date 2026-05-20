@@ -1,16 +1,22 @@
-import AppLogoIcon from './app-logo-icon';
+import { useAppearance } from '@/hooks/use-appearance';
 
-export default function AppLogo() {
+export default function AppLogo({
+    className = 'w-28 object-contain p-4 md:w-48',
+    ...props
+}) {
+    const { mode } = useAppearance();
+
+    const isDark =
+        mode === 'dark' ||
+        (mode === 'system' &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches);
+
     return (
-        <>
-            <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-md">
-                <AppLogoIcon className="size-5 fill-current text-white" />
-            </div>
-            <div className="ml-1 grid flex-1 text-left text-sm">
-                <span className="mb-0.5 truncate leading-tight font-semibold">
-                    Laravel Starter Kit
-                </span>
-            </div>
-        </>
+        <img
+            src={isDark ? '/logo.png' : '/logo_3.png'}
+            alt="Logo"
+            className={className}
+            {...props}
+        />
     );
 }

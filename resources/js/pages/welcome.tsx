@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { motion } from 'framer-motion';
+import AppLogo from '../components/app-logo';
 import CustomAuthLayout from '../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../types';
 
@@ -19,11 +20,7 @@ export default function HomePage() {
                 <div className="w-full max-w-5xl">
                     <div className="flex items-center justify-center">
                         <div className="">
-                            <img
-                                src={import.meta.env.VITE_LOGO_PATH}
-                                alt="Logo"
-                                className="w-28 bg-background object-contain p-4 md:w-48"
-                            />
+                            <AppLogo />
                         </div>
                     </div>
                 </div>
