@@ -12,17 +12,12 @@ use Illuminate\Support\Facades\Hash;
 class OrganizationStructureSeeder extends Seeder
 {
     private array $dhakaBranches = [
-        'Dhaka Main Branch',
-        'Nodda Branch',
-        'Uttara Branch',
-        'Mirpur Branch',
-        'Mohammadpur Branch',
-        'Savar Branch',
-        'Shadhonpara Branch',
-        'Monipuripara Branch',
-        'Narayanganj Branch',
-        'Mohakhali Branch',
-        'Pagar Branch',
+        'Main Branch',
+        'Branch Office-1',
+        'Branch Office-2',
+        'Branch Office-3',
+        'Branch Office-4',
+        'Branch Office-5',
     ];
 
     public function run(): void
@@ -30,8 +25,8 @@ class OrganizationStructureSeeder extends Seeder
         // 1. Organization
         $organization = Organization::factory()->create([
             'code' => 'ORG001',
-            'name' => 'Demo Microfinance Ltd',
-            'short_name' => 'DML',
+            'name' => 'Union Credit Union Society Ltd.',
+            'short_name' => 'UCUSL',
         ]);
 
         // 2. Branches
@@ -45,53 +40,14 @@ class OrganizationStructureSeeder extends Seeder
 
         $this->command->info('✅ Organization with branches created.');
 
-        // -------------------------------
-        // 3. Vault + Account per Branch
-        // -------------------------------
-        // foreach ($branches as $branch) {
-
-        //     // ✅ Step 1: Create Vault FIRST
-        //     $vault = Vault::firstOrCreate(
-        //         [
-        //             'branch_id' => $branch->id,
-        //         ],
-        //         [
-        //             'name' => $branch->name . ' Main Vault',
-        //             'is_active' => true,
-        //             'subledger_account_id' => null, // temporary
-        //         ]
-        //     );
-
-        //     // ✅ Step 2: Create Account linked to Vault
-        //     $vaultAccount = SubledgerAccount::factory()
-        //         ->vault()
-        //         ->create([
-        //             'organization_id' => $organization->id,
-        //             'branch_id' => $branch->id,
-        //             'name' => $branch->name . ' Vault Account',
-        //             'accountable_id' => $vault->id,
-        //             'accountable_type' => Vault::class,
-        //         ]);
-
-        //     // ✅ Step 3: Update Vault with subledger_account_id
-        //     $vault->update([
-        //         'subledger_account_id' => $vaultAccount->id,
-        //     ]);
-        // }
-
-        $this->command->info('✅ Vault + account created for each branch.');
-
-        // -------------------------------
-        // 4. Default System Users
-        // -------------------------------
         $defaultUsers = [
             ['name' => 'Super Admin', 'email' => 'super.admin@email.com'],
         ];
 
         $mainBranch = $branches->first();
 
+        // 3. Users
         foreach ($defaultUsers as $userData) {
-
             $user = User::firstOrCreate(
                 ['email' => $userData['email']],
                 [
@@ -102,45 +58,12 @@ class OrganizationStructureSeeder extends Seeder
                     'email_verified_at' => now(),
                 ]
             );
-
             // Assign role
             $roleModels = Role::where('slug', 'system_administrator')->first();
 
             if ($roleModels) {
                 $user->roles()->sync([$roleModels->id]);
             }
-
-            // ✅ Step 1: Create Teller FIRST
-            // $teller = Teller::firstOrCreate(
-            //     [
-            //         'user_id' => $user->id,
-            //     ],
-            //     [
-            //         'branch_id' => $mainBranch->id,
-            //         'subledger_account_id' => null, // temporary
-            //         'code' => 'TLR-' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
-            //         'name' => $userData['name'],
-            //         'max_cash_limit' => 500000,
-            //         'max_transaction_limit' => 100000,
-            //         'is_active' => true,
-            //     ]
-            // );
-
-            // // ✅ Step 2: Create Teller Account
-            // $tellerAccount = SubledgerAccount::factory()
-            //     ->teller()
-            //     ->create([
-            //         'organization_id' => $organization->id,
-            //         'branch_id' => $mainBranch->id,
-            //         'name' => $userData['name'] . ' Teller Cash Account',
-            //         'accountable_id' => $teller->id,
-            //         'accountable_type' => Teller::class,
-            //     ]);
-
-            // // ✅ Step 3: Update Teller
-            // $teller->update([
-            //     'subledger_account_id' => $tellerAccount->id,
-            // ]);
         }
 
         $this->command->info('✅ Core admin users + teller accounts created.');

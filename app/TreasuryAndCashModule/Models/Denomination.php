@@ -11,7 +11,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Denomination extends Model
 {
     use HasFactory, Auditable, SoftDeletes;
-    protected $fillable = ['value', 'is_active'];
+    protected $fillable = ['value', 'is_active', 'type'];
+
+    const TYPE_COIN = 'coin';
+    const TYPE_NOTE = 'note';
 
     public function vaultDenominations(): HasMany
     {
