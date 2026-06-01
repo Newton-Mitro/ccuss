@@ -1,6 +1,5 @@
 import { Eye } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import { Input } from '../../../../../components/ui/input';
+import { useMemo } from 'react';
 import { formatBDTCurrency } from '../../../../../lib/bdtCurrencyFormatter';
 import { formatDate } from '../../../../../lib/date_util';
 
@@ -17,8 +16,6 @@ function VoucherQueueSection({
     voucherCollectNowHandler,
     cancelVoucherHandler,
 }: Props) {
-    const [receivedAmount, setReceivedAmount] = useState<number>(0);
-
     const { pendingAmount, postedAmount } = useMemo(() => {
         return voucher_entries.reduce(
             (acc, voucher) => {
@@ -38,19 +35,9 @@ function VoucherQueueSection({
         );
     }, [voucher_entries]);
 
-    const returnAmount = useMemo(() => {
-        if (!receivedAmount) return 0;
-        return receivedAmount - pendingAmount;
-    }, [receivedAmount, pendingAmount]);
-
-    const handleReceivedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = Number(e.target.value);
-        setReceivedAmount(isNaN(value) ? 0 : value);
-    };
-
     return (
         <div className="flex flex-col gap-4 bg-card">
-            <div className="flex h-[calc(100vh/2-42px)] flex-col overflow-hidden rounded-md border">
+            <div className="flex h-[calc(100vh/2+70px)] flex-col overflow-hidden rounded-md border">
                 {/* Header */}
                 <div className="sticky top-0 z-10 flex items-center justify-between rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-3">
                     <h2 className="text-sm font-medium text-card-foreground">
@@ -157,48 +144,18 @@ function VoucherQueueSection({
 
                 {/* Footer */}
                 <div className="sticky bottom-0 z-20 border-t bg-sidebar">
-                    <div className="flex items-center justify-between gap-4 px-4 py-2">
-                        {/* 🔹 Left Section — Totals */}
-                        <div className="flex flex-col items-center gap-1 text-sm">
-                            {/* Pending */}
-                            <div className="flex items-center gap-2 rounded-full bg-amber-100 px-3 text-amber-700">
-                                <span className="text-xs font-medium tracking-wide uppercase">
-                                    {`Pending ${formatBDTCurrency(pendingAmount)}`}
-                                </span>
-                            </div>
-
-                            {/* Posted */}
-                            <div className="flex items-center gap-2 rounded-full bg-emerald-100 px-3 text-emerald-700">
-                                <span className="text-xs font-medium tracking-wide uppercase">
-                                    {`Posted ${formatBDTCurrency(postedAmount)}`}
-                                </span>
-                            </div>
+                    <div className="flex items-center justify-between gap-4 px-4 py-3">
+                        {/* Pending */}
+                        <div className="flex items-center gap-2 rounded-full bg-amber-100 px-3 text-amber-700">
+                            <span className="text-xs font-medium tracking-wide uppercase">
+                                {`Pending ${formatBDTCurrency(pendingAmount)}`}
+                            </span>
                         </div>
 
-                        {/* 🔹 Middle Section — Received Input */}
-                        <Input
-                            type="number"
-                            min="0"
-                            placeholder="Pending received"
-                            className="h-9 text-sm"
-                            value={receivedAmount || ''}
-                            onChange={handleReceivedChange}
-                        />
-
-                        {/* 🔹 Right Section — Return */}
-                        <div className="flex items-center gap-3 text-sm">
-                            <span className="font-medium text-muted-foreground">
-                                Return
-                            </span>
-
-                            <span
-                                className={`text-base font-semibold ${
-                                    returnAmount < 0
-                                        ? 'text-red-600'
-                                        : 'text-emerald-600'
-                                }`}
-                            >
-                                {formatBDTCurrency(returnAmount)}
+                        {/* Posted */}
+                        <div className="flex items-center gap-2 rounded-full bg-emerald-100 px-3 text-emerald-700">
+                            <span className="text-xs font-medium tracking-wide uppercase">
+                                {`Posted ${formatBDTCurrency(postedAmount)}`}
                             </span>
                         </div>
                     </div>

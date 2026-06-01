@@ -21,7 +21,7 @@ function VoucherHeaderSection({
     console.log(cash_subledger_accounts);
     return (
         <div className="rounded-md border bg-card md:col-span-6">
-            <div className="sticky top-0 z-10 flex items-center justify-between rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-3">
+            <div className="flex items-center justify-between rounded-tl-md rounded-tr-md border-b bg-sidebar px-4 py-3">
                 <h2 className="text-sm font-medium text-card-foreground">
                     Voucher Header
                 </h2>

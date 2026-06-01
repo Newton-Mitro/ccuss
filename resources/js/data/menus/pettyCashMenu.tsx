@@ -71,36 +71,6 @@ export const pettyCashMenu: SidebarItem[] = [
                     },
                 ],
             },
-
-            {
-                name: 'Reports',
-                icon: <i className="fa-solid fa-chart-pie" />,
-                children_expanded: false,
-                permission: ['petty_cash.reports.view'],
-                children: [
-                    {
-                        name: 'Account Summary',
-                        icon: <i className="fa-solid fa-book-open" />,
-                        path: '/petty-cash-account-summary',
-                        match_path: 'petty-cash-account-summary',
-                        permission: ['petty_cash.reports.view'],
-                    },
-                    {
-                        name: 'Expense Reports',
-                        icon: <i className="fa-solid fa-file-lines" />,
-                        path: '/petty-cash-expense-reports',
-                        match_path: 'petty-cash-expense-reports',
-                        permission: ['petty_cash.reports.view'],
-                    },
-                    {
-                        name: 'Voucher Reports',
-                        icon: <i className="fa-solid fa-file-circle-check" />,
-                        path: '/petty-cash-voucher-reports',
-                        match_path: 'petty-cash-voucher-reports',
-                        permission: ['petty_cash.reports.view'],
-                    },
-                ],
-            },
         ],
     },
 ];

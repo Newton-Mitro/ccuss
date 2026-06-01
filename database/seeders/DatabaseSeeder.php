@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
         Model::withoutEvents(function () {
             $this->call([
                 RoleSeeder::class,
+                DenominationSeeder::class,
                 OrganizationStructureSeeder::class,
                 CustomerModulePermissionSeeder::class,
                 CustomerModuleRolePermissionSeeder::class,

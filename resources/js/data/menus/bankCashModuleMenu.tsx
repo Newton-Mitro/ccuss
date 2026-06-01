@@ -43,36 +43,6 @@ export const bankCashModuleMenu: SidebarItem[] = [
                     },
                 ],
             },
-
-            {
-                name: 'Reports',
-                icon: <i className="fa-solid fa-chart-line" />,
-                children_expanded: false,
-                permission: ['bank.reports.view'],
-                children: [
-                    {
-                        name: 'Account Summary',
-                        icon: <i className="fa-solid fa-book" />,
-                        path: '/bank-account-summary',
-                        match_path: 'bank-account-summary',
-                        permission: ['bank.reports.view'],
-                    },
-                    {
-                        name: 'Transaction Reports',
-                        icon: <i className="fa-solid fa-file-invoice" />,
-                        path: '/bank-transaction-reports',
-                        match_path: 'bank-transaction-reports',
-                        permission: ['bank.reports.view'],
-                    },
-                    {
-                        name: 'Cheque Reports',
-                        icon: <i className="fa-solid fa-money-check" />,
-                        path: '/bank-cheque-reports',
-                        match_path: 'bank-cheque-reports',
-                        permission: ['bank.reports.view'],
-                    },
-                ],
-            },
         ],
     },
 ];

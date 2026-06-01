@@ -28,7 +28,6 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
 
     const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-    // ----------------------- API SEARCH
     const searchCustomers = async () => {
         if (!query?.trim()) {
             setCustomers([]);
@@ -74,7 +73,7 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
 
     return (
         <div
-            className="relative w-full rounded-md border bg-muted/30 p-4"
+            className="relative w-full rounded-md border bg-muted p-4"
             ref={dropdownRef}
         >
             {/* INPUT + SEARCH BUTTON */}
@@ -207,24 +206,15 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
                     </div>
                 </div>
             ) : (
-                // Skeleton with exact same height
                 <div className="mt-3 flex flex-col gap-4 rounded-md border bg-background/60 p-3 md:flex-row">
                     <div className="flex items-center justify-center">
-                        {/* Avatar */}
-                        <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-full bg-muted" />
+                        <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full bg-muted" />
                     </div>
-
-                    {/* Right side */}
                     <div className="flex flex-1 flex-col justify-between space-y-2">
-                        {/* Name & type row */}
                         <div className="space-y-1">
                             <div className="h-4 w-3/5 rounded bg-muted" />{' '}
-                            {/* name */}
                             <div className="h-3 w-2/5 rounded bg-muted" />{' '}
-                            {/* type/status */}
                         </div>
-
-                        {/* Grid info row */}
                         <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-3">
                             <div className="h-8 w-full rounded bg-muted" />
                             <div className="h-8 w-full rounded bg-muted" />

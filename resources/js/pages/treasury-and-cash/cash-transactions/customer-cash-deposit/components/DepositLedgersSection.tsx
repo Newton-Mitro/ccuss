@@ -81,7 +81,7 @@ function DepositLedgersSection({
                         </div>
 
                         {/* Scroll Body */}
-                        <div className="h-[calc(100vh/2-86px)] overflow-y-auto bg-muted/30 p-2">
+                        <div className="h-[calc(100vh/2-86px)] overflow-y-auto bg-muted p-2">
                             <table className="w-full table-fixed border-separate border-spacing-y-2">
                                 <tbody>
                                     {collectionSubledgerAccounts.map(
