@@ -53,6 +53,14 @@ export default function Index() {
     });
 
     const handleSearch = () => {
+        // router.get('/vaults', {
+        //     search: data.search,
+        //     branch_id: data.branch_id,
+        //     subledger_account_id: data.subledger_account_id,
+        //     status: data.status,
+        //     per_page: data.per_page,
+        //     page: data.page,
+        // }, { preserveState: true });
         get('/vaults', { preserveState: true });
     };
 

@@ -108,11 +108,6 @@ class VaultController extends Controller
 
     public function edit(Vault $vault)
     {
-        // 🔐 Branch isolation
-        if ($vault->branch_id !== Auth::user()->branch_id) {
-            abort(403);
-        }
-
         return Inertia::render('treasury-and-cash/vaults/edit', [
             'vault' => $vault->load('subledgerAccount'),
             'branch' => Auth::user()->branch,
@@ -122,10 +117,6 @@ class VaultController extends Controller
 
     public function show(Vault $vault)
     {
-        if ($vault->branch_id !== Auth::user()->branch_id) {
-            abort(403);
-        }
-
         return Inertia::render('treasury-and-cash/vaults/show_vault_page', [
             'vault' => $vault->load(['branch', 'subledgerAccount', 'denominations.denomination']),
         ]);
@@ -133,10 +124,6 @@ class VaultController extends Controller
 
     public function update(Request $request, Vault $vault)
     {
-        if ($vault->branch_id !== Auth::user()->branch_id) {
-            abort(403);
-        }
-
         $data = $request->validate([
             'name' => 'nullable|string|max:255',
             'branch_id' => 'required|exists:branches,id',

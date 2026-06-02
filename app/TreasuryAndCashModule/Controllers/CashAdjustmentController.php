@@ -24,16 +24,12 @@ class CashAdjustmentController extends Controller
             })
             ->get();
 
-        $collection_ledgers = SubledgerAccount::all();
-
-
         $voucher_entries = VoucherEntry::all();
 
         return Inertia::render('treasury-and-cash/cash-adjustments/teller-cash-adjustment-page', [
             'ledger_accounts' => LedgerAccount::where('is_control_account', true)->where('is_active', true)->get(),
             'branches' => Branch::select('id', 'name')->get(),
             'teller_subledger_accounts' => $teller_subledger_accounts,
-            'lines' => $collection_ledgers,
             'voucher_entries' => $voucher_entries,
             'user_branch_id' => auth()->user()->branch_id,
         ]);

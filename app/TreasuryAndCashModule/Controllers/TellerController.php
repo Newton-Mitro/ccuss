@@ -134,10 +134,6 @@ class TellerController extends Controller
 
     public function edit(Teller $teller): Response
     {
-        if ($teller->branch_id !== Auth::user()->branch_id) {
-            abort(403);
-        }
-
         $branch = Auth::user()->branch;
 
         return Inertia::render('treasury-and-cash/tellers/teller-form', [
@@ -150,10 +146,6 @@ class TellerController extends Controller
 
     public function update(Request $request, Teller $teller)
     {
-        if ($teller->branch_id !== Auth::user()->branch_id) {
-            abort(403);
-        }
-
         $data = $request->validate([
             'user_id' => 'required|exists:users,id',
             'name' => 'required|string|max:255',
@@ -186,10 +178,6 @@ class TellerController extends Controller
 
     public function show(Teller $teller)
     {
-        if ($teller->branch_id !== Auth::user()->branch_id) {
-            abort(403);
-        }
-
         return Inertia::render('treasury-and-cash/tellers/show_teller_page', [
             'teller' => $teller->load(['branch', 'user', 'subledgerAccount']),
         ]);
@@ -197,10 +185,6 @@ class TellerController extends Controller
 
     public function destroy(Teller $teller)
     {
-        if ($teller->branch_id !== Auth::user()->branch_id) {
-            abort(403);
-        }
-
         if ($teller->sessions()->exists()) {
             return back()->withErrors([
                 'teller' => 'Cannot delete teller with active sessions'
