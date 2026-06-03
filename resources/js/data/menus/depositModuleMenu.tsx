@@ -53,7 +53,7 @@ export const depositModuleMenu: SidebarItem[] = [
             {
                 name: 'Saving Accounts',
                 icon: <i className="fa-solid fa-wallet" />,
-                path: '/saving-accounts',
+                path: '/deposit-accounts/create',
                 match_path: 'saving-account',
                 permission: ['saving-account.view'],
             },
@@ -64,7 +64,7 @@ export const depositModuleMenu: SidebarItem[] = [
             {
                 name: 'Member Accounts',
                 icon: <i className="fa-solid fa-users" />,
-                path: '/member-list',
+                path: '/deposit-accounts/create',
                 match_path: 'member-list',
                 permission: ['member.list.view'],
             },
@@ -75,14 +75,14 @@ export const depositModuleMenu: SidebarItem[] = [
             {
                 name: 'RD Accounts',
                 icon: <i className="fa-solid fa-wallet" />,
-                path: '/rd-accounts',
+                path: '/deposit-accounts/create',
                 match_path: 'rd-accounts',
                 permission: ['recurring.deposit.view'],
             },
             {
                 name: 'TD Accounts',
                 icon: <i className="fa-solid fa-wallet" />,
-                path: '/td-accounts',
+                path: '/deposit-accounts/create',
                 match_path: 'td-accounts',
                 permission: ['term.deposit.view'],
             },

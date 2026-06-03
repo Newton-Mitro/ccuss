@@ -18,7 +18,7 @@ export default function Login({ status, canResetPassword, canRegister }) {
     }, []);
 
     return (
-        <div className="flex min-h-screen bg-background">
+        <div className="flex min-h-screen bg-background px-6 lg:px-12">
             <Head title="Log in" />
 
             {/* Left Branding Section */}
@@ -26,7 +26,7 @@ export default function Login({ status, canResetPassword, canRegister }) {
                 initial={{ scale: 0.2, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 1 }}
-                className="hidden w-7/12 flex-col items-center justify-center lg:flex"
+                className="hidden flex-col items-center justify-center lg:flex lg:w-7/12"
             >
                 <div className="">
                     <AppLogo />

@@ -109,12 +109,9 @@ class TellerController extends Controller
             $subledgerAccount = SubledgerAccount::create([
                 'organization_id' => $organizationId,
                 'branch_id' => $data['branch_id'] ?? Auth::user()->branch_id,
-
                 'account_number' => 'T-' . str_pad($teller->id, 5, '0', STR_PAD_LEFT),
                 'name' => $data['name'],
-
                 'status' => 'active',
-
                 // polymorphic
                 'accountable_type' => Teller::class,
                 'accountable_id' => $teller->id,
