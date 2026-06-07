@@ -201,18 +201,6 @@ export default function AccountOpeningCreate() {
                             </div>
 
                             <div>
-                                <Label>Account Type</Label>
-
-                                <Select
-                                    value={data.account_type}
-                                    onChange={(v) => setData('account_type', v)}
-                                    options={accountTypes}
-                                />
-
-                                <InputError message={errors.account_type} />
-                            </div>
-
-                            <div>
                                 <Label>Account Name</Label>
 
                                 <Input
