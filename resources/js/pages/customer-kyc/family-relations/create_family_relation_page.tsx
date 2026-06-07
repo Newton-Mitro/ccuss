@@ -112,7 +112,7 @@ const Create = () => {
                                     {`${customer.name} • ${customer.customer_no}`}
                                 </Link>
                                 <p className="text-xs text-muted-foreground">
-                                    {customer.kyc_status} • {customer.type}
+                                    {customer.status} • {customer.type}
                                 </p>
                             </div>
 

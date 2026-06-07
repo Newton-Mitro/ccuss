@@ -34,7 +34,7 @@ export default function Index() {
 
     const { data, setData, get } = useForm({
         search: filters.search || '',
-        kyc_status: filters.kyc_status || 'all',
+        status: filters.status || 'all',
         per_page: Number(filters.per_page) || 18,
         page: Number(filters.page) || 1,
     });
@@ -46,7 +46,7 @@ export default function Index() {
             get(route('customers.index'), { preserveState: true });
         }, 400);
         return () => clearTimeout(delay);
-    }, [data.search, data.kyc_status, data.per_page, data.page]);
+    }, [data.search, data.status, data.per_page, data.page]);
 
     const handleDelete = (id: number, name: string) => {
         appSwal
@@ -112,9 +112,9 @@ export default function Index() {
                     <div className="w-60">
                         <Select
                             className="bg-card"
-                            value={data.kyc_status}
+                            value={data.status}
                             onChange={(value) => {
-                                setData('kyc_status', value);
+                                setData('status', value);
                                 setData('page', 1);
                             }}
                             options={kycStatuses}
@@ -157,7 +157,7 @@ export default function Index() {
                                             'Type',
                                             'Phone',
                                             'Email',
-                                            'KYC Status',
+                                            'Status',
                                             'Actions',
                                         ].map((h) => (
                                             <th

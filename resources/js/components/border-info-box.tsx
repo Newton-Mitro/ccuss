@@ -5,8 +5,8 @@ export function BorderInfoBox({
     value,
     className = 'bg-card',
 }: {
-    label: string;
-    value: string;
+    label: any;
+    value: any;
     className?: string;
 }) {
     return (

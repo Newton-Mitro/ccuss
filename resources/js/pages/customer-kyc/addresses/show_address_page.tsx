@@ -122,7 +122,7 @@ export default function ViewAddress({ address }: Props) {
                                     />
                                     <p className="text-xs text-muted-foreground">
                                         {address.customer?.type} •{' '}
-                                        {address.customer?.kyc_status}
+                                        {address.customer?.status}
                                     </p>
                                     <div className="text-xs text-muted-foreground">
                                         {address.customer?.id} •{' '}

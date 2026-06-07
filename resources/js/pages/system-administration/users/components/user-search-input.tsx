@@ -127,7 +127,7 @@ export const CustomerSearchInput: React.FC<CustomerSearchInputProps> = ({
                             {customer.customer_no && (
                                 <span className="truncate text-muted-foreground">
                                     | {customer.customer_no} | {customer.type} |{' '}
-                                    {customer.kyc_status}
+                                    {customer.status}
                                 </span>
                             )}
                         </li>

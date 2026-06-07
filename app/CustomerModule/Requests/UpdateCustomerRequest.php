@@ -22,7 +22,7 @@ class UpdateCustomerRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:100'],
 
             /* ================= KYC & Status ================= */
-            'kyc_status' => ['nullable', Rule::in(['pending', 'verified', 'rejected'])],
+            'status' => ['nullable', Rule::in(['pending', 'verified', 'rejected'])],
 
             /* ================= Personal Info ================= */
             'dob' => [

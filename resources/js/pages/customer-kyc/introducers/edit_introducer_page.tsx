@@ -110,7 +110,7 @@ const Edit = () => {
                             </Link>
 
                             <p className="text-xs text-muted-foreground">
-                                {customer.kyc_status} • {customer.type}
+                                {customer.status} • {customer.type}
                             </p>
 
                             <div className="grid grid-cols-1 gap-1 text-xs md:grid-cols-4">

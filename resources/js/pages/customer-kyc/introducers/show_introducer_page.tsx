@@ -316,7 +316,7 @@ function CustomerDetails({ customer }: { customer?: any }) {
                 </Link>
             </p>
             <p className="text-xs text-muted-foreground">
-                {customer?.type} • {customer?.kyc_status}
+                {customer?.type} • {customer?.status}
             </p>
             <p className="text-xs text-muted-foreground">
                 {customer?.customer_no} • {customer?.email} • {customer?.phone}

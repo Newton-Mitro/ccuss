@@ -163,7 +163,7 @@ const Show = () => {
                                     </div>
                                     <p className="text-xs text-muted-foreground">
                                         {document.customer?.type} •{' '}
-                                        {document.customer?.kyc_status}
+                                        {document.customer?.status}
                                     </p>
                                     <div className="text-xs text-muted-foreground">
                                         {document.customer?.customer_no} •{' '}

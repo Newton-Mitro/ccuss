@@ -45,9 +45,9 @@ class CustomerController extends Controller
                 ->orWhere('phone', 'like', "%{$search}%");
         });
 
-        if ($kycStatus = $request->input('kyc_status')) {
-            if ($kycStatus !== 'all') {
-                $query->where('kyc_status', $kycStatus);
+        if ($status = $request->input('status')) {
+            if ($status !== 'all') {
+                $query->where('status', $status);
             }
         }
 
@@ -73,9 +73,9 @@ class CustomerController extends Controller
             );
         }
 
-        if ($kycStatus = $request->input('kyc_status')) {
-            if ($kycStatus !== 'all') {
-                $query->where('kyc_status', $kycStatus);
+        if ($status = $request->input('status')) {
+            if ($status !== 'all') {
+                $query->where('status', $status);
             }
         }
 
@@ -85,7 +85,7 @@ class CustomerController extends Controller
 
         return Inertia::render('customer-kyc/customers/list_customer_page', [
             'paginated_data' => $customers,
-            'filters' => $request->only(['search', 'kyc_status', 'per_page', 'page']),
+            'filters' => $request->only(['search', 'status', 'per_page', 'page']),
         ]);
     }
 
