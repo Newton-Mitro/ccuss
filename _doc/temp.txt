@@ -1,0 +1,684 @@
+# Top 200 English Speaking Sentences for Software Engineers
+
+## A. Self-Introduction (1–20)
+
+1. Hello, my name is Newton.
+2. I am a software engineer.
+3. I specialize in Flutter development.
+4. I have experience in mobile application development.
+5. I enjoy solving technical problems.
+6. I have been working as a software engineer for several years.
+7. I am passionate about software development.
+8. I enjoy learning new technologies.
+9. I work well both independently and in teams.
+10. I am currently looking for remote opportunities.
+11. I have experience with Clean Architecture.
+12. I use BLoC for state management.
+13. I have worked on multiple production applications.
+14. I enjoy building scalable applications.
+15. I am always trying to improve my skills.
+16. I have experience working with APIs.
+17. I am interested in software architecture.
+18. I enjoy writing clean code.
+19. I believe communication is very important.
+20. Thank you for giving me this opportunity.
+
+## B. Daily Workplace Communication (21–40)
+
+21. Good morning, everyone.
+22. How are you doing today?
+23. I hope you're doing well.
+24. What are you working on today?
+25. I am currently working on a new feature.
+26. I have completed my assigned task.
+27. I need some help with this issue.
+28. Could you please explain this?
+29. Let me check that.
+30. Give me a few minutes.
+31. I'll get back to you shortly.
+32. Thank you for your support.
+33. That makes sense.
+34. I understand your point.
+35. I completely agree.
+36. I have a different opinion.
+37. That's a great idea.
+38. We can discuss it later.
+39. Let's move forward.
+40. Have a great day.
+
+## C. Meetings (41–60)
+
+41. Can everyone hear me?
+42. Shall we start the meeting?
+43. Let me share my screen.
+44. Can you see my screen?
+45. I'd like to discuss today's tasks.
+46. I have a quick question.
+47. Could you repeat that?
+48. Sorry, I missed that.
+49. Let me explain my approach.
+50. I would like to add something.
+51. That's an interesting point.
+52. I agree with your suggestion.
+53. Let's discuss this further.
+54. We need to make a decision.
+55. What do you think?
+56. Could you clarify that?
+57. Let's schedule another meeting.
+58. Thank you for your time.
+59. I'll follow up later.
+60. Let's wrap up the meeting.
+
+## D. Coding and Development (61–90)
+
+61. I'm implementing a new feature.
+62. I'm fixing a bug.
+63. I'm writing unit tests.
+64. I'm reviewing the code.
+65. I'm refactoring the codebase.
+66. I'm optimizing performance.
+67. I'm updating dependencies.
+68. The application is working correctly.
+69. The build is failing.
+70. The app crashes on startup.
+71. I found the root cause.
+72. I'm investigating the issue.
+73. I reproduced the bug.
+74. I can't reproduce the issue.
+75. The API is not responding.
+76. The response format is incorrect.
+77. The validation is failing.
+78. The database query is slow.
+79. The UI needs improvement.
+80. The implementation is complete.
+81. Everything works as expected.
+82. I need to test this feature.
+83. I'll create a new branch.
+84. I'll push the changes.
+85. I'll submit a pull request.
+86. Please review my code.
+87. I've fixed the issue.
+88. I'll deploy it today.
+89. The deployment was successful.
+90. The issue has been resolved.
+
+## E. Flutter Development (91–110)
+
+91. I'm developing a Flutter application.
+92. I'm using BLoC for state management.
+93. I'm using Clean Architecture.
+94. I'm creating a reusable widget.
+95. I'm handling API integration.
+96. I'm implementing form validation.
+97. I'm managing application state.
+98. I'm optimizing widget rebuilds.
+99. I'm fixing UI issues.
+100. I'm working on responsive design.
+101. I'm handling navigation.
+102. I'm updating the app theme.
+103. I'm implementing localization.
+104. I'm working with Firebase.
+105. I'm debugging the application.
+106. I'm testing on Android.
+107. I'm testing on iOS.
+108. The feature is ready for testing.
+109. The release build succeeded.
+110. The app is ready for deployment.
+
+## F. Asking Questions (111–130)
+
+111. Could you help me?
+112. Can you explain this?
+113. What is the expected behavior?
+114. What should I do next?
+115. Which approach is better?
+116. Do you have any suggestions?
+117. Is there any documentation?
+118. Can you share an example?
+119. When is the deadline?
+120. Who is responsible for this task?
+121. Should I create a ticket?
+122. Should I open an issue?
+123. Is this the correct implementation?
+124. Can we discuss this?
+125. May I ask a question?
+126. Could you review this?
+127. What do you recommend?
+128. Can you verify this?
+129. Is this a priority?
+130. What are the requirements?
+
+## G. Problem Solving (131–150)
+
+131. I'm trying to identify the problem.
+132. I found an error in the code.
+133. I need more information.
+134. This issue is difficult to reproduce.
+135. I'm still investigating.
+136. I think I found the problem.
+137. I have a possible solution.
+138. Let's test this approach.
+139. This solution should work.
+140. I'll verify the results.
+141. We need further testing.
+142. The performance has improved.
+143. The bug still exists.
+144. The issue occurs occasionally.
+145. I fixed the main problem.
+146. We should monitor this.
+147. The solution is stable.
+148. I'll document the changes.
+149. Let's proceed carefully.
+150. Everything looks good.
+
+## H. Job Interviews (151–170)
+
+151. Let me introduce myself.
+152. Thank you for inviting me.
+153. I have experience in software development.
+154. I specialize in Flutter applications.
+155. I enjoy solving challenging problems.
+156. I have strong analytical skills.
+157. I enjoy working with teams.
+158. I'm a fast learner.
+159. I'm highly motivated.
+160. I'm passionate about technology.
+161. One of my strengths is problem-solving.
+162. I enjoy learning new frameworks.
+163. I can work independently.
+164. I can adapt quickly.
+165. I enjoy remote work.
+166. I'm interested in this opportunity.
+167. I believe I can contribute to your team.
+168. I'm excited about this role.
+169. Thank you for your consideration.
+170. I look forward to hearing from you.
+
+## I. Remote Work Communication (171–190)
+
+171. I'm available now.
+172. I'm working remotely today.
+173. I'll join the meeting shortly.
+174. My internet connection is stable.
+175. Sorry, I was on mute.
+176. Can you hear me now?
+177. I'll update the task status.
+178. I'll send the report.
+179. I've completed the assignment.
+180. I'll share the documentation.
+181. Please check your email.
+182. Let's communicate through Slack.
+183. I'll provide an update tomorrow.
+184. The task is on schedule.
+185. We need to prioritize this.
+186. I'll work on this immediately.
+187. I need some additional time.
+188. Thank you for your patience.
+189. I appreciate your feedback.
+190. Let's keep in touch.
+
+## J. Everyday English Fluency (191–200)
+
+191. How was your day?
+192. I'm doing great.
+193. I'm a little busy today.
+194. That's interesting.
+195. Really? That's amazing.
+196. I understand.
+197. I don't understand.
+198. Could you speak more slowly?
+199. Thank you very much.
+200. I'm improving my English every day.
+
+
+1. Daily Conversation Sentences
+- Good morning! How are you doing today?
+- I'm doing well, thank you. How about you?
+- What are you working on today?
+- I'm currently working on a new feature.
+- Could you please explain that again?
+- I understand.
+- I don't understand this part.
+- Let me think for a moment.
+- That's a good idea.
+- I agree with you.
+- I have a different opinion.
+- Could you help me with this?
+- Thank you for your help.
+- You're welcome.
+- Have a great day!
+
+2. Software Engineer Workplace Sentences
+- I'm a software engineer specializing in mobile application development.
+- I primarily work with Flutter and Dart.
+- I'm currently developing a new feature.
+- I'm fixing a bug.
+- I'm reviewing the code.
+- I've completed my task.
+- The implementation is still in progress.
+- The application is crashing on startup.
+- I found the root cause of the issue.
+- I'll investigate this problem.
+- I need more time to complete this task.
+- The API response is incorrect.
+- The build is failing.
+- I've pushed the changes to Git.
+- Could you review my pull request?
+- I'll deploy the application today.
+- The issue has been resolved.
+- Everything is working as expected.
+
+3. Common Meeting Sentences
+- Can everyone hear me clearly?
+- Let's get started.
+- I'd like to discuss today's tasks.
+- Could you share your screen?
+- Please give me a moment.
+- Let me explain my approach.
+- I have a question.
+- Could you repeat that?
+- I completely agree.
+- That's an interesting point.
+- Let me check and get back to you.
+- We can discuss this later.
+- Thank you for your time.
+
+4. Remote Job Interview Sentences
+- Let me introduce myself.
+- My name is Newton.
+- I am a software engineer with experience in Flutter development.
+- I have been working with Flutter for several years.
+- I enjoy solving complex problems.
+- I have experience with BLoC and Clean Architecture.
+- I am passionate about learning new technologies.
+- I work well in a team environment.
+- I can work independently.
+- One of my strengths is problem-solving.
+- I'm looking for remote opportunities.
+- I believe I can contribute to your team.
+
+5. Explaining Your Work
+- I'm working on a mobile application.
+- This feature allows users to create accounts.
+- I'm implementing state management using BLoC.
+- The application communicates with REST APIs.
+- I'm optimizing the performance.
+- I'm writing reusable components.
+- I'm fixing UI issues.
+- I'm adding form validation.
+- I'm testing the application.
+- I'm refactoring the existing code.
+
+6. Asking Questions at Work
+- Could you explain the requirements?
+- What is the expected behavior?
+- Should I create a new branch?
+- Which approach do you recommend?
+- When is the deadline?
+- Can we schedule a meeting?
+- Is there any documentation available?
+- Could you share an example?
+- Do you have any suggestions?
+
+7. Small Talk for International Teams
+- Where are you from?
+- How's the weather there?
+- What do you usually do on weekends?
+- Have you watched any good movies recently?
+- What technologies are you currently learning?
+- How long have you been working remotely?
+- That's interesting!
+- Nice to meet you.
+- It was great talking to you.
+
+8. Sentences You Should Practice Every Day
+
+Practice these 10 sentences aloud every day:
+
+- Hello, my name is Newton, and I'm a software engineer.
+- I specialize in Flutter application development.
+- Currently, I'm working on a mobile application project.
+- I'm implementing a new feature using BLoC architecture.
+- I enjoy solving technical problems.
+- Could you please explain that again?
+- Let me check and get back to you.
+- I have completed the implementation.
+- I'm continuously improving my English speaking skills.
+- My goal is to get a remote software engineering job.
+
+
+# 30-Day English Speaking Plan for Software Engineers
+
+## Goal
+
+By the end of 30 days, you should be able to:
+
+* Introduce yourself confidently.
+* Explain your projects and technical skills.
+* Participate in meetings.
+* Communicate with international teammates.
+* Handle basic technical interviews in English.
+
+## Daily Routine (30 Minutes)
+
+### Step 1: Read Aloud (10 minutes)
+
+* Read the day's sentences slowly.
+* Focus on pronunciation and clarity.
+
+### Step 2: Speak Without Reading (10 minutes)
+
+* Close the text and try to say the sentences from memory.
+
+### Step 3: Record Yourself (10 minutes)
+
+* Record your voice on your phone.
+* Listen and identify mistakes.
+
+---
+
+# Week 1: Basic Communication and Confidence
+
+### Day 1: Greetings
+
+Practice:
+
+* Good morning. How are you?
+* I'm doing well. How about you?
+* Nice to meet you.
+* Thank you for your time.
+* Have a great day.
+
+### Day 2: Self Introduction
+
+Practice:
+
+* My name is Newton.
+* I am a software engineer.
+* I specialize in Flutter development.
+* I enjoy solving technical problems.
+* I am passionate about software engineering.
+
+### Day 3: Talking About Experience
+
+Practice:
+
+* I have several years of experience.
+* I work with Flutter and Dart.
+* I have experience with Clean Architecture.
+* I enjoy building scalable applications.
+* I continuously improve my skills.
+
+### Day 4: Daily Work
+
+Practice:
+
+* I'm working on a new feature.
+* I'm fixing a bug.
+* I'm reviewing code.
+* I'm testing the application.
+* I've completed my task.
+
+### Day 5: Asking Questions
+
+Practice:
+
+* Could you explain this?
+* Could you repeat that?
+* What do you recommend?
+* Can you help me?
+* What is the expected behavior?
+
+### Day 6: Expressing Opinions
+
+Practice:
+
+* I agree with you.
+* I disagree respectfully.
+* That's a great idea.
+* I have a different opinion.
+* That makes sense.
+
+### Day 7: Review Day
+
+Speak for 5 minutes about:
+
+* Who you are.
+* Your experience.
+* Your current work.
+
+---
+
+# Week 2: Software Engineering Communication
+
+### Day 8: Describing Projects
+
+Practice:
+
+* I'm developing a mobile application.
+* The app communicates with REST APIs.
+* I'm implementing authentication.
+* I'm adding new features.
+* The project is in production.
+
+### Day 9: Flutter Development
+
+Practice:
+
+* I'm using Flutter for development.
+* I'm using BLoC for state management.
+* I'm implementing Clean Architecture.
+* I'm creating reusable widgets.
+* I'm optimizing performance.
+
+### Day 10: Bug Fixing
+
+Practice:
+
+* I found a bug.
+* I'm investigating the issue.
+* I reproduced the problem.
+* I found the root cause.
+* The issue has been fixed.
+
+### Day 11: Git and Deployment
+
+Practice:
+
+* I created a new branch.
+* I committed the changes.
+* I pushed the code.
+* I created a pull request.
+* The deployment succeeded.
+
+### Day 12: Code Review
+
+Practice:
+
+* Could you review my code?
+* I updated the implementation.
+* I refactored the code.
+* I added unit tests.
+* Thank you for your feedback.
+
+### Day 13: APIs and Backend
+
+Practice:
+
+* I'm integrating APIs.
+* The API response is incorrect.
+* The server returned an error.
+* I need to debug this issue.
+* The request completed successfully.
+
+### Day 14: Review Day
+
+Explain one of your projects for 5 minutes.
+
+---
+
+# Week 3: Meetings and Remote Work
+
+### Day 15: Starting Meetings
+
+Practice:
+
+* Can everyone hear me?
+* Let's start the meeting.
+* I'd like to discuss today's tasks.
+* Let me share my screen.
+* Can you see my screen?
+
+### Day 16: During Meetings
+
+Practice:
+
+* I have a question.
+* Could you clarify that?
+* I agree with your suggestion.
+* Let's discuss this further.
+* That's an interesting point.
+
+### Day 17: Giving Updates
+
+Practice:
+
+* Here's my progress update.
+* I've completed the feature.
+* I'm still working on the issue.
+* I need additional time.
+* I'll provide another update tomorrow.
+
+### Day 18: Remote Work
+
+Practice:
+
+* I'm working remotely.
+* I'll join the meeting shortly.
+* Sorry, I was on mute.
+* I'll send the documentation.
+* Please check your email.
+
+### Day 19: Problem Solving
+
+Practice:
+
+* I'm investigating the problem.
+* I have a possible solution.
+* Let's test this approach.
+* We need further testing.
+* Everything looks good.
+
+### Day 20: Team Communication
+
+Practice:
+
+* Thank you for your support.
+* I appreciate your feedback.
+* Please let me know your thoughts.
+* Let's collaborate on this.
+* I'll follow up later.
+
+### Day 21: Review Day
+
+Speak for 5–10 minutes about your daily work routine.
+
+---
+
+# Week 4: Job Interviews and Fluency
+
+### Day 22: Interview Introduction
+
+Practice:
+
+* Let me introduce myself.
+* I'm a software engineer.
+* I specialize in Flutter development.
+* I enjoy solving challenging problems.
+* I'm excited about this opportunity.
+
+### Day 23: Strengths
+
+Practice:
+
+* One of my strengths is problem-solving.
+* I'm a fast learner.
+* I work well in teams.
+* I can work independently.
+* I adapt quickly.
+
+### Day 24: Technical Skills
+
+Practice:
+
+* I have experience with Flutter.
+* I use BLoC architecture.
+* I work with REST APIs.
+* I write clean code.
+* I focus on performance optimization.
+
+### Day 25: Explaining Projects
+
+Practice:
+
+* This project was developed using Flutter.
+* I implemented authentication.
+* I handled state management.
+* I integrated APIs.
+* I optimized the user experience.
+
+### Day 26: Behavioral Questions
+
+Practice:
+
+* I enjoy teamwork.
+* I learn from mistakes.
+* I stay calm under pressure.
+* I enjoy solving problems.
+* I continuously improve myself.
+
+### Day 27: Future Goals
+
+Practice:
+
+* I want to work remotely.
+* I want to improve my English.
+* I want to become a better engineer.
+* I enjoy learning new technologies.
+* I'm excited about future opportunities.
+
+### Day 28: Mock Interview
+
+Answer these questions aloud:
+
+* Tell me about yourself.
+* Why should we hire you?
+* What are your strengths?
+* Describe a challenging project.
+* Why do you want this job?
+
+### Day 29: Free Speaking
+
+Speak for 10 minutes about:
+
+* Your career.
+* Your projects.
+* Your goals.
+* Your daily routine.
+
+### Day 30: Final Challenge
+
+Record a 10-minute video where you:
+
+1. Introduce yourself.
+2. Explain your current project.
+3. Describe a bug you solved.
+4. Explain your future goals.
+5. Describe why you want a remote job.
+
+After recording, watch the video and note:
+
+* Pronunciation mistakes.
+* Grammar mistakes.
+* Speaking speed.
+* Confidence level.

@@ -13,8 +13,10 @@ return new class extends Migration {
             $table->string('customer_no', 50)->unique()->comment('Unique customer number');
             $table->enum('type', ['individual', 'organization'])->comment('Customer type');
             $table->string('name', 150);
-            $table->string('phone', 50)->nullable();
-            $table->string('email', 100)->nullable();
+            $table->string('primary_phone', 50)->nullable();
+            $table->string('alternate_phone', 50)->nullable();
+            $table->string('primary_email', 100)->nullable();
+            $table->string('alternate_email', 100)->nullable();
             $table->enum('identification_type', ['national_identification_number', 'birth_registration_number', 'registration_no', 'passport', 'driving_license']);
             $table->string('identification_number', 50);
 
@@ -46,6 +48,11 @@ return new class extends Migration {
             $table->string('postal_code', 20)->nullable();
             $table->string('country', 150)->default('Bangladesh');
             $table->enum('type', ['current', 'permanent', 'mailing', 'work', 'registered', 'other']);
+
+            // Verification
+            $table->enum('verification_status', ['pending', 'verified', 'rejected'])->default('pending');
+            $table->timestamp('verified_at')->nullable();
+            $table->text('remarks')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
@@ -75,15 +82,14 @@ return new class extends Migration {
 
         Schema::create('kyc_profiles', function (Blueprint $table) {
             $table->id();
-            $table->enum('kyc_status', ['pending', 'verified', 'rejected'])->default('pending');
+            $table->integer('verification_value')->default(0);
             $table->enum('kyc_level', [
-                'minimal',     // very limited info (e.g., phone only)
-                'basic',       // NID + basic identity
-                'standard',    // identity + address verification
-                'full',        // full document verification + face match
-                'enhanced'     // EDD (Enhanced Due Diligence)
+                'minimal',     // basic (e.g., phone and email) + identity type -> 3
+                'basic',       // basic + photo -> 3+1
+                'standard',    // basic + identity type + photo + address (present and permanent) -> 3+1+2
+                'full',        // basic + identity type + photo + address + introducer -> 3+1+2+2 
+                'enhanced'     // basic + identity type + photo + address + introducer + family relations (father, mother, spouse, children) + additional documents
             ])->default('minimal');
-            $table->enum('risk_level', ['low', 'medium', 'high'])->default('low');
             $table->timestamps();
             $table->softDeletes();
 
@@ -128,6 +134,7 @@ return new class extends Migration {
             $table->string('file_path');
             $table->string('mime');
             $table->string('alt_text')->nullable();
+
             // Verification
             $table->enum('verification_status', ['pending', 'verified', 'rejected'])->default('pending');
             $table->timestamp('verified_at')->nullable();
@@ -141,6 +148,8 @@ return new class extends Migration {
         Schema::create('customer_introducers', function (Blueprint $table) {
             $table->id();
             $table->enum('relationship_type', ['family', 'friend', 'business', 'colleague', 'other'])->default('other');
+
+            // Verification
             $table->enum('verification_status', ['pending', 'verified', 'rejected'])->default('pending');
             $table->timestamp('verified_at')->nullable();
             $table->text('remarks')->nullable();

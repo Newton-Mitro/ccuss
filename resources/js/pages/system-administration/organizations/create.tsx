@@ -14,7 +14,7 @@ import { BreadcrumbItem } from '../../../types';
 function CreateOrganization() {
     useFlashToastHandler();
 
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors, setError } = useForm({
         code: '',
         name: '',
         short_name: '',
@@ -62,6 +62,10 @@ function CreateOrganization() {
         post('/organizations', {
             preserveScroll: true,
             preserveState: true,
+            onError: (errors) => {
+                console.log(errors);
+                setError(errors);
+            },
         });
     };
 
@@ -384,7 +388,7 @@ function CreateOrganization() {
 
                         <div className="w-full lg:w-2/12">
                             <div className="w-full space-y-2">
-                                <Label className="text-xs">Photo</Label>
+                                <Label className="text-xs">Logo</Label>
 
                                 {/* Preview Box */}
                                 <div
@@ -406,7 +410,7 @@ function CreateOrganization() {
                                             {/* Overlay (hover actions) */}
                                             <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition group-hover:opacity-100">
                                                 <span className="text-xs font-medium text-white">
-                                                    Change Photo
+                                                    Change Logo
                                                 </span>
                                             </div>
                                         </>

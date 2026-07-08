@@ -16,7 +16,7 @@ function EditOrganization() {
 
     useFlashToastHandler();
 
-    const { data, setData, processing, errors } = useForm({
+    const { data, setData, processing, errors, setError } = useForm({
         code: organization.code || '',
         name: organization.name || '',
         short_name: organization.short_name || '',
@@ -37,6 +37,8 @@ function EditOrganization() {
         report_footer: organization.report_footer || '',
         logo: null as File | null,
     });
+
+    console.log(errors);
 
     const [photoPreview, setPhotoPreview] = useState<string | null>(
         organization.logo_url || null,
@@ -73,6 +75,10 @@ function EditOrganization() {
             {
                 forceFormData: true,
                 preserveScroll: true,
+                onError: (errors) => {
+                    console.log(errors);
+                    setError(errors);
+                },
             },
         );
     };
@@ -400,7 +406,7 @@ function EditOrganization() {
 
                                 {/* Preview Box */}
                                 <div
-                                    className="group relative h-40 w-full cursor-pointer overflow-hidden rounded-md border bg-background"
+                                    className={`group relative h-40 w-full cursor-pointer overflow-hidden rounded-md border bg-background ${errors.logo ? 'border-2 border-red-500' : ''}`}
                                     onClick={() =>
                                         document
                                             .getElementById('photoInput')
@@ -418,7 +424,7 @@ function EditOrganization() {
                                             {/* Overlay (hover actions) */}
                                             <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition group-hover:opacity-100">
                                                 <span className="text-xs font-medium text-white">
-                                                    Change Photo
+                                                    Change Logo
                                                 </span>
                                             </div>
                                         </>
@@ -445,7 +451,7 @@ function EditOrganization() {
                                         onClick={() => setPhotoPreview(null)}
                                         className="w-full text-xs text-red-500 hover:underline"
                                     >
-                                        Remove Photo
+                                        Remove Logo
                                     </button>
                                 )}
                             </div>

@@ -47,6 +47,7 @@ class OrganizationController extends Controller
      */
     public function store(Request $request)
     {
+
         $data = $this->validateData($request);
 
         // Handle logo upload
@@ -86,7 +87,10 @@ class OrganizationController extends Controller
      */
     public function update(Request $request, Organization $organization)
     {
+
         $data = $this->validateData($request, $organization->id);
+
+
 
         // Handle logo update
         if ($request->hasFile('logo')) {
@@ -142,7 +146,7 @@ class OrganizationController extends Controller
             'state' => 'nullable|max:100',
             'postal_code' => 'nullable|max:20',
             'country' => 'nullable|max:100',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp,jpe|max:4048',
         ]);
     }
 }
