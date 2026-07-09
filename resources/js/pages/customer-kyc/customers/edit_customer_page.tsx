@@ -192,7 +192,7 @@ const Edit = ({ customer }: EditProps) => {
                             </div>
 
                             <div>
-                                <Label className="text-xs">Phone</Label>
+                                <Label className="text-xs">Primary Phone</Label>
                                 <Input
                                     value={data.phone}
                                     onChange={(e) =>
@@ -204,7 +204,35 @@ const Edit = ({ customer }: EditProps) => {
                             </div>
 
                             <div>
-                                <Label className="text-xs">Email</Label>
+                                <Label className="text-xs">Primary Email</Label>
+                                <Input
+                                    value={data.email}
+                                    onChange={(e) =>
+                                        setData('email', e.target.value)
+                                    }
+                                    className="h-8 text-sm"
+                                />
+                                <InputError message={errors.email} />
+                            </div>
+
+                            <div>
+                                <Label className="text-xs">
+                                    Alternate Phone
+                                </Label>
+                                <Input
+                                    value={data.phone}
+                                    onChange={(e) =>
+                                        setData('phone', e.target.value)
+                                    }
+                                    className="h-8 text-sm"
+                                />
+                                <InputError message={errors.phone} />
+                            </div>
+
+                            <div>
+                                <Label className="text-xs">
+                                    Alternate Email
+                                </Label>
                                 <Input
                                     value={data.email}
                                     onChange={(e) =>

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\CustomerModule\Models\Customer;
 use App\CustomerModule\Models\KycProfile;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -11,17 +12,70 @@ class KycProfileFactory extends Factory
 
     public function definition(): array
     {
-        $kycLevels = ['basic', 'full', 'enhanced'];
-        $riskLevels = ['low', 'medium', 'high'];
+        $levels = [
+            'minimal',
+            'basic',
+            'standard',
+            'full',
+            'enhanced',
+        ];
+
+        $level = fake()->randomElement($levels);
+
+        $verificationValue = match ($level) {
+            'minimal' => fake()->numberBetween(0, 3),
+            'basic' => fake()->numberBetween(4, 5),
+            'standard' => fake()->numberBetween(6, 8),
+            'full' => fake()->numberBetween(9, 10),
+            'enhanced' => fake()->numberBetween(11, 15),
+        };
 
         return [
-            'kyc_level' => fake()->randomElement($kycLevels),
-            'risk_level' => fake()->randomElement($riskLevels),
+            'customer_id' => Customer::factory(),
+
+            'verification_value' => $verificationValue,
+
+            'kyc_level' => $level,
         ];
     }
 
-    protected static function newFactory()
+    public function minimal(): static
     {
-        return KycProfileFactory::new();
+        return $this->state(fn() => [
+            'kyc_level' => 'minimal',
+            'verification_value' => fake()->numberBetween(0, 3),
+        ]);
+    }
+
+    public function basic(): static
+    {
+        return $this->state(fn() => [
+            'kyc_level' => 'basic',
+            'verification_value' => fake()->numberBetween(4, 5),
+        ]);
+    }
+
+    public function standard(): static
+    {
+        return $this->state(fn() => [
+            'kyc_level' => 'standard',
+            'verification_value' => fake()->numberBetween(6, 8),
+        ]);
+    }
+
+    public function full(): static
+    {
+        return $this->state(fn() => [
+            'kyc_level' => 'full',
+            'verification_value' => fake()->numberBetween(9, 10),
+        ]);
+    }
+
+    public function enhanced(): static
+    {
+        return $this->state(fn() => [
+            'kyc_level' => 'enhanced',
+            'verification_value' => fake()->numberBetween(11, 15),
+        ]);
     }
 }

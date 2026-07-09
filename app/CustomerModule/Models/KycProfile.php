@@ -4,6 +4,7 @@ namespace App\CustomerModule\Models;
 
 use App\SystemAdministration\Traits\Auditable;
 use Database\Factories\KycProfileFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,73 +12,57 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class KycProfile extends Model
 {
-    use HasFactory, Auditable, SoftDeletes;
+    use HasFactory;
+    use Auditable;
+    use SoftDeletes;
 
     protected $fillable = [
         'customer_id',
-        'kyc_status',
+        'verification_value',
         'kyc_level',
-        'risk_level',
     ];
 
     protected $casts = [
-        'kyc_status' => 'string',
-        'kyc_level' => 'string',
-        'risk_level' => 'string',
+        'verification_value' => 'integer',
+        'deleted_at' => 'datetime',
     ];
 
-    /* ========================
-     * Constants (Enums)
-     * ======================== */
+    /*
+    |--------------------------------------------------------------------------
+    | KYC Levels
+    |--------------------------------------------------------------------------
+    */
 
-    // KYC Status
-    public const STATUS_PENDING = 'pending';
-    public const STATUS_VERIFIED = 'verified';
-    public const STATUS_REJECTED = 'rejected';
-
-    // KYC Levels
     public const LEVEL_MINIMAL = 'minimal';
     public const LEVEL_BASIC = 'basic';
     public const LEVEL_STANDARD = 'standard';
     public const LEVEL_FULL = 'full';
     public const LEVEL_ENHANCED = 'enhanced';
 
-    // Risk Levels
-    public const RISK_LOW = 'low';
-    public const RISK_MEDIUM = 'medium';
-    public const RISK_HIGH = 'high';
+    public const LEVELS = [
+        self::LEVEL_MINIMAL,
+        self::LEVEL_BASIC,
+        self::LEVEL_STANDARD,
+        self::LEVEL_FULL,
+        self::LEVEL_ENHANCED,
+    ];
 
-    /* ========================
-     * Relationships
-     * ======================== */
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
 
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
-    /* ========================
-     * Helpers - Status
-     * ======================== */
-
-    public function isPending(): bool
-    {
-        return $this->kyc_status === self::STATUS_PENDING;
-    }
-
-    public function isVerified(): bool
-    {
-        return $this->kyc_status === self::STATUS_VERIFIED;
-    }
-
-    public function isRejected(): bool
-    {
-        return $this->kyc_status === self::STATUS_REJECTED;
-    }
-
-    /* ========================
-     * Helpers - Level
-     * ======================== */
+    /*
+    |--------------------------------------------------------------------------
+    | Level Helpers
+    |--------------------------------------------------------------------------
+    */
 
     public function isMinimal(): bool
     {
@@ -104,35 +89,85 @@ class KycProfile extends Model
         return $this->kyc_level === self::LEVEL_ENHANCED;
     }
 
-    /* ========================
-     * Helpers - Risk
-     * ======================== */
+    /*
+    |--------------------------------------------------------------------------
+    | Verification Score Helpers
+    |--------------------------------------------------------------------------
+    */
 
-    public function isLowRisk(): bool
+    public function isVerified(): bool
     {
-        return $this->risk_level === self::RISK_LOW;
+        return $this->verification_value > 0;
     }
-
-    public function isMediumRisk(): bool
-    {
-        return $this->risk_level === self::RISK_MEDIUM;
-    }
-
-    public function isHighRisk(): bool
-    {
-        return $this->risk_level === self::RISK_HIGH;
-    }
-
-    /* ========================
-     * Business Logic Helpers
-     * ======================== */
 
     public function canTransact(): bool
     {
-        return $this->isVerified();
+        return in_array($this->kyc_level, [
+            self::LEVEL_STANDARD,
+            self::LEVEL_FULL,
+            self::LEVEL_ENHANCED,
+        ], true);
     }
 
-    protected static function newFactory()
+    public function isFullyVerified(): bool
+    {
+        return in_array($this->kyc_level, [
+            self::LEVEL_FULL,
+            self::LEVEL_ENHANCED,
+        ], true);
+    }
+
+    public function completionPercentage(): int
+    {
+        return min(
+            100,
+            (int) round(($this->verification_value / 15) * 100)
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
+
+    public function scopeLevel(Builder $query, string $level): Builder
+    {
+        return $query->where('kyc_level', $level);
+    }
+
+    public function scopeMinimal(Builder $query): Builder
+    {
+        return $query->where('kyc_level', self::LEVEL_MINIMAL);
+    }
+
+    public function scopeBasic(Builder $query): Builder
+    {
+        return $query->where('kyc_level', self::LEVEL_BASIC);
+    }
+
+    public function scopeStandard(Builder $query): Builder
+    {
+        return $query->where('kyc_level', self::LEVEL_STANDARD);
+    }
+
+    public function scopeFull(Builder $query): Builder
+    {
+        return $query->where('kyc_level', self::LEVEL_FULL);
+    }
+
+    public function scopeEnhanced(Builder $query): Builder
+    {
+        return $query->where('kyc_level', self::LEVEL_ENHANCED);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
+
+    protected static function newFactory(): KycProfileFactory
     {
         return KycProfileFactory::new();
     }
