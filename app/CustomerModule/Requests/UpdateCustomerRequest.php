@@ -69,7 +69,7 @@ class UpdateCustomerRequest extends FormRequest
             /* ================= Relations / Optional ================= */
             'organization_id' => ['nullable', 'integer', 'exists:organizations,id'],
             'branch_id' => ['nullable', 'integer', 'exists:branches,id'],
-            'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
+            'photo' => ['nullable', 'image', 'max:2048'],
         ];
     }
 
