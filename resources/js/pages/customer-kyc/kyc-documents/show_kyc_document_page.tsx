@@ -167,8 +167,8 @@ const Show = () => {
                                     </p>
                                     <div className="text-xs text-muted-foreground">
                                         {document.customer?.customer_no} •{' '}
-                                        {document.customer?.email} •{' '}
-                                        {document.customer?.phone}
+                                        {document.customer?.primary_email} •{' '}
+                                        {document.customer?.primary_phone}
                                     </div>
                                 </div>
                             </div>

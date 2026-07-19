@@ -118,12 +118,12 @@ const Create = () => {
 
                             <div className="grid grid-cols-1 gap-1 text-xs md:grid-cols-4">
                                 <BolderLessInfoBox
-                                    label="Phone"
-                                    value={customer.phone}
+                                    label="Primary Phone"
+                                    value={customer.primary_phone}
                                 />
                                 <BolderLessInfoBox
-                                    label="Email"
-                                    value={customer.email}
+                                    label="Primary Email"
+                                    value={customer.primary_email}
                                 />
                                 <BolderLessInfoBox
                                     label="Identification Type"

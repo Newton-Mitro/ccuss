@@ -319,84 +319,92 @@ export default function Show({ customer }: ShowProps) {
 
             {/* ================= Family ================= */}
 
-            <SectionHeader
-                icon={<UsersIcon size={18} />}
-                title="Family & Relatives"
-                actions={
-                    <Link
-                        href={route('family-relations.create', customer.id)}
-                        className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
-                    >
-                        <Plus size={14} /> Add
-                    </Link>
-                }
-            >
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
-                    {customer.family_relations?.map((rel) => (
-                        <DataCard
-                            key={rel.id}
-                            onShow={() => {
-                                router.visit(
-                                    route('family-relations.show', [rel.id]),
-                                );
-                            }}
-                            onEdit={() => {
-                                router.visit(
-                                    route('family-relations.edit', [rel.id]),
-                                );
-                            }}
-                            onDelete={() => {
-                                handleDeleteCustomerFamilyRelation(rel.id);
-                            }}
+            {customer.type === 'individual' && (
+                <SectionHeader
+                    icon={<UsersIcon size={18} />}
+                    title="Family & Relatives"
+                    actions={
+                        <Link
+                            href={route('family-relations.create', customer.id)}
+                            className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
                         >
-                            <div className="flex items-center gap-2">
-                                {rel.relative?.photo?.url ? (
-                                    <img
-                                        src={rel.relative.photo.url}
-                                        className="h-10 w-10 rounded-full"
-                                    />
-                                ) : (
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-xs">
-                                        {rel.relative?.name?.charAt(0)}
-                                    </div>
-                                )}
-
-                                {rel.relative && (
-                                    <div className="flex flex-col text-xs">
-                                        <div className="text-sm font-medium">
-                                            <Link
-                                                href={route(
-                                                    'customers.show',
-                                                    rel.relative?.id,
-                                                )}
-                                                className="cursor-pointer text-sm font-semibold hover:underline"
-                                                onClick={(e) =>
-                                                    e.stopPropagation()
-                                                }
-                                            >
-                                                {`${rel.relative?.name} • ${rel.relative?.customer_no}`}
-                                            </Link>
+                            <Plus size={14} /> Add
+                        </Link>
+                    }
+                >
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
+                        {customer.family_relations?.map((rel) => (
+                            <DataCard
+                                key={rel.id}
+                                onShow={() => {
+                                    router.visit(
+                                        route('family-relations.show', [
+                                            rel.id,
+                                        ]),
+                                    );
+                                }}
+                                onEdit={() => {
+                                    router.visit(
+                                        route('family-relations.edit', [
+                                            rel.id,
+                                        ]),
+                                    );
+                                }}
+                                onDelete={() => {
+                                    handleDeleteCustomerFamilyRelation(rel.id);
+                                }}
+                            >
+                                <div className="flex items-center gap-2">
+                                    {rel.relative?.photo?.url ? (
+                                        <img
+                                            src={rel.relative.photo.url}
+                                            className="h-10 w-10 rounded-full"
+                                        />
+                                    ) : (
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-xs">
+                                            {rel.relative?.name?.charAt(0)}
                                         </div>
+                                    )}
 
-                                        <div className="flex gap-2 capitalize">
-                                            <span>
-                                                {rel.relation_type.replace(
-                                                    /_/g,
-                                                    ' ',
-                                                )}
-                                            </span>
+                                    {rel.relative && (
+                                        <div className="flex flex-col text-xs">
+                                            <div className="text-sm font-medium">
+                                                <Link
+                                                    href={route(
+                                                        'customers.show',
+                                                        rel.relative?.id,
+                                                    )}
+                                                    className="cursor-pointer text-sm font-semibold hover:underline"
+                                                    onClick={(e) =>
+                                                        e.stopPropagation()
+                                                    }
+                                                >
+                                                    {`${rel.relative?.name} • ${rel.relative?.customer_no}`}
+                                                </Link>
+                                            </div>
 
-                                            <Badge
-                                                text={rel.verification_status}
-                                            />
+                                            <div className="flex gap-2 capitalize">
+                                                <span>
+                                                    {rel.relation_type.replace(
+                                                        /_/g,
+                                                        ' ',
+                                                    )}
+                                                </span>
+
+                                                <Badge
+                                                    text={
+                                                        rel.verification_status
+                                                    }
+                                                />
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
-                            </div>
-                        </DataCard>
-                    ))}
-                </div>
-            </SectionHeader>
+                                    )}
+                                </div>
+                            </DataCard>
+                        ))}
+                    </div>
+                </SectionHeader>
+            )}
 
             {/* ================= Introducers ================= */}
 

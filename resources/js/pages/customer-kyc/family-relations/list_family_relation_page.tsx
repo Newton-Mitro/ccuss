@@ -172,7 +172,8 @@ export default function FamilyRelationIndex() {
                                                 {f.relative?.name}
                                             </td>
                                             <td className="px-2 py-1">
-                                                {f.relative?.phone || '—'}
+                                                {f.relative?.primary_phone ||
+                                                    '—'}
                                             </td>
                                             <td className="px-2 py-1 capitalize">
                                                 {f.relation_type.replace(
@@ -272,7 +273,7 @@ export default function FamilyRelationIndex() {
                                     </div>
 
                                     <div className="mt-2 text-xs text-muted-foreground">
-                                        📞 {f.relative?.phone || '—'}
+                                        📞 {f.relative?.primary_phone || '—'}
                                     </div>
 
                                     <div className="mt-2 flex justify-end gap-3">

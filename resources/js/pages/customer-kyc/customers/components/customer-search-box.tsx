@@ -191,7 +191,10 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
                         </div>
 
                         <div className="grid grid-cols-1 gap-1 text-xs md:grid-cols-3">
-                            <Info label="Phone" value={customer.phone} />
+                            <Info
+                                label="Primary Phone"
+                                value={customer?.primary_phone}
+                            />
                             <Info
                                 label="Identification Type"
                                 value={formatUndersoreString(

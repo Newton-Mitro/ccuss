@@ -127,8 +127,8 @@ export default function ViewAddress({ address }: Props) {
                                     <div className="text-xs text-muted-foreground">
                                         {address.customer?.id} •{' '}
                                         {address.customer?.customer_no} •{' '}
-                                        {address.customer?.email} •{' '}
-                                        {address.customer?.phone}
+                                        {address.customer?.primary_email} •{' '}
+                                        {address.customer?.primary_phone}
                                     </div>
                                 </div>
                             </div>

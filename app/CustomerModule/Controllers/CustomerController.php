@@ -41,8 +41,8 @@ class CustomerController extends Controller
         $query->where(function ($q) use ($search) {
             $q->where('name', 'like', "%{$search}%")
                 ->orWhere('customer_no', 'like', "%{$search}%")
-                ->orWhere('email', 'like', "%{$search}%")
-                ->orWhere('phone', 'like', "%{$search}%");
+                ->orWhere('primary_email', 'like', "%{$search}%")
+                ->orWhere('primary_phone', 'like', "%{$search}%");
         });
 
         if ($status = $request->input('status')) {
