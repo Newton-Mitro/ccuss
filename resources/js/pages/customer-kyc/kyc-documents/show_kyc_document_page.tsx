@@ -98,7 +98,7 @@ const Show = () => {
                     {document.mime === 'application/pdf' && (
                         <iframe
                             src={document.url}
-                            className="h-[500px] w-full rounded-md border"
+                            className="h-125 w-full rounded-md border"
                         />
                     )}
 
@@ -223,7 +223,7 @@ const Show = () => {
 
                                             <span className="flex items-center gap-1">
                                                 <User size={12} />
-                                                <span className="max-w-[80px] truncate">
+                                                <span className="max-w-20 truncate">
                                                     {audit.user?.name ?? 'SYS'}
                                                 </span>
                                             </span>

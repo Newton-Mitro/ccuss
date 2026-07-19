@@ -589,7 +589,7 @@ export default function Show({ customer }: ShowProps) {
 
                                     <span className="flex items-center gap-1">
                                         <User size={12} />
-                                        <span className="max-w-[80px] truncate">
+                                        <span className="max-w-20 truncate">
                                             {audit.user?.name ?? 'SYS'}
                                         </span>
                                     </span>
