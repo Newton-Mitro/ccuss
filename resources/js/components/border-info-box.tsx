@@ -1,5 +1,3 @@
-import formatUndersoreString from '../lib/formatUnderscoreString';
-
 export function BorderInfoBox({
     label,
     value,
@@ -14,9 +12,7 @@ export function BorderInfoBox({
             className={`rounded-md border border-border p-3 ${className || ''}`}
         >
             <p className="text-xs text-muted-foreground">{label}</p>
-            <p className="text-sm font-medium">
-                {formatUndersoreString(value?.toString() || '—')}
-            </p>
+            <p className="text-sm font-medium">{value || '—'}</p>
         </div>
     );
 }

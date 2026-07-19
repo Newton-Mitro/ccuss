@@ -193,15 +193,21 @@ export default function Show({ customer }: ShowProps) {
 
                             <BorderInfoBox
                                 label="Gender"
-                                value={customer.gender}
+                                value={formatUndersoreString(
+                                    customer.gender || '—',
+                                )}
                             />
                             <BorderInfoBox
                                 label="Religion"
-                                value={customer.religion}
+                                value={formatUndersoreString(
+                                    customer.religion || '—',
+                                )}
                             />
                             <BorderInfoBox
                                 label="Marital Status"
-                                value={customer.marital_status}
+                                value={formatUndersoreString(
+                                    customer.marital_status || '—',
+                                )}
                             />
                             <BorderInfoBox
                                 label="Blood Group"
@@ -209,15 +215,21 @@ export default function Show({ customer }: ShowProps) {
                             />
                             <BorderInfoBox
                                 label="Nationality"
-                                value={customer.nationality}
+                                value={formatUndersoreString(
+                                    customer.nationality || '—',
+                                )}
                             />
                             <BorderInfoBox
                                 label="Occupation"
-                                value={customer.occupation}
+                                value={formatUndersoreString(
+                                    customer.occupation || '—',
+                                )}
                             />
                             <BorderInfoBox
                                 label="Education"
-                                value={customer.education}
+                                value={formatUndersoreString(
+                                    customer.education || '—',
+                                )}
                             />
                         </>
                     )}
@@ -248,7 +260,9 @@ export default function Show({ customer }: ShowProps) {
 
                     <BorderInfoBox
                         label="ID Type"
-                        value={customer.identification_type}
+                        value={formatUndersoreString(
+                            customer.identification_type || '—',
+                        )}
                     />
 
                     <BorderInfoBox
@@ -267,7 +281,9 @@ export default function Show({ customer }: ShowProps) {
                     <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
                         <BorderInfoBox
                             label="KYC Level"
-                            value={customer.kyc_profile.kyc_level}
+                            value={formatUndersoreString(
+                                customer.kyc_profile.kyc_level || '—',
+                            )}
                         />
                         <BorderInfoBox
                             label="Verification Value"
