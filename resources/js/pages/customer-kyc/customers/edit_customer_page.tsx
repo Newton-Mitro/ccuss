@@ -47,8 +47,10 @@ const Edit = ({ customer }: EditProps) => {
         customer_no: customer.customer_no,
         type: customer.type,
         name: customer.name,
-        phone: customer.phone,
-        email: customer.email,
+        primary_phone: customer.primary_phone || '',
+        primary_email: customer.primary_email || '',
+        alternate_phone: customer.alternate_phone || '',
+        alternate_email: customer.alternate_email || '',
         dob: customer.dob,
         gender: customer.gender,
         religion: customer.religion,
@@ -97,6 +99,9 @@ const Edit = ({ customer }: EditProps) => {
             {
                 forceFormData: true,
                 preserveScroll: true,
+                onError: (errors) => {
+                    console.log('Validation errors:', errors);
+                },
             },
         );
     };
@@ -194,25 +199,25 @@ const Edit = ({ customer }: EditProps) => {
                             <div>
                                 <Label className="text-xs">Primary Phone</Label>
                                 <Input
-                                    value={data.phone}
+                                    value={data.primary_phone}
                                     onChange={(e) =>
-                                        setData('phone', e.target.value)
+                                        setData('primary_phone', e.target.value)
                                     }
                                     className="h-8 text-sm"
                                 />
-                                <InputError message={errors.phone} />
+                                <InputError message={errors.primary_phone} />
                             </div>
 
                             <div>
                                 <Label className="text-xs">Primary Email</Label>
                                 <Input
-                                    value={data.email}
+                                    value={data.primary_email}
                                     onChange={(e) =>
-                                        setData('email', e.target.value)
+                                        setData('primary_email', e.target.value)
                                     }
                                     className="h-8 text-sm"
                                 />
-                                <InputError message={errors.email} />
+                                <InputError message={errors.primary_email} />
                             </div>
 
                             <div>
@@ -220,13 +225,16 @@ const Edit = ({ customer }: EditProps) => {
                                     Alternate Phone
                                 </Label>
                                 <Input
-                                    value={data.phone}
+                                    value={data.alternate_phone}
                                     onChange={(e) =>
-                                        setData('phone', e.target.value)
+                                        setData(
+                                            'alternate_phone',
+                                            e.target.value,
+                                        )
                                     }
                                     className="h-8 text-sm"
                                 />
-                                <InputError message={errors.phone} />
+                                <InputError message={errors.alternate_phone} />
                             </div>
 
                             <div>
@@ -234,13 +242,16 @@ const Edit = ({ customer }: EditProps) => {
                                     Alternate Email
                                 </Label>
                                 <Input
-                                    value={data.email}
+                                    value={data.alternate_email}
                                     onChange={(e) =>
-                                        setData('email', e.target.value)
+                                        setData(
+                                            'alternate_email',
+                                            e.target.value,
+                                        )
                                     }
                                     className="h-8 text-sm"
                                 />
-                                <InputError message={errors.email} />
+                                <InputError message={errors.alternate_email} />
                             </div>
                         </div>
 

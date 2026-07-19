@@ -35,8 +35,10 @@ const Create = () => {
         customer_no: '',
         type: '', // individual or organization
         name: '',
-        phone: '',
-        email: '',
+        primary_phone: '',
+        primary_email: '',
+        alternate_phone: '',
+        alternate_email: '',
         dob: '',
         gender: '',
         religion: '',
@@ -175,27 +177,61 @@ const Create = () => {
                             </div>
 
                             <div>
-                                <Label className="text-xs">Phone</Label>
+                                <Label className="text-xs">Primary Phone</Label>
                                 <Input
-                                    value={data.phone}
+                                    value={data.primary_phone}
                                     onChange={(e) =>
-                                        setData('phone', e.target.value)
+                                        setData('primary_phone', e.target.value)
                                     }
                                     className="h-8 text-sm"
                                 />
-                                <InputError message={errors.phone} />
+                                <InputError message={errors.primary_phone} />
                             </div>
 
                             <div>
-                                <Label className="text-xs">Email</Label>
+                                <Label className="text-xs">Primary Email</Label>
                                 <Input
-                                    value={data.email}
+                                    value={data.primary_email}
                                     onChange={(e) =>
-                                        setData('email', e.target.value)
+                                        setData('primary_email', e.target.value)
                                     }
                                     className="h-8 text-sm"
                                 />
-                                <InputError message={errors.email} />
+                                <InputError message={errors.primary_email} />
+                            </div>
+
+                            <div>
+                                <Label className="text-xs">
+                                    Alternate Phone
+                                </Label>
+                                <Input
+                                    value={data.alternate_phone}
+                                    onChange={(e) =>
+                                        setData(
+                                            'alternate_phone',
+                                            e.target.value,
+                                        )
+                                    }
+                                    className="h-8 text-sm"
+                                />
+                                <InputError message={errors.alternate_phone} />
+                            </div>
+
+                            <div>
+                                <Label className="text-xs">
+                                    Alternate Email
+                                </Label>
+                                <Input
+                                    value={data.alternate_email}
+                                    onChange={(e) =>
+                                        setData(
+                                            'alternate_email',
+                                            e.target.value,
+                                        )
+                                    }
+                                    className="h-8 text-sm"
+                                />
+                                <InputError message={errors.alternate_email} />
                             </div>
                         </div>
 

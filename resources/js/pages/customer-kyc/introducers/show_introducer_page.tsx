@@ -129,14 +129,19 @@ export default function ShowIntroducer() {
 
                             <div className="flex items-center gap-4">
                                 <Avatar
-                                    name={introducer_request.introducer?.name}
+                                    name={
+                                        introducer_request.introducer_customer
+                                            ?.name
+                                    }
                                     photo={
-                                        introducer_request.introducer?.photo
-                                            ?.url
+                                        introducer_request.introducer_customer
+                                            ?.photo?.url
                                     }
                                 />
                                 <CustomerDetails
-                                    customer={introducer_request.introducer}
+                                    customer={
+                                        introducer_request.introducer_customer
+                                    }
                                 />
                             </div>
                         </CardContent>

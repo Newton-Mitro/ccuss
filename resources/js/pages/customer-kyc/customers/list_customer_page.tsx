@@ -30,6 +30,8 @@ interface Props extends SharedData {
 export default function Index() {
     const { paginated_data, filters } = usePage<Props>().props;
 
+    console.log('paginated_data', paginated_data);
+
     useFlashToastHandler();
 
     const { data, setData, get } = useForm({
@@ -192,12 +194,16 @@ export default function Index() {
                                                 {c.type}
                                             </td>
                                             <td className="px-2 py-1">
-                                                {c.phone}
+                                                {c.primary_phone ||
+                                                    c.alternate_phone ||
+                                                    '—'}
                                             </td>
                                             <td className="px-2 py-1">
-                                                {c.email}
+                                                {c.primary_email ||
+                                                    c.alternate_email ||
+                                                    '—'}
                                             </td>
-                                            <td className="px-2 py-1">
+                                            <td className="px-2 py-1 capitalize">
                                                 <Badge text={c.status} />
                                             </td>
                                             <td className="px-2 py-1">
@@ -289,8 +295,15 @@ export default function Index() {
                                     </div>
 
                                     <div className="text-xs text-muted-foreground">
-                                        📞 {c.phone || '—'} <br />
-                                        ✉️ {c.email || '—'}
+                                        📞{' '}
+                                        {c.primary_phone ||
+                                            c.alternate_phone ||
+                                            '—'}{' '}
+                                        <br />
+                                        ✉️{' '}
+                                        {c.primary_email ||
+                                            c.alternate_email ||
+                                            '—'}
                                     </div>
 
                                     <div className="flex justify-end gap-3">

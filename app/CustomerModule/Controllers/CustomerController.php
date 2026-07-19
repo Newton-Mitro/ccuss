@@ -106,19 +106,19 @@ class CustomerController extends Controller
         $data['organization_id'] = auth()->user()->organization_id;
         $data['branch_id'] = auth()->user()->branch_id;
 
-        if (empty($data['phone']) && empty($data['email'])) {
-            return back()->withInput()->with('error', 'Phone or email is required.');
+        if (empty($data['primary_phone']) && empty($data['primary_email'])) {
+            return back()->withInput()->with('error', 'Primary phone or email is required.');
         }
 
         $exists = Customer::where(function ($q) use ($data) {
             $q->where('identification_number', $data['identification_number']);
 
-            if (!empty($data['email'])) {
-                $q->orWhere('email', $data['email']);
+            if (!empty($data['primary_email'])) {
+                $q->orWhere('primary_email', $data['primary_email']);
             }
 
-            if (!empty($data['phone'])) {
-                $q->orWhere('phone', $data['phone']);
+            if (!empty($data['primary_phone'])) {
+                $q->orWhere('primary_phone', $data['primary_phone']);
             }
         })->exists();
 
@@ -148,7 +148,6 @@ class CustomerController extends Controller
             KycProfile::create([
                 'customer_id' => $customer->id,
                 'kyc_level' => KycProfile::LEVEL_BASIC,
-                'risk_level' => KycProfile::RISK_HIGH
             ]);
 
             /** =========================
@@ -182,13 +181,11 @@ class CustomerController extends Controller
         $customer->load([
             'photo',
             'addresses',
-            'relatedToMe.customer.photo',
             'familyRelations.relative.photo',
-            'introducers.introducer.photo',
+            'introducers.introducedCustomer.photo',
+            'introducers.introducerCustomer.photo',
             'kycProfile',
             'kycDocuments',
-            'onlineServiceClient.organization',
-            'onlineServiceClient.branch',
             'audits',
         ]);
 
@@ -217,19 +214,19 @@ class CustomerController extends Controller
         $data = $request->validated();
 
 
-        if (empty($data['phone']) && empty($data['email'])) {
-            return back()->withInput()->with('error', 'Phone or email is required.');
+        if (empty($data['primary_phone']) && empty($data['primary_email'])) {
+            return back()->withInput()->with('error', 'Primary phone or email is required.');
         }
 
         $exists = Customer::where(function ($q) use ($data) {
             $q->where('identification_number', $data['identification_number']);
 
-            if (!empty($data['email'])) {
-                $q->orWhere('email', $data['email']);
+            if (!empty($data['primary_email'])) {
+                $q->orWhere('primary_email', $data['primary_email']);
             }
 
-            if (!empty($data['phone'])) {
-                $q->orWhere('phone', $data['phone']);
+            if (!empty($data['primary_phone'])) {
+                $q->orWhere('primary_phone', $data['primary_phone']);
             }
         })->where('id', '!=', $customer->id)->exists();
 

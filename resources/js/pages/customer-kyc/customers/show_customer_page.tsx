@@ -39,6 +39,8 @@ export default function Show({ customer }: ShowProps) {
         { title: `View Customer: ${customer.name}`, href: '' },
     ];
 
+    console.log('customer', customer);
+
     useFlashToastHandler();
 
     const isIndividual = customer.type === 'individual';
@@ -149,7 +151,7 @@ export default function Show({ customer }: ShowProps) {
                             {customer.customer_no} | {customer.type}
                         </p>
 
-                        <div className="">
+                        <div className="capitalize">
                             <Badge text={customer.status} />
                         </div>
                     </div>
@@ -227,8 +229,22 @@ export default function Show({ customer }: ShowProps) {
                         />
                     )}
 
-                    <BorderInfoBox label="Phone" value={customer.phone} />
-                    <BorderInfoBox label="Email" value={customer.email} />
+                    <BorderInfoBox
+                        label="Primary Phone"
+                        value={customer.primary_phone || '—'}
+                    />
+                    <BorderInfoBox
+                        label="Alternate Phone"
+                        value={customer.alternate_phone || '—'}
+                    />
+                    <BorderInfoBox
+                        label="Primary Email"
+                        value={customer.primary_email || '—'}
+                    />
+                    <BorderInfoBox
+                        label="Alternate Email"
+                        value={customer.alternate_email || '—'}
+                    />
 
                     <BorderInfoBox
                         label="ID Type"
@@ -254,8 +270,8 @@ export default function Show({ customer }: ShowProps) {
                             value={customer.kyc_profile.kyc_level}
                         />
                         <BorderInfoBox
-                            label="Risk Level"
-                            value={customer.kyc_profile.risk_level}
+                            label="Verification Value"
+                            value={customer.kyc_profile.verification_value}
                         />
                     </div>
                 </SectionHeader>
@@ -345,73 +361,37 @@ export default function Show({ customer }: ShowProps) {
                                     </div>
                                 )}
 
-                                <div className="flex flex-col text-xs">
-                                    <div className="text-sm font-medium">
-                                        <Link
-                                            href={route(
-                                                'customers.show',
-                                                rel.relative?.id,
-                                            )}
-                                            className="cursor-pointer text-sm font-semibold hover:underline"
-                                            onClick={(e) => e.stopPropagation()}
-                                        >
-                                            {`${rel.relative?.name} • ${rel.relative?.customer_no}`}
-                                        </Link>
-                                    </div>
+                                {rel.relative && (
+                                    <div className="flex flex-col text-xs">
+                                        <div className="text-sm font-medium">
+                                            <Link
+                                                href={route(
+                                                    'customers.show',
+                                                    rel.relative?.id,
+                                                )}
+                                                className="cursor-pointer text-sm font-semibold hover:underline"
+                                                onClick={(e) =>
+                                                    e.stopPropagation()
+                                                }
+                                            >
+                                                {`${rel.relative?.name} • ${rel.relative?.customer_no}`}
+                                            </Link>
+                                        </div>
 
-                                    <div className="flex gap-2 capitalize">
-                                        <span>
-                                            {rel.relation_type.replace(
-                                                /_/g,
-                                                ' ',
-                                            )}
-                                        </span>
+                                        <div className="flex gap-2 capitalize">
+                                            <span>
+                                                {rel.relation_type.replace(
+                                                    /_/g,
+                                                    ' ',
+                                                )}
+                                            </span>
 
-                                        <Badge text={rel.verification_status} />
-                                    </div>
-                                </div>
-                            </div>
-                        </DataCard>
-                    ))}
-                    {customer.related_to_me?.map((rel) => (
-                        <DataCard key={rel.customer.id}>
-                            <div className="flex items-center gap-2">
-                                {rel.customer?.photo?.url ? (
-                                    <img
-                                        src={rel.customer.photo.url}
-                                        className="h-10 w-10 rounded-full"
-                                    />
-                                ) : (
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-xs">
-                                        {rel.customer?.name?.charAt(0)}
+                                            <Badge
+                                                text={rel.verification_status}
+                                            />
+                                        </div>
                                     </div>
                                 )}
-
-                                <div className="flex flex-col text-xs">
-                                    <div className="text-sm font-medium">
-                                        <Link
-                                            href={route(
-                                                'customers.show',
-                                                rel.customer?.id,
-                                            )}
-                                            className="cursor-pointer text-sm font-semibold hover:underline"
-                                            onClick={(e) => e.stopPropagation()}
-                                        >
-                                            {`${rel.customer?.name} • ${rel.customer?.customer_no}`}
-                                        </Link>
-                                    </div>
-
-                                    <div className="flex gap-2 capitalize">
-                                        <span>
-                                            {rel.relation_type.replace(
-                                                /_/g,
-                                                ' ',
-                                            )}
-                                        </span>
-
-                                        <Badge text={rel.verification_status} />
-                                    </div>
-                                </div>
                             </div>
                         </DataCard>
                     ))}
@@ -451,43 +431,52 @@ export default function Show({ customer }: ShowProps) {
                             }}
                         >
                             <div className="flex items-center gap-2">
-                                {intro.introducer?.photo?.url ? (
+                                {intro.introducer_customer?.photo?.url ? (
                                     <img
-                                        src={intro.introducer.photo.url}
+                                        src={
+                                            intro.introducer_customer.photo.url
+                                        }
                                         className="h-10 w-10 rounded-full"
                                     />
                                 ) : (
                                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-xs">
-                                        {intro.introducer?.name?.charAt(0)}
+                                        {intro.introducer_customer?.name?.charAt(
+                                            0,
+                                        )}
                                     </div>
                                 )}
-                                <div className="">
-                                    <div className="text-sm font-medium">
-                                        <Link
-                                            href={route(
-                                                'customers.show',
-                                                intro.introducer?.id,
-                                            )}
-                                            className="cursor-pointer text-sm font-semibold hover:underline"
-                                            onClick={(e) => e.stopPropagation()}
-                                        >
-                                            {`${intro.introducer?.name} • ${intro.introducer?.customer_no}`}
-                                        </Link>
-                                    </div>
+                                {intro.introducer_customer && (
+                                    <div className="">
+                                        <div className="text-sm font-medium">
+                                            <Link
+                                                href={route(
+                                                    'customers.show',
+                                                    intro.introducer_customer
+                                                        ?.id,
+                                                )}
+                                                className="cursor-pointer text-sm font-semibold hover:underline"
+                                                onClick={(e) =>
+                                                    e.stopPropagation()
+                                                }
+                                            >
+                                                {`${intro.introducer_customer?.name} • ${intro.introducer_customer?.customer_no}`}
+                                            </Link>
+                                        </div>
 
-                                    <div className="flex gap-2 text-xs capitalize">
-                                        <span>
-                                            {intro.relationship_type.replace(
-                                                /_/g,
-                                                ' ',
-                                            )}
-                                        </span>
+                                        <div className="flex gap-2 text-xs capitalize">
+                                            <span>
+                                                {intro.relationship_type.replace(
+                                                    /_/g,
+                                                    ' ',
+                                                )}
+                                            </span>
 
-                                        <Badge
-                                            text={intro.verification_status}
-                                        />
+                                            <Badge
+                                                text={intro.verification_status}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         </DataCard>
                     ))}

@@ -18,11 +18,13 @@ class StoreCustomerRequest extends FormRequest
             /* ================= Core ================= */
             'type' => ['required', Rule::in(['individual', 'organization'])],
             'name' => ['required', 'string', 'max:150'],
-            'phone' => ['nullable', 'string', 'max:50'],
-            'email' => ['nullable', 'email', 'max:100'],
+            'primary_phone' => ['nullable', 'string', 'max:50'],
+            'primary_email' => ['nullable', 'email', 'max:100'],
+            'alternate_phone' => ['nullable', 'string', 'max:50'],
+            'alternate_email' => ['nullable', 'email', 'max:100'],
 
             /* ================= KYC & Status ================= */
-            'status' => ['nullable', Rule::in(['pending', 'verified', 'rejected'])],
+            'status' => ['nullable', Rule::in(['pending', 'active', 'inactive', 'suspended', 'closed'])],
 
             /* ================= Personal Info ================= */
             'dob' => [

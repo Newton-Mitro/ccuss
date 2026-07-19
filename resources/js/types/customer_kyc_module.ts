@@ -19,7 +19,6 @@ export type IdentificationType =
     | 'registration_no'
     | 'passport'
     | 'driving_license';
-export type KycStatus = 'pending' | 'verified' | 'rejected';
 export type AddressType =
     | 'current'
     | 'permanent'
@@ -29,7 +28,6 @@ export type AddressType =
     | 'other';
 export type VerificationStatus = 'pending' | 'verified' | 'rejected';
 export type KycLevel = 'basic' | 'full' | 'enhanced';
-export type RiskLevel = 'low' | 'medium' | 'high';
 export type CustomerStatus =
     | 'pending'
     | 'active'
@@ -47,8 +45,10 @@ export interface Customer extends Timestamped {
 
     // Common fields
     name: string;
-    phone?: string | null;
-    email?: string | null;
+    primary_phone?: string | null;
+    alternate_phone?: string | null;
+    primary_email?: string | null;
+    alternate_email?: string | null;
 
     // Individual-only fields
     dob?: string | null;
@@ -186,7 +186,7 @@ export interface CustomerIntroducer extends Timestamped {
     introduced_customer?: Customer | null;
 
     introducer_customer_id: ID;
-    introducer?: Customer | null;
+    introducer_customer?: Customer | null;
 
     introducer_account_id?: ID | null;
 
@@ -204,14 +204,8 @@ export interface CustomerIntroducer extends Timestamped {
 export interface KycProfile extends Timestamped {
     id: ID;
     customer_id: ID;
+    verification_value: number;
     customer?: Customer | null;
-
-    kyc_status: KycStatus;
     kyc_level: KycLevel;
-    risk_level: RiskLevel;
-
-    verification_status: 'pending' | 'approved' | 'rejected';
-    verified_at?: Timestamp | null;
-    remarks?: string | null;
     audits?: Audit[];
 }

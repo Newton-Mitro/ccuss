@@ -154,7 +154,8 @@ export default function IntroducersIndex() {
                                             <td className="px-2 py-1">
                                                 <img
                                                     src={
-                                                        i.introducer?.photo?.url
+                                                        i.introducer_customer
+                                                            ?.photo?.url
                                                     }
                                                     className="h-6 w-6 rounded-full"
                                                 />
@@ -164,7 +165,8 @@ export default function IntroducersIndex() {
                                                     '—'}
                                             </td>
                                             <td className="px-2 py-1">
-                                                {i.introducer?.name ?? '—'}
+                                                {i.introducer_customer?.name ??
+                                                    '—'}
                                             </td>
                                             <td className="px-2 py-1 capitalize">
                                                 {i.relationship_type.replace(
@@ -232,7 +234,7 @@ export default function IntroducersIndex() {
                                                 {i.introduced_customer?.name}
                                             </p>
                                             <p className="text-xs text-muted-foreground">
-                                                {i.introducer?.name}
+                                                {i.introducer_customer?.name}
                                             </p>
                                         </div>
 
