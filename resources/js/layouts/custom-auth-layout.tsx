@@ -81,6 +81,79 @@ export default function CustomAuthLayout({
     ];
 
     /* ------------------------------------------------------------------
+     * Logout
+     * ------------------------------------------------------------------ */
+    const handleLogout = () => {
+        cleanup();
+        localStorage.removeItem(STORAGE_KEY);
+        router.post(logout(), {}, { preserveScroll: false });
+    };
+
+    // Detect DevTools open
+    useEffect(() => {
+        const threshold = 160;
+
+        const detect = () => {
+            if (
+                window.outerWidth - window.innerWidth > threshold ||
+                window.outerHeight - window.innerHeight > threshold
+            ) {
+                console.log('DevTools may be open');
+                // Optional:
+                handleLogout();
+                // window.location.href = '/dashboard'; // Redirect to a safe page
+            }
+        };
+
+        const interval = setInterval(detect, 1000);
+
+        return () => clearInterval(interval);
+    }, []);
+
+    // Disable right-click context menu and certain key combinations
+    useEffect(() => {
+        const disableContextMenu = (e: MouseEvent) => {
+            e.preventDefault();
+        };
+
+        document.addEventListener('contextmenu', disableContextMenu);
+
+        return () => {
+            document.removeEventListener('contextmenu', disableContextMenu);
+        };
+    }, []);
+
+    // Disable certain key combinations (like F12, Ctrl+Shift+I, etc.)
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // F12
+            if (e.key === 'F12') {
+                e.preventDefault();
+            }
+
+            // Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C
+            if (
+                e.ctrlKey &&
+                e.shiftKey &&
+                ['I', 'J', 'C'].includes(e.key.toUpperCase())
+            ) {
+                e.preventDefault();
+            }
+
+            // Ctrl+U (View Source)
+            if (e.ctrlKey && e.key.toUpperCase() === 'U') {
+                e.preventDefault();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
+
+    /* ------------------------------------------------------------------
      * Persist sidebar open/close
      * ------------------------------------------------------------------ */
     useEffect(() => {
@@ -138,15 +211,6 @@ export default function CustomAuthLayout({
     };
 
     /* ------------------------------------------------------------------
-     * Logout
-     * ------------------------------------------------------------------ */
-    const handleLogout = () => {
-        cleanup();
-        localStorage.removeItem(STORAGE_KEY);
-        router.post(logout(), {}, { preserveScroll: false });
-    };
-
-    /* ------------------------------------------------------------------
      * Sidebar search filter
      * ------------------------------------------------------------------ */
     const filteredMenu = useMemo(() => {
@@ -179,7 +243,7 @@ export default function CustomAuthLayout({
      * Render
      * ------------------------------------------------------------------ */
     return (
-        <div className="flex h-screen bg-background text-foreground">
+        <div className="flex h-screen bg-background text-foreground select-none">
             {/* Sidebar */}
             <aside
                 className={cn(

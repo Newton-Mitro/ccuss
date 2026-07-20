@@ -49,14 +49,10 @@ class CustomerFactory extends Factory
             'name' => $name,
 
             'primary_phone' => fake()->phoneNumber(),
-            'alternate_phone' => fake()->boolean(40)
-                ? fake()->phoneNumber()
-                : null,
+            'alternate_phone' => fake()->phoneNumber(),
 
             'primary_email' => fake()->safeEmail(),
-            'alternate_email' => fake()->boolean(30)
-                ? fake()->safeEmail()
-                : null,
+            'alternate_email' => fake()->safeEmail(),
 
             'identification_type' => $type === 'individual'
                 ? fake()->randomElement([
@@ -144,6 +140,46 @@ class CustomerFactory extends Factory
             'gender' => 'male',
             'name' => fake()->firstNameMale() . ' ' . fake()->lastName(),
             'customer_no' => 'IND-' . fake()->unique()->numerify('######'),
+            'primary_phone' => fake()->phoneNumber(),
+            'alternate_phone' => fake()->phoneNumber(),
+            'primary_email' => fake()->safeEmail(),
+            'alternate_email' => fake()->safeEmail(),
+            'religion' => fake()->randomElement([
+                'christianity',
+                'islam',
+                'hinduism',
+                'buddhism',
+                'other',
+            ]),
+            'marital_status' => fake()->randomElement([
+                'single',
+                'married',
+                'widowed',
+                'divorced',
+                'other',
+            ]),
+            'blood_group' => fake()->randomElement([
+                'A+',
+                'A-',
+                'B+',
+                'B-',
+                'AB+',
+                'AB-',
+                'O+',
+                'O-',
+            ]),
+            'dob' => fake()->dateTimeBetween('-70 years', '-18 years')->format('Y-m-d'),
+            'occupation' => fake()->jobTitle(),
+            'education' => fake()->randomElement([
+                'Primary',
+                'Secondary',
+                'Higher Secondary',
+                'Diploma',
+                'Bachelor',
+                'Master',
+                'PhD',
+            ]),
+            'nationality' => fake()->country(),
             'identification_type' => fake()->randomElement([
                 'national_identification_number',
                 'birth_registration_number',
@@ -160,6 +196,46 @@ class CustomerFactory extends Factory
             'gender' => 'female',
             'name' => fake()->firstNameFemale() . ' ' . fake()->lastName(),
             'customer_no' => 'IND-' . fake()->unique()->numerify('######'),
+            'primary_phone' => fake()->phoneNumber(),
+            'alternate_phone' => fake()->phoneNumber(),
+            'primary_email' => fake()->safeEmail(),
+            'alternate_email' => fake()->safeEmail(),
+            'religion' => fake()->randomElement([
+                'christianity',
+                'islam',
+                'hinduism',
+                'buddhism',
+                'other',
+            ]),
+            'marital_status' => fake()->randomElement([
+                'single',
+                'married',
+                'widowed',
+                'divorced',
+                'other',
+            ]),
+            'blood_group' => fake()->randomElement([
+                'A+',
+                'A-',
+                'B+',
+                'B-',
+                'AB+',
+                'AB-',
+                'O+',
+                'O-',
+            ]),
+            'dob' => fake()->dateTimeBetween('-70 years', '-18 years')->format('Y-m-d'),
+            'occupation' => fake()->jobTitle(),
+            'education' => fake()->randomElement([
+                'Primary',
+                'Secondary',
+                'Higher Secondary',
+                'Diploma',
+                'Bachelor',
+                'Master',
+                'PhD',
+            ]),
+            'nationality' => fake()->country(),
             'identification_type' => fake()->randomElement([
                 'national_identification_number',
                 'birth_registration_number',

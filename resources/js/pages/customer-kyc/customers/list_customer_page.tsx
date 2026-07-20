@@ -191,7 +191,9 @@ export default function Index() {
                                                 {c.name}
                                             </td>
                                             <td className="px-2 py-1 capitalize">
-                                                {c.type}
+                                                {c.type === 'individual'
+                                                    ? c.type + ' - ' + c.gender
+                                                    : c.type}
                                             </td>
                                             <td className="px-2 py-1">
                                                 {c.primary_phone ||
