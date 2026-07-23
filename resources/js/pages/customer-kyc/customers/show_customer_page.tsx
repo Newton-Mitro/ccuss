@@ -11,13 +11,11 @@ import {
     User,
     UserCheckIcon,
     UserIcon,
-    Users,
     UsersIcon,
     X,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
 import { BorderInfoBox } from '../../../components/border-info-box';
-import { UserInfo } from '../../../components/user-info';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
@@ -38,8 +36,6 @@ export default function Show({ customer }: ShowProps) {
         { title: 'Customers', href: route('customers.index') },
         { title: `View Customer: ${customer.name}`, href: '' },
     ];
-
-    console.log('customer', customer);
 
     useFlashToastHandler();
 
@@ -549,24 +545,6 @@ export default function Show({ customer }: ShowProps) {
                 </div>
             </SectionHeader>
 
-            {/* ================= Online Service ================= */}
-
-            {customer.online_service_client && (
-                <SectionHeader
-                    icon={<Users size={18} />}
-                    title="Online Service Account"
-                >
-                    <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
-                        <div className="flex items-center gap-2 rounded-md border bg-card p-4 hover:shadow-md">
-                            <UserInfo
-                                user={customer.online_service_client}
-                                showEmail
-                            />
-                        </div>
-                    </div>
-                </SectionHeader>
-            )}
-
             {customer.audits.length > 0 && (
                 <SectionHeader
                     icon={<History size={18} />}
@@ -612,7 +590,6 @@ export default function Show({ customer }: ShowProps) {
 }
 
 /* ================= UI Components ================= */
-
 const ActionButton = ({ children, icon, as = 'button', ...props }: any) =>
     as === 'button' ? (
         <button

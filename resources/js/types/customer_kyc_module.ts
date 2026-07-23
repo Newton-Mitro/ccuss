@@ -1,6 +1,5 @@
 import { Audit } from './audit_models';
 import { ID, Timestamp, Timestamped } from './base_types';
-import { User } from './user';
 
 /* ===========================
  * Enums / Types
@@ -75,8 +74,6 @@ export interface Customer extends Timestamped {
     family_relations?: CustomerFamilyRelation[];
     related_to_me?: CustomerFamilyRelation[];
     introducers?: CustomerIntroducer[];
-    introduced_customers?: CustomerIntroducer[];
-    online_service_client?: User | null;
     kyc_profile?: KycProfile | null;
     kyc_documents?: KycDocument[];
     audits?: Audit[];
