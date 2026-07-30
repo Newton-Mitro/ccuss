@@ -57,3 +57,7 @@ abashedly
 torrential
 exorbitant
 commence
+anxiously
+exponentially
+physique
+humongous
