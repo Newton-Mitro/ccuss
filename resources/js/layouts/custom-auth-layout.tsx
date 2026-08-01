@@ -89,40 +89,6 @@ export default function CustomAuthLayout({
         router.post(logout(), {}, { preserveScroll: false });
     };
 
-    // Detect DevTools open
-    useEffect(() => {
-        const threshold = 160;
-
-        const detect = () => {
-            if (
-                window.outerWidth - window.innerWidth > threshold ||
-                window.outerHeight - window.innerHeight > threshold
-            ) {
-                console.log('DevTools may be open');
-                // Optional:
-                handleLogout();
-                // window.location.href = '/dashboard'; // Redirect to a safe page
-            }
-        };
-
-        const interval = setInterval(detect, 1000);
-
-        return () => clearInterval(interval);
-    }, []);
-
-    // Disable right-click context menu and certain key combinations
-    useEffect(() => {
-        const disableContextMenu = (e: MouseEvent) => {
-            e.preventDefault();
-        };
-
-        document.addEventListener('contextmenu', disableContextMenu);
-
-        return () => {
-            document.removeEventListener('contextmenu', disableContextMenu);
-        };
-    }, []);
-
     // Disable certain key combinations (like F12, Ctrl+Shift+I, etc.)
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {

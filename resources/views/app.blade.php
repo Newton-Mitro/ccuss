@@ -3,6 +3,53 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script>
+(function () {
+    // Disable right click
+    document.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+    });
+
+    // Disable common DevTools shortcuts
+    document.addEventListener("keydown", function (e) {
+        // F12
+        if (e.key === "F12") {
+            e.preventDefault();
+            return false;
+        }
+
+        // Ctrl+Shift+I
+        if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "i") {
+            e.preventDefault();
+            return false;
+        }
+
+        // Ctrl+Shift+J
+        if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "j") {
+            e.preventDefault();
+            return false;
+        }
+
+        // Ctrl+Shift+C
+        if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "c") {
+            e.preventDefault();
+            return false;
+        }
+
+        // Ctrl+U (View Source)
+        if (e.ctrlKey && e.key.toLowerCase() === "u") {
+            e.preventDefault();
+            return false;
+        }
+
+        // Ctrl+S (optional)
+        if (e.ctrlKey && e.key.toLowerCase() === "s") {
+            e.preventDefault();
+            return false;
+        }
+    });
+})();
+</script>
 
         {{-- Inline script to detect system dark mode preference and apply it immediately --}}
         <script>
