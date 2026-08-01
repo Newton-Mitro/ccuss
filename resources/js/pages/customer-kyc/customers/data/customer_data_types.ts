@@ -46,12 +46,20 @@ export const kycStatuses = [
         value: 'pending',
     },
     {
-        label: 'Verified',
-        value: 'verified',
+        label: 'Active',
+        value: 'active',
     },
     {
-        label: 'Rejected',
-        value: 'rejected',
+        label: 'Inactive',
+        value: 'inactive',
+    },
+    {
+        label: 'Suspended',
+        value: 'suspended',
+    },
+    {
+        label: 'Closed',
+        value: 'closed',
     },
 ];
 

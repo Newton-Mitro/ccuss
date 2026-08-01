@@ -31,7 +31,7 @@ const Create = () => {
 
     const handleBack = () => window.history.back();
 
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors, clearErrors } = useForm({
         customer_no: '',
         type: '', // individual or organization
         name: '',
@@ -94,6 +94,7 @@ const Create = () => {
 
     // Handle Customer Type change
     const handleTypeChange = (value: string) => {
+        clearErrors();
         setData('type', value);
 
         if (value === 'organization') {
@@ -112,6 +113,11 @@ const Create = () => {
             setData('identification_type', '');
             setData('identification_number', '');
         }
+    };
+
+    const handleDataChange = (key: any, value: any) => {
+        clearErrors(key);
+        setData(key, value);
     };
 
     return (
@@ -168,9 +174,12 @@ const Create = () => {
                                 <Label className="text-xs">Name</Label>
                                 <Input
                                     value={data.name}
-                                    onChange={(e) =>
-                                        setData('name', e.target.value)
-                                    }
+                                    onChange={(e) => {
+                                        handleDataChange(
+                                            'name',
+                                            e.target.value,
+                                        );
+                                    }}
                                     className="h-8 text-sm"
                                 />
                                 <InputError message={errors.name} />
@@ -181,7 +190,10 @@ const Create = () => {
                                 <Input
                                     value={data.primary_phone}
                                     onChange={(e) =>
-                                        setData('primary_phone', e.target.value)
+                                        handleDataChange(
+                                            'primary_phone',
+                                            e.target.value,
+                                        )
                                     }
                                     className="h-8 text-sm"
                                 />
@@ -193,7 +205,10 @@ const Create = () => {
                                 <Input
                                     value={data.primary_email}
                                     onChange={(e) =>
-                                        setData('primary_email', e.target.value)
+                                        handleDataChange(
+                                            'primary_email',
+                                            e.target.value,
+                                        )
                                     }
                                     className="h-8 text-sm"
                                 />
@@ -207,7 +222,7 @@ const Create = () => {
                                 <Input
                                     value={data.alternate_phone}
                                     onChange={(e) =>
-                                        setData(
+                                        handleDataChange(
                                             'alternate_phone',
                                             e.target.value,
                                         )
@@ -224,7 +239,7 @@ const Create = () => {
                                 <Input
                                     value={data.alternate_email}
                                     onChange={(e) =>
-                                        setData(
+                                        handleDataChange(
                                             'alternate_email',
                                             e.target.value,
                                         )
@@ -242,7 +257,9 @@ const Create = () => {
                                     <Label className="text-xs">DOB</Label>
                                     <AppDatePicker
                                         value={data.dob}
-                                        onChange={(val) => setData('dob', val)}
+                                        onChange={(val) =>
+                                            handleDataChange('dob', val)
+                                        }
                                     />
                                     <InputError message={errors.dob} />
                                 </div>
@@ -251,7 +268,7 @@ const Create = () => {
                                     <Select
                                         value={data.gender}
                                         onChange={(value) =>
-                                            setData('gender', value)
+                                            handleDataChange('gender', value)
                                         }
                                         options={genders}
                                     />
@@ -263,7 +280,7 @@ const Create = () => {
                                     <Select
                                         value={data.religion}
                                         onChange={(value) =>
-                                            setData('religion', value)
+                                            handleDataChange('religion', value)
                                         }
                                         options={religions}
                                     />
@@ -277,7 +294,10 @@ const Create = () => {
                                     <Select
                                         value={data.marital_status}
                                         onChange={(value) =>
-                                            setData('marital_status', value)
+                                            handleDataChange(
+                                                'marital_status',
+                                                value,
+                                            )
                                         }
                                         options={maritalStatuses}
                                     />
@@ -294,7 +314,10 @@ const Create = () => {
                                     <Select
                                         value={data.blood_group}
                                         onChange={(value) =>
-                                            setData('blood_group', value)
+                                            handleDataChange(
+                                                'blood_group',
+                                                value,
+                                            )
                                         }
                                         options={bloodGroups}
                                     />
@@ -308,7 +331,10 @@ const Create = () => {
                                     <Select
                                         value={data.nationality}
                                         onChange={(value) =>
-                                            setData('nationality', value)
+                                            handleDataChange(
+                                                'nationality',
+                                                value,
+                                            )
                                         }
                                         options={nationalities}
                                     />
@@ -322,7 +348,10 @@ const Create = () => {
                                     <Select
                                         value={data.occupation}
                                         onChange={(value) =>
-                                            setData('occupation', value)
+                                            handleDataChange(
+                                                'occupation',
+                                                value,
+                                            )
                                         }
                                         options={occupations}
                                     />
@@ -334,7 +363,7 @@ const Create = () => {
                                     <Select
                                         value={data.education}
                                         onChange={(value) =>
-                                            setData('education', value)
+                                            handleDataChange('education', value)
                                         }
                                         options={educations}
                                     />
@@ -353,7 +382,10 @@ const Create = () => {
                                 <Select
                                     value={data.identification_type}
                                     onChange={(value) =>
-                                        setData('identification_type', value)
+                                        handleDataChange(
+                                            'identification_type',
+                                            value,
+                                        )
                                     }
                                     options={
                                         data.type === 'organization'
@@ -373,7 +405,7 @@ const Create = () => {
                                 <Input
                                     value={data.identification_number}
                                     onChange={(e) =>
-                                        setData(
+                                        handleDataChange(
                                             'identification_number',
                                             e.target.value,
                                         )
@@ -393,7 +425,7 @@ const Create = () => {
                                     value={data.status}
                                     disabled
                                     onChange={(value) =>
-                                        setData('status', value)
+                                        handleDataChange('status', value)
                                     }
                                     options={customerStatuses}
                                 />
