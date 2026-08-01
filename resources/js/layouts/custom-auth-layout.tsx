@@ -89,36 +89,6 @@ export default function CustomAuthLayout({
         router.post(logout(), {}, { preserveScroll: false });
     };
 
-    // Disable certain key combinations (like F12, Ctrl+Shift+I, etc.)
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            // F12
-            if (e.key === 'F12') {
-                e.preventDefault();
-            }
-
-            // Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C
-            if (
-                e.ctrlKey &&
-                e.shiftKey &&
-                ['I', 'J', 'C'].includes(e.key.toUpperCase())
-            ) {
-                e.preventDefault();
-            }
-
-            // Ctrl+U (View Source)
-            if (e.ctrlKey && e.key.toUpperCase() === 'U') {
-                e.preventDefault();
-            }
-        };
-
-        document.addEventListener('keydown', handleKeyDown);
-
-        return () => {
-            document.removeEventListener('keydown', handleKeyDown);
-        };
-    }, []);
-
     /* ------------------------------------------------------------------
      * Persist sidebar open/close
      * ------------------------------------------------------------------ */
