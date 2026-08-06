@@ -11,11 +11,13 @@ export default function AppLogo({
         (mode === 'system' &&
             window.matchMedia('(prefers-color-scheme: dark)').matches);
 
+    const logo = import.meta.env.VITE_LOGO_PATH;
+
     return (
         <img
-            src={isDark ? '/logo.png' : '/logo_3.png'}
-            alt="Logo"
-            className={className}
+            src={logo}
+            alt={import.meta.env.VITE_APP_NAME}
+            className={className + (isDark ? ' invert' : '')}
             {...props}
         />
     );

@@ -79,6 +79,9 @@ class CustomerController extends Controller
             }
         }
 
+        // throw new \Exception('Something went wrong');
+        // abort(500, 'Internal Server Error: Something went wrong while fetching customers.');
+
         $customers = $query->latest()
             ->paginate($request->input('per_page', 18))
             ->withQueryString();

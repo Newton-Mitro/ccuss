@@ -5,6 +5,7 @@ namespace App\SystemAdministration\Controllers;
 use App\Http\Controllers\Controller;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
+use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -107,6 +108,8 @@ class UserController extends Controller
             $user->roles()->sync($validated['roles']);
         }
 
+        $user->permissions()->sync($user->getPermissionsAttribute()->pluck('id')->toArray());
+
         return redirect()->route('users.index')
             ->with('success', $user->name . ' User created successfully.');
     }
@@ -129,11 +132,18 @@ class UserController extends Controller
      * ========================== */
     public function edit(User $user)
     {
+        // Fetch all roles with their assigned permissions
+        $roles = Role::with('permissions')->get();
+
+        // Fetch all available permissions
+        $permissions = Permission::all();
+
         return Inertia::render('system-administration/users/user-form-page', [
             'user' => $user->load('roles'),
-            'roles' => Role::all(),
+            'roles' => $roles,
             'organizations' => Organization::all(),
             'branches' => Branch::all(),
+            'permissions' => $permissions,
         ]);
     }
 
@@ -180,6 +190,7 @@ class UserController extends Controller
         if (isset($validated['roles'])) {
             $user->roles()->sync($validated['roles']);
         }
+
 
         return redirect()->route('users.index')
             ->with('success', $user->name . ' User updated successfully.');

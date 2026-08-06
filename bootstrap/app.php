@@ -10,6 +10,8 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
+use Inertia\Inertia;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -37,6 +39,31 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+
+            $status = 500;
+
+            // Get HTTP exception status (403, 404, 500, etc.)
+            if ($e instanceof HttpExceptionInterface) {
+                $status = $e->getStatusCode();
+            }
+
+            if ($status === 403) {
+                return Inertia::render('errors/403')
+                    ->toResponse(request())
+                    ->setStatusCode(403);
+            }
+
+            if ($status === 500) {
+                return Inertia::render('errors/500')
+                    ->toResponse(request())
+                    ->setStatusCode(500);
+            }
+        });
+        $exceptions->report(function (\Throwable $e) {
+            return Inertia::render('errors/500')
+                ->toResponse(request())
+                ->setStatusCode(500);
+        });
     })
     ->create();

@@ -1,5 +1,8 @@
 FROM php:8.3-fpm
 
+# Set working directory
+WORKDIR /var/www/union_banking
+
 # System dependencies
 RUN apt-get update && apt-get install -y \
     git \
@@ -33,11 +36,10 @@ RUN pecl install redis \
 # ----------------------------
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Set working directory
-WORKDIR /var/www/union_banking
+COPY . .
 
-# ----------------------------
-# Optional: run composer install on build (if you want)
-# ----------------------------
-# COPY composer.json composer.lock ./
-# RUN composer install --no-dev --optimize-autoloader
+RUN composer install
+
+RUN chown -R www-data:www-data \
+    storage \
+    bootstrap/cache

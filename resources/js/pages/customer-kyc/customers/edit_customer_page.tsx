@@ -43,7 +43,7 @@ const Edit = ({ customer }: EditProps) => {
 
     const handleBack = () => window.history.back();
 
-    const { data, setData, processing, errors } = useForm({
+    const { data, setData, processing, errors, clearErrors } = useForm({
         customer_no: customer.customer_no,
         type: customer.type,
         name: customer.name,
@@ -108,6 +108,7 @@ const Edit = ({ customer }: EditProps) => {
 
     const handleTypeChange = (value: string) => {
         setData('type', value as CustomerType);
+        clearErrors();
 
         if (value === 'organization') {
             setData('identification_type', 'registration_no');
@@ -125,6 +126,11 @@ const Edit = ({ customer }: EditProps) => {
             setData('identification_type', null);
             setData('identification_number', '');
         }
+    };
+
+    const handleDataChange = (key: any, value: any) => {
+        clearErrors(key);
+        setData(key, value);
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -189,7 +195,7 @@ const Edit = ({ customer }: EditProps) => {
                                 <Input
                                     value={data.name}
                                     onChange={(e) =>
-                                        setData('name', e.target.value)
+                                        handleDataChange('name', e.target.value)
                                     }
                                     className="h-8 text-sm"
                                 />
@@ -201,7 +207,10 @@ const Edit = ({ customer }: EditProps) => {
                                 <Input
                                     value={data.primary_phone}
                                     onChange={(e) =>
-                                        setData('primary_phone', e.target.value)
+                                        handleDataChange(
+                                            'primary_phone',
+                                            e.target.value,
+                                        )
                                     }
                                     className="h-8 text-sm"
                                 />
@@ -213,7 +222,10 @@ const Edit = ({ customer }: EditProps) => {
                                 <Input
                                     value={data.primary_email}
                                     onChange={(e) =>
-                                        setData('primary_email', e.target.value)
+                                        handleDataChange(
+                                            'primary_email',
+                                            e.target.value,
+                                        )
                                     }
                                     className="h-8 text-sm"
                                 />
@@ -227,7 +239,7 @@ const Edit = ({ customer }: EditProps) => {
                                 <Input
                                     value={data.alternate_phone}
                                     onChange={(e) =>
-                                        setData(
+                                        handleDataChange(
                                             'alternate_phone',
                                             e.target.value,
                                         )
@@ -244,7 +256,7 @@ const Edit = ({ customer }: EditProps) => {
                                 <Input
                                     value={data.alternate_email}
                                     onChange={(e) =>
-                                        setData(
+                                        handleDataChange(
                                             'alternate_email',
                                             e.target.value,
                                         )
@@ -262,7 +274,9 @@ const Edit = ({ customer }: EditProps) => {
                                     <Label className="text-xs">DOB</Label>
                                     <AppDatePicker
                                         value={data.dob}
-                                        onChange={(val) => setData('dob', val)}
+                                        onChange={(val) =>
+                                            handleDataChange('dob', val)
+                                        }
                                     />
                                     <InputError message={errors.dob} />
                                 </div>
@@ -271,7 +285,10 @@ const Edit = ({ customer }: EditProps) => {
                                     <Select
                                         value={data.gender}
                                         onChange={(value) =>
-                                            setData('gender', value as Gender)
+                                            handleDataChange(
+                                                'gender',
+                                                value as Gender,
+                                            )
                                         }
                                         options={genders}
                                     />
@@ -283,7 +300,7 @@ const Edit = ({ customer }: EditProps) => {
                                     <Select
                                         value={data.religion}
                                         onChange={(value) =>
-                                            setData(
+                                            handleDataChange(
                                                 'religion',
                                                 value as Religion,
                                             )
@@ -300,7 +317,10 @@ const Edit = ({ customer }: EditProps) => {
                                     <Select
                                         value={data.marital_status}
                                         onChange={(value) =>
-                                            setData('marital_status', value)
+                                            handleDataChange(
+                                                'marital_status',
+                                                value,
+                                            )
                                         }
                                         options={maritalStatuses}
                                     />
@@ -317,7 +337,10 @@ const Edit = ({ customer }: EditProps) => {
                                     <Select
                                         value={data.blood_group}
                                         onChange={(value) =>
-                                            setData('blood_group', value)
+                                            handleDataChange(
+                                                'blood_group',
+                                                value,
+                                            )
                                         }
                                         options={bloodGroups}
                                     />
@@ -331,7 +354,10 @@ const Edit = ({ customer }: EditProps) => {
                                     <Select
                                         value={data.nationality}
                                         onChange={(value) =>
-                                            setData('nationality', value)
+                                            handleDataChange(
+                                                'nationality',
+                                                value,
+                                            )
                                         }
                                         options={nationalities}
                                     />
@@ -345,7 +371,10 @@ const Edit = ({ customer }: EditProps) => {
                                     <Select
                                         value={data.occupation}
                                         onChange={(value) =>
-                                            setData('occupation', value)
+                                            handleDataChange(
+                                                'occupation',
+                                                value,
+                                            )
                                         }
                                         options={occupations}
                                     />
@@ -357,7 +386,7 @@ const Edit = ({ customer }: EditProps) => {
                                     <Select
                                         value={data.education}
                                         onChange={(value) =>
-                                            setData('education', value)
+                                            handleDataChange('education', value)
                                         }
                                         options={educations}
                                     />
@@ -376,7 +405,7 @@ const Edit = ({ customer }: EditProps) => {
                                 <Select
                                     value={data.identification_type}
                                     onChange={(value) =>
-                                        setData(
+                                        handleDataChange(
                                             'identification_type',
                                             value as IdentificationType,
                                         )
@@ -399,7 +428,7 @@ const Edit = ({ customer }: EditProps) => {
                                 <Input
                                     value={data.identification_number}
                                     onChange={(e) =>
-                                        setData(
+                                        handleDataChange(
                                             'identification_number',
                                             e.target.value,
                                         )
@@ -419,7 +448,7 @@ const Edit = ({ customer }: EditProps) => {
                                     value={data.status}
                                     disabled
                                     onChange={(value) =>
-                                        setData(
+                                        handleDataChange(
                                             'status',
                                             value as CustomerStatus,
                                         )
