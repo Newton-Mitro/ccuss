@@ -69,3 +69,33 @@ docker logs -f union_banking_queue
 docker exec -it union_banking_scheduler chown -R www-data:www-data storage
 docker exec -it union_banking_scheduler chmod -R 775 storage
 ```
+
+```
+ai/
+├── manifest.json
+│
+├── modules/
+│   ├── customers.json
+│   ├── accounts.json
+│   ├── loans.json
+│   ├── deposits.json
+│   ├── transactions.json
+│   ├── payroll.json
+│   └── reports.json
+│
+├── entities/
+│   ├── customer.json
+│   ├── account.json
+│   ├── loan.json
+│   └── transaction.json
+│
+├── workflows/
+│   ├── loan-payment.json
+│   ├── loan-disbursement.json
+│   └── account-transfer.json
+│
+└── rules/
+    ├── financial.json
+    ├── loan.json
+    └── permissions.json
+```

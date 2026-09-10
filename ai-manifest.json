@@ -1,0 +1,761 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "manifest_version": "1.0.0",
+
+    "software": {
+        "name": "Dhaka Credit ERP",
+        "slug": "dhaka-credit-erp",
+        "version": "1.0.0",
+        "description": "Enterprise resource planning system for cooperative credit union operations.",
+        "type": "erp",
+        "locale": "en-BD",
+        "timezone": "Asia/Dhaka",
+        "currency": "BDT"
+    },
+
+    "ai": {
+        "enabled": true,
+
+        "purpose": [
+            "Understand the structure and capabilities of the software",
+            "Answer questions about system data",
+            "Perform authorized operations",
+            "Guide users through business workflows",
+            "Explain business rules and system behavior"
+        ],
+
+        "behavior": {
+            "must_validate_before_mutation": true,
+            "must_check_permissions": true,
+            "must_respect_business_rules": true,
+            "must_confirm_financial_transactions": true,
+            "must_not_invent_data": true,
+            "must_not_invent_capabilities": true,
+            "must_explain_failed_operations": true
+        }
+    },
+
+    "organization": {
+        "multi_organization": true,
+        "multi_branch": true,
+
+        "entities": ["Organization", "Branch"]
+    },
+
+    "modules": {
+        "customers": {
+            "name": "Customers",
+            "description": "Manage individual and organizational customers or members.",
+            "enabled": true,
+
+            "entities": ["Customer", "CustomerKyc"],
+
+            "operations": [
+                "customer.create",
+                "customer.update",
+                "customer.get",
+                "customer.search",
+                "customer.list",
+                "customer.activate",
+                "customer.deactivate"
+            ]
+        },
+
+        "accounts": {
+            "name": "Accounts",
+            "description": "Manage customer deposit and financial accounts.",
+            "enabled": true,
+
+            "entities": ["Account", "AccountTransaction"],
+
+            "operations": [
+                "account.create",
+                "account.get",
+                "account.search",
+                "account.deposit",
+                "account.withdraw",
+                "account.transfer",
+                "account.statement",
+                "account.balance"
+            ]
+        },
+
+        "loans": {
+            "name": "Loans",
+            "description": "Manage loan applications, approvals, disbursements and repayments.",
+            "enabled": true,
+
+            "entities": ["Loan", "LoanPayment", "LoanSchedule"],
+
+            "operations": [
+                "loan.create",
+                "loan.get",
+                "loan.search",
+                "loan.calculate",
+                "loan.approve",
+                "loan.reject",
+                "loan.disburse",
+                "loan.payment",
+                "loan.balance",
+                "loan.schedule",
+                "loan.close"
+            ]
+        },
+
+        "deposits": {
+            "name": "Deposits",
+            "description": "Manage member deposit products and transactions.",
+            "enabled": true,
+
+            "entities": ["Deposit", "DepositTransaction"],
+
+            "operations": [
+                "deposit.create",
+                "deposit.get",
+                "deposit.deposit",
+                "deposit.withdraw",
+                "deposit.close",
+                "deposit.statement"
+            ]
+        },
+
+        "transactions": {
+            "name": "Transactions",
+            "description": "Manage financial transactions and accounting entries.",
+            "enabled": true,
+
+            "entities": ["Transaction", "Voucher", "VoucherEntry"],
+
+            "operations": [
+                "transaction.create",
+                "transaction.get",
+                "transaction.search",
+                "transaction.reverse",
+                "voucher.create",
+                "voucher.post",
+                "voucher.reverse"
+            ]
+        },
+
+        "general_ledger": {
+            "name": "General Ledger",
+            "description": "Manage chart of accounts, ledger accounts and accounting periods.",
+            "enabled": true,
+
+            "entities": ["GlAccount", "FiscalPeriod", "LedgerEntry"],
+
+            "operations": [
+                "gl.account.create",
+                "gl.account.get",
+                "gl.account.list",
+                "gl.balance",
+                "gl.ledger",
+                "fiscal_period.open",
+                "fiscal_period.close"
+            ]
+        },
+
+        "teller": {
+            "name": "Teller",
+            "description": "Manage teller operations, cash transactions and teller sessions.",
+            "enabled": true,
+
+            "entities": ["Teller", "TellerSession", "CashTransaction"],
+
+            "operations": [
+                "teller.open_session",
+                "teller.close_session",
+                "teller.balance",
+                "teller.deposit",
+                "teller.withdraw",
+                "teller.transfer"
+            ]
+        },
+
+        "vault": {
+            "name": "Vault",
+            "description": "Manage branch vault cash and teller cash transfers.",
+            "enabled": true,
+
+            "entities": ["Vault", "VaultTransaction"],
+
+            "operations": [
+                "vault.balance",
+                "vault.deposit",
+                "vault.withdraw",
+                "vault.transfer"
+            ]
+        },
+
+        "payroll": {
+            "name": "Payroll",
+            "description": "Manage employees, salaries and payroll processing.",
+            "enabled": true,
+
+            "entities": ["Employee", "Payroll", "Salary"],
+
+            "operations": [
+                "employee.create",
+                "employee.update",
+                "employee.get",
+                "payroll.calculate",
+                "payroll.process",
+                "payroll.statement"
+            ]
+        },
+
+        "reports": {
+            "name": "Reports",
+            "description": "Generate operational, financial and management reports.",
+            "enabled": true,
+
+            "operations": [
+                "report.customer",
+                "report.loan",
+                "report.deposit",
+                "report.transaction",
+                "report.ledger",
+                "report.teller",
+                "report.financial"
+            ]
+        }
+    },
+
+    "entities": {
+        "Customer": {
+            "description": "A person or organization registered with the credit union.",
+
+            "fields": {
+                "id": {
+                    "type": "integer",
+                    "primary_key": true
+                },
+                "type": {
+                    "type": "enum",
+                    "values": ["INDIVIDUAL", "ORGANIZATION"]
+                },
+                "name": {
+                    "type": "string",
+                    "required": true
+                },
+                "mobile": {
+                    "type": "string",
+                    "required": true
+                },
+                "email": {
+                    "type": "string",
+                    "required": false
+                },
+                "status": {
+                    "type": "enum",
+                    "values": ["ACTIVE", "INACTIVE"]
+                },
+                "organization_id": {
+                    "type": "integer",
+                    "required": true
+                },
+                "branch_id": {
+                    "type": "integer",
+                    "required": true
+                }
+            }
+        },
+
+        "Account": {
+            "description": "A financial account owned by a customer.",
+
+            "fields": {
+                "id": {
+                    "type": "integer",
+                    "primary_key": true
+                },
+                "customer_id": {
+                    "type": "integer",
+                    "required": true
+                },
+                "account_number": {
+                    "type": "string",
+                    "required": true,
+                    "unique": true
+                },
+                "balance": {
+                    "type": "decimal"
+                },
+                "status": {
+                    "type": "enum",
+                    "values": ["ACTIVE", "BLOCKED", "CLOSED"]
+                }
+            }
+        },
+
+        "Loan": {
+            "description": "A loan facility provided to a customer.",
+
+            "fields": {
+                "id": {
+                    "type": "integer",
+                    "primary_key": true
+                },
+                "customer_id": {
+                    "type": "integer",
+                    "required": true
+                },
+                "loan_number": {
+                    "type": "string",
+                    "required": true,
+                    "unique": true
+                },
+                "principal": {
+                    "type": "decimal",
+                    "required": true
+                },
+                "interest_rate": {
+                    "type": "decimal"
+                },
+                "outstanding_balance": {
+                    "type": "decimal"
+                },
+                "status": {
+                    "type": "enum",
+                    "values": [
+                        "PENDING",
+                        "APPROVED",
+                        "REJECTED",
+                        "DISBURSED",
+                        "CLOSED"
+                    ]
+                }
+            }
+        },
+
+        "LoanPayment": {
+            "description": "A payment made against a loan.",
+
+            "fields": {
+                "id": {
+                    "type": "integer",
+                    "primary_key": true
+                },
+                "loan_id": {
+                    "type": "integer",
+                    "required": true
+                },
+                "amount": {
+                    "type": "decimal",
+                    "required": true
+                },
+                "payment_date": {
+                    "type": "date",
+                    "required": true
+                },
+                "transaction_id": {
+                    "type": "integer"
+                }
+            }
+        },
+
+        "Transaction": {
+            "description": "A financial transaction recorded in the system.",
+
+            "fields": {
+                "id": {
+                    "type": "integer",
+                    "primary_key": true
+                },
+                "type": {
+                    "type": "string"
+                },
+                "amount": {
+                    "type": "decimal",
+                    "required": true
+                },
+                "reference": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "enum",
+                    "values": ["PENDING", "POSTED", "REVERSED"]
+                }
+            }
+        }
+    },
+
+    "relationships": [
+        {
+            "from": "Organization",
+            "to": "Branch",
+            "type": "one_to_many",
+            "foreign_key": "organization_id"
+        },
+
+        {
+            "from": "Branch",
+            "to": "Customer",
+            "type": "one_to_many",
+            "foreign_key": "branch_id"
+        },
+
+        {
+            "from": "Customer",
+            "to": "Account",
+            "type": "one_to_many",
+            "foreign_key": "customer_id"
+        },
+
+        {
+            "from": "Customer",
+            "to": "Loan",
+            "type": "one_to_many",
+            "foreign_key": "customer_id"
+        },
+
+        {
+            "from": "Loan",
+            "to": "LoanPayment",
+            "type": "one_to_many",
+            "foreign_key": "loan_id"
+        },
+
+        {
+            "from": "LoanPayment",
+            "to": "Transaction",
+            "type": "one_to_one",
+            "foreign_key": "transaction_id"
+        }
+    ],
+
+    "business_rules": {
+        "customer": [
+            {
+                "id": "customer.active.required",
+                "description": "Only active customers can perform financial operations."
+            }
+        ],
+
+        "loan": [
+            {
+                "id": "loan.payment.positive",
+                "description": "Loan payment amount must be greater than zero."
+            },
+            {
+                "id": "loan.payment.not_exceed_balance",
+                "description": "Loan payment cannot exceed the outstanding loan balance."
+            },
+            {
+                "id": "loan.approval.pending_only",
+                "description": "Only pending loans can be approved."
+            },
+            {
+                "id": "loan.disbursement.approved_only",
+                "description": "Only approved loans can be disbursed."
+            },
+            {
+                "id": "loan.payment.disbursed_only",
+                "description": "Payments can only be made against disbursed loans."
+            }
+        ],
+
+        "account": [
+            {
+                "id": "account.withdraw.sufficient_balance",
+                "description": "Account withdrawals cannot exceed the available balance."
+            },
+            {
+                "id": "account.closed.no_transactions",
+                "description": "Closed accounts cannot receive financial transactions."
+            }
+        ]
+    },
+
+    "permissions": {
+        "roles": {
+            "admin": {
+                "description": "Full system administrator.",
+                "permissions": ["*"]
+            },
+
+            "manager": {
+                "description": "Branch or organizational manager.",
+                "permissions": [
+                    "customer.*",
+                    "account.*",
+                    "loan.get",
+                    "loan.create",
+                    "loan.approve",
+                    "loan.reject",
+                    "loan.payment",
+                    "deposit.*",
+                    "report.*"
+                ]
+            },
+
+            "teller": {
+                "description": "Performs authorized branch financial transactions.",
+                "permissions": [
+                    "customer.get",
+                    "customer.search",
+                    "account.get",
+                    "account.balance",
+                    "account.deposit",
+                    "account.withdraw",
+                    "loan.get",
+                    "loan.payment",
+                    "deposit.deposit",
+                    "deposit.withdraw",
+                    "teller.*"
+                ]
+            }
+        }
+    },
+
+    "tools": {
+        "customer.get": {
+            "description": "Retrieve a customer by ID, account number or mobile number.",
+
+            "input": {
+                "type": "object",
+                "properties": {
+                    "customer_id": {
+                        "type": "integer"
+                    },
+                    "mobile": {
+                        "type": "string"
+                    }
+                }
+            },
+
+            "output": {
+                "type": "Customer"
+            },
+
+            "requires_permission": "customer.get",
+            "read_only": true
+        },
+
+        "customer.search": {
+            "description": "Search customers using name, mobile number or customer identifier.",
+
+            "input": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "required": true
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "default": 20
+                    }
+                }
+            },
+
+            "requires_permission": "customer.search",
+            "read_only": true
+        },
+
+        "loan.balance": {
+            "description": "Retrieve the current outstanding balance of a loan.",
+
+            "input": {
+                "type": "object",
+                "required": ["loan_id"],
+                "properties": {
+                    "loan_id": {
+                        "type": "integer"
+                    }
+                }
+            },
+
+            "output": {
+                "type": "object",
+                "properties": {
+                    "loan_id": {
+                        "type": "integer"
+                    },
+                    "outstanding_balance": {
+                        "type": "decimal"
+                    }
+                }
+            },
+
+            "requires_permission": "loan.get",
+            "read_only": true
+        },
+
+        "loan.payment": {
+            "description": "Record a payment against a disbursed loan.",
+
+            "input": {
+                "type": "object",
+                "required": ["loan_id", "amount"],
+                "properties": {
+                    "loan_id": {
+                        "type": "integer"
+                    },
+                    "amount": {
+                        "type": "decimal",
+                        "minimum": 0.01
+                    }
+                }
+            },
+
+            "output": {
+                "type": "LoanPayment"
+            },
+
+            "requires_permission": "loan.payment",
+
+            "danger_level": "high",
+
+            "requires_confirmation": true,
+
+            "preconditions": [
+                "loan.exists",
+                "loan.status == DISBURSED",
+                "amount > 0",
+                "amount <= loan.outstanding_balance"
+            ]
+        }
+    },
+
+    "workflows": {
+        "loan_disbursement": {
+            "description": "Process an approved loan for disbursement.",
+
+            "steps": [
+                {
+                    "order": 1,
+                    "operation": "loan.get"
+                },
+                {
+                    "order": 2,
+                    "operation": "validate_loan_approval"
+                },
+                {
+                    "order": 3,
+                    "operation": "loan.disburse"
+                },
+                {
+                    "order": 4,
+                    "operation": "transaction.create"
+                }
+            ]
+        },
+
+        "loan_payment": {
+            "description": "Receive and record a loan payment.",
+
+            "steps": [
+                {
+                    "order": 1,
+                    "operation": "loan.get"
+                },
+                {
+                    "order": 2,
+                    "operation": "loan.balance"
+                },
+                {
+                    "order": 3,
+                    "operation": "validate_payment"
+                },
+                {
+                    "order": 4,
+                    "operation": "request_confirmation"
+                },
+                {
+                    "order": 5,
+                    "operation": "loan.payment"
+                },
+                {
+                    "order": 6,
+                    "operation": "transaction.create"
+                }
+            ]
+        }
+    },
+
+    "navigation": {
+        "customer": {
+            "list": "/customers",
+            "create": "/customers/create",
+            "details": "/customers/{id}"
+        },
+
+        "loan": {
+            "list": "/loans",
+            "create": "/loans/create",
+            "details": "/loans/{id}"
+        },
+
+        "account": {
+            "list": "/accounts",
+            "details": "/accounts/{id}"
+        }
+    },
+
+    "api": {
+        "base_url": "/api",
+
+        "authentication": {
+            "type": "session",
+            "required": true
+        },
+
+        "error_format": {
+            "type": "json",
+            "fields": ["message", "errors", "code"]
+        }
+    },
+
+    "data_access": {
+        "tenant_isolation": true,
+
+        "scope": ["organization_id", "branch_id"],
+
+        "rules": [
+            "AI must only access data belonging to the authenticated user's organization.",
+            "AI must respect branch-level access restrictions.",
+            "AI must never bypass authorization policies."
+        ]
+    },
+
+    "audit": {
+        "enabled": true,
+
+        "audit_mutations": true,
+
+        "audit_reads": false,
+
+        "record": [
+            "user_id",
+            "operation",
+            "entity",
+            "entity_id",
+            "timestamp",
+            "parameters",
+            "result",
+            "ip_address"
+        ]
+    },
+
+    "examples": [
+        {
+            "user": "How much does customer 10025 owe?",
+            "intent": "get_customer_loan_balance",
+            "expected_tools": ["customer.get", "loan.balance"]
+        },
+
+        {
+            "user": "Find the customer with mobile 01700000000.",
+            "intent": "find_customer",
+            "expected_tools": ["customer.search"]
+        },
+
+        {
+            "user": "Record a 5000 taka payment for loan 1001.",
+            "intent": "loan_payment",
+            "expected_workflow": "loan_payment",
+            "requires_confirmation": true
+        }
+    ]
+}
