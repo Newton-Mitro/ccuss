@@ -2,8 +2,11 @@
 
 namespace App\CustomerModule\Controllers;
 
+use App\CustomerModule\Application\CustomerIntroducerService;
 use App\CustomerModule\Models\Customer;
 use App\CustomerModule\Models\CustomerIntroducer;
+use App\CustomerModule\Requests\StoreIntroducerRequest;
+use App\CustomerModule\Requests\UpdateIntroducerRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,8 +16,9 @@ use Inertia\Response;
 
 class CustomerIntroducerController extends Controller
 {
-    public function __construct()
-    {
+    public function __construct(
+        private readonly CustomerIntroducerService $customerIntroducerService,
+    ) {
         $this->middleware('permission:customer_introducer.view')->only(['index', 'show']);
         $this->middleware('permission:customer_introducer.create')->only(['create']);
         $this->middleware('permission:customer_introducer.update')->only(['update', 'edit']);
@@ -39,7 +43,7 @@ class CustomerIntroducerController extends Controller
                 $q->whereHas('introducedCustomer', function ($qc) use ($search) {
                     $qc->where('name', 'like', "%{$search}%")
                         ->orWhere('customer_no', 'like', "%{$search}%");
-                })->orWhereHas('introducer', function ($qi) use ($search) {
+                })->orWhereHas('introducerCustomer', function ($qi) use ($search) {
                     $qi->where('name', 'like', "%{$search}%")
                         ->orWhere('customer_no', 'like', "%{$search}%");
                 });
@@ -81,8 +85,8 @@ class CustomerIntroducerController extends Controller
         $introducer->load([
             'introducedCustomer',
             'introducedCustomer.photo',
-            'introducer',
-            'introducer.photo',
+            'introducerCustomer',
+            'introducerCustomer.photo',
             'audits',
         ]);
 
@@ -109,54 +113,24 @@ class CustomerIntroducerController extends Controller
                 'introducer' => $introducer->load([
                     'introducedCustomer',
                     'introducedCustomer.photo',
-                    'introducer',
-                    'introducer.photo',
+                    'introducerCustomer',
+                    'introducerCustomer.photo',
                 ]),
             ]
         );
     }
 
-    public function store(Request $request)
+    public function store(StoreIntroducerRequest $request)
     {
-        $data = $request->validate([
-            'introduced_customer_id' => ['required', 'exists:customers,id'],
+        $data = $request->validated();
 
-            'introducer_customer_id' => [
-                'required',
-                'exists:customers,id',
-                'different:introduced_customer_id', // ✅ FIXED
-            ],
-
-            'relationship_type' => [
-                'required',
-                Rule::in(['family', 'friend', 'business', 'colleague', 'other']),
-            ],
-
-            'remarks' => ['nullable', 'string'],
-        ]);
-
-        // ✅ Prevent duplicate introducer
-        $exists = CustomerIntroducer::where(
-            'introduced_customer_id',
-            $data['introduced_customer_id']
-        )
-            ->where(
-                'introducer_customer_id',
-                $data['introducer_customer_id']
-            )
-            ->exists();
-
-        if ($exists) {
+        try {
+            $this->customerIntroducerService->createIntroducer($data);
+        } catch (\InvalidArgumentException $e) {
             return response()->json([
-                'error' => 'This introducer already exists for the customer.',
+                'error' => $e->getMessage(),
             ], 422);
         }
-
-        $introducer = CustomerIntroducer::create([
-            ...$data,
-            'verification_status' => 'pending',
-            'created_by' => auth()->id(),
-        ]);
 
         return redirect()
             ->route('customers.show', $data['introduced_customer_id'])
@@ -164,21 +138,18 @@ class CustomerIntroducerController extends Controller
     }
 
     public function update(
-        Request $request,
+        UpdateIntroducerRequest $request,
         CustomerIntroducer $introducer
     ) {
-        $data = $request->validate([
-            'relationship_type' => [
-                'required',
-                Rule::in(['family', 'friend', 'business', 'colleague', 'other']),
-            ],
-            'remarks' => ['nullable', 'string'],
-        ]);
+        $data = $request->validated();
 
-        $introducer->update([
-            ...$data,
-            'updated_by' => auth()->id(),
-        ]);
+        try {
+            $this->customerIntroducerService->updateIntroducer($introducer, $data);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+            ], 422);
+        }
 
         return redirect()
             ->route('customers.show', $introducer->introduced_customer_id)
@@ -211,7 +182,8 @@ class CustomerIntroducerController extends Controller
 
     public function destroy(CustomerIntroducer $introducer)
     {
-        $introducer->delete();
+        $this->customerIntroducerService->deleteIntroducer($introducer);
+
         return redirect()->back()->with([
             'success' => 'Introducer deleted successfully.',
         ]);

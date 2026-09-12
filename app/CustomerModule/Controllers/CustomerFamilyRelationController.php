@@ -2,6 +2,7 @@
 
 namespace App\CustomerModule\Controllers;
 
+use App\CustomerModule\Application\CustomerFamilyRelationService;
 use App\CustomerModule\Models\Customer;
 use App\CustomerModule\Models\CustomerFamilyRelation;
 use App\CustomerModule\Requests\StoreFamilyRelationRequest;
@@ -13,8 +14,9 @@ use Inertia\Response;
 
 class CustomerFamilyRelationController extends Controller
 {
-    public function __construct()
-    {
+    public function __construct(
+        private readonly CustomerFamilyRelationService $customerFamilyRelationService,
+    ) {
         $this->middleware('permission:customer_family_relation.view')->only(['index', 'show']);
         $this->middleware('permission:customer_family_relation.create')->only(['create']);
         $this->middleware('permission:customer_family_relation.update')->only(['update', 'edit']);
@@ -28,7 +30,6 @@ class CustomerFamilyRelationController extends Controller
         $query = CustomerFamilyRelation::query()
             ->with(['customer', 'relative', 'relative.photo']);
 
-        // 🔍 Search filter
         if ($search = $request->string('search')->toString()) {
             $query->where(function ($q) use ($search) {
                 $q->whereHas('customer', function ($qc) use ($search) {
@@ -41,7 +42,6 @@ class CustomerFamilyRelationController extends Controller
             });
         }
 
-        // 🎯 Status filter
         if ($status = $request->string('verification_status')->toString()) {
             $query->where('verification_status', $status);
         }
@@ -55,7 +55,7 @@ class CustomerFamilyRelationController extends Controller
             'paginated_data' => $relations,
             'filters' => $request->only([
                 'search',
-                'verification_status', // ✅ added
+                'verification_status',
                 'per_page',
                 'page',
             ]),
@@ -89,22 +89,13 @@ class CustomerFamilyRelationController extends Controller
     {
         $data = $request->validated();
 
-        // ✅ Prevent duplicate relations (both directions)
-        $exists = CustomerFamilyRelation::where(function ($q) use ($data) {
-            $q->where('customer_id', $data['customer_id'])
-                ->where('relative_id', $data['relative_id']);
-        })->orWhere(function ($q) use ($data) {
-            $q->where('customer_id', $data['relative_id'])
-                ->where('relative_id', $data['customer_id']);
-        })->exists();
-
-        if ($exists) {
+        try {
+            $this->customerFamilyRelationService->createRelation($data);
+        } catch (\InvalidArgumentException $e) {
             return response()->json([
-                'error' => 'This family relation already exists.',
+                'error' => $e->getMessage(),
             ], 422);
         }
-
-        $relation = CustomerFamilyRelation::create($data);
 
         return redirect()
             ->route('customers.show', $data['customer_id'])
@@ -117,20 +108,13 @@ class CustomerFamilyRelationController extends Controller
     ) {
         $data = $request->validated();
 
-        // $exists = CustomerFamilyRelation::where(function ($q) use ($data) {
-        //     $q->where('customer_id', $data['customer_id'])
-        //         ->where('relative_id', $data['relative_id']);
-        // })
-        //     ->where('id', '!=', $familyRelation->id)
-        //     ->exists();
-
-        // if ($exists) {
-        //     return response()->json([
-        //         'error' => 'This family relation already exists.',
-        //     ], 422);
-        // }
-
-        $familyRelation->update($data);
+        try {
+            $this->customerFamilyRelationService->updateRelation($familyRelation, $data);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+            ], 422);
+        }
 
         return redirect()
             ->route('customers.show', $data['customer_id'])
@@ -139,7 +123,7 @@ class CustomerFamilyRelationController extends Controller
 
     public function destroy(CustomerFamilyRelation $familyRelation)
     {
-        $familyRelation->delete();
+        $this->customerFamilyRelationService->deleteRelation($familyRelation);
 
         return redirect()->back()->with([
             'success' => 'Family relation deleted successfully.',
@@ -156,7 +140,7 @@ class CustomerFamilyRelationController extends Controller
             'verification_status' => 'verified',
             'verified_at' => now(),
             'verified_by' => auth()->id(),
-            'rejection_reason' => null, // reset if previously rejected
+            'rejection_reason' => null,
         ]);
 
         return redirect()->back()->with('success', 'Family relation approved successfully.');

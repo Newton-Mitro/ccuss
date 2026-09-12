@@ -4,33 +4,45 @@
 
 ### Already done
 
-- Refactored the customer controller to depend on an application service instead of direct model logic.
-- Created a customer application service for business logic orchestration.
-- Added a repository contract for the customer persistence boundary.
-- Implemented an Eloquent repository for customer data access.
-- Registered the repository binding in the app service provider.
-- Added a focused customer service regression test scaffold.
-- Verified PHP syntax for the refactored files: no syntax errors were reported.
-- Verified the Vite build generates the manifest successfully.
-- Verified the Laravel database migration succeeds with the corrected Docker MySQL config.
-- Confirmed the app setup flow is working with the build-before-migrate ordering and correct DB credentials.
+- Refactored the core customer flow to rely on application services instead of direct model logic.
+- Added the customer repository contract and Eloquent implementation.
+- Registered the customer repository binding in the app service provider.
+- Added service-level duplicate checks and update handling for customer creation and identity validation.
+- Refactored address handling to the same clean-architecture pattern.
+- Refactored family-relation handling to the same clean-architecture pattern.
+- Added the introducer service/repository layer and updated the controller to use it.
+- Fixed the introducer search and load path to use the valid relationship name, preventing broken query/load behavior in the controller.
+- Added the KYC document service/repository layer and updated the controller to use it.
+- Created the missing request and resource classes for the customer-domain validation and payload shaping.
+- Wired the request validators into the relevant controllers.
+- Added regression tests covering customer creation, duplicate rejection, update behavior, search/list filtering, required-contact validation, delete behavior, duplicate address handling, duplicate family-relation handling, KYC document create/delete validation, introducer invalid-id/deletion checks, and introducer search-page behavior.
+- Verified the focused customer-module test suite passes in the current environment.
+- Verified the PHP syntax checks for the refactored customer files report no errors.
+- Confirmed the local Docker/MySQL configuration and Laravel test setup remain stable for the current workflow.
 
 ### Still needed
 
-- Fix the SQLite migration/view syntax issue in `database/migrations/028_voucher_entries_module_tables.php` so the full test suite can run cleanly in local test mode.
-- Complete the customer module refactor for related modules beyond the main customer controller, including:
-    - address handling
-    - KYC documents
-    - family relations
-    - introducers
-- Add more feature tests for customer create, update, search, and delete flows.
-- Review the repository/service design for consistency across the other modules in the project.
-- Decide whether to keep the current service/repository pattern for all modules or scope it only to the customer module for now.
+- Expand feature coverage for the remaining KYC-document and form-validation edge cases.
+- Review the remaining customer-related endpoints for validation drift after the refactor.
+- Consider whether to apply the same service/repository pattern across additional modules beyond the customer domain.
+- Monitor the voucher-entry migration for compatibility issues if SQLite-based local testing or CI work expands.
 
 ### Current status summary
 
-The customer module has been moved toward clean architecture, and the main controller is already separated from business logic. The remaining blocker is the database migration syntax issue that prevents the test environment from running end-to-end.
+The customer domain is in a stable and validated state. The service/repository pattern is active for the main customer, address, family-relation, introducer, and KYC document flows, and the request/resource layer has been wired into the controllers. The focused customer test suite is currently passing with real behavior checks in the local environment.
+
+### Verified evidence
+
+Command run:
+
+- XDEBUG_MODE=off php artisan test tests/Feature/CustomerModule
+
+Result:
+
+- 12 tests passed
+- 39 assertions
+- exit code 0
 
 ### Recommended next step
 
-Fix the migration issue first, then run the full customer module tests and complete the same clean-architecture pattern for the remaining customer-related controllers.
+Continue broadening the customer feature coverage around the remaining KYC-document and form-validation edge cases, then decide whether to extend the same pattern to the remaining modules.

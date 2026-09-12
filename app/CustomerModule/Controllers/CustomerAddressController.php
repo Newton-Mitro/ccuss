@@ -2,6 +2,7 @@
 
 namespace App\CustomerModule\Controllers;
 
+use App\CustomerModule\Application\CustomerAddressService;
 use App\CustomerModule\Models\Customer;
 use App\CustomerModule\Models\CustomerAddress;
 use App\CustomerModule\Requests\StoreAddressRequest;
@@ -12,8 +13,9 @@ use Inertia\Response;
 
 class CustomerAddressController extends Controller
 {
-    public function __construct()
-    {
+    public function __construct(
+        private readonly CustomerAddressService $customerAddressService,
+    ) {
         $this->middleware('permission:customer_address.view')->only(['show']);
         $this->middleware('permission:customer_address.create')->only(['create']);
         $this->middleware('permission:customer_address.update')->only(['update', 'edit']);
@@ -22,7 +24,6 @@ class CustomerAddressController extends Controller
 
     public function show(CustomerAddress $address): Response
     {
-        // Load the related customer info
         $address->load(['customer', 'customer.photo']);
 
         return Inertia::render('customer-kyc/addresses/view_address_page', [
@@ -48,17 +49,13 @@ class CustomerAddressController extends Controller
     {
         $data = $request->validated();
 
-        $exists = CustomerAddress::where('customer_id', $data['customer_id'])
-            ->where('type', $data['type'])
-            ->exists();
-
-        if ($exists) {
+        try {
+            $address = $this->customerAddressService->createAddress($data);
+        } catch (\InvalidArgumentException $e) {
             return response()->json([
-                'error' => 'This customer already has an address of this type.'
+                'error' => $e->getMessage(),
             ], 422);
         }
-
-        $address = CustomerAddress::create($data);
 
         return redirect()
             ->route('customers.show', $data['customer_id'])
@@ -69,18 +66,13 @@ class CustomerAddressController extends Controller
     {
         $data = $request->validated();
 
-        $exists = CustomerAddress::where('customer_id', $data['customer_id'])
-            ->where('type', $data['type'])
-            ->where('id', '!=', $address->id)
-            ->exists();
-
-        if ($exists) {
+        try {
+            $address = $this->customerAddressService->updateAddress($address, $data);
+        } catch (\InvalidArgumentException $e) {
             return response()->json([
-                'error' => 'This customer already has an address of this type.'
+                'error' => $e->getMessage(),
             ], 422);
         }
-
-        $address->update($data);
 
         return redirect()
             ->route('customers.show', $data['customer_id'])
@@ -89,7 +81,7 @@ class CustomerAddressController extends Controller
 
     public function destroy(CustomerAddress $address)
     {
-        $address->delete();
+        $this->customerAddressService->deleteAddress($address);
 
         return redirect()->back()->with([
             'success' => $address->type . ' address deleted successfully.',

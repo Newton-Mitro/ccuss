@@ -1,17 +1,19 @@
 <?php
 namespace App\CustomerModule\Controllers;
 
+use App\CustomerModule\Application\KycDocumentService;
 use App\CustomerModule\Models\Customer;
 use App\CustomerModule\Models\KycDocument;
+use App\CustomerModule\Requests\StoreKycDocumentRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class KycDocumentController extends Controller
 {
-    public function __construct()
-    {
+    public function __construct(
+        private readonly KycDocumentService $kycDocumentService,
+    ) {
         $this->middleware('permission:customer_kyc_document.view')->only(['index', 'show']);
         $this->middleware('permission:customer_kyc_document.create')->only(['create']);
         $this->middleware('permission:customer_kyc_document.update')->only(['update', 'edit']);
@@ -69,26 +71,17 @@ class KycDocumentController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreKycDocumentRequest $request)
     {
-        $request->validate([
-            'customer_id' => 'required|exists:customers,id',
-            'document_type' => 'required|in:nid,nid,smart_nid,passport,driving_license,birth_certificate,utility_bill,electricity_bill,water_bill,gas_bill,bank_statement,rental_agreement,tin_certificate,tax_return,salary_slip,income_certificate,trade_license,certificate_of_incorporation,memorandum_of_association,articles_of_association,partnership_deed,photo,signature,live_selfie,pep_declaration,fatca_form',
-            'file' => 'required|file|max:10240', // 10MB
-            'alt_text' => 'nullable|string|max:255',
-        ]);
+        $data = $request->validated();
 
         $file = $request->file('file');
-        $path = $file->store('uploads/customers/' . $request->customer_id, 'public');
 
-        $kycDocument = KycDocument::create([
-            'customer_id' => $request->customer_id,
-            'document_type' => $request->document_type,
-            'file_name' => $file->getClientOriginalName(),
-            'file_path' => $path,
-            'mime' => $file->getClientMimeType(),
-            'alt_text' => $request->alt_text,
-        ]);
+        try {
+            $this->kycDocumentService->createDocument($file, $data);
+        } catch (\InvalidArgumentException $e) {
+            return redirect()->back()->withErrors(['document' => $e->getMessage()]);
+        }
 
         return redirect()
             ->route('customers.show', $request->customer_id)
@@ -111,8 +104,7 @@ class KycDocumentController extends Controller
 
     public function destroy(KycDocument $kycDocument)
     {
-        Storage::delete($kycDocument->file_path);
-        $kycDocument->delete();
+        $this->kycDocumentService->deleteDocument($kycDocument);
 
         return redirect()->back()->with([
             'success' => 'KYC document deleted successfully.',

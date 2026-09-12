@@ -118,7 +118,7 @@ return new class extends Migration {
         // Trial Balance View
         // -----------------------
         DB::statement("
-        CREATE OR REPLACE VIEW view_trial_balance AS
+        CREATE VIEW view_trial_balance AS
         SELECT
             a.id AS ledger_account_id,
             a.code AS account_code,
@@ -148,7 +148,7 @@ return new class extends Migration {
         // Profit & Loss View
         // -----------------------
         DB::statement("
-        CREATE OR REPLACE VIEW view_profit_and_loss AS
+        CREATE VIEW view_profit_and_loss AS
         SELECT
             CASE WHEN a.type = 'income' THEN 'income' WHEN a.type = 'expense' THEN 'expense' END AS category,
             a.id AS ledger_account_id,
@@ -178,7 +178,7 @@ return new class extends Migration {
         // Balance Sheet View
         // -----------------------
         DB::statement("
-        CREATE OR REPLACE VIEW view_balance_sheet AS
+        CREATE VIEW view_balance_sheet AS
         SELECT
             a.type AS category,
             a.id AS ledger_account_id,
@@ -205,7 +205,7 @@ return new class extends Migration {
         // Cash Flow View (corrected)
         // -----------------------
         DB::statement("
-        CREATE OR REPLACE VIEW view_cash_flow AS
+        CREATE VIEW view_cash_flow AS
         SELECT
             je.fiscal_year_id,
             fy.code AS fiscal_year_code,
@@ -238,7 +238,7 @@ return new class extends Migration {
         // Shareholders' Equity View
         // -----------------------
         DB::statement("
-        CREATE OR REPLACE VIEW view_shareholders_equity AS
+        CREATE VIEW view_shareholders_equity AS
         WITH equity_accounts AS (
             SELECT id, code, name
             FROM ledger_accounts
