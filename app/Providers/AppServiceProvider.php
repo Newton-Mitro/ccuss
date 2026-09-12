@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\CustomerModule\Application\Contracts\CustomerRepositoryInterface;
+use App\CustomerModule\Infrastructure\Persistence\EloquentCustomerRepository;
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
 
@@ -12,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(CustomerRepositoryInterface::class, EloquentCustomerRepository::class);
     }
 
     /**
