@@ -17,15 +17,15 @@ class Role extends Model
     {
         return $this->belongsToMany(
             Permission::class,
-            'permission_role', // <--- pivot table name, must match your migration
-            'role_id',         // <--- foreign key on pivot table pointing to this model
-            'permission_id'    // <--- foreign key on pivot table pointing to related model
+            'permission_role',
+            'role_id',
+            'permission_id'
         );
     }
 
     public function users()
     {
-        return $this->belongsToMany(User::class, 'user_role');
+        return $this->belongsToMany(User::class, 'role_user', 'role_id', 'user_id');
     }
 }
 

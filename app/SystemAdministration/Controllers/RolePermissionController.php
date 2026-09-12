@@ -3,13 +3,20 @@
 namespace App\SystemAdministration\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\SystemAdministration\Application\RolePermissionService;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\Permission;
+use App\SystemAdministration\Requests\UpdateRolePermissionRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class RolePermissionController extends Controller
 {
+    public function __construct(
+        private readonly RolePermissionService $rolePermissionService,
+    ) {
+    }
+
     /**
      * Show the form for editing a role's permissions.
      */
@@ -30,16 +37,11 @@ class RolePermissionController extends Controller
     /**
      * Update the permissions for a given role.
      */
-    public function update(Request $request, $roleId)
+    public function update(UpdateRolePermissionRequest $request, $roleId)
     {
         $role = Role::findOrFail($roleId);
 
-        $request->validate([
-            'permissions' => 'array',
-            'permissions.*' => 'exists:permissions,id',
-        ]);
-
-        $role->permissions()->sync($request->input('permissions', []));
+        $this->rolePermissionService->syncPermissions($role, $request->validated('permissions', []));
 
         return redirect()
             ->back()

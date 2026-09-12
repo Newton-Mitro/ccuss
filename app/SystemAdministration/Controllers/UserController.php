@@ -3,20 +3,25 @@
 namespace App\SystemAdministration\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\SystemAdministration\Application\UserService;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
+use App\SystemAdministration\Requests\StoreUserRequest;
+use App\SystemAdministration\Requests\UpdateUserRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
+    public function __construct(
+        private readonly UserService $userService,
+    ) {
+    }
+
     public function searchUsers(Request $request): JsonResponse
     {
         $search = $request->query('search');
@@ -77,38 +82,18 @@ class UserController extends Controller
     /* ==========================
      * STORE
      * ========================== */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6|confirmed',
-            'organization_id' => 'required|exists:organizations,id',
-            'branch_id' => 'required|exists:branches,id',
-            'roles' => 'nullable|array',
-            'roles.*' => 'exists:roles,id',
-            'status' => 'nullable|in:active,inactive',
-            'photo' => 'nullable|image|max:2048',
-        ]);
+        $validated = $request->validated();
 
-        // Upload photo
-        $photoPath = null;
-        if ($request->hasFile('photo')) {
-            $photoPath = $request->file('photo')->store('uploads/users', 'public');
+        try {
+            $user = $this->userService->createUser(
+                $validated,
+                $request->hasFile('photo') ? $request->file('photo') : null,
+            );
+        } catch (\InvalidArgumentException | \RuntimeException $e) {
+            return back()->withInput()->with('error', $e->getMessage());
         }
-
-        $user = User::create([
-            ...$validated,
-            'password' => Hash::make($validated['password']),
-            'photo_path' => $photoPath,
-            'status' => $validated['status'] ?? 'inactive',
-        ]);
-
-        if (!empty($validated['roles'])) {
-            $user->roles()->sync($validated['roles']);
-        }
-
-        $user->permissions()->sync($user->getPermissionsAttribute()->pluck('id')->toArray());
 
         return redirect()->route('users.index')
             ->with('success', $user->name . ' User created successfully.');
@@ -150,47 +135,19 @@ class UserController extends Controller
     /* ==========================
      * UPDATE
      * ========================== */
-    public function update(Request $request, User $user)
+    public function update(UpdateUserRequest $request, User $user)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => [
-                'required',
-                'email',
-                Rule::unique('users')->ignore($user->id),
-            ],
-            'password' => 'nullable|string|min:6|confirmed',
-            'organization_id' => 'required|exists:organizations,id',
-            'branch_id' => 'required|exists:branches,id',
-            'roles' => 'nullable|array',
-            'roles.*' => 'exists:roles,id',
-            'status' => 'nullable|in:active,inactive',
-            'photo' => 'nullable|image|max:2048',
-        ]);
+        $validated = $request->validated();
 
-        // Handle photo update
-        if ($request->hasFile('photo')) {
-            // Delete old photo
-            if ($user->photo_path) {
-                Storage::disk('public')->delete($user->photo_path);
-            }
-
-            $validated['photo_path'] = $request->file('photo')->store('uploads/users', 'public');
+        try {
+            $user = $this->userService->updateUser(
+                $user,
+                $validated,
+                $request->hasFile('photo') ? $request->file('photo') : null,
+            );
+        } catch (\InvalidArgumentException | \RuntimeException $e) {
+            return back()->withInput()->with('error', $e->getMessage());
         }
-
-        // Handle password safely
-        if (!empty($validated['password'])) {
-            $validated['password'] = Hash::make($validated['password']);
-        } else {
-            unset($validated['password']);
-        }
-
-        $user->update($validated);
-
-        if (isset($validated['roles'])) {
-            $user->roles()->sync($validated['roles']);
-        }
-
 
         return redirect()->route('users.index')
             ->with('success', $user->name . ' User updated successfully.');

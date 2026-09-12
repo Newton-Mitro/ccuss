@@ -3,13 +3,20 @@
 namespace App\SystemAdministration\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\SystemAdministration\Application\OrganizationService;
 use App\SystemAdministration\Models\Organization;
+use App\SystemAdministration\Requests\StoreOrganizationRequest;
+use App\SystemAdministration\Requests\UpdateOrganizationRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class OrganizationController extends Controller
 {
+    public function __construct(
+        private readonly OrganizationService $organizationService,
+    ) {
+    }
+
     /**
      * Display list
      */
@@ -45,17 +52,18 @@ class OrganizationController extends Controller
     /**
      * Store new organization
      */
-    public function store(Request $request)
+    public function store(StoreOrganizationRequest $request)
     {
+        $data = $request->validated();
 
-        $data = $this->validateData($request);
-
-        // Handle logo upload
-        if ($request->hasFile('logo')) {
-            $data['logo_path'] = $request->file('logo')->store('uploads/organizations', 'public');
+        try {
+            $organization = $this->organizationService->createOrganization(
+                $data,
+                $request->hasFile('logo') ? $request->file('logo') : null,
+            );
+        } catch (\InvalidArgumentException | \RuntimeException $e) {
+            return back()->withInput()->with('error', $e->getMessage());
         }
-
-        $organization = Organization::create($data);
 
         return redirect()
             ->route('organizations.index')
@@ -85,24 +93,19 @@ class OrganizationController extends Controller
     /**
      * Update organization
      */
-    public function update(Request $request, Organization $organization)
+    public function update(UpdateOrganizationRequest $request, Organization $organization)
     {
+        $data = $request->validated();
 
-        $data = $this->validateData($request, $organization->id);
-
-
-
-        // Handle logo update
-        if ($request->hasFile('logo')) {
-            // Delete old logo if exists
-            if ($organization->logo) {
-                Storage::disk('public')->delete($organization->logo);
-            }
-
-            $data['logo_path'] = $request->file('logo')->store('uploads/organizations', 'public');
+        try {
+            $organization = $this->organizationService->updateOrganization(
+                $organization,
+                $data,
+                $request->hasFile('logo') ? $request->file('logo') : null,
+            );
+        } catch (\InvalidArgumentException | \RuntimeException $e) {
+            return back()->withInput()->with('error', $e->getMessage());
         }
-
-        $organization->update($data);
 
         return redirect()
             ->route('organizations.index')
@@ -114,39 +117,10 @@ class OrganizationController extends Controller
      */
     public function destroy(Organization $organization)
     {
-        // Delete logo if exists
-        if ($organization->logo_path) {
-            Storage::disk('public')->delete($organization->logo_path);
-        }
-
-        $organization->delete();
+        $this->organizationService->deleteOrganization($organization);
 
         return redirect()
             ->route('organizations.index')
             ->with('success', $organization->name . ' Organization deleted!');
-    }
-
-    /**
-     * Centralized validation logic
-     */
-    private function validateData(Request $request, $id = null)
-    {
-        return $request->validate([
-            'code' => 'required|max:20|unique:organizations,code,' . $id,
-            'name' => 'required|max:150',
-            'short_name' => 'nullable|max:50',
-            'registration_no' => 'nullable|max:100',
-            'tax_id' => 'nullable|max:50',
-            'phone' => 'nullable|max:30',
-            'email' => 'nullable|email|max:100',
-            'website' => 'nullable|max:150',
-            'address_line1' => 'nullable|max:255',
-            'address_line2' => 'nullable|max:255',
-            'city' => 'nullable|max:100',
-            'state' => 'nullable|max:100',
-            'postal_code' => 'nullable|max:20',
-            'country' => 'nullable|max:100',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp,jpe|max:4048',
-        ]);
     }
 }

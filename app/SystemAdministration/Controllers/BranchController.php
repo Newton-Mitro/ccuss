@@ -3,15 +3,22 @@
 namespace App\SystemAdministration\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\SystemAdministration\Application\BranchService;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Requests\StoreBranchRequest;
 use App\SystemAdministration\Requests\UpdateBranchRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class BranchController extends Controller
 {
+    public function __construct(
+        private readonly BranchService $branchService,
+    ) {
+    }
+
     public function index(Request $request): Response
     {
         $query = Branch::query();
@@ -40,7 +47,11 @@ class BranchController extends Controller
 
     public function store(StoreBranchRequest $request)
     {
-        $branch = Branch::create($request->validated());
+        try {
+            $branch = $this->branchService->createBranch($request->validated());
+        } catch (\InvalidArgumentException | \RuntimeException $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
 
         return redirect()
             ->route('branches.index')
@@ -63,7 +74,11 @@ class BranchController extends Controller
 
     public function update(UpdateBranchRequest $request, Branch $branch)
     {
-        $branch->update($request->validated());
+        try {
+            $branch = $this->branchService->updateBranch($branch, $request->validated());
+        } catch (\InvalidArgumentException | \RuntimeException $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
 
         return redirect()
             ->route('branches.index')
@@ -72,7 +87,7 @@ class BranchController extends Controller
 
     public function destroy(Branch $branch)
     {
-        $branch->delete();
+        $this->branchService->deleteBranch($branch);
 
         return redirect()
             ->route('branches.index')

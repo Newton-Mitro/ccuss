@@ -12,6 +12,18 @@ use App\CustomerModule\Infrastructure\Persistence\EloquentCustomerFamilyRelation
 use App\CustomerModule\Infrastructure\Persistence\EloquentCustomerIntroducerRepository;
 use App\CustomerModule\Infrastructure\Persistence\EloquentCustomerRepository;
 use App\CustomerModule\Infrastructure\Persistence\EloquentKycDocumentRepository;
+use App\SystemAdministration\Application\Contracts\AuditLogRepositoryInterface;
+use App\SystemAdministration\Application\Contracts\BranchRepositoryInterface;
+use App\SystemAdministration\Application\Contracts\DatabaseBackupRepositoryInterface;
+use App\SystemAdministration\Application\Contracts\OrganizationRepositoryInterface;
+use App\SystemAdministration\Application\Contracts\RolePermissionRepositoryInterface;
+use App\SystemAdministration\Application\Contracts\UserRepositoryInterface;
+use App\SystemAdministration\Infrastructure\Persistence\EloquentAuditLogRepository;
+use App\SystemAdministration\Infrastructure\Persistence\EloquentBranchRepository;
+use App\SystemAdministration\Infrastructure\Persistence\EloquentDatabaseBackupRepository;
+use App\SystemAdministration\Infrastructure\Persistence\EloquentOrganizationRepository;
+use App\SystemAdministration\Infrastructure\Persistence\EloquentRolePermissionRepository;
+use App\SystemAdministration\Infrastructure\Persistence\EloquentUserRepository;
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
 
@@ -27,6 +39,13 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(CustomerFamilyRelationRepositoryInterface::class, EloquentCustomerFamilyRelationRepository::class);
         $this->app->bind(CustomerIntroducerRepositoryInterface::class, EloquentCustomerIntroducerRepository::class);
         $this->app->bind(KycDocumentRepositoryInterface::class, EloquentKycDocumentRepository::class);
+
+        $this->app->bind(OrganizationRepositoryInterface::class, EloquentOrganizationRepository::class);
+        $this->app->bind(BranchRepositoryInterface::class, EloquentBranchRepository::class);
+        $this->app->bind(UserRepositoryInterface::class, EloquentUserRepository::class);
+        $this->app->bind(RolePermissionRepositoryInterface::class, EloquentRolePermissionRepository::class);
+        $this->app->bind(AuditLogRepositoryInterface::class, EloquentAuditLogRepository::class);
+        $this->app->bind(DatabaseBackupRepositoryInterface::class, EloquentDatabaseBackupRepository::class);
     }
 
     /**
