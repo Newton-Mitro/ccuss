@@ -6,7 +6,7 @@ export const homeMenu: SidebarItem[] = [
         name: 'User Home',
         icon: <i className="fa-solid fa-building-columns" />,
         permission: ['banks.view'],
-        path: route('auth.home'),
+        path: route('dashboard'),
         match_path: 'dashboard',
     },
 ];

@@ -189,7 +189,7 @@ export default function CustomAuthLayout({
             >
                 {/* Logo */}
                 <Link
-                    href={route('auth.home')}
+                    href={route('dashboard')}
                     className="flex h-16 items-center gap-2 border-b pl-3"
                 >
                     <AppLogo className="h-10 w-10 rounded-full border border-border p-1" />
