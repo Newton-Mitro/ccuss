@@ -72,7 +72,10 @@ export default function FamilyRelationIndex() {
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customer & KYC', href: '' },
-        { title: 'Family Relations', href: '#' },
+        {
+            title: 'Family Relations',
+            href: route('family-relations.index'),
+        },
     ];
 
     return (

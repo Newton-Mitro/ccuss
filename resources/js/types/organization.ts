@@ -1,5 +1,7 @@
 // types/organization.ts
 
+import { Branch } from './branch';
+
 export interface Organization {
     id: number;
     code: string;
@@ -22,4 +24,5 @@ export interface Organization {
     report_footer?: string | null;
     created_at: string;
     updated_at: string;
+    branches?: Branch[];
 }

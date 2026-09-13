@@ -8,26 +8,11 @@ export const systemAdministrationMenu: SidebarItem[] = [
         permission: ['organization.view'],
         children: [
             {
-                name: 'Organizational Setup',
-                icon: <i className="fa-solid fa-building"></i>,
-                children_expanded: false,
+                name: 'Organizations',
+                icon: <i className="fa-solid fa-building-wheat" />,
+                path: '/organizations',
+                match_path: 'organizations',
                 permission: ['organization.view'],
-                children: [
-                    {
-                        name: 'Organizations',
-                        icon: <i className="fa-solid fa-building-wheat" />,
-                        path: '/organizations',
-                        match_path: 'organizations',
-                        permission: ['organization.view'],
-                    },
-                    {
-                        name: 'Branches',
-                        icon: <i className="fa-solid fa-leaf" />,
-                        path: '/branches',
-                        match_path: 'branches',
-                        permission: ['organization.branches.view'],
-                    },
-                ],
             },
             {
                 name: 'User, Role & Permissions',

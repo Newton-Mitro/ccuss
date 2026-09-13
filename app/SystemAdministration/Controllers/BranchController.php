@@ -5,10 +5,10 @@ namespace App\SystemAdministration\Controllers;
 use App\Http\Controllers\Controller;
 use App\SystemAdministration\Application\BranchService;
 use App\SystemAdministration\Models\Branch;
+use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Requests\StoreBranchRequest;
 use App\SystemAdministration\Requests\UpdateBranchRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -40,9 +40,16 @@ class BranchController extends Controller
         ]);
     }
 
-    public function create(): Response
+    public function create(Request $request): Response
     {
-        return Inertia::render('system-administration/branches/create');
+        return Inertia::render('system-administration/branches/create', [
+            'organization' => $request->integer('organization_id')
+                ? Organization::find($request->integer('organization_id'))
+                : null,
+            'organizations' => Organization::query()
+                ->orderBy('name')
+                ->get(['id', 'name', 'code']),
+        ]);
     }
 
     public function store(StoreBranchRequest $request)
@@ -54,21 +61,21 @@ class BranchController extends Controller
         }
 
         return redirect()
-            ->route('branches.index')
+            ->route('organizations.show', $branch->organization_id)
             ->with('success', $branch->name . ' Branch created successfully.');
     }
 
     public function show(Branch $branch): Response
     {
         return Inertia::render('system-administration/branches/show', [
-            'branch' => $branch->load('manager'),
+            'branch' => $branch->load(['manager', 'organization']),
         ]);
     }
 
     public function edit(Branch $branch): Response
     {
         return Inertia::render('system-administration/branches/edit', [
-            'branch' => $branch->load('manager'),
+            'branch' => $branch->load(['manager', 'organization']),
         ]);
     }
 
@@ -81,7 +88,7 @@ class BranchController extends Controller
         }
 
         return redirect()
-            ->route('branches.index')
+            ->route('organizations.show', $branch->organization_id)
             ->with('success', $branch->name . ' Branch updated successfully.');
     }
 
@@ -90,7 +97,7 @@ class BranchController extends Controller
         $this->branchService->deleteBranch($branch);
 
         return redirect()
-            ->route('branches.index')
+            ->route('organizations.show', $branch->organization_id)
             ->with('success', $branch->name . ' Branch deleted successfully.');
     }
 }

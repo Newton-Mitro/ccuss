@@ -1,6 +1,7 @@
 <?php
 
 use App\SystemAdministration\Controllers\AuditLogController;
+use App\SystemAdministration\Controllers\BranchController;
 use App\SystemAdministration\Controllers\DatabaseBackupController;
 use App\SystemAdministration\Controllers\OrganizationController;
 use App\SystemAdministration\Controllers\RolePermissionController;
@@ -26,6 +27,12 @@ Route::middleware(['auth', 'verified'])->prefix('roles')->name('roles.')->group(
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('organizations', OrganizationController::class);
 });
+
+Route::middleware(['auth', 'verified'])->prefix('organizations')
+    ->group(function () {
+        Route::resource('branches', BranchController::class);
+        // Route::resource('introducers', CustomerIntroducerController::class);
+    });
 
 Route::prefix('audits')->middleware(['auth', 'verified'])->group(function () {
     Route::get('/', [AuditLogController::class, 'index'])->name('audits.index');

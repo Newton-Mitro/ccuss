@@ -69,7 +69,7 @@ export default function IntroducersIndex() {
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customer & KYC', href: '' },
-        { title: 'Introducers', href: '#' },
+        { title: 'Introducers', href: route('introducers.index') },
     ];
 
     return (

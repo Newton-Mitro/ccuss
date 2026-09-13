@@ -76,7 +76,7 @@ class OrganizationController extends Controller
     public function show(Organization $organization)
     {
         return Inertia::render('system-administration/organizations/show', [
-            'organization' => $organization,
+            'organization' => $organization->load('branches.manager'),
         ]);
     }
 

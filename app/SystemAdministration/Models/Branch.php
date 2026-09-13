@@ -33,6 +33,11 @@ class Branch extends Model
         return $this->belongsTo(Customer::class, 'manager_id');
     }
 
+    public function organization()
+    {
+        return $this->belongsTo(Organization::class);
+    }
+
     protected static function newFactory()
     {
         return BranchFactory::new();

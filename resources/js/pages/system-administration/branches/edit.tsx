@@ -24,7 +24,7 @@ function Edit() {
         address: branch.address || '',
         latitude: branch.latitude || '',
         longitude: branch.longitude || '',
-        organization_id: 1,
+        organization_id: branch.organization_id,
         manager_id: branch.manager_id || null,
     });
 
@@ -39,7 +39,18 @@ function Edit() {
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'System Administration', href: '' },
-        { title: 'Branches', href: route('branches.index') },
+        ...(branch.organization
+            ? [
+                  {
+                      title: 'Organizations',
+                      href: route('organizations.index'),
+                  },
+                  {
+                      title: branch.organization.name,
+                      href: route('organizations.show', branch.organization.id),
+                  },
+              ]
+            : [{ title: 'Branches', href: route('branches.index') }]),
         { title: 'Edit Branch', href: '' },
     ];
 

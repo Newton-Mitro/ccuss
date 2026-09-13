@@ -16,7 +16,18 @@ export default function Show({ branch }: ShowProps) {
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'System Administration', href: '' },
-        { title: 'Branches', href: route('branches.index') },
+        ...(branch.organization
+            ? [
+                  {
+                      title: 'Organizations',
+                      href: route('organizations.index'),
+                  },
+                  {
+                      title: branch.organization.name,
+                      href: route('organizations.show', branch.organization.id),
+                  },
+              ]
+            : [{ title: 'Branches', href: route('branches.index') }]),
         { title: branch.name, href: '' },
     ];
 

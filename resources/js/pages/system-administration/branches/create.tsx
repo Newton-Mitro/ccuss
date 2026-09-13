@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import React from 'react';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
@@ -13,6 +13,7 @@ import { Customer } from '../../../types/customer_kyc_module';
 import { CustomerSearchBox } from '../../customer-kyc/customers/components/customer-search-box';
 
 function Create() {
+    const { organization, organizations } = usePage<any>().props;
     useFlashToastHandler();
     const { data, setData, post, processing, errors } = useForm({
         code: '',
@@ -20,13 +21,13 @@ function Create() {
         address: '',
         latitude: '',
         longitude: '',
-        organization_id: 1,
+        organization_id: organization?.id ?? null,
         manager_id: null as number | null,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/branches', {
+        post(route('branches.store'), {
             preserveScroll: true,
             preserveState: true,
         });
@@ -34,7 +35,18 @@ function Create() {
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'System Administration', href: '' },
-        { title: 'Branches', href: route('branches.index') },
+        ...(organization
+            ? [
+                  {
+                      title: 'Organizations',
+                      href: route('organizations.index'),
+                  },
+                  {
+                      title: organization.name,
+                      href: route('organizations.show', organization.id),
+                  },
+              ]
+            : [{ title: 'Branches', href: route('branches.index') }]),
         { title: 'Add Branch', href: '' },
     ];
 
@@ -45,7 +57,11 @@ function Create() {
             <div className="text-foreground">
                 <HeadingSmall
                     title="Create Branch"
-                    description="Fill in the branch details below to register a new branch."
+                    description={
+                        organization
+                            ? `Add a branch to ${organization.name}.`
+                            : 'Fill in the branch details below to register a new branch.'
+                    }
                 />
 
                 <form
@@ -59,6 +75,44 @@ function Create() {
                         </h3>
 
                         <div className="grid grid-cols-1 gap-x-5 gap-y-2 md:grid-cols-4">
+                            {!organization && (
+                                <div>
+                                    <Label>Organization</Label>
+                                    <select
+                                        value={data.organization_id ?? ''}
+                                        onChange={(e) =>
+                                            setData(
+                                                'organization_id',
+                                                e.target.value
+                                                    ? Number(e.target.value)
+                                                    : null,
+                                            )
+                                        }
+                                        className="h-8 w-full rounded-md border bg-background px-2 text-sm"
+                                    >
+                                        <option value="">
+                                            Select organization
+                                        </option>
+                                        {organizations?.map(
+                                            (item: {
+                                                id: number;
+                                                name: string;
+                                                code: string;
+                                            }) => (
+                                                <option
+                                                    key={item.id}
+                                                    value={item.id}
+                                                >
+                                                    {item.name} ({item.code})
+                                                </option>
+                                            ),
+                                        )}
+                                    </select>
+                                    <InputError
+                                        message={errors.organization_id}
+                                    />
+                                </div>
+                            )}
                             <div>
                                 <Label>Branch Code</Label>
                                 <Input

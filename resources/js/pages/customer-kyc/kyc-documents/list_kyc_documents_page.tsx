@@ -70,7 +70,7 @@ export default function KycDocumentsIndex() {
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customer & KYC', href: '' },
-        { title: 'KYC Documents', href: '' },
+        { title: 'KYC Documents', href: route('kyc-documents.index') },
     ];
 
     return (

@@ -20,11 +20,7 @@ Route::get('/dashboard', [DashboardController::class, 'home'])
     ->name('dashboard');
 
 
-Route::middleware(['auth', 'verified'])
-    ->group(function () {
-        Route::resource('branches', BranchController::class);
-        // Route::resource('introducers', CustomerIntroducerController::class);
-    });
+
 
 
 require __DIR__ . '/system_administration_routes.php';
