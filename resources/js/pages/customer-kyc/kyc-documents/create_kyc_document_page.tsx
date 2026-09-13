@@ -51,14 +51,18 @@ const CreateKycDocument = () => {
         formData.append('document_type', data.document_type);
         if (data.file) formData.append('file', data.file);
 
-        post(route('kyc-documents.store'), {
+        post(route('customers.kyc-documents.store', customer.id), {
             preserveScroll: true,
         });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customer & KYC', href: '' },
-        { title: 'KYC Documents', href: route('kyc-documents.index') },
+        { title: 'Customers', href: route('customers.index') },
+        {
+            title: customer.name,
+            href: route('customers.show', customer.id),
+        },
         { title: 'Upload Document', href: '' },
     ];
 
@@ -85,7 +89,7 @@ const CreateKycDocument = () => {
                     </div>
 
                     <Link
-                        href={route('kyc-documents.index')}
+                        href={route('customers.show', customer.id)}
                         className="btn-secondary"
                     >
                         <ListFilter className="h-4 w-4" />

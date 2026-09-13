@@ -41,4 +41,27 @@ class KycDocumentService
 
         return $this->kycDocumentRepository->delete($document);
     }
+
+    public function updateDocument(
+        KycDocument $document,
+        array $data,
+        ?UploadedFile $file = null,
+    ): KycDocument {
+        if ($file) {
+            if ($document->file_path) {
+                Storage::disk('public')->delete($document->file_path);
+            }
+
+            $data['file_name'] = $file->getClientOriginalName();
+            $data['file_path'] = $file->store(
+                'uploads/customers/' . $document->customer_id,
+                'public',
+            );
+            $data['mime'] = $file->getClientMimeType();
+        }
+
+        unset($data['file'], $data['customer_id']);
+
+        return $this->kycDocumentRepository->update($document, $data);
+    }
 }

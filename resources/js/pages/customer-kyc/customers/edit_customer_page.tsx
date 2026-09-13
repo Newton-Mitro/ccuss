@@ -136,6 +136,10 @@ const Edit = ({ customer }: EditProps) => {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customer & KYC', href: '' },
         { title: 'Customers', href: route('customers.index') },
+        {
+            title: customer.name,
+            href: route('customers.show', customer.id),
+        },
         { title: `Edit Customer: ${customer.name}`, href: '' },
     ];
 

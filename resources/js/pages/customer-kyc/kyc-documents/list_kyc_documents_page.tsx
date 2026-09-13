@@ -4,7 +4,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Eye, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 
@@ -19,7 +19,6 @@ import { Badge } from '../../../lib/statusConfig';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { KycDocument } from '../../../types/customer_kyc_module';
 import { PaginatedResponse } from '../../../types/paginated_response';
-import { documentStatuses } from './data/document_statuses';
 import { documentTypes } from './data/document_types';
 
 interface Props extends SharedData {
@@ -35,7 +34,6 @@ export default function KycDocumentsIndex() {
     const { data, setData, get } = useForm({
         search: filters.search || '',
         document_type: filters.document_type || 'all',
-        verification_status: filters.verification_status || 'all',
         per_page: Number(filters.per_page) || 18,
         page: Number(filters.page) || 1,
     });
@@ -48,9 +46,9 @@ export default function KycDocumentsIndex() {
         }, 400);
 
         return () => clearTimeout(delay);
-    }, [data.search, data.document_type, data.verification_status, data.page]);
+    }, [data.search, data.document_type, data.page]);
 
-    const handleDelete = (id: number) => {
+    const handleDelete = (document: KycDocument) => {
         appSwal
             .fire({
                 title: 'Delete document?',
@@ -61,9 +59,15 @@ export default function KycDocumentsIndex() {
             })
             .then((res) => {
                 if (res.isConfirmed) {
-                    router.delete(route('kyc-documents.destroy', id), {
-                        preserveScroll: true,
-                    });
+                    router.delete(
+                        route('customers.kyc-documents.destroy', [
+                            document.customer_id,
+                            document.id,
+                        ]),
+                        {
+                            preserveScroll: true,
+                        },
+                    );
                 }
             });
     };
@@ -107,16 +111,6 @@ export default function KycDocumentsIndex() {
                                 setData('page', 1);
                             }}
                             options={documentTypes}
-                        />
-
-                        <Select
-                            className="bg-card"
-                            value={data.verification_status}
-                            onChange={(value) => {
-                                setData('verification_status', value);
-                                setData('page', 1);
-                            }}
-                            options={documentStatuses}
                         />
                     </div>
                 </div>
@@ -194,8 +188,11 @@ export default function KycDocumentsIndex() {
                                                             >
                                                                 <Link
                                                                     href={route(
-                                                                        'kyc-documents.show',
-                                                                        i.id,
+                                                                        'customers.kyc-documents.show',
+                                                                        [
+                                                                            i.customer_id,
+                                                                            i.id,
+                                                                        ],
                                                                     )}
                                                                 >
                                                                     <Eye className="h-5 w-5 text-info" />
@@ -207,10 +204,28 @@ export default function KycDocumentsIndex() {
                                                             <TooltipTrigger
                                                                 asChild
                                                             >
+                                                                <Link
+                                                                    href={route(
+                                                                        'customers.kyc-documents.edit',
+                                                                        [
+                                                                            i.customer_id,
+                                                                            i.id,
+                                                                        ],
+                                                                    )}
+                                                                >
+                                                                    <Pencil className="h-5 w-5 text-yellow-500" />
+                                                                </Link>
+                                                            </TooltipTrigger>
+                                                        </Tooltip>
+
+                                                        <Tooltip>
+                                                            <TooltipTrigger
+                                                                asChild
+                                                            >
                                                                 <button
                                                                     onClick={() =>
                                                                         handleDelete(
-                                                                            i.id,
+                                                                            i,
                                                                         )
                                                                     }
                                                                 >
@@ -262,17 +277,24 @@ export default function KycDocumentsIndex() {
                                         <div className="flex gap-4">
                                             <Link
                                                 href={route(
-                                                    'kyc-documents.show',
-                                                    i.id,
+                                                    'customers.kyc-documents.show',
+                                                    [i.customer_id, i.id],
                                                 )}
                                             >
                                                 <Eye className="h-5 w-5" />
                                             </Link>
 
+                                            <Link
+                                                href={route(
+                                                    'customers.kyc-documents.edit',
+                                                    [i.customer_id, i.id],
+                                                )}
+                                            >
+                                                <Pencil className="h-5 w-5" />
+                                            </Link>
+
                                             <button
-                                                onClick={() =>
-                                                    handleDelete(i.id)
-                                                }
+                                                onClick={() => handleDelete(i)}
                                             >
                                                 <Trash2 className="h-5 w-5 text-destructive" />
                                             </button>

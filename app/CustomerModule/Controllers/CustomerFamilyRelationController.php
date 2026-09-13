@@ -25,10 +25,12 @@ class CustomerFamilyRelationController extends Controller
         $this->middleware('permission:customer_family_relation.reject')->only(['reject']);
     }
 
-    public function index(Request $request): Response
+    public function index(Request $request, ?Customer $customer = null): Response
     {
         $query = CustomerFamilyRelation::query()
-            ->with(['customer', 'relative', 'relative.photo']);
+            ->with(['customer', 'relative', 'relative.photo'])
+            ->where('verification_status', 'pending')
+            ->when($customer, fn($query) => $query->where('customer_id', $customer->id));
 
         if ($search = $request->string('search')->toString()) {
             $query->where(function ($q) use ($search) {
@@ -62,8 +64,9 @@ class CustomerFamilyRelationController extends Controller
         ]);
     }
 
-    public function show(CustomerFamilyRelation $familyRelation): Response
+    public function show(Customer $customer, CustomerFamilyRelation $familyRelation): Response
     {
+        abort_unless($familyRelation->customer_id === $customer->id, 404);
         $familyRelation->load(['customer', 'relative', 'audits', 'customer.photo', 'relative.photo']);
 
         return Inertia::render('customer-kyc/family-relations/show_family_relation_page', [
@@ -78,16 +81,18 @@ class CustomerFamilyRelationController extends Controller
         ]);
     }
 
-    public function edit(CustomerFamilyRelation $familyRelation): Response
+    public function edit(Customer $customer, CustomerFamilyRelation $familyRelation): Response
     {
+        abort_unless($familyRelation->customer_id === $customer->id, 404);
         return Inertia::render('customer-kyc/family-relations/edit_family_relation_page', [
             'family_relation' => $familyRelation->load('customer', 'customer.photo', 'relative', 'relative.photo'),
         ]);
     }
 
-    public function store(StoreFamilyRelationRequest $request)
+    public function store(StoreFamilyRelationRequest $request, Customer $customer)
     {
         $data = $request->validated();
+        $data['customer_id'] = $customer->id;
 
         try {
             $this->customerFamilyRelationService->createRelation($data);
@@ -104,9 +109,12 @@ class CustomerFamilyRelationController extends Controller
 
     public function update(
         UpdateFamilyRelationRequest $request,
+        Customer $customer,
         CustomerFamilyRelation $familyRelation
     ) {
+        abort_unless($familyRelation->customer_id === $customer->id, 404);
         $data = $request->validated();
+        $data['customer_id'] = $customer->id;
 
         try {
             $this->customerFamilyRelationService->updateRelation($familyRelation, $data);
@@ -121,8 +129,9 @@ class CustomerFamilyRelationController extends Controller
             ->with('success', 'Family relation updated successfully.');
     }
 
-    public function destroy(CustomerFamilyRelation $familyRelation)
+    public function destroy(Customer $customer, CustomerFamilyRelation $familyRelation)
     {
+        abort_unless($familyRelation->customer_id === $customer->id, 404);
         $this->customerFamilyRelationService->deleteRelation($familyRelation);
 
         return redirect()->back()->with([
@@ -130,8 +139,9 @@ class CustomerFamilyRelationController extends Controller
         ]);
     }
 
-    public function approve(CustomerFamilyRelation $familyRelation)
+    public function approve(Customer $customer, CustomerFamilyRelation $familyRelation)
     {
+        abort_unless($familyRelation->customer_id === $customer->id, 404);
         if ($familyRelation->verification_status === 'verified') {
             return redirect()->back()->with('info', 'Already verified.');
         }
@@ -146,8 +156,9 @@ class CustomerFamilyRelationController extends Controller
         return redirect()->back()->with('success', 'Family relation approved successfully.');
     }
 
-    public function reject(Request $request, CustomerFamilyRelation $familyRelation)
+    public function reject(Request $request, Customer $customer, CustomerFamilyRelation $familyRelation)
     {
+        abort_unless($familyRelation->customer_id === $customer->id, 404);
         $request->validate([
             'rejection_reason' => ['required', 'string', 'max:500'],
         ]);

@@ -38,8 +38,17 @@ export default function ShowIntroducer() {
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customer & KYC', href: '' },
-        { title: 'Introducers', href: route('introducers.index') },
-        { title: `Introducer #${introducer_request?.id}`, href: '' },
+        { title: 'Customers', href: route('customers.index') },
+        {
+            title:
+                introducer_request.introduced_customer?.name ||
+                `Introducer #${introducer_request.id}`,
+            href: route(
+                'customers.show',
+                introducer_request.introduced_customer_id,
+            ),
+        },
+        { title: `Introducer #${introducer_request.id}`, href: '' },
     ];
 
     // 🎯 Status badge mapping
@@ -70,11 +79,23 @@ export default function ShowIntroducer() {
 
     // ✅ Actions for pending verification
     const handleApprove = () => {
-        router.post(route('introducers.approve', introducer_request.id), {});
+        router.post(
+            route('customers.introducers.approve', [
+                introducer_request.introduced_customer_id,
+                introducer_request.id,
+            ]),
+            {},
+        );
     };
 
     const handleReject = () => {
-        router.post(route('introducers.reject', introducer_request.id), {});
+        router.post(
+            route('customers.introducers.reject', [
+                introducer_request.introduced_customer_id,
+                introducer_request.id,
+            ]),
+            {},
+        );
     };
 
     return (
@@ -100,14 +121,20 @@ export default function ShowIntroducer() {
                     </div>
 
                     <Link
-                        href={route('introducers.index')}
+                        href={route(
+                            'customers.show',
+                            introducer_request.introduced_customer_id,
+                        )}
                         className="flex items-center gap-1 rounded border border-border bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition-all hover:bg-secondary/50"
                     >
                         Introducers
                     </Link>
 
                     <Link
-                        href={route('introducers.edit', introducer_request.id)}
+                        href={route('customers.introducers.edit', [
+                            introducer_request.introduced_customer_id,
+                            introducer_request.id,
+                        ])}
                         className="flex items-center gap-1 rounded border border-border bg-accent px-3 py-1.5 text-sm text-accent-foreground transition-all hover:bg-accent/50"
                     >
                         <CheckCheck className="h-4 w-4" />
@@ -316,9 +343,13 @@ function CustomerDetails({ customer }: { customer?: any }) {
     return (
         <div className="flex-1 space-y-1">
             <p className="text-sm font-medium text-info underline">
-                <Link href={route('customers.show', customer?.id)}>
-                    {customer?.name || '—'}{' '}
-                </Link>
+                {customer?.id ? (
+                    <Link href={route('customers.show', customer.id)}>
+                        {customer.name}{' '}
+                    </Link>
+                ) : (
+                    customer?.name || '—'
+                )}
             </p>
             <p className="text-xs text-muted-foreground">
                 {customer?.type} • {customer?.status}

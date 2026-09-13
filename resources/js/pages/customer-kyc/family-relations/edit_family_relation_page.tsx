@@ -37,16 +37,26 @@ const Edit = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        put(route('family-relations.update', family_relation.id), {
-            preserveScroll: true,
-        });
+        put(
+            route('customers.family-relations.update', [
+                family_relation.customer_id,
+                family_relation.id,
+            ]),
+            {
+                preserveScroll: true,
+            },
+        );
     };
 
     const relations = getRelations(customer?.gender, selectedRelative?.gender);
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customer & KYC', href: '' },
-        { title: 'Family Relations', href: route('family-relations.index') },
+        { title: 'Customers', href: route('customers.index') },
+        {
+            title: customer.name,
+            href: route('customers.show', customer.id),
+        },
         { title: 'Edit Relation', href: '' },
     ];
 
@@ -66,7 +76,7 @@ const Edit = () => {
                     </button>
 
                     <Link
-                        href={route('family-relations.index')}
+                        href={route('customers.show', customer.id)}
                         className="btn-secondary"
                     >
                         <ListFilter className="h-4 w-4" />

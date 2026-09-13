@@ -5,6 +5,7 @@ use App\CustomerModule\Application\KycDocumentService;
 use App\CustomerModule\Models\Customer;
 use App\CustomerModule\Models\KycDocument;
 use App\CustomerModule\Requests\StoreKycDocumentRequest;
+use App\CustomerModule\Requests\UpdateKycDocumentRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -22,9 +23,11 @@ class KycDocumentController extends Controller
         $this->middleware('permission:customer_kyc_document.reject')->only(['reject']);
     }
 
-    public function index(Request $request)
+    public function index(Request $request, ?Customer $customer = null)
     {
-        $query = KycDocument::with('customer');
+        $query = KycDocument::with('customer')
+            ->where('verification_status', 'pending')
+            ->when($customer, fn($query) => $query->where('customer_id', $customer->id));
 
         // 🔍 Search (by customer name)
         if ($search = $request->string('search')->toString()) {
@@ -71,9 +74,10 @@ class KycDocumentController extends Controller
         ]);
     }
 
-    public function store(StoreKycDocumentRequest $request)
+    public function store(StoreKycDocumentRequest $request, Customer $customer)
     {
         $data = $request->validated();
+        $data['customer_id'] = $customer->id;
 
         $file = $request->file('file');
 
@@ -88,22 +92,50 @@ class KycDocumentController extends Controller
             ->with('success', 'KYC document added successfully.');
     }
 
-    public function edit(KycDocument $kycDocument)
+    public function edit(Customer $customer, KycDocument $kycDocument)
     {
+        abort_unless($kycDocument->customer_id === $customer->id, 404);
         return Inertia::render('customer-kyc/kyc-documents/edit_kyc_document_page', [
-            'document' => $kycDocument,
+            'document' => $kycDocument->load('customer', 'customer.photo'),
         ]);
     }
 
-    public function show(KycDocument $kycDocument)
+    public function update(
+        UpdateKycDocumentRequest $request,
+        Customer $customer,
+        KycDocument $kycDocument,
+    ) {
+        abort_unless($kycDocument->customer_id === $customer->id, 404);
+
+        try {
+            $document = $this->kycDocumentService->updateDocument(
+                $kycDocument,
+                $request->validated(),
+                $request->file('file'),
+            );
+        } catch (\InvalidArgumentException $e) {
+            return redirect()->back()->withErrors(['document' => $e->getMessage()]);
+        }
+
+        return redirect()
+            ->route('customers.kyc-documents.show', [
+                $document->customer_id,
+                $document->id,
+            ])
+            ->with('success', 'KYC document updated successfully.');
+    }
+
+    public function show(Customer $customer, KycDocument $kycDocument)
     {
+        abort_unless($kycDocument->customer_id === $customer->id, 404);
         return Inertia::render('customer-kyc/kyc-documents/show_kyc_document_page', [
             'document' => $kycDocument->load('customer', 'customer.photo', 'audits'),
         ]);
     }
 
-    public function destroy(KycDocument $kycDocument)
+    public function destroy(Customer $customer, KycDocument $kycDocument)
     {
+        abort_unless($kycDocument->customer_id === $customer->id, 404);
         $this->kycDocumentService->deleteDocument($kycDocument);
 
         return redirect()->back()->with([
@@ -111,8 +143,9 @@ class KycDocumentController extends Controller
         ]);
     }
 
-    public function approve(KycDocument $kycDocument)
+    public function approve(Customer $customer, KycDocument $kycDocument)
     {
+        abort_unless($kycDocument->customer_id === $customer->id, 404);
         if ($kycDocument->verification_status === 'verified') {
             return redirect()->back()->with('info', 'Already verified.');
         }
@@ -127,8 +160,9 @@ class KycDocumentController extends Controller
         return redirect()->back()->with('success', 'KYC document verified successfully.');
     }
 
-    public function reject(Request $request, KycDocument $kycDocument)
+    public function reject(Request $request, Customer $customer, KycDocument $kycDocument)
     {
+        abort_unless($kycDocument->customer_id === $customer->id, 404);
         $request->validate([
             'rejection_reason' => ['required', 'string', 'max:500'],
         ]);

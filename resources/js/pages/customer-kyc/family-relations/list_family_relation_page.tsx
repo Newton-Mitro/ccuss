@@ -11,7 +11,6 @@ import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
 import { Input } from '../../../components/ui/input';
-import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
@@ -19,7 +18,6 @@ import { Badge } from '../../../lib/statusConfig';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { CustomerFamilyRelation } from '../../../types/customer_kyc_module';
 import { PaginatedResponse } from '../../../types/paginated_response';
-import { familyRelationStatuses } from './data/family_relation_statuses';
 
 interface Props extends SharedData {
     paginated_data: PaginatedResponse<CustomerFamilyRelation>;
@@ -35,7 +33,6 @@ export default function FamilyRelationIndex() {
         search: filters.search || '',
         per_page: Number(filters.per_page) || 18,
         page: Number(filters.page) || 1,
-        verification_status: filters.verification_status || null,
     });
 
     const isEmpty = paginated_data.data.length === 0;
@@ -49,23 +46,29 @@ export default function FamilyRelationIndex() {
         }, 400);
 
         return () => clearTimeout(delay);
-    }, [data.search, data.per_page, data.page, data.verification_status]);
+    }, [data.search, data.per_page, data.page]);
 
-    const handleDelete = (id: number, customerName: string) => {
+    const handleDelete = (relation: CustomerFamilyRelation) => {
         appSwal
             .fire({
                 title: 'Are you sure?',
-                text: `Relation of "${customerName}" will be permanently deleted!`,
+                text: `Relation of "${relation.customer?.name || ''}" will be permanently deleted!`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Yes, delete it!',
             })
             .then((result) => {
                 if (result.isConfirmed) {
-                    router.delete(route('family-relations.destroy', id), {
-                        preserveScroll: true,
-                        preserveState: true,
-                    });
+                    router.delete(
+                        route('customers.family-relations.destroy', [
+                            relation.customer_id,
+                            relation.id,
+                        ]),
+                        {
+                            preserveScroll: true,
+                            preserveState: true,
+                        },
+                    );
                 }
             });
     };
@@ -100,18 +103,6 @@ export default function FamilyRelationIndex() {
                                 setData('search', e.target.value);
                                 setData('page', 1);
                             }}
-                        />
-                    </div>
-
-                    <div className="w-48">
-                        <Select
-                            className="bg-card"
-                            value={data.verification_status as string}
-                            onChange={(value) => {
-                                setData('verification_status', value);
-                                setData('page', 1);
-                            }}
-                            options={familyRelationStatuses}
                         />
                     </div>
                 </div>
@@ -198,8 +189,11 @@ export default function FamilyRelationIndex() {
                                                             >
                                                                 <Link
                                                                     href={route(
-                                                                        'family-relations.show',
-                                                                        f.id,
+                                                                        'customers.family-relations.show',
+                                                                        [
+                                                                            f.customer_id,
+                                                                            f.id,
+                                                                        ],
                                                                     )}
                                                                 >
                                                                     <Eye className="h-5 w-5" />
@@ -213,8 +207,11 @@ export default function FamilyRelationIndex() {
                                                             >
                                                                 <Link
                                                                     href={route(
-                                                                        'family-relations.edit',
-                                                                        f.id,
+                                                                        'customers.family-relations.edit',
+                                                                        [
+                                                                            f.customer_id,
+                                                                            f.id,
+                                                                        ],
                                                                     )}
                                                                 >
                                                                     <Pencil className="h-5 w-5 text-yellow-500" />
@@ -229,11 +226,7 @@ export default function FamilyRelationIndex() {
                                                                 <button
                                                                     onClick={() =>
                                                                         handleDelete(
-                                                                            f.id,
-                                                                            f
-                                                                                .customer
-                                                                                ?.name ||
-                                                                                '',
+                                                                            f,
                                                                         )
                                                                     }
                                                                 >
@@ -282,28 +275,21 @@ export default function FamilyRelationIndex() {
                                     <div className="mt-2 flex justify-end gap-3">
                                         <Link
                                             href={route(
-                                                'family-relations.show',
-                                                f.id,
+                                                'customers.family-relations.show',
+                                                [f.customer_id, f.id],
                                             )}
                                         >
                                             <Eye className="h-5 w-5" />
                                         </Link>
                                         <Link
                                             href={route(
-                                                'family-relations.edit',
-                                                f.id,
+                                                'customers.family-relations.edit',
+                                                [f.customer_id, f.id],
                                             )}
                                         >
                                             <Pencil className="h-5 w-5" />
                                         </Link>
-                                        <button
-                                            onClick={() =>
-                                                handleDelete(
-                                                    f.id,
-                                                    f.customer?.name || '',
-                                                )
-                                            }
-                                        >
+                                        <button onClick={() => handleDelete(f)}>
                                             <Trash2 className="h-5 w-5 text-destructive" />
                                         </button>
                                     </div>

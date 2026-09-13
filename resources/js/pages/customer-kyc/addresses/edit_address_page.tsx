@@ -45,7 +45,7 @@ const Edit = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        put(route('addresses.update', address.id), {
+        put(route('customers.addresses.update', [customer.id, address.id]), {
             preserveScroll: true,
         });
     };
@@ -53,6 +53,10 @@ const Edit = () => {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customer & KYC', href: '' },
         { title: 'Customers', href: route('customers.index') },
+        {
+            title: customer.name,
+            href: route('customers.show', customer.id),
+        },
         { title: 'Edit Address', href: '' },
     ];
 

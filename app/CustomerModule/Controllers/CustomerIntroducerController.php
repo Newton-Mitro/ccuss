@@ -28,14 +28,16 @@ class CustomerIntroducerController extends Controller
     }
 
 
-    public function index(Request $request): Response
+    public function index(Request $request, ?Customer $customer = null): Response
     {
         $query = CustomerIntroducer::query()
             ->with([
                 'introducedCustomer:id,name,customer_no',
                 'introducerCustomer',
                 'introducerCustomer.photo',
-            ]);
+            ])
+            ->where('verification_status', 'pending')
+            ->when($customer, fn($query) => $query->where('introduced_customer_id', $customer->id));
 
         // 🔍 Search filter
         if ($search = $request->string('search')->toString()) {
@@ -80,8 +82,9 @@ class CustomerIntroducerController extends Controller
         );
     }
 
-    public function show(CustomerIntroducer $introducer): Response
+    public function show(Customer $customer, CustomerIntroducer $introducer): Response
     {
+        abort_unless($introducer->introduced_customer_id === $customer->id, 404);
         $introducer->load([
             'introducedCustomer',
             'introducedCustomer.photo',
@@ -105,8 +108,9 @@ class CustomerIntroducerController extends Controller
         ]);
     }
 
-    public function edit(CustomerIntroducer $introducer): Response
+    public function edit(Customer $customer, CustomerIntroducer $introducer): Response
     {
+        abort_unless($introducer->introduced_customer_id === $customer->id, 404);
         return Inertia::render(
             'customer-kyc/introducers/edit_introducer_page',
             [
@@ -120,9 +124,10 @@ class CustomerIntroducerController extends Controller
         );
     }
 
-    public function store(StoreIntroducerRequest $request)
+    public function store(StoreIntroducerRequest $request, Customer $customer)
     {
         $data = $request->validated();
+        $data['introduced_customer_id'] = $customer->id;
 
         try {
             $this->customerIntroducerService->createIntroducer($data);
@@ -139,9 +144,12 @@ class CustomerIntroducerController extends Controller
 
     public function update(
         UpdateIntroducerRequest $request,
+        Customer $customer,
         CustomerIntroducer $introducer
     ) {
+        abort_unless($introducer->introduced_customer_id === $customer->id, 404);
         $data = $request->validated();
+        $data['introduced_customer_id'] = $customer->id;
 
         try {
             $this->customerIntroducerService->updateIntroducer($introducer, $data);
@@ -180,8 +188,9 @@ class CustomerIntroducerController extends Controller
         ]);
     }
 
-    public function destroy(CustomerIntroducer $introducer)
+    public function destroy(Customer $customer, CustomerIntroducer $introducer)
     {
+        abort_unless($introducer->introduced_customer_id === $customer->id, 404);
         $this->customerIntroducerService->deleteIntroducer($introducer);
 
         return redirect()->back()->with([
@@ -189,8 +198,9 @@ class CustomerIntroducerController extends Controller
         ]);
     }
 
-    public function approve(CustomerIntroducer $introducer)
+    public function approve(Customer $customer, CustomerIntroducer $introducer)
     {
+        abort_unless($introducer->introduced_customer_id === $customer->id, 404);
         if ($introducer->verification_status === 'verified') {
             return redirect()->back()->with('info', 'Already verified.');
         }
@@ -205,8 +215,9 @@ class CustomerIntroducerController extends Controller
         return redirect()->back()->with('success', 'Introducer approved successfully.');
     }
 
-    public function reject(Request $request, CustomerIntroducer $introducer)
+    public function reject(Request $request, Customer $customer, CustomerIntroducer $introducer)
     {
+        abort_unless($introducer->introduced_customer_id === $customer->id, 404);
         $request->validate([
             'rejection_reason' => ['required', 'string', 'max:500'],
         ]);

@@ -29,7 +29,11 @@ const Show = () => {
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customer & KYC', href: '' },
-        { title: 'KYC Documents', href: route('kyc-documents.index') },
+        { title: 'Customers', href: route('customers.index') },
+        {
+            title: document.customer?.name || `Document #${document.id}`,
+            href: route('customers.show', document.customer_id),
+        },
         { title: `Document #${document.id}`, href: '' },
     ];
 
@@ -42,11 +46,23 @@ const Show = () => {
 
     // 🚀 Actions (optional endpoints)
     const handleApprove = () => {
-        router.post(route('kyc-documents.approve', document.id), {});
+        router.post(
+            route('customers.kyc-documents.approve', [
+                document.customer_id,
+                document.id,
+            ]),
+            {},
+        );
     };
 
     const handleReject = () => {
-        router.post(route('kyc-documents.reject', document.id), {});
+        router.post(
+            route('customers.kyc-documents.reject', [
+                document.customer_id,
+                document.id,
+            ]),
+            {},
+        );
     };
 
     return (
@@ -72,7 +88,7 @@ const Show = () => {
                     </div>
 
                     <Link
-                        href={route('kyc-documents.index')}
+                        href={route('customers.show', document.customer_id)}
                         className="flex items-center gap-1 rounded border border-border bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition-all hover:bg-secondary/50"
                     >
                         Documents

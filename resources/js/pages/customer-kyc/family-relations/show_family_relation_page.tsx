@@ -37,7 +37,13 @@ export default function ShowFamilyRelation() {
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customer & KYC', href: '' },
-        { title: 'Family Relations', href: route('family-relations.index') },
+        { title: 'Customers', href: route('customers.index') },
+        {
+            title:
+                familyRelation.customer?.name ||
+                `Relation #${familyRelation.id}`,
+            href: route('customers.show', familyRelation.customer_id),
+        },
         { title: `Relation #${familyRelation.id}`, href: '' },
     ];
 
@@ -69,12 +75,21 @@ export default function ShowFamilyRelation() {
 
     // ✅ Actions for pending verification
     const handleApprove = () => {
-        router.post(route('family-relations.approve', familyRelation.id), {});
+        router.post(
+            route('customers.family-relations.approve', [
+                familyRelation.customer_id,
+                familyRelation.id,
+            ]),
+            {},
+        );
     };
 
     const handleReject = () => {
         router.post(
-            route('family-relations.reject', familyRelation.id),
+            route('customers.family-relations.reject', [
+                familyRelation.customer_id,
+                familyRelation.id,
+            ]),
             {
                 rejection_reason,
             },
@@ -104,14 +119,20 @@ export default function ShowFamilyRelation() {
                     </div>
 
                     <Link
-                        href={route('family-relations.index')}
+                        href={route(
+                            'customers.show',
+                            familyRelation.customer_id,
+                        )}
                         className="flex items-center gap-1 rounded border border-border bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition-all hover:bg-secondary/50"
                     >
                         Relations
                     </Link>
 
                     <Link
-                        href={route('family-relations.edit', familyRelation.id)}
+                        href={route('customers.family-relations.edit', [
+                            familyRelation.customer_id,
+                            familyRelation.id,
+                        ])}
                         className="flex items-center gap-1 rounded border border-border bg-accent px-3 py-1.5 text-sm text-accent-foreground transition-all hover:bg-accent/50"
                     >
                         <CheckCheck className="h-4 w-4" />
@@ -325,9 +346,13 @@ function CustomerDetails({ customer }: { customer?: any }) {
     return (
         <div className="flex-1 space-y-1">
             <p className="text-sm font-medium text-info underline">
-                <Link href={route('customers.show', customer?.id)}>
-                    {customer?.name || '—'}{' '}
-                </Link>
+                {customer?.id ? (
+                    <Link href={route('customers.show', customer.id)}>
+                        {customer.name}{' '}
+                    </Link>
+                ) : (
+                    customer?.name || '—'
+                )}
             </p>
             <p className="text-xs text-muted-foreground capitalize">
                 {customer?.type} • {customer?.status}

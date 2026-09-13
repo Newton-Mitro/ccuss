@@ -15,14 +15,14 @@ class DatabaseSeeder extends Seeder
         Model::withoutEvents(function () {
             $this->call([
                 RoleSeeder::class,
-                DenominationSeeder::class,
+                    // DenominationSeeder::class,
                 OrganizationStructureSeeder::class,
                 CustomerModulePermissionSeeder::class,
                 CustomerModuleRolePermissionSeeder::class,
 
                 CustomerSeeder::class,
-                FiscalYearSeeder::class,
-                ChartOfAccountsSeeder::class,
+                // FiscalYearSeeder::class,
+                // ChartOfAccountsSeeder::class,
                 // RealVoucherEntrySeeder::class
             ]);
         });

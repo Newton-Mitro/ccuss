@@ -4,14 +4,13 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Eye, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
 import { Input } from '../../../components/ui/input';
-import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
@@ -20,7 +19,6 @@ import { Badge } from '../../../lib/statusConfig';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { CustomerIntroducer } from '../../../types/customer_kyc_module';
 import { PaginatedResponse } from '../../../types/paginated_response';
-import { introducerStatuses } from './data/introducer_status';
 
 interface Props extends SharedData {
     paginated_data: PaginatedResponse<CustomerIntroducer>;
@@ -34,7 +32,6 @@ export default function IntroducersIndex() {
 
     const { data, setData, get } = useForm({
         search: filters.search || '',
-        verification_status: filters.verification_status || 'all',
         per_page: Number(filters.per_page) || 18,
         page: Number(filters.page) || 1,
     });
@@ -47,9 +44,9 @@ export default function IntroducersIndex() {
         }, 400);
 
         return () => clearTimeout(delay);
-    }, [data.search, data.verification_status, data.per_page, data.page]);
+    }, [data.search, data.per_page, data.page]);
 
-    const handleDelete = (id: number) => {
+    const handleDelete = (introducer: CustomerIntroducer) => {
         appSwal
             .fire({
                 title: 'Delete introducer?',
@@ -60,9 +57,15 @@ export default function IntroducersIndex() {
             })
             .then((res) => {
                 if (res.isConfirmed) {
-                    router.delete(route('introducers.destroy', id), {
-                        preserveScroll: true,
-                    });
+                    router.delete(
+                        route('customers.introducers.destroy', [
+                            introducer.introduced_customer_id,
+                            introducer.id,
+                        ]),
+                        {
+                            preserveScroll: true,
+                        },
+                    );
                 }
             });
     };
@@ -94,18 +97,6 @@ export default function IntroducersIndex() {
                                 setData('search', e.target.value);
                                 setData('page', 1);
                             }}
-                        />
-                    </div>
-
-                    <div className="w-48">
-                        <Select
-                            className="bg-card"
-                            value={data.verification_status}
-                            onChange={(value) => {
-                                setData('verification_status', value);
-                                setData('page', 1);
-                            }}
-                            options={introducerStatuses}
                         />
                     </div>
                 </div>
@@ -188,8 +179,11 @@ export default function IntroducersIndex() {
                                                             >
                                                                 <Link
                                                                     href={route(
-                                                                        'introducers.show',
-                                                                        i.id,
+                                                                        'customers.introducers.show',
+                                                                        [
+                                                                            i.introduced_customer_id,
+                                                                            i.id,
+                                                                        ],
                                                                     )}
                                                                 >
                                                                     <Eye className="h-5 w-5 text-info" />
@@ -201,10 +195,28 @@ export default function IntroducersIndex() {
                                                             <TooltipTrigger
                                                                 asChild
                                                             >
+                                                                <Link
+                                                                    href={route(
+                                                                        'customers.introducers.edit',
+                                                                        [
+                                                                            i.introduced_customer_id,
+                                                                            i.id,
+                                                                        ],
+                                                                    )}
+                                                                >
+                                                                    <Pencil className="h-5 w-5 text-yellow-500" />
+                                                                </Link>
+                                                            </TooltipTrigger>
+                                                        </Tooltip>
+
+                                                        <Tooltip>
+                                                            <TooltipTrigger
+                                                                asChild
+                                                            >
                                                                 <button
                                                                     onClick={() =>
                                                                         handleDelete(
-                                                                            i.id,
+                                                                            i,
                                                                         )
                                                                     }
                                                                 >
@@ -250,16 +262,29 @@ export default function IntroducersIndex() {
                                     <div className="flex justify-end gap-4">
                                         <Link
                                             href={route(
-                                                'introducers.show',
-                                                i.id,
+                                                'customers.introducers.show',
+                                                [
+                                                    i.introduced_customer_id,
+                                                    i.id,
+                                                ],
                                             )}
                                         >
                                             <Eye className="h-5 w-5" />
                                         </Link>
 
-                                        <button
-                                            onClick={() => handleDelete(i.id)}
+                                        <Link
+                                            href={route(
+                                                'customers.introducers.edit',
+                                                [
+                                                    i.introduced_customer_id,
+                                                    i.id,
+                                                ],
+                                            )}
                                         >
+                                            <Pencil className="h-5 w-5" />
+                                        </Link>
+
+                                        <button onClick={() => handleDelete(i)}>
                                             <Trash2 className="h-5 w-5 text-destructive" />
                                         </button>
                                     </div>

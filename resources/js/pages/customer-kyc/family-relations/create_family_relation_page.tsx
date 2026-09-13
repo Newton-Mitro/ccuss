@@ -34,14 +34,18 @@ const Create = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('family-relations.store'), {
+        post(route('customers.family-relations.store', customer.id), {
             preserveScroll: true,
         });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customer & KYC', href: '' },
-        { title: 'Family Relations', href: route('family-relations.index') },
+        { title: 'Customers', href: route('customers.index') },
+        {
+            title: customer.name,
+            href: route('customers.show', customer.id),
+        },
         { title: 'Add Relation', href: '' },
     ];
 
@@ -69,7 +73,7 @@ const Create = () => {
                     </div>
 
                     <Link
-                        href={route('family-relations.index')}
+                        href={route('customers.show', customer.id)}
                         className="btn-secondary"
                     >
                         <ListFilter className="h-4 w-4" />

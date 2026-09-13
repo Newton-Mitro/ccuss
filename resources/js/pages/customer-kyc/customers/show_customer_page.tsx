@@ -34,7 +34,7 @@ export default function Show({ customer }: ShowProps) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customer & KYC', href: '' },
         { title: 'Customers', href: route('customers.index') },
-        { title: `View Customer: ${customer.name}`, href: '' },
+        { title: customer.name, href: '' },
     ];
 
     useFlashToastHandler();
@@ -53,10 +53,13 @@ export default function Show({ customer }: ShowProps) {
             })
             .then((result) => {
                 if (result.isConfirmed) {
-                    router.delete(route('addresses.destroy', id), {
-                        preserveScroll: true,
-                        preserveState: true,
-                    });
+                    router.delete(
+                        route('customers.addresses.destroy', [customer.id, id]),
+                        {
+                            preserveScroll: true,
+                            preserveState: true,
+                        },
+                    );
                 }
             });
     };
@@ -72,10 +75,16 @@ export default function Show({ customer }: ShowProps) {
             })
             .then((result) => {
                 if (result.isConfirmed) {
-                    router.delete(route('family-relations.destroy', id), {
-                        preserveScroll: true,
-                        preserveState: true,
-                    });
+                    router.delete(
+                        route('customers.family-relations.destroy', [
+                            customer.id,
+                            id,
+                        ]),
+                        {
+                            preserveScroll: true,
+                            preserveState: true,
+                        },
+                    );
                 }
             });
     };
@@ -91,10 +100,16 @@ export default function Show({ customer }: ShowProps) {
             })
             .then((result) => {
                 if (result.isConfirmed) {
-                    router.delete(route('introducers.destroy', id), {
-                        preserveScroll: true,
-                        preserveState: true,
-                    });
+                    router.delete(
+                        route('customers.introducers.destroy', [
+                            customer.id,
+                            id,
+                        ]),
+                        {
+                            preserveScroll: true,
+                            preserveState: true,
+                        },
+                    );
                 }
             });
     };
@@ -110,10 +125,16 @@ export default function Show({ customer }: ShowProps) {
             })
             .then((result) => {
                 if (result.isConfirmed) {
-                    router.delete(route('kyc-documents.destroy', id), {
-                        preserveScroll: true,
-                        preserveState: true,
-                    });
+                    router.delete(
+                        route('customers.kyc-documents.destroy', [
+                            customer.id,
+                            id,
+                        ]),
+                        {
+                            preserveScroll: true,
+                            preserveState: true,
+                        },
+                    );
                 }
             });
     };
@@ -296,7 +317,7 @@ export default function Show({ customer }: ShowProps) {
                 title="Addresses"
                 actions={
                     <Link
-                        href={route('addresses.create', customer.id)}
+                        href={route('customers.addresses.create', customer.id)}
                         className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
                     >
                         <Plus size={14} /> Add
@@ -309,7 +330,10 @@ export default function Show({ customer }: ShowProps) {
                             key={addr.id}
                             onEdit={() => {
                                 router.visit(
-                                    route('addresses.edit', [addr.id]),
+                                    route('customers.addresses.edit', [
+                                        customer.id,
+                                        addr.id,
+                                    ]),
                                 );
                             }}
                             onDelete={() => {
@@ -337,7 +361,10 @@ export default function Show({ customer }: ShowProps) {
                     title="Family & Relatives"
                     actions={
                         <Link
-                            href={route('family-relations.create', customer.id)}
+                            href={route(
+                                'customers.family-relations.create',
+                                customer.id,
+                            )}
                             className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
                         >
                             <Plus size={14} /> Add
@@ -350,16 +377,18 @@ export default function Show({ customer }: ShowProps) {
                                 key={rel.id}
                                 onShow={() => {
                                     router.visit(
-                                        route('family-relations.show', [
-                                            rel.id,
-                                        ]),
+                                        route(
+                                            'customers.family-relations.show',
+                                            [customer.id, rel.id],
+                                        ),
                                     );
                                 }}
                                 onEdit={() => {
                                     router.visit(
-                                        route('family-relations.edit', [
-                                            rel.id,
-                                        ]),
+                                        route(
+                                            'customers.family-relations.edit',
+                                            [customer.id, rel.id],
+                                        ),
                                     );
                                 }}
                                 onDelete={() => {
@@ -425,7 +454,10 @@ export default function Show({ customer }: ShowProps) {
                 title="Introducers"
                 actions={
                     <Link
-                        href={route('introducers.create', customer.id)}
+                        href={route(
+                            'customers.introducers.create',
+                            customer.id,
+                        )}
                         className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
                     >
                         <Plus size={14} /> Add
@@ -438,12 +470,18 @@ export default function Show({ customer }: ShowProps) {
                             key={intro.id}
                             onShow={() => {
                                 router.visit(
-                                    route('introducers.show', [intro.id]),
+                                    route('customers.introducers.show', [
+                                        customer.id,
+                                        intro.id,
+                                    ]),
                                 );
                             }}
                             onEdit={() => {
                                 router.visit(
-                                    route('introducers.edit', [intro.id]),
+                                    route('customers.introducers.edit', [
+                                        customer.id,
+                                        intro.id,
+                                    ]),
                                 );
                             }}
                             onDelete={() => {
@@ -510,7 +548,10 @@ export default function Show({ customer }: ShowProps) {
                 title="KYC Documents"
                 actions={
                     <Link
-                        href={route('kyc-documents.create', customer.id)}
+                        href={route(
+                            'customers.kyc-documents.create',
+                            customer.id,
+                        )}
                         className="flex items-center gap-1 rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-secondary/80"
                     >
                         <Plus size={14} /> Add
@@ -523,7 +564,10 @@ export default function Show({ customer }: ShowProps) {
                             key={doc.id}
                             onShow={() => {
                                 router.visit(
-                                    route('kyc-documents.show', [doc.id]),
+                                    route('customers.kyc-documents.show', [
+                                        customer.id,
+                                        doc.id,
+                                    ]),
                                 );
                             }}
                             onDelete={() => {

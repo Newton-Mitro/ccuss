@@ -42,7 +42,7 @@ const Create = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('addresses.store'), {
+        post(route('customers.addresses.store', customer.id), {
             preserveScroll: true,
         });
     };
@@ -50,6 +50,10 @@ const Create = () => {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customer & KYC', href: '' },
         { title: 'Customers', href: route('customers.index') },
+        {
+            title: customer.name,
+            href: route('customers.show', customer.id),
+        },
         { title: 'Add Address', href: '' },
     ];
 

@@ -63,7 +63,7 @@ export default function Login({ status, canResetPassword, canRegister }) {
                                 <AppLogo />
                             </div>
                             <h2 className="mt-3 text-sm text-muted-foreground">
-                                Welcome back to 6
+                                Welcome back to
                             </h2>
                             <h1 className="text-xl font-bold tracking-tight">
                                 <span className="text-primary">

@@ -41,14 +41,18 @@ const Create = () => {
             return;
         }
 
-        post(route('introducers.store'), {
+        post(route('customers.introducers.store', customer.id), {
             preserveScroll: true,
         });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customer & KYC', href: '' },
-        { title: 'Introducers', href: route('introducers.index') },
+        { title: 'Customers', href: route('customers.index') },
+        {
+            title: customer.name,
+            href: route('customers.show', customer.id),
+        },
         { title: 'Add Introducer', href: '' },
     ];
 
@@ -75,7 +79,7 @@ const Create = () => {
                     </div>
 
                     <Link
-                        href={route('introducers.index')}
+                        href={route('customers.show', customer.id)}
                         className="btn-secondary"
                     >
                         <ListFilter className="h-4 w-4" />

@@ -26,9 +26,10 @@ export default function ViewAddress({ address }: Props) {
         { title: 'Customer & KYC', href: '' },
         { title: 'Customers', href: route('customers.index') },
         {
-            title: `Address #${address.id}`,
-            href: '#',
+            title: address.customer?.name || 'Customer',
+            href: route('customers.show', address.customer_id),
         },
+        { title: `Address #${address.id}`, href: '' },
     ];
 
     return (
@@ -44,7 +45,10 @@ export default function ViewAddress({ address }: Props) {
 
                     <div className="flex gap-2">
                         <Link
-                            href={route('addresses.edit', address.id)}
+                            href={route('customers.addresses.edit', [
+                                address.customer_id,
+                                address.id,
+                            ])}
                             className="flex items-center gap-1 rounded bg-accent px-3 py-1 text-accent-foreground transition hover:bg-accent/90"
                         >
                             <Edit2 size={16} />

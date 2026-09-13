@@ -37,14 +37,21 @@ const Edit = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        put(route('introducers.update', introducer.id), {
-            preserveScroll: true,
-        });
+        put(
+            route('customers.introducers.update', [customer.id, introducer.id]),
+            {
+                preserveScroll: true,
+            },
+        );
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customer & KYC', href: '' },
-        { title: 'Introducers', href: route('introducers.index') },
+        { title: 'Customers', href: route('customers.index') },
+        {
+            title: customer.name,
+            href: route('customers.show', customer.id),
+        },
         { title: 'Edit Introducer', href: '' },
     ];
 
@@ -68,7 +75,7 @@ const Edit = () => {
                     </button>
 
                     <Link
-                        href={route('introducers.index')}
+                        href={route('customers.show', customer.id)}
                         className="btn-secondary"
                     >
                         <ListFilter className="h-4 w-4" />
