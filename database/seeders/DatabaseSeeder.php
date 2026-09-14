@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 
-use Database\Seeders\Permissions\CustomerModulePermissionSeeder;
 use Database\Seeders\RolePermissions\CustomerModuleRolePermissionSeeder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
@@ -17,7 +16,7 @@ class DatabaseSeeder extends Seeder
                 RoleSeeder::class,
                     // DenominationSeeder::class,
                 OrganizationStructureSeeder::class,
-                CustomerModulePermissionSeeder::class,
+                    // CustomerModulePermissionSeeder::class,
                 CustomerModuleRolePermissionSeeder::class,
 
                 CustomerSeeder::class,

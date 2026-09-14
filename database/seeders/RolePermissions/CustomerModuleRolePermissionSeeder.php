@@ -12,43 +12,7 @@ class CustomerModuleRolePermissionSeeder extends Seeder
     {
         $rolePermissions = [
             'system_administrator' => 'ALL',
-            'branch_manager' => [
-                'customer.view',
-                'customer.create',
-                'customer.update',
-                'customer.search',
-            ],
-            'teller' => [
-                'customer.view',
-                'customer.search',
-                'customer_address.view',
-            ],
-            'customer_service' => [
-                'customer.view',
-                'customer.search',
-                'customer_address.view',
-                'customer_family_relation.view',
-                'customer_introducer.view',
-            ],
-            'loan_officer' => [
-                'customer.view',
-                'customer.search',
-                'customer_kyc_document.view',
-                'customer_kyc_document.verify',
-            ],
-            'audit_officer' => [
-                'customer.view',
-                'customer.search',
-                'customer_kyc_document.view',
-                'customer_kyc_document.verify',
-                'customer_kyc_document.reject',
-            ],
-            'hr_officer' => [
-                'customer.view',
-            ],
-            'basic_user' => [
-                'customer.view',
-            ],
+
         ];
 
         foreach ($rolePermissions as $roleSlug => $permissions) {

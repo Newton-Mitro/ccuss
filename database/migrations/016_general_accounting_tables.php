@@ -141,9 +141,7 @@ return new class extends Migration {
 
             $table->foreignId('financial_transaction_id')
                 ->nullable()
-                ->unique()
-                ->constrained()
-                ->nullOnDelete();
+                ->unique();
 
             $table->string('voucher_no', 100);
 
@@ -210,10 +208,7 @@ return new class extends Migration {
                 ->constrained()
                 ->nullOnDelete();
 
-            $table->foreignId('cost_center_id')
-                ->nullable()
-                ->constrained()
-                ->nullOnDelete();
+            $table->unsignedBigInteger('cost_center_id')->nullable();
 
             $table->nullableMorphs('party');
 
@@ -264,6 +259,13 @@ return new class extends Migration {
                 'organization_id',
                 'code',
             ]);
+        });
+
+        Schema::table('voucher_entries', function (Blueprint $table) {
+            $table->foreign('cost_center_id')
+                ->references('id')
+                ->on('cost_centers')
+                ->nullOnDelete();
         });
 
         Schema::create('budgets', function (Blueprint $table) {

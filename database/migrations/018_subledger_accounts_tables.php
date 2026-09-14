@@ -113,7 +113,7 @@ return new class extends Migration {
             $table->unique([
                 'financial_product_id',
                 'transaction_type',
-            ]);
+            ], 'fp_account_map_product_type_unique');
 
             $table->index('transaction_type');
         });
@@ -230,11 +230,6 @@ return new class extends Migration {
             ]);
 
             $table->index([
-                'holder_type',
-                'holder_id',
-            ]);
-
-            $table->index([
                 'account_type',
                 'status',
             ]);
@@ -311,13 +306,20 @@ return new class extends Migration {
             $table->index([
                 'financial_account_id',
                 'transaction_date',
-            ]);
+            ], 'fin_tx_account_date_index');
 
             $table->index([
                 'organization_id',
                 'transaction_type',
                 'transaction_date',
-            ]);
+            ], 'fin_tx_org_type_date_index');
+        });
+
+        Schema::table('vouchers', function (Blueprint $table) {
+            $table->foreign('financial_transaction_id')
+                ->references('id')
+                ->on('financial_transactions')
+                ->nullOnDelete();
         });
 
         Schema::create('financial_transaction_entries', function (Blueprint $table) {
@@ -360,7 +362,7 @@ return new class extends Migration {
             $table->index([
                 'financial_transaction_id',
                 'line_no',
-            ]);
+            ], 'fin_tx_entry_line_index');
         });
 
     }

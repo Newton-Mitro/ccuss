@@ -11,7 +11,14 @@ class Permission extends Model
 {
     use HasFactory, Auditable, SoftDeletes;
 
-    protected $fillable = ['name', 'slug', 'description'];
+    protected $fillable = [
+        'module',
+        'name',
+        'slug',
+        'action',
+        'description',
+        'for_admin',
+    ];
 
     public function roles()
     {

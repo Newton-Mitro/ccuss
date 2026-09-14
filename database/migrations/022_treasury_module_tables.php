@@ -300,7 +300,7 @@ return new class extends Migration {
             $table->unique([
                 'cash_count_id',
                 'cash_denomination_id',
-            ]);
+            ], 'cash_count_denomination_unique');
         });
 
         Schema::create('cash_transfers', function (Blueprint $table) {
