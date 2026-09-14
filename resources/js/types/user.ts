@@ -1,5 +1,4 @@
 import { Branch } from './branch';
-import { Organization } from './organization';
 
 // types/role.ts
 export interface Role {
@@ -29,9 +28,7 @@ export interface User {
     name: string;
     email: string;
     phone?: string | null;
-    organization_id: number;
-    branch_id: number;
-    organization?: Organization;
+    branch_id?: number | null;
     branch?: Branch;
     roles: Role[];
     permissions?: Permission[];

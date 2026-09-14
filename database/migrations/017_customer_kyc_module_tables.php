@@ -33,7 +33,6 @@ return new class extends Migration {
             $table->timestamps();
             $table->softDeletes();
 
-            $table->foreignId('organization_id')->constrained()->restrictOnDelete();
             $table->foreignId('branch_id')->constrained()->restrictOnDelete();
         });
 

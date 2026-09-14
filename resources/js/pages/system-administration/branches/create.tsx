@@ -13,7 +13,7 @@ import { Customer } from '../../../types/customer_kyc_module';
 import { CustomerSearchBox } from '../../customer-kyc/customers/components/customer-search-box';
 
 function Create() {
-    const { organization, organizations } = usePage<any>().props;
+    const { organization } = usePage<any>().props;
     useFlashToastHandler();
     const { data, setData, post, processing, errors } = useForm({
         code: '',
@@ -21,7 +21,6 @@ function Create() {
         address: '',
         latitude: '',
         longitude: '',
-        organization_id: organization?.id ?? null,
         manager_id: null as number | null,
     });
 
@@ -75,44 +74,6 @@ function Create() {
                         </h3>
 
                         <div className="grid grid-cols-1 gap-x-5 gap-y-2 md:grid-cols-4">
-                            {!organization && (
-                                <div>
-                                    <Label>Organization</Label>
-                                    <select
-                                        value={data.organization_id ?? ''}
-                                        onChange={(e) =>
-                                            setData(
-                                                'organization_id',
-                                                e.target.value
-                                                    ? Number(e.target.value)
-                                                    : null,
-                                            )
-                                        }
-                                        className="h-8 w-full rounded-md border bg-background px-2 text-sm"
-                                    >
-                                        <option value="">
-                                            Select organization
-                                        </option>
-                                        {organizations?.map(
-                                            (item: {
-                                                id: number;
-                                                name: string;
-                                                code: string;
-                                            }) => (
-                                                <option
-                                                    key={item.id}
-                                                    value={item.id}
-                                                >
-                                                    {item.name} ({item.code})
-                                                </option>
-                                            ),
-                                        )}
-                                    </select>
-                                    <InputError
-                                        message={errors.organization_id}
-                                    />
-                                </div>
-                            )}
                             <div>
                                 <Label>Branch Code</Label>
                                 <Input

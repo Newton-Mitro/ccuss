@@ -24,7 +24,6 @@ function Edit() {
         address: branch.address || '',
         latitude: branch.latitude || '',
         longitude: branch.longitude || '',
-        organization_id: branch.organization_id,
         manager_id: branch.manager_id || null,
     });
 

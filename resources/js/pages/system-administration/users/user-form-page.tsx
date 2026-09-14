@@ -12,23 +12,15 @@ import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Branch } from '../../../types/branch';
-import { Organization } from '../../../types/organization';
 import { Role, User } from '../../../types/user';
 
 interface UserFormPageProps extends SharedData {
     user?: User;
     roles: Role[];
-    organizations: Organization[];
     branches: Branch[];
 }
 
-const UserForm = ({
-    user,
-    roles,
-    organizations,
-    branches,
-    auth,
-}: UserFormPageProps) => {
+const UserForm = ({ user, roles, branches, auth }: UserFormPageProps) => {
     useFlashToastHandler();
 
     const handleBack = () => window.history.back();
@@ -40,7 +32,6 @@ const UserForm = ({
         email: user?.email || '',
         password: '',
         password_confirmation: '',
-        organization_id: user?.organization_id || '',
         branch_id: user?.branch_id || '',
         roles: user?.roles?.map((r: any) => r.id) || [],
         photo: null as File | null,
@@ -149,22 +140,6 @@ const UserForm = ({
                 <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
                     {/* LEFT: FORM */}
                     <div className="grid flex-1 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                        <div>
-                            <Label className="text-xs">Organization</Label>
-                            <Select
-                                value={data.organization_id?.toString()}
-                                onChange={(val) =>
-                                    setData('organization_id', Number(val))
-                                }
-                                options={organizations.map((org) => ({
-                                    value: org.id.toString(),
-                                    label: org.name,
-                                }))}
-                                placeholder="Select Organization"
-                            />
-                            <InputError message={errors.organization_id} />
-                        </div>
-
                         <div>
                             <Label className="text-xs">Branch</Label>
                             <Select
@@ -329,185 +304,6 @@ const UserForm = ({
                     </div>
 
                     <InputError message={errors.roles} />
-                </div>
-
-                <div className="flex-1 space-y-4 rounded-md border bg-card p-4">
-                    {selectedRole && (
-                        <>
-                            <div className="flex items-center justify-between">
-                                <Label className="text-sm">Permissions</Label>
-                                <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={toggleSelectAll}
-                                >
-                                    {selectAll ? 'Clear All' : 'Select All'}
-                                </Button>
-                            </div>
-
-                            <div className="scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent max-h-[65vh] space-y-4 overflow-y-auto rounded-md border">
-                                {Object.entries(groupedPermissions).map(
-                                    ([module, perms]) => {
-                                        const ids = perms.map((p) => p.id);
-                                        const allSelected = ids.every((id) =>
-                                            data.permissions.includes(id),
-                                        );
-
-                                        return (
-                                            <div
-                                                key={module}
-                                                className="rounded-lg"
-                                            >
-                                                {/* Module Header */}
-                                                <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-lg border-b bg-background/80 px-4 py-2 backdrop-blur">
-                                                    <h3 className="text-sm font-semibold capitalize">
-                                                        {module.replace(
-                                                            '-',
-                                                            ' ',
-                                                        )}
-                                                    </h3>
-                                                    <Button
-                                                        type="button"
-                                                        size="sm"
-                                                        variant="ghost"
-                                                        className="text-xs"
-                                                        onClick={() => {
-                                                            if (allSelected) {
-                                                                setData(
-                                                                    'permissions',
-                                                                    data.permissions.filter(
-                                                                        (id) =>
-                                                                            !ids.includes(
-                                                                                id,
-                                                                            ),
-                                                                    ),
-                                                                );
-                                                            } else {
-                                                                setData(
-                                                                    'permissions',
-                                                                    Array.from(
-                                                                        new Set(
-                                                                            [
-                                                                                ...data.permissions,
-                                                                                ...ids,
-                                                                            ],
-                                                                        ),
-                                                                    ),
-                                                                );
-                                                            }
-                                                        }}
-                                                    >
-                                                        {allSelected
-                                                            ? 'Clear'
-                                                            : 'Select'}{' '}
-                                                        Section
-                                                    </Button>
-                                                </div>
-
-                                                {/* Permission Grid */}
-                                                <div className="grid grid-cols-2 gap-2 p-3 md:grid-cols-3 lg:grid-cols-4">
-                                                    {perms.map((perm) => {
-                                                        const checked =
-                                                            data.permissions.includes(
-                                                                perm.id,
-                                                            );
-                                                        return (
-                                                            <label
-                                                                key={perm.id}
-                                                                className={`group flex cursor-pointer items-center justify-between rounded-lg border px-3 py-2 text-sm transition-all ${
-                                                                    checked
-                                                                        ? 'border-primary bg-primary/10'
-                                                                        : 'hover:bg-muted/50'
-                                                                }`}
-                                                            >
-                                                                <div className="flex items-center gap-2">
-                                                                    <input
-                                                                        type="checkbox"
-                                                                        checked={
-                                                                            checked
-                                                                        }
-                                                                        onChange={(
-                                                                            e,
-                                                                        ) => {
-                                                                            if (
-                                                                                e
-                                                                                    .target
-                                                                                    .checked
-                                                                            ) {
-                                                                                setData(
-                                                                                    'permissions',
-                                                                                    [
-                                                                                        ...data.permissions,
-                                                                                        perm.id,
-                                                                                    ],
-                                                                                );
-                                                                            } else {
-                                                                                setData(
-                                                                                    'permissions',
-                                                                                    data.permissions.filter(
-                                                                                        (
-                                                                                            id,
-                                                                                        ) =>
-                                                                                            id !==
-                                                                                            perm.id,
-                                                                                    ),
-                                                                                );
-                                                                            }
-                                                                        }}
-                                                                        className="h-4 w-4"
-                                                                    />
-                                                                    <div className="flex flex-col">
-                                                                        <Tooltip>
-                                                                            <TooltipTrigger
-                                                                                asChild
-                                                                            >
-                                                                                <span className="capitalize">
-                                                                                    {
-                                                                                        perm.name
-                                                                                    }
-                                                                                </span>
-                                                                            </TooltipTrigger>
-                                                                            <TooltipContent>
-                                                                                <span className="text-xs">
-                                                                                    {
-                                                                                        perm.description
-                                                                                    }
-                                                                                </span>
-                                                                            </TooltipContent>
-                                                                        </Tooltip>
-                                                                    </div>
-                                                                </div>
-                                                                {checked && (
-                                                                    <CheckCheck className="h-4 w-4 text-primary opacity-80" />
-                                                                )}
-                                                            </label>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-                                        );
-                                    },
-                                )}
-                            </div>
-                            <InputError message={errors.permissions} />
-                            <div className="flex justify-end">
-                                <Button type="submit" disabled={processing}>
-                                    {processing ? (
-                                        <>
-                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            Saving...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <CheckCheck className="mr-2 h-4 w-4" />
-                                            Save Permissions
-                                        </>
-                                    )}
-                                </Button>
-                            </div>
-                        </>
-                    )}
                 </div>
 
                 {/* SUBMIT */}

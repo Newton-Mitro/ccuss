@@ -192,7 +192,7 @@ export default function CustomAuthLayout({
                     href={route('dashboard')}
                     className="flex h-16 items-center gap-2 border-b pl-3"
                 >
-                    <AppLogo className="h-10 w-10 rounded-full border border-border p-1" />
+                    <AppLogo className="h-10 w-10 rounded-full border p-1" />
 
                     <span
                         className={cn(
@@ -300,9 +300,6 @@ export default function CustomAuthLayout({
                         {/* Organization & Branch Info */}
                         {sidebarOpen && (
                             <div className="flex flex-col items-center px-2 text-xs text-sidebar-foreground/70">
-                                <span className="text-xs">
-                                    {auth?.user?.organization?.name || 'N/A'}
-                                </span>
                                 <div className="text-xs">
                                     <span className="rounded-full bg-primary px-2 py-0.5 text-primary-foreground">
                                         {auth?.user?.branch?.name || 'N/A'}

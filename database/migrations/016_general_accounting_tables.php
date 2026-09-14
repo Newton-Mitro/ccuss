@@ -10,7 +10,6 @@ return new class extends Migration {
     {
         Schema::create('fiscal_years', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
             $table->string('name', 50);
             $table->date('start_date');
             $table->date('end_date');
@@ -53,7 +52,6 @@ return new class extends Migration {
 
         Schema::create('account_groups', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
             $table->foreignId('parent_id')->nullable()->constrained('account_groups')->nullOnDelete();
             $table->string('code', 50);
             $table->string('name', 150);
@@ -77,7 +75,6 @@ return new class extends Migration {
 
         Schema::create('accounts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
             $table->foreignId('account_group_id')->constrained('account_groups')->restrictOnDelete();
             $table->foreignId('parent_id')->nullable()->constrained('accounts')->nullOnDelete();
             $table->string('code', 50);
@@ -121,10 +118,6 @@ return new class extends Migration {
 
         Schema::create('vouchers', function (Blueprint $table) {
             $table->id();
-
-            $table->foreignId('organization_id')
-                ->constrained()
-                ->cascadeOnDelete();
 
             $table->foreignId('branch_id')
                 ->nullable()
@@ -237,10 +230,6 @@ return new class extends Migration {
         Schema::create('cost_centers', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('organization_id')
-                ->constrained()
-                ->cascadeOnDelete();
-
             $table->foreignId('parent_id')
                 ->nullable()
                 ->constrained('cost_centers')
@@ -270,10 +259,6 @@ return new class extends Migration {
 
         Schema::create('budgets', function (Blueprint $table) {
             $table->id();
-
-            $table->foreignId('organization_id')
-                ->constrained()
-                ->cascadeOnDelete();
 
             $table->foreignId('fiscal_year_id')
                 ->constrained()

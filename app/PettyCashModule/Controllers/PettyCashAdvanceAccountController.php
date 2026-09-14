@@ -8,6 +8,7 @@ use App\PettyCashModule\Models\PettyCashAccount;
 use App\SubledgerModule\Models\Subledger;
 use App\SubledgerModule\Models\SubledgerAccount;
 use App\SystemAdministration\Models\User;
+use App\SystemAdministration\Models\Organization;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -27,12 +28,12 @@ class PettyCashAdvanceAccountController extends Controller
                 $q->orWhereHas(
                     'employee',
                     fn($e) =>
-                    $e->where('name', 'like', "%{$search}%")
+                        $e->where('name', 'like', "%{$search}%")
                 )
                     ->orWhereHas(
                         'pettyCashAccount',
                         fn($p) =>
-                        $p->where('name', 'like', "%{$search}%")
+                            $p->where('name', 'like', "%{$search}%")
                     );
             });
         }
@@ -90,7 +91,9 @@ class PettyCashAdvanceAccountController extends Controller
             abort(403);
         }
 
-        $advance = DB::transaction(function () use ($data, $request, $subledger, $employee) {
+        $organizationId = Organization::query()->value('id');
+
+        $advance = DB::transaction(function () use ($data, $organizationId, $subledger, $employee) {
 
             // 1. Create advance account
             $advance = PettyCashAdvanceAccount::create([
@@ -102,7 +105,7 @@ class PettyCashAdvanceAccountController extends Controller
 
             // 2. Create central account
             $subledgerAccount = SubledgerAccount::create([
-                'organization_id' => $request->user()->organization_id ?? null,
+                'organization_id' => $organizationId,
                 'branch_id' => optional($advance->pettyCashAccount)->branch_id,
 
                 'account_number' => 'PCA-' . str_pad($advance->id, 5, '0', STR_PAD_LEFT),

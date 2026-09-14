@@ -20,11 +20,6 @@ class StoreBranchRequest extends FormRequest
                 'max:20',
                 'unique:branches,code',
             ],
-            'organization_id' => [
-                'required',
-                'integer',
-                'exists:organizations,id',
-            ],
             'name' => [
                 'required',
                 'string',
@@ -58,8 +53,6 @@ class StoreBranchRequest extends FormRequest
             'code.required' => 'Branch code is required.',
             'code.unique' => 'This branch code is already in use.',
             'name.required' => 'Please enter the branch name.',
-            'organization_id.required' => 'Please select an organization.',
-            'organization_id.exists' => 'The selected organization does not exist.',
             'latitude.between' => 'Latitude must be between -90 and 90.',
             'longitude.between' => 'Longitude must be between -180 and 180.',
             'manager_id.exists' => 'The selected manager does not exist.',

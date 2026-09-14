@@ -4,8 +4,8 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Eye, Pencil } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
@@ -13,7 +13,6 @@ import HeadingSmall from '../../../components/heading-small';
 import { Input } from '../../../components/ui/input';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Organization } from '../../../types/organization';
 
@@ -53,26 +52,6 @@ export default function Index() {
         return () => clearTimeout(delay);
     }, [data.search, data.per_page, data.page]);
 
-    // Delete action
-    const handleDelete = (id: number, name: string) => {
-        appSwal
-            .fire({
-                title: 'Are you sure?',
-                text: `Organization "${name}" will be permanently deleted!`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, delete it!',
-            })
-            .then((result) => {
-                if (result.isConfirmed) {
-                    router.delete(`/organizations/${id}`, {
-                        preserveScroll: true,
-                        preserveState: true,
-                    });
-                }
-            });
-    };
-
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'System Administration', href: '' },
         { title: 'Organizations', href: route('organizations.index') },
@@ -86,14 +65,8 @@ export default function Index() {
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
                         title="Organizations"
-                        description="Manage all organizations and their details."
+                        description="Manage the organization profile and branches."
                     />
-                    <Link
-                        href="/organizations/create"
-                        className="inline-block rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-                    >
-                        Add Organization
-                    </Link>
                 </div>
 
                 {/* Search */}
@@ -187,26 +160,6 @@ export default function Index() {
                                                         </TooltipTrigger>
                                                         <TooltipContent>
                                                             Edit
-                                                        </TooltipContent>
-                                                    </Tooltip>
-
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    handleDelete(
-                                                                        organization.id,
-                                                                        organization.name,
-                                                                    )
-                                                                }
-                                                                className="text-destructive hover:text-destructive/80"
-                                                            >
-                                                                <Trash2 className="h-5 w-5" />
-                                                            </button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                            Delete
                                                         </TooltipContent>
                                                     </Tooltip>
                                                 </div>

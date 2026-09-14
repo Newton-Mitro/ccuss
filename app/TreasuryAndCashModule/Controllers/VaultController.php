@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\SubledgerModule\Models\Subledger;
 use App\SubledgerModule\Models\SubledgerAccount;
 use App\SystemAdministration\Models\Branch;
+use App\SystemAdministration\Models\Organization;
 use App\TreasuryAndCashModule\Models\Vault;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,7 +25,7 @@ class VaultController extends Controller
                     ->orWhereHas(
                         'branch',
                         fn($b) =>
-                        $b->where('name', 'like', "%{$search}%")
+                            $b->where('name', 'like', "%{$search}%")
                     );
             });
         }
@@ -61,7 +62,7 @@ class VaultController extends Controller
 
     public function store(Request $request)
     {
-        $organization = Auth::user()->organization;
+        $organizationId = Organization::query()->value('id');
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'branch_id' => 'required|exists:branches,id',
@@ -75,7 +76,7 @@ class VaultController extends Controller
             abort(403);
         }
 
-        $vault = DB::transaction(function () use ($data, $organization, $subledger) {
+        $vault = DB::transaction(function () use ($data, $organizationId, $subledger) {
             // 1. Create Vault
             $vault = Vault::create([
                 'branch_id' => $data['branch_id'],
@@ -85,7 +86,7 @@ class VaultController extends Controller
             ]);
             // 2. Create Account (🔥 core part)
             $subledgerAccount = SubledgerAccount::create([
-                'organization_id' => $organization->id ?? null,
+                'organization_id' => $organizationId,
                 'branch_id' => $data['branch_id'],
                 'account_number' => 'V-' . str_pad($vault->id, 5, '0', STR_PAD_LEFT),
                 'name' => ($data['name'] ?? 'Vault'),

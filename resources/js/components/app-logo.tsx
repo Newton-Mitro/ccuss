@@ -17,7 +17,7 @@ export default function AppLogo({
         <img
             src={logo}
             alt={import.meta.env.VITE_APP_NAME}
-            className={className + (isDark ? ' invert' : '')}
+            className={className + (isDark ? ' ' : '')}
             {...props}
         />
     );

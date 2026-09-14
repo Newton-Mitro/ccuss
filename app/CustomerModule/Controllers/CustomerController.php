@@ -5,6 +5,7 @@ namespace App\CustomerModule\Controllers;
 use App\CustomerModule\Application\CustomerService;
 use App\CustomerModule\Models\Customer;
 use App\CustomerModule\Requests\StoreCustomerRequest;
+use App\SystemAdministration\Models\Organization;
 use App\CustomerModule\Requests\UpdateCustomerRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
@@ -60,7 +61,7 @@ class CustomerController extends Controller
     public function store(StoreCustomerRequest $request): RedirectResponse
     {
         $data = $request->validated();
-        $data['organization_id'] = auth()->user()->organization_id;
+        $data['organization_id'] = Organization::query()->value('id');
         $data['branch_id'] = auth()->user()->branch_id;
 
         try {

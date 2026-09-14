@@ -5,7 +5,6 @@ namespace App\SystemAdministration\Controllers;
 use App\Http\Controllers\Controller;
 use App\SystemAdministration\Application\UserService;
 use App\SystemAdministration\Models\Branch;
-use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
@@ -13,6 +12,7 @@ use App\SystemAdministration\Requests\StoreUserRequest;
 use App\SystemAdministration\Requests\UpdateUserRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -30,7 +30,7 @@ class UserController extends Controller
             return response()->json(['data' => []]);
         }
 
-        $users = User::with(['organization', 'branch'])
+        $users = User::with('branch')
             ->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%");
@@ -50,7 +50,7 @@ class UserController extends Controller
         $filters = $request->only(['search', 'per_page', 'page']);
         $perPage = $filters['per_page'] ?? 18;
 
-        $users = User::with(['organization', 'branch'])
+        $users = User::with('branch')
             ->when($filters['search'] ?? null, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
@@ -74,7 +74,6 @@ class UserController extends Controller
     {
         return Inertia::render('system-administration/users/user-form-page', [
             'roles' => Role::all(),
-            'organizations' => Organization::all(),
             'branches' => Branch::all(),
         ]);
     }
@@ -104,7 +103,7 @@ class UserController extends Controller
      * ========================== */
     public function show(User $user)
     {
-        $user->load(['organization', 'branch', 'roles.permissions']);
+        $user->load(['branch', 'roles.permissions']);
 
         return Inertia::render(
             'system-administration/users/show-user-page',
@@ -126,7 +125,6 @@ class UserController extends Controller
         return Inertia::render('system-administration/users/user-form-page', [
             'user' => $user->load('roles'),
             'roles' => $roles,
-            'organizations' => Organization::all(),
             'branches' => Branch::all(),
             'permissions' => $permissions,
         ]);

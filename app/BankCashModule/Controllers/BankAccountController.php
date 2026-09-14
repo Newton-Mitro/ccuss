@@ -6,6 +6,7 @@ use App\BankCashModule\Models\BankAccount;
 use App\Http\Controllers\Controller;
 use App\SubledgerModule\Models\Subledger;
 use App\SubledgerModule\Models\SubledgerAccount;
+use App\SystemAdministration\Models\Organization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -56,6 +57,7 @@ class BankAccountController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
+        $organizationId = Organization::query()->value('id');
 
         $data = $request->validate([
             // account layer
@@ -80,7 +82,7 @@ class BankAccountController extends Controller
             abort(403);
         }
 
-        $bankAccount = DB::transaction(function () use ($data, $user, $subledger) {
+        $bankAccount = DB::transaction(function () use ($data, $user, $organizationId, $subledger) {
 
             /* ---------------------------------------------
             | 1. Create Bank Account
@@ -99,7 +101,7 @@ class BankAccountController extends Controller
             | 2. Create Subledger Account
             --------------------------------------------- */
             $subledgerAccount = SubledgerAccount::create([
-                'organization_id' => $user->organization_id ?? null,
+                'organization_id' => $organizationId,
                 'branch_id' => $user->branch_id ?? null,
                 'account_number' => $data['account_number'],
                 'name' => $data['name'] ?? $data['bank_name'],

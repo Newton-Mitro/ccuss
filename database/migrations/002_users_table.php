@@ -22,7 +22,6 @@ return new class extends Migration {
             $table->timestamps();
             $table->softDeletes();
 
-            $table->foreignId('organization_id')->nullable()->constrained();
             $table->foreignId('branch_id')->nullable()->constrained();
             $table->foreignId('customer_id')->nullable()->unique();
             $table->foreignId('employee_id')->nullable()->unique();

@@ -9,10 +9,6 @@ return new class extends Migration {
         Schema::create('branch_days', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('organization_id')
-                ->constrained()
-                ->cascadeOnDelete();
-
             $table->foreignId('branch_id')
                 ->constrained()
                 ->cascadeOnDelete();
@@ -56,10 +52,6 @@ return new class extends Migration {
 
         Schema::create('cash_locations', function (Blueprint $table) {
             $table->id();
-
-            $table->foreignId('organization_id')
-                ->constrained()
-                ->cascadeOnDelete();
 
             $table->foreignId('branch_id')
                 ->constrained()
@@ -203,10 +195,6 @@ return new class extends Migration {
 
         Schema::create('cash_denominations', function (Blueprint $table) {
             $table->id();
-
-            $table->foreignId('organization_id')
-                ->constrained()
-                ->cascadeOnDelete();
 
             $table->string('currency', 10)->default('BDT');
 
@@ -448,10 +436,6 @@ return new class extends Migration {
         Schema::create('banks', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('organization_id')
-                ->constrained()
-                ->cascadeOnDelete();
-
             $table->string('code', 50);
             $table->string('name', 150);
 
@@ -469,10 +453,6 @@ return new class extends Migration {
 
         Schema::create('bank_accounts', function (Blueprint $table) {
             $table->id();
-
-            $table->foreignId('organization_id')
-                ->constrained()
-                ->cascadeOnDelete();
 
             $table->foreignId('branch_id')
                 ->nullable()

@@ -46,10 +46,9 @@ Route::middleware(['auth', 'verified'])->prefix('roles')->name('roles.')->group(
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('organizations', OrganizationController::class)
+        ->only(['index', 'show', 'edit', 'update'])
         ->middlewareFor(['index', 'show'], 'permission:organizations.view')
-        ->middlewareFor(['create', 'store'], 'permission:organizations.create')
-        ->middlewareFor(['edit', 'update'], 'permission:organizations.update')
-        ->middlewareFor('destroy', 'permission:organizations.delete');
+        ->middlewareFor(['edit', 'update'], 'permission:organizations.update');
 });
 
 Route::middleware(['auth', 'verified'])->prefix('organizations')

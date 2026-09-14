@@ -43,19 +43,16 @@ class BranchController extends Controller
     public function create(Request $request): Response
     {
         return Inertia::render('system-administration/branches/create', [
-            'organization' => $request->integer('organization_id')
-                ? Organization::find($request->integer('organization_id'))
-                : null,
-            'organizations' => Organization::query()
-                ->orderBy('name')
-                ->get(['id', 'name', 'code']),
+            'organization' => Organization::query()->firstOrFail(),
         ]);
     }
 
     public function store(StoreBranchRequest $request)
     {
         try {
-            $branch = $this->branchService->createBranch($request->validated());
+            $data = $request->validated();
+            $data['organization_id'] = Organization::query()->firstOrFail()->id;
+            $branch = $this->branchService->createBranch($data);
         } catch (\InvalidArgumentException | \RuntimeException $e) {
             return back()->withInput()->with('error', $e->getMessage());
         }

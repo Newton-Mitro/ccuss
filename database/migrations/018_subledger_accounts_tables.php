@@ -11,10 +11,6 @@ return new class extends Migration {
         Schema::create('financial_products', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('organization_id')
-                ->constrained()
-                ->cascadeOnDelete();
-
             $table->string('code', 50);
             $table->string('name', 150);
 
@@ -120,10 +116,6 @@ return new class extends Migration {
 
         Schema::create('financial_accounts', function (Blueprint $table) {
             $table->id();
-
-            $table->foreignId('organization_id')
-                ->constrained()
-                ->cascadeOnDelete();
 
             $table->foreignId('branch_id')
                 ->nullable()
@@ -237,10 +229,6 @@ return new class extends Migration {
 
         Schema::create('financial_transactions', function (Blueprint $table) {
             $table->id();
-
-            $table->foreignId('organization_id')
-                ->constrained()
-                ->cascadeOnDelete();
 
             $table->foreignId('branch_id')
                 ->nullable()

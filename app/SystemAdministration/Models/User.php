@@ -2,12 +2,10 @@
 
 namespace App\SystemAdministration\Models;
 
-use App\CustomerModule\Models\Customer;
 use App\SystemAdministration\Traits\Auditable;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -20,7 +18,6 @@ class User extends Authenticatable implements MustVerifyEmail
     use HasFactory, Notifiable, TwoFactorAuthenticatable, Auditable, SoftDeletes;
 
     protected $fillable = [
-        'organization_id',
         'branch_id',
         'customer_id',
         'name',
@@ -57,19 +54,9 @@ class User extends Authenticatable implements MustVerifyEmail
     |--------------------------------------------------------------------------
     */
 
-    public function organization(): BelongsTo
-    {
-        return $this->belongsTo(Organization::class);
-    }
-
-    public function branch(): BelongsTo
+    public function branch()
     {
         return $this->belongsTo(Branch::class);
-    }
-
-    public function customer(): BelongsTo
-    {
-        return $this->belongsTo(Customer::class);
     }
 
     public function roles(): BelongsToMany

@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <script>
+        <!-- <script>
 (function () {
     // Disable right click
     document.addEventListener("contextmenu", function (e) {
@@ -49,7 +49,7 @@
         }
     });
 })();
-</script>
+</script> -->
 
         {{-- Inline script to detect system dark mode preference and apply it immediately --}}
         <script>

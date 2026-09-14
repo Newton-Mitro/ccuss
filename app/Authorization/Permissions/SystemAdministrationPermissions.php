@@ -105,28 +105,10 @@ final class SystemAdministrationPermissions
 
             new PermissionDefinition(
                 module: 'organizations',
-                name: 'Create Organization',
-                slug: 'organizations.create',
-                action: 'create',
-                description: 'Create new organizations',
-                forAdmin: true,
-            ),
-
-            new PermissionDefinition(
-                module: 'organizations',
                 name: 'Update Organization',
                 slug: 'organizations.update',
                 action: 'update',
                 description: 'Update organization records',
-                forAdmin: true,
-            ),
-
-            new PermissionDefinition(
-                module: 'organizations',
-                name: 'Delete Organization',
-                slug: 'organizations.delete',
-                action: 'delete',
-                description: 'Delete organization records',
                 forAdmin: true,
             ),
 
