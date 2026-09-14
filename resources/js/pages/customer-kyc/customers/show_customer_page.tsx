@@ -328,6 +328,14 @@ export default function Show({ customer }: ShowProps) {
                     {customer.addresses.map((addr) => (
                         <DataCard
                             key={addr.id}
+                            onShow={() => {
+                                router.visit(
+                                    route('customers.addresses.show', [
+                                        customer.id,
+                                        addr.id,
+                                    ]),
+                                );
+                            }}
                             onEdit={() => {
                                 router.visit(
                                     route('customers.addresses.edit', [

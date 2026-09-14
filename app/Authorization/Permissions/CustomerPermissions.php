@@ -82,6 +82,24 @@ final class CustomerPermissions
             ),
 
             new PermissionDefinition(
+                module: 'customer_address',
+                name: 'Approve Customer Address',
+                slug: 'customer_address.approve',
+                action: 'approve',
+                description: 'Approve customer addresses',
+                forAdmin: true,
+            ),
+
+            new PermissionDefinition(
+                module: 'customer_address',
+                name: 'Reject Customer Address',
+                slug: 'customer_address.reject',
+                action: 'reject',
+                description: 'Reject customer addresses',
+                forAdmin: true,
+            ),
+
+            new PermissionDefinition(
                 module: 'customer_family_relation',
                 name: 'View Family Relations',
                 slug: 'customer_family_relation.view',

@@ -86,6 +86,16 @@ Route::middleware(['auth', 'verified'])
             [CustomerAddressController::class, 'show']
         )->name('addresses.show');
 
+        Route::post(
+            '/{customer}/addresses/{address}/approve',
+            [CustomerAddressController::class, 'approve']
+        )->name('addresses.approve');
+
+        Route::post(
+            '/{customer}/addresses/{address}/reject',
+            [CustomerAddressController::class, 'reject']
+        )->name('addresses.reject');
+
         Route::get(
             '/{customer}/addresses/{address}/edit',
             [CustomerAddressController::class, 'edit']

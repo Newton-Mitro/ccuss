@@ -21,6 +21,8 @@ class CustomerAddressController extends Controller
         $this->middleware('permission:customer_address.create')->only(['create']);
         $this->middleware('permission:customer_address.update')->only(['update', 'edit']);
         $this->middleware('permission:customer_address.delete')->only(['destroy']);
+        $this->middleware('permission:customer_address.approve')->only(['approve']);
+        $this->middleware('permission:customer_address.reject')->only(['reject']);
     }
 
     public function index(Request $request, ?Customer $customer = null): Response
@@ -54,9 +56,45 @@ class CustomerAddressController extends Controller
         abort_unless($address->customer_id === $customer->id, 404);
         $address->load(['customer', 'customer.photo']);
 
-        return Inertia::render('customer-kyc/addresses/view_address_page', [
+        return Inertia::render('customer-kyc/addresses/show_address_page', [
             'address' => $address,
         ]);
+    }
+
+    public function approve(Customer $customer, CustomerAddress $address)
+    {
+        abort_unless($address->customer_id === $customer->id, 404);
+
+        if ($address->verification_status === CustomerAddress::STATUS_VERIFIED) {
+            return redirect()->back()->with('info', 'Already verified.');
+        }
+
+        $address->update([
+            'verification_status' => CustomerAddress::STATUS_VERIFIED,
+            'verified_at' => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Address approved successfully.');
+    }
+
+    public function reject(Request $request, Customer $customer, CustomerAddress $address)
+    {
+        abort_unless($address->customer_id === $customer->id, 404);
+        $request->validate([
+            'rejection_reason' => ['required', 'string', 'max:500'],
+        ]);
+
+        if ($address->verification_status === CustomerAddress::STATUS_REJECTED) {
+            return redirect()->back()->with('info', 'Already rejected.');
+        }
+
+        $address->update([
+            'verification_status' => CustomerAddress::STATUS_REJECTED,
+            'verified_at' => now(),
+            'remarks' => $request->string('rejection_reason')->toString(),
+        ]);
+
+        return redirect()->back()->with('success', 'Address rejected successfully.');
     }
 
     public function create(Customer $customer): Response
