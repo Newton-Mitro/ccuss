@@ -15,6 +15,7 @@ import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
 import AppLogo from './app-logo';
+import { OrganizationSwitcher } from './organization-switcher';
 
 const mainNavItems: NavItem[] = [
     {
@@ -53,6 +54,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
+                <OrganizationSwitcher />
                 <NavMain items={mainNavItems} />
             </SidebarContent>
 

@@ -4,6 +4,7 @@ use App\SystemAdministration\Controllers\AuditLogController;
 use App\SystemAdministration\Controllers\BranchController;
 use App\SystemAdministration\Controllers\DatabaseBackupController;
 use App\SystemAdministration\Controllers\OrganizationController;
+use App\SystemAdministration\Controllers\OrganizationContextController;
 use App\SystemAdministration\Controllers\RolePermissionController;
 use App\SystemAdministration\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -45,8 +46,11 @@ Route::middleware(['auth', 'verified'])->prefix('roles')->name('roles.')->group(
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('organization/select', [OrganizationContextController::class, 'store'])
+        ->name('organizations.select.store');
+
     Route::resource('organizations', OrganizationController::class)
-        ->only(['index', 'show', 'edit', 'update'])
+        ->only(['index', 'create', 'store', 'show', 'edit', 'update'])
         ->middlewareFor(['index', 'show'], 'permission:organizations.view')
         ->middlewareFor(['edit', 'update'], 'permission:organizations.update');
 });
@@ -58,7 +62,6 @@ Route::middleware(['auth', 'verified'])->prefix('organizations')
             ->middlewareFor(['create', 'store'], 'permission:branches.create')
             ->middlewareFor(['edit', 'update'], 'permission:branches.update')
             ->middlewareFor('destroy', 'permission:branches.delete');
-        // Route::resource('introducers', CustomerIntroducerController::class);
     });
 
 Route::prefix('audits')->middleware(['auth', 'verified'])->group(function () {

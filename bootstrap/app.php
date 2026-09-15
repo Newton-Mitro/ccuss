@@ -5,6 +5,7 @@ use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\PermissionMiddleware;
 use App\Http\Middleware\RoleMiddleware;
 use App\SystemAdministration\Middleware\AuditBatchMiddleware;
+use App\SystemAdministration\Middleware\EnsureActiveOrganization;
 use Illuminate\Auth\Middleware\EnsureEmailIsVerified;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -36,6 +37,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => PermissionMiddleware::class,
             'role' => RoleMiddleware::class,
             'verified' => EnsureEmailIsVerified::class,
+            'organization' => EnsureActiveOrganization::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

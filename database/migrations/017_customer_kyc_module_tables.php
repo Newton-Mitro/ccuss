@@ -33,8 +33,8 @@ return new class extends Migration {
             $table->timestamps();
             $table->softDeletes();
 
-            $table->foreignId('branch_id')->constrained()->restrictOnDelete();
-            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('organization_id')->nullable()->constrained()->nullOnDelete();
         });
 
         Schema::create('customer_addresses', function (Blueprint $table) {

@@ -65,8 +65,10 @@ class OrganizationController extends Controller
             return back()->withInput()->with('error', $e->getMessage());
         }
 
+        $request->session()->put('active_organization_id', $organization->id);
+
         return redirect()
-            ->route('organizations.index')
+            ->route('dashboard')
             ->with('success', $organization->name . ' Organization created successfully!');
     }
 

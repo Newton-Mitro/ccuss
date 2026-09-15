@@ -16,7 +16,7 @@ Route::get('/', function (Request $request) {
 })->middleware('guest:web')->name('home');
 
 Route::get('/dashboard', [DashboardController::class, 'home'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'organization'])
     ->name('dashboard');
 
 

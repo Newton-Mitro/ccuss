@@ -13,6 +13,7 @@ import { logout } from '@/routes';
 import { Link, router, usePage } from '@inertiajs/react';
 import {
     Building2,
+    CheckCircle2,
     ChevronsDown,
     ChevronsUp,
     InfoIcon,
@@ -22,6 +23,7 @@ import {
     Moon,
     Search,
     Sun,
+    TriangleAlert,
     UserCircle,
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -51,7 +53,7 @@ export default function CustomAuthLayout({
 }: CustomAuthLayoutProps) {
     const page = usePage<SharedData>();
 
-    const { auth } = page.props;
+    const { auth, organization } = page.props;
     const cleanup = useMobileNavigation();
 
     /* ------------------------------------------------------------------
@@ -133,14 +135,9 @@ export default function CustomAuthLayout({
      * Expand / Collapse all menus
      * ------------------------------------------------------------------ */
     const applyMenuAction = (action: 'expand-all' | 'collapse-all') => {
-        Object.keys(localStorage)
-            .filter((k) => k.startsWith(STORAGE_KEY))
-            .forEach((k) =>
-                localStorage.setItem(
-                    k,
-                    JSON.stringify(action === 'expand-all'),
-                ),
-            );
+        Object.keys(localStorage).forEach((k) =>
+            localStorage.setItem(k, JSON.stringify(action === 'expand-all')),
+        );
 
         setMenuAction(action);
         setTimeout(() => setMenuAction(null), 0);
@@ -276,6 +273,39 @@ export default function CustomAuthLayout({
                             'mt-auto flex flex-col items-center justify-center border-t border-border bg-secondary px-4 py-3',
                         )}
                     >
+                        <div
+                            className={cn(
+                                'mb-3 flex w-full items-start gap-3 rounded border bg-background px-3 py-2 text-left text-sm',
+                                organization.active
+                                    ? 'border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400'
+                                    : 'border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400',
+                            )}
+                        >
+                            {organization.active ? (
+                                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+                            ) : (
+                                <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" />
+                            )}
+                            <div className="min-w-0">
+                                {organization.active ? (
+                                    <div className="flex min-w-0 flex-col justify-center">
+                                        <p className="truncate leading-tight font-medium">
+                                            {organization.active.name}
+                                        </p>
+                                        <p className="mt-0.5 text-xs opacity-70">
+                                            {organization.active.code}
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="inline-flex items-center rounded-md px-2 py-1">
+                                        <p className="text-xs font-medium tracking-wide text-red-600 uppercase dark:text-red-400">
+                                            No Active Organization
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
                         {/* User Info */}
                         <div
                             className={cn(
@@ -284,7 +314,7 @@ export default function CustomAuthLayout({
                             )}
                         >
                             {sidebarOpen && (
-                                <div className="flex flex-col items-center justify-center">
+                                <div className="flex flex-col items-center justify-center gap-1">
                                     <Link
                                         href={'/settings/profile'}
                                         className="flex flex-col items-center justify-center"
@@ -293,6 +323,19 @@ export default function CustomAuthLayout({
                                             {auth?.user?.name}
                                         </span>
                                     </Link>
+
+                                    <div className="text-xs">
+                                        <span
+                                            className={`rounded-full border px-2 py-0.5 ${
+                                                auth?.user?.branch
+                                                    ? 'border-green-500/30 bg-green-500/10 text-green-700 dark:text-green-400'
+                                                    : 'border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-400'
+                                            }`}
+                                        >
+                                            {auth?.user?.branch?.name ||
+                                                'Assign User to Branch'}
+                                        </span>
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -300,12 +343,7 @@ export default function CustomAuthLayout({
                         {/* Organization & Branch Info */}
                         {sidebarOpen && (
                             <div className="flex flex-col items-center px-2 text-xs text-sidebar-foreground/70">
-                                <div className="text-xs">
-                                    <span className="rounded-full bg-primary px-2 py-0.5 text-primary-foreground">
-                                        {auth?.user?.branch?.name || 'N/A'}
-                                    </span>
-                                </div>
-                                <div className="pt-3 text-xs text-muted-foreground/90">
+                                <div className="pt-2 text-xs text-muted-foreground/90">
                                     {`${import.meta.env.VITE_APP_NAME}` +
                                         ' | ' +
                                         `${import.meta.env.VITE_APP_VERSION}`}

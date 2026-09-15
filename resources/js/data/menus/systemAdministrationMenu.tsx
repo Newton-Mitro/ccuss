@@ -8,7 +8,7 @@ export const systemAdministrationMenu: SidebarItem[] = [
         permission: ['organizations.view'],
         children: [
             {
-                name: 'Organizations',
+                name: 'Switch Organization',
                 icon: <i className="fa-solid fa-building-wheat" />,
                 path: '/organizations',
                 match_path: 'organizations',

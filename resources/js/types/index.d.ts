@@ -1,5 +1,6 @@
 import { InertiaLinkProps } from '@inertiajs/react';
 import { LucideIcon } from 'lucide-react';
+import { Organization } from './organization';
 import { User } from './user';
 
 export interface Auth {
@@ -28,6 +29,11 @@ export interface SharedData {
     quote: { message: string; author: string };
     auth: Auth;
     sidebarOpen: boolean;
+    organization: {
+        activeId: number | null;
+        active: Organization | null;
+        available: Organization[];
+    };
     flash?: {
         error?: string;
         success?: string;

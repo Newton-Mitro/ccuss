@@ -4,15 +4,24 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { Eye, Pencil } from 'lucide-react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import {
+    Building2,
+    Check,
+    Eye,
+    Pencil,
+    Plus,
+    SwitchCamera,
+} from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
+import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Organization } from '../../../types/organization';
 
@@ -39,18 +48,42 @@ export default function Index() {
         page: Number(filters.page) || 1,
     });
 
-    // Debounced search
-    const handleSearch = () => {
-        get('/organizations', {
-            preserveState: true,
-            replace: true,
-        });
-    };
-
     useEffect(() => {
+        const handleSearch = () => {
+            get('/organizations', {
+                preserveState: true,
+                replace: true,
+            });
+        };
+
         const delay = setTimeout(handleSearch, 400);
         return () => clearTimeout(delay);
-    }, [data.search, data.per_page, data.page]);
+    }, [data.search, data.per_page, data.page, get]);
+
+    const handleSwitchOrganization = (organization: Organization) => {
+        if (props.organization.activeId === organization.id) {
+            return;
+        }
+
+        appSwal
+            .fire({
+                title: 'Switch organization?',
+                text: `Switch your active workspace to "${organization.name}"?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, switch',
+                cancelButtonText: 'Cancel',
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    router.post(
+                        route('organizations.select.store'),
+                        { organization_id: organization.id },
+                        { preserveScroll: true },
+                    );
+                }
+            });
+    };
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'System Administration', href: '' },
@@ -62,11 +95,30 @@ export default function Index() {
             <Head title="Organizations" />
             <div className="space-y-4 text-foreground">
                 {/* Header */}
-                <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                     <HeadingSmall
                         title="Organizations"
-                        description="Manage the organization profile and branches."
+                        description="Choose the workspace you want to use, or create a new organization."
                     />
+                    <Button asChild>
+                        <Link href={route('organizations.create')}>
+                            <Plus className="h-4 w-4" />
+                            Create organization
+                        </Link>
+                    </Button>
+                </div>
+
+                <div className="flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
+                    <Building2 className="h-5 w-5 shrink-0 text-primary" />
+                    <div className="min-w-0">
+                        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                            Active organization
+                        </p>
+                        <p className="truncate font-medium">
+                            {props.organization.active?.name ||
+                                'No organization selected'}
+                        </p>
+                    </div>
                 </div>
 
                 {/* Search */}
@@ -134,15 +186,67 @@ export default function Index() {
                                         </td>
                                         <td className="px-2 py-1">
                                             <TooltipProvider>
-                                                <div className="flex space-x-2">
+                                                <div className="flex items-center gap-1">
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
-                                                            <Link
-                                                                href={`/organizations/${organization.id}`}
-                                                                className="text-info"
+                                                            <Button
+                                                                type="button"
+                                                                size="icon"
+                                                                variant={
+                                                                    props
+                                                                        .organization
+                                                                        .activeId ===
+                                                                    organization.id
+                                                                        ? 'secondary'
+                                                                        : 'ghost'
+                                                                }
+                                                                onClick={() =>
+                                                                    handleSwitchOrganization(
+                                                                        organization,
+                                                                    )
+                                                                }
+                                                                aria-label={
+                                                                    props
+                                                                        .organization
+                                                                        .activeId ===
+                                                                    organization.id
+                                                                        ? 'Active organization'
+                                                                        : 'Switch organization'
+                                                                }
                                                             >
-                                                                <Eye className="h-5 w-5" />
-                                                            </Link>
+                                                                {props
+                                                                    .organization
+                                                                    .activeId ===
+                                                                organization.id ? (
+                                                                    <Check className="h-4 w-4" />
+                                                                ) : (
+                                                                    <SwitchCamera className="h-4 w-4" />
+                                                                )}
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            {props.organization
+                                                                .activeId ===
+                                                            organization.id
+                                                                ? 'Active organization'
+                                                                : 'Switch organization'}
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button
+                                                                asChild
+                                                                type="button"
+                                                                size="icon"
+                                                                variant="ghost"
+                                                            >
+                                                                <Link
+                                                                    href={`/organizations/${organization.id}`}
+                                                                    aria-label="View organization"
+                                                                >
+                                                                    <Eye className="h-4 w-4 text-info" />
+                                                                </Link>
+                                                            </Button>
                                                         </TooltipTrigger>
                                                         <TooltipContent>
                                                             View
@@ -151,12 +255,19 @@ export default function Index() {
 
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
-                                                            <Link
-                                                                href={`/organizations/${organization.id}/edit`}
-                                                                className="text-success"
+                                                            <Button
+                                                                asChild
+                                                                type="button"
+                                                                size="icon"
+                                                                variant="ghost"
                                                             >
-                                                                <Pencil className="h-5 w-5" />
-                                                            </Link>
+                                                                <Link
+                                                                    href={`/organizations/${organization.id}/edit`}
+                                                                    aria-label="Edit organization"
+                                                                >
+                                                                    <Pencil className="h-4 w-4 text-success" />
+                                                                </Link>
+                                                            </Button>
                                                         </TooltipTrigger>
                                                         <TooltipContent>
                                                             Edit
@@ -171,9 +282,26 @@ export default function Index() {
                                 <tr>
                                     <td
                                         colSpan={6}
-                                        className="px-4 py-6 text-center text-muted-foreground"
+                                        className="px-4 py-10 text-center text-muted-foreground"
                                     >
-                                        No organizations found.
+                                        <Building2 className="mx-auto h-8 w-8 text-primary/60" />
+                                        <p className="mt-2">
+                                            No organizations found.
+                                        </p>
+                                        <Button
+                                            asChild
+                                            size="sm"
+                                            className="mt-4"
+                                        >
+                                            <Link
+                                                href={route(
+                                                    'organizations.create',
+                                                )}
+                                            >
+                                                <Plus className="h-4 w-4" />
+                                                Create organization
+                                            </Link>
+                                        </Button>
                                     </td>
                                 </tr>
                             )}
