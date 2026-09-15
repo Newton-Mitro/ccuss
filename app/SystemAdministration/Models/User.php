@@ -3,6 +3,7 @@
 namespace App\SystemAdministration\Models;
 
 use App\SystemAdministration\Traits\Auditable;
+use App\Support\Traits\UppercaseEnumAttributes;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,7 +16,12 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable, TwoFactorAuthenticatable, Auditable, SoftDeletes;
+    use HasFactory, Notifiable, TwoFactorAuthenticatable, Auditable, SoftDeletes, UppercaseEnumAttributes;
+
+    public const STATUS_ACTIVE = 'ACTIVE';
+    public const STATUS_INACTIVE = 'INACTIVE';
+
+    protected array $uppercaseEnumAttributes = ['status'];
 
     protected $fillable = [
         'branch_id',

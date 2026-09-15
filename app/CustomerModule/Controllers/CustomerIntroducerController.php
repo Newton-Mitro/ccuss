@@ -36,7 +36,7 @@ class CustomerIntroducerController extends Controller
                 'introducerCustomer',
                 'introducerCustomer.photo',
             ])
-            ->where('verification_status', 'pending')
+            ->where('verification_status', CustomerIntroducer::STATUS_PENDING)
             ->when($customer, fn($query) => $query->where('introduced_customer_id', $customer->id));
 
         // 🔍 Search filter
@@ -201,12 +201,12 @@ class CustomerIntroducerController extends Controller
     public function approve(Customer $customer, CustomerIntroducer $introducer)
     {
         abort_unless($introducer->introduced_customer_id === $customer->id, 404);
-        if ($introducer->verification_status === 'verified') {
+        if ($introducer->verification_status === CustomerIntroducer::STATUS_VERIFIED) {
             return redirect()->back()->with('info', 'Already verified.');
         }
 
         $introducer->update([
-            'verification_status' => 'verified',
+            'verification_status' => CustomerIntroducer::STATUS_VERIFIED,
             'verified_at' => now(),
             'verified_by' => auth()->id(),
             'rejection_reason' => null, // reset if previously rejected
@@ -222,12 +222,12 @@ class CustomerIntroducerController extends Controller
             'rejection_reason' => ['required', 'string', 'max:500'],
         ]);
 
-        if ($introducer->verification_status === 'rejected') {
+        if ($introducer->verification_status === CustomerIntroducer::STATUS_REJECTED) {
             return redirect()->back()->with('info', 'Already rejected.');
         }
 
         $introducer->update([
-            'verification_status' => 'rejected',
+            'verification_status' => CustomerIntroducer::STATUS_REJECTED,
             'verified_at' => now(),
             'verified_by' => auth()->id(),
             'rejection_reason' => $request->rejection_reason,

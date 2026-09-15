@@ -20,7 +20,7 @@ class StoreUserRequest extends FormRequest
             'branch_id' => ['nullable', 'exists:branches,id'],
             'roles' => ['nullable', 'array'],
             'roles.*' => ['exists:roles,id'],
-            'status' => ['nullable', 'in:active,inactive'],
+            'status' => ['nullable', 'in:ACTIVE,INACTIVE'],
             'photo' => ['nullable', 'image', 'max:2048'],
         ];
     }

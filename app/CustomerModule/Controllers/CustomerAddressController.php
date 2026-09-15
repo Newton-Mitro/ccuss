@@ -29,7 +29,7 @@ class CustomerAddressController extends Controller
     {
         $query = CustomerAddress::query()
             ->with('customer')
-            ->where('verification_status', 'pending')
+            ->where('verification_status', CustomerAddress::STATUS_PENDING)
             ->when($customer, fn($query) => $query->where('customer_id', $customer->id));
 
         if ($search = $request->string('search')->toString()) {

@@ -11,29 +11,30 @@ return new class extends Migration {
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
             $table->string('customer_no', 50)->unique()->comment('Unique customer number');
-            $table->enum('type', ['individual', 'organization'])->comment('Customer type');
+            $table->enum('type', ['INDIVIDUAL', 'ORGANIZATION'])->comment('Customer type');
             $table->string('name', 150);
             $table->string('primary_phone', 50)->nullable();
             $table->string('alternate_phone', 50)->nullable();
             $table->string('primary_email', 100)->nullable();
             $table->string('alternate_email', 100)->nullable();
-            $table->enum('identification_type', ['national_identification_number', 'birth_registration_number', 'registration_no', 'passport', 'driving_license']);
+            $table->enum('identification_type', ['NATIONAL_IDENTIFICATION_NUMBER', 'BIRTH_REGISTRATION_NUMBER', 'REGISTRATION_NO', 'PASSPORT', 'DRIVING_LICENSE']);
             $table->string('identification_number', 50);
 
             $table->date('dob')->nullable();
-            $table->enum('gender', ['male', 'female', 'other'])->nullable();
-            $table->enum('marital_status', ['single', 'married', 'widowed', 'divorced', 'other'])->nullable();
+            $table->enum('gender', ['MALE', 'FEMALE', 'OTHER'])->nullable();
+            $table->enum('marital_status', ['SINGLE', 'MARRIED', 'WIDOWED', 'DIVORCED', 'OTHER'])->nullable();
             $table->enum('blood_group', ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'])->nullable();
             $table->string('nationality', 100)->nullable();
             $table->string('occupation', 100)->nullable();
             $table->string('education', 100)->nullable();
-            $table->enum('religion', ['christianity', 'islam', 'hinduism', 'buddhism', 'other'])->nullable();
+            $table->enum('religion', ['CHRISTIANITY', 'ISLAM', 'HINDUISM', 'BUDDHISM', 'OTHER'])->nullable();
 
-            $table->enum('status', ['pending', 'active', 'inactive', 'suspended', 'closed'])->default('pending');
+            $table->enum('status', ['PENDING', 'ACTIVE', 'INACTIVE', 'SUSPENDED', 'CLOSED'])->default('PENDING');
             $table->timestamps();
             $table->softDeletes();
 
             $table->foreignId('branch_id')->constrained()->restrictOnDelete();
+            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
         });
 
         Schema::create('customer_addresses', function (Blueprint $table) {
@@ -46,10 +47,10 @@ return new class extends Migration {
             $table->string('union_ward', 100)->nullable();
             $table->string('postal_code', 20)->nullable();
             $table->string('country', 150)->default('Bangladesh');
-            $table->enum('type', ['current', 'permanent', 'mailing', 'work', 'registered', 'other']);
+            $table->enum('type', ['CURRENT', 'PERMANENT', 'MAILING', 'WORK', 'REGISTERED', 'OTHER']);
 
             // Verification
-            $table->enum('verification_status', ['pending', 'verified', 'rejected'])->default('pending');
+            $table->enum('verification_status', ['PENDING', 'VERIFIED', 'REJECTED'])->default('PENDING');
             $table->timestamp('verified_at')->nullable();
             $table->text('remarks')->nullable();
             $table->timestamps();
@@ -63,10 +64,10 @@ return new class extends Migration {
 
         Schema::create('customer_family_relations', function (Blueprint $table) {
             $table->id();
-            $table->enum('relation_type', ['father', 'mother', 'son', 'daughter', 'brother', 'sister', 'husband', 'wife', 'grandfather', 'grandmother', 'uncle', 'aunt', 'nephew', 'niece', 'father_in_law', 'mother_in_law', 'son_in_law', 'daughter_in_law', 'brother_in_law', 'sister_in_law']);
+            $table->enum('relation_type', ['FATHER', 'MOTHER', 'SON', 'DAUGHTER', 'BROTHER', 'SISTER', 'HUSBAND', 'WIFE', 'GRANDFATHER', 'GRANDMOTHER', 'UNCLE', 'AUNT', 'NEPHEW', 'NIECE', 'FATHER_IN_LAW', 'MOTHER_IN_LAW', 'SON_IN_LAW', 'DAUGHTER_IN_LAW', 'BROTHER_IN_LAW', 'SISTER_IN_LAW']);
 
             // Verification
-            $table->enum('verification_status', ['pending', 'verified', 'rejected'])->default('pending');
+            $table->enum('verification_status', ['PENDING', 'VERIFIED', 'REJECTED'])->default('PENDING');
             $table->timestamp('verified_at')->nullable();
             $table->text('remarks')->nullable();
             $table->timestamps();
@@ -83,12 +84,12 @@ return new class extends Migration {
             $table->id();
             $table->integer('verification_value')->default(0);
             $table->enum('kyc_level', [
-                'minimal',     // basic (e.g., phone and email) + identity type -> 3
-                'basic',       // basic + photo -> 3+1
-                'standard',    // basic + identity type + photo + address (present and permanent) -> 3+1+2
-                'full',        // basic + identity type + photo + address + introducer -> 3+1+2+2 
-                'enhanced'     // basic + identity type + photo + address + introducer + family relations (father, mother, spouse, children) + additional documents
-            ])->default('minimal');
+                'MINIMAL',     // basic (e.g., phone and email) + identity type -> 3
+                'BASIC',       // basic + photo -> 3+1
+                'STANDARD',    // basic + identity type + photo + address (present and permanent) -> 3+1+2
+                'FULL',        // basic + identity type + photo + address + introducer -> 3+1+2+2
+                'ENHANCED'     // basic + identity type + photo + address + introducer + family relations (father, mother, spouse, children) + additional documents
+            ])->default('MINIMAL');
             $table->timestamps();
             $table->softDeletes();
 
@@ -98,36 +99,36 @@ return new class extends Migration {
         Schema::create('kyc_documents', function (Blueprint $table) {
             $table->id();
             $table->enum('document_type', [
-                'national_identification_number',
-                'smart_nid',
-                'passport',
-                'driving_license',
-                'birth_certificate',
+                'NATIONAL_IDENTIFICATION_NUMBER',
+                'SMART_NID',
+                'PASSPORT',
+                'DRIVING_LICENSE',
+                'BIRTH_CERTIFICATE',
 
-                'utility_bill',
-                'electricity_bill',
-                'water_bill',
-                'gas_bill',
-                'bank_statement',
-                'rental_agreement',
+                'UTILITY_BILL',
+                'ELECTRICITY_BILL',
+                'WATER_BILL',
+                'GAS_BILL',
+                'BANK_STATEMENT',
+                'RENTAL_AGREEMENT',
 
-                'tin_certificate',
-                'tax_return',
-                'salary_slip',
-                'income_certificate',
+                'TIN_CERTIFICATE',
+                'TAX_RETURN',
+                'SALARY_SLIP',
+                'INCOME_CERTIFICATE',
 
-                'trade_license',
-                'certificate_of_incorporation',
-                'memorandum_of_association',
-                'articles_of_association',
-                'partnership_deed',
+                'TRADE_LICENSE',
+                'CERTIFICATE_OF_INCORPORATION',
+                'MEMORANDUM_OF_ASSOCIATION',
+                'ARTICLES_OF_ASSOCIATION',
+                'PARTNERSHIP_DEED',
 
-                'photo',
-                'signature',
-                'live_selfie',
+                'PHOTO',
+                'SIGNATURE',
+                'LIVE_SELFIE',
 
-                'pep_declaration',
-                'fatca_form'
+                'PEP_DECLARATION',
+                'FATCA_FORM'
             ]);
             $table->string('file_name');
             $table->string('file_path');
@@ -135,7 +136,7 @@ return new class extends Migration {
             $table->string('alt_text')->nullable();
 
             // Verification
-            $table->enum('verification_status', ['pending', 'verified', 'rejected'])->default('pending');
+            $table->enum('verification_status', ['PENDING', 'VERIFIED', 'REJECTED'])->default('PENDING');
             $table->timestamp('verified_at')->nullable();
             $table->text('remarks')->nullable();
             $table->timestamps();
@@ -146,10 +147,10 @@ return new class extends Migration {
 
         Schema::create('customer_introducers', function (Blueprint $table) {
             $table->id();
-            $table->enum('relationship_type', ['family', 'friend', 'business', 'colleague', 'other'])->default('other');
+            $table->enum('relationship_type', ['FAMILY', 'FRIEND', 'BUSINESS', 'COLLEAGUE', 'OTHER'])->default('OTHER');
 
             // Verification
-            $table->enum('verification_status', ['pending', 'verified', 'rejected'])->default('pending');
+            $table->enum('verification_status', ['PENDING', 'VERIFIED', 'REJECTED'])->default('PENDING');
             $table->timestamp('verified_at')->nullable();
             $table->text('remarks')->nullable();
             $table->timestamps();

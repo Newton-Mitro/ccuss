@@ -17,7 +17,7 @@ class EloquentCustomerAddressRepository implements CustomerAddressRepositoryInte
     {
         $query = CustomerAddress::query()
             ->where('customer_id', $customerId)
-            ->where('type', $type);
+            ->where('type', strtoupper($type));
 
         if ($excludeId !== null) {
             $query->where('id', '!=', $excludeId);

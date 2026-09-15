@@ -16,7 +16,7 @@ class StoreCustomerRequest extends FormRequest
     {
         return [
             /* ================= Core ================= */
-            'type' => ['required', Rule::in(['individual', 'organization'])],
+            'type' => ['required', Rule::in(['INDIVIDUAL', 'ORGANIZATION'])],
             'name' => ['required', 'string', 'max:150'],
             'primary_phone' => ['nullable', 'string', 'max:50'],
             'primary_email' => ['nullable', 'email', 'max:100'],
@@ -24,7 +24,7 @@ class StoreCustomerRequest extends FormRequest
             'alternate_email' => ['nullable', 'email', 'max:100'],
 
             /* ================= KYC & Status ================= */
-            'status' => ['nullable', Rule::in(['pending', 'active', 'inactive', 'suspended', 'closed'])],
+            'status' => ['nullable', Rule::in(['PENDING', 'ACTIVE', 'INACTIVE', 'SUSPENDED', 'CLOSED'])],
 
             /* ================= Personal Info ================= */
             'dob' => [
@@ -34,12 +34,12 @@ class StoreCustomerRequest extends FormRequest
             ],
             'gender' => [
                 'nullable',
-                Rule::in(['male', 'female', 'other']),
-                'required_if:type,individual',
+                Rule::in(['MALE', 'FEMALE', 'OTHER']),
+                'required_if:type,INDIVIDUAL',
             ],
             'marital_status' => [
                 'nullable',
-                Rule::in(['single', 'married', 'widowed', 'divorced', 'other']),
+                Rule::in(['SINGLE', 'MARRIED', 'WIDOWED', 'DIVORCED', 'OTHER']),
             ],
             'blood_group' => [
                 'nullable',
@@ -51,18 +51,18 @@ class StoreCustomerRequest extends FormRequest
             'religion' => [
                 'nullable',
                 Rule::in([
-                    'christianity',
-                    'islam',
-                    'hinduism',
-                    'buddhism',
-                    'other',
+                    'CHRISTIANITY',
+                    'ISLAM',
+                    'HINDUISM',
+                    'BUDDHISM',
+                    'OTHER',
                 ]),
             ],
 
             /* ================= Identification ================= */
             'identification_type' => [
                 'required',
-                Rule::in(['national_identification_number', 'birth_registration_number', 'passport', 'driving_license', 'registration_no']),
+                Rule::in(['NATIONAL_IDENTIFICATION_NUMBER', 'BIRTH_REGISTRATION_NUMBER', 'PASSPORT', 'DRIVING_LICENSE', 'REGISTRATION_NO']),
             ],
             'identification_number' => ['required', 'string', 'max:50'],
 

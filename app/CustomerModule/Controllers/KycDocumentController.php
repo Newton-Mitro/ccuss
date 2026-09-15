@@ -26,7 +26,7 @@ class KycDocumentController extends Controller
     public function index(Request $request, ?Customer $customer = null)
     {
         $query = KycDocument::with('customer')
-            ->where('verification_status', 'pending')
+            ->where('verification_status', KycDocument::STATUS_PENDING)
             ->when($customer, fn($query) => $query->where('customer_id', $customer->id));
 
         // 🔍 Search (by customer name)
@@ -146,12 +146,12 @@ class KycDocumentController extends Controller
     public function approve(Customer $customer, KycDocument $kycDocument)
     {
         abort_unless($kycDocument->customer_id === $customer->id, 404);
-        if ($kycDocument->verification_status === 'verified') {
+        if ($kycDocument->verification_status === KycDocument::STATUS_VERIFIED) {
             return redirect()->back()->with('info', 'Already verified.');
         }
 
         $kycDocument->update([
-            'verification_status' => 'verified',
+            'verification_status' => KycDocument::STATUS_VERIFIED,
             'verified_at' => now(),
             'verified_by' => auth()->id(),
             'rejection_reason' => null, // reset if previously rejected
@@ -167,12 +167,12 @@ class KycDocumentController extends Controller
             'rejection_reason' => ['required', 'string', 'max:500'],
         ]);
 
-        if ($kycDocument->verification_status === 'rejected') {
+        if ($kycDocument->verification_status === KycDocument::STATUS_REJECTED) {
             return redirect()->back()->with('info', 'Already rejected.');
         }
 
         $kycDocument->update([
-            'verification_status' => 'rejected',
+            'verification_status' => KycDocument::STATUS_REJECTED,
             'verified_at' => now(),
             'verified_by' => auth()->id(),
             'rejection_reason' => $request->rejection_reason,

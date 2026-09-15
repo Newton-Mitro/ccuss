@@ -3,6 +3,7 @@
 namespace App\CustomerModule\Models;
 
 use App\SystemAdministration\Traits\Auditable;
+use App\Support\Traits\UppercaseEnumAttributes;
 use Database\Factories\KycProfileFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,6 +16,9 @@ class KycProfile extends Model
     use HasFactory;
     use Auditable;
     use SoftDeletes;
+    use UppercaseEnumAttributes;
+
+    protected array $uppercaseEnumAttributes = ['kyc_level'];
 
     protected $fillable = [
         'customer_id',
@@ -33,11 +37,11 @@ class KycProfile extends Model
     |--------------------------------------------------------------------------
     */
 
-    public const LEVEL_MINIMAL = 'minimal';
-    public const LEVEL_BASIC = 'basic';
-    public const LEVEL_STANDARD = 'standard';
-    public const LEVEL_FULL = 'full';
-    public const LEVEL_ENHANCED = 'enhanced';
+    public const LEVEL_MINIMAL = 'MINIMAL';
+    public const LEVEL_BASIC = 'BASIC';
+    public const LEVEL_STANDARD = 'STANDARD';
+    public const LEVEL_FULL = 'FULL';
+    public const LEVEL_ENHANCED = 'ENHANCED';
 
     public const LEVELS = [
         self::LEVEL_MINIMAL,

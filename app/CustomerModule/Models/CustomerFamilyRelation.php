@@ -3,6 +3,7 @@
 namespace App\CustomerModule\Models;
 
 use App\SystemAdministration\Traits\Auditable;
+use App\Support\Traits\UppercaseEnumAttributes;
 use Database\Factories\CustomerFamilyRelationFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,6 +16,9 @@ class CustomerFamilyRelation extends Model
     use HasFactory;
     use Auditable;
     use SoftDeletes;
+    use UppercaseEnumAttributes;
+
+    protected array $uppercaseEnumAttributes = ['relation_type', 'verification_status'];
 
     protected $fillable = [
         'customer_id',
@@ -38,26 +42,26 @@ class CustomerFamilyRelation extends Model
     |--------------------------------------------------------------------------
     */
 
-    public const FATHER = 'father';
-    public const MOTHER = 'mother';
-    public const SON = 'son';
-    public const DAUGHTER = 'daughter';
-    public const BROTHER = 'brother';
-    public const SISTER = 'sister';
-    public const HUSBAND = 'husband';
-    public const WIFE = 'wife';
-    public const GRANDFATHER = 'grandfather';
-    public const GRANDMOTHER = 'grandmother';
-    public const UNCLE = 'uncle';
-    public const AUNT = 'aunt';
-    public const NEPHEW = 'nephew';
-    public const NIECE = 'niece';
-    public const FATHER_IN_LAW = 'father_in_law';
-    public const MOTHER_IN_LAW = 'mother_in_law';
-    public const SON_IN_LAW = 'son_in_law';
-    public const DAUGHTER_IN_LAW = 'daughter_in_law';
-    public const BROTHER_IN_LAW = 'brother_in_law';
-    public const SISTER_IN_LAW = 'sister_in_law';
+    public const FATHER = 'FATHER';
+    public const MOTHER = 'MOTHER';
+    public const SON = 'SON';
+    public const DAUGHTER = 'DAUGHTER';
+    public const BROTHER = 'BROTHER';
+    public const SISTER = 'SISTER';
+    public const HUSBAND = 'HUSBAND';
+    public const WIFE = 'WIFE';
+    public const GRANDFATHER = 'GRANDFATHER';
+    public const GRANDMOTHER = 'GRANDMOTHER';
+    public const UNCLE = 'UNCLE';
+    public const AUNT = 'AUNT';
+    public const NEPHEW = 'NEPHEW';
+    public const NIECE = 'NIECE';
+    public const FATHER_IN_LAW = 'FATHER_IN_LAW';
+    public const MOTHER_IN_LAW = 'MOTHER_IN_LAW';
+    public const SON_IN_LAW = 'SON_IN_LAW';
+    public const DAUGHTER_IN_LAW = 'DAUGHTER_IN_LAW';
+    public const BROTHER_IN_LAW = 'BROTHER_IN_LAW';
+    public const SISTER_IN_LAW = 'SISTER_IN_LAW';
 
     public const RELATION_TYPES = [
         self::FATHER,
@@ -88,9 +92,9 @@ class CustomerFamilyRelation extends Model
     |--------------------------------------------------------------------------
     */
 
-    public const STATUS_PENDING = 'pending';
-    public const STATUS_VERIFIED = 'verified';
-    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_PENDING = 'PENDING';
+    public const STATUS_VERIFIED = 'VERIFIED';
+    public const STATUS_REJECTED = 'REJECTED';
 
     /*
     |--------------------------------------------------------------------------

@@ -3,6 +3,7 @@
 namespace App\CustomerModule\Models;
 
 use App\SystemAdministration\Traits\Auditable;
+use App\Support\Traits\UppercaseEnumAttributes;
 use Database\Factories\KycDocumentFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,6 +17,9 @@ class KycDocument extends Model
     use HasFactory;
     use Auditable;
     use SoftDeletes;
+    use UppercaseEnumAttributes;
+
+    protected array $uppercaseEnumAttributes = ['document_type', 'verification_status'];
 
     protected $fillable = [
         'customer_id',
@@ -47,36 +51,36 @@ class KycDocument extends Model
     |--------------------------------------------------------------------------
     */
 
-    public const NATIONAL_ID = 'national_identification_number';
-    public const SMART_NID = 'smart_nid';
-    public const PASSPORT = 'passport';
-    public const DRIVING_LICENSE = 'driving_license';
-    public const BIRTH_CERTIFICATE = 'birth_certificate';
+    public const NATIONAL_ID = 'NATIONAL_IDENTIFICATION_NUMBER';
+    public const SMART_NID = 'SMART_NID';
+    public const PASSPORT = 'PASSPORT';
+    public const DRIVING_LICENSE = 'DRIVING_LICENSE';
+    public const BIRTH_CERTIFICATE = 'BIRTH_CERTIFICATE';
 
-    public const UTILITY_BILL = 'utility_bill';
-    public const ELECTRICITY_BILL = 'electricity_bill';
-    public const WATER_BILL = 'water_bill';
-    public const GAS_BILL = 'gas_bill';
-    public const BANK_STATEMENT = 'bank_statement';
-    public const RENTAL_AGREEMENT = 'rental_agreement';
+    public const UTILITY_BILL = 'UTILITY_BILL';
+    public const ELECTRICITY_BILL = 'ELECTRICITY_BILL';
+    public const WATER_BILL = 'WATER_BILL';
+    public const GAS_BILL = 'GAS_BILL';
+    public const BANK_STATEMENT = 'BANK_STATEMENT';
+    public const RENTAL_AGREEMENT = 'RENTAL_AGREEMENT';
 
-    public const TIN_CERTIFICATE = 'tin_certificate';
-    public const TAX_RETURN = 'tax_return';
-    public const SALARY_SLIP = 'salary_slip';
-    public const INCOME_CERTIFICATE = 'income_certificate';
+    public const TIN_CERTIFICATE = 'TIN_CERTIFICATE';
+    public const TAX_RETURN = 'TAX_RETURN';
+    public const SALARY_SLIP = 'SALARY_SLIP';
+    public const INCOME_CERTIFICATE = 'INCOME_CERTIFICATE';
 
-    public const TRADE_LICENSE = 'trade_license';
-    public const CERTIFICATE_OF_INCORPORATION = 'certificate_of_incorporation';
-    public const MEMORANDUM_OF_ASSOCIATION = 'memorandum_of_association';
-    public const ARTICLES_OF_ASSOCIATION = 'articles_of_association';
-    public const PARTNERSHIP_DEED = 'partnership_deed';
+    public const TRADE_LICENSE = 'TRADE_LICENSE';
+    public const CERTIFICATE_OF_INCORPORATION = 'CERTIFICATE_OF_INCORPORATION';
+    public const MEMORANDUM_OF_ASSOCIATION = 'MEMORANDUM_OF_ASSOCIATION';
+    public const ARTICLES_OF_ASSOCIATION = 'ARTICLES_OF_ASSOCIATION';
+    public const PARTNERSHIP_DEED = 'PARTNERSHIP_DEED';
 
-    public const PHOTO = 'photo';
-    public const SIGNATURE = 'signature';
-    public const LIVE_SELFIE = 'live_selfie';
+    public const PHOTO = 'PHOTO';
+    public const SIGNATURE = 'SIGNATURE';
+    public const LIVE_SELFIE = 'LIVE_SELFIE';
 
-    public const PEP_DECLARATION = 'pep_declaration';
-    public const FATCA_FORM = 'fatca_form';
+    public const PEP_DECLARATION = 'PEP_DECLARATION';
+    public const FATCA_FORM = 'FATCA_FORM';
 
     public const DOCUMENT_TYPES = [
         self::NATIONAL_ID,
@@ -112,9 +116,9 @@ class KycDocument extends Model
     |--------------------------------------------------------------------------
     */
 
-    public const STATUS_PENDING = 'pending';
-    public const STATUS_VERIFIED = 'verified';
-    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_PENDING = 'PENDING';
+    public const STATUS_VERIFIED = 'VERIFIED';
+    public const STATUS_REJECTED = 'REJECTED';
 
     /*
     |--------------------------------------------------------------------------

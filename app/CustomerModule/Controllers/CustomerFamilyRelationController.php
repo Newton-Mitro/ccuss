@@ -29,7 +29,7 @@ class CustomerFamilyRelationController extends Controller
     {
         $query = CustomerFamilyRelation::query()
             ->with(['customer', 'relative', 'relative.photo'])
-            ->where('verification_status', 'pending')
+            ->where('verification_status', CustomerFamilyRelation::STATUS_PENDING)
             ->when($customer, fn($query) => $query->where('customer_id', $customer->id));
 
         if ($search = $request->string('search')->toString()) {
@@ -142,12 +142,12 @@ class CustomerFamilyRelationController extends Controller
     public function approve(Customer $customer, CustomerFamilyRelation $familyRelation)
     {
         abort_unless($familyRelation->customer_id === $customer->id, 404);
-        if ($familyRelation->verification_status === 'verified') {
+        if ($familyRelation->verification_status === CustomerFamilyRelation::STATUS_VERIFIED) {
             return redirect()->back()->with('info', 'Already verified.');
         }
 
         $familyRelation->update([
-            'verification_status' => 'verified',
+            'verification_status' => CustomerFamilyRelation::STATUS_VERIFIED,
             'verified_at' => now(),
             'verified_by' => auth()->id(),
             'rejection_reason' => null,
@@ -163,12 +163,12 @@ class CustomerFamilyRelationController extends Controller
             'rejection_reason' => ['required', 'string', 'max:500'],
         ]);
 
-        if ($familyRelation->verification_status === 'rejected') {
+        if ($familyRelation->verification_status === CustomerFamilyRelation::STATUS_REJECTED) {
             return redirect()->back()->with('info', 'Already rejected.');
         }
 
         $familyRelation->update([
-            'verification_status' => 'rejected',
+            'verification_status' => CustomerFamilyRelation::STATUS_REJECTED,
             'verified_at' => now(),
             'verified_by' => auth()->id(),
             'rejection_reason' => $request->rejection_reason,

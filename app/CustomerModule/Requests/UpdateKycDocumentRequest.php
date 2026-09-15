@@ -27,7 +27,7 @@ class UpdateKycDocumentRequest extends FormRequest
             'verification_status' => [
                 'sometimes',
                 'nullable',
-                Rule::in(['pending', 'verified', 'rejected']),
+                Rule::in(['PENDING', 'VERIFIED', 'REJECTED']),
             ],
         ];
     }

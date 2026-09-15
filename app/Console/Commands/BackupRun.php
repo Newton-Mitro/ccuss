@@ -14,8 +14,8 @@ class BackupRun extends Command
     public function handle()
     {
         $log = DatabaseBackupLog::create([
-            'status' => 'running',
-            'backup_type' => 'full',
+            'status' => DatabaseBackupLog::STATUS_RUNNING,
+            'backup_type' => DatabaseBackupLog::TYPE_FULL,
             'created_by' => null,
             'started_at' => now(),
         ]);
@@ -58,7 +58,7 @@ class BackupRun extends Command
 
             if ($result !== 0 || !file_exists($fullPath)) {
                 $log->update([
-                    'status' => 'failed',
+                    'status' => DatabaseBackupLog::STATUS_FAILED,
                     'error' => implode("\n", $output),
                     'completed_at' => now(),
                 ]);
@@ -76,7 +76,7 @@ class BackupRun extends Command
 
             // Update log
             $log->update([
-                'status' => 'success',
+                'status' => DatabaseBackupLog::STATUS_SUCCESS,
                 'file_name' => $fileName,
                 'file_path' => $relativePath . '/' . $fileName,
                 'file_size' => $fileSize,
@@ -90,7 +90,7 @@ class BackupRun extends Command
 
         } catch (\Throwable $e) {
             $log->update([
-                'status' => 'failed',
+                'status' => DatabaseBackupLog::STATUS_FAILED,
                 'error' => $e->getMessage(),
                 'completed_at' => now(),
             ]);

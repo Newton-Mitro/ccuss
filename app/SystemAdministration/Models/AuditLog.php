@@ -5,9 +5,17 @@ namespace App\SystemAdministration\Models;
 use App\SystemAdministration\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use App\Support\Traits\UppercaseEnumAttributes;
 
 class AuditLog extends Model
 {
+    use UppercaseEnumAttributes;
+
+    protected array $uppercaseEnumAttributes = ['event'];
+    public const EVENT_CREATED = 'CREATED';
+    public const EVENT_UPDATED = 'UPDATED';
+    public const EVENT_DELETED = 'DELETED';
+
     protected $fillable = [
         'auditable_type',
         'auditable_id',

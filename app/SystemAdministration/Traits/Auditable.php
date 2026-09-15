@@ -10,19 +10,19 @@ trait Auditable
     public static function bootAuditable()
     {
         static::created(function ($model) {
-            $model->writeAudit('created', null, $model->getAttributes());
+            $model->writeAudit(AuditLog::EVENT_CREATED, null, $model->getAttributes());
         });
 
         static::updated(function ($model) {
             $model->writeAudit(
-                'updated',
+                AuditLog::EVENT_UPDATED,
                 $model->getOriginal(),
                 $model->getChanges()
             );
         });
 
         static::deleted(function ($model) {
-            $model->writeAudit('deleted', $model->getOriginal(), null);
+            $model->writeAudit(AuditLog::EVENT_DELETED, $model->getOriginal(), null);
         });
     }
 
@@ -34,7 +34,7 @@ trait Auditable
         $new = $new ? array_diff_key($new, array_flip($ignored)) : null;
 
         // ✅ Always log created
-        if ($event !== 'created' && empty($old) && empty($new)) {
+        if ($event !== AuditLog::EVENT_CREATED && empty($old) && empty($new)) {
             return;
         }
 

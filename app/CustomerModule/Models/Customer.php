@@ -4,8 +4,8 @@ namespace App\CustomerModule\Models;
 
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
-use App\SystemAdministration\Models\User;
 use App\SystemAdministration\Traits\Auditable;
+use App\Support\Traits\UppercaseEnumAttributes;
 use Database\Factories\CustomerFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,6 +20,17 @@ class Customer extends Model
     use HasFactory;
     use Auditable;
     use SoftDeletes;
+    use UppercaseEnumAttributes;
+
+    protected array $uppercaseEnumAttributes = [
+        'type',
+        'identification_type',
+        'gender',
+        'marital_status',
+        'blood_group',
+        'religion',
+        'status',
+    ];
 
     protected $fillable = [
         'organization_id',
@@ -61,8 +72,8 @@ class Customer extends Model
     |--------------------------------------------------------------------------
     */
 
-    public const TYPE_INDIVIDUAL = 'individual';
-    public const TYPE_ORGANIZATION = 'organization';
+    public const TYPE_INDIVIDUAL = 'INDIVIDUAL';
+    public const TYPE_ORGANIZATION = 'ORGANIZATION';
 
     /*
     |--------------------------------------------------------------------------
@@ -70,11 +81,11 @@ class Customer extends Model
     |--------------------------------------------------------------------------
     */
 
-    public const STATUS_PENDING = 'pending';
-    public const STATUS_ACTIVE = 'active';
-    public const STATUS_INACTIVE = 'inactive';
-    public const STATUS_SUSPENDED = 'suspended';
-    public const STATUS_CLOSED = 'closed';
+    public const STATUS_PENDING = 'PENDING';
+    public const STATUS_ACTIVE = 'ACTIVE';
+    public const STATUS_INACTIVE = 'INACTIVE';
+    public const STATUS_SUSPENDED = 'SUSPENDED';
+    public const STATUS_CLOSED = 'CLOSED';
 
     /*
     |--------------------------------------------------------------------------
@@ -106,25 +117,25 @@ class Customer extends Model
     public function currentAddress(): HasOne
     {
         return $this->hasOne(CustomerAddress::class)
-            ->where('type', 'current');
+            ->where('type', CustomerAddress::TYPE_CURRENT);
     }
 
     public function permanentAddress(): HasOne
     {
         return $this->hasOne(CustomerAddress::class)
-            ->where('type', 'permanent');
+            ->where('type', CustomerAddress::TYPE_PERMANENT);
     }
 
     public function mailingAddress(): HasOne
     {
         return $this->hasOne(CustomerAddress::class)
-            ->where('type', 'mailing');
+            ->where('type', CustomerAddress::TYPE_MAILING);
     }
 
     public function workAddress(): HasOne
     {
         return $this->hasOne(CustomerAddress::class)
-            ->where('type', 'work');
+            ->where('type', CustomerAddress::TYPE_WORK);
     }
 
     /*
@@ -162,37 +173,37 @@ class Customer extends Model
     public function photo(): HasOne
     {
         return $this->hasOne(KycDocument::class)
-            ->where('document_type', 'photo');
+            ->where('document_type', KycDocument::PHOTO);
     }
 
     public function signature(): HasOne
     {
         return $this->hasOne(KycDocument::class)
-            ->where('document_type', 'signature');
+            ->where('document_type', KycDocument::SIGNATURE);
     }
 
     public function selfie(): HasOne
     {
         return $this->hasOne(KycDocument::class)
-            ->where('document_type', 'live_selfie');
+            ->where('document_type', KycDocument::LIVE_SELFIE);
     }
 
     public function nationalId(): HasOne
     {
         return $this->hasOne(KycDocument::class)
-            ->where('document_type', 'national_identification_number');
+            ->where('document_type', KycDocument::NATIONAL_ID);
     }
 
     public function passport(): HasOne
     {
         return $this->hasOne(KycDocument::class)
-            ->where('document_type', 'passport');
+            ->where('document_type', KycDocument::PASSPORT);
     }
 
     public function tradeLicense(): HasOne
     {
         return $this->hasOne(KycDocument::class)
-            ->where('document_type', 'trade_license');
+            ->where('document_type', KycDocument::TRADE_LICENSE);
     }
 
     /*

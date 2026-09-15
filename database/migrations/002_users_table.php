@@ -18,13 +18,14 @@ return new class extends Migration {
             $table->text('two_factor_recovery_codes')->nullable();
             $table->timestamp('two_factor_confirmed_at')->nullable();
             $table->string('photo_path', 255)->nullable();
-            $table->enum('status', ['active', 'inactive'])->default('inactive');
+            $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('INACTIVE');
             $table->timestamps();
             $table->softDeletes();
 
-            $table->foreignId('branch_id')->nullable()->constrained();
+            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('customer_id')->nullable()->unique();
             $table->foreignId('employee_id')->nullable()->unique();
+            $table->foreignId('organization_id')->nullable()->constrained()->nullOnDelete();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

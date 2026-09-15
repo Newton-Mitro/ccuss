@@ -3,6 +3,7 @@
 namespace App\CustomerModule\Models;
 
 use App\SystemAdministration\Traits\Auditable;
+use App\Support\Traits\UppercaseEnumAttributes;
 use Database\Factories\CustomerAddressFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,6 +16,9 @@ class CustomerAddress extends Model
     use HasFactory;
     use Auditable;
     use SoftDeletes;
+    use UppercaseEnumAttributes;
+
+    protected array $uppercaseEnumAttributes = ['type', 'verification_status'];
 
     protected $fillable = [
         'customer_id',
@@ -47,12 +51,12 @@ class CustomerAddress extends Model
     |--------------------------------------------------------------------------
     */
 
-    public const TYPE_CURRENT = 'current';
-    public const TYPE_PERMANENT = 'permanent';
-    public const TYPE_MAILING = 'mailing';
-    public const TYPE_WORK = 'work';
-    public const TYPE_REGISTERED = 'registered';
-    public const TYPE_OTHER = 'other';
+    public const TYPE_CURRENT = 'CURRENT';
+    public const TYPE_PERMANENT = 'PERMANENT';
+    public const TYPE_MAILING = 'MAILING';
+    public const TYPE_WORK = 'WORK';
+    public const TYPE_REGISTERED = 'REGISTERED';
+    public const TYPE_OTHER = 'OTHER';
 
     /*
     |--------------------------------------------------------------------------
@@ -60,9 +64,9 @@ class CustomerAddress extends Model
     |--------------------------------------------------------------------------
     */
 
-    public const STATUS_PENDING = 'pending';
-    public const STATUS_VERIFIED = 'verified';
-    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_PENDING = 'PENDING';
+    public const STATUS_VERIFIED = 'VERIFIED';
+    public const STATUS_REJECTED = 'REJECTED';
 
     /*
     |--------------------------------------------------------------------------

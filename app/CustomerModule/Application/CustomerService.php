@@ -4,6 +4,7 @@ namespace App\CustomerModule\Application;
 
 use App\CustomerModule\Application\Contracts\CustomerRepositoryInterface;
 use App\CustomerModule\Models\Customer;
+use App\CustomerModule\Models\KycDocument;
 use App\CustomerModule\Models\KycProfile;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
@@ -41,7 +42,7 @@ class CustomerService
         $customer = null;
 
         DB::transaction(function () use ($data, $photo, &$customer) {
-            $typePrefix = $data['type'] === 'individual' ? 'IND' : 'ORG';
+            $typePrefix = strtoupper($data['type']) === Customer::TYPE_INDIVIDUAL ? 'IND' : 'ORG';
             $lastId = Customer::lockForUpdate()->max('id') ?? 0;
             $nextNumber = str_pad($lastId + 1, 5, '0', STR_PAD_LEFT);
             $data['customer_no'] = "{$typePrefix}-{$nextNumber}";
@@ -56,12 +57,12 @@ class CustomerService
                 $path = $photo->store('uploads/customers/' . $customer->id, 'public');
 
                 $customer->kycDocuments()->create([
-                    'document_type' => 'photo',
+                    'document_type' => KycDocument::PHOTO,
                     'file_name' => $photo->getClientOriginalName(),
                     'file_path' => $path,
                     'mime' => $photo->getClientMimeType(),
                     'url' => asset('storage/' . $path),
-                    'verification_status' => 'pending',
+                    'verification_status' => KycDocument::STATUS_PENDING,
                 ]);
             }
         });
@@ -84,7 +85,7 @@ class CustomerService
                 ($data['type'] ?? $customer->type) !== $customer->type ||
                 ($data['identification_type'] ?? $customer->identification_type) !== $customer->identification_type
             ) {
-                $prefix = ($data['type'] ?? $customer->type) === 'individual' ? 'IND' : 'ORG';
+                $prefix = strtoupper($data['type'] ?? $customer->type) === Customer::TYPE_INDIVIDUAL ? 'IND' : 'ORG';
                 $data['customer_no'] = "{$prefix}-" . str_pad($customer->id, 5, '0', STR_PAD_LEFT);
             }
 
@@ -104,12 +105,12 @@ class CustomerService
                 $path = $photo->store('uploads/customers/' . $customer->id, 'public');
 
                 $customer->kycDocuments()->create([
-                    'document_type' => 'photo',
+                    'document_type' => KycDocument::PHOTO,
                     'file_name' => $photo->getClientOriginalName(),
                     'file_path' => $path,
                     'mime' => $photo->getClientMimeType(),
                     'url' => asset('storage/' . $path),
-                    'verification_status' => 'pending',
+                    'verification_status' => KycDocument::STATUS_PENDING,
                 ]);
             }
         });

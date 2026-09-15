@@ -103,7 +103,7 @@ test('customer service updates an existing customer without changing its identit
 
     expect($updated)->toBeInstanceOf(Customer::class)
         ->and($updated->name)->toBe('Bob Updated')
-        ->and($updated->status)->toBe('inactive')
+        ->and($updated->status)->toBe(Customer::STATUS_INACTIVE)
         ->and($updated->primary_phone)->toBe('5550002222');
 });
 
@@ -298,7 +298,7 @@ test('kyc document service requires a valid customer and can create and delete d
 
     expect($document)->toBeInstanceOf(KycDocument::class)
         ->and($document->customer_id)->toBe($customer->id)
-        ->and($document->document_type)->toBe('passport')
+        ->and($document->document_type)->toBe(KycDocument::PASSPORT)
         ->and($document->file_path)->not->toBeNull();
 
     expect($service->deleteDocument($document))->toBeTrue()

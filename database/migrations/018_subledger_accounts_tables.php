@@ -10,6 +10,7 @@ return new class extends Migration {
     {
         Schema::create('financial_products', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
             $table->string('code', 50);
             $table->string('name', 150);
             $table->enum('category', [
@@ -68,6 +69,7 @@ return new class extends Migration {
 
         Schema::create('financial_accounts', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
             $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('financial_product_id')->nullable()->constrained()->nullOnDelete();
             /*
@@ -131,6 +133,7 @@ return new class extends Migration {
 
         Schema::create('financial_transactions', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
             $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('financial_account_id')->nullable()->constrained()->nullOnDelete();
             $table->string('transaction_no', 100);

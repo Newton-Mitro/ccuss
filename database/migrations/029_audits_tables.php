@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->string('auditable_type', 150);
             $table->unsignedBigInteger('auditable_id');
             $table->uuid('batch_id')->index();
-            $table->enum('event', ['created', 'updated', 'deleted',]);
+            $table->enum('event', ['CREATED', 'UPDATED', 'DELETED',]);
             $table->json('old_values')->nullable();
             $table->json('new_values')->nullable();
             // Request metadata
@@ -37,8 +37,8 @@ return new class extends Migration {
             $table->string('file_path')->nullable();
             $table->unsignedBigInteger('file_size')->nullable();
             $table->string('storage_disk')->default('local');
-            $table->enum('backup_type', ['full', 'database_only', 'files_only'])->default('full');
-            $table->enum('status', ['running', 'success', 'failed'])->default('running');
+            $table->enum('backup_type', ['FULL', 'DATABASE_ONLY', 'FILES_ONLY'])->default('FULL');
+            $table->enum('status', ['RUNNING', 'SUCCESS', 'FAILED'])->default('RUNNING');
             $table->string('checksum')->nullable();
             $table->integer('duration_seconds')->nullable();
             $table->text('message')->nullable();

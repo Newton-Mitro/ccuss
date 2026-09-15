@@ -8,6 +8,7 @@ return new class extends Migration {
     {
         Schema::create('branch_days', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             $table->date('business_date');
             $table->enum('status', ['OPEN', 'CLOSING', 'CLOSED'])->default('OPEN');
@@ -24,6 +25,7 @@ return new class extends Migration {
 
         Schema::create('cash_locations', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             $table->foreignId('financial_account_id')->nullable()->constrained('financial_accounts')->nullOnDelete();
             $table->string('code', 50);
@@ -78,6 +80,7 @@ return new class extends Migration {
 
         Schema::create('cash_denominations', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
             $table->string('currency', 10)->default('BDT');
             $table->enum('type', ['NOTE', 'COIN'])->default('NOTE');
             $table->decimal('value', 20, 4);
@@ -162,6 +165,7 @@ return new class extends Migration {
 
         Schema::create('banks', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
             $table->string('code', 50);
             $table->string('name', 150);
             $table->string('short_name', 50)->nullable();
@@ -172,6 +176,7 @@ return new class extends Migration {
 
         Schema::create('bank_accounts', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
             $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('bank_id')->constrained()->restrictOnDelete();
             $table->foreignId('financial_account_id')->constrained('financial_accounts')->restrictOnDelete();

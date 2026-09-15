@@ -44,7 +44,7 @@ it('creates an introducer record and marks it pending', function () {
     ]);
 
     expect($record)->toBeInstanceOf(CustomerIntroducer::class)
-        ->and($record->verification_status)->toBe('pending')
+        ->and($record->verification_status)->toBe(CustomerIntroducer::STATUS_PENDING)
         ->and($record->introduced_customer_id)->toBe($introduced->id);
 });
 

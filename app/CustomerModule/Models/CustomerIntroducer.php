@@ -4,6 +4,7 @@ namespace App\CustomerModule\Models;
 
 use App\AccountModule\Models\Account;
 use App\SystemAdministration\Traits\Auditable;
+use App\Support\Traits\UppercaseEnumAttributes;
 use Database\Factories\CustomerIntroducerFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,6 +17,9 @@ class CustomerIntroducer extends Model
     use HasFactory;
     use Auditable;
     use SoftDeletes;
+    use UppercaseEnumAttributes;
+
+    protected array $uppercaseEnumAttributes = ['relationship_type', 'verification_status'];
 
     protected $fillable = [
         'introduced_customer_id',
@@ -40,11 +44,11 @@ class CustomerIntroducer extends Model
     |--------------------------------------------------------------------------
     */
 
-    public const FAMILY = 'family';
-    public const FRIEND = 'friend';
-    public const BUSINESS = 'business';
-    public const COLLEAGUE = 'colleague';
-    public const OTHER = 'other';
+    public const FAMILY = 'FAMILY';
+    public const FRIEND = 'FRIEND';
+    public const BUSINESS = 'BUSINESS';
+    public const COLLEAGUE = 'COLLEAGUE';
+    public const OTHER = 'OTHER';
 
     public const RELATIONSHIP_TYPES = [
         self::FAMILY,
@@ -60,9 +64,9 @@ class CustomerIntroducer extends Model
     |--------------------------------------------------------------------------
     */
 
-    public const STATUS_PENDING = 'pending';
-    public const STATUS_VERIFIED = 'verified';
-    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_PENDING = 'PENDING';
+    public const STATUS_VERIFIED = 'VERIFIED';
+    public const STATUS_REJECTED = 'REJECTED';
 
     /*
     |--------------------------------------------------------------------------

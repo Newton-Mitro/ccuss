@@ -29,8 +29,8 @@ class EloquentCustomerRepository implements CustomerRepositoryInterface
                     ->orWhere('primary_phone', 'like', "%{$search}%");
             });
 
-        if ($status && $status !== 'all') {
-            $query->where('status', $status);
+        if ($status && strtolower($status) !== 'all') {
+            $query->where('status', strtoupper($status));
         }
 
         return $query->latest()->limit(18)->get();
@@ -49,8 +49,8 @@ class EloquentCustomerRepository implements CustomerRepositoryInterface
             });
         }
 
-        if ($status && $status !== 'all') {
-            $query->where('status', $status);
+        if ($status && strtolower($status) !== 'all') {
+            $query->where('status', strtoupper($status));
         }
 
         return $query->latest()->paginate($perPage)->withQueryString();
