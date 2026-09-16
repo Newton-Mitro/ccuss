@@ -15,14 +15,17 @@ class AuditLogController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 18);
+        $organizationId = $request->attributes->get('active_organization')->id;
 
         $audits = AuditLog::query()
             ->with('user')
+            ->where('organization_id', $organizationId)
             ->when($request->event, fn($q) => $q->where('event', $request->event))
             ->when($request->user_id, fn($q) => $q->where('user_id', $request->user_id))
             ->whereIn('id', function ($query) {
                 $query->selectRaw('MAX(id)')
                     ->from('audit_logs')
+                    ->where('organization_id', request()->attributes->get('active_organization')->id)
                     ->groupBy('batch_id');
             })
             ->orderBy('created_at', 'desc')
@@ -53,6 +56,8 @@ class AuditLogController extends Controller
             ->join('audit_logs as b', 'b.batch_id', '=', 'a.batch_id')
             ->where('b.auditable_type', $validated['type'])
             ->where('b.auditable_id', $validated['id'])
+            ->where('a.organization_id', $request->attributes->get('active_organization')->id)
+            ->where('b.organization_id', $request->attributes->get('active_organization')->id)
             ->with('user')
             ->orderBy('a.created_at')
             ->get()
@@ -70,9 +75,10 @@ class AuditLogController extends Controller
     /**
      * Single audit batch (deep dive / modal view)
      */
-    public function batch(string $batchId)
+    public function batch(Request $request, string $batchId)
     {
         $audits = AuditLog::where('batch_id', $batchId)
+            ->where('organization_id', $request->attributes->get('active_organization')->id)
             ->with('user')
             ->orderBy('created_at')
             ->get();

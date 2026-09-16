@@ -46,6 +46,7 @@ trait Auditable
             'auditable_type' => get_class($this),
             'auditable_id' => $this->getKey(),
             'user_id' => auth()->id(),
+            'organization_id' => $this->auditOrganizationId(),
             'event' => $event,
             'old_values' => $old,
             'new_values' => $new,
@@ -53,6 +54,19 @@ trait Auditable
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
         ]);
+    }
+
+    protected function auditOrganizationId(): ?int
+    {
+        $activeOrganization = request()->attributes->get('active_organization');
+        $branchOrganizationId = method_exists($this, 'branch')
+            ? $this->branch?->organization_id
+            : null;
+
+        return $activeOrganization?->id
+            ?? auth()->user()?->organization_id
+            ?? $this->organization_id
+            ?? $branchOrganizationId;
     }
 
     public function audits()
