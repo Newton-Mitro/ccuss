@@ -5,7 +5,6 @@ namespace App\SystemAdministration\Controllers;
 use App\Http\Controllers\Controller;
 use App\SystemAdministration\Application\BranchService;
 use App\SystemAdministration\Models\Branch;
-use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Requests\StoreBranchRequest;
 use App\SystemAdministration\Requests\UpdateBranchRequest;
 use Illuminate\Http\Request;
@@ -21,7 +20,10 @@ class BranchController extends Controller
 
     public function index(Request $request): Response
     {
-        $query = Branch::query();
+        $query = Branch::query()->where(
+            'organization_id',
+            $request->attributes->get('active_organization')->id,
+        );
 
         // ✅ Optional search filter
         if ($search = $request->input('search')) {
@@ -43,7 +45,7 @@ class BranchController extends Controller
     public function create(Request $request): Response
     {
         return Inertia::render('system-administration/branches/create', [
-            'organization' => Organization::query()->firstOrFail(),
+            'organization' => $request->attributes->get('active_organization'),
         ]);
     }
 
@@ -51,7 +53,7 @@ class BranchController extends Controller
     {
         try {
             $data = $request->validated();
-            $data['organization_id'] = Organization::query()->firstOrFail()->id;
+            $data['organization_id'] = $request->attributes->get('active_organization')->id;
             $branch = $this->branchService->createBranch($data);
         } catch (\InvalidArgumentException | \RuntimeException $e) {
             return back()->withInput()->with('error', $e->getMessage());
@@ -64,6 +66,8 @@ class BranchController extends Controller
 
     public function show(Branch $branch): Response
     {
+        $this->authorizeOrganization($branch);
+
         return Inertia::render('system-administration/branches/show', [
             'branch' => $branch->load(['manager', 'organization']),
         ]);
@@ -71,6 +75,8 @@ class BranchController extends Controller
 
     public function edit(Branch $branch): Response
     {
+        $this->authorizeOrganization($branch);
+
         return Inertia::render('system-administration/branches/edit', [
             'branch' => $branch->load(['manager', 'organization']),
         ]);
@@ -78,6 +84,8 @@ class BranchController extends Controller
 
     public function update(UpdateBranchRequest $request, Branch $branch)
     {
+        $this->authorizeOrganization($branch);
+
         try {
             $branch = $this->branchService->updateBranch($branch, $request->validated());
         } catch (\InvalidArgumentException | \RuntimeException $e) {
@@ -91,10 +99,20 @@ class BranchController extends Controller
 
     public function destroy(Branch $branch)
     {
+        $this->authorizeOrganization($branch);
+
         $this->branchService->deleteBranch($branch);
 
         return redirect()
             ->route('organizations.show', $branch->organization_id)
             ->with('success', $branch->name . ' Branch deleted successfully.');
+    }
+
+    private function authorizeOrganization(Branch $branch): void
+    {
+        abort_unless(
+            $branch->organization_id === request()->attributes->get('active_organization')->id,
+            404,
+        );
     }
 }

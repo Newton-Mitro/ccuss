@@ -17,9 +17,20 @@ class EnsureActiveOrganization
 
         $activeOrganizationId = $request->session()->get('active_organization_id');
 
-        if (!$activeOrganizationId || !Organization::query()->whereKey($activeOrganizationId)->exists()) {
+        $hasAccess = $activeOrganizationId && (
+            $request->user()->organizations()->whereKey($activeOrganizationId)->exists()
+            || $request->user()->organization_id === (int) $activeOrganizationId
+        );
+
+        if (!$hasAccess) {
+            $request->session()->forget('active_organization_id');
             return redirect()->route('organizations.index');
         }
+
+        $request->attributes->set(
+            'active_organization',
+            Organization::query()->findOrFail($activeOrganizationId),
+        );
 
         return $next($request);
     }

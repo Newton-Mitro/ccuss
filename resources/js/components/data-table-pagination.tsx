@@ -12,7 +12,7 @@ interface Props {
     perPage: number;
     onPerPageChange: (value: number) => void;
     links: LinkItem[];
-    perPageOptions?: number[];
+    perPageOptions?: { value: number; label: number | string }[];
 }
 
 const recordPerPage = [
@@ -23,6 +23,10 @@ const recordPerPage = [
     {
         value: 10,
         label: 10,
+    },
+    {
+        value: 18,
+        label: 18,
     },
     {
         value: 25,

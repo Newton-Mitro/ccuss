@@ -9,12 +9,12 @@ use App\TreasuryAndCashModule\Controllers\TellerTransactionController;
 use App\TreasuryAndCashModule\Controllers\VaultController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::resource('vaults', VaultController::class);
     Route::resource('tellers', TellerController::class);
 });
 
-Route::middleware(['auth', 'verified'])->prefix('teller-sessions')->name('teller-sessions.')->group(function () {
+Route::middleware(['auth', 'verified', 'organization'])->prefix('teller-sessions')->name('teller-sessions.')->group(function () {
     Route::get('/', [TellerSessionController::class, 'index'])->name('index');
     Route::get('/create', [TellerSessionController::class, 'create'])->name('create');
     Route::post('/', [TellerSessionController::class, 'store'])->name('store');
@@ -23,7 +23,7 @@ Route::middleware(['auth', 'verified'])->prefix('teller-sessions')->name('teller
     Route::post('/close/{tellerSession}', [TellerSessionController::class, 'close'])->name('close');
 });
 
-Route::middleware(['auth', 'verified'])->prefix('branch-days')->name('branch-days.')->group(function () {
+Route::middleware(['auth', 'verified', 'organization'])->prefix('branch-days')->name('branch-days.')->group(function () {
     Route::get('/', [BranchDayController::class, 'index'])->name('index');
     Route::get('/create', [BranchDayController::class, 'create'])->name('create'); // Move this up
     Route::get('/{branchDay}', [BranchDayController::class, 'show'])->name('show');

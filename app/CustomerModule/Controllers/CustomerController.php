@@ -5,7 +5,6 @@ namespace App\CustomerModule\Controllers;
 use App\CustomerModule\Application\CustomerService;
 use App\CustomerModule\Models\Customer;
 use App\CustomerModule\Requests\StoreCustomerRequest;
-use App\SystemAdministration\Models\Organization;
 use App\CustomerModule\Requests\UpdateCustomerRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
@@ -61,7 +60,7 @@ class CustomerController extends Controller
     public function store(StoreCustomerRequest $request): RedirectResponse
     {
         $data = $request->validated();
-        $data['organization_id'] = Organization::query()->value('id');
+        $data['organization_id'] = $request->attributes->get('active_organization')->id;
         $data['branch_id'] = auth()->user()->branch_id;
 
         try {
@@ -79,6 +78,8 @@ class CustomerController extends Controller
 
     public function show(Customer $customer): Response
     {
+        $this->authorizeOrganization($customer);
+
         $customer->load([
             'photo',
             'addresses',
@@ -97,6 +98,8 @@ class CustomerController extends Controller
 
     public function edit(Customer $customer): Response
     {
+        $this->authorizeOrganization($customer);
+
         $customer->load(['photo', 'kycProfile', 'kycDocuments']);
 
         return Inertia::render('customer-kyc/customers/edit_customer_page', [
@@ -106,6 +109,8 @@ class CustomerController extends Controller
 
     public function update(UpdateCustomerRequest $request, Customer $customer): RedirectResponse
     {
+        $this->authorizeOrganization($customer);
+
         $data = $request->validated();
 
         try {
@@ -124,9 +129,19 @@ class CustomerController extends Controller
 
     public function destroy(Customer $customer): RedirectResponse
     {
+        $this->authorizeOrganization($customer);
+
         $this->customerService->deleteCustomer($customer);
 
         return redirect()->route('customers.index')
             ->with('success', 'Customer ' . $customer->name . ' deleted successfully.');
+    }
+
+    private function authorizeOrganization(Customer $customer): void
+    {
+        abort_unless(
+            $customer->organization_id === request()->attributes->get('active_organization')->id,
+            404,
+        );
     }
 }

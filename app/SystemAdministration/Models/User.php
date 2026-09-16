@@ -4,7 +4,9 @@ namespace App\SystemAdministration\Models;
 
 use App\SystemAdministration\Traits\Auditable;
 use App\Support\Traits\UppercaseEnumAttributes;
+use App\SystemAdministration\Models\Organization;
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -24,6 +26,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected array $uppercaseEnumAttributes = ['status'];
 
     protected $fillable = [
+        'organization_id',
         'branch_id',
         'customer_id',
         'name',
@@ -57,12 +60,23 @@ class User extends Authenticatable implements MustVerifyEmail
     /*
     |--------------------------------------------------------------------------
     | Relationships
+
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
+    }
     |--------------------------------------------------------------------------
     */
 
     public function branch()
     {
         return $this->belongsTo(Branch::class);
+    }
+
+    public function organizations(): BelongsToMany
+    {
+        return $this->belongsToMany(Organization::class, 'organization_user')
+            ->withTimestamps();
     }
 
     public function roles(): BelongsToMany

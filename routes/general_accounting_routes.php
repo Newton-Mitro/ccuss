@@ -7,7 +7,7 @@ use App\GeneralAccounting\Controllers\LedgerAccountController;
 use Illuminate\Support\Facades\Route;
 
 // Fiscal Years
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::resource('fiscal-years', FiscalYearController::class)
         ->names([
             'index' => 'fiscal-years.index',

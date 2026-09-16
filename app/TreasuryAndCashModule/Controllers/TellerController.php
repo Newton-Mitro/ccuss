@@ -7,7 +7,6 @@ use App\SubledgerModule\Models\Subledger;
 use App\SubledgerModule\Models\SubledgerAccount;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\User;
-use App\SystemAdministration\Models\Organization;
 use App\TreasuryAndCashModule\Models\Teller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -76,7 +75,7 @@ class TellerController extends Controller
 
     public function store(Request $request)
     {
-        $organizationId = Organization::query()->value('id');
+        $organizationId = $request->attributes->get('active_organization')->id;
         $data = $request->validate([
             'branch_id' => 'required|exists:branches,id',
             'name' => 'required|string|max:255',

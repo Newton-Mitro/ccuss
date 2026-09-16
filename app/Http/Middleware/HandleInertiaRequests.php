@@ -4,7 +4,6 @@ namespace App\Http\Middleware;
 
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
-use App\SystemAdministration\Models\Organization;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -53,11 +52,14 @@ class HandleInertiaRequests extends Middleware
             ],
             'organization' => [
                 'activeId' => $request->session()->get('active_organization_id'),
-                'active' => fn() => ($id = $request->session()->get('active_organization_id'))
-                    ? Organization::query()->find($id)
-                    : null,
+                'active' => fn() => $request->user()?->organizations()
+                    ->whereKey($request->session()->get('active_organization_id'))
+                    ->first()
+                    ?? ($request->user()?->organization_id
+                        ? $request->user()->organization
+                        : null),
                 'available' => fn() => $request->user()
-                    ? Organization::query()->orderBy('name')->get()
+                    ? $request->user()->organizations()->orderBy('name')->get()
                     : [],
             ],
             'flash' => [

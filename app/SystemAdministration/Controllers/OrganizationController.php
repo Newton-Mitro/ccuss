@@ -17,12 +17,34 @@ class OrganizationController extends Controller
     ) {
     }
 
+    public function switchOrganization(Request $request)
+    {
+        $validated = $request->validate([
+            'organization_id' => ['required', 'integer', 'exists:organizations,id'],
+        ]);
+
+        abort_unless(
+            $request->user()->organizations()->whereKey($validated['organization_id'])->exists()
+            || $request->user()->organization_id === (int) $validated['organization_id'],
+            403,
+        );
+
+        $request->session()->put('active_organization_id', $validated['organization_id']);
+
+        return redirect()->back()->with('success', 'Organization context switched successfully.');
+        // return redirect()->intended(route('dashboard'));
+    }
+
     /**
      * Display list
      */
     public function index(Request $request)
     {
         $organizations = Organization::query()
+            ->where(function ($query) use ($request) {
+                $query->whereHas('users', fn($users) => $users->whereKey($request->user()->id))
+                    ->orWhereKey($request->user()->organization_id);
+            })
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
@@ -66,6 +88,7 @@ class OrganizationController extends Controller
         }
 
         $request->session()->put('active_organization_id', $organization->id);
+        $request->user()->organizations()->syncWithoutDetaching([$organization->id]);
 
         return redirect()
             ->route('dashboard')
@@ -77,6 +100,8 @@ class OrganizationController extends Controller
      */
     public function show(Organization $organization)
     {
+        $this->authorizeAccess(request(), $organization);
+
         return Inertia::render('system-administration/organizations/show', [
             'organization' => $organization->load('branches.manager'),
         ]);
@@ -87,6 +112,8 @@ class OrganizationController extends Controller
      */
     public function edit(Organization $organization)
     {
+        $this->authorizeAccess(request(), $organization);
+
         return Inertia::render('system-administration/organizations/edit', [
             'organization' => $organization,
         ]);
@@ -97,6 +124,8 @@ class OrganizationController extends Controller
      */
     public function update(UpdateOrganizationRequest $request, Organization $organization)
     {
+        $this->authorizeAccess($request, $organization);
+
         $data = $request->validated();
 
         try {
@@ -119,10 +148,21 @@ class OrganizationController extends Controller
      */
     public function destroy(Organization $organization)
     {
+        $this->authorizeAccess(request(), $organization);
+
         $this->organizationService->deleteOrganization($organization);
 
         return redirect()
             ->route('organizations.index')
             ->with('success', $organization->name . ' Organization deleted!');
+    }
+
+    private function authorizeAccess(Request $request, Organization $organization): void
+    {
+        abort_unless(
+            $request->user()->organizations()->whereKey($organization->id)->exists()
+            || $request->user()->organization_id === $organization->id,
+            403,
+        );
     }
 }

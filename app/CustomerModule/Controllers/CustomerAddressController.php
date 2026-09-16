@@ -30,6 +30,10 @@ class CustomerAddressController extends Controller
         $query = CustomerAddress::query()
             ->with('customer')
             ->where('verification_status', CustomerAddress::STATUS_PENDING)
+            ->whereHas('customer', fn($customerQuery) => $customerQuery->where(
+                'organization_id',
+                $request->attributes->get('active_organization')->id,
+            ))
             ->when($customer, fn($query) => $query->where('customer_id', $customer->id));
 
         if ($search = $request->string('search')->toString()) {
@@ -54,6 +58,10 @@ class CustomerAddressController extends Controller
     public function show(Customer $customer, CustomerAddress $address): Response
     {
         abort_unless($address->customer_id === $customer->id, 404);
+        abort_unless(
+            $customer->organization_id === request()->attributes->get('active_organization')->id,
+            404,
+        );
         $address->load(['customer', 'customer.photo']);
 
         return Inertia::render('customer-kyc/addresses/show_address_page', [

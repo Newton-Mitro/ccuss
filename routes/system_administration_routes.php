@@ -4,12 +4,11 @@ use App\SystemAdministration\Controllers\AuditLogController;
 use App\SystemAdministration\Controllers\BranchController;
 use App\SystemAdministration\Controllers\DatabaseBackupController;
 use App\SystemAdministration\Controllers\OrganizationController;
-use App\SystemAdministration\Controllers\OrganizationContextController;
 use App\SystemAdministration\Controllers\RolePermissionController;
 use App\SystemAdministration\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'verified'])->prefix('users')->name('users.')->group(function () {
+Route::middleware(['auth', 'verified', 'organization'])->prefix('users')->name('users.')->group(function () {
     Route::get('/search', [UserController::class, 'searchUsers'])
         ->middleware('permission:users.search')
         ->name('search');
@@ -46,8 +45,8 @@ Route::middleware(['auth', 'verified'])->prefix('roles')->name('roles.')->group(
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::post('organization/select', [OrganizationContextController::class, 'store'])
-        ->name('organizations.select.store');
+    Route::post('organization/switch', [OrganizationController::class, 'switchOrganization'])
+        ->name('organizations.switch');
 
     Route::resource('organizations', OrganizationController::class)
         ->only(['index', 'create', 'store', 'show', 'edit', 'update'])
@@ -55,7 +54,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middlewareFor(['edit', 'update'], 'permission:organizations.update');
 });
 
-Route::middleware(['auth', 'verified'])->prefix('organizations')
+Route::middleware(['auth', 'verified', 'organization'])->prefix('organizations')
     ->group(function () {
         Route::resource('branches', BranchController::class)
             ->middlewareFor(['index', 'show'], 'permission:branches.view')
@@ -64,7 +63,7 @@ Route::middleware(['auth', 'verified'])->prefix('organizations')
             ->middlewareFor('destroy', 'permission:branches.delete');
     });
 
-Route::prefix('audits')->middleware(['auth', 'verified'])->group(function () {
+Route::prefix('audits')->middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/', [AuditLogController::class, 'index'])
         ->middleware('permission:activity_logs.view')
         ->name('audits.index');

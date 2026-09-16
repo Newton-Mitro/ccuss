@@ -38,6 +38,10 @@ class UserService
 
         $user = $this->userRepository->create($data);
 
+        if (!empty($data['organization_id'])) {
+            $user->organizations()->syncWithoutDetaching([$data['organization_id']]);
+        }
+
         if (!empty($data['roles']) && is_array($data['roles'])) {
             $user->roles()->sync($data['roles']);
         }
@@ -68,6 +72,10 @@ class UserService
         }
 
         $updated = $this->userRepository->update($user, $data);
+
+        if (!empty($data['organization_id'])) {
+            $updated->organizations()->syncWithoutDetaching([$data['organization_id']]);
+        }
 
         if (isset($data['roles']) && is_array($data['roles'])) {
             $updated->roles()->sync($data['roles']);

@@ -5,7 +5,7 @@ use App\SubledgerModule\Controllers\SubledgerController;
 use Illuminate\Support\Facades\Route;
 
 
-Route::middleware(['auth', 'verified'])
+Route::middleware(['auth', 'verified', 'organization'])
     ->group(function () {
         Route::resource('subledgers', SubledgerController::class);
         Route::resource('subledger-accounts', SubledgerAccountController::class);

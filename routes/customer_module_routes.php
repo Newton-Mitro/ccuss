@@ -7,7 +7,7 @@ use App\CustomerModule\Controllers\CustomerIntroducerController;
 use App\CustomerModule\Controllers\KycDocumentController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'organization'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
@@ -29,7 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 
-Route::middleware(['auth', 'verified'])
+Route::middleware(['auth', 'verified', 'organization'])
     ->prefix('customers')
     ->name('customers.')
     ->group(function () {

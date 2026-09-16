@@ -12,7 +12,7 @@ class EloquentCustomerRepository implements CustomerRepositoryInterface
 {
     public function query(): Builder
     {
-        return Customer::query();
+        return $this->scopeToOrganization(Customer::query());
     }
 
     public function search(string|null $search, string|null $status = null): Collection
@@ -21,7 +21,7 @@ class EloquentCustomerRepository implements CustomerRepositoryInterface
             return new Collection();
         }
 
-        $query = Customer::with(['photo', 'kycProfile'])
+        $query = $this->scopeToOrganization(Customer::with(['photo', 'kycProfile']))
             ->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('customer_no', 'like', "%{$search}%")
@@ -38,7 +38,7 @@ class EloquentCustomerRepository implements CustomerRepositoryInterface
 
     public function paginate(string|null $search, string|null $status = null, int $perPage = 18): LengthAwarePaginator
     {
-        $query = Customer::with(['photo', 'kycProfile']);
+        $query = $this->scopeToOrganization(Customer::with(['photo', 'kycProfile']));
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -75,22 +75,34 @@ class EloquentCustomerRepository implements CustomerRepositoryInterface
 
     public function existsDuplicate(array $data, ?int $excludeId = null): bool
     {
-        $query = Customer::query()->where(function ($q) use ($data) {
-            $q->where('identification_number', $data['identification_number']);
+        $query = $this->scopeToOrganization(Customer::query())
+            ->where(function ($q) use ($data) {
+                $q->where('identification_number', $data['identification_number']);
 
-            if (!empty($data['primary_email'])) {
-                $q->orWhere('primary_email', $data['primary_email']);
-            }
+                if (!empty($data['primary_email'])) {
+                    $q->orWhere('primary_email', $data['primary_email']);
+                }
 
-            if (!empty($data['primary_phone'])) {
-                $q->orWhere('primary_phone', $data['primary_phone']);
-            }
-        });
+                if (!empty($data['primary_phone'])) {
+                    $q->orWhere('primary_phone', $data['primary_phone']);
+                }
+            });
 
         if ($excludeId) {
             $query->where('id', '!=', $excludeId);
         }
 
         return $query->exists();
+    }
+
+    private function scopeToOrganization(Builder $query): Builder
+    {
+        $organization = request()->attributes->get('active_organization');
+
+        if ($organization) {
+            $query->where('organization_id', $organization->id);
+        }
+
+        return $query;
     }
 }

@@ -6,7 +6,6 @@ use App\BankCashModule\Models\BankAccount;
 use App\Http\Controllers\Controller;
 use App\SubledgerModule\Models\Subledger;
 use App\SubledgerModule\Models\SubledgerAccount;
-use App\SystemAdministration\Models\Organization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -57,7 +56,7 @@ class BankAccountController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
-        $organizationId = Organization::query()->value('id');
+        $organizationId = $request->attributes->get('active_organization')->id;
 
         $data = $request->validate([
             // account layer

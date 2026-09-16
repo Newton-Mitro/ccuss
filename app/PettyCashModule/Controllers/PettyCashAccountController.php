@@ -9,7 +9,6 @@ use App\SubledgerModule\Models\Subledger;
 use App\SubledgerModule\Models\SubledgerAccount;
 use Illuminate\Support\Facades\DB;
 use App\SystemAdministration\Models\Branch;
-use App\SystemAdministration\Models\Organization;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -72,7 +71,7 @@ class PettyCashAccountController extends Controller
 
     public function store(Request $request)
     {
-        $organizationId = Organization::query()->value('id');
+        $organizationId = $request->attributes->get('active_organization')->id;
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'branch_id' => 'required|exists:branches,id',

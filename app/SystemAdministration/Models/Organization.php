@@ -7,6 +7,7 @@ use Database\Factories\OrganizationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Storage;
 
 class Organization extends Model
@@ -52,6 +53,12 @@ class Organization extends Model
     public function branches()
     {
         return $this->hasMany(Branch::class);
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'organization_user')
+            ->withTimestamps();
     }
 
     /*

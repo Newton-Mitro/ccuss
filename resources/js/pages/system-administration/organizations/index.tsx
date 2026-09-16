@@ -12,6 +12,7 @@ import {
     Pencil,
     Plus,
     SwitchCamera,
+    TriangleAlert,
 } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
@@ -22,6 +23,7 @@ import { Input } from '../../../components/ui/input';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
+import { cn } from '../../../lib/utils';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Organization } from '../../../types/organization';
 
@@ -50,7 +52,7 @@ export default function Index() {
 
     useEffect(() => {
         const handleSearch = () => {
-            get('/organizations', {
+            get(route('organizations.index'), {
                 preserveState: true,
                 replace: true,
             });
@@ -77,7 +79,7 @@ export default function Index() {
             .then((result) => {
                 if (result.isConfirmed) {
                     router.post(
-                        route('organizations.select.store'),
+                        route('organizations.switch'),
                         { organization_id: organization.id },
                         { preserveScroll: true },
                     );
@@ -100,24 +102,45 @@ export default function Index() {
                         title="Organizations"
                         description="Choose the workspace you want to use, or create a new organization."
                     />
-                    <Button asChild>
-                        <Link href={route('organizations.create')}>
-                            <Plus className="h-4 w-4" />
-                            Create organization
-                        </Link>
-                    </Button>
-                </div>
 
-                <div className="flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
-                    <Building2 className="h-5 w-5 shrink-0 text-primary" />
-                    <div className="min-w-0">
-                        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                            Active organization
-                        </p>
-                        <p className="truncate font-medium">
-                            {props.organization.active?.name ||
-                                'No organization selected'}
-                        </p>
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                        <div
+                            className={cn(
+                                'flex items-center gap-3 rounded-lg border px-4 py-1',
+                                props.organization.active
+                                    ? 'border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400'
+                                    : 'border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400',
+                            )}
+                        >
+                            {props.organization.active ? (
+                                <Building2 className="h-5 w-5 shrink-0" />
+                            ) : (
+                                <TriangleAlert className="h-5 w-5 shrink-0" />
+                            )}
+
+                            <div className="min-w-0">
+                                <p className="text-xs font-medium tracking-wide uppercase opacity-70">
+                                    Active organization
+                                </p>
+
+                                <p className="truncate font-medium">
+                                    {props.organization.active?.name ||
+                                        'No organization selected'}
+                                </p>
+
+                                {props.organization.active?.code && (
+                                    <p className="mt-0.5 text-xs opacity-70">
+                                        {props.organization.active.code}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                        <Button asChild>
+                            <Link href={route('organizations.create')}>
+                                <Plus className="h-4 w-4" />
+                                Create organization
+                            </Link>
+                        </Button>
                     </div>
                 </div>
 
@@ -311,8 +334,8 @@ export default function Index() {
 
                 {/* Pagination */}
                 <DataTablePagination
-                    perPage={data.per_page}
-                    onPerPageChange={function (value: number): void {
+                    perPage={organizations.per_page}
+                    onPerPageChange={(value: number) => {
                         setData('per_page', value);
                         setData('page', 1);
                     }}

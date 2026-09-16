@@ -8,7 +8,6 @@ use App\PettyCashModule\Models\PettyCashAccount;
 use App\SubledgerModule\Models\Subledger;
 use App\SubledgerModule\Models\SubledgerAccount;
 use App\SystemAdministration\Models\User;
-use App\SystemAdministration\Models\Organization;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -91,7 +90,7 @@ class PettyCashAdvanceAccountController extends Controller
             abort(403);
         }
 
-        $organizationId = Organization::query()->value('id');
+        $organizationId = $request->attributes->get('active_organization')->id;
 
         $advance = DB::transaction(function () use ($data, $organizationId, $subledger, $employee) {
 

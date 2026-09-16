@@ -4,7 +4,7 @@ use App\ChequeManagement\Controllers\ChequeBookController;
 use App\ChequeManagement\Controllers\ChequeController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::resource('cheque-books', ChequeBookController::class);
     Route::resource('cheques', ChequeController::class);
 

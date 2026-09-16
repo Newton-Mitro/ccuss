@@ -28,7 +28,7 @@ export function OrganizationSwitcher() {
 
     const selectOrganization = (value: string) => {
         router.post(
-            route('organizations.select.store'),
+            route('organizations.switch'),
             { organization_id: Number(value) },
             { preserveScroll: true },
         );
