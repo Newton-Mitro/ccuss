@@ -30,7 +30,7 @@ class UserController extends Controller
             return response()->json(['data' => []]);
         }
 
-        $users = User::with('branch')
+        $users = $this->organizationUsers($request)->with('branch')
             ->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%");
@@ -50,7 +50,7 @@ class UserController extends Controller
         $filters = $request->only(['search', 'per_page', 'page']);
         $perPage = $filters['per_page'] ?? 18;
 
-        $users = User::with('branch')
+        $users = $this->organizationUsers($request)->with('branch')
             ->when($filters['search'] ?? null, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
@@ -70,11 +70,11 @@ class UserController extends Controller
     /* ==========================
      * CREATE
      * ========================== */
-    public function create()
+    public function create(Request $request)
     {
         return Inertia::render('system-administration/users/user-form-page', [
             'roles' => Role::all(),
-            'branches' => Branch::all(),
+            'branches' => $this->organizationBranches($request)->get(),
         ]);
     }
 
@@ -84,6 +84,11 @@ class UserController extends Controller
     public function store(StoreUserRequest $request)
     {
         $validated = $request->validated();
+        $validated['organization_id'] = $this->activeOrganizationId($request);
+        $this->ensureBranchBelongsToOrganization(
+            isset($validated['branch_id']) ? (int) $validated['branch_id'] : null,
+            $request,
+        );
 
         try {
             $user = $this->userService->createUser(
@@ -103,6 +108,8 @@ class UserController extends Controller
      * ========================== */
     public function show(User $user)
     {
+        $this->authorizeOrganization($user, request());
+
         $user->load(['branch', 'roles.permissions']);
 
         return Inertia::render(
@@ -116,6 +123,8 @@ class UserController extends Controller
      * ========================== */
     public function edit(User $user)
     {
+        $this->authorizeOrganization($user, request());
+
         // Fetch all roles with their assigned permissions
         $roles = Role::with('permissions')->get();
 
@@ -125,7 +134,7 @@ class UserController extends Controller
         return Inertia::render('system-administration/users/user-form-page', [
             'user' => $user->load('roles'),
             'roles' => $roles,
-            'branches' => Branch::all(),
+            'branches' => $this->organizationBranches(request())->get(),
             'permissions' => $permissions,
         ]);
     }
@@ -136,6 +145,12 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request, User $user)
     {
         $validated = $request->validated();
+        $this->authorizeOrganization($user, $request);
+        $validated['organization_id'] = $this->activeOrganizationId($request);
+        $this->ensureBranchBelongsToOrganization(
+            isset($validated['branch_id']) ? (int) $validated['branch_id'] : null,
+            $request,
+        );
 
         try {
             $user = $this->userService->updateUser(
@@ -156,6 +171,8 @@ class UserController extends Controller
      * ========================== */
     public function destroy(User $user)
     {
+        $this->authorizeOrganization($user, request());
+
         // Delete photo
         if ($user->photo_path) {
             Storage::disk('public')->delete($user->photo_path);
@@ -165,5 +182,37 @@ class UserController extends Controller
 
         return redirect()->route('users.index')
             ->with('success', $user->name . ' User deleted successfully.');
+    }
+
+    private function organizationUsers(Request $request)
+    {
+        return User::query()->where('organization_id', $this->activeOrganizationId($request));
+    }
+
+    private function organizationBranches(Request $request)
+    {
+        return Branch::query()->where('organization_id', $this->activeOrganizationId($request));
+    }
+
+    private function activeOrganizationId(Request $request): int
+    {
+        return (int) $request->attributes->get('active_organization')->id;
+    }
+
+    private function ensureBranchBelongsToOrganization(?int $branchId, Request $request): void
+    {
+        if ($branchId === null) {
+            return;
+        }
+
+        abort_unless(
+            $this->organizationBranches($request)->whereKey($branchId)->exists(),
+            422,
+        );
+    }
+
+    private function authorizeOrganization(User $user, Request $request): void
+    {
+        abort_unless($user->organization_id === $this->activeOrganizationId($request), 404);
     }
 }

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\SystemAdministration\Models\Role;
+use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\User;
 use Database\Seeders\SystemAdministratorRolePermissionSeeder;
 use Illuminate\Database\Eloquent\Model;
@@ -31,6 +32,18 @@ class DatabaseSeeder extends Seeder
                 CustomerSeeder::class,
             ]);
         });
+
+        $organization = Organization::query()
+            ->where('code', 'ORG001')
+            ->firstOrFail();
+
+        $user->forceFill([
+            'organization_id' => $organization->id,
+            'branch_id' => $organization->branches()->oldest('id')->value('id'),
+        ])->save();
+
+        $user->organizations()->syncWithoutDetaching([$organization->id]);
+        $user->branches()->syncWithoutDetaching([$user->branch_id]);
 
         // Assign role
         $roleModels = Role::where('slug', 'system_administrator')->first();

@@ -42,6 +42,10 @@ class UserService
             $user->organizations()->syncWithoutDetaching([$data['organization_id']]);
         }
 
+        if (!empty($data['branch_id'])) {
+            $user->branches()->syncWithoutDetaching([$data['branch_id']]);
+        }
+
         if (!empty($data['roles']) && is_array($data['roles'])) {
             $user->roles()->sync($data['roles']);
         }
@@ -75,6 +79,10 @@ class UserService
 
         if (!empty($data['organization_id'])) {
             $updated->organizations()->syncWithoutDetaching([$data['organization_id']]);
+        }
+
+        if (!empty($data['branch_id'])) {
+            $updated->branches()->syncWithoutDetaching([$data['branch_id']]);
         }
 
         if (isset($data['roles']) && is_array($data['roles'])) {

@@ -54,10 +54,7 @@ class HandleInertiaRequests extends Middleware
                 'activeId' => $request->session()->get('active_organization_id'),
                 'active' => fn() => $request->user()?->organizations()
                     ->whereKey($request->session()->get('active_organization_id'))
-                    ->first()
-                    ?? ($request->user()?->organization_id
-                        ? $request->user()->organization
-                        : null),
+                    ->first(),
                 'available' => fn() => $request->user()
                     ? $request->user()->organizations()->orderBy('name')->get()
                     : [],

@@ -43,7 +43,7 @@ class OrganizationController extends Controller
         $organizations = Organization::query()
             ->where(function ($query) use ($request) {
                 $query->whereHas('users', fn($users) => $users->whereKey($request->user()->id))
-                    ->orWhereKey($request->user()->organization_id);
+                    ->orWhere('organizations.id', $request->user()->organization_id);
             })
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {

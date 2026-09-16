@@ -60,17 +60,23 @@ class User extends Authenticatable implements MustVerifyEmail
     /*
     |--------------------------------------------------------------------------
     | Relationships
+    |--------------------------------------------------------------------------
+    */
 
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
-    |--------------------------------------------------------------------------
-    */
 
     public function branch()
     {
         return $this->belongsTo(Branch::class);
+    }
+
+    public function branches(): BelongsToMany
+    {
+        return $this->belongsToMany(Branch::class, 'branch_user')
+            ->withTimestamps();
     }
 
     public function organizations(): BelongsToMany

@@ -25,3 +25,12 @@ test('users can switch to their primary organization', function () {
 
     expect(session('active_organization_id'))->toBe($user->organization_id);
 });
+
+test('users can load organizations after authentication', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->withoutMiddleware()
+        ->get(route('organizations.index'))
+        ->assertSuccessful();
+});
