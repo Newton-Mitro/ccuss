@@ -84,6 +84,19 @@ class FiscalYearController extends Controller
         return redirect()->route('fiscal-years.index')->with('success', 'Fiscal year deleted successfully.');
     }
 
+    public function closeYear(Request $request, FiscalYear $fiscalYear)
+    {
+        $this->authorizeOrganization($request, $fiscalYear);
+
+        try {
+            $this->fiscalYearService->closeYear($fiscalYear);
+        } catch (\RuntimeException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
+
+        return redirect()->route('fiscal-years.index')->with('success', 'Fiscal year closed successfully.');
+    }
+
     private function organizationQuery(Request $request)
     {
         return FiscalYear::query()->where(

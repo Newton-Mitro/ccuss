@@ -1,5 +1,5 @@
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { Lock, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
@@ -169,9 +169,34 @@ export default function FiscalYearIndex() {
                                                     fy.id,
                                                 )}
                                                 className="text-success"
+                                                title="Edit fiscal year"
                                             >
                                                 <Pencil className="h-5 w-5" />
                                             </Link>
+
+                                            {!fy.is_closed && (
+                                                <button
+                                                    type="button"
+                                                    title="Close fiscal year"
+                                                    disabled={processing}
+                                                    onClick={() =>
+                                                        router.post(
+                                                            route(
+                                                                'fiscal-years.close-year',
+                                                                fy.id,
+                                                            ),
+                                                            {},
+                                                            {
+                                                                preserveScroll: true,
+                                                                preserveState: true,
+                                                            },
+                                                        )
+                                                    }
+                                                    className="text-amber-600 hover:text-amber-700 disabled:opacity-40"
+                                                >
+                                                    <Lock className="h-5 w-5" />
+                                                </button>
+                                            )}
 
                                             <button
                                                 type="button"
@@ -180,6 +205,7 @@ export default function FiscalYearIndex() {
                                                     handleDelete(fy.id, fy.code)
                                                 }
                                                 className="text-destructive hover:text-destructive/80 disabled:opacity-50"
+                                                title="Delete fiscal year"
                                             >
                                                 <Trash2 className="h-5 w-5" />
                                             </button>

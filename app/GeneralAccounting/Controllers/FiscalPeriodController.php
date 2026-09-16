@@ -103,6 +103,32 @@ class FiscalPeriodController extends Controller
         return redirect()->route('fiscal-periods.index')->with('success', 'Fiscal period deleted successfully.');
     }
 
+    public function close(Request $request, FiscalPeriod $fiscalPeriod)
+    {
+        $this->authorizeOrganization($request, $fiscalPeriod);
+
+        try {
+            $this->fiscalPeriodService->close($fiscalPeriod);
+        } catch (\RuntimeException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
+
+        return redirect()->route('fiscal-periods.index')->with('success', 'Fiscal period closed successfully.');
+    }
+
+    public function reopen(Request $request, FiscalPeriod $fiscalPeriod)
+    {
+        $this->authorizeOrganization($request, $fiscalPeriod);
+
+        try {
+            $this->fiscalPeriodService->reopen($fiscalPeriod);
+        } catch (\RuntimeException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
+
+        return redirect()->route('fiscal-periods.index')->with('success', 'Fiscal period reopened successfully.');
+    }
+
     private function organizationFiscalYear(Request $request, int $id): FiscalYear
     {
         return FiscalYear::query()

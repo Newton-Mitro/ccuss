@@ -21,6 +21,9 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
             'destroy' => 'fiscal-years.destroy',
         ]);
 
+    Route::post('/fiscal-years/{fiscal_year}/close-year', [FiscalYearController::class, 'closeYear'])
+        ->name('fiscal-years.close-year');
+
     // Fiscal Periods
     Route::resource('fiscal-periods', FiscalPeriodController::class)
         ->except(['show'])
@@ -32,6 +35,11 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
             'update' => 'fiscal-periods.update',
             'destroy' => 'fiscal-periods.destroy',
         ]);
+
+    Route::post('/fiscal-periods/{fiscal_period}/close', [FiscalPeriodController::class, 'close'])
+        ->name('fiscal-periods.close');
+    Route::post('/fiscal-periods/{fiscal_period}/reopen', [FiscalPeriodController::class, 'reopen'])
+        ->name('fiscal-periods.reopen');
 });
 
 Route::middleware(['auth', 'verified', 'organization'])->group(function () {
@@ -74,6 +82,13 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
         ->name('financial-reports.cash-flow');
     Route::get('/financial-reports/shareholders-equity', [AccountingReportController::class, 'shareholdersEquity'])
         ->name('financial-reports.shareholders-equity');
+
+    Route::get('/opening-balances', [\App\GeneralAccounting\Controllers\OpeningBalanceController::class, 'index'])
+        ->name('opening-balances.index');
+    Route::get('/opening-balances/create', [\App\GeneralAccounting\Controllers\OpeningBalanceController::class, 'create'])
+        ->name('opening-balances.create');
+    Route::post('/opening-balances', [\App\GeneralAccounting\Controllers\OpeningBalanceController::class, 'store'])
+        ->name('opening-balances.store');
 });
 
 

@@ -22,6 +22,7 @@ use App\GeneralAccounting\Infrastructure\Persistence\EloquentFiscalPeriodReposit
 use App\GeneralAccounting\Infrastructure\Persistence\EloquentFiscalYearRepository;
 use App\GeneralAccounting\Infrastructure\Persistence\EloquentLedgerAccountRepository;
 use App\GeneralAccounting\Infrastructure\Persistence\EloquentVoucherRepository;
+use App\GeneralAccounting\Application\OpeningBalanceService;
 use App\SystemAdministration\Application\Contracts\AuditLogRepositoryInterface;
 use App\SystemAdministration\Application\Contracts\BranchRepositoryInterface;
 use App\SystemAdministration\Application\Contracts\DatabaseBackupRepositoryInterface;
@@ -55,6 +56,12 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(AccountGroupRepositoryInterface::class, EloquentAccountGroupRepository::class);
         $this->app->bind(LedgerAccountRepositoryInterface::class, EloquentLedgerAccountRepository::class);
         $this->app->bind(VoucherRepositoryInterface::class, EloquentVoucherRepository::class);
+        $this->app->bind(OpeningBalanceService::class, function ($app) {
+            return new OpeningBalanceService(
+                $app->make(VoucherRepositoryInterface::class),
+                $app->make(\App\GeneralAccounting\Application\VoucherService::class),
+            );
+        });
 
         $this->app->bind(OrganizationRepositoryInterface::class, EloquentOrganizationRepository::class);
         $this->app->bind(BranchRepositoryInterface::class, EloquentBranchRepository::class);
