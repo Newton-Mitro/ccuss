@@ -1,14 +1,16 @@
 <?php
 
-use App\GeneralAccounting\Controllers\AccountingReportController;
+use App\GeneralAccounting\Controllers\AccountGroupController;
 use App\GeneralAccounting\Controllers\FiscalPeriodController;
 use App\GeneralAccounting\Controllers\FiscalYearController;
 use App\GeneralAccounting\Controllers\LedgerAccountController;
+use App\GeneralAccounting\Controllers\VoucherController;
 use Illuminate\Support\Facades\Route;
 
 // Fiscal Years
 Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::resource('fiscal-years', FiscalYearController::class)
+        ->except(['show'])
         ->names([
             'index' => 'fiscal-years.index',
             'create' => 'fiscal-years.create',
@@ -20,6 +22,7 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
 
     // Fiscal Periods
     Route::resource('fiscal-periods', FiscalPeriodController::class)
+        ->except(['show'])
         ->names([
             'index' => 'fiscal-periods.index',
             'create' => 'fiscal-periods.create',
@@ -30,19 +33,31 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
         ]);
 });
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('ledger-accounts', LedgerAccountController::class);
-    Route::get('/api/search-ledger', [LedgerAccountController::class, 'ledgerSearch'])->name('ledger-accounts.search');
-    Route::get('/api/get-cash-ledgers', [LedgerAccountController::class, 'cashLedgerList'])->name('ledger-accounts.cash-ledger-list');
+Route::middleware(['auth', 'verified', 'organization'])->group(function () {
+    Route::resource('account-groups', AccountGroupController::class)
+        ->except(['show'])
+        ->names([
+            'index' => 'account-groups.index',
+            'create' => 'account-groups.create',
+            'store' => 'account-groups.store',
+            'edit' => 'account-groups.edit',
+            'update' => 'account-groups.update',
+            'destroy' => 'account-groups.destroy',
+        ]);
+
+    Route::resource('ledger-accounts', LedgerAccountController::class)
+        ->middleware('permission:accounting.coa.view');
+
+    Route::get('/api/search-ledger', [LedgerAccountController::class, 'ledgerSearch'])
+        ->name('ledger-accounts.search');
+
+    Route::get('/vouchers', [VoucherController::class, 'index'])->name('vouchers.index');
+    Route::get('/vouchers/create', [VoucherController::class, 'create'])->name('vouchers.create');
+    Route::post('/vouchers', [VoucherController::class, 'store'])->name('vouchers.store');
+    Route::get('/vouchers/{voucher}', [VoucherController::class, 'show'])->name('vouchers.show');
+    Route::post('/vouchers/{voucher}/post', [VoucherController::class, 'post'])->name('vouchers.post');
 });
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/trial-balance', [AccountingReportController::class, 'trialBalance'])->name('financial-reports.trial-balance');
-    Route::get('/financial-reports/profit-loss', [AccountingReportController::class, 'profitAndLoss'])->name('financial-reports.profit-loss');
-    Route::get('/financial-reports/balance-sheet', [AccountingReportController::class, 'balanceSheet'])->name('financial-reports.balance-sheet');
-    Route::get('/financial-reports/cash-flow', [AccountingReportController::class, 'cashFlow'])->name('financial-reports.cash-flow');
-    Route::get('/financial-reports/shareholders-equity', [AccountingReportController::class, 'shareholdersEquity'])->name('financial-reports.shareholders-equity');
-});
 
 
 

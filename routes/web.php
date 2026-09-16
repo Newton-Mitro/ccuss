@@ -26,5 +26,6 @@ Route::get('/dashboard', [DashboardController::class, 'home'])
 require __DIR__ . '/system_administration_routes.php';
 require __DIR__ . '/settings_routes.php';
 require __DIR__ . '/customer_module_routes.php';
+require __DIR__ . '/general_accounting_routes.php';
 
 

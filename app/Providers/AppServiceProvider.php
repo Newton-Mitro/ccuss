@@ -12,6 +12,16 @@ use App\CustomerModule\Infrastructure\Persistence\EloquentCustomerFamilyRelation
 use App\CustomerModule\Infrastructure\Persistence\EloquentCustomerIntroducerRepository;
 use App\CustomerModule\Infrastructure\Persistence\EloquentCustomerRepository;
 use App\CustomerModule\Infrastructure\Persistence\EloquentKycDocumentRepository;
+use App\GeneralAccounting\Application\Contracts\FiscalPeriodRepositoryInterface;
+use App\GeneralAccounting\Application\Contracts\FiscalYearRepositoryInterface;
+use App\GeneralAccounting\Application\Contracts\AccountGroupRepositoryInterface;
+use App\GeneralAccounting\Application\Contracts\LedgerAccountRepositoryInterface;
+use App\GeneralAccounting\Application\Contracts\VoucherRepositoryInterface;
+use App\GeneralAccounting\Infrastructure\Persistence\EloquentAccountGroupRepository;
+use App\GeneralAccounting\Infrastructure\Persistence\EloquentFiscalPeriodRepository;
+use App\GeneralAccounting\Infrastructure\Persistence\EloquentFiscalYearRepository;
+use App\GeneralAccounting\Infrastructure\Persistence\EloquentLedgerAccountRepository;
+use App\GeneralAccounting\Infrastructure\Persistence\EloquentVoucherRepository;
 use App\SystemAdministration\Application\Contracts\AuditLogRepositoryInterface;
 use App\SystemAdministration\Application\Contracts\BranchRepositoryInterface;
 use App\SystemAdministration\Application\Contracts\DatabaseBackupRepositoryInterface;
@@ -39,6 +49,12 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(CustomerFamilyRelationRepositoryInterface::class, EloquentCustomerFamilyRelationRepository::class);
         $this->app->bind(CustomerIntroducerRepositoryInterface::class, EloquentCustomerIntroducerRepository::class);
         $this->app->bind(KycDocumentRepositoryInterface::class, EloquentKycDocumentRepository::class);
+
+        $this->app->bind(FiscalYearRepositoryInterface::class, EloquentFiscalYearRepository::class);
+        $this->app->bind(FiscalPeriodRepositoryInterface::class, EloquentFiscalPeriodRepository::class);
+        $this->app->bind(AccountGroupRepositoryInterface::class, EloquentAccountGroupRepository::class);
+        $this->app->bind(LedgerAccountRepositoryInterface::class, EloquentLedgerAccountRepository::class);
+        $this->app->bind(VoucherRepositoryInterface::class, EloquentVoucherRepository::class);
 
         $this->app->bind(OrganizationRepositoryInterface::class, EloquentOrganizationRepository::class);
         $this->app->bind(BranchRepositoryInterface::class, EloquentBranchRepository::class);
