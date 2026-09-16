@@ -27,6 +27,12 @@ Route::middleware(['auth', 'verified', 'organization'])->prefix('users')->name('
     Route::post('/{user}/branch', [UserController::class, 'assignBranch'])
         ->middleware('permission:users.update')
         ->name('branch.update');
+    Route::get('/{user}/organization', [UserController::class, 'editOrganization'])
+        ->middleware('permission:users.update')
+        ->name('organization.edit');
+    Route::post('/{user}/organization', [UserController::class, 'assignOrganization'])
+        ->middleware('permission:users.update')
+        ->name('organization.update');
     Route::get('/{user}', [UserController::class, 'show'])
         ->middleware('permission:users.view')
         ->name('show');

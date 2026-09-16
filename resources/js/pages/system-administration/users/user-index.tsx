@@ -5,7 +5,14 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Eye, GitBranch, Pencil, Trash2, UserPlus } from 'lucide-react';
+import {
+    Building2,
+    Eye,
+    GitBranch,
+    Pencil,
+    Trash2,
+    UserPlus,
+} from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
@@ -175,6 +182,23 @@ export default function Index() {
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link
+                                                                href={route(
+                                                                    'users.organization.edit',
+                                                                    u.id,
+                                                                )}
+                                                                className="text-amber-600"
+                                                            >
+                                                                <Building2 className="h-5 w-5" />
+                                                            </Link>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            Assign Organization
+                                                        </TooltipContent>
+                                                    </Tooltip>
+
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Link
                                                                 href={`/users/${u.id}/edit`}
                                                                 className="text-success"
                                                             >
@@ -250,6 +274,15 @@ export default function Index() {
                                     className="text-primary"
                                 >
                                     <GitBranch className="h-5 w-5" />
+                                </Link>
+                                <Link
+                                    href={route(
+                                        'users.organization.edit',
+                                        u.id,
+                                    )}
+                                    className="text-amber-600"
+                                >
+                                    <Building2 className="h-5 w-5" />
                                 </Link>
                                 <Link
                                     href={`/users/${u.id}/edit`}

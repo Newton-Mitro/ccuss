@@ -9,6 +9,7 @@ use App\CustomerModule\Models\KycDocument;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 test('customer service creates a customer and kyc profile', function () {
     $organization = Organization::factory()->create();
@@ -303,4 +304,38 @@ test('kyc document service requires a valid customer and can create and delete d
 
     expect($service->deleteDocument($document))->toBeTrue()
         ->and(KycDocument::find($document->id))->toBeNull();
+});
+
+test('kyc document service replaces document files without allowing customer reassignment', function () {
+    Storage::fake('public');
+    $organization = Organization::factory()->create();
+    $branch = Branch::factory()->create(['organization_id' => $organization->id]);
+    $customer = Customer::factory()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+    ]);
+    $otherCustomer = Customer::factory()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+    ]);
+
+    $service = app(KycDocumentService::class);
+    $document = $service->createDocument(UploadedFile::fake()->image('old.jpg'), [
+        'customer_id' => $customer->id,
+        'document_type' => KycDocument::PASSPORT,
+    ]);
+    $oldPath = $document->file_path;
+
+    $updated = $service->updateDocument($document, [
+        'customer_id' => $otherCustomer->id,
+        'document_type' => KycDocument::NATIONAL_ID,
+        'alt_text' => 'Updated identity document',
+    ], UploadedFile::fake()->image('new.jpg'));
+
+    expect($updated->customer_id)->toBe($customer->id)
+        ->and($updated->document_type)->toBe(KycDocument::NATIONAL_ID)
+        ->and($updated->alt_text)->toBe('Updated identity document')
+        ->and($updated->file_path)->not->toBe($oldPath)
+        ->and(Storage::disk('public')->exists($oldPath))->toBeFalse()
+        ->and(Storage::disk('public')->exists($updated->file_path))->toBeTrue();
 });

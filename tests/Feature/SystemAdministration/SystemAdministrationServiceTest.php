@@ -13,6 +13,7 @@ use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 test('organization service creates and rejects duplicate codes', function () {
@@ -39,6 +40,30 @@ test('organization service creates and rejects duplicate codes', function () {
     ]))->toThrow(RuntimeException::class, 'Organization code already exists.');
 });
 
+test('organization service replaces logos and deletes the old logo', function () {
+    Storage::fake('public');
+    $service = app(OrganizationService::class);
+
+    $organization = $service->createOrganization([
+        'code' => 'ORG-002',
+        'name' => 'Logo Org',
+    ], UploadedFile::fake()->image('old-logo.png'));
+    $oldPath = $organization->logo_path;
+
+    $updated = $service->updateOrganization(
+        $organization,
+        ['code' => 'ORG-002', 'name' => 'Updated Logo Org'],
+        UploadedFile::fake()->image('new-logo.png'),
+    );
+
+    expect($updated->name)->toBe('Updated Logo Org')
+        ->and(Storage::disk('public')->exists($oldPath))->toBeFalse()
+        ->and(Storage::disk('public')->exists($updated->logo_path))->toBeTrue();
+
+    expect($service->deleteOrganization($updated))->toBeTrue()
+        ->and(Storage::disk('public')->exists($updated->logo_path))->toBeFalse();
+});
+
 test('branch service creates branches and rejects duplicate codes per organization', function () {
     $organization = Organization::factory()->create([
         'code' => 'ORG-010',
@@ -63,6 +88,26 @@ test('branch service creates branches and rejects duplicate codes per organizati
         'name' => 'Another Dhaka Branch',
         'address' => 'Mirpur',
     ]))->toThrow(RuntimeException::class, 'Branch code already exists for this organization.');
+});
+
+test('branch service updates and deletes branches', function () {
+    $organization = Organization::factory()->create();
+    $branch = Branch::factory()->create([
+        'organization_id' => $organization->id,
+        'code' => 'BR-UPDATE',
+    ]);
+    $service = app(BranchService::class);
+
+    $updated = $service->updateBranch($branch, [
+        'organization_id' => $organization->id,
+        'code' => 'BR-UPDATED',
+        'name' => 'Updated Branch',
+    ]);
+
+    expect($updated->fresh()->name)->toBe('Updated Branch')
+        ->and($updated->fresh()->code)->toBe('BR-UPDATED')
+        ->and($service->deleteBranch($updated))->toBeTrue()
+        ->and(Branch::find($updated->id))->toBeNull();
 });
 
 test('user service creates users without assigning a branch and rejects duplicate email addresses', function () {
@@ -116,6 +161,37 @@ test('user service update ignores branch assignment and keeps it separate from u
         ->and($updatedUser->email)->toBe('updated@example.com')
         ->and($updatedUser->branch_id)->toBeNull()
         ->and($updatedUser->branches()->count())->toBe(0);
+});
+
+test('user service can assign a user to multiple organizations', function () {
+    $organizationOne = Organization::factory()->create(['code' => 'ORG-100']);
+    $organizationTwo = Organization::factory()->create(['code' => 'ORG-101']);
+
+    $service = app(UserService::class);
+
+    $user = $service->createUser([
+        'organization_id' => $organizationOne->id,
+        'organization_ids' => [$organizationOne->id, $organizationTwo->id],
+        'name' => 'Multi Org User',
+        'email' => 'multi-org@example.com',
+        'password' => 'secret123',
+        'status' => 'active',
+    ]);
+
+    expect($user->organizations()->pluck('organizations.id')->sort()->values()->all())
+        ->toBe([$organizationOne->id, $organizationTwo->id])
+        ->and($user->organization_id)->toBe($organizationOne->id);
+
+    $updatedUser = $service->updateUser($user, [
+        'name' => 'Updated Multi Org User',
+        'email' => 'multi-org-updated@example.com',
+        'organization_id' => $organizationTwo->id,
+        'organization_ids' => [$organizationTwo->id],
+    ]);
+
+    expect($updatedUser->organizations()->pluck('organizations.id')->sort()->values()->all())
+        ->toBe([$organizationTwo->id])
+        ->and($updatedUser->organization_id)->toBe($organizationTwo->id);
 });
 
 test('role permission service syncs the selected permissions to a role', function () {

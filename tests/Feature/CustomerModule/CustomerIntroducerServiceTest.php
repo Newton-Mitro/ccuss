@@ -168,7 +168,37 @@ it('renders the introducer index page when searching by introducer customer name
     ]);
 
     $controller = app(CustomerIntroducerController::class);
-    $response = $controller->index(Request::create('/introducers', 'GET', ['search' => 'Search Introducer']));
+    $request = Request::create('/introducers', 'GET', ['search' => 'Search Introducer']);
+    $request->attributes->set('active_organization', $organization);
+    $response = $controller->index($request);
 
     expect($response)->toBeInstanceOf(\Inertia\Response::class);
+});
+
+it('updates an introducer and rejects duplicate reciprocal relationships', function () {
+    $organization = Organization::factory()->create();
+    $branch = Branch::factory()->create(['organization_id' => $organization->id]);
+    $introduced = Customer::factory()->create(['organization_id' => $organization->id, 'branch_id' => $branch->id]);
+    $introducer = Customer::factory()->create(['organization_id' => $organization->id, 'branch_id' => $branch->id]);
+    $other = Customer::factory()->create(['organization_id' => $organization->id, 'branch_id' => $branch->id]);
+
+    $service = app(CustomerIntroducerService::class);
+    $record = $service->createIntroducer([
+        'introduced_customer_id' => $introduced->id,
+        'introducer_customer_id' => $introducer->id,
+        'relationship_type' => 'friend',
+    ]);
+    $service->createIntroducer([
+        'introduced_customer_id' => $other->id,
+        'introducer_customer_id' => $introducer->id,
+        'relationship_type' => 'friend',
+    ]);
+
+    expect($service->updateIntroducer($record, ['relationship_type' => 'colleague'])->relationship_type)
+        ->toBe('COLLEAGUE');
+
+    expect(fn() => $service->updateIntroducer($record, [
+        'introduced_customer_id' => $introducer->id,
+        'introducer_customer_id' => $other->id,
+    ]))->toThrow(InvalidArgumentException::class, 'This introducer already exists for the customer.');
 });

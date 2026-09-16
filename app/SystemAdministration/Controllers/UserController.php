@@ -5,6 +5,7 @@ namespace App\SystemAdministration\Controllers;
 use App\Http\Controllers\Controller;
 use App\SystemAdministration\Application\UserService;
 use App\SystemAdministration\Models\Branch;
+use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
@@ -74,6 +75,7 @@ class UserController extends Controller
     {
         return Inertia::render('system-administration/users/user-form-page', [
             'roles' => Role::all(),
+            'organizations' => Organization::query()->orderBy('name')->get(),
         ]);
     }
 
@@ -105,6 +107,44 @@ class UserController extends Controller
 
         return redirect()->route('users.index')
             ->with('success', $user->name . ' assigned to the selected branch.');
+    }
+
+    public function editOrganization(User $user, Request $request)
+    {
+        $this->authorizeOrganization($user, $request);
+
+        return Inertia::render('system-administration/users/assign-organization-page', [
+            'user' => $user->load(['organization', 'organizations']),
+            'organizations' => Organization::query()->orderBy('name')->get(),
+        ]);
+    }
+
+    public function assignOrganization(Request $request, User $user)
+    {
+        $this->authorizeOrganization($user, $request);
+
+        $validated = $request->validate([
+            'organization_ids' => ['required', 'array'],
+            'organization_ids.*' => ['integer', 'exists:organizations,id'],
+            'organization_id' => ['nullable', 'integer', 'exists:organizations,id'],
+        ]);
+
+        $organizationIds = array_values(array_unique(array_map('intval', $validated['organization_ids'])));
+
+        if (!empty($organizationIds)) {
+            $primaryOrganizationId = (int) ($validated['organization_id'] ?? $organizationIds[0]);
+            if (!in_array($primaryOrganizationId, $organizationIds, true)) {
+                $primaryOrganizationId = $organizationIds[0];
+            }
+            $user->forceFill(['organization_id' => $primaryOrganizationId])->save();
+        } else {
+            $user->forceFill(['organization_id' => null])->save();
+        }
+
+        $user->organizations()->sync($organizationIds);
+
+        return redirect()->route('users.index')
+            ->with('success', $user->name . ' organization memberships updated.');
     }
 
     /* ==========================
@@ -157,9 +197,10 @@ class UserController extends Controller
         $permissions = Permission::all();
 
         return Inertia::render('system-administration/users/user-form-page', [
-            'user' => $user->load('roles'),
+            'user' => $user->load(['roles', 'organizations']),
             'roles' => $roles,
             'permissions' => $permissions,
+            'organizations' => Organization::query()->orderBy('name')->get(),
         ]);
     }
 
@@ -206,7 +247,12 @@ class UserController extends Controller
 
     private function organizationUsers(Request $request)
     {
-        return User::query()->where('organization_id', $this->activeOrganizationId($request));
+        $organizationId = $this->activeOrganizationId($request);
+
+        return User::query()->where(function ($query) use ($organizationId) {
+            $query->where('organization_id', $organizationId)
+                ->orWhereHas('organizations', fn($q) => $q->where('organizations.id', $organizationId));
+        });
     }
 
     private function organizationBranches(Request $request)
@@ -221,6 +267,12 @@ class UserController extends Controller
 
     private function authorizeOrganization(User $user, Request $request): void
     {
-        abort_unless($user->organization_id === $this->activeOrganizationId($request), 404);
+        $organizationId = $this->activeOrganizationId($request);
+
+        abort_unless(
+            $user->organization_id === $organizationId
+            || $user->organizations()->whereKey($organizationId)->exists(),
+            404,
+        );
     }
 }

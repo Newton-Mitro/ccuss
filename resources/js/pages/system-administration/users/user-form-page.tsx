@@ -7,17 +7,20 @@ import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
+import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
+import { Organization } from '../../../types/organization';
 import { Role, User } from '../../../types/user';
 
 interface UserFormPageProps extends SharedData {
     user?: User;
     roles: Role[];
+    organizations: Organization[];
 }
 
-const UserForm = ({ user, roles, auth }: UserFormPageProps) => {
+const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
     useFlashToastHandler();
 
     const handleBack = () => window.history.back();
@@ -29,6 +32,11 @@ const UserForm = ({ user, roles, auth }: UserFormPageProps) => {
         email: user?.email || '',
         password: '',
         password_confirmation: '',
+        organization_id:
+            user?.organization_id || user?.organizations?.[0]?.id || '',
+        organization_ids:
+            user?.organizations?.map((org) => org.id) ||
+            (user?.organization_id ? [user.organization_id] : []),
         roles: user?.roles?.map((r: any) => r.id) || [],
         photo: null as File | null,
     });
@@ -55,12 +63,46 @@ const UserForm = ({ user, roles, auth }: UserFormPageProps) => {
         }
     };
 
+    const toggleOrganization = (orgId: number) => {
+        const current = Array.isArray(data.organization_ids)
+            ? [...data.organization_ids]
+            : [];
+        const next = current.includes(orgId)
+            ? current.filter((id) => id !== orgId)
+            : [...current, orgId];
+
+        setData('organization_ids', next);
+
+        if (!next.length) {
+            setData('organization_id', '');
+            return;
+        }
+
+        const selectedPrimary = Number(data.organization_id) || next[0];
+        const primaryIsSelected = next.includes(Number(selectedPrimary));
+
+        setData(
+            'organization_id',
+            primaryIsSelected ? selectedPrimary : next[0],
+        );
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
+        const selectedOrgIds = Array.isArray(data.organization_ids)
+            ? [...new Set(data.organization_ids.map(Number).filter(Boolean))]
+            : [];
+        const primaryOrganizationId =
+            Number(data.organization_id) || selectedOrgIds[0] || '';
+
         const payload = new FormData();
 
-        Object.entries(data).forEach(([key, value]) => {
+        Object.entries({
+            ...data,
+            organization_id: primaryOrganizationId,
+            organization_ids: selectedOrgIds,
+        }).forEach(([key, value]) => {
             if (value !== null && value !== undefined) {
                 if (Array.isArray(value)) {
                     value.forEach((v) => payload.append(`${key}[]`, v));
@@ -136,6 +178,63 @@ const UserForm = ({ user, roles, auth }: UserFormPageProps) => {
                 <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
                     {/* LEFT: FORM */}
                     <div className="grid flex-1 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                        <div className="md:col-span-2 xl:col-span-3">
+                            <Label className="text-xs">Organizations</Label>
+                            <div className="mt-1 grid grid-cols-1 gap-2 rounded-md border p-2 md:grid-cols-2 xl:grid-cols-3">
+                                {organizations.map((org) => (
+                                    <label
+                                        key={org.id}
+                                        className="flex items-center gap-2 rounded-md border p-2 text-sm hover:bg-accent/40"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={
+                                                Array.isArray(
+                                                    data.organization_ids,
+                                                ) &&
+                                                data.organization_ids.includes(
+                                                    org.id,
+                                                )
+                                            }
+                                            onChange={() =>
+                                                toggleOrganization(org.id)
+                                            }
+                                        />
+                                        <span>{org.name}</span>
+                                    </label>
+                                ))}
+                            </div>
+                            <InputError message={errors.organization_ids} />
+                        </div>
+
+                        <div>
+                            <Label className="text-xs">
+                                Primary Organization
+                            </Label>
+                            <Select
+                                value={data.organization_id?.toString() || ''}
+                                onChange={(val) =>
+                                    setData('organization_id', Number(val))
+                                }
+                                options={organizations
+                                    .filter(
+                                        (org) =>
+                                            Array.isArray(
+                                                data.organization_ids,
+                                            ) &&
+                                            data.organization_ids.includes(
+                                                org.id,
+                                            ),
+                                    )
+                                    .map((org) => ({
+                                        value: org.id.toString(),
+                                        label: org.name,
+                                    }))}
+                                placeholder="Select primary organization"
+                            />
+                            <InputError message={errors.organization_id} />
+                        </div>
+
                         <div>
                             <Label className="text-xs">Name</Label>
                             <Input

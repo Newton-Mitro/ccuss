@@ -30,6 +30,22 @@ class UserService
 
         unset($data['branch_id']);
 
+        $organizationIds = array_values(array_unique(array_filter(array_map(
+            'intval',
+            (array) ($data['organization_ids'] ?? [])
+        ))));
+
+        if (empty($organizationIds) && !empty($data['organization_id'])) {
+            $organizationIds = [(int) $data['organization_id']];
+        }
+
+        if (!empty($organizationIds)) {
+            $data['organization_id'] = (int) ($data['organization_id'] ?? $organizationIds[0]);
+            if (!in_array((int) $data['organization_id'], $organizationIds, true)) {
+                $data['organization_id'] = $organizationIds[0];
+            }
+        }
+
         if (!empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         }
@@ -40,8 +56,8 @@ class UserService
 
         $user = $this->userRepository->create($data);
 
-        if (!empty($data['organization_id'])) {
-            $user->organizations()->syncWithoutDetaching([$data['organization_id']]);
+        if (!empty($organizationIds)) {
+            $user->organizations()->sync($organizationIds);
         }
 
         if (!empty($data['roles']) && is_array($data['roles'])) {
@@ -61,6 +77,22 @@ class UserService
 
         unset($data['branch_id']);
 
+        $organizationIds = array_values(array_unique(array_filter(array_map(
+            'intval',
+            (array) ($data['organization_ids'] ?? [])
+        ))));
+
+        if (empty($organizationIds) && !empty($data['organization_id'])) {
+            $organizationIds = [(int) $data['organization_id']];
+        }
+
+        if (!empty($organizationIds)) {
+            $data['organization_id'] = (int) ($data['organization_id'] ?? $user->organization_id ?? $organizationIds[0]);
+            if (!in_array((int) $data['organization_id'], $organizationIds, true)) {
+                $data['organization_id'] = $organizationIds[0];
+            }
+        }
+
         if (!empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         } else {
@@ -75,10 +107,13 @@ class UserService
             $data['photo_path'] = $photo->store('uploads/users', 'public');
         }
 
+        unset($data['organization_ids']);
+
         $updated = $this->userRepository->update($user, $data);
 
-        if (!empty($data['organization_id'])) {
-            $updated->organizations()->syncWithoutDetaching([$data['organization_id']]);
+        if (!empty($organizationIds)) {
+            $updated->organizations()->sync($organizationIds);
+            $updated->forceFill(['organization_id' => $data['organization_id']])->save();
         }
 
         if (isset($data['roles']) && is_array($data['roles'])) {
