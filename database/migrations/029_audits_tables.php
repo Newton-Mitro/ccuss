@@ -23,11 +23,13 @@ return new class extends Migration {
             $table->string('user_agent')->nullable();
             $table->timestamps();
             $table->softDeletes();
+            $table->foreignId('organization_id')->nullable()->constrained()->nullOnDelete();
 
             // Indexes
             $table->index(['auditable_type', 'auditable_id'], 'idx_auditable');
             $table->index('user_id', 'idx_user');
             $table->index('event', 'idx_event');
+            $table->index(['organization_id', 'created_at'], 'audit_logs_org_created_at_index');
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
         });
 

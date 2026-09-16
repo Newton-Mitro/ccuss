@@ -123,7 +123,7 @@ export default function ViewAddress({ address }: Props) {
                 </div>
 
                 {/* Verification Actions */}
-                {address.verification_status === 'pending' && (
+                {address.verification_status === 'PENDING' && (
                     <section className="rounded-md border bg-card p-3">
                         <div className="mb-2 flex items-center justify-between gap-3">
                             <div className="min-w-0">
@@ -234,7 +234,7 @@ export default function ViewAddress({ address }: Props) {
                                         {address.customer?.status}
                                     </p>
 
-                                    <p className="break-words">
+                                    <p className="wrap-break-word">
                                         {address.customer?.id} •{' '}
                                         {address.customer?.customer_no} •{' '}
                                         {address.customer?.primary_email} •{' '}

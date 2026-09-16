@@ -62,11 +62,19 @@ trait Auditable
         $branchOrganizationId = method_exists($this, 'branch')
             ? $this->branch?->organization_id
             : null;
+        $relatedOrganizationId = method_exists($this, 'customer')
+            ? $this->customer?->organization_id
+            : null;
+
+        $relatedOrganizationId ??= method_exists($this, 'introducedCustomer')
+            ? $this->introducedCustomer?->organization_id
+            : null;
 
         return $activeOrganization?->id
             ?? auth()->user()?->organization_id
             ?? $this->organization_id
-            ?? $branchOrganizationId;
+            ?? $branchOrganizationId
+            ?? $relatedOrganizationId;
     }
 
     public function audits()

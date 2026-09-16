@@ -166,10 +166,21 @@ return new class extends Migration {
                 'uq_customer_introducer'
             );
         });
+
+        Schema::table('users', function (Blueprint $table): void {
+            $table->foreign('customer_id', 'users_customer_id_foreign')
+                ->references('id')
+                ->on('customers')
+                ->nullOnDelete();
+        });
     }
 
     public function down(): void
     {
+        Schema::table('users', function (Blueprint $table): void {
+            $table->dropForeign('users_customer_id_foreign');
+        });
+
         Schema::dropIfExists('customer_introducers');
         Schema::dropIfExists('kyc_documents');
         Schema::dropIfExists('kyc_profiles');

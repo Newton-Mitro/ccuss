@@ -65,12 +65,12 @@ export default function ShowFamilyRelation() {
 
     const statusClass =
         STATUS_MAP[
-            familyRelation.verification_status as keyof typeof STATUS_MAP
+            familyRelation.verification_status.toLowerCase() as keyof typeof STATUS_MAP
         ]?.class ?? 'bg-muted text-muted-foreground';
 
     const statusLabel =
         STATUS_MAP[
-            familyRelation.verification_status as keyof typeof STATUS_MAP
+            familyRelation.verification_status.toLowerCase() as keyof typeof STATUS_MAP
         ]?.label ?? 'Unknown';
 
     // ✅ Actions for pending verification
@@ -270,7 +270,7 @@ export default function ShowFamilyRelation() {
                             </p>
                             <div className="mt-3 flex flex-col gap-2">
                                 {familyRelation.verification_status ===
-                                    'pending' && (
+                                    'PENDING' && (
                                     <>
                                         <div className="">
                                             <Input
@@ -307,7 +307,7 @@ export default function ShowFamilyRelation() {
                                     </>
                                 )}
                                 {familyRelation.verification_status !==
-                                    'pending' && (
+                                    'PENDING' && (
                                     <Badge
                                         className={`rounded px-2 py-1 text-xs ${statusClass}`}
                                     >

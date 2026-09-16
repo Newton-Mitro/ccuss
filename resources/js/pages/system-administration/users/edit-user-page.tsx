@@ -16,7 +16,6 @@ import {
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
-import { Branch } from '../../../types/branch';
 import { Organization } from '../../../types/organization';
 import { Permission, Role, User } from '../../../types/user';
 
@@ -24,7 +23,6 @@ interface UserFormPageProps extends SharedData {
     user?: User;
     roles: Role[];
     organizations: Organization[];
-    branches: Branch[];
     permissions: Permission[];
 }
 
@@ -32,7 +30,6 @@ const UserForm = ({
     user,
     roles,
     organizations,
-    branches,
     permissions,
     auth,
 }: UserFormPageProps) => {
@@ -48,7 +45,6 @@ const UserForm = ({
         password: '',
         password_confirmation: '',
         organization_id: user?.organization_id || '',
-        branch_id: user?.branch_id || '',
         roles: user?.roles?.map((r: any) => r.id) || [],
         permissions: user?.permissions?.map((p: any) => p.id) || [],
         photo: null as File | null,
@@ -215,22 +211,6 @@ const UserForm = ({
                                 placeholder="Select Organization"
                             />
                             <InputError message={errors.organization_id} />
-                        </div>
-
-                        <div>
-                            <Label className="text-xs">Branch</Label>
-                            <Select
-                                value={data.branch_id?.toString()}
-                                onChange={(val) =>
-                                    setData('branch_id', Number(val))
-                                }
-                                options={branches.map((b) => ({
-                                    value: b.id.toString(),
-                                    label: b.name,
-                                }))}
-                                placeholder="Select Branch"
-                            />
-                            <InputError message={errors.branch_id} />
                         </div>
 
                         <div>

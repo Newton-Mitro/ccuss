@@ -19,6 +19,7 @@ import { Badge } from '../../../lib/statusConfig';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { KycDocument } from '../../../types/customer_kyc_module';
 import { PaginatedResponse } from '../../../types/paginated_response';
+import ApprovalActions from '../components/approval-actions';
 import { documentTypes } from './data/document_types';
 
 interface Props extends SharedData {
@@ -46,7 +47,7 @@ export default function KycDocumentsIndex() {
         }, 400);
 
         return () => clearTimeout(delay);
-    }, [data.search, data.document_type, data.page]);
+    }, [data.search, data.document_type, data.per_page, data.page, get]);
 
     const handleDelete = (document: KycDocument) => {
         appSwal
@@ -181,7 +182,27 @@ export default function KycDocumentsIndex() {
 
                                             <td className="px-2 py-1">
                                                 <TooltipProvider>
-                                                    <div className="flex gap-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <ApprovalActions
+                                                            approveUrl={route(
+                                                                'customers.kyc-documents.approve',
+                                                                [
+                                                                    i.customer_id,
+                                                                    i.id,
+                                                                ],
+                                                            )}
+                                                            rejectUrl={route(
+                                                                'customers.kyc-documents.reject',
+                                                                [
+                                                                    i.customer_id,
+                                                                    i.id,
+                                                                ],
+                                                            )}
+                                                            pending={
+                                                                i.verification_status ===
+                                                                'PENDING'
+                                                            }
+                                                        />
                                                         <Tooltip>
                                                             <TooltipTrigger
                                                                 asChild
@@ -274,7 +295,21 @@ export default function KycDocumentsIndex() {
                                             View File
                                         </a>
 
-                                        <div className="flex gap-4">
+                                        <div className="flex items-center gap-2">
+                                            <ApprovalActions
+                                                approveUrl={route(
+                                                    'customers.kyc-documents.approve',
+                                                    [i.customer_id, i.id],
+                                                )}
+                                                rejectUrl={route(
+                                                    'customers.kyc-documents.reject',
+                                                    [i.customer_id, i.id],
+                                                )}
+                                                pending={
+                                                    i.verification_status ===
+                                                    'PENDING'
+                                                }
+                                            />
                                             <Link
                                                 href={route(
                                                     'customers.kyc-documents.show',

@@ -178,23 +178,23 @@ class CustomerSeeder extends Seeder
         // ======================
         foreach ($customers as $customer) {
 
-            if ($customer->type === 'organization')
+            if (strtolower($customer->type) === 'organization')
                 continue;
 
             $relatives = $customers
                 ->where('id', '!=', $customer->id)
-                ->where('type', 'individual')
+                ->filter(fn($relative) => strtolower($relative->type) === 'individual')
                 ->shuffle()
                 ->take(rand(2, 4));
 
             foreach ($relatives as $relative) {
 
-                if ($customer->gender === 'male') {
-                    $relationshipOptions = $relative->gender === 'male'
+                if (strtolower($customer->gender) === 'male') {
+                    $relationshipOptions = strtolower($relative->gender) === 'male'
                         ? ['father', 'brother', 'son', 'grandfather', 'uncle', 'nephew', 'father_in_law', 'son_in_law', 'brother_in_law']
                         : ['mother', 'sister', 'daughter', 'wife', 'grandmother', 'aunt', 'niece', 'mother_in_law', 'daughter_in_law', 'sister_in_law'];
                 } else {
-                    $relationshipOptions = $relative->gender === 'male'
+                    $relationshipOptions = strtolower($relative->gender) === 'male'
                         ? ['father', 'brother', 'son', 'husband', 'grandfather', 'uncle', 'nephew', 'father_in_law', 'son_in_law', 'brother_in_law']
                         : ['mother', 'sister', 'daughter', 'wife', 'grandmother', 'aunt', 'niece', 'mother_in_law', 'daughter_in_law', 'sister_in_law'];
                 }

@@ -28,6 +28,8 @@ class UserService
             throw new \RuntimeException('User email already exists.');
         }
 
+        unset($data['branch_id']);
+
         if (!empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         }
@@ -40,10 +42,6 @@ class UserService
 
         if (!empty($data['organization_id'])) {
             $user->organizations()->syncWithoutDetaching([$data['organization_id']]);
-        }
-
-        if (!empty($data['branch_id'])) {
-            $user->branches()->syncWithoutDetaching([$data['branch_id']]);
         }
 
         if (!empty($data['roles']) && is_array($data['roles'])) {
@@ -60,6 +58,8 @@ class UserService
         if ($this->userRepository->existsByEmail($email, $user->id)) {
             throw new \RuntimeException('User email already exists.');
         }
+
+        unset($data['branch_id']);
 
         if (!empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
@@ -79,10 +79,6 @@ class UserService
 
         if (!empty($data['organization_id'])) {
             $updated->organizations()->syncWithoutDetaching([$data['organization_id']]);
-        }
-
-        if (!empty($data['branch_id'])) {
-            $updated->branches()->syncWithoutDetaching([$data['branch_id']]);
         }
 
         if (isset($data['roles']) && is_array($data['roles'])) {

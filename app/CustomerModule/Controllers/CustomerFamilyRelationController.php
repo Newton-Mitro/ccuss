@@ -30,6 +30,10 @@ class CustomerFamilyRelationController extends Controller
         $query = CustomerFamilyRelation::query()
             ->with(['customer', 'relative', 'relative.photo'])
             ->where('verification_status', CustomerFamilyRelation::STATUS_PENDING)
+            ->whereHas('customer', fn($customerQuery) => $customerQuery->where(
+                'organization_id',
+                $request->attributes->get('active_organization')->id,
+            ))
             ->when($customer, fn($query) => $query->where('customer_id', $customer->id));
 
         if ($search = $request->string('search')->toString()) {
@@ -67,6 +71,10 @@ class CustomerFamilyRelationController extends Controller
     public function show(Customer $customer, CustomerFamilyRelation $familyRelation): Response
     {
         abort_unless($familyRelation->customer_id === $customer->id, 404);
+        abort_unless(
+            $customer->organization_id === request()->attributes->get('active_organization')->id,
+            404,
+        );
         $familyRelation->load(['customer', 'relative', 'audits', 'customer.photo', 'relative.photo']);
 
         return Inertia::render('customer-kyc/family-relations/show_family_relation_page', [

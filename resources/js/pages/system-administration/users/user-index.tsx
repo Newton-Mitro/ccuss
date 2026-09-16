@@ -5,7 +5,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Eye, Pencil, Trash2, UserPlus } from 'lucide-react';
+import { Eye, GitBranch, Pencil, Trash2, UserPlus } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
@@ -113,20 +113,16 @@ export default function Index() {
                     <table className="w-full border-collapse">
                         <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
-                                {[
-                                    'Name',
-                                    'Email',
-                                    'Organization',
-                                    'Branch',
-                                    'Actions',
-                                ].map((h) => (
-                                    <th
-                                        key={h}
-                                        className="border-b p-2 text-left text-sm font-medium text-muted-foreground"
-                                    >
-                                        {h}
-                                    </th>
-                                ))}
+                                {['Name', 'Email', 'Branch', 'Actions'].map(
+                                    (h) => (
+                                        <th
+                                            key={h}
+                                            className="border-b p-2 text-left text-sm font-medium text-muted-foreground"
+                                        >
+                                            {h}
+                                        </th>
+                                    ),
+                                )}
                             </tr>
                         </thead>
                         <tbody>
@@ -138,9 +134,7 @@ export default function Index() {
                                     >
                                         <td className="px-2 py-1">{u.name}</td>
                                         <td className="px-2 py-1">{u.email}</td>
-                                        <td className="px-2 py-1">
-                                            {u.organization?.name}
-                                        </td>
+
                                         <td className="px-2 py-1">
                                             {u.branch?.name}
                                         </td>
@@ -158,6 +152,23 @@ export default function Index() {
                                                         </TooltipTrigger>
                                                         <TooltipContent>
                                                             View
+                                                        </TooltipContent>
+                                                    </Tooltip>
+
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Link
+                                                                href={route(
+                                                                    'users.branch.edit',
+                                                                    u.id,
+                                                                )}
+                                                                className="text-primary"
+                                                            >
+                                                                <GitBranch className="h-5 w-5" />
+                                                            </Link>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            Assign Branch
                                                         </TooltipContent>
                                                     </Tooltip>
 
@@ -224,9 +235,6 @@ export default function Index() {
                             <div className="flex items-start justify-between">
                                 <div>
                                     <p className="font-medium">{u.name}</p>
-                                    <p className="text-xs text-muted-foreground">
-                                        {u.email} · {u.organization?.name}
-                                    </p>
                                 </div>
                             </div>
 
@@ -236,6 +244,12 @@ export default function Index() {
                                     className="text-primary"
                                 >
                                     <Eye className="h-5 w-5" />
+                                </Link>
+                                <Link
+                                    href={route('users.branch.edit', u.id)}
+                                    className="text-primary"
+                                >
+                                    <GitBranch className="h-5 w-5" />
                                 </Link>
                                 <Link
                                     href={`/users/${u.id}/edit`}

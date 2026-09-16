@@ -18,6 +18,7 @@ import { Badge } from '../../../lib/statusConfig';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { CustomerFamilyRelation } from '../../../types/customer_kyc_module';
 import { PaginatedResponse } from '../../../types/paginated_response';
+import ApprovalActions from '../components/approval-actions';
 
 interface Props extends SharedData {
     paginated_data: PaginatedResponse<CustomerFamilyRelation>;
@@ -46,7 +47,7 @@ export default function FamilyRelationIndex() {
         }, 400);
 
         return () => clearTimeout(delay);
-    }, [data.search, data.per_page, data.page]);
+    }, [data.search, data.per_page, data.page, get]);
 
     const handleDelete = (relation: CustomerFamilyRelation) => {
         appSwal
@@ -182,7 +183,27 @@ export default function FamilyRelationIndex() {
                                             </td>
                                             <td className="px-2 py-1">
                                                 <TooltipProvider>
-                                                    <div className="flex gap-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <ApprovalActions
+                                                            approveUrl={route(
+                                                                'customers.family-relations.approve',
+                                                                [
+                                                                    f.customer_id,
+                                                                    f.id,
+                                                                ],
+                                                            )}
+                                                            rejectUrl={route(
+                                                                'customers.family-relations.reject',
+                                                                [
+                                                                    f.customer_id,
+                                                                    f.id,
+                                                                ],
+                                                            )}
+                                                            pending={
+                                                                f.verification_status ===
+                                                                'PENDING'
+                                                            }
+                                                        />
                                                         <Tooltip>
                                                             <TooltipTrigger
                                                                 asChild
@@ -272,7 +293,21 @@ export default function FamilyRelationIndex() {
                                         📞 {f.relative?.primary_phone || '—'}
                                     </div>
 
-                                    <div className="mt-2 flex justify-end gap-3">
+                                    <div className="mt-2 flex items-center justify-end gap-2">
+                                        <ApprovalActions
+                                            approveUrl={route(
+                                                'customers.family-relations.approve',
+                                                [f.customer_id, f.id],
+                                            )}
+                                            rejectUrl={route(
+                                                'customers.family-relations.reject',
+                                                [f.customer_id, f.id],
+                                            )}
+                                            pending={
+                                                f.verification_status ===
+                                                'PENDING'
+                                            }
+                                        />
                                         <Link
                                             href={route(
                                                 'customers.family-relations.show',

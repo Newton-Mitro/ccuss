@@ -42,7 +42,12 @@ const Show = () => {
         verified: 'bg-success text-success-foreground',
         rejected: 'bg-destructive text-destructive-foreground',
         pending: 'bg-warning text-warning-foreground',
-    }[document.verification_status];
+    }[
+        document.verification_status.toLowerCase() as
+            | 'verified'
+            | 'rejected'
+            | 'pending'
+    ];
 
     // 🚀 Actions (optional endpoints)
     const handleApprove = () => {
@@ -265,7 +270,7 @@ const Show = () => {
                     </div>
 
                     {/* ACTIONS */}
-                    {document.verification_status === 'pending' && (
+                    {document.verification_status === 'PENDING' && (
                         <div className="flex gap-2 rounded-md border bg-card p-4">
                             <div className="">
                                 <Input

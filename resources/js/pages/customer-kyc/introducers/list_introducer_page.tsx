@@ -19,6 +19,7 @@ import { Badge } from '../../../lib/statusConfig';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { CustomerIntroducer } from '../../../types/customer_kyc_module';
 import { PaginatedResponse } from '../../../types/paginated_response';
+import ApprovalActions from '../components/approval-actions';
 
 interface Props extends SharedData {
     paginated_data: PaginatedResponse<CustomerIntroducer>;
@@ -44,7 +45,7 @@ export default function IntroducersIndex() {
         }, 400);
 
         return () => clearTimeout(delay);
-    }, [data.search, data.per_page, data.page]);
+    }, [data.search, data.per_page, data.page, get]);
 
     const handleDelete = (introducer: CustomerIntroducer) => {
         appSwal
@@ -172,7 +173,27 @@ export default function IntroducersIndex() {
                                             </td>
                                             <td className="px-2 py-1">
                                                 <TooltipProvider>
-                                                    <div className="flex gap-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <ApprovalActions
+                                                            approveUrl={route(
+                                                                'customers.introducers.approve',
+                                                                [
+                                                                    i.introduced_customer_id,
+                                                                    i.id,
+                                                                ],
+                                                            )}
+                                                            rejectUrl={route(
+                                                                'customers.introducers.reject',
+                                                                [
+                                                                    i.introduced_customer_id,
+                                                                    i.id,
+                                                                ],
+                                                            )}
+                                                            pending={
+                                                                i.verification_status ===
+                                                                'PENDING'
+                                                            }
+                                                        />
                                                         <Tooltip>
                                                             <TooltipTrigger
                                                                 asChild
@@ -259,7 +280,27 @@ export default function IntroducersIndex() {
                                         )}
                                     </p>
 
-                                    <div className="flex justify-end gap-4">
+                                    <div className="flex items-center justify-end gap-2">
+                                        <ApprovalActions
+                                            approveUrl={route(
+                                                'customers.introducers.approve',
+                                                [
+                                                    i.introduced_customer_id,
+                                                    i.id,
+                                                ],
+                                            )}
+                                            rejectUrl={route(
+                                                'customers.introducers.reject',
+                                                [
+                                                    i.introduced_customer_id,
+                                                    i.id,
+                                                ],
+                                            )}
+                                            pending={
+                                                i.verification_status ===
+                                                'PENDING'
+                                            }
+                                        />
                                         <Link
                                             href={route(
                                                 'customers.introducers.show',

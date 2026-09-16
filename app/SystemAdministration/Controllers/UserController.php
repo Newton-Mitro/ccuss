@@ -50,7 +50,7 @@ class UserController extends Controller
         $filters = $request->only(['search', 'per_page', 'page']);
         $perPage = $filters['per_page'] ?? 18;
 
-        $users = $this->organizationUsers($request)->with('branch')
+        $users = $this->organizationUsers($request)->with(['branch', 'organization'])
             ->when($filters['search'] ?? null, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
@@ -74,8 +74,37 @@ class UserController extends Controller
     {
         return Inertia::render('system-administration/users/user-form-page', [
             'roles' => Role::all(),
+        ]);
+    }
+
+    public function editBranch(User $user, Request $request)
+    {
+        $this->authorizeOrganization($user, $request);
+
+        return Inertia::render('system-administration/users/assign-branch-page', [
+            'user' => $user->load(['branch', 'organization']),
             'branches' => $this->organizationBranches($request)->get(),
         ]);
+    }
+
+    public function assignBranch(Request $request, User $user)
+    {
+        $this->authorizeOrganization($user, $request);
+
+        $validated = $request->validate([
+            'branch_id' => ['required', 'integer', 'exists:branches,id'],
+        ]);
+
+        abort_unless(
+            $this->organizationBranches($request)->whereKey($validated['branch_id'])->exists(),
+            422,
+        );
+
+        $user->forceFill(['branch_id' => $validated['branch_id']])->save();
+        $user->branches()->syncWithoutDetaching([$validated['branch_id']]);
+
+        return redirect()->route('users.index')
+            ->with('success', $user->name . ' assigned to the selected branch.');
     }
 
     /* ==========================
@@ -85,10 +114,6 @@ class UserController extends Controller
     {
         $validated = $request->validated();
         $validated['organization_id'] = $this->activeOrganizationId($request);
-        $this->ensureBranchBelongsToOrganization(
-            isset($validated['branch_id']) ? (int) $validated['branch_id'] : null,
-            $request,
-        );
 
         try {
             $user = $this->userService->createUser(
@@ -134,7 +159,6 @@ class UserController extends Controller
         return Inertia::render('system-administration/users/user-form-page', [
             'user' => $user->load('roles'),
             'roles' => $roles,
-            'branches' => $this->organizationBranches(request())->get(),
             'permissions' => $permissions,
         ]);
     }
@@ -147,10 +171,6 @@ class UserController extends Controller
         $validated = $request->validated();
         $this->authorizeOrganization($user, $request);
         $validated['organization_id'] = $this->activeOrganizationId($request);
-        $this->ensureBranchBelongsToOrganization(
-            isset($validated['branch_id']) ? (int) $validated['branch_id'] : null,
-            $request,
-        );
 
         try {
             $user = $this->userService->updateUser(
@@ -197,18 +217,6 @@ class UserController extends Controller
     private function activeOrganizationId(Request $request): int
     {
         return (int) $request->attributes->get('active_organization')->id;
-    }
-
-    private function ensureBranchBelongsToOrganization(?int $branchId, Request $request): void
-    {
-        if ($branchId === null) {
-            return;
-        }
-
-        abort_unless(
-            $this->organizationBranches($request)->whereKey($branchId)->exists(),
-            422,
-        );
     }
 
     private function authorizeOrganization(User $user, Request $request): void

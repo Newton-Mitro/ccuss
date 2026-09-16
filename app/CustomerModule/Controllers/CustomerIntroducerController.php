@@ -37,6 +37,10 @@ class CustomerIntroducerController extends Controller
                 'introducerCustomer.photo',
             ])
             ->where('verification_status', CustomerIntroducer::STATUS_PENDING)
+            ->whereHas('introducedCustomer', fn($customerQuery) => $customerQuery->where(
+                'organization_id',
+                $request->attributes->get('active_organization')->id,
+            ))
             ->when($customer, fn($query) => $query->where('introduced_customer_id', $customer->id));
 
         // 🔍 Search filter
@@ -85,6 +89,10 @@ class CustomerIntroducerController extends Controller
     public function show(Customer $customer, CustomerIntroducer $introducer): Response
     {
         abort_unless($introducer->introduced_customer_id === $customer->id, 404);
+        abort_unless(
+            $customer->organization_id === request()->attributes->get('active_organization')->id,
+            404,
+        );
         $introducer->load([
             'introducedCustomer',
             'introducedCustomer.photo',

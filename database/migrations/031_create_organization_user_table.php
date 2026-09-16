@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->timestamps();
 
             $table->primary(['organization_id', 'user_id']);
+            $table->index('user_id', 'organization_user_user_id_index');
         });
 
         DB::table('users')

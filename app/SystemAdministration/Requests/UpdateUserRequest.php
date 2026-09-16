@@ -20,7 +20,6 @@ class UpdateUserRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($userId)],
             'password' => ['nullable', 'string', 'min:6', 'confirmed'],
-            'branch_id' => ['nullable', 'exists:branches,id'],
             'roles' => ['nullable', 'array'],
             'roles.*' => ['exists:roles,id'],
             'status' => ['nullable', 'in:ACTIVE,INACTIVE'],

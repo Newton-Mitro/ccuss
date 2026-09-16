@@ -7,20 +7,17 @@ import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
-import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
-import { Branch } from '../../../types/branch';
 import { Role, User } from '../../../types/user';
 
 interface UserFormPageProps extends SharedData {
     user?: User;
     roles: Role[];
-    branches: Branch[];
 }
 
-const UserForm = ({ user, roles, branches, auth }: UserFormPageProps) => {
+const UserForm = ({ user, roles, auth }: UserFormPageProps) => {
     useFlashToastHandler();
 
     const handleBack = () => window.history.back();
@@ -32,7 +29,6 @@ const UserForm = ({ user, roles, branches, auth }: UserFormPageProps) => {
         email: user?.email || '',
         password: '',
         password_confirmation: '',
-        branch_id: user?.branch_id || '',
         roles: user?.roles?.map((r: any) => r.id) || [],
         photo: null as File | null,
     });
@@ -140,22 +136,6 @@ const UserForm = ({ user, roles, branches, auth }: UserFormPageProps) => {
                 <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
                     {/* LEFT: FORM */}
                     <div className="grid flex-1 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                        <div>
-                            <Label className="text-xs">Branch</Label>
-                            <Select
-                                value={data.branch_id?.toString()}
-                                onChange={(val) =>
-                                    setData('branch_id', Number(val))
-                                }
-                                options={branches.map((b) => ({
-                                    value: b.id.toString(),
-                                    label: b.name,
-                                }))}
-                                placeholder="Select Branch"
-                            />
-                            <InputError message={errors.branch_id} />
-                        </div>
-
                         <div>
                             <Label className="text-xs">Name</Label>
                             <Input

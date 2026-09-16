@@ -65,7 +65,7 @@ test('branch service creates branches and rejects duplicate codes per organizati
     ]))->toThrow(RuntimeException::class, 'Branch code already exists for this organization.');
 });
 
-test('user service creates users and rejects duplicate email addresses', function () {
+test('user service creates users without assigning a branch and rejects duplicate email addresses', function () {
     $organization = Organization::factory()->create();
     $branch = Branch::factory()->create(['organization_id' => $organization->id]);
 
@@ -81,7 +81,9 @@ test('user service creates users and rejects duplicate email addresses', functio
     ]);
 
     expect($user)->toBeInstanceOf(User::class)
-        ->and($user->email)->toBe('user@example.com');
+        ->and($user->email)->toBe('user@example.com')
+        ->and($user->branch_id)->toBeNull()
+        ->and($user->branches()->count())->toBe(0);
 
     expect(fn() => $service->createUser([
         'organization_id' => $organization->id,
@@ -91,6 +93,29 @@ test('user service creates users and rejects duplicate email addresses', functio
         'password' => 'secret123',
         'status' => 'inactive',
     ]))->toThrow(RuntimeException::class, 'User email already exists.');
+});
+
+test('user service update ignores branch assignment and keeps it separate from user editing', function () {
+    $organization = Organization::factory()->create();
+    $branch = Branch::factory()->create(['organization_id' => $organization->id]);
+    $user = User::factory()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => null,
+    ]);
+
+    $service = app(UserService::class);
+
+    $updatedUser = $service->updateUser($user, [
+        'name' => 'Updated User',
+        'email' => 'updated@example.com',
+        'branch_id' => $branch->id,
+        'status' => 'ACTIVE',
+    ]);
+
+    expect($updatedUser->name)->toBe('Updated User')
+        ->and($updatedUser->email)->toBe('updated@example.com')
+        ->and($updatedUser->branch_id)->toBeNull()
+        ->and($updatedUser->branches()->count())->toBe(0);
 });
 
 test('role permission service syncs the selected permissions to a role', function () {

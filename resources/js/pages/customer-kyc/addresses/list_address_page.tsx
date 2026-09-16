@@ -12,6 +12,7 @@ import { Badge } from '../../../lib/statusConfig';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { CustomerAddress } from '../../../types/customer_kyc_module';
 import { PaginatedResponse } from '../../../types/paginated_response';
+import ApprovalActions from '../components/approval-actions';
 
 interface Props extends SharedData {
     paginated_data: PaginatedResponse<CustomerAddress>;
@@ -154,10 +155,32 @@ export default function AddressIndex() {
                                                     .join(', ')}
                                             </td>
                                             <td className="px-2 py-1">
-                                                <AddressActions
-                                                    address={address}
-                                                    onDelete={handleDelete}
-                                                />
+                                                <div className="flex items-center gap-2">
+                                                    <AddressActions
+                                                        address={address}
+                                                        onDelete={handleDelete}
+                                                    />
+                                                    <ApprovalActions
+                                                        approveUrl={route(
+                                                            'customers.addresses.approve',
+                                                            [
+                                                                address.customer_id,
+                                                                address.id,
+                                                            ],
+                                                        )}
+                                                        rejectUrl={route(
+                                                            'customers.addresses.reject',
+                                                            [
+                                                                address.customer_id,
+                                                                address.id,
+                                                            ],
+                                                        )}
+                                                        pending={
+                                                            address.verification_status ===
+                                                            'PENDING'
+                                                        }
+                                                    />
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
@@ -196,10 +219,30 @@ export default function AddressIndex() {
                                             .join(', ')}
                                     </p>
 
-                                    <div className="flex justify-end">
+                                    <div className="flex items-center justify-end gap-2">
                                         <AddressActions
                                             address={address}
                                             onDelete={handleDelete}
+                                        />
+                                        <ApprovalActions
+                                            approveUrl={route(
+                                                'customers.addresses.approve',
+                                                [
+                                                    address.customer_id,
+                                                    address.id,
+                                                ],
+                                            )}
+                                            rejectUrl={route(
+                                                'customers.addresses.reject',
+                                                [
+                                                    address.customer_id,
+                                                    address.id,
+                                                ],
+                                            )}
+                                            pending={
+                                                address.verification_status ===
+                                                'PENDING'
+                                            }
                                         />
                                     </div>
                                 </div>
@@ -231,7 +274,7 @@ function AddressActions({
     onDelete: (address: CustomerAddress) => void;
 }) {
     return (
-        <div className="flex justify-end gap-3">
+        <div className="flex items-center gap-2">
             <Link
                 href={route('customers.addresses.show', [
                     address.customer_id,

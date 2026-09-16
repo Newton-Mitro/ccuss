@@ -69,12 +69,12 @@ export default function ShowIntroducer() {
 
     const statusClass =
         STATUS_MAP[
-            introducer_request.verification_status as keyof typeof STATUS_MAP
+            introducer_request.verification_status.toLowerCase() as keyof typeof STATUS_MAP
         ]?.class ?? 'bg-muted text-muted-foreground';
 
     const statusLabel =
         STATUS_MAP[
-            introducer_request.verification_status as keyof typeof STATUS_MAP
+            introducer_request.verification_status.toLowerCase() as keyof typeof STATUS_MAP
         ]?.label ?? 'Unknown';
 
     // ✅ Actions for pending verification
@@ -282,7 +282,7 @@ export default function ShowIntroducer() {
                     </div>
 
                     {/* ACTIONS */}
-                    {introducer_request.verification_status === 'pending' && (
+                    {introducer_request.verification_status === 'PENDING' && (
                         <div className="flex gap-2 rounded-md border bg-card p-4">
                             <div className="">
                                 <Input

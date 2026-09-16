@@ -167,6 +167,13 @@ return new class extends Migration {
             $table->foreign('financial_transaction_id')->references('id')->on('financial_transactions')->nullOnDelete();
         });
 
+        Schema::table('customer_introducers', function (Blueprint $table): void {
+            $table->foreign('introducer_account_id', 'customer_introducers_account_id_foreign')
+                ->references('id')
+                ->on('financial_accounts')
+                ->nullOnDelete();
+        });
+
         Schema::create('financial_transaction_entries', function (Blueprint $table) {
             $table->id();
             $table->foreignId('financial_transaction_id')->constrained()->cascadeOnDelete();
@@ -191,6 +198,10 @@ return new class extends Migration {
 
     public function down(): void
     {
+        Schema::table('customer_introducers', function (Blueprint $table): void {
+            $table->dropForeign('customer_introducers_account_id_foreign');
+        });
+
         Schema::dropIfExists('financial_transaction_entries');
         Schema::dropIfExists('financial_transactions');
         Schema::dropIfExists('financial_accounts');

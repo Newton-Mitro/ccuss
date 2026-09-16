@@ -27,6 +27,10 @@ class KycDocumentController extends Controller
     {
         $query = KycDocument::with('customer')
             ->where('verification_status', KycDocument::STATUS_PENDING)
+            ->whereHas('customer', fn($customerQuery) => $customerQuery->where(
+                'organization_id',
+                $request->attributes->get('active_organization')->id,
+            ))
             ->when($customer, fn($query) => $query->where('customer_id', $customer->id));
 
         // 🔍 Search (by customer name)
@@ -128,6 +132,10 @@ class KycDocumentController extends Controller
     public function show(Customer $customer, KycDocument $kycDocument)
     {
         abort_unless($kycDocument->customer_id === $customer->id, 404);
+        abort_unless(
+            $customer->organization_id === request()->attributes->get('active_organization')->id,
+            404,
+        );
         return Inertia::render('customer-kyc/kyc-documents/show_kyc_document_page', [
             'document' => $kycDocument->load('customer', 'customer.photo', 'audits'),
         ]);
