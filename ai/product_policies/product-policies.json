@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "generated_on": "2026-09-16",
+  "institution": "The Christian Co-operative Credit Union Ltd., Dhaka",
+  "brand": "Dhaka Credit",
+  "source_catalog": "https://www.cccul.com/deposit-products",
+  "source_loans": "https://www.cccul.com/loan-products",
+  "ai_policy": {
+    "source_priority": [
+      "Latest internally approved Dhaka Credit policy/circular",
+      "Latest official Dhaka Credit product page",
+      "This normalized knowledge base"
+    ],
+    "do_not_invent": [
+      "fees",
+      "penalties",
+      "collateral",
+      "approval authorities",
+      "exceptions",
+      "missing maturity formulas",
+      "conditions represented only as 'condition apply'"
+    ],
+    "escalate_when": [
+      "the requested rule is missing",
+      "two official sources conflict",
+      "a rate/limit may have changed",
+      "the customer asks for a binding contractual interpretation"
+    ]
+  },
+  "products": [
+    {
+      "category": "deposit",
+      "file": "deposits/savings-account.md"
+    },
+    {
+      "category": "deposit",
+      "file": "deposits/health-care-scheme.md"
+    },
+    {
+      "category": "deposit",
+      "file": "deposits/troimashik-savings.md"
+    },
+    {
+      "category": "deposit",
+      "file": "deposits/monthly-saving-account.md"
+    },
+    {
+      "category": "deposit",
+      "file": "deposits/aged-savings.md"
+    },
+    {
+      "category": "deposit",
+      "file": "deposits/double-deposit-scheme.md"
+    },
+    {
+      "category": "deposit",
+      "file": "deposits/kotipoti-deposit.md"
+    },
+    {
+      "category": "deposit",
+      "file": "deposits/loan-against-half-millionaire-deposit.md"
+    },
+    {
+      "category": "deposit",
+      "file": "deposits/education-savings-account.md"
+    },
+    {
+      "category": "deposit",
+      "file": "deposits/millionaire-scheme.md"
+    },
+    {
+      "category": "deposit",
+      "file": "deposits/credit-account.md"
+    },
+    {
+      "category": "deposit",
+      "file": "deposits/housing-deposit-scheme.md"
+    },
+    {
+      "category": "loan",
+      "file": "loans/general-loan.md"
+    },
+    {
+      "category": "loan",
+      "file": "loans/metropolitan-house-building-loan.md"
+    },
+    {
+      "category": "loan",
+      "file": "loans/higher-education-loan.md"
+    },
+    {
+      "category": "loan",
+      "file": "loans/emergency-loan.md"
+    },
+    {
+      "category": "loan",
+      "file": "loans/double-loan-on-fixed-deposit.md"
+    },
+    {
+      "category": "loan",
+      "file": "loans/higher-education-support-loan.md"
+    },
+    {
+      "category": "loan",
+      "file": "loans/top-up-loan.md"
+    },
+    {
+      "category": "loan",
+      "file": "loans/going-abroad-loan.md"
+    },
+    {
+      "category": "loan",
+      "file": "loans/flat-purchase-loan.md"
+    },
+    {
+      "category": "loan",
+      "file": "loans/instant-loan.md"
+    },
+    {
+      "category": "loan",
+      "file": "loans/higher-education-solvency-loan.md"
+    }
+  ],
+  "additional_catalog": "CATALOG_ADDITIONAL_PRODUCTS.md"
+}
