@@ -36,8 +36,8 @@ export const generalAccountingMenu: SidebarItem[] = [
                             {
                                 name: 'Account Groups',
                                 icon: <i className="fa-solid fa-sitemap" />,
-                                path: '/ledger-accounts?view=groups',
-                                match_path: 'ledger-accounts',
+                                path: '/account-groups',
+                                match_path: 'account-groups',
                                 permission: ['accounting.coa.view'],
                             },
                             {

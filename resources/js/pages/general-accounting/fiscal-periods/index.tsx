@@ -14,11 +14,11 @@ import { periodStatuses } from './data/period_statuses';
 
 interface FiscalPeriod {
     id: number;
-    period_name: string;
-    fiscal_year?: { code: string };
+    name: string;
+    fiscal_year?: { name: string };
     start_date: string;
     end_date: string;
-    status: 'open' | 'closed' | 'locked'; // ✅ FIXED
+    status: 'OPEN' | 'CLOSED';
 }
 
 interface FiscalPeriodPageProps extends SharedData {
@@ -178,12 +178,10 @@ export default function FiscalPeriodIndex() {
                                         key={fp.id}
                                         className="border-b transition-colors even:bg-muted hover:bg-accent/20"
                                     >
-                                        <td className="px-2 py-1">
-                                            {fp.period_name}
-                                        </td>
+                                        <td className="px-2 py-1">{fp.name}</td>
 
                                         <td className="px-2 py-1">
-                                            {fp.fiscal_year?.code || '-'}
+                                            {fp.fiscal_year?.name || '-'}
                                         </td>
 
                                         <td className="px-2 py-1">
@@ -265,10 +263,7 @@ export default function FiscalPeriodIndex() {
                                                 type="button"
                                                 disabled={processing}
                                                 onClick={() =>
-                                                    handleDelete(
-                                                        fp.id,
-                                                        fp.period_name,
-                                                    )
+                                                    handleDelete(fp.id, fp.name)
                                                 }
                                                 className="text-destructive hover:text-destructive/80 disabled:opacity-50"
                                                 title="Delete fiscal period"

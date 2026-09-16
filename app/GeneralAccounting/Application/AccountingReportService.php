@@ -238,6 +238,23 @@ class AccountingReportService
         $period = $fiscalPeriodId ? FiscalPeriod::query()->findOrFail($fiscalPeriodId) : null;
         $profit = $this->profitAndLoss($organizationId, $fiscalPeriodId, $from, $to);
 
+        $openingCutoff = $period?->start_date->toDateString() ?? $from;
+        $openingBalances = collect();
+
+        if ($openingCutoff) {
+            $openingBalances = $this->postedEntries($organizationId, null, null, null)
+                ->join('accounts', 'accounts.id', '=', 'voucher_entries.account_id')
+                ->where('accounts.type', 'EQUITY')
+                ->whereDate('vouchers.voucher_date', '<', $openingCutoff)
+                ->select(
+                    'accounts.id',
+                    DB::raw('SUM(voucher_entries.credit - voucher_entries.debit) as opening_balance'),
+                )
+                ->groupBy('accounts.id')
+                ->get()
+                ->keyBy('id');
+        }
+
         $rows = $this->postedEntries($organizationId, $fiscalPeriodId, $from, $to)
             ->join('accounts', 'accounts.id', '=', 'voucher_entries.account_id')
             ->where('accounts.type', 'EQUITY')
@@ -250,14 +267,22 @@ class AccountingReportService
             ->groupBy('accounts.id', 'accounts.code', 'accounts.name')
             ->get();
 
-        return $rows->map(fn($row) => (object) [
-            'account_code' => $row->account_code,
-            'account_name' => $row->account_name,
-            'period_name' => $period?->name,
-            'opening_balance' => 0.0,
-            'net_profit' => (float) $profit['net_income'],
-            'ending_balance' => (float) $row->ending_balance,
-        ]);
+        $accountIds = $rows->pluck('id')->merge($openingBalances->keys())->unique();
+
+        return $accountIds->map(function ($accountId) use ($rows, $openingBalances, $period, $profit) {
+            $row = $rows->firstWhere('id', $accountId);
+            $openingBalance = (float) ($openingBalances[$accountId]->opening_balance ?? 0);
+            $movement = (float) ($row->ending_balance ?? 0);
+
+            return (object) [
+                'account_code' => $row?->account_code,
+                'account_name' => $row?->account_name,
+                'period_name' => $period?->name,
+                'opening_balance' => $openingBalance,
+                'net_profit' => (float) $profit['net_income'],
+                'ending_balance' => $openingBalance + $movement,
+            ];
+        })->values();
     }
 
     private function postedEntries(int $organizationId, ?int $fiscalPeriodId, ?string $from, ?string $to)

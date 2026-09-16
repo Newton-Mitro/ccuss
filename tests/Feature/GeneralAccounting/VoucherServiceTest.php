@@ -7,12 +7,29 @@ use App\GeneralAccounting\Application\LedgerAccountService;
 use App\GeneralAccounting\Application\VoucherService;
 use App\GeneralAccounting\Models\Voucher;
 use App\SystemAdministration\Models\Organization;
+use App\SystemAdministration\Models\Permission;
+use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
 
 function voucherFixture(): array
 {
     $organization = Organization::factory()->create();
     $user = User::factory()->create(['organization_id' => $organization->id]);
+    $role = Role::firstOrCreate(
+        ['slug' => 'accounting_test'],
+        ['name' => 'Accounting Test'],
+    );
+    $role->permissions()->sync([
+        Permission::updateOrCreate(
+            ['slug' => 'accounting.voucher_entries.view'],
+            ['module' => 'accounting_voucher', 'name' => 'View Vouchers', 'action' => 'view'],
+        )->id,
+        Permission::updateOrCreate(
+            ['slug' => 'accounting.voucher.create'],
+            ['module' => 'accounting_voucher', 'name' => 'Create Vouchers', 'action' => 'create'],
+        )->id,
+    ]);
+    $user->roles()->sync([$role->id]);
     $fiscalYear = app(FiscalYearService::class)->create([
         'organization_id' => $organization->id,
         'name' => '2025-2026',
@@ -229,4 +246,41 @@ it('edits draft vouchers and rejects edits to posted vouchers', function () {
             ['account_id' => $fixture['accounts'][1]->id, 'debit' => 0, 'credit' => 300],
         ],
     ], $fixture['organization']->id))->toThrow(RuntimeException::class, 'Only draft vouchers can be edited');
+});
+
+it('rejects voucher entries that reference another organization account', function () {
+    $fixture = voucherFixture();
+    $otherOrganization = Organization::factory()->create();
+    $otherGroup = app(AccountGroupService::class)->create([
+        'organization_id' => $otherOrganization->id,
+        'code' => '1000',
+        'name' => 'Other Assets',
+        'type' => 'ASSET',
+        'normal_balance' => 'DEBIT',
+    ]);
+    $otherAccount = app(LedgerAccountService::class)->create([
+        'organization_id' => $otherOrganization->id,
+        'account_group_id' => $otherGroup->id,
+        'code' => '1100',
+        'name' => 'Other Cash',
+        'type' => 'ASSET',
+        'normal_balance' => 'DEBIT',
+        'status' => true,
+    ]);
+
+    $response = $this
+        ->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('vouchers.store'), [
+            'fiscal_period_id' => $fixture['period']->id,
+            'voucher_type' => 'JOURNAL',
+            'voucher_date' => '2025-07-15',
+            'entries' => [
+                ['account_id' => $otherAccount->id, 'debit' => 300, 'credit' => 0],
+                ['account_id' => $fixture['accounts'][1]->id, 'debit' => 0, 'credit' => 300],
+            ],
+        ]);
+
+    $response->assertSessionHasErrors('entries.0.account_id');
+    expect(Voucher::query()->where('organization_id', $fixture['organization']->id)->count())->toBe(0);
 });

@@ -14,9 +14,23 @@ class StoreLedgerAccountRequest extends FormRequest
 
     public function rules(): array
     {
+        $organizationId = (int) $this->attributes->get('active_organization')?->id;
+
         return [
-            'account_group_id' => ['required', 'integer', 'exists:account_groups,id'],
-            'parent_id' => ['nullable', 'integer', 'exists:accounts,id'],
+            'account_group_id' => [
+                'required',
+                'integer',
+                Rule::exists('account_groups', 'id')->where(
+                    fn($query) => $query->where('organization_id', $organizationId),
+                ),
+            ],
+            'parent_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('accounts', 'id')->where(
+                    fn($query) => $query->where('organization_id', $organizationId),
+                ),
+            ],
             'code' => ['required', 'string', 'max:50'],
             'name' => ['required', 'string', 'max:150'],
             'type' => ['required', Rule::in(['ASSET', 'LIABILITY', 'EQUITY', 'INCOME', 'EXPENSE'])],

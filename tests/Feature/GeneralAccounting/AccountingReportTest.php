@@ -273,3 +273,50 @@ it('builds cash flow and shareholders equity statements from posted cash and equ
         ->and($equityStatement[0]->account_name)->toBe('Share Capital')
         ->and($equityStatement[0]->ending_balance)->toBe(250.0);
 });
+
+it('carries prior posted equity activity into the selected period opening balance', function () {
+    $fixture = reportFixture();
+    $selectedPeriod = app(FiscalPeriodService::class)->create($fixture['fiscalYear'], [
+        'name' => 'August 2025',
+        'start_date' => '2025-08-01',
+        'end_date' => '2025-08-31',
+        'status' => 'OPEN',
+    ]);
+    $equityGroup = app(AccountGroupService::class)->create([
+        'organization_id' => $fixture['organization']->id,
+        'code' => '3000',
+        'name' => 'Equity',
+        'type' => 'EQUITY',
+        'normal_balance' => 'CREDIT',
+    ]);
+    $equity = app(LedgerAccountService::class)->create([
+        'organization_id' => $fixture['organization']->id,
+        'account_group_id' => $equityGroup->id,
+        'code' => '3001',
+        'name' => 'Share Capital',
+        'type' => 'EQUITY',
+        'normal_balance' => 'CREDIT',
+        'status' => true,
+    ]);
+    $voucherService = app(VoucherService::class);
+
+    $priorVoucher = $voucherService->createDraft([
+        'fiscal_period_id' => $fixture['period']->id,
+        'voucher_type' => 'JOURNAL',
+        'voucher_date' => '2025-07-15',
+        'entries' => [
+            ['account_id' => $fixture['cash']->id, 'debit' => 1000, 'credit' => 0],
+            ['account_id' => $equity->id, 'debit' => 0, 'credit' => 1000],
+        ],
+    ], $fixture['organization']->id, $fixture['user']->id);
+    $voucherService->post($priorVoucher, $fixture['organization']->id, $fixture['user']->id);
+
+    $statement = app(AccountingReportService::class)->shareholdersEquity(
+        $fixture['organization']->id,
+        $selectedPeriod->id,
+    );
+
+    expect($statement)->toHaveCount(1)
+        ->and($statement[0]->opening_balance)->toBe(1000.0)
+        ->and($statement[0]->ending_balance)->toBe(1000.0);
+});

@@ -5,6 +5,7 @@ namespace App\GeneralAccounting\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FiscalPeriod extends Model
 {
@@ -26,5 +27,10 @@ class FiscalPeriod extends Model
     public function fiscalYear(): BelongsTo
     {
         return $this->belongsTo(FiscalYear::class);
+    }
+
+    public function vouchers(): HasMany
+    {
+        return $this->hasMany(Voucher::class);
     }
 }

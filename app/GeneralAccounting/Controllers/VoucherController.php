@@ -18,6 +18,12 @@ class VoucherController extends Controller
     public function __construct(
         private readonly VoucherService $voucherService,
     ) {
+        $this->middleware('permission:accounting.voucher_entries.view')->only(['index', 'show']);
+        $this->middleware('permission:accounting.voucher.create')->only(['create', 'store']);
+        $this->middleware('permission:accounting.voucher.update')->only(['edit', 'update']);
+        $this->middleware('permission:accounting.voucher.post')->only(['post']);
+        $this->middleware('permission:accounting.voucher.cancel')->only(['cancel']);
+        $this->middleware('permission:accounting.voucher.reverse')->only(['reverse']);
     }
 
     public function index(Request $request): Response
@@ -42,6 +48,7 @@ class VoucherController extends Controller
         return Inertia::render('general-accounting/vouchers/create/journal_voucher_entry_page', [
             'fiscalPeriods' => $this->fiscalPeriods($request),
             'accounts' => $this->accounts($request),
+            'voucherType' => $request->string('type')->upper()->value() ?: 'JOURNAL',
         ]);
     }
 

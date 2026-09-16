@@ -15,6 +15,7 @@ class AccountingReportController extends Controller
     public function __construct(
         private readonly AccountingReportService $reportService,
     ) {
+        $this->middleware('permission:accounting.reports.view');
     }
 
     public function trialBalance(Request $request): Response

@@ -25,7 +25,11 @@ import { TYPE_COLORS } from './utils';
 | Types
 --------------------------------------------- */
 interface GlAccountsIndexProps extends SharedData {
-    glAccounts: LedgerAccount[];
+    glAccounts: {
+        data: LedgerAccount[];
+        links: { url: string | null; label: string; active: boolean }[];
+        per_page?: number;
+    };
     fiscalYears: any[];
     fiscalPeriods: any[];
     fiscal_year_id: number | null;
@@ -37,6 +41,7 @@ interface GlAccountsIndexProps extends SharedData {
 --------------------------------------------- */
 export default function GlAccountsIndex() {
     const { glAccounts } = usePage<GlAccountsIndexProps>().props;
+    const accountRows = glAccounts?.data ?? [];
 
     useFlashToastHandler();
 
@@ -64,8 +69,8 @@ export default function GlAccountsIndex() {
     | Full tree expansion baseline
     --------------------------------------------- */
     const allExpandableIds = useMemo(() => {
-        return glAccounts?.length ? collectExpandableIds(glAccounts) : [];
-    }, [glAccounts]);
+        return accountRows.length ? collectExpandableIds(accountRows) : [];
+    }, [accountRows]);
 
     /* ---------------------------------------------
     | Expansion state
@@ -118,7 +123,8 @@ export default function GlAccountsIndex() {
         return (
             <ul className="space-y-1">
                 {nodes.map((acc) => {
-                    const children = acc.children_recursive || [];
+                    const children =
+                        acc.children_recursive || acc.children || [];
                     const isExpanded = expandedIds.includes(acc.id);
                     const hasChildren = children.length > 0;
 
@@ -257,7 +263,7 @@ export default function GlAccountsIndex() {
 
                 {/* TREE */}
                 <Card className="overflow-y-auto p-6">
-                    {renderTree(glAccounts)}
+                    {renderTree(accountRows)}
                 </Card>
             </div>
         </CustomAuthLayout>

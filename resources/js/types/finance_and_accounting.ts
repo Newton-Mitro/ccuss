@@ -3,21 +3,26 @@ import { Timestamped } from './base_types';
 // Fiscal Year
 export interface FiscalYear extends Timestamped {
     id: number;
-    code: string; // e.g. "FY-2025-26"
+    name: string;
     start_date: string; // ISO date
     end_date: string; // ISO date
-    is_active: boolean;
-    is_closed: boolean;
+    status: 'OPEN' | 'CLOSED';
+    is_current: boolean;
+    code?: string;
+    is_active?: boolean;
+    is_closed?: boolean;
 }
 
 // Fiscal Period
 export interface FiscalPeriod extends Timestamped {
     id: number;
     fiscal_year_id: number;
-    period_name: string; // e.g. "JAN-2026"
+    name: string;
     start_date: string;
     end_date: string;
-    is_open: boolean;
+    status: 'OPEN' | 'CLOSED';
+    period_name?: string;
+    is_open?: boolean;
 }
 
 // Account

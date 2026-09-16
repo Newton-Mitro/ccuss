@@ -17,6 +17,12 @@ class FiscalPeriodController extends Controller
     public function __construct(
         private readonly FiscalPeriodService $fiscalPeriodService,
     ) {
+        $this->middleware('permission:settings.fiscal.view')->only(['index']);
+        $this->middleware('permission:settings.fiscal.create')->only(['create', 'store']);
+        $this->middleware('permission:settings.fiscal.update')->only(['edit', 'update']);
+        $this->middleware('permission:settings.fiscal.delete')->only(['destroy']);
+        $this->middleware('permission:accounting.period_end.close')->only(['close']);
+        $this->middleware('permission:accounting.period_end.reopen')->only(['reopen']);
     }
 
     public function index(Request $request): Response

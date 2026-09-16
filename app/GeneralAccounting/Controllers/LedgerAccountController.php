@@ -18,6 +18,10 @@ class LedgerAccountController extends Controller
     public function __construct(
         private readonly LedgerAccountService $accountService,
     ) {
+        $this->middleware('permission:accounting.coa.view')->only(['index', 'show', 'ledgerSearch']);
+        $this->middleware('permission:accounting.coa.create')->only(['create', 'store']);
+        $this->middleware('permission:accounting.coa.update')->only(['edit', 'update']);
+        $this->middleware('permission:accounting.coa.delete')->only(['destroy']);
     }
 
     public function index(Request $request): Response

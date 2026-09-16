@@ -1,10 +1,11 @@
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Lock, Pencil, Plus, Trash2 } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
 import { Input } from '../../../components/ui/input';
+import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
@@ -16,11 +17,15 @@ interface FiscalYearPageProps extends SharedData {
         data: FiscalYear[];
         links: { url: string | null; label: string; active: boolean }[];
     };
+    retainedEarningsAccounts: { id: number; code: string; name: string }[];
     filters: Record<string, string>;
 }
 
 export default function FiscalYearIndex() {
-    const { fiscalYears, filters } = usePage<FiscalYearPageProps>().props;
+    const { fiscalYears, filters, retainedEarningsAccounts } =
+        usePage<FiscalYearPageProps>().props;
+    const [retainedEarningsAccountId, setRetainedEarningsAccountId] =
+        useState('');
 
     useFlashToastHandler();
 
@@ -135,7 +140,7 @@ export default function FiscalYearIndex() {
                                         key={fy.id}
                                         className="border-b transition-colors even:bg-muted hover:bg-accent/20"
                                     >
-                                        <td className="px-2 py-1">{fy.code}</td>
+                                        <td className="px-2 py-1">{fy.name}</td>
 
                                         <td className="px-2 py-1">
                                             {new Date(
@@ -151,7 +156,7 @@ export default function FiscalYearIndex() {
 
                                         {/* 🔥 Unified status */}
                                         <td className="px-2 py-1">
-                                            {fy.is_closed ? (
+                                            {fy.status === 'CLOSED' ? (
                                                 <span className="font-medium text-red-600">
                                                     Closed
                                                 </span>
@@ -175,34 +180,65 @@ export default function FiscalYearIndex() {
                                             </Link>
 
                                             {!fy.is_closed && (
-                                                <button
-                                                    type="button"
-                                                    title="Close fiscal year"
-                                                    disabled={processing}
-                                                    onClick={() =>
-                                                        router.post(
-                                                            route(
-                                                                'fiscal-years.close-year',
-                                                                fy.id,
-                                                            ),
-                                                            {},
+                                                <>
+                                                    <Select
+                                                        value={
+                                                            retainedEarningsAccountId
+                                                        }
+                                                        onChange={
+                                                            setRetainedEarningsAccountId
+                                                        }
+                                                        options={[
                                                             {
-                                                                preserveScroll: true,
-                                                                preserveState: true,
+                                                                value: '',
+                                                                label: 'Retained earnings account',
                                                             },
-                                                        )
-                                                    }
-                                                    className="text-amber-600 hover:text-amber-700 disabled:opacity-40"
-                                                >
-                                                    <Lock className="h-5 w-5" />
-                                                </button>
+                                                            ...retainedEarningsAccounts.map(
+                                                                (account) => ({
+                                                                    value: String(
+                                                                        account.id,
+                                                                    ),
+                                                                    label: `${account.code} - ${account.name}`,
+                                                                }),
+                                                            ),
+                                                        ]}
+                                                        className="w-56"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        title="Close fiscal year"
+                                                        disabled={
+                                                            processing ||
+                                                            !retainedEarningsAccountId
+                                                        }
+                                                        onClick={() =>
+                                                            router.post(
+                                                                route(
+                                                                    'fiscal-years.close-year',
+                                                                    fy.id,
+                                                                ),
+                                                                {
+                                                                    retained_earnings_account_id:
+                                                                        retainedEarningsAccountId,
+                                                                },
+                                                                {
+                                                                    preserveScroll: true,
+                                                                    preserveState: true,
+                                                                },
+                                                            )
+                                                        }
+                                                        className="text-amber-600 hover:text-amber-700 disabled:opacity-40"
+                                                    >
+                                                        <Lock className="h-5 w-5" />
+                                                    </button>
+                                                </>
                                             )}
 
                                             <button
                                                 type="button"
                                                 disabled={processing}
                                                 onClick={() =>
-                                                    handleDelete(fy.id, fy.code)
+                                                    handleDelete(fy.id, fy.name)
                                                 }
                                                 className="text-destructive hover:text-destructive/80 disabled:opacity-50"
                                                 title="Delete fiscal year"

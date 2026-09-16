@@ -12,43 +12,18 @@ import { Plus, Trash2 } from 'lucide-react';
 import React from 'react';
 import { route } from 'ziggy-js';
 
-interface Account {
-    id: number;
-    code: string;
-    name: string;
-}
-interface FiscalPeriod {
-    id: number;
-    name: string;
-    fiscal_year?: { name: string };
-}
 interface Entry {
     account_id: string;
-    debit: string;
-    credit: string;
+    amount: string;
     description: string;
 }
 
-const emptyEntry = (): Entry => ({
-    account_id: '',
-    debit: '',
-    credit: '',
-    description: '',
-});
-
-export default function JournalVoucherEntryPage() {
-    const { fiscalPeriods, accounts, voucherType } = usePage()
-        .props as unknown as {
-        fiscalPeriods: FiscalPeriod[];
-        accounts: Account[];
-        voucherType: string;
-    };
+export default function OpeningBalancesCreate() {
+    const { fiscalPeriods, accounts } = usePage().props as any;
     const { data, setData, post, processing, errors } = useForm({
-        fiscal_period_id: String(fiscalPeriods[0]?.id ?? ''),
-        voucher_type: voucherType || 'JOURNAL',
-        voucher_date: new Date().toISOString().slice(0, 10),
-        description: '',
-        entries: [emptyEntry(), emptyEntry()],
+        fiscal_period_id: fiscalPeriods[0]?.id ?? '',
+        offset_account_id: '',
+        entries: [{ account_id: '', amount: '', description: '' }] as Entry[],
     });
     useFlashToastHandler();
 
@@ -57,41 +32,29 @@ export default function JournalVoucherEntryPage() {
         entries[index] = { ...entries[index], [field]: value };
         setData('entries', entries);
     };
-    const totalDebit = data.entries.reduce(
-        (sum, entry) => sum + Number(entry.debit || 0),
-        0,
-    );
-    const totalCredit = data.entries.reduce(
-        (sum, entry) => sum + Number(entry.credit || 0),
-        0,
-    );
-    const balanced =
-        data.entries.length >= 2 &&
-        totalDebit > 0 &&
-        totalDebit === totalCredit;
     const submit = (event: React.FormEvent) => {
         event.preventDefault();
-        post(route('vouchers.store'), { preserveScroll: true });
+        post(route('opening-balances.store'), { preserveScroll: true });
     };
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'General Accounting', href: '' },
-        { title: 'Vouchers', href: route('vouchers.index') },
-        { title: 'Create Voucher', href: '' },
+        { title: 'Opening Balances', href: route('opening-balances.index') },
+        { title: 'Apply Opening Balances', href: '' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title={`${data.voucher_type} Voucher`} />
+            <Head title="Apply Opening Balances" />
             <div className="space-y-4">
                 <HeadingSmall
-                    title={`${data.voucher_type} Voucher`}
-                    description="Create a balanced draft voucher."
+                    title="Apply Opening Balances"
+                    description="Create and post one balanced opening voucher."
                 />
                 <form
                     onSubmit={submit}
                     className="space-y-5 rounded-md border bg-card p-6"
                 >
-                    <div className="grid gap-4 md:grid-cols-3">
+                    <div className="grid gap-4 md:grid-cols-2">
                         <div>
                             <Label>Fiscal period</Label>
                             <Select
@@ -99,38 +62,34 @@ export default function JournalVoucherEntryPage() {
                                 onChange={(value) =>
                                     setData('fiscal_period_id', value)
                                 }
-                                options={fiscalPeriods.map((period) => ({
-                                    value: String(period.id),
+                                options={fiscalPeriods.map((period: any) => ({
+                                    value: period.id,
                                     label: `${period.name} - ${period.fiscal_year?.name ?? ''}`,
                                 }))}
                             />
                             <InputError message={errors.fiscal_period_id} />
                         </div>
                         <div>
-                            <Label>Voucher date</Label>
-                            <Input
-                                type="date"
-                                value={data.voucher_date}
-                                onChange={(event) =>
-                                    setData('voucher_date', event.target.value)
+                            <Label>Offset account</Label>
+                            <Select
+                                value={data.offset_account_id}
+                                onChange={(value) =>
+                                    setData('offset_account_id', value)
                                 }
+                                options={[
+                                    { value: '', label: 'Select account' },
+                                    ...accounts.map((account: any) => ({
+                                        value: account.id,
+                                        label: `${account.code} - ${account.name}`,
+                                    })),
+                                ]}
                             />
-                            <InputError message={errors.voucher_date} />
-                        </div>
-                        <div>
-                            <Label>Description</Label>
-                            <Input
-                                value={data.description}
-                                onChange={(event) =>
-                                    setData('description', event.target.value)
-                                }
-                            />
-                            <InputError message={errors.description} />
+                            <InputError message={errors.offset_account_id} />
                         </div>
                     </div>
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                            <h2 className="font-medium">Entries</h2>
+                            <h2 className="font-medium">Balance entries</h2>
                             <Button
                                 type="button"
                                 variant="outline"
@@ -138,7 +97,11 @@ export default function JournalVoucherEntryPage() {
                                 onClick={() =>
                                     setData('entries', [
                                         ...data.entries,
-                                        emptyEntry(),
+                                        {
+                                            account_id: '',
+                                            amount: '',
+                                            description: '',
+                                        },
                                     ])
                                 }
                             >
@@ -148,7 +111,7 @@ export default function JournalVoucherEntryPage() {
                         {data.entries.map((entry, index) => (
                             <div
                                 key={index}
-                                className="grid items-end gap-3 md:grid-cols-[1fr_8rem_8rem_1fr_auto]"
+                                className="grid items-end gap-3 md:grid-cols-[1fr_10rem_1fr_auto]"
                             >
                                 <div>
                                     <Label>Account</Label>
@@ -166,64 +129,31 @@ export default function JournalVoucherEntryPage() {
                                                 value: '',
                                                 label: 'Select account',
                                             },
-                                            ...accounts.map((account) => ({
-                                                value: String(account.id),
+                                            ...accounts.map((account: any) => ({
+                                                value: account.id,
                                                 label: `${account.code} - ${account.name}`,
                                             })),
                                         ]}
                                     />
-                                    <InputError
-                                        message={
-                                            errors[
-                                                `entries.${index}.account_id`
-                                            ]
-                                        }
-                                    />
                                 </div>
                                 <div>
-                                    <Label>Debit</Label>
+                                    <Label>Amount</Label>
                                     <Input
                                         type="number"
                                         min="0"
                                         step="0.0001"
-                                        value={entry.debit}
+                                        value={entry.amount}
                                         onChange={(event) =>
                                             updateEntry(
                                                 index,
-                                                'debit',
+                                                'amount',
                                                 event.target.value,
                                             )
                                         }
                                     />
-                                    <InputError
-                                        message={
-                                            errors[`entries.${index}.debit`]
-                                        }
-                                    />
                                 </div>
                                 <div>
-                                    <Label>Credit</Label>
-                                    <Input
-                                        type="number"
-                                        min="0"
-                                        step="0.0001"
-                                        value={entry.credit}
-                                        onChange={(event) =>
-                                            updateEntry(
-                                                index,
-                                                'credit',
-                                                event.target.value,
-                                            )
-                                        }
-                                    />
-                                    <InputError
-                                        message={
-                                            errors[`entries.${index}.credit`]
-                                        }
-                                    />
-                                </div>
-                                <div>
-                                    <Label>Line description</Label>
+                                    <Label>Description</Label>
                                     <Input
                                         value={entry.description}
                                         onChange={(event) =>
@@ -238,7 +168,7 @@ export default function JournalVoucherEntryPage() {
                                 <button
                                     type="button"
                                     title="Remove line"
-                                    disabled={data.entries.length <= 2}
+                                    disabled={data.entries.length === 1}
                                     onClick={() =>
                                         setData(
                                             'entries',
@@ -255,18 +185,9 @@ export default function JournalVoucherEntryPage() {
                         ))}
                         <InputError message={errors.entries} />
                     </div>
-                    <div className="flex items-center justify-between border-t pt-4 text-sm">
-                        <span>
-                            Debit: {totalDebit.toFixed(4)} | Credit:{' '}
-                            {totalCredit.toFixed(4)}
-                        </span>
-                        <Button
-                            type="submit"
-                            disabled={processing || !balanced}
-                        >
-                            Save draft voucher
-                        </Button>
-                    </div>
+                    <Button type="submit" disabled={processing}>
+                        Post opening balances
+                    </Button>
                 </form>
             </div>
         </CustomAuthLayout>

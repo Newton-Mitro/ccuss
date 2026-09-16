@@ -4,10 +4,12 @@ namespace App\GeneralAccounting\Controllers;
 
 use App\GeneralAccounting\Application\FiscalYearService;
 use App\GeneralAccounting\Models\FiscalYear;
+use App\GeneralAccounting\Models\LedgerAccount;
 use App\GeneralAccounting\Requests\StoreFiscalYearRequest;
 use App\GeneralAccounting\Requests\UpdateFiscalYearRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -16,6 +18,11 @@ class FiscalYearController extends Controller
     public function __construct(
         private readonly FiscalYearService $fiscalYearService,
     ) {
+        $this->middleware('permission:settings.fiscal_year.view')->only(['index']);
+        $this->middleware('permission:settings.fiscal_year.create')->only(['create', 'store']);
+        $this->middleware('permission:settings.fiscal_year.update')->only(['edit', 'update']);
+        $this->middleware('permission:settings.fiscal_year.delete')->only(['destroy']);
+        $this->middleware('permission:accounting.year_end.close')->only(['closeYear']);
     }
 
     public function index(Request $request): Response
@@ -27,6 +34,12 @@ class FiscalYearController extends Controller
 
         return Inertia::render('general-accounting/fiscal-years/index', [
             'fiscalYears' => $fiscalYears,
+            'retainedEarningsAccounts' => LedgerAccount::query()
+                ->where('organization_id', $request->attributes->get('active_organization')->id)
+                ->where('type', 'EQUITY')
+                ->where('status', true)
+                ->orderBy('code')
+                ->get(['id', 'code', 'name']),
             'filters' => $request->only(['search', 'per_page', 'page']),
         ]);
     }
@@ -87,9 +100,23 @@ class FiscalYearController extends Controller
     public function closeYear(Request $request, FiscalYear $fiscalYear)
     {
         $this->authorizeOrganization($request, $fiscalYear);
+        $validated = $request->validate([
+            'retained_earnings_account_id' => [
+                'required',
+                'integer',
+                Rule::exists('accounts', 'id')->where(fn($query) => $query
+                    ->where('organization_id', $request->attributes->get('active_organization')->id)
+                    ->where('type', 'EQUITY')
+                    ->where('status', true)),
+            ],
+        ]);
 
         try {
-            $this->fiscalYearService->closeYear($fiscalYear);
+            $this->fiscalYearService->closeYearWithClosingVoucher(
+                $fiscalYear,
+                (int) $validated['retained_earnings_account_id'],
+                $request->user()->id,
+            );
         } catch (\RuntimeException $exception) {
             return back()->with('error', $exception->getMessage());
         }

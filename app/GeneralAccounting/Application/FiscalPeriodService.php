@@ -62,6 +62,10 @@ class FiscalPeriodService
             throw new RuntimeException('The fiscal period is already closed.');
         }
 
+        if ($fiscalPeriod->vouchers()->where('status', 'DRAFT')->exists()) {
+            throw new RuntimeException('The fiscal period has draft vouchers that must be resolved first.');
+        }
+
         return $this->fiscalPeriodRepository->update($fiscalPeriod, ['status' => 'CLOSED']);
     }
 
