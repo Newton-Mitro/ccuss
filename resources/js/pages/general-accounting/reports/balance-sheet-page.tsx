@@ -40,7 +40,7 @@ export default function BalanceSheetPage() {
         const year = Number(value);
         setFiscalYear(year);
         router.get(
-            '/reports/balance-sheet',
+            '/financial-reports/balance-sheet',
             { fiscal_year_id: year },
             { preserveState: true },
         );
@@ -61,7 +61,7 @@ export default function BalanceSheetPage() {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'General Accounting', href: '' },
         { title: 'Reports', href: '#' },
-        { title: 'Balance Sheet', href: '/reports/balance-sheet' },
+        { title: 'Balance Sheet', href: '/financial-reports/balance-sheet' },
     ];
 
     return (

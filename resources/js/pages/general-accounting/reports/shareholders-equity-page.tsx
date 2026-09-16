@@ -42,7 +42,7 @@ export default function ShareholdersEquityPage() {
         const year = Number(value);
         setFiscalYear(year);
         router.get(
-            '/reports/shareholders-equity',
+            '/financial-reports/shareholders-equity',
             { fiscal_year_id: year },
             { preserveState: true },
         );
@@ -89,7 +89,10 @@ export default function ShareholdersEquityPage() {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'General Accounting', href: '' },
         { title: 'Reports', href: '#' },
-        { title: 'Shareholders’ Equity', href: '/reports/shareholders-equity' },
+        {
+            title: 'Shareholders’ Equity',
+            href: '/financial-reports/shareholders-equity',
+        },
     ];
 
     return (

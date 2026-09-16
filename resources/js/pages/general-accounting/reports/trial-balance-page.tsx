@@ -62,7 +62,7 @@ export default function TrialBalancePage() {
         const year = Number(value);
         setFiscalYear(year);
         router.get(
-            '/reports/trial-balance',
+            '/trial-balance',
             { fiscal_year_id: year, fiscal_period_id: fiscalPeriod },
             { preserveState: true },
         );
@@ -72,7 +72,7 @@ export default function TrialBalancePage() {
         const period = Number(value);
         setFiscalPeriod(period);
         router.get(
-            '/reports/trial-balance',
+            '/trial-balance',
             { fiscal_year_id: fiscalYear, fiscal_period_id: period },
             { preserveState: true },
         );
@@ -111,7 +111,7 @@ export default function TrialBalancePage() {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'General Accounting', href: '' },
         { title: 'Reports', href: '' },
-        { title: 'Trial Balance', href: '/reports/trial-balance' },
+        { title: 'Trial Balance', href: '/trial-balance' },
     ];
 
     return (

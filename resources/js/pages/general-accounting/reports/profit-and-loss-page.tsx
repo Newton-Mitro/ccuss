@@ -52,7 +52,7 @@ export default function ProfitAndLossPage() {
         const year = Number(value);
         setFiscalYear(year);
         router.get(
-            '/reports/profit-loss',
+            '/financial-reports/profit-loss',
             { fiscal_year_id: year, fiscal_period_id: fiscalPeriod },
             { preserveState: true },
         );
@@ -62,7 +62,7 @@ export default function ProfitAndLossPage() {
         const period = Number(value);
         setFiscalPeriod(period);
         router.get(
-            '/reports/profit-loss',
+            '/financial-reports/profit-loss',
             { fiscal_year_id: fiscalYear, fiscal_period_id: period },
             { preserveState: true },
         );
@@ -81,7 +81,7 @@ export default function ProfitAndLossPage() {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'General Accounting', href: '' },
         { title: 'Reports', href: '#' },
-        { title: 'Profit & Loss', href: '/reports/profit-loss' },
+        { title: 'Profit & Loss', href: '/financial-reports/profit-loss' },
     ];
 
     return (

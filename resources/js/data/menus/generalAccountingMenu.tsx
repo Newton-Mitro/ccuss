@@ -183,20 +183,6 @@ export const generalAccountingMenu: SidebarItem[] = [
                         permission: ['accounting.general_ledger.view'],
                     },
                     {
-                        name: 'Account Statement',
-                        icon: <i className="fa-solid fa-file-lines" />,
-                        path: '/financial-reports/account-statement',
-                        match_path: 'financial-reports/account-statement',
-                        permission: ['accounting.account_statement.view'],
-                    },
-                    {
-                        name: 'Day Book',
-                        icon: <i className="fa-solid fa-book-open" />,
-                        path: '/financial-reports/day-book',
-                        match_path: 'financial-reports/day-book',
-                        permission: ['accounting.day_book.view'],
-                    },
-                    {
                         name: 'Profit & Loss',
                         icon: <i className="fa-solid fa-chart-line" />,
                         path: '/financial-reports/profit-loss',

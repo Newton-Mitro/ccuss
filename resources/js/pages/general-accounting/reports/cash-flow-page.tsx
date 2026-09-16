@@ -56,7 +56,7 @@ export default function CashFlowStatementPage() {
         const year = Number(value);
         setFiscalYear(year);
         router.get(
-            '/reports/cash-flow',
+            '/financial-reports/cash-flow',
             {
                 fiscal_year_id: year || undefined,
                 fiscal_period_id: fiscalPeriod || undefined,
@@ -69,7 +69,7 @@ export default function CashFlowStatementPage() {
         const period = Number(value);
         setFiscalPeriod(period);
         router.get(
-            '/reports/cash-flow',
+            '/financial-reports/cash-flow',
             {
                 fiscal_year_id: fiscalYear || undefined,
                 fiscal_period_id: period || undefined,
@@ -99,7 +99,7 @@ export default function CashFlowStatementPage() {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'General Accounting', href: '' },
         { title: 'Reports', href: '#' },
-        { title: 'Cash Flow Statement', href: '/reports/cash-flow' },
+        { title: 'Cash Flow Statement', href: '/financial-reports/cash-flow' },
     ];
 
     return (
