@@ -40,6 +40,16 @@ test('organization service creates and rejects duplicate codes', function () {
     ]))->toThrow(RuntimeException::class, 'Organization code already exists.');
 });
 
+test('organization service generates a code when one is not provided', function () {
+    Organization::factory()->create(['code' => 'ORG-004']);
+
+    $organization = app(OrganizationService::class)->createOrganization([
+        'name' => 'Generated Code Org',
+    ]);
+
+    expect($organization->code)->toBe('ORG-002');
+});
+
 test('organization service replaces logos and deletes the old logo', function () {
     Storage::fake('public');
     $service = app(OrganizationService::class);

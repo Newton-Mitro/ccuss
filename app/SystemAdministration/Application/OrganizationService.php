@@ -6,7 +6,6 @@ use App\SystemAdministration\Application\Contracts\OrganizationRepositoryInterfa
 use App\SystemAdministration\Models\Organization;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use InvalidArgumentException;
 
 class OrganizationService
 {
@@ -18,10 +17,8 @@ class OrganizationService
     public function createOrganization(array $data, ?UploadedFile $logo = null): Organization
     {
         $code = trim((string) ($data['code'] ?? ''));
-
-        if ($code === '') {
-            throw new InvalidArgumentException('Organization code is required.');
-        }
+        $code = $code !== '' ? $code : $this->generateOrganizationCode();
+        $data['code'] = $code;
 
         if ($this->organizationRepository->existsByCode($code)) {
             throw new \RuntimeException('Organization code already exists.');
@@ -32,6 +29,18 @@ class OrganizationService
         }
 
         return $this->organizationRepository->create($data);
+    }
+
+    private function generateOrganizationCode(): string
+    {
+        $nextNumber = ((int) Organization::withTrashed()->max('id')) + 1;
+
+        do {
+            $code = 'ORG-' . str_pad((string) $nextNumber, 3, '0', STR_PAD_LEFT);
+            $nextNumber++;
+        } while ($this->organizationRepository->existsByCode($code));
+
+        return $code;
     }
 
     public function updateOrganization(Organization $organization, array $data, ?UploadedFile $logo = null): Organization

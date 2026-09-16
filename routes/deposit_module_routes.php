@@ -1,10 +1,5 @@
 <?php
 
-use App\DepositModule\Controllers\DepositAccountController;
-use Illuminate\Support\Facades\Route;
-
-Route::middleware(['auth', 'verified', 'organization'])->group(function () {
-    Route::get('/deposit-accounts/create', [DepositAccountController::class, 'create'])->name('create');
-});
+// Deposit account routes will be registered when the backend module is available.
 
 

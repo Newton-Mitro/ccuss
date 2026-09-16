@@ -98,19 +98,6 @@ function CreateOrganization() {
                                 </h3>
                                 <div className="grid grid-cols-1 gap-x-5 gap-y-2 md:grid-cols-3">
                                     <div>
-                                        <Label>Organization Code</Label>
-                                        <Input
-                                            value={data.code}
-                                            onChange={(e) =>
-                                                setData('code', e.target.value)
-                                            }
-                                            className="h-8 text-sm"
-                                            placeholder="ORG-001"
-                                        />
-                                        <InputError message={errors.code} />
-                                    </div>
-
-                                    <div>
                                         <Label>Organization Name</Label>
                                         <Input
                                             value={data.name}
