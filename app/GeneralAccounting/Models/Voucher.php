@@ -6,12 +6,15 @@ use App\GeneralAccounting\Models\VoucherEntry;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Voucher extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'organization_id',
         'branch_id',

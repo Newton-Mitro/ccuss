@@ -3,12 +3,15 @@
 namespace App\GeneralAccounting\Models;
 
 use App\SystemAdministration\Models\Organization;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AccountGroup extends Model
 {
+    use HasFactory;
+
     protected $table = 'account_groups';
 
     protected $fillable = [

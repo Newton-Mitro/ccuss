@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
                 RoleSeeder::class,
                 SystemAdministratorRolePermissionSeeder::class,
                 OrganizationStructureSeeder::class,
+                GeneralAccountingSeeder::class,
                 CustomerSeeder::class,
             ]);
         });

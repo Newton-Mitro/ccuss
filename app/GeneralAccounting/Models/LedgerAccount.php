@@ -4,12 +4,15 @@ namespace App\GeneralAccounting\Models;
 
 use App\GeneralAccounting\Models\AccountGroup;
 use App\SystemAdministration\Models\Organization;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LedgerAccount extends Model
 {
+    use HasFactory;
+
     protected $table = 'accounts';
 
     protected $fillable = [

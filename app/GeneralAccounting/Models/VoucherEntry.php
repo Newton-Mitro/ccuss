@@ -3,11 +3,14 @@
 namespace App\GeneralAccounting\Models;
 
 use App\GeneralAccounting\Models\Voucher;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class VoucherEntry extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'voucher_id',
         'account_id',
