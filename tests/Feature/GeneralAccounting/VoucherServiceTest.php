@@ -125,3 +125,108 @@ it('posts a draft and rejects posting it twice', function () {
     expect(fn() => $service->post($posted, $fixture['organization']->id, $fixture['user']->id))
         ->toThrow(RuntimeException::class, 'Only draft vouchers can be posted');
 });
+
+it('cancels drafts and reverses posted vouchers with opposite entries', function () {
+    $fixture = voucherFixture();
+    $service = app(VoucherService::class);
+    $voucher = $service->createDraft([
+        'fiscal_period_id' => $fixture['period']->id,
+        'voucher_type' => 'JOURNAL',
+        'voucher_date' => '2025-07-10',
+        'entries' => [
+            ['account_id' => $fixture['accounts'][0]->id, 'debit' => 125, 'credit' => 0],
+            ['account_id' => $fixture['accounts'][1]->id, 'debit' => 0, 'credit' => 125],
+        ],
+    ], $fixture['organization']->id, $fixture['user']->id);
+
+    expect($service->cancel($voucher, $fixture['organization']->id)->status)
+        ->toBe('CANCELLED');
+
+    $posted = $service->createDraft([
+        'fiscal_period_id' => $fixture['period']->id,
+        'voucher_type' => 'JOURNAL',
+        'voucher_date' => '2025-07-11',
+        'entries' => [
+            ['account_id' => $fixture['accounts'][0]->id, 'debit' => 200, 'credit' => 0],
+            ['account_id' => $fixture['accounts'][1]->id, 'debit' => 0, 'credit' => 200],
+        ],
+    ], $fixture['organization']->id, $fixture['user']->id);
+    $posted = $service->post($posted, $fixture['organization']->id, $fixture['user']->id);
+
+    $reversal = $service->reverse($posted, $fixture['organization']->id, $fixture['user']->id);
+
+    expect($posted->fresh()->status)->toBe('REVERSED')
+        ->and($reversal->status)->toBe('POSTED')
+        ->and($reversal->voucher_type)->toBe('ADJUSTMENT')
+        ->and((float) $reversal->entries[0]->debit)->toBe(0.0)
+        ->and((float) $reversal->entries[0]->credit)->toBe(200.0);
+});
+
+it('creates a voucher through the organization-scoped HTTP endpoint', function () {
+    $fixture = voucherFixture();
+
+    $response = $this
+        ->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('vouchers.store'), [
+            'fiscal_period_id' => $fixture['period']->id,
+            'voucher_type' => 'RECEIPT',
+            'voucher_date' => '2025-07-15',
+            'description' => 'HTTP voucher',
+            'entries' => [
+                ['account_id' => $fixture['accounts'][0]->id, 'debit' => 300, 'credit' => 0],
+                ['account_id' => $fixture['accounts'][1]->id, 'debit' => 0, 'credit' => 300],
+            ],
+        ]);
+
+    $response->assertRedirect();
+    expect(Voucher::query()
+        ->where('organization_id', $fixture['organization']->id)
+        ->where('voucher_type', 'RECEIPT')
+        ->where('description', 'HTTP voucher')
+        ->exists())->toBeTrue();
+});
+
+it('edits draft vouchers and rejects edits to posted vouchers', function () {
+    $fixture = voucherFixture();
+    $service = app(VoucherService::class);
+    $voucher = $service->createDraft([
+        'fiscal_period_id' => $fixture['period']->id,
+        'voucher_type' => 'JOURNAL',
+        'voucher_date' => '2025-07-10',
+        'description' => 'Before edit',
+        'entries' => [
+            ['account_id' => $fixture['accounts'][0]->id, 'debit' => 100, 'credit' => 0],
+            ['account_id' => $fixture['accounts'][1]->id, 'debit' => 0, 'credit' => 100],
+        ],
+    ], $fixture['organization']->id, $fixture['user']->id);
+    $voucherNumber = $voucher->voucher_no;
+
+    $updated = $service->updateDraft($voucher, [
+        'fiscal_period_id' => $fixture['period']->id,
+        'voucher_type' => 'PAYMENT',
+        'voucher_date' => '2025-07-12',
+        'description' => 'After edit',
+        'entries' => [
+            ['account_id' => $fixture['accounts'][0]->id, 'debit' => 250, 'credit' => 0],
+            ['account_id' => $fixture['accounts'][1]->id, 'debit' => 0, 'credit' => 250],
+        ],
+    ], $fixture['organization']->id);
+
+    expect($updated->voucher_no)->toBe($voucherNumber)
+        ->and($updated->voucher_type)->toBe('PAYMENT')
+        ->and($updated->description)->toBe('After edit')
+        ->and((float) $updated->entries[0]->debit)->toBe(250.0);
+
+    $posted = $service->post($updated, $fixture['organization']->id, $fixture['user']->id);
+
+    expect(fn() => $service->updateDraft($posted, [
+        'fiscal_period_id' => $fixture['period']->id,
+        'voucher_type' => 'PAYMENT',
+        'voucher_date' => '2025-07-12',
+        'entries' => [
+            ['account_id' => $fixture['accounts'][0]->id, 'debit' => 300, 'credit' => 0],
+            ['account_id' => $fixture['accounts'][1]->id, 'debit' => 0, 'credit' => 300],
+        ],
+    ], $fixture['organization']->id))->toThrow(RuntimeException::class, 'Only draft vouchers can be edited');
+});

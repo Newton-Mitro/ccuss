@@ -23,6 +23,7 @@ class StoreLedgerAccountRequest extends FormRequest
             'normal_balance' => ['required', Rule::in(['DEBIT', 'CREDIT'])],
             'is_control_account' => ['nullable', 'boolean'],
             'is_reconcilable' => ['nullable', 'boolean'],
+            'is_cash_account' => ['nullable', 'boolean'],
             'is_system' => ['nullable', 'boolean'],
             'status' => ['nullable', 'boolean'],
         ];

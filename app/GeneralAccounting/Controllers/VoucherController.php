@@ -7,6 +7,7 @@ use App\GeneralAccounting\Models\FiscalPeriod;
 use App\GeneralAccounting\Models\LedgerAccount;
 use App\GeneralAccounting\Models\Voucher;
 use App\GeneralAccounting\Requests\StoreVoucherRequest;
+use App\GeneralAccounting\Requests\UpdateVoucherRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -68,6 +69,34 @@ class VoucherController extends Controller
         ]);
     }
 
+    public function edit(Request $request, Voucher $voucher): Response
+    {
+        $this->authorizeOrganization($request, $voucher);
+
+        return Inertia::render('general-accounting/vouchers/edit/debit_voucher_edit_page', [
+            'voucher' => $voucher->load('entries.account'),
+            'fiscalPeriods' => $this->fiscalPeriods($request),
+            'accounts' => $this->accounts($request),
+        ]);
+    }
+
+    public function update(UpdateVoucherRequest $request, Voucher $voucher)
+    {
+        $this->authorizeOrganization($request, $voucher);
+
+        try {
+            $this->voucherService->updateDraft(
+                $voucher,
+                $request->validated(),
+                $request->attributes->get('active_organization')->id,
+            );
+        } catch (\InvalidArgumentException | \RuntimeException $exception) {
+            return back()->withInput()->with('error', $exception->getMessage());
+        }
+
+        return redirect()->route('vouchers.show', $voucher)->with('success', 'Voucher draft updated successfully.');
+    }
+
     public function post(Request $request, Voucher $voucher)
     {
         $this->authorizeOrganization($request, $voucher);
@@ -83,6 +112,39 @@ class VoucherController extends Controller
         }
 
         return back()->with('success', 'Voucher posted successfully.');
+    }
+
+    public function cancel(Request $request, Voucher $voucher)
+    {
+        $this->authorizeOrganization($request, $voucher);
+
+        try {
+            $this->voucherService->cancel(
+                $voucher,
+                $request->attributes->get('active_organization')->id,
+            );
+        } catch (\RuntimeException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
+
+        return back()->with('success', 'Voucher cancelled successfully.');
+    }
+
+    public function reverse(Request $request, Voucher $voucher)
+    {
+        $this->authorizeOrganization($request, $voucher);
+
+        try {
+            $reversal = $this->voucherService->reverse(
+                $voucher->load(['entries', 'fiscalPeriod']),
+                $request->attributes->get('active_organization')->id,
+                $request->user()->id,
+            );
+        } catch (\InvalidArgumentException | \RuntimeException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
+
+        return redirect()->route('vouchers.show', $reversal)->with('success', 'Voucher reversed successfully.');
     }
 
     private function fiscalPeriods(Request $request)

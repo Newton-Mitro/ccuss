@@ -23,6 +23,7 @@ class LedgerAccount extends Model
         'level',
         'is_control_account',
         'is_reconcilable',
+        'is_cash_account',
         'is_system',
         'status',
     ];
@@ -31,6 +32,7 @@ class LedgerAccount extends Model
         'level' => 'integer',
         'is_control_account' => 'boolean',
         'is_reconcilable' => 'boolean',
+        'is_cash_account' => 'boolean',
         'is_system' => 'boolean',
         'status' => 'boolean',
     ];

@@ -71,6 +71,19 @@ class FiscalYearService
         return $this->fiscalYearRepository->delete($fiscalYear);
     }
 
+    public function closeYear(FiscalYear $fiscalYear): FiscalYear
+    {
+        if ($fiscalYear->periods()->where('status', '!=', 'CLOSED')->exists()) {
+            throw new RuntimeException('all periods must be closed');
+        }
+
+        return DB::transaction(function () use ($fiscalYear) {
+            $fiscalYear->update(['status' => 'CLOSED']);
+
+            return $fiscalYear->fresh();
+        });
+    }
+
     private function validateDateRange(array $data): void
     {
         if (($data['start_date'] ?? '') >= ($data['end_date'] ?? '')) {

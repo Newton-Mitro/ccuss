@@ -39,6 +39,17 @@ class EloquentVoucherRepository implements VoucherRepositoryInterface
         });
     }
 
+    public function updateWithEntries(Voucher $voucher, array $voucherData, array $entries): Voucher
+    {
+        return DB::transaction(function () use ($voucher, $voucherData, $entries) {
+            $voucher->update($voucherData);
+            $voucher->entries()->delete();
+            $voucher->entries()->createMany($entries);
+
+            return $voucher->fresh('entries.account');
+        });
+    }
+
     public function updateStatus(Voucher $voucher, string $status, ?int $postedBy = null): Voucher
     {
         $voucher->update([

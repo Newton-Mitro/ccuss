@@ -1,6 +1,7 @@
 <?php
 
 use App\GeneralAccounting\Controllers\AccountGroupController;
+use App\GeneralAccounting\Controllers\AccountingReportController;
 use App\GeneralAccounting\Controllers\FiscalPeriodController;
 use App\GeneralAccounting\Controllers\FiscalYearController;
 use App\GeneralAccounting\Controllers\LedgerAccountController;
@@ -55,7 +56,24 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/vouchers/create', [VoucherController::class, 'create'])->name('vouchers.create');
     Route::post('/vouchers', [VoucherController::class, 'store'])->name('vouchers.store');
     Route::get('/vouchers/{voucher}', [VoucherController::class, 'show'])->name('vouchers.show');
+    Route::get('/vouchers/{voucher}/edit', [VoucherController::class, 'edit'])->name('vouchers.edit');
+    Route::put('/vouchers/{voucher}', [VoucherController::class, 'update'])->name('vouchers.update');
     Route::post('/vouchers/{voucher}/post', [VoucherController::class, 'post'])->name('vouchers.post');
+    Route::post('/vouchers/{voucher}/cancel', [VoucherController::class, 'cancel'])->name('vouchers.cancel');
+    Route::post('/vouchers/{voucher}/reverse', [VoucherController::class, 'reverse'])->name('vouchers.reverse');
+
+    Route::get('/trial-balance', [AccountingReportController::class, 'trialBalance'])
+        ->name('financial-reports.trial-balance');
+    Route::get('/financial-reports/general-ledger', [AccountingReportController::class, 'generalLedger'])
+        ->name('financial-reports.general-ledger');
+    Route::get('/financial-reports/profit-loss', [AccountingReportController::class, 'profitAndLoss'])
+        ->name('financial-reports.profit-loss');
+    Route::get('/financial-reports/balance-sheet', [AccountingReportController::class, 'balanceSheet'])
+        ->name('financial-reports.balance-sheet');
+    Route::get('/financial-reports/cash-flow', [AccountingReportController::class, 'cashFlow'])
+        ->name('financial-reports.cash-flow');
+    Route::get('/financial-reports/shareholders-equity', [AccountingReportController::class, 'shareholdersEquity'])
+        ->name('financial-reports.shareholders-equity');
 });
 
 

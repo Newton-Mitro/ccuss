@@ -56,6 +56,24 @@ class FiscalPeriodService
         return DB::transaction(fn() => $this->fiscalPeriodRepository->delete($fiscalPeriod));
     }
 
+    public function close(FiscalPeriod $fiscalPeriod): FiscalPeriod
+    {
+        if ($fiscalPeriod->status === 'CLOSED') {
+            throw new RuntimeException('The fiscal period is already closed.');
+        }
+
+        return $this->fiscalPeriodRepository->update($fiscalPeriod, ['status' => 'CLOSED']);
+    }
+
+    public function reopen(FiscalPeriod $fiscalPeriod): FiscalPeriod
+    {
+        if ($fiscalPeriod->status !== 'CLOSED') {
+            throw new RuntimeException('Only closed fiscal periods can be reopened.');
+        }
+
+        return $this->fiscalPeriodRepository->update($fiscalPeriod, ['status' => 'OPEN']);
+    }
+
     private function validateWithinYear(FiscalYear $fiscalYear, array $data): void
     {
         if (($data['start_date'] ?? '') >= ($data['end_date'] ?? '')) {

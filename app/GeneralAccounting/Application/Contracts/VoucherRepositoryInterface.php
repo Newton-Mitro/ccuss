@@ -13,5 +13,7 @@ interface VoucherRepositoryInterface
 
     public function createWithEntries(array $voucherData, array $entries): Voucher;
 
+    public function updateWithEntries(Voucher $voucher, array $voucherData, array $entries): Voucher;
+
     public function updateStatus(Voucher $voucher, string $status, ?int $postedBy = null): Voucher;
 }

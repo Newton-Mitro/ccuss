@@ -6,6 +6,7 @@ use App\GeneralAccounting\Application\Contracts\VoucherRepositoryInterface;
 use App\GeneralAccounting\Models\FiscalPeriod;
 use App\GeneralAccounting\Models\LedgerAccount;
 use App\GeneralAccounting\Models\Voucher;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -65,6 +66,87 @@ class VoucherService
         $this->validateEntries($voucher->entries->toArray(), $organizationId);
 
         return $this->voucherRepository->updateStatus($voucher, 'POSTED', $userId);
+    }
+
+    public function updateDraft(Voucher $voucher, array $data, int $organizationId): Voucher
+    {
+        $this->authorizeOrganization($voucher, $organizationId);
+
+        if ($voucher->status !== 'DRAFT') {
+            throw new RuntimeException('Only draft vouchers can be edited.');
+        }
+
+        $this->validateHeader($data, $organizationId);
+        $entries = $this->validateEntries($data['entries'] ?? [], $organizationId);
+        $period = FiscalPeriod::query()
+            ->whereHas('fiscalYear', fn($query) => $query->where('organization_id', $organizationId))
+            ->findOrFail($data['fiscal_period_id']);
+
+        if ($period->status !== 'OPEN') {
+            throw new RuntimeException('Vouchers cannot be edited in a closed fiscal period.');
+        }
+
+        if ($data['voucher_date'] < $period->start_date->toDateString() || $data['voucher_date'] > $period->end_date->toDateString()) {
+            throw new InvalidArgumentException('The voucher date must be within the fiscal period.');
+        }
+
+        return $this->voucherRepository->updateWithEntries($voucher, [
+            'branch_id' => $data['branch_id'] ?? null,
+            'fiscal_year_id' => $period->fiscal_year_id,
+            'fiscal_period_id' => $period->id,
+            'voucher_type' => $data['voucher_type'],
+            'voucher_date' => $data['voucher_date'],
+            'description' => $data['description'] ?? null,
+        ], $entries);
+    }
+
+    public function cancel(Voucher $voucher, int $organizationId): Voucher
+    {
+        $this->authorizeOrganization($voucher, $organizationId);
+
+        if ($voucher->status !== 'DRAFT') {
+            throw new RuntimeException('Only draft vouchers can be cancelled.');
+        }
+
+        return $this->voucherRepository->updateStatus($voucher, 'CANCELLED');
+    }
+
+    public function reverse(Voucher $voucher, int $organizationId, int $userId): Voucher
+    {
+        $this->authorizeOrganization($voucher, $organizationId);
+
+        if ($voucher->status !== 'POSTED') {
+            throw new RuntimeException('Only posted vouchers can be reversed.');
+        }
+
+        if ($voucher->fiscalPeriod->status !== 'OPEN') {
+            throw new RuntimeException('Posted vouchers cannot be reversed in a closed fiscal period.');
+        }
+
+        return DB::transaction(function () use ($voucher, $organizationId, $userId) {
+            $reversal = $this->createDraft([
+                'fiscal_period_id' => $voucher->fiscal_period_id,
+                'voucher_type' => 'ADJUSTMENT',
+                'voucher_date' => $voucher->voucher_date->toDateString(),
+                'description' => 'Reversal of ' . $voucher->voucher_no,
+                'entries' => $voucher->entries->map(fn($entry) => [
+                    'account_id' => $entry->account_id,
+                    'branch_id' => $entry->branch_id,
+                    'cost_center_id' => $entry->cost_center_id,
+                    'party_type' => $entry->party_type,
+                    'party_id' => $entry->party_id,
+                    'description' => $entry->description,
+                    'debit' => $entry->credit,
+                    'credit' => $entry->debit,
+                    'reference' => $voucher->voucher_no,
+                ])->all(),
+            ], $organizationId, $userId);
+
+            $reversal = $this->post($reversal, $organizationId, $userId);
+            $this->voucherRepository->updateStatus($voucher, 'REVERSED');
+
+            return $reversal->fresh('entries.account');
+        });
     }
 
     private function validateHeader(array $data, int $organizationId): void
