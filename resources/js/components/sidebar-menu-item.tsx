@@ -16,7 +16,22 @@ interface Props {
 
 /** Recursively check if item or its children are active */
 function isItemActive(item: SidebarItem, url: string): boolean {
-    if (item.match_path && url.includes(item.match_path)) return true;
+    if (item.path && item.match_path) {
+        const currentPath = url.split('#')[0];
+        const itemPath = item.path.split('#')[0];
+        const itemHasQuery = itemPath.includes('?');
+
+        if (
+            itemHasQuery
+                ? currentPath === itemPath
+                : currentPath.split('?')[0] === itemPath
+        ) {
+            return true;
+        }
+    } else if (item.match_path && url.includes(item.match_path)) {
+        return true;
+    }
+
     return !!item.children?.some((c) => isItemActive(c, url));
 }
 
@@ -29,10 +44,7 @@ export function SidebarMenuItem({
     const { url } = usePage();
     const hasChildren = !!item.children?.length;
 
-    const isSelfActive = useMemo(
-        () => !!item.match_path && url.includes(item.match_path),
-        [url, item.match_path],
-    );
+    const isSelfActive = useMemo(() => isItemActive(item, url), [item, url]);
 
     const hasActiveChild = useMemo(
         () =>

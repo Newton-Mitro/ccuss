@@ -5,7 +5,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { Eye, Pencil } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
@@ -13,12 +13,23 @@ import HeadingSmall from '../../../components/heading-small';
 import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { appSwal } from '../../../lib/appSwal';
-import { BreadcrumbItem, SharedData } from '../../../types';
+import { SharedData } from '../../../types';
 import { transactionStatus } from './data/transaction_statuses';
 
+interface Voucher {
+    id: number;
+    voucher_no: string;
+    voucher_type: string;
+    voucher_date: string;
+    status: string;
+    fiscal_year?: { code?: string };
+    fiscal_period?: { name?: string; period_name?: string };
+    branch?: { name: string };
+    entries?: { debit: number; credit: number }[];
+}
+
 interface VoucherPageProps extends SharedData {
-    voucher_entries: {
+    vouchers: {
         data: Voucher[];
         links: { url: string | null; label: string; active: boolean }[];
     };
@@ -26,27 +37,19 @@ interface VoucherPageProps extends SharedData {
 }
 
 export default function Index() {
-    const { voucher_entries, filters } = usePage<VoucherPageProps>().props;
-
-    useFlashToastHandler();
-
-    const {
-        data,
-        setData,
-        get,
-        delete: destroy,
-        processing,
-    } = useForm({
+    const { vouchers, filters } = usePage<VoucherPageProps>().props;
+    const { data, setData, get } = useForm({
         search: filters.search || '',
         status: filters.status || 'all',
         per_page: Number(filters.per_page) || 18,
         page: Number(filters.page) || 1,
     });
 
-    // Fetch voucher_entries on filter/search change
+    useFlashToastHandler();
+
     useEffect(() => {
         const delay = setTimeout(() => {
-            get(route('voucher_entries.index'), {
+            get(route('vouchers.index'), {
                 preserveScroll: true,
                 preserveState: true,
             });
@@ -54,104 +57,56 @@ export default function Index() {
         return () => clearTimeout(delay);
     }, [data.search, data.status, data.per_page, data.page]);
 
-    const handleDelete = (id: number, voucherNo: string) => {
-        appSwal
-            .fire({
-                title: 'Are you sure?',
-                text: `Voucher "${voucherNo}" will be permanently deleted!`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, delete it!',
-            })
-            .then((result) => {
-                if (result.isConfirmed) {
-                    destroy(route('voucher_entries.destroy', id), {
-                        preserveScroll: true,
-                        preserveState: true,
-                    });
-                }
-            });
-    };
+    const getTotals = (entries: Voucher['entries']) => ({
+        totalDebit:
+            entries?.reduce((sum, entry) => sum + Number(entry.debit), 0) || 0,
+        totalCredit:
+            entries?.reduce((sum, entry) => sum + Number(entry.credit), 0) || 0,
+    });
 
-    const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Vouchers', href: '/voucher_entries' },
+    const createTypes = [
+        { label: 'Payment', type: 'PAYMENT', color: 'bg-blue-600' },
+        { label: 'Receipt', type: 'RECEIPT', color: 'bg-green-600' },
+        { label: 'Journal', type: 'JOURNAL', color: 'bg-purple-600' },
+        { label: 'Contra', type: 'CONTRA', color: 'bg-gray-600' },
     ];
 
-    const getTotals = (lines?: { debit: number; credit: number }[]) => {
-        const totalDebit =
-            lines?.reduce((sum, l) => sum + Number(l.debit), 0) || 0;
-        const totalCredit =
-            lines?.reduce((sum, l) => sum + Number(l.credit), 0) || 0;
-        return { totalDebit, totalCredit };
-    };
-
-    const editRouteMap = {
-        DEBIT_OR_PAYMENT: 'voucher_entries.edit.debit',
-        CREDIT_OR_RECEIPT: 'voucher_entries.edit.credit',
-        JOURNAL_OR_NON_CASH: 'voucher_entries.edit.journal',
-        CONTRA: 'voucher_entries.edit.contra',
-    };
-
     return (
-        <CustomAuthLayout breadcrumbs={breadcrumbs}>
+        <CustomAuthLayout
+            breadcrumbs={[{ title: 'Vouchers', href: '/vouchers' }]}
+        >
             <Head title="Vouchers" />
-
             <div className="space-y-4 p-2 text-foreground">
-                {/* Header */}
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
                     <HeadingSmall
                         title="Vouchers"
-                        description="Manage all voucher_entries with ease"
+                        description="Manage all vouchers with ease"
                     />
-
-                    {/* Voucher Type Buttons */}
                     <div className="mt-2 flex flex-wrap gap-2 sm:mt-0">
-                        {[
-                            {
-                                label: 'Debit / Payment',
-                                route: 'voucher_entries.create.debit',
-                                color: 'bg-blue-600',
-                            },
-                            {
-                                label: 'Credit / Receipt',
-                                route: 'voucher_entries.create.credit',
-                                color: 'bg-green-600',
-                            },
-                            {
-                                label: 'Journal / Non-Cash',
-                                route: 'voucher_entries.create.journal',
-                                color: 'bg-purple-600',
-                            },
-                            {
-                                label: 'Contra',
-                                route: 'voucher_entries.create.contra',
-                                color: 'bg-gray-600',
-                            },
-                        ].map((v) => (
+                        {createTypes.map((item) => (
                             <Link
-                                key={v.route}
-                                href={route(v.route)}
-                                className={`min-w-[120px] flex-1 rounded-md px-3 py-2 text-center text-sm font-medium text-white hover:opacity-90 sm:flex-none ${v.color}`}
+                                key={item.type}
+                                href={route('vouchers.create', {
+                                    query: { type: item.type },
+                                })}
+                                className={`min-w-30 flex-1 rounded-md px-3 py-2 text-center text-sm font-medium text-white hover:opacity-90 sm:flex-none ${item.color}`}
                             >
-                                {v.label}
+                                {item.label}
                             </Link>
                         ))}
                     </div>
                 </div>
-
-                {/* Filters */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <input
                         type="text"
-                        placeholder="Search voucher_entries..."
+                        placeholder="Search vouchers..."
                         value={data.search}
-                        onChange={(e) => {
-                            setData('search', e.target.value);
+                        onChange={(event) => {
+                            setData('search', event.target.value);
                             setData('page', 1);
                         }}
                         className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                     />
-
                     <Select
                         value={data.status}
                         onChange={(value) => {
@@ -161,71 +116,69 @@ export default function Index() {
                         options={transactionStatus}
                     />
                 </div>
-
-                {/* Table */}
                 <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border md:h-[calc(100vh-300px)]">
                     <table className="w-full border-collapse">
                         <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
                                 {[
-                                    'Voucher Date',
-                                    'Voucher Type',
+                                    'Date',
+                                    'Type',
                                     'Voucher No',
                                     'Fiscal Year',
                                     'Period',
                                     'Branch',
-                                    'Total Debit',
-                                    'Total Credit',
+                                    'Debit',
+                                    'Credit',
                                     'Status',
                                     'Actions',
-                                ].map((h) => (
+                                ].map((heading) => (
                                     <th
-                                        key={h}
+                                        key={heading}
                                         className="border-b p-2 text-left text-sm font-medium text-muted-foreground"
                                     >
-                                        {h}
+                                        {heading}
                                     </th>
                                 ))}
                             </tr>
                         </thead>
                         <tbody>
-                            {voucher_entries.data.length > 0 ? (
-                                voucher_entries.data.map((v) => {
-                                    const NON_EDITABLE = [
-                                        'OPENING_BALANCE',
-                                        'CLOSING_BALANCE',
-                                    ];
-                                    const canEdit = !NON_EDITABLE.includes(
-                                        v.voucher_type,
-                                    );
-
+                            {vouchers.data.length > 0 ? (
+                                vouchers.data.map((voucher) => {
                                     const { totalDebit, totalCredit } =
-                                        getTotals(v.lines);
+                                        getTotals(voucher.entries);
+                                    const canEdit = ![
+                                        'OPENING',
+                                        'CLOSING',
+                                    ].includes(voucher.voucher_type);
                                     return (
                                         <tr
-                                            key={v.id}
+                                            key={voucher.id}
                                             className="border-b transition-colors even:bg-muted hover:bg-accent/20"
                                         >
                                             <td className="px-2 py-1">
                                                 {new Date(
-                                                    v.voucher_date,
+                                                    voucher.voucher_date,
                                                 ).toLocaleDateString()}
                                             </td>
                                             <td className="px-2 py-1">
-                                                {v.voucher_type || '-'}
+                                                {voucher.voucher_type || '-'}
                                             </td>
                                             <td className="px-2 py-1">
-                                                {v.voucher_no}
+                                                {voucher.voucher_no}
                                             </td>
                                             <td className="px-2 py-1">
-                                                {v.fiscal_year?.code || '-'}
-                                            </td>
-                                            <td className="px-2 py-1">
-                                                {v.fiscal_period?.period_name ||
+                                                {voucher.fiscal_year?.code ||
                                                     '-'}
                                             </td>
                                             <td className="px-2 py-1">
-                                                {v.branch?.name || '-'}
+                                                {voucher.fiscal_period
+                                                    ?.period_name ||
+                                                    voucher.fiscal_period
+                                                        ?.name ||
+                                                    '-'}
+                                            </td>
+                                            <td className="px-2 py-1">
+                                                {voucher.branch?.name || '-'}
                                             </td>
                                             <td className="px-2 py-1">
                                                 {totalDebit.toFixed(2)}
@@ -234,20 +187,19 @@ export default function Index() {
                                                 {totalCredit.toFixed(2)}
                                             </td>
                                             <td className="px-2 py-1">
-                                                {v.status}
+                                                {voucher.status}
                                             </td>
                                             <td className="px-2 py-1">
                                                 <TooltipProvider>
                                                     <div className="flex space-x-2">
-                                                        {/* View */}
                                                         <Tooltip>
                                                             <TooltipTrigger
                                                                 asChild
                                                             >
                                                                 <Link
                                                                     href={route(
-                                                                        'voucher_entries.show',
-                                                                        v.id,
+                                                                        'vouchers.show',
+                                                                        voucher.id,
                                                                     )}
                                                                     className="text-primary hover:text-primary/80"
                                                                 >
@@ -258,8 +210,6 @@ export default function Index() {
                                                                 View
                                                             </TooltipContent>
                                                         </Tooltip>
-
-                                                        {/* Edit */}
                                                         <Tooltip>
                                                             <TooltipTrigger
                                                                 asChild
@@ -267,11 +217,8 @@ export default function Index() {
                                                                 {canEdit ? (
                                                                     <Link
                                                                         href={route(
-                                                                            editRouteMap[
-                                                                                v
-                                                                                    .voucher_type
-                                                                            ],
-                                                                            v.id,
+                                                                            'vouchers.edit',
+                                                                            voucher.id,
                                                                         )}
                                                                         className="text-success"
                                                                     >
@@ -289,32 +236,6 @@ export default function Index() {
                                                                     : 'Editing disabled'}
                                                             </TooltipContent>
                                                         </Tooltip>
-
-                                                        {/* Delete */}
-                                                        <Tooltip>
-                                                            <TooltipTrigger
-                                                                asChild
-                                                            >
-                                                                <button
-                                                                    type="button"
-                                                                    disabled={
-                                                                        processing
-                                                                    }
-                                                                    onClick={() =>
-                                                                        handleDelete(
-                                                                            v.id,
-                                                                            v.voucher_no,
-                                                                        )
-                                                                    }
-                                                                    className="text-destructive hover:text-destructive/80 disabled:opacity-50"
-                                                                >
-                                                                    <Trash2 className="h-5 w-5" />
-                                                                </button>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent>
-                                                                Delete
-                                                            </TooltipContent>
-                                                        </Tooltip>
                                                     </div>
                                                 </TooltipProvider>
                                             </td>
@@ -327,22 +248,20 @@ export default function Index() {
                                         colSpan={10}
                                         className="px-4 py-6 text-center text-muted-foreground"
                                     >
-                                        No voucher_entries found.
+                                        No vouchers found.
                                     </td>
                                 </tr>
                             )}
                         </tbody>
                     </table>
                 </div>
-
-                {/* Pagination + Records Dropdown */}
                 <DataTablePagination
                     perPage={data.per_page}
-                    onPerPageChange={function (value: number): void {
+                    onPerPageChange={(value) => {
                         setData('per_page', Number(value));
                         setData('page', 1);
                     }}
-                    links={voucher_entries.links}
+                    links={vouchers.links}
                 />
             </div>
         </CustomAuthLayout>

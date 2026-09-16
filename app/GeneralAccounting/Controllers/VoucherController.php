@@ -29,8 +29,20 @@ class VoucherController extends Controller
     public function index(Request $request): Response
     {
         $vouchers = $this->organizationQuery($request)
-            ->with(['fiscalPeriod', 'creator'])
-            ->when($request->filled('status'), fn($query) => $query->where('status', $request->string('status')->upper()))
+            ->with(['fiscalYear', 'fiscalPeriod', 'branch', 'creator', 'entries'])
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = $request->string('search')->value();
+
+                $query->where(function ($query) use ($search) {
+                    $query->where('voucher_no', 'like', "%{$search}%")
+                        ->orWhere('voucher_type', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                });
+            })
+            ->when(
+                $request->filled('status') && $request->string('status')->lower()->value() !== 'all',
+                fn($query) => $query->where('status', $request->string('status')->upper()),
+            )
             ->when($request->filled('voucher_type'), fn($query) => $query->where('voucher_type', $request->string('voucher_type')->upper()))
             ->latest('voucher_date')
             ->latest('id')
@@ -39,7 +51,7 @@ class VoucherController extends Controller
 
         return Inertia::render('general-accounting/vouchers/index', [
             'vouchers' => $vouchers,
-            'filters' => $request->only(['status', 'voucher_type', 'per_page', 'page']),
+            'filters' => $request->only(['search', 'status', 'voucher_type', 'per_page', 'page']),
         ]);
     }
 
