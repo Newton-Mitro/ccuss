@@ -55,24 +55,26 @@ class AccountingReportController extends Controller
             ->where('status', true)
             ->when($accountId > 0, fn($query) => $query->whereKey($accountId))
             ->orderBy('code')
-            ->firstOrFail();
+            ->first();
 
-        $accountId = $account->id;
+        $accounts = LedgerAccount::query()
+            ->where('organization_id', $organizationId)
+            ->where('status', true)
+            ->orderBy('code')
+            ->get(['id', 'code', 'name']);
+
+        $accountId = $account?->id;
 
         return Inertia::render('general-accounting/reports/general-ledger-page', [
             'account' => $account,
-            'entries' => $this->reportService->generalLedger(
+            'entries' => $account ? $this->reportService->generalLedger(
                 $organizationId,
                 $accountId,
                 $request->integer('fiscal_period_id') ?: null,
                 $request->input('from'),
                 $request->input('to'),
-            ),
-            'accounts' => LedgerAccount::query()
-                ->where('organization_id', $organizationId)
-                ->where('status', true)
-                ->orderBy('code')
-                ->get(['id', 'code', 'name']),
+            ) : collect(),
+            'accounts' => $accounts,
             'fiscalPeriods' => $this->fiscalPeriods($request),
             'filters' => $request->only(['account_id', 'fiscal_period_id', 'from', 'to']),
         ]);

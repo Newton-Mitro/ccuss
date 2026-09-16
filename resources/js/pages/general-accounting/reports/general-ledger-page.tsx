@@ -17,24 +17,46 @@ interface LedgerEntry {
     running_balance: number;
 }
 
+interface FiscalPeriod {
+    id: number;
+    name: string;
+}
+
 interface Props extends SharedData {
-    account: { id: number; code: string; name: string };
+    account: { id: number; code: string; name: string } | null;
     entries: LedgerEntry[];
     accounts: { id: number; code: string; name: string }[];
+    fiscalPeriods: FiscalPeriod[];
     filters: { account_id?: string; fiscal_period_id?: string };
 }
 
 export default function GeneralLedgerPage() {
-    const { account, entries, accounts, filters } = usePage<Props>().props;
-    const [accountId, setAccountId] = useState(String(account.id));
+    const { account, entries, accounts, fiscalPeriods, filters } =
+        usePage<Props>().props;
+    const [accountId, setAccountId] = useState(
+        account ? String(account.id) : '',
+    );
+    const [periodId, setPeriodId] = useState(filters.fiscal_period_id || '');
+
+    const reloadLedger = (nextAccountId: string, nextPeriodId: string) => {
+        router.get(
+            '/financial-reports/general-ledger',
+            {
+                account_id: nextAccountId,
+                fiscal_period_id: nextPeriodId || undefined,
+            },
+            { preserveState: true },
+        );
+    };
 
     const changeAccount = (value: string) => {
         setAccountId(value);
-        router.get(
-            '/financial-reports/general-ledger',
-            { account_id: value, fiscal_period_id: filters.fiscal_period_id },
-            { preserveState: true },
-        );
+        reloadLedger(value, periodId);
+    };
+
+    const changePeriod = (value: string) => {
+        setPeriodId(value);
+        reloadLedger(accountId, value);
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -50,16 +72,34 @@ export default function GeneralLedgerPage() {
                 <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
                     <HeadingSmall
                         title="General Ledger"
-                        description={`${account.code} - ${account.name}`}
+                        description={
+                            account
+                                ? `${account.code} - ${account.name}`
+                                : 'Select an account to view transactions'
+                        }
                     />
-                    <div className="w-full sm:w-72">
+                    <div className="flex w-full flex-col gap-2 sm:w-120 sm:flex-row">
                         <Select
                             value={accountId}
                             onChange={changeAccount}
+                            className="w-full sm:flex-1"
                             options={accounts.map((item) => ({
                                 value: String(item.id),
                                 label: `${item.code} - ${item.name}`,
                             }))}
+                        />
+                        <Select
+                            value={periodId}
+                            onChange={changePeriod}
+                            className="w-full sm:flex-1"
+                            placeholder="All periods"
+                            options={[
+                                { value: '', label: 'All periods' },
+                                ...fiscalPeriods.map((period) => ({
+                                    value: String(period.id),
+                                    label: period.name,
+                                })),
+                            ]}
                         />
                     </div>
                 </div>

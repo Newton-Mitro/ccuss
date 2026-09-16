@@ -5,6 +5,7 @@ use App\GeneralAccounting\Controllers\AccountingReportController;
 use App\GeneralAccounting\Controllers\FiscalPeriodController;
 use App\GeneralAccounting\Controllers\FiscalYearController;
 use App\GeneralAccounting\Controllers\LedgerAccountController;
+use App\GeneralAccounting\Controllers\PeriodEndController;
 use App\GeneralAccounting\Controllers\VoucherController;
 use Illuminate\Support\Facades\Route;
 
@@ -40,6 +41,13 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
         ->name('fiscal-periods.close');
     Route::post('/fiscal-periods/{fiscal_period}/reopen', [FiscalPeriodController::class, 'reopen'])
         ->name('fiscal-periods.reopen');
+
+    Route::get('/period-end/close', [PeriodEndController::class, 'close'])
+        ->name('period-end.close');
+    Route::get('/period-end/reopen', [PeriodEndController::class, 'reopen'])
+        ->name('period-end.reopen');
+    Route::get('/period-end/year-end-closing', [PeriodEndController::class, 'yearEndClosing'])
+        ->name('period-end.year-end-closing');
 });
 
 Route::middleware(['auth', 'verified', 'organization'])->group(function () {

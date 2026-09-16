@@ -3,7 +3,7 @@ import { SidebarItem } from '../../types';
 
 export const homeMenu: SidebarItem[] = [
     {
-        name: 'User Home',
+        name: 'Dashboard',
         icon: <i className="fa-solid fa-building-columns" />,
         permission: ['banks.view'],
         path: route('dashboard'),

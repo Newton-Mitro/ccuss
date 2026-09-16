@@ -7,6 +7,8 @@ use App\GeneralAccounting\Application\FiscalYearService;
 use App\GeneralAccounting\Application\LedgerAccountService;
 use App\GeneralAccounting\Application\VoucherService;
 use App\SystemAdministration\Models\Organization;
+use App\SystemAdministration\Models\Permission;
+use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
 
 function reportFixture(): array
@@ -53,6 +55,97 @@ function reportFixture(): array
 
     return compact('organization', 'user', 'fiscalYear', 'period', 'cash', 'bank');
 }
+
+function grantReportPermission(User $user): void
+{
+    $role = Role::firstOrCreate(
+        ['slug' => 'accounting_reports_test'],
+        ['name' => 'Accounting Reports Test'],
+    );
+    $permission = Permission::updateOrCreate(
+        ['slug' => 'accounting.reports.view'],
+        [
+            'module' => 'accounting_reports',
+            'name' => 'View Reports',
+            'action' => 'view',
+        ],
+    );
+
+    $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+}
+
+it('loads the general ledger report through its HTTP route', function () {
+    $fixture = reportFixture();
+    grantReportPermission($fixture['user']);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('financial-reports.general-ledger'))
+        ->assertSuccessful()
+        ->assertSee('general-accounting/reports/general-ledger-page');
+});
+
+it('redirects unauthenticated users from the general ledger report to login', function () {
+    $this->get(route('financial-reports.general-ledger'))
+        ->assertRedirect(route('login'));
+});
+
+it('redirects users without an active organization to organization selection', function () {
+    $fixture = reportFixture();
+    grantReportPermission($fixture['user']);
+
+    $this->actingAs($fixture['user'])
+        ->get(route('financial-reports.general-ledger'))
+        ->assertRedirect(route('organizations.index'));
+});
+
+it('forbids users without report permission from the general ledger report', function () {
+    $fixture = reportFixture();
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('financial-reports.general-ledger'))
+        ->assertForbidden();
+});
+
+it('loads the general ledger report when the organization has no active accounts', function () {
+    $fixture = reportFixture();
+    $fixture['cash']->update(['status' => false]);
+    $fixture['bank']->update(['status' => false]);
+    grantReportPermission($fixture['user']);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('financial-reports.general-ledger'))
+        ->assertSuccessful()
+        ->assertSee('general-accounting/reports/general-ledger-page');
+});
+
+it('loads every financial report route for an authorized organization user', function () {
+    $fixture = reportFixture();
+    grantReportPermission($fixture['user']);
+    $routes = [
+        'financial-reports.trial-balance',
+        'financial-reports.general-ledger',
+        'financial-reports.profit-loss',
+        'financial-reports.balance-sheet',
+        'financial-reports.cash-flow',
+        'financial-reports.shareholders-equity',
+    ];
+
+    foreach ($routes as $routeName) {
+        $query = ['fiscal_period_id' => $fixture['period']->id];
+        if ($routeName === 'financial-reports.general-ledger') {
+            $query['account_id'] = $fixture['cash']->id;
+        }
+
+        $this->actingAs($fixture['user'])
+            ->withSession(['active_organization_id' => $fixture['organization']->id])
+            ->get(route($routeName, $query))
+            ->assertSuccessful();
+    }
+});
 
 it('builds trial balance from posted vouchers and excludes drafts', function () {
     $fixture = reportFixture();
