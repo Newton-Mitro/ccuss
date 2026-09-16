@@ -8,32 +8,26 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class AccountGroup extends Model
+class CostCenter extends Model
 {
     use HasFactory;
 
     protected static function newFactory()
     {
-        return \Database\Factories\AccountGroupFactory::new();
+        return \Database\Factories\CostCenterFactory::new();
     }
-
-    protected $table = 'account_groups';
 
     protected $fillable = [
         'organization_id',
         'parent_id',
         'code',
         'name',
-        'type',
-        'normal_balance',
         'level',
-        'is_system',
         'status',
     ];
 
     protected $casts = [
         'level' => 'integer',
-        'is_system' => 'boolean',
         'status' => 'boolean',
     ];
 
@@ -52,8 +46,8 @@ class AccountGroup extends Model
         return $this->hasMany(self::class, 'parent_id');
     }
 
-    public function accounts(): HasMany
+    public function voucherEntries(): HasMany
     {
-        return $this->hasMany(LedgerAccount::class);
+        return $this->hasMany(VoucherEntry::class);
     }
 }

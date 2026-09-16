@@ -4,6 +4,9 @@ namespace Database\Seeders;
 
 use App\GeneralAccounting\Application\VoucherService;
 use App\GeneralAccounting\Models\AccountGroup;
+use App\GeneralAccounting\Models\Budget;
+use App\GeneralAccounting\Models\BudgetEntry;
+use App\GeneralAccounting\Models\CostCenter;
 use App\GeneralAccounting\Models\FiscalYear;
 use App\GeneralAccounting\Models\LedgerAccount;
 use App\GeneralAccounting\Models\Voucher;
@@ -76,6 +79,27 @@ class GeneralAccountingSeeder extends Seeder
                 );
             }
 
+            $operations = CostCenter::query()->firstOrCreate(
+                ['organization_id' => $organization->id, 'code' => 'CC-OPS'],
+                ['name' => 'Operations', 'level' => 0, 'status' => true],
+            );
+
+            foreach ([
+                ['CC-FIN', 'Finance'],
+                ['CC-HR', 'Human Resources'],
+                ['CC-IT', 'Information Technology'],
+            ] as [$code, $name]) {
+                CostCenter::query()->firstOrCreate(
+                    ['organization_id' => $organization->id, 'code' => $code],
+                    [
+                        'parent_id' => $operations->id,
+                        'name' => $name,
+                        'level' => 1,
+                        'status' => true,
+                    ],
+                );
+            }
+
             $fiscalYear = FiscalYear::query()->firstOrCreate(
                 [
                     'organization_id' => $organization->id,
@@ -104,6 +128,33 @@ class GeneralAccountingSeeder extends Seeder
             }
 
             $period = $fiscalYear->periods()->where('name', 'July 2025')->firstOrFail();
+
+            $budget = Budget::query()->firstOrCreate(
+                [
+                    'organization_id' => $organization->id,
+                    'fiscal_year_id' => $fiscalYear->id,
+                    'name' => 'Operating Budget 2025-2026',
+                ],
+                ['status' => 'ACTIVE'],
+            );
+
+            foreach ([
+                [$accounts['5100']->id, $operations->id, $period->id, 25000],
+                [$accounts['5100']->id, null, null, 120000],
+                [$accounts['4100']->id, null, $period->id, 500000],
+            ] as [$accountId, $costCenterId, $periodId, $amount]) {
+                BudgetEntry::query()->firstOrCreate(
+                    [
+                        'organization_id' => $organization->id,
+                        'budget_id' => $budget->id,
+                        'account_id' => $accountId,
+                        'cost_center_id' => $costCenterId,
+                        'fiscal_period_id' => $periodId,
+                    ],
+                    ['amount' => $amount],
+                );
+            }
+
             if (
                 !Voucher::query()
                     ->where('organization_id', $organization->id)

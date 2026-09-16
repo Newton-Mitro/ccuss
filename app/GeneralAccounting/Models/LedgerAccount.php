@@ -13,6 +13,11 @@ class LedgerAccount extends Model
 {
     use HasFactory;
 
+    protected static function newFactory()
+    {
+        return \Database\Factories\LedgerAccountFactory::new();
+    }
+
     protected $table = 'accounts';
 
     protected $fillable = [

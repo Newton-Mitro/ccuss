@@ -2,40 +2,41 @@
 
 namespace App\GeneralAccounting\Models;
 
+use App\SystemAdministration\Models\Organization;
+use App\GeneralAccounting\Models\BudgetEntry;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class FiscalPeriod extends Model
+class Budget extends Model
 {
     use HasFactory;
 
     protected static function newFactory()
     {
-        return \Database\Factories\FiscalPeriodFactory::new();
+        return \Database\Factories\BudgetFactory::new();
     }
 
     protected $fillable = [
+        'organization_id',
         'fiscal_year_id',
         'name',
-        'start_date',
-        'end_date',
         'status',
     ];
 
-    protected $casts = [
-        'start_date' => 'date',
-        'end_date' => 'date',
-    ];
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
+    }
 
     public function fiscalYear(): BelongsTo
     {
         return $this->belongsTo(FiscalYear::class);
     }
 
-    public function vouchers(): HasMany
+    public function entries(): HasMany
     {
-        return $this->hasMany(Voucher::class);
+        return $this->hasMany(BudgetEntry::class);
     }
 }

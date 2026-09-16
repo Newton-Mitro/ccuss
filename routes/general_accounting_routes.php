@@ -2,6 +2,8 @@
 
 use App\GeneralAccounting\Controllers\AccountGroupController;
 use App\GeneralAccounting\Controllers\AccountingReportController;
+use App\GeneralAccounting\Controllers\CostCenterController;
+use App\GeneralAccounting\Controllers\BudgetController;
 use App\GeneralAccounting\Controllers\FiscalPeriodController;
 use App\GeneralAccounting\Controllers\FiscalYearController;
 use App\GeneralAccounting\Controllers\LedgerAccountController;
@@ -67,6 +69,24 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
 
     Route::get('/api/search-ledger', [LedgerAccountController::class, 'ledgerSearch'])
         ->name('ledger-accounts.search');
+
+    Route::resource('cost-centers', CostCenterController::class)
+        ->except(['show'])
+        ->names([
+            'index' => 'cost-centers.index',
+            'create' => 'cost-centers.create',
+            'store' => 'cost-centers.store',
+            'edit' => 'cost-centers.edit',
+            'update' => 'cost-centers.update',
+            'destroy' => 'cost-centers.destroy',
+        ]);
+
+    Route::get('/budgets/entries', [BudgetController::class, 'entries'])->name('budgets.entries');
+    Route::resource('budgets', BudgetController::class);
+    Route::post('/budgets/{budget}/activate', [BudgetController::class, 'activate'])->name('budgets.activate');
+    Route::post('/budgets/{budget}/close', [BudgetController::class, 'close'])->name('budgets.close');
+    Route::get('/financial-reports/budget-vs-actual', [BudgetController::class, 'budgetVsActual'])
+        ->name('financial-reports.budget-vs-actual');
 
     Route::get('/vouchers', [VoucherController::class, 'index'])->name('vouchers.index');
     Route::get('/vouchers/create', [VoucherController::class, 'create'])->name('vouchers.create');

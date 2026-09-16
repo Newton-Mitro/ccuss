@@ -15,6 +15,11 @@ class Voucher extends Model
 {
     use HasFactory;
 
+    protected static function newFactory()
+    {
+        return \Database\Factories\VoucherFactory::new();
+    }
+
     protected $fillable = [
         'organization_id',
         'branch_id',

@@ -12,51 +12,46 @@ import { Plus, Trash2 } from 'lucide-react';
 import React from 'react';
 import { route } from 'ziggy-js';
 
-interface Account {
-    id: number;
-    code: string;
-    name: string;
-}
-interface CostCenter {
-    id: number;
-    code: string;
-    name: string;
-}
-interface FiscalPeriod {
-    id: number;
-    name: string;
-    fiscal_year?: { name: string };
-}
-interface Entry {
+type Option = { id: number; code?: string; name: string };
+type Entry = {
     account_id: string;
-    debit: string;
-    credit: string;
-    description: string;
     cost_center_id: string;
-}
+    fiscal_period_id: string;
+    amount: string;
+};
 
 const emptyEntry = (): Entry => ({
     account_id: '',
-    debit: '',
-    credit: '',
-    description: '',
     cost_center_id: '',
+    fiscal_period_id: '',
+    amount: '',
 });
 
-export default function JournalVoucherEntryPage() {
-    const { fiscalPeriods, accounts, costCenters, voucherType } = usePage()
-        .props as unknown as {
-        fiscalPeriods: FiscalPeriod[];
-        accounts: Account[];
-        costCenters: CostCenter[];
-        voucherType: string;
+export default function BudgetForm() {
+    const props = usePage().props as any;
+    const budget = props.budget;
+    const editing = Boolean(budget);
+    const { fiscalYears, fiscalPeriods, accounts, costCenters } = props as {
+        fiscalYears: Option[];
+        fiscalPeriods: Option[];
+        accounts: Option[];
+        costCenters: Option[];
     };
-    const { data, setData, post, processing, errors } = useForm({
-        fiscal_period_id: String(fiscalPeriods[0]?.id ?? ''),
-        voucher_type: voucherType || 'JOURNAL',
-        voucher_date: new Date().toISOString().slice(0, 10),
-        description: '',
-        entries: [emptyEntry(), emptyEntry()],
+    const { data, setData, post, put, processing, errors } = useForm({
+        name: budget?.name ?? '',
+        fiscal_year_id: String(
+            budget?.fiscal_year_id ?? fiscalYears[0]?.id ?? '',
+        ),
+        entries: (budget?.entries ?? []).map((entry: any) => ({
+            account_id: String(entry.account_id),
+            cost_center_id: entry.cost_center_id
+                ? String(entry.cost_center_id)
+                : '',
+            fiscal_period_id: entry.fiscal_period_id
+                ? String(entry.fiscal_period_id)
+                : '',
+            amount: String(entry.amount),
+        })) as Entry[],
     });
     useFlashToastHandler();
 
@@ -65,80 +60,61 @@ export default function JournalVoucherEntryPage() {
         entries[index] = { ...entries[index], [field]: value };
         setData('entries', entries);
     };
-    const totalDebit = data.entries.reduce(
-        (sum, entry) => sum + Number(entry.debit || 0),
-        0,
-    );
-    const totalCredit = data.entries.reduce(
-        (sum, entry) => sum + Number(entry.credit || 0),
-        0,
-    );
-    const balanced =
-        data.entries.length >= 2 &&
-        totalDebit > 0 &&
-        totalDebit === totalCredit;
+
     const submit = (event: React.FormEvent) => {
         event.preventDefault();
-        post(route('vouchers.store'), { preserveScroll: true });
+        editing
+            ? put(route('budgets.update', budget.id), { preserveScroll: true })
+            : post(route('budgets.store'), { preserveScroll: true });
     };
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'General Accounting', href: '' },
-        { title: 'Vouchers', href: route('vouchers.index') },
-        { title: 'Create Voucher', href: '' },
+        { title: 'Budgets', href: route('budgets.index') },
+        { title: editing ? 'Edit Budget' : 'Create Budget', href: '' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title={`${data.voucher_type} Voucher`} />
+            <Head title={editing ? 'Edit Budget' : 'Create Budget'} />
             <div className="space-y-4">
                 <HeadingSmall
-                    title={`${data.voucher_type} Voucher`}
-                    description="Create a balanced draft voucher."
+                    title={editing ? 'Edit Budget' : 'Create Budget'}
+                    description="Set planned amounts for accounts, cost centers, and fiscal periods."
                 />
                 <form
                     onSubmit={submit}
                     className="space-y-5 rounded-md border bg-card p-6"
                 >
-                    <div className="grid gap-4 md:grid-cols-3">
+                    <div className="grid gap-4 md:grid-cols-2">
                         <div>
-                            <Label>Fiscal period</Label>
-                            <Select
-                                value={data.fiscal_period_id}
-                                onChange={(value) =>
-                                    setData('fiscal_period_id', value)
+                            <Label>Name</Label>
+                            <Input
+                                value={data.name}
+                                onChange={(event) =>
+                                    setData('name', event.target.value)
                                 }
-                                options={fiscalPeriods.map((period) => ({
-                                    value: String(period.id),
-                                    label: `${period.name} - ${period.fiscal_year?.name ?? ''}`,
+                            />
+                            <InputError message={errors.name} />
+                        </div>
+                        <div>
+                            <Label>Fiscal year</Label>
+                            <Select
+                                value={data.fiscal_year_id}
+                                onChange={(value) =>
+                                    setData('fiscal_year_id', value)
+                                }
+                                options={fiscalYears.map((year) => ({
+                                    value: String(year.id),
+                                    label: year.name,
                                 }))}
                             />
-                            <InputError message={errors.fiscal_period_id} />
-                        </div>
-                        <div>
-                            <Label>Voucher date</Label>
-                            <Input
-                                type="date"
-                                value={data.voucher_date}
-                                onChange={(event) =>
-                                    setData('voucher_date', event.target.value)
-                                }
-                            />
-                            <InputError message={errors.voucher_date} />
-                        </div>
-                        <div>
-                            <Label>Description</Label>
-                            <Input
-                                value={data.description}
-                                onChange={(event) =>
-                                    setData('description', event.target.value)
-                                }
-                            />
-                            <InputError message={errors.description} />
+                            <InputError message={errors.fiscal_year_id} />
                         </div>
                     </div>
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                            <h2 className="font-medium">Entries</h2>
+                            <h2 className="font-medium">Budget entries</h2>
                             <Button
                                 type="button"
                                 variant="outline"
@@ -150,13 +126,13 @@ export default function JournalVoucherEntryPage() {
                                     ])
                                 }
                             >
-                                <Plus className="mr-1 h-4 w-4" /> Add line
+                                <Plus className="mr-1 h-4 w-4" /> Add entry
                             </Button>
                         </div>
                         {data.entries.map((entry, index) => (
                             <div
                                 key={index}
-                                className="grid items-end gap-3 md:grid-cols-[1fr_12rem_8rem_8rem_1fr_auto]"
+                                className="grid items-end gap-3 md:grid-cols-[1fr_1fr_1fr_9rem_auto]"
                             >
                                 <div>
                                     <Label>Account</Label>
@@ -174,9 +150,9 @@ export default function JournalVoucherEntryPage() {
                                                 value: '',
                                                 label: 'Select account',
                                             },
-                                            ...accounts.map((account) => ({
-                                                value: String(account.id),
-                                                label: `${account.code} - ${account.name}`,
+                                            ...accounts.map((item) => ({
+                                                value: String(item.id),
+                                                label: `${item.code} - ${item.name}`,
                                             })),
                                         ]}
                                     />
@@ -200,15 +176,14 @@ export default function JournalVoucherEntryPage() {
                                             )
                                         }
                                         options={[
-                                            { value: '', label: 'None' },
-                                            ...costCenters.map(
-                                                (costCenter) => ({
-                                                    value: String(
-                                                        costCenter.id,
-                                                    ),
-                                                    label: `${costCenter.code} - ${costCenter.name}`,
-                                                }),
-                                            ),
+                                            {
+                                                value: '',
+                                                label: 'All cost centers',
+                                            },
+                                            ...costCenters.map((item) => ({
+                                                value: String(item.id),
+                                                label: `${item.code} - ${item.name}`,
+                                            })),
                                         ]}
                                     />
                                     <InputError
@@ -220,64 +195,57 @@ export default function JournalVoucherEntryPage() {
                                     />
                                 </div>
                                 <div>
-                                    <Label>Debit</Label>
+                                    <Label>Fiscal period</Label>
+                                    <Select
+                                        value={entry.fiscal_period_id}
+                                        onChange={(value) =>
+                                            updateEntry(
+                                                index,
+                                                'fiscal_period_id',
+                                                value,
+                                            )
+                                        }
+                                        options={[
+                                            { value: '', label: 'Annual' },
+                                            ...fiscalPeriods.map((item) => ({
+                                                value: String(item.id),
+                                                label: item.name,
+                                            })),
+                                        ]}
+                                    />
+                                    <InputError
+                                        message={
+                                            errors[
+                                                `entries.${index}.fiscal_period_id`
+                                            ]
+                                        }
+                                    />
+                                </div>
+                                <div>
+                                    <Label>Amount</Label>
                                     <Input
                                         type="number"
                                         min="0"
                                         step="0.0001"
-                                        value={entry.debit}
+                                        value={entry.amount}
                                         onChange={(event) =>
                                             updateEntry(
                                                 index,
-                                                'debit',
+                                                'amount',
                                                 event.target.value,
                                             )
                                         }
                                     />
                                     <InputError
                                         message={
-                                            errors[`entries.${index}.debit`]
-                                        }
-                                    />
-                                </div>
-                                <div>
-                                    <Label>Credit</Label>
-                                    <Input
-                                        type="number"
-                                        min="0"
-                                        step="0.0001"
-                                        value={entry.credit}
-                                        onChange={(event) =>
-                                            updateEntry(
-                                                index,
-                                                'credit',
-                                                event.target.value,
-                                            )
-                                        }
-                                    />
-                                    <InputError
-                                        message={
-                                            errors[`entries.${index}.credit`]
-                                        }
-                                    />
-                                </div>
-                                <div>
-                                    <Label>Line description</Label>
-                                    <Input
-                                        value={entry.description}
-                                        onChange={(event) =>
-                                            updateEntry(
-                                                index,
-                                                'description',
-                                                event.target.value,
-                                            )
+                                            errors[`entries.${index}.amount`]
                                         }
                                     />
                                 </div>
                                 <button
                                     type="button"
-                                    title="Remove line"
-                                    disabled={data.entries.length <= 2}
+                                    title="Remove entry"
+                                    disabled={data.entries.length <= 1}
                                     onClick={() =>
                                         setData(
                                             'entries',
@@ -292,20 +260,10 @@ export default function JournalVoucherEntryPage() {
                                 </button>
                             </div>
                         ))}
-                        <InputError message={errors.entries} />
                     </div>
-                    <div className="flex items-center justify-between border-t pt-4 text-sm">
-                        <span>
-                            Debit: {totalDebit.toFixed(4)} | Credit:{' '}
-                            {totalCredit.toFixed(4)}
-                        </span>
-                        <Button
-                            type="submit"
-                            disabled={processing || !balanced}
-                        >
-                            Save draft voucher
-                        </Button>
-                    </div>
+                    <Button type="submit" disabled={processing}>
+                        {editing ? 'Update budget' : 'Save draft budget'}
+                    </Button>
                 </form>
             </div>
         </CustomAuthLayout>

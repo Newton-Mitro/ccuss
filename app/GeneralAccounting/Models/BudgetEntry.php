@@ -2,47 +2,49 @@
 
 namespace App\GeneralAccounting\Models;
 
-use App\GeneralAccounting\Models\Voucher;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class VoucherEntry extends Model
+class BudgetEntry extends Model
 {
     use HasFactory;
 
     protected static function newFactory()
     {
-        return \Database\Factories\VoucherEntryFactory::new();
+        return \Database\Factories\BudgetEntryFactory::new();
     }
 
     protected $fillable = [
-        'voucher_id',
+        'organization_id',
+        'budget_id',
         'account_id',
-        'branch_id',
         'cost_center_id',
-        'party_type',
-        'party_id',
-        'description',
-        'debit',
-        'credit',
-        'reference',
-        'line_no',
+        'fiscal_period_id',
+        'amount',
     ];
 
     protected $casts = [
-        'debit' => 'decimal:4',
-        'credit' => 'decimal:4',
-        'line_no' => 'integer',
+        'amount' => 'decimal:4',
     ];
 
-    public function voucher(): BelongsTo
+    public function budget(): BelongsTo
     {
-        return $this->belongsTo(Voucher::class);
+        return $this->belongsTo(Budget::class);
     }
 
     public function account(): BelongsTo
     {
         return $this->belongsTo(LedgerAccount::class, 'account_id');
+    }
+
+    public function costCenter(): BelongsTo
+    {
+        return $this->belongsTo(CostCenter::class);
+    }
+
+    public function fiscalPeriod(): BelongsTo
+    {
+        return $this->belongsTo(FiscalPeriod::class);
     }
 }

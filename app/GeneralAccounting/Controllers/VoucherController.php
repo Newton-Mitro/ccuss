@@ -4,6 +4,7 @@ namespace App\GeneralAccounting\Controllers;
 
 use App\GeneralAccounting\Application\VoucherService;
 use App\GeneralAccounting\Models\FiscalPeriod;
+use App\GeneralAccounting\Models\CostCenter;
 use App\GeneralAccounting\Models\LedgerAccount;
 use App\GeneralAccounting\Models\Voucher;
 use App\GeneralAccounting\Requests\StoreVoucherRequest;
@@ -60,6 +61,7 @@ class VoucherController extends Controller
         return Inertia::render('general-accounting/vouchers/create/journal_voucher_entry_page', [
             'fiscalPeriods' => $this->fiscalPeriods($request),
             'accounts' => $this->accounts($request),
+            'costCenters' => $this->costCenters($request),
             'voucherType' => $request->string('type')->upper()->value() ?: 'JOURNAL',
         ]);
     }
@@ -186,6 +188,15 @@ class VoucherController extends Controller
             ->where('status', true)
             ->orderBy('code')
             ->get(['id', 'code', 'name', 'type', 'normal_balance']);
+    }
+
+    private function costCenters(Request $request)
+    {
+        return CostCenter::query()
+            ->where('organization_id', $request->attributes->get('active_organization')->id)
+            ->where('status', true)
+            ->orderBy('code')
+            ->get(['id', 'code', 'name']);
     }
 
     private function organizationQuery(Request $request)
