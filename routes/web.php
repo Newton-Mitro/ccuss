@@ -27,5 +27,6 @@ require __DIR__ . '/system_administration_routes.php';
 require __DIR__ . '/settings_routes.php';
 require __DIR__ . '/customer_module_routes.php';
 require __DIR__ . '/general_accounting_routes.php';
+require __DIR__ . '/financial_services_routes.php';
 
 

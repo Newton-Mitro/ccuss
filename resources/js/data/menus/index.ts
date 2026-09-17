@@ -1,6 +1,7 @@
 import { SidebarItem } from '../../types';
 import { chequeManagementMenu } from './chequeManagementMenu';
 import { customerKycMenu } from './customerKycMenu';
+import { financialServicesMenu } from './financialServicesMenu';
 import { generalAccountingMenu } from './generalAccountingMenu';
 import { homeMenu } from './homeMenu';
 import { systemAdministrationMenu } from './systemAdministrationMenu';
@@ -10,5 +11,6 @@ export const sidebarMenu: SidebarItem[] = [
     ...customerKycMenu,
     ...chequeManagementMenu,
     ...generalAccountingMenu,
+    ...financialServicesMenu,
     ...systemAdministrationMenu,
 ];

@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\User;
+use Database\Seeders\FinancialServicesSeeder;
 use Database\Seeders\SystemAdministratorRolePermissionSeeder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
@@ -30,6 +31,7 @@ class DatabaseSeeder extends Seeder
                 SystemAdministratorRolePermissionSeeder::class,
                 OrganizationStructureSeeder::class,
                 GeneralAccountingSeeder::class,
+                FinancialServicesSeeder::class,
                 CustomerSeeder::class,
             ]);
         });

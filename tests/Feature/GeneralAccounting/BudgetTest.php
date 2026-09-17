@@ -114,7 +114,7 @@ it('loads the budget report for an authorized organization user', function () {
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('financial-reports.budget-vs-actual'))
         ->assertSuccessful()
-        ->assertSee('general-accounting/budgets/budget-vs-actual');
+        ->assertInertia(fn($page) => $page->component('general-accounting/budgets/budget-vs-actual'));
 });
 
 it('loads the budget entries menu route for an authorized organization user', function () {
@@ -124,7 +124,7 @@ it('loads the budget entries menu route for an authorized organization user', fu
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('budgets.entries'))
         ->assertSuccessful()
-        ->assertSee('general-accounting/budgets/entries');
+        ->assertInertia(fn($page) => $page->component('general-accounting/budgets/entries'));
 });
 
 it('forbids users without budget permission', function () {

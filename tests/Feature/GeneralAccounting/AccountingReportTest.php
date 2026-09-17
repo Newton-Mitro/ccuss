@@ -83,7 +83,7 @@ it('loads the general ledger report through its HTTP route', function () {
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('financial-reports.general-ledger'))
         ->assertSuccessful()
-        ->assertSee('general-accounting/reports/general-ledger-page');
+        ->assertInertia(fn($page) => $page->component('general-accounting/reports/general-ledger-page'));
 });
 
 it('redirects unauthenticated users from the general ledger report to login', function () {
@@ -119,7 +119,7 @@ it('loads the general ledger report when the organization has no active accounts
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('financial-reports.general-ledger'))
         ->assertSuccessful()
-        ->assertSee('general-accounting/reports/general-ledger-page');
+        ->assertInertia(fn($page) => $page->component('general-accounting/reports/general-ledger-page'));
 });
 
 it('loads every financial report route for an authorized organization user', function () {

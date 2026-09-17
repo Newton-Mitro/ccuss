@@ -149,7 +149,7 @@ it('loads the cost center index for an authorized organization user', function (
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('cost-centers.index'))
         ->assertSuccessful()
-        ->assertSee('general-accounting/cost-centers/index');
+        ->assertInertia(fn($page) => $page->component('general-accounting/cost-centers/index'));
 });
 
 it('forbids users without cost center permission', function () {
