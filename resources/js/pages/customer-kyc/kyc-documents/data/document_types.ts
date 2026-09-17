@@ -5,102 +5,102 @@ export const documentTypes = [
     },
     {
         label: 'NID',
-        value: 'national_identification_number',
+        value: 'NATIONAL_IDENTIFICATION_NUMBER',
     },
     {
         label: 'Smart NID',
-        value: 'smart_nid',
+        value: 'SMART_NID',
     },
     {
         label: 'Passport',
-        value: 'passport',
+        value: 'PASSPORT',
     },
     {
         label: 'Driving License',
-        value: 'driving_license',
+        value: 'DRIVING_LICENSE',
     },
     {
         label: 'Birth Certificate',
-        value: 'birth_certificate',
+        value: 'BIRTH_CERTIFICATE',
     },
     {
         label: 'Utility Bill',
-        value: 'utility_bill',
+        value: 'UTILITY_BILL',
     },
     {
         label: 'Electricity Bill',
-        value: 'electricity_bill',
+        value: 'ELECTRICITY_BILL',
     },
     {
         label: 'Water Bill',
-        value: 'water_bill',
+        value: 'WATER_BILL',
     },
     {
         label: 'Gas Bill',
-        value: 'gas_bill',
+        value: 'GAS_BILL',
     },
     {
         label: 'Bank Statement',
-        value: 'bank_statement',
+        value: 'BANK_STATEMENT',
     },
     {
         label: 'Rental Agreement',
-        value: 'rental_agreement',
+        value: 'RENTAL_AGREEMENT',
     },
     {
         label: 'TIN Certificate',
-        value: 'tin_certificate',
+        value: 'TIN_CERTIFICATE',
     },
     {
         label: 'Tax Return',
-        value: 'tax_return',
+        value: 'TAX_RETURN',
     },
     {
         label: 'Salary Slip',
-        value: 'salary_slip',
+        value: 'SALARY_SLIP',
     },
     {
         label: 'Income Certificate',
-        value: 'income_certificate',
+        value: 'INCOME_CERTIFICATE',
     },
     {
         label: 'Trade License',
-        value: 'trade_license',
+        value: 'TRADE_LICENSE',
     },
     {
         label: 'Certificate of Incorporation',
-        value: 'certificate_of_incorporation',
+        value: 'CERTIFICATE_OF_INCORPORATION',
     },
     {
         label: 'Memorandum of Association',
-        value: 'memorandum_of_association',
+        value: 'MEMORANDUM_OF_ASSOCIATION',
     },
     {
         label: 'Articles of Association',
-        value: 'articles_of_association',
+        value: 'ARTICLES_OF_ASSOCIATION',
     },
     {
         label: 'Partnership Deed',
-        value: 'partnership_deed',
+        value: 'PARTNERSHIP_DEED',
     },
     {
         label: 'Photo',
-        value: 'photo',
+        value: 'PHOTO',
     },
     {
         label: 'Signature',
-        value: 'signature',
+        value: 'SIGNATURE',
     },
     {
         label: 'Live Selfie',
-        value: 'live_selfie',
+        value: 'LIVE_SELFIE',
     },
     {
         label: 'PEP Declaration',
-        value: 'pep_declaration',
+        value: 'PEP_DECLARATION',
     },
     {
         label: 'FATCA Form',
-        value: 'fatca_form',
+        value: 'FATCA_FORM',
     },
 ];

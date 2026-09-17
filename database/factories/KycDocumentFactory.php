@@ -14,42 +14,42 @@ class KycDocumentFactory extends Factory
     public function definition(): array
     {
         $documentType = fake()->randomElement([
-            'national_identification_number',
-            'smart_nid',
-            'passport',
-            'driving_license',
-            'birth_certificate',
+            'NATIONAL_IDENTIFICATION_NUMBER',
+            'SMART_NID',
+            'PASSPORT',
+            'DRIVING_LICENSE',
+            'BIRTH_CERTIFICATE',
 
-            'utility_bill',
-            'electricity_bill',
-            'water_bill',
-            'gas_bill',
-            'bank_statement',
-            'rental_agreement',
+            'UTILITY_BILL',
+            'ELECTRICITY_BILL',
+            'WATER_BILL',
+            'GAS_BILL',
+            'BANK_STATEMENT',
+            'RENTAL_AGREEMENT',
 
-            'tin_certificate',
-            'tax_return',
-            'salary_slip',
-            'income_certificate',
+            'TIN_CERTIFICATE',
+            'TAX_RETURN',
+            'SALARY_SLIP',
+            'INCOME_CERTIFICATE',
 
-            'trade_license',
-            'certificate_of_incorporation',
-            'memorandum_of_association',
-            'articles_of_association',
-            'partnership_deed',
+            'TRADE_LICENSE',
+            'CERTIFICATE_OF_INCORPORATION',
+            'MEMORANDUM_OF_ASSOCIATION',
+            'ARTICLES_OF_ASSOCIATION',
+            'PARTNERSHIP_DEED',
 
-            'photo',
-            'signature',
-            'live_selfie',
+            'PHOTO',
+            'SIGNATURE',
+            'LIVE_SELFIE',
 
-            'pep_declaration',
-            'fatca_form',
+            'PEP_DECLARATION',
+            'FATCA_FORM',
         ]);
 
         $status = fake()->randomElement([
-            'pending',
-            'verified',
-            'rejected',
+            'PENDING',
+            'VERIFIED',
+            'REJECTED',
         ]);
 
         $extension = fake()->randomElement([
@@ -79,11 +79,11 @@ class KycDocumentFactory extends Factory
 
             'verification_status' => $status,
 
-            'verified_at' => $status === 'verified'
+            'verified_at' => $status === 'VERIFIED'
                 ? fake()->dateTimeBetween('-1 year', 'now')
                 : null,
 
-            'remarks' => $status === 'rejected'
+            'remarks' => $status === 'REJECTED'
                 ? fake()->sentence()
                 : null,
         ];
@@ -92,7 +92,7 @@ class KycDocumentFactory extends Factory
     public function verified(): static
     {
         return $this->state(fn() => [
-            'verification_status' => 'verified',
+            'verification_status' => 'VERIFIED',
             'verified_at' => now(),
             'remarks' => null,
         ]);
@@ -101,7 +101,7 @@ class KycDocumentFactory extends Factory
     public function pending(): static
     {
         return $this->state(fn() => [
-            'verification_status' => 'pending',
+            'verification_status' => 'PENDING',
             'verified_at' => null,
             'remarks' => null,
         ]);
@@ -110,7 +110,7 @@ class KycDocumentFactory extends Factory
     public function rejected(): static
     {
         return $this->state(fn() => [
-            'verification_status' => 'rejected',
+            'verification_status' => 'REJECTED',
             'verified_at' => null,
             'remarks' => fake()->sentence(),
         ]);
@@ -143,17 +143,17 @@ class KycDocumentFactory extends Factory
 
     public function photo(): static
     {
-        return $this->type('photo');
+        return $this->type('PHOTO');
     }
 
     public function signature(): static
     {
-        return $this->type('signature');
+        return $this->type('SIGNATURE');
     }
 
     public function selfie(): static
     {
-        return $this->type('live_selfie');
+        return $this->type('LIVE_SELFIE');
     }
 
     public function passport(): static
@@ -163,6 +163,6 @@ class KycDocumentFactory extends Factory
 
     public function nid(): static
     {
-        return $this->type('national_identification_number');
+        return $this->type('NATIONAL_IDENTIFICATION_NUMBER');
     }
 }

@@ -1,11 +1,11 @@
 export const customerTypes = [
     {
         label: 'Individual',
-        value: 'individual',
+        value: 'INDIVIDUAL',
     },
     {
         label: 'Organization',
-        value: 'organization',
+        value: 'ORGANIZATION',
     },
 ];
 
@@ -16,23 +16,23 @@ export const customerStatuses = [
     },
     {
         label: 'Pending',
-        value: 'pending',
+        value: 'PENDING',
     },
     {
         label: 'Active',
-        value: 'active',
+        value: 'ACTIVE',
     },
     {
         label: 'Inactive',
-        value: 'inactive',
+        value: 'INACTIVE',
     },
     {
         label: 'Suspended',
-        value: 'suspended',
+        value: 'SUSPENDED',
     },
     {
         label: 'Closed',
-        value: 'closed',
+        value: 'CLOSED',
     },
 ];
 
@@ -43,57 +43,57 @@ export const kycStatuses = [
     },
     {
         label: 'Pending',
-        value: 'pending',
+        value: 'PENDING',
     },
     {
         label: 'Active',
-        value: 'active',
+        value: 'ACTIVE',
     },
     {
         label: 'Inactive',
-        value: 'inactive',
+        value: 'INACTIVE',
     },
     {
         label: 'Suspended',
-        value: 'suspended',
+        value: 'SUSPENDED',
     },
     {
         label: 'Closed',
-        value: 'closed',
+        value: 'CLOSED',
     },
 ];
 
 export const genders = [
     {
         label: 'Male',
-        value: 'male',
+        value: 'MALE',
     },
     {
         label: 'Female',
-        value: 'female',
+        value: 'FEMALE',
     },
     {
         label: 'Other',
-        value: 'other',
+        value: 'OTHER',
     },
 ];
 
 export const maritalStatuses = [
     {
         label: 'Single',
-        value: 'single',
+        value: 'SINGLE',
     },
     {
         label: 'Married',
-        value: 'married',
+        value: 'MARRIED',
     },
     {
         label: 'Divorced',
-        value: 'divorced',
+        value: 'DIVORCED',
     },
     {
         label: 'Widowed',
-        value: 'widowed',
+        value: 'WIDOWED',
     },
 ];
 
@@ -163,7 +163,7 @@ export const occupations = [
     },
     {
         label: 'Other',
-        value: 'other',
+        value: 'OTHER',
     },
 ];
 
@@ -174,49 +174,49 @@ export const religions = [
     },
     {
         label: 'Muslim',
-        value: 'islam',
+        value: 'ISLAM',
     },
     {
         label: 'Christian',
-        value: 'christianity',
+        value: 'CHRISTIANITY',
     },
     {
         label: 'Buddhist',
-        value: 'buddhism',
+        value: 'BUDDHISM',
     },
     {
         label: 'Hindu',
-        value: 'hinduism',
+        value: 'HINDUISM',
     },
     {
         label: 'Other',
-        value: 'other',
+        value: 'OTHER',
     },
 ];
 
 export const individualIdentificationTypes = [
     {
         label: 'NID',
-        value: 'national_identification_number',
+        value: 'NATIONAL_IDENTIFICATION_NUMBER',
     },
     {
         label: 'BRN',
-        value: 'birth_registration_number',
+        value: 'BIRTH_REGISTRATION_NUMBER',
     },
     {
         label: 'Passport',
-        value: 'passport',
+        value: 'PASSPORT',
     },
     {
         label: 'Driving License',
-        value: 'driving_license',
+        value: 'DRIVING_LICENSE',
     },
 ];
 
 export const organizationIdentificationTypes = [
     {
         label: 'Registration No',
-        value: 'registration_no',
+        value: 'REGISTRATION_NO',
     },
 ];
 

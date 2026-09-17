@@ -13,17 +13,17 @@ class CustomerFactory extends Factory
 
     public function definition(): array
     {
-        $type = fake()->randomElement(['individual', 'organization']);
+        $type = fake()->randomElement(['INDIVIDUAL', 'ORGANIZATION']);
 
-        $gender = $type === 'individual'
-            ? fake()->randomElement(['male', 'female', 'other'])
+        $gender = $type === 'INDIVIDUAL'
+            ? fake()->randomElement(['MALE', 'FEMALE', 'OTHER'])
             : null;
 
-        $name = $type === 'organization'
+        $name = $type === 'ORGANIZATION'
             ? fake()->company()
             : match ($gender) {
-                'male' => fake()->firstNameMale() . ' ' . fake()->lastName(),
-                'female' => fake()->firstNameFemale() . ' ' . fake()->lastName(),
+                'MALE' => fake()->firstNameMale() . ' ' . fake()->lastName(),
+                'FEMALE' => fake()->firstNameFemale() . ' ' . fake()->lastName(),
                 default => fake()->name(),
             };
 
@@ -40,7 +40,7 @@ class CustomerFactory extends Factory
 
             'customer_no' => sprintf(
                 '%s-%06d',
-                $type === 'individual' ? 'IND' : 'ORG',
+                $type === 'INDIVIDUAL' ? 'IND' : 'ORG',
                 fake()->unique()->numberBetween(1, 999999)
             ),
 
@@ -54,34 +54,34 @@ class CustomerFactory extends Factory
             'primary_email' => fake()->safeEmail(),
             'alternate_email' => fake()->safeEmail(),
 
-            'identification_type' => $type === 'individual'
+            'identification_type' => $type === 'INDIVIDUAL'
                 ? fake()->randomElement([
-                    'national_identification_number',
-                    'birth_registration_number',
-                    'passport',
-                    'driving_license',
+                    'NATIONAL_IDENTIFICATION_NUMBER',
+                    'BIRTH_REGISTRATION_NUMBER',
+                    'PASSPORT',
+                    'DRIVING_LICENSE',
                 ])
-                : 'registration_no',
+                : 'REGISTRATION_NO',
 
             'identification_number' => strtoupper(Str::random(12)),
 
-            'dob' => $type === 'individual'
+            'dob' => $type === 'INDIVIDUAL'
                 ? fake()->dateTimeBetween('-70 years', '-18 years')->format('Y-m-d')
                 : null,
 
             'gender' => $gender,
 
-            'marital_status' => $type === 'individual'
+            'marital_status' => $type === 'INDIVIDUAL'
                 ? fake()->randomElement([
-                    'single',
-                    'married',
-                    'widowed',
-                    'divorced',
-                    'other',
+                    'SINGLE',
+                    'MARRIED',
+                    'WIDOWED',
+                    'DIVORCED',
+                    'OTHER',
                 ])
                 : null,
 
-            'blood_group' => $type === 'individual'
+            'blood_group' => $type === 'INDIVIDUAL'
                 ? fake()->randomElement([
                     'A+',
                     'A-',
@@ -94,15 +94,15 @@ class CustomerFactory extends Factory
                 ])
                 : null,
 
-            'nationality' => $type === 'individual'
+            'nationality' => $type === 'INDIVIDUAL'
                 ? fake()->country()
                 : null,
 
-            'occupation' => $type === 'individual'
+            'occupation' => $type === 'INDIVIDUAL'
                 ? fake()->jobTitle()
                 : null,
 
-            'education' => $type === 'individual'
+            'education' => $type === 'INDIVIDUAL'
                 ? fake()->randomElement([
                     'Primary',
                     'Secondary',
@@ -114,21 +114,21 @@ class CustomerFactory extends Factory
                 ])
                 : null,
 
-            'religion' => $type === 'individual'
+            'religion' => $type === 'INDIVIDUAL'
                 ? fake()->randomElement([
-                    'christianity',
-                    'islam',
-                    'hinduism',
-                    'buddhism',
-                    'other',
+                    'CHRISTIANITY',
+                    'ISLAM',
+                    'HINDUISM',
+                    'BUDDHISM',
+                    'OTHER',
                 ])
                 : null,
 
             'status' => fake()->randomElement([
-                'pending',
-                'active',
-                'inactive',
-                'suspended',
+                'PENDING',
+                'ACTIVE',
+                'INACTIVE',
+                'SUSPENDED',
             ]),
         ];
     }
@@ -136,8 +136,8 @@ class CustomerFactory extends Factory
     public function individualMale(): static
     {
         return $this->state(fn() => [
-            'type' => 'individual',
-            'gender' => 'male',
+            'type' => 'INDIVIDUAL',
+            'gender' => 'MALE',
             'name' => fake()->firstNameMale() . ' ' . fake()->lastName(),
             'customer_no' => 'IND-' . fake()->unique()->numerify('######'),
             'primary_phone' => fake()->phoneNumber(),
@@ -145,18 +145,18 @@ class CustomerFactory extends Factory
             'primary_email' => fake()->safeEmail(),
             'alternate_email' => fake()->safeEmail(),
             'religion' => fake()->randomElement([
-                'christianity',
-                'islam',
-                'hinduism',
-                'buddhism',
-                'other',
+                'CHRISTIANITY',
+                'ISLAM',
+                'HINDUISM',
+                'BUDDHISM',
+                'OTHER',
             ]),
             'marital_status' => fake()->randomElement([
-                'single',
-                'married',
-                'widowed',
-                'divorced',
-                'other',
+                'SINGLE',
+                'MARRIED',
+                'WIDOWED',
+                'DIVORCED',
+                'OTHER',
             ]),
             'blood_group' => fake()->randomElement([
                 'A+',
@@ -181,7 +181,7 @@ class CustomerFactory extends Factory
             ]),
             'nationality' => fake()->country(),
             'identification_type' => fake()->randomElement([
-                'national_identification_number',
+                'NATIONAL_IDENTIFICATION_NUMBER',
                 'birth_registration_number',
                 'passport',
                 'driving_license',
@@ -192,8 +192,8 @@ class CustomerFactory extends Factory
     public function individualFemale(): static
     {
         return $this->state(fn() => [
-            'type' => 'individual',
-            'gender' => 'female',
+            'type' => 'INDIVIDUAL',
+            'gender' => 'FEMALE',
             'name' => fake()->firstNameFemale() . ' ' . fake()->lastName(),
             'customer_no' => 'IND-' . fake()->unique()->numerify('######'),
             'primary_phone' => fake()->phoneNumber(),
@@ -201,18 +201,18 @@ class CustomerFactory extends Factory
             'primary_email' => fake()->safeEmail(),
             'alternate_email' => fake()->safeEmail(),
             'religion' => fake()->randomElement([
-                'christianity',
-                'islam',
-                'hinduism',
-                'buddhism',
-                'other',
+                'CHRISTIANITY',
+                'ISLAM',
+                'HINDUISM',
+                'BUDDHISM',
+                'OTHER',
             ]),
             'marital_status' => fake()->randomElement([
-                'single',
-                'married',
-                'widowed',
-                'divorced',
-                'other',
+                'SINGLE',
+                'MARRIED',
+                'WIDOWED',
+                'DIVORCED',
+                'OTHER',
             ]),
             'blood_group' => fake()->randomElement([
                 'A+',
@@ -237,7 +237,7 @@ class CustomerFactory extends Factory
             ]),
             'nationality' => fake()->country(),
             'identification_type' => fake()->randomElement([
-                'national_identification_number',
+                'NATIONAL_IDENTIFICATION_NUMBER',
                 'birth_registration_number',
                 'passport',
                 'driving_license',
@@ -248,7 +248,7 @@ class CustomerFactory extends Factory
     public function organization(): static
     {
         return $this->state(fn() => [
-            'type' => 'organization',
+            'type' => 'ORGANIZATION',
             'gender' => null,
             'dob' => null,
             'marital_status' => null,
@@ -259,28 +259,28 @@ class CustomerFactory extends Factory
             'religion' => null,
             'name' => fake()->company(),
             'customer_no' => 'ORG-' . fake()->unique()->numerify('######'),
-            'identification_type' => 'registration_no',
+            'identification_type' => 'REGISTRATION_NO',
         ]);
     }
 
     public function active(): static
     {
         return $this->state(fn() => [
-            'status' => 'active',
+            'status' => 'ACTIVE',
         ]);
     }
 
     public function pending(): static
     {
         return $this->state(fn() => [
-            'status' => 'pending',
+            'status' => 'PENDING',
         ]);
     }
 
     public function suspended(): static
     {
         return $this->state(fn() => [
-            'status' => 'suspended',
+            'status' => 'SUSPENDED',
         ]);
     }
 }

@@ -30,7 +30,7 @@ class UpdateIntroducerRequest extends FormRequest
             'relationship_type' => [
                 'sometimes',
                 'required',
-                Rule::in(['family', 'friend', 'business', 'colleague', 'other']),
+                Rule::in(['FAMILY', 'FRIEND', 'BUSINESS', 'COLLEAGUE', 'OTHER']),
             ],
             'remarks' => ['sometimes', 'nullable', 'string', 'max:500'],
             'verification_status' => [

@@ -201,7 +201,7 @@ export default function FamilyRelationIndex() {
                                                             )}
                                                             pending={
                                                                 f.verification_status ===
-                                                                'pending'
+                                                                'PENDING'
                                                             }
                                                         />
                                                         <Tooltip>
@@ -305,7 +305,7 @@ export default function FamilyRelationIndex() {
                                             )}
                                             pending={
                                                 f.verification_status ===
-                                                'pending'
+                                                'PENDING'
                                             }
                                         />
                                         <Link

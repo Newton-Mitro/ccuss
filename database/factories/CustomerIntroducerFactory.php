@@ -13,9 +13,9 @@ class CustomerIntroducerFactory extends Factory
     public function definition(): array
     {
         $status = fake()->randomElement([
-            'pending',
-            'verified',
-            'rejected',
+            'PENDING',
+            'VERIFIED',
+            'REJECTED',
         ]);
 
         return [
@@ -29,20 +29,20 @@ class CustomerIntroducerFactory extends Factory
             'introducer_account_id' => null,
 
             'relationship_type' => fake()->randomElement([
-                'family',
-                'friend',
-                'business',
-                'colleague',
-                'other',
+                'FAMILY',
+                'FRIEND',
+                'BUSINESS',
+                'COLLEAGUE',
+                'OTHER',
             ]),
 
             'verification_status' => $status,
 
-            'verified_at' => $status === 'verified'
+            'verified_at' => $status === 'VERIFIED'
                 ? fake()->dateTimeBetween('-1 year', 'now')
                 : null,
 
-            'remarks' => $status === 'rejected'
+            'remarks' => $status === 'REJECTED'
                 ? fake()->sentence()
                 : null,
         ];
@@ -51,7 +51,7 @@ class CustomerIntroducerFactory extends Factory
     public function verified(): static
     {
         return $this->state(fn() => [
-            'verification_status' => 'verified',
+            'verification_status' => 'VERIFIED',
             'verified_at' => now(),
             'remarks' => null,
         ]);
@@ -60,7 +60,7 @@ class CustomerIntroducerFactory extends Factory
     public function pending(): static
     {
         return $this->state(fn() => [
-            'verification_status' => 'pending',
+            'verification_status' => 'PENDING',
             'verified_at' => null,
             'remarks' => null,
         ]);
@@ -69,7 +69,7 @@ class CustomerIntroducerFactory extends Factory
     public function rejected(): static
     {
         return $this->state(fn() => [
-            'verification_status' => 'rejected',
+            'verification_status' => 'REJECTED',
             'verified_at' => null,
             'remarks' => fake()->sentence(),
         ]);
@@ -78,35 +78,35 @@ class CustomerIntroducerFactory extends Factory
     public function family(): static
     {
         return $this->state(fn() => [
-            'relationship_type' => 'family',
+            'relationship_type' => 'FAMILY',
         ]);
     }
 
     public function friend(): static
     {
         return $this->state(fn() => [
-            'relationship_type' => 'friend',
+            'relationship_type' => 'FRIEND',
         ]);
     }
 
     public function business(): static
     {
         return $this->state(fn() => [
-            'relationship_type' => 'business',
+            'relationship_type' => 'BUSINESS',
         ]);
     }
 
     public function colleague(): static
     {
         return $this->state(fn() => [
-            'relationship_type' => 'colleague',
+            'relationship_type' => 'COLLEAGUE',
         ]);
     }
 
     public function other(): static
     {
         return $this->state(fn() => [
-            'relationship_type' => 'other',
+            'relationship_type' => 'OTHER',
         ]);
     }
 }

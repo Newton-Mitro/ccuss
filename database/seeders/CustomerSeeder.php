@@ -92,13 +92,13 @@ class CustomerSeeder extends Seeder
 
             if ($type === 'organization') {
 
-                KycDocument::factory()->for($customer)->type('photo')->verified()->create([
+                KycDocument::factory()->for($customer)->type('PHOTO')->verified()->create([
                     'file_name' => $photoFileName,
                     'file_path' => "{$basePath}/{$photoFileName}",
                     'mime' => 'image/' . $photoExt,
                 ]);
 
-                KycDocument::factory()->for($customer)->type('trade_license')->create([
+                KycDocument::factory()->for($customer)->type('TRADE_LICENSE')->create([
                     'file_name' => $photoFileName,
                     'file_path' => "{$basePath}/{$photoFileName}",
                     'mime' => 'image/' . $photoExt,
@@ -118,19 +118,19 @@ class CustomerSeeder extends Seeder
                 // ======================
                 // 📄 KYC DOCUMENTS
                 // ======================
-                KycDocument::factory()->for($customer)->type('photo')->verified()->create([
+                KycDocument::factory()->for($customer)->type('PHOTO')->verified()->create([
                     'file_name' => $photoFileName,
                     'file_path' => "{$basePath}/{$photoFileName}",
                     'mime' => 'image/' . $photoExt,
                 ]);
 
-                KycDocument::factory()->for($customer)->type('signature')->verified()->create([
+                KycDocument::factory()->for($customer)->type('SIGNATURE')->verified()->create([
                     'file_name' => $signatureFileName,
                     'file_path' => "{$basePath}/{$signatureFileName}",
                     'mime' => 'image/' . $signatureExt,
                 ]);
 
-                KycDocument::factory()->for($customer)->type('national_identification_number')->create([
+                KycDocument::factory()->for($customer)->type('NATIONAL_IDENTIFICATION_NUMBER')->create([
                     'file_name' => $nidFileName,
                     'file_path' => "{$basePath}/{$nidFileName}",
                     'mime' => 'image/' . $nidExt,
@@ -140,7 +140,7 @@ class CustomerSeeder extends Seeder
             // ======================
             // 🏠 ADDRESSES
             // ======================
-            foreach (['current', 'permanent', 'mailing'] as $addrType) {
+            foreach (['CURRENT', 'PERMANENT', 'MAILING'] as $addrType) {
                 CustomerAddress::factory()->for($customer)->create([
                     'type' => $addrType
                 ]);
@@ -163,11 +163,11 @@ class CustomerSeeder extends Seeder
                 'introducer_customer_id' => $introducer->id,
                 'introducer_account_id' => null,
                 'relationship_type' => collect([
-                    'family',
-                    'friend',
-                    'business',
-                    'colleague',
-                    'other'
+                    'FAMILY',
+                    'FRIEND',
+                    'BUSINESS',
+                    'COLLEAGUE',
+                    'OTHER'
                 ])->random(),
                 'verified_at' => now(),
             ]);
@@ -178,25 +178,25 @@ class CustomerSeeder extends Seeder
         // ======================
         foreach ($customers as $customer) {
 
-            if (strtolower($customer->type) === 'organization')
+            if ($customer->type === 'ORGANIZATION')
                 continue;
 
             $relatives = $customers
                 ->where('id', '!=', $customer->id)
-                ->filter(fn($relative) => strtolower($relative->type) === 'individual')
+                ->filter(fn($relative) => $relative->type === 'INDIVIDUAL')
                 ->shuffle()
                 ->take(rand(2, 4));
 
             foreach ($relatives as $relative) {
 
-                if (strtolower($customer->gender) === 'male') {
-                    $relationshipOptions = strtolower($relative->gender) === 'male'
-                        ? ['father', 'brother', 'son', 'grandfather', 'uncle', 'nephew', 'father_in_law', 'son_in_law', 'brother_in_law']
-                        : ['mother', 'sister', 'daughter', 'wife', 'grandmother', 'aunt', 'niece', 'mother_in_law', 'daughter_in_law', 'sister_in_law'];
+                if ($customer->gender === 'MALE') {
+                    $relationshipOptions = $relative->gender === 'MALE'
+                        ? ['FATHER', 'BROTHER', 'SON', 'GRANDFATHER', 'UNCLE', 'NEPHEW', 'FATHER_IN_LAW', 'SON_IN_LAW', 'BROTHER_IN_LAW']
+                        : ['MOTHER', 'SISTER', 'DAUGHTER', 'WIFE', 'GRANDMOTHER', 'AUNT', 'NIECE', 'MOTHER_IN_LAW', 'DAUGHTER_IN_LAW', 'SISTER_IN_LAW'];
                 } else {
-                    $relationshipOptions = strtolower($relative->gender) === 'male'
-                        ? ['father', 'brother', 'son', 'husband', 'grandfather', 'uncle', 'nephew', 'father_in_law', 'son_in_law', 'brother_in_law']
-                        : ['mother', 'sister', 'daughter', 'wife', 'grandmother', 'aunt', 'niece', 'mother_in_law', 'daughter_in_law', 'sister_in_law'];
+                    $relationshipOptions = $relative->gender === 'MALE'
+                        ? ['FATHER', 'BROTHER', 'SON', 'HUSBAND', 'GRANDFATHER', 'UNCLE', 'NEPHEW', 'FATHER_IN_LAW', 'SON_IN_LAW', 'BROTHER_IN_LAW']
+                        : ['MOTHER', 'SISTER', 'DAUGHTER', 'WIFE', 'GRANDMOTHER', 'AUNT', 'NIECE', 'MOTHER_IN_LAW', 'DAUGHTER_IN_LAW', 'SISTER_IN_LAW'];
                 }
 
                 CustomerFamilyRelation::firstOrCreate(

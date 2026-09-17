@@ -60,16 +60,7 @@ class VoucherController extends Controller
     {
         $voucherType = $request->string('type')->upper()->value() ?: 'JOURNAL';
 
-        $createPages = [
-            'PAYMENT' => 'general-accounting/vouchers/create/payment_voucher_entry_page',
-            'RECEIPT' => 'general-accounting/vouchers/create/receipt_voucher_entry_page',
-            'CONTRA' => 'general-accounting/vouchers/create/contra_voucher_entry_page_v2',
-            'JOURNAL' => 'general-accounting/vouchers/create/journal_voucher_entry_page',
-            'ADJUSTMENT' => 'general-accounting/vouchers/create/journal_voucher_entry_page',
-            'OPENING' => 'general-accounting/vouchers/create/journal_voucher_entry_page',
-        ];
-
-        return Inertia::render($createPages[$voucherType] ?? $createPages['JOURNAL'], [
+        return Inertia::render('general-accounting/vouchers/create/journal_voucher_entry_page', [
             'fiscalPeriods' => $this->fiscalPeriods($request),
             'accounts' => $this->accounts($request),
             'costCenters' => $this->costCenters($request),

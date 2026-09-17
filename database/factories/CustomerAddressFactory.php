@@ -13,9 +13,9 @@ class CustomerAddressFactory extends Factory
     public function definition(): array
     {
         $status = fake()->randomElement([
-            'pending',
-            'verified',
-            'rejected',
+            'PENDING',
+            'VERIFIED',
+            'REJECTED',
         ]);
 
         return [
@@ -43,19 +43,19 @@ class CustomerAddressFactory extends Factory
             'country' => 'Bangladesh',
 
             'type' => fake()->randomElement([
-                'current',
-                'permanent',
-                'mailing',
-                'work',
-                'registered',
-                'other',
+                'CURRENT',
+                'PERMANENT',
+                'MAILING',
+                'WORK',
+                'REGISTERED',
+                'OTHER',
             ]),
 
             'verification_status' => $status,
-            'verified_at' => $status === 'verified'
+            'verified_at' => $status === 'VERIFIED'
                 ? fake()->dateTimeBetween('-1 year', 'now')
                 : null,
-            'remarks' => $status === 'rejected'
+            'remarks' => $status === 'REJECTED'
                 ? fake()->sentence()
                 : null,
         ];
@@ -64,42 +64,42 @@ class CustomerAddressFactory extends Factory
     public function current(): static
     {
         return $this->state(fn() => [
-            'type' => 'current',
+            'type' => 'CURRENT',
         ]);
     }
 
     public function permanent(): static
     {
         return $this->state(fn() => [
-            'type' => 'permanent',
+            'type' => 'PERMANENT',
         ]);
     }
 
     public function mailing(): static
     {
         return $this->state(fn() => [
-            'type' => 'mailing',
+            'type' => 'MAILING',
         ]);
     }
 
     public function work(): static
     {
         return $this->state(fn() => [
-            'type' => 'work',
+            'type' => 'WORK',
         ]);
     }
 
     public function registered(): static
     {
         return $this->state(fn() => [
-            'type' => 'registered',
+            'type' => 'REGISTERED',
         ]);
     }
 
     public function verified(): static
     {
         return $this->state(fn() => [
-            'verification_status' => 'verified',
+            'verification_status' => 'VERIFIED',
             'verified_at' => now(),
             'remarks' => null,
         ]);
@@ -108,7 +108,7 @@ class CustomerAddressFactory extends Factory
     public function pending(): static
     {
         return $this->state(fn() => [
-            'verification_status' => 'pending',
+            'verification_status' => 'PENDING',
             'verified_at' => null,
             'remarks' => null,
         ]);
@@ -117,7 +117,7 @@ class CustomerAddressFactory extends Factory
     public function rejected(): static
     {
         return $this->state(fn() => [
-            'verification_status' => 'rejected',
+            'verification_status' => 'REJECTED',
             'verified_at' => null,
             'remarks' => fake()->sentence(),
         ]);

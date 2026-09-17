@@ -270,7 +270,7 @@ export default function ShowFamilyRelation() {
                             </p>
                             <div className="mt-3 flex flex-col gap-2">
                                 {familyRelation.verification_status ===
-                                    'pending' && (
+                                    'PENDING' && (
                                     <>
                                         <div className="">
                                             <Input
@@ -307,7 +307,7 @@ export default function ShowFamilyRelation() {
                                     </>
                                 )}
                                 {familyRelation.verification_status !==
-                                    'pending' && (
+                                    'PENDING' && (
                                     <Badge
                                         className={`rounded px-2 py-1 text-xs ${statusClass}`}
                                     >

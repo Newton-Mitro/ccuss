@@ -13,9 +13,9 @@ class CustomerFamilyRelationFactory extends Factory
     public function definition(): array
     {
         $status = fake()->randomElement([
-            'pending',
-            'verified',
-            'rejected',
+            'PENDING',
+            'VERIFIED',
+            'REJECTED',
         ]);
 
         return [
@@ -23,35 +23,35 @@ class CustomerFamilyRelationFactory extends Factory
             'relative_id' => Customer::factory(),
 
             'relation_type' => fake()->randomElement([
-                'father',
-                'mother',
-                'son',
-                'daughter',
-                'brother',
-                'sister',
-                'husband',
-                'wife',
-                'grandfather',
-                'grandmother',
-                'uncle',
-                'aunt',
-                'nephew',
-                'niece',
-                'father_in_law',
-                'mother_in_law',
-                'son_in_law',
-                'daughter_in_law',
-                'brother_in_law',
-                'sister_in_law',
+                'FATHER',
+                'MOTHER',
+                'SON',
+                'DAUGHTER',
+                'BROTHER',
+                'SISTER',
+                'HUSBAND',
+                'WIFE',
+                'GRANDFATHER',
+                'GRANDMOTHER',
+                'UNCLE',
+                'AUNT',
+                'NEPHEW',
+                'NIECE',
+                'FATHER_IN_LAW',
+                'MOTHER_IN_LAW',
+                'SON_IN_LAW',
+                'DAUGHTER_IN_LAW',
+                'BROTHER_IN_LAW',
+                'SISTER_IN_LAW',
             ]),
 
             'verification_status' => $status,
 
-            'verified_at' => $status === 'verified'
+            'verified_at' => $status === 'VERIFIED'
                 ? fake()->dateTimeBetween('-1 year', 'now')
                 : null,
 
-            'remarks' => $status === 'rejected'
+            'remarks' => $status === 'REJECTED'
                 ? fake()->sentence()
                 : null,
         ];
@@ -60,7 +60,7 @@ class CustomerFamilyRelationFactory extends Factory
     public function verified(): static
     {
         return $this->state(fn() => [
-            'verification_status' => 'verified',
+            'verification_status' => 'VERIFIED',
             'verified_at' => now(),
             'remarks' => null,
         ]);
@@ -69,7 +69,7 @@ class CustomerFamilyRelationFactory extends Factory
     public function pending(): static
     {
         return $this->state(fn() => [
-            'verification_status' => 'pending',
+            'verification_status' => 'PENDING',
             'verified_at' => null,
             'remarks' => null,
         ]);
@@ -78,7 +78,7 @@ class CustomerFamilyRelationFactory extends Factory
     public function rejected(): static
     {
         return $this->state(fn() => [
-            'verification_status' => 'rejected',
+            'verification_status' => 'REJECTED',
             'verified_at' => null,
             'remarks' => fake()->sentence(),
         ]);
@@ -87,14 +87,14 @@ class CustomerFamilyRelationFactory extends Factory
     public function father(): static
     {
         return $this->state(fn() => [
-            'relation_type' => 'father',
+            'relation_type' => 'FATHER',
         ]);
     }
 
     public function mother(): static
     {
         return $this->state(fn() => [
-            'relation_type' => 'mother',
+            'relation_type' => 'MOTHER',
         ]);
     }
 
@@ -102,8 +102,8 @@ class CustomerFamilyRelationFactory extends Factory
     {
         return $this->state(fn() => [
             'relation_type' => fake()->randomElement([
-                'husband',
-                'wife',
+                'HUSBAND',
+                'WIFE',
             ]),
         ]);
     }
@@ -112,8 +112,8 @@ class CustomerFamilyRelationFactory extends Factory
     {
         return $this->state(fn() => [
             'relation_type' => fake()->randomElement([
-                'son',
-                'daughter',
+                'SON',
+                'DAUGHTER',
             ]),
         ]);
     }
@@ -122,8 +122,8 @@ class CustomerFamilyRelationFactory extends Factory
     {
         return $this->state(fn() => [
             'relation_type' => fake()->randomElement([
-                'brother',
-                'sister',
+                'BROTHER',
+                'SISTER',
             ]),
         ]);
     }

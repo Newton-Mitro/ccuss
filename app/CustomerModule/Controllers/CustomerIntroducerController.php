@@ -179,7 +179,7 @@ class CustomerIntroducerController extends Controller
         $data = $request->validate([
             'verification_status' => [
                 'required',
-                Rule::in(['verified', 'rejected']),
+                Rule::in(['VERIFIED', 'REJECTED']),
             ],
             'remarks' => ['nullable', 'string'],
         ]);

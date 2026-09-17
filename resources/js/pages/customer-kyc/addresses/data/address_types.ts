@@ -1,26 +1,26 @@
 export const addressTypes = [
     {
         label: 'Current',
-        value: 'current',
+        value: 'CURRENT',
     },
     {
         label: 'Permanent',
-        value: 'permanent',
+        value: 'PERMANENT',
     },
     {
         label: 'Mailing',
-        value: 'mailing',
+        value: 'MAILING',
     },
     {
         label: 'Work',
-        value: 'work',
+        value: 'WORK',
     },
     {
         label: 'Registered',
-        value: 'registered',
+        value: 'REGISTERED',
     },
     {
         label: 'Other',
-        value: 'other',
+        value: 'OTHER',
     },
 ];

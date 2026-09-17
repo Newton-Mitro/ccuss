@@ -1,22 +1,22 @@
 export const relationshipTypes = [
     {
         label: 'Family',
-        value: 'family',
+        value: 'FAMILY',
     },
     {
         label: 'Friend',
-        value: 'friend',
+        value: 'FRIEND',
     },
     {
         label: 'Business',
-        value: 'business',
+        value: 'BUSINESS',
     },
     {
         label: 'Colleague',
-        value: 'colleague',
+        value: 'COLLEAGUE',
     },
     {
         label: 'Other',
-        value: 'other',
+        value: 'OTHER',
     },
 ];

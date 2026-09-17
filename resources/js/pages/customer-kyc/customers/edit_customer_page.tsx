@@ -62,7 +62,7 @@ const Edit = ({ customer }: EditProps) => {
         identification_type: customer.identification_type,
         identification_number: customer.identification_number,
         photo: null as File | null,
-        status: customer.status || 'pending',
+        status: customer.status || 'PENDING',
     });
 
     const [photoPreview, setPhotoPreview] = useState<string | null>(
@@ -110,8 +110,8 @@ const Edit = ({ customer }: EditProps) => {
         setData('type', value as CustomerType);
         clearErrors();
 
-        if (value === 'organization') {
-            setData('identification_type', 'registration_no');
+        if (value === 'ORGANIZATION') {
+            setData('identification_type', 'REGISTRATION_NO');
             setData('identification_number', '');
             // Clear individual-only fields
             setData('dob', '');
@@ -272,7 +272,7 @@ const Edit = ({ customer }: EditProps) => {
                         </div>
 
                         {/* individual ONLY FIELDS */}
-                        {data.type === 'individual' && (
+                        {data.type === 'INDIVIDUAL' && (
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                                 <div>
                                     <Label className="text-xs">DOB</Label>
@@ -415,7 +415,7 @@ const Edit = ({ customer }: EditProps) => {
                                         )
                                     }
                                     options={
-                                        data.type === 'organization'
+                                        data.type === 'ORGANIZATION'
                                             ? organizationIdentificationTypes
                                             : individualIdentificationTypes
                                     }

@@ -123,7 +123,7 @@ export default function ViewAddress({ address }: Props) {
                 </div>
 
                 {/* Verification Actions */}
-                {address.verification_status === 'pending' && (
+                {address.verification_status === 'PENDING' && (
                     <section className="rounded-md border bg-card p-3">
                         <div className="mb-2 flex items-center justify-between gap-3">
                             <div className="min-w-0">
@@ -300,7 +300,7 @@ export default function ViewAddress({ address }: Props) {
                                 value={address.verification_status}
                             />
 
-                            {address.verification_status === 'rejected' && (
+                            {address.verification_status === 'REJECTED' && (
                                 <BorderInfoBox
                                     label="Rejection Reason"
                                     value={address.remarks}

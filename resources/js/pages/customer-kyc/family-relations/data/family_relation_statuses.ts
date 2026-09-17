@@ -5,14 +5,14 @@ export const familyRelationStatuses = [
     },
     {
         label: 'Pending',
-        value: 'pending',
+        value: 'PENDING',
     },
     {
         label: 'Verified',
-        value: 'verified',
+        value: 'VERIFIED',
     },
     {
         label: 'Rejected',
-        value: 'rejected',
+        value: 'REJECTED',
     },
 ];

@@ -4,35 +4,35 @@ import { ID, Timestamp, Timestamped } from './base_types';
 /* ===========================
  * Enums / Types
  * =========================== */
-export type CustomerType = 'individual' | 'organization';
-export type Gender = 'male' | 'female' | 'other';
+export type CustomerType = 'INDIVIDUAL' | 'ORGANIZATION';
+export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
 export type Religion =
-    | 'christianity'
-    | 'islam'
-    | 'hinduism'
-    | 'buddhism'
-    | 'other';
+    | 'CHRISTIANITY'
+    | 'ISLAM'
+    | 'HINDUISM'
+    | 'BUDDHISM'
+    | 'OTHER';
 export type IdentificationType =
-    | 'national_identification_number'
-    | 'birth_registration_number'
-    | 'registration_no'
-    | 'passport'
-    | 'driving_license';
+    | 'NATIONAL_IDENTIFICATION_NUMBER'
+    | 'BIRTH_REGISTRATION_NUMBER'
+    | 'REGISTRATION_NO'
+    | 'PASSPORT'
+    | 'DRIVING_LICENSE';
 export type AddressType =
-    | 'current'
-    | 'permanent'
-    | 'mailing'
-    | 'work'
-    | 'registered'
-    | 'other';
-export type VerificationStatus = 'pending' | 'verified' | 'rejected';
-export type KycLevel = 'basic' | 'full' | 'enhanced';
+    | 'CURRENT'
+    | 'PERMANENT'
+    | 'MAILING'
+    | 'WORK'
+    | 'REGISTERED'
+    | 'OTHER';
+export type VerificationStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
+export type KycLevel = 'MINIMAL' | 'BASIC' | 'STANDARD' | 'FULL' | 'ENHANCED';
 export type CustomerStatus =
-    | 'pending'
-    | 'active'
-    | 'inactive'
-    | 'suspended'
-    | 'closed';
+    | 'PENDING'
+    | 'ACTIVE'
+    | 'INACTIVE'
+    | 'SUSPENDED'
+    | 'CLOSED';
 
 /* ===========================
  * Customer
@@ -129,26 +129,26 @@ export interface CustomerAddress extends Timestamped {
  * Customer Family Relations
  * =========================== */
 export type RelationType =
-    | 'father'
-    | 'mother'
-    | 'son'
-    | 'daughter'
-    | 'brother'
-    | 'sister'
-    | 'husband'
-    | 'wife'
-    | 'grandfather'
-    | 'grandmother'
-    | 'uncle'
-    | 'aunt'
-    | 'nephew'
-    | 'niece'
-    | 'father_in_law'
-    | 'mother_in_law'
-    | 'son_in_law'
-    | 'daughter_in_law'
-    | 'brother_in_law'
-    | 'sister_in_law';
+    | 'FATHER'
+    | 'MOTHER'
+    | 'SON'
+    | 'DAUGHTER'
+    | 'BROTHER'
+    | 'SISTER'
+    | 'HUSBAND'
+    | 'WIFE'
+    | 'GRANDFATHER'
+    | 'GRANDMOTHER'
+    | 'UNCLE'
+    | 'AUNT'
+    | 'NEPHEW'
+    | 'NIECE'
+    | 'FATHER_IN_LAW'
+    | 'MOTHER_IN_LAW'
+    | 'SON_IN_LAW'
+    | 'DAUGHTER_IN_LAW'
+    | 'BROTHER_IN_LAW'
+    | 'SISTER_IN_LAW';
 
 export interface CustomerFamilyRelation extends Timestamped {
     id: ID;
@@ -170,11 +170,11 @@ export interface CustomerFamilyRelation extends Timestamped {
  * Customer Introducers
  * =========================== */
 export type IntroducerRelationshipType =
-    | 'family'
-    | 'friend'
-    | 'business'
-    | 'colleague'
-    | 'other';
+    | 'FAMILY'
+    | 'FRIEND'
+    | 'BUSINESS'
+    | 'COLLEAGUE'
+    | 'OTHER';
 
 export interface CustomerIntroducer extends Timestamped {
     id: ID;

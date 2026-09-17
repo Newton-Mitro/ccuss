@@ -200,7 +200,7 @@ export default function KycDocumentsIndex() {
                                                             )}
                                                             pending={
                                                                 i.verification_status ===
-                                                                'pending'
+                                                                'PENDING'
                                                             }
                                                         />
                                                         <Tooltip>
@@ -307,7 +307,7 @@ export default function KycDocumentsIndex() {
                                                 )}
                                                 pending={
                                                     i.verification_status ===
-                                                    'pending'
+                                                    'PENDING'
                                                 }
                                             />
                                             <Link

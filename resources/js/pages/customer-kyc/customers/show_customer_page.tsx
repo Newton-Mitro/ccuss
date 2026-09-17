@@ -39,8 +39,8 @@ export default function Show({ customer }: ShowProps) {
 
     useFlashToastHandler();
 
-    const isIndividual = customer.type === 'individual';
-    const isOrganization = customer.type === 'organization';
+    const isIndividual = customer.type === 'INDIVIDUAL';
+    const isOrganization = customer.type === 'ORGANIZATION';
 
     const handleDeleteCustomerAddress = (id: number) => {
         appSwal
@@ -363,7 +363,7 @@ export default function Show({ customer }: ShowProps) {
 
             {/* ================= Family ================= */}
 
-            {customer.type === 'individual' && (
+            {customer.type === 'INDIVIDUAL' && (
                 <SectionHeader
                     icon={<UsersIcon size={18} />}
                     title="Family & Relatives"

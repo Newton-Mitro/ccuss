@@ -27,7 +27,7 @@ class StoreIntroducerRequest extends FormRequest
             ],
             'relationship_type' => [
                 'required',
-                Rule::in(['family', 'friend', 'business', 'colleague', 'other']),
+                Rule::in(['FAMILY', 'FRIEND', 'BUSINESS', 'COLLEAGUE', 'OTHER']),
             ],
             'remarks' => ['nullable', 'string', 'max:500'],
         ];

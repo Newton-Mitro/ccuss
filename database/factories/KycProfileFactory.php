@@ -13,21 +13,21 @@ class KycProfileFactory extends Factory
     public function definition(): array
     {
         $levels = [
-            'minimal',
-            'basic',
-            'standard',
-            'full',
-            'enhanced',
+            'MINIMAL',
+            'BASIC',
+            'STANDARD',
+            'FULL',
+            'ENHANCED',
         ];
 
         $level = fake()->randomElement($levels);
 
         $verificationValue = match ($level) {
-            'minimal' => fake()->numberBetween(0, 3),
-            'basic' => fake()->numberBetween(4, 5),
-            'standard' => fake()->numberBetween(6, 8),
-            'full' => fake()->numberBetween(9, 10),
-            'enhanced' => fake()->numberBetween(11, 15),
+            'MINIMAL' => fake()->numberBetween(0, 3),
+            'BASIC' => fake()->numberBetween(4, 5),
+            'STANDARD' => fake()->numberBetween(6, 8),
+            'FULL' => fake()->numberBetween(9, 10),
+            'ENHANCED' => fake()->numberBetween(11, 15),
         };
 
         return [
@@ -42,7 +42,7 @@ class KycProfileFactory extends Factory
     public function minimal(): static
     {
         return $this->state(fn() => [
-            'kyc_level' => 'minimal',
+            'kyc_level' => 'MINIMAL',
             'verification_value' => fake()->numberBetween(0, 3),
         ]);
     }
@@ -50,7 +50,7 @@ class KycProfileFactory extends Factory
     public function basic(): static
     {
         return $this->state(fn() => [
-            'kyc_level' => 'basic',
+            'kyc_level' => 'BASIC',
             'verification_value' => fake()->numberBetween(4, 5),
         ]);
     }
@@ -58,7 +58,7 @@ class KycProfileFactory extends Factory
     public function standard(): static
     {
         return $this->state(fn() => [
-            'kyc_level' => 'standard',
+            'kyc_level' => 'STANDARD',
             'verification_value' => fake()->numberBetween(6, 8),
         ]);
     }
@@ -66,7 +66,7 @@ class KycProfileFactory extends Factory
     public function full(): static
     {
         return $this->state(fn() => [
-            'kyc_level' => 'full',
+            'kyc_level' => 'FULL',
             'verification_value' => fake()->numberBetween(9, 10),
         ]);
     }
@@ -74,7 +74,7 @@ class KycProfileFactory extends Factory
     public function enhanced(): static
     {
         return $this->state(fn() => [
-            'kyc_level' => 'enhanced',
+            'kyc_level' => 'ENHANCED',
             'verification_value' => fake()->numberBetween(11, 15),
         ]);
     }

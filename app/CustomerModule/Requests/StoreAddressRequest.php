@@ -27,7 +27,7 @@ class StoreAddressRequest extends FormRequest
 
             'country' => ['required', 'string', 'max:150'],
 
-            'type' => ['required', 'in:current,permanent,mailing,work,registered,other'],
+            'type' => ['required', 'in:CURRENT,PERMANENT,MAILING,WORK,REGISTERED,OTHER'],
         ];
     }
 

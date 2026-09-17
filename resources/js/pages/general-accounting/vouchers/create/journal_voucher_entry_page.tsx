@@ -19,6 +19,7 @@ interface Account {
     id: number;
     code: string;
     name: string;
+    type?: string;
 }
 
 interface CostCenter {
@@ -58,6 +59,9 @@ const voucherModes: Record<
         description: string;
         accountHint: string;
         lineHint: string;
+        debitLabel: string;
+        creditLabel: string;
+        rule: string;
     }
 > = {
     JOURNAL: {
@@ -65,6 +69,9 @@ const voucherModes: Record<
         description: 'Record a balanced non-cash accounting adjustment.',
         accountHint: 'Choose the affected ledger account.',
         lineHint: 'Add each debit and credit movement.',
+        debitLabel: 'Debit account',
+        creditLabel: 'Credit account',
+        rule: 'Use this for non-cash adjustments and reclassifications.',
     },
 
     PAYMENT: {
@@ -72,6 +79,9 @@ const voucherModes: Record<
         description: 'Record money paid from the organization.',
         accountHint: 'Choose the expense or payable account.',
         lineHint: 'Add the payment allocation lines.',
+        debitLabel: 'Expense or payable',
+        creditLabel: 'Cash or bank account',
+        rule: 'Use one cash or bank credit line, with one or more expense or payable debit lines.',
     },
 
     RECEIPT: {
@@ -79,6 +89,9 @@ const voucherModes: Record<
         description: 'Record money received by the organization.',
         accountHint: 'Choose the income, receivable, or source account.',
         lineHint: 'Add the receipt allocation lines.',
+        debitLabel: 'Cash or bank account',
+        creditLabel: 'Income or receivable',
+        rule: 'Use one cash or bank debit line, with one or more income or receivable credit lines.',
     },
 
     CONTRA: {
@@ -86,6 +99,9 @@ const voucherModes: Record<
         description: 'Transfer value between cash and bank accounts.',
         accountHint: 'Choose the source or destination account.',
         lineHint: 'Use matching source and destination lines.',
+        debitLabel: 'Receiving cash or bank',
+        creditLabel: 'Paying cash or bank',
+        rule: 'Use exactly two cash or bank accounts: one debit and one credit.',
     },
 
     ADJUSTMENT: {
@@ -93,6 +109,9 @@ const voucherModes: Record<
         description: 'Correct or reclassify an existing accounting balance.',
         accountHint: 'Choose the account to adjust.',
         lineHint: 'Document the correction clearly.',
+        debitLabel: 'Debit account',
+        creditLabel: 'Credit account',
+        rule: 'Explain the correction in the description and line notes.',
     },
 
     OPENING: {
@@ -100,6 +119,9 @@ const voucherModes: Record<
         description: 'Set opening balances for the active fiscal period.',
         accountHint: 'Choose the opening balance account.',
         lineHint: 'Enter the opening debit and credit balances.',
+        debitLabel: 'Debit account',
+        creditLabel: 'Credit account',
+        rule: 'Opening balances must balance before they can be saved.',
     },
 };
 
@@ -124,26 +146,103 @@ export default function JournalVoucherEntryPage() {
 
     const [draftEntry, setDraftEntry] = useState<Entry>(emptyEntry());
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
+    const [draftError, setDraftError] = useState('');
 
     useFlashToastHandler();
 
     const updateDraftEntry = (field: keyof Entry, value: string) => {
+        setDraftError('');
         setDraftEntry((current) => ({
             ...current,
             [field]: value,
         }));
     };
 
+    const isSettlementAccount = (account?: Account) =>
+        Boolean(
+            account &&
+            account.type?.toLowerCase() === 'asset' &&
+            /cash|bank/i.test(`${account.code} ${account.name}`),
+        );
+
+    const accountingLineIsValid = (
+        account: Account | undefined,
+        isDebit: boolean,
+    ) => {
+        if (!account) {
+            setDraftError('Select a valid ledger account for this line.');
+            return false;
+        }
+
+        const settlement = isSettlementAccount(account);
+
+        if (voucherType === 'CONTRA' && !settlement) {
+            setDraftError(
+                'Contra vouchers can only use cash or bank accounts.',
+            );
+            return false;
+        }
+
+        if (voucherType === 'PAYMENT' && (isDebit ? settlement : !settlement)) {
+            setDraftError(
+                isDebit
+                    ? 'Payment debits must use an expense, payable, or other non-cash account.'
+                    : 'Payment credits must use a cash or bank account.',
+            );
+            return false;
+        }
+
+        if (voucherType === 'RECEIPT' && (isDebit ? !settlement : settlement)) {
+            setDraftError(
+                isDebit
+                    ? 'Receipt debits must use a cash or bank account.'
+                    : 'Receipt credits must use an income, receivable, or other non-cash account.',
+            );
+            return false;
+        }
+
+        if (
+            (voucherType === 'PAYMENT' || voucherType === 'RECEIPT') &&
+            settlement &&
+            data.entries.some((entry, index) => {
+                if (index === editingIndex) {
+                    return false;
+                }
+
+                const existingAccount = accounts.find(
+                    (item) => String(item.id) === entry.account_id,
+                );
+                return isSettlementAccount(existingAccount);
+            })
+        ) {
+            setDraftError(
+                `${mode.label} allows exactly one cash or bank line. Add other accounts on the allocation side.`,
+            );
+            return false;
+        }
+
+        return true;
+    };
+
     const addOrUpdateEntry = () => {
         const debit = Number(draftEntry.debit || 0);
         const credit = Number(draftEntry.credit || 0);
+        const account = accounts.find(
+            (item) => String(item.id) === draftEntry.account_id,
+        );
 
         // An entry must have an account and exactly one side.
         if (!draftEntry.account_id) {
+            setDraftError('Select a ledger account for this line.');
             return;
         }
 
         if ((debit <= 0 && credit <= 0) || (debit > 0 && credit > 0)) {
+            setDraftError('Enter a positive amount on exactly one side.');
+            return;
+        }
+
+        if (!accountingLineIsValid(account, debit > 0)) {
             return;
         }
 
@@ -165,6 +264,7 @@ export default function JournalVoucherEntryPage() {
 
         setDraftEntry(emptyEntry());
         setEditingIndex(null);
+        setDraftError('');
     };
 
     const editEntry = (index: number) => {
@@ -213,10 +313,51 @@ export default function JournalVoucherEntryPage() {
         totalCredit > 0 &&
         difference < 0.0001;
 
+    const accountingIssue = (() => {
+        if (voucherType === 'CONTRA') {
+            if (data.entries.length > 2) {
+                return 'A contra voucher must contain exactly two lines.';
+            }
+
+            if (
+                data.entries.some((entry) => {
+                    const account = accounts.find(
+                        (item) => String(item.id) === entry.account_id,
+                    );
+                    return !isSettlementAccount(account);
+                })
+            ) {
+                return 'Contra vouchers require cash or bank accounts on both sides.';
+            }
+        }
+
+        if (voucherType === 'PAYMENT' || voucherType === 'RECEIPT') {
+            const settlementLineCount = data.entries.filter((entry) => {
+                const account = accounts.find(
+                    (item) => String(item.id) === entry.account_id,
+                );
+                return isSettlementAccount(account);
+            }).length;
+
+            const hasAllocation = data.entries.some((entry) => {
+                const account = accounts.find(
+                    (item) => String(item.id) === entry.account_id,
+                );
+                return !isSettlementAccount(account);
+            });
+
+            if (settlementLineCount !== 1 || !hasAllocation) {
+                return `${mode.label} needs exactly one cash/bank line and one or more allocation lines.`;
+            }
+        }
+
+        return '';
+    })();
+
     const submit = (event: React.FormEvent) => {
         event.preventDefault();
 
-        if (!balanced || processing) {
+        if (!balanced || accountingIssue || processing) {
             return;
         }
 
@@ -248,6 +389,32 @@ export default function JournalVoucherEntryPage() {
         ((draftDebit > 0 && draftCredit === 0) ||
             (draftCredit > 0 && draftDebit === 0));
 
+    const draftAccountOptions = accounts.filter((account) => {
+        const selected = String(account.id) === draftEntry.account_id;
+
+        if (voucherType === 'CONTRA') {
+            return selected || isSettlementAccount(account);
+        }
+
+        if (voucherType === 'PAYMENT' && draftCredit > 0) {
+            return selected || isSettlementAccount(account);
+        }
+
+        if (voucherType === 'PAYMENT' && draftDebit > 0) {
+            return selected || !isSettlementAccount(account);
+        }
+
+        if (voucherType === 'RECEIPT' && draftDebit > 0) {
+            return selected || isSettlementAccount(account);
+        }
+
+        if (voucherType === 'RECEIPT' && draftCredit > 0) {
+            return selected || !isSettlementAccount(account);
+        }
+
+        return true;
+    });
+
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`${data.voucher_type} Voucher`} />
@@ -257,8 +424,18 @@ export default function JournalVoucherEntryPage() {
                     title={mode.label}
                     description={mode.description}
                     action={
-                        <StatusBadge tone={balanced ? 'success' : 'warning'}>
-                            {balanced ? 'Balanced' : 'Needs balancing'}
+                        <StatusBadge
+                            tone={
+                                balanced && !accountingIssue
+                                    ? 'success'
+                                    : 'warning'
+                            }
+                        >
+                            {balanced && !accountingIssue
+                                ? 'Ready to save'
+                                : balanced
+                                  ? 'Needs review'
+                                  : 'Needs balancing'}
                         </StatusBadge>
                     }
                 />
@@ -355,6 +532,9 @@ export default function JournalVoucherEntryPage() {
                                     {mode.lineHint} Debit and credit must
                                     balance.
                                 </p>
+                                <p className="text-xs font-medium text-primary">
+                                    Rule: {mode.rule}
+                                </p>
                             </div>
 
                             <StatusBadge tone="info">
@@ -376,10 +556,12 @@ export default function JournalVoucherEntryPage() {
                                             value: '',
                                             label: 'Select account',
                                         },
-                                        ...accounts.map((account) => ({
-                                            value: String(account.id),
-                                            label: `${account.code} - ${account.name}`,
-                                        })),
+                                        ...draftAccountOptions.map(
+                                            (account) => ({
+                                                value: String(account.id),
+                                                label: `${account.code} - ${account.name} (${account.type ?? 'ledger'})`,
+                                            }),
+                                        ),
                                     ]}
                                 />
                             </div>
@@ -409,7 +591,7 @@ export default function JournalVoucherEntryPage() {
                             </div>
 
                             <div>
-                                <Label>Debit</Label>
+                                <Label>{mode.debitLabel}</Label>
 
                                 <Input
                                     type="number"
@@ -433,7 +615,7 @@ export default function JournalVoucherEntryPage() {
                             </div>
 
                             <div>
-                                <Label>Credit</Label>
+                                <Label>{mode.creditLabel}</Label>
 
                                 <Input
                                     type="number"
@@ -488,6 +670,12 @@ export default function JournalVoucherEntryPage() {
                                     : 'Update line'}
                             </Button>
                         </div>
+
+                        {draftError && (
+                            <p className="text-sm text-destructive">
+                                {draftError}
+                            </p>
+                        )}
 
                         <InputError message={errors.entries} />
                     </section>
@@ -646,11 +834,21 @@ export default function JournalVoucherEntryPage() {
                                         Difference {difference.toFixed(4)}
                                     </StatusBadge>
                                 )}
+
+                                {accountingIssue && data.entries.length > 0 && (
+                                    <StatusBadge tone="warning">
+                                        {accountingIssue}
+                                    </StatusBadge>
+                                )}
                             </div>
 
                             <Button
                                 type="submit"
-                                disabled={processing || !balanced}
+                                disabled={
+                                    processing ||
+                                    !balanced ||
+                                    Boolean(accountingIssue)
+                                }
                             >
                                 {processing
                                     ? 'Saving...'
