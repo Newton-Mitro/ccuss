@@ -17,9 +17,9 @@ export default function AuthSplitLayout({
     const { name, quote } = usePage<SharedData>().props;
 
     return (
-        <div className="relative grid h-dvh flex-col items-center justify-center px-8 sm:px-0 lg:max-w-none lg:grid-cols-2 lg:px-0">
-            <div className="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex">
-                <div className="absolute inset-0 bg-zinc-900" />
+        <div className="auth-shell relative grid h-dvh flex-col items-center justify-center bg-background px-8 sm:px-0 lg:max-w-none lg:grid-cols-2 lg:px-0">
+            <div className="relative hidden h-full flex-col bg-primary p-10 text-primary-foreground lg:flex">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-accent" />
                 <Link
                     href={home()}
                     className="relative z-20 flex items-center text-lg font-medium"
@@ -33,7 +33,7 @@ export default function AuthSplitLayout({
                             <p className="text-lg">
                                 &ldquo;{quote.message}&rdquo;
                             </p>
-                            <footer className="text-sm text-neutral-300">
+                            <footer className="text-sm text-primary-foreground/70">
                                 {quote.author}
                             </footer>
                         </blockquote>

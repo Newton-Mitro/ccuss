@@ -84,7 +84,7 @@ export function SidebarMenuItem({
 
     /** Tailwind classes for container */
     const containerClasses = cn(
-        'block w-full rounded-lg text-sm transition-all duration-200 hover:scale-105',
+        'block w-full rounded-xl text-sm transition-colors duration-200',
         sidebarOpen ? 'px-0' : '',
         isActive
             ? isSelfActive
@@ -148,7 +148,7 @@ export function SidebarMenuItem({
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.25 }}
-                        className="mt-1 space-y-1 rounded-md bg-sidebar/50"
+                        className="mt-1 space-y-1 rounded-xl border-l border-sidebar-border/70 bg-sidebar/35 py-1"
                     >
                         {item.children!.map((child, idx) => (
                             <SidebarMenuItem

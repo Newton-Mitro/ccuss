@@ -1,4 +1,4 @@
-import HeadingSmall from '@/components/heading-small';
+import { ResourcePageHeader } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { route } from 'ziggy-js';
+import DataTablePagination from '../../../components/data-table-pagination';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import { appSwal } from '../../../lib/appSwal';
 import { SharedData } from '../../../types';
@@ -134,7 +135,7 @@ export default function GlAccountsIndex() {
                             className={`${acc.is_control_account && 'text-warning'} ${acc.is_group ? 'font-bold text-info' : 'text-card-foreground'}`}
                         >
                             <div
-                                className="flex cursor-pointer items-center justify-between rounded-lg px-3 py-1 hover:bg-accent/10"
+                                className="account-tree-row flex cursor-pointer items-center justify-between rounded-lg px-3 py-1"
                                 style={{ marginLeft: `${level * 1.5}rem` }}
                                 onClick={() =>
                                     hasChildren && toggleExpand(acc.id)
@@ -227,44 +228,76 @@ export default function GlAccountsIndex() {
             <Head title="Chart of Accounts" />
 
             <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                    <HeadingSmall
-                        title="Chart of Accounts"
-                        description="Manage your ledger hierarchy"
-                    />
-                    {/* FILTER BAR */}
-                    <div className="flex gap-2">
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={expandAll}
-                            className="bg-card"
-                        >
-                            <ChevronDownIcon className="h-4 w-4" />
-                        </Button>
+                <ResourcePageHeader
+                    title="Chart of Accounts"
+                    description="Manage your ledger hierarchy"
+                    action={
+                        <div className="flex flex-wrap gap-2">
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={expandAll}
+                                className="bg-card"
+                            >
+                                <ChevronDownIcon className="h-4 w-4" />
+                            </Button>
 
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={collapseAll}
-                            className="bg-card"
-                        >
-                            <ChevronUpIcon className="h-4 w-4" />
-                        </Button>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={collapseAll}
+                                className="bg-card"
+                            >
+                                <ChevronUpIcon className="h-4 w-4" />
+                            </Button>
 
+                            <Link
+                                href={route('ledger-accounts.create')}
+                                className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                            >
+                                <Plus className="h-4 w-4" /> Add Ledger
+                            </Link>
+                        </div>
+                    }
+                />
+
+                {accountRows.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center rounded-md border bg-card py-16 text-center text-muted-foreground">
+                        <p className="text-base font-medium">
+                            No ledger accounts found
+                        </p>
+                        <p className="text-xs">
+                            Create a ledger account to build your chart of
+                            accounts.
+                        </p>
                         <Link
                             href={route('ledger-accounts.create')}
-                            className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                            className="mt-4 rounded bg-primary px-4 py-2 text-xs text-primary-foreground hover:bg-primary/90"
                         >
-                            <Plus className="h-4 w-4" /> Add Ledger
+                            Add Ledger Account
                         </Link>
                     </div>
-                </div>
-
-                {/* TREE */}
-                <Card className="overflow-y-auto p-6">
-                    {renderTree(accountRows)}
-                </Card>
+                ) : (
+                    <>
+                        <Card className="h-[calc(100vh-320px)] overflow-y-auto rounded-md border bg-card p-3 md:p-6">
+                            {renderTree(accountRows)}
+                        </Card>
+                        <DataTablePagination
+                            links={glAccounts.links}
+                            perPage={glAccounts.per_page ?? 18}
+                            onPerPageChange={(perPage) =>
+                                router.get(
+                                    route('ledger-accounts.index'),
+                                    { per_page: perPage },
+                                    {
+                                        preserveScroll: true,
+                                        preserveState: true,
+                                    },
+                                )
+                            }
+                        />
+                    </>
+                )}
             </div>
         </CustomAuthLayout>
     );

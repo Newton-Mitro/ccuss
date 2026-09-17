@@ -352,6 +352,170 @@
         border: var(--border);
     }
 
+    html {
+        background: var(--background);
+    }
+
+    body {
+        min-width: 320px;
+        background:
+            radial-gradient(
+                circle at top right,
+                color-mix(in oklch, var(--primary) 7%, transparent),
+                transparent 28rem
+            ),
+            var(--background);
+        color: var(--foreground);
+    }
+
+    ::selection {
+        background: var(--primary);
+        color: var(--primary-foreground);
+    }
+
+    [data-slot='input'],
+    select,
+    textarea {
+        border-color: color-mix(in oklch, var(--border) 90%, var(--primary));
+        background-color: color-mix(
+            in oklch,
+            var(--background) 92%,
+            var(--card)
+        );
+        transition:
+            border-color 0.2s,
+            box-shadow 0.2s,
+            background-color 0.2s;
+    }
+
+    [data-slot='input']:focus,
+    select:focus,
+    textarea:focus {
+        border-color: var(--ring);
+        box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 18%, transparent);
+        outline: none;
+    }
+
+    .app-main table {
+        width: 100%;
+        border-collapse: collapse;
+        border-color: var(--border);
+    }
+
+    .app-main table td {
+        color: var(--foreground);
+        vertical-align: middle;
+    }
+
+    .app-main table tbody tr:nth-child(even) {
+        background: color-mix(in oklch, var(--muted) 38%, transparent);
+    }
+
+    .app-main table thead th {
+        background: color-mix(in oklch, var(--muted) 82%, var(--card));
+        border-color: var(--border);
+        color: var(--muted-foreground);
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+    }
+
+    .app-main table tbody tr {
+        border-color: color-mix(in oklch, var(--border) 85%, transparent);
+        transition: background-color 0.2s;
+    }
+
+    .app-main table tbody tr:hover {
+        background: color-mix(in oklch, var(--primary) 6%, transparent);
+    }
+
+    .app-main [class~='overflow-auto'][class~='bg-card'] {
+        overflow: auto;
+        border-radius: 0.85rem;
+        background: color-mix(in oklch, var(--card) 96%, var(--primary));
+    }
+
+    .app-main table thead th:first-child {
+        border-top-left-radius: 0.5rem;
+    }
+
+    .app-main table thead th:last-child {
+        border-top-right-radius: 0.5rem;
+    }
+
+    /* Dense list tables follow the customer index rhythm. */
+    .app-main [data-slot='resource-table-card'] table thead th {
+        padding: 0.5rem !important;
+        background: var(--muted) !important;
+        font-size: 0.875rem !important;
+        font-weight: 500 !important;
+        letter-spacing: normal !important;
+        text-transform: none !important;
+    }
+
+    .app-main [data-slot='resource-table-card'] table tbody tr {
+        min-height: 2.5rem;
+        background: transparent;
+    }
+
+    .app-main [data-slot='resource-table-card'] table tbody tr:nth-child(even) {
+        background: var(--muted);
+    }
+
+    .app-main [data-slot='resource-table-card'] table tbody tr:hover {
+        background: color-mix(in oklch, var(--accent) 20%, transparent);
+    }
+
+    .app-main [data-slot='resource-table-card'] table tbody td {
+        height: 2.5rem;
+        padding: 0.25rem 0.5rem !important;
+        line-height: 1.25rem;
+    }
+
+    .app-main .account-tree-row {
+        min-height: 2.5rem;
+        transition: background-color 0.2s;
+    }
+
+    .app-main .account-tree-row:hover {
+        background: color-mix(in oklch, var(--accent) 20%, transparent);
+    }
+
+    /* Shared page surfaces used by the resource pages. */
+    .app-main [class~='bg-card'] {
+        border-color: color-mix(in oklch, var(--border) 88%, var(--primary));
+        box-shadow: 0 10px 30px
+            color-mix(in oklch, var(--foreground) 4%, transparent);
+    }
+
+    .app-main [class~='rounded-md'][class~='border'],
+    .app-main [class~='rounded-lg'][class~='border'] {
+        border-radius: 0.85rem;
+    }
+
+    .app-main form[class~='bg-card'],
+    .app-main form[class~='border'] {
+        background: color-mix(in oklch, var(--card) 94%, var(--primary));
+    }
+
+    .app-main label {
+        color: var(--foreground);
+        font-weight: 500;
+    }
+
+    .app-main :is(button, a)[title] {
+        transition:
+            color 0.2s,
+            background-color 0.2s,
+            border-color 0.2s,
+            transform 0.2s;
+    }
+
+    .app-main :is(button, a)[title]:hover {
+        transform: translateY(-1px);
+    }
+
     .ck-content h1,
     .ck-content h2,
     .ck-content h3,

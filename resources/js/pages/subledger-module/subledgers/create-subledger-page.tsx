@@ -2,8 +2,8 @@ import { Head, useForm } from '@inertiajs/react';
 import React from 'react';
 import { route } from 'ziggy-js';
 
-import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
+import { ResourcePageHeader } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -45,20 +45,23 @@ export default function Create({ glAccounts }: any) {
             <Head title="Create Subledger" />
 
             <div className="text-foreground">
-                <HeadingSmall
+                <ResourcePageHeader
                     title="Create Subledger"
                     description="Define a new subledger account for transaction classification."
                 />
 
                 <form
                     onSubmit={handleSubmit}
-                    className="mt-4 space-y-3 rounded-xl border bg-card p-8"
+                    className="mt-4 space-y-6 rounded-2xl border border-border/80 bg-card p-5 shadow-sm sm:p-6"
                 >
                     {/* 🔹 Basic Details */}
                     <div>
-                        <h3 className="text-lg font-semibold text-muted-foreground">
+                        <h3 className="font-medium text-foreground">
                             Basic Details
                         </h3>
+                        <p className="mb-3 text-xs text-muted-foreground">
+                            Give the subledger a clear code and display name.
+                        </p>
 
                         <div className="grid grid-cols-1 gap-x-5 gap-y-2 md:grid-cols-4">
                             <div>
@@ -103,9 +106,13 @@ export default function Create({ glAccounts }: any) {
 
                     {/* 🔹 Classification */}
                     <div>
-                        <h3 className="text-lg font-semibold text-muted-foreground">
+                        <h3 className="font-medium text-foreground">
                             Classification
                         </h3>
+                        <p className="mb-3 text-xs text-muted-foreground">
+                            Connect it to a general ledger account and choose
+                            its classification.
+                        </p>
 
                         <div className="grid grid-cols-1 gap-x-5 gap-y-2 md:grid-cols-4">
                             <div>
@@ -153,9 +160,10 @@ export default function Create({ glAccounts }: any) {
                                 <InputError message={errors.gl_account_id} />
                             </div>
 
-                            <div className="flex items-center gap-2 pt-6">
+                            <div className="flex items-center gap-3 rounded-xl border border-border/70 bg-muted/30 px-3 py-2 md:mt-5">
                                 <input
                                     type="checkbox"
+                                    className="h-4 w-4 accent-primary"
                                     checked={data.is_active}
                                     onChange={(e) =>
                                         setData('is_active', e.target.checked)
@@ -167,7 +175,7 @@ export default function Create({ glAccounts }: any) {
                     </div>
 
                     {/* 🔹 Action */}
-                    <div className="flex justify-end">
+                    <div className="flex justify-end border-t pt-4">
                         <Button
                             type="submit"
                             disabled={processing}

@@ -1,5 +1,8 @@
-import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
+import {
+    ResourcePageHeader,
+    StatusBadge,
+} from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -91,54 +94,81 @@ export default function JournalVoucherEntryPage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`${data.voucher_type} Voucher`} />
             <div className="space-y-4">
-                <HeadingSmall
+                <ResourcePageHeader
                     title={`${data.voucher_type} Voucher`}
                     description="Create a balanced draft voucher."
+                    action={
+                        <StatusBadge tone={balanced ? 'success' : 'warning'}>
+                            {balanced ? 'Balanced' : 'Needs balancing'}
+                        </StatusBadge>
+                    }
                 />
                 <form
                     onSubmit={submit}
-                    className="space-y-5 rounded-md border bg-card p-6"
+                    className="space-y-6 rounded-2xl border border-border/80 bg-card p-4 shadow-sm sm:p-6"
                 >
-                    <div className="grid gap-4 md:grid-cols-3">
+                    <section className="space-y-4 rounded-xl border border-border/70 bg-muted/20 p-4">
                         <div>
-                            <Label>Fiscal period</Label>
-                            <Select
-                                value={data.fiscal_period_id}
-                                onChange={(value) =>
-                                    setData('fiscal_period_id', value)
-                                }
-                                options={fiscalPeriods.map((period) => ({
-                                    value: String(period.id),
-                                    label: `${period.name} - ${period.fiscal_year?.name ?? ''}`,
-                                }))}
-                            />
-                            <InputError message={errors.fiscal_period_id} />
+                            <h2 className="font-medium text-foreground">
+                                Voucher details
+                            </h2>
+                            <p className="text-xs text-muted-foreground">
+                                Set the period, date, and purpose before adding
+                                entries.
+                            </p>
                         </div>
-                        <div>
-                            <Label>Voucher date</Label>
-                            <Input
-                                type="date"
-                                value={data.voucher_date}
-                                onChange={(event) =>
-                                    setData('voucher_date', event.target.value)
-                                }
-                            />
-                            <InputError message={errors.voucher_date} />
+                        <div className="grid gap-4 md:grid-cols-3">
+                            <div>
+                                <Label>Fiscal period</Label>
+                                <Select
+                                    value={data.fiscal_period_id}
+                                    onChange={(value) =>
+                                        setData('fiscal_period_id', value)
+                                    }
+                                    options={fiscalPeriods.map((period) => ({
+                                        value: String(period.id),
+                                        label: `${period.name} - ${period.fiscal_year?.name ?? ''}`,
+                                    }))}
+                                />
+                                <InputError message={errors.fiscal_period_id} />
+                            </div>
+                            <div>
+                                <Label>Voucher date</Label>
+                                <Input
+                                    type="date"
+                                    value={data.voucher_date}
+                                    onChange={(event) =>
+                                        setData(
+                                            'voucher_date',
+                                            event.target.value,
+                                        )
+                                    }
+                                />
+                                <InputError message={errors.voucher_date} />
+                            </div>
+                            <div>
+                                <Label>Description</Label>
+                                <Input
+                                    value={data.description}
+                                    onChange={(event) =>
+                                        setData(
+                                            'description',
+                                            event.target.value,
+                                        )
+                                    }
+                                />
+                                <InputError message={errors.description} />
+                            </div>
                         </div>
-                        <div>
-                            <Label>Description</Label>
-                            <Input
-                                value={data.description}
-                                onChange={(event) =>
-                                    setData('description', event.target.value)
-                                }
-                            />
-                            <InputError message={errors.description} />
-                        </div>
-                    </div>
-                    <div className="space-y-3">
+                    </section>
+                    <section className="space-y-4 rounded-xl border border-border/70 bg-muted/20 p-4">
                         <div className="flex items-center justify-between">
-                            <h2 className="font-medium">Entries</h2>
+                            <div>
+                                <h2 className="font-medium">Voucher entries</h2>
+                                <p className="text-xs text-muted-foreground">
+                                    Every debit must have an equal credit.
+                                </p>
+                            </div>
                             <Button
                                 type="button"
                                 variant="outline"
@@ -156,7 +186,7 @@ export default function JournalVoucherEntryPage() {
                         {data.entries.map((entry, index) => (
                             <div
                                 key={index}
-                                className="grid items-end gap-3 md:grid-cols-[1fr_12rem_8rem_8rem_1fr_auto]"
+                                className="grid items-end gap-3 rounded-xl border border-border/70 bg-card p-3 shadow-sm md:grid-cols-[1fr_12rem_8rem_8rem_1fr_auto]"
                             >
                                 <div>
                                     <Label>Account</Label>
@@ -293,19 +323,23 @@ export default function JournalVoucherEntryPage() {
                             </div>
                         ))}
                         <InputError message={errors.entries} />
-                    </div>
-                    <div className="flex items-center justify-between border-t pt-4 text-sm">
-                        <span>
-                            Debit: {totalDebit.toFixed(4)} | Credit:{' '}
-                            {totalCredit.toFixed(4)}
-                        </span>
-                        <Button
-                            type="submit"
-                            disabled={processing || !balanced}
-                        >
-                            Save draft voucher
-                        </Button>
-                    </div>
+                        <div className="flex flex-col gap-3 border-t pt-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex flex-wrap gap-2">
+                                <StatusBadge tone="info">
+                                    Debit {totalDebit.toFixed(4)}
+                                </StatusBadge>
+                                <StatusBadge tone="info">
+                                    Credit {totalCredit.toFixed(4)}
+                                </StatusBadge>
+                            </div>
+                            <Button
+                                type="submit"
+                                disabled={processing || !balanced}
+                            >
+                                Save draft voucher
+                            </Button>
+                        </div>
+                    </section>
                 </form>
             </div>
         </CustomAuthLayout>

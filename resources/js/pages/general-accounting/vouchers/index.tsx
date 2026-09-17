@@ -9,7 +9,11 @@ import { Eye, Pencil } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
-import HeadingSmall from '../../../components/heading-small';
+import {
+    ResourcePageHeader,
+    ResourceTableCard,
+    ResourceToolbar,
+} from '../../../components/resource-page-shell';
 import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
@@ -77,26 +81,26 @@ export default function Index() {
         >
             <Head title="Vouchers" />
             <div className="space-y-4 p-2 text-foreground">
-                <div className="flex flex-col items-start justify-between gap-2 sm:flex-row">
-                    <HeadingSmall
-                        title="Vouchers"
-                        description="Manage all vouchers with ease"
-                    />
-                    <div className="mt-2 flex flex-wrap gap-2 sm:mt-0">
-                        {createTypes.map((item) => (
-                            <Link
-                                key={item.type}
-                                href={route('vouchers.create', {
-                                    query: { type: item.type },
-                                })}
-                                className={`min-w-30 flex-1 rounded-md px-3 py-2 text-center text-sm font-medium text-white hover:opacity-90 sm:flex-none ${item.color}`}
-                            >
-                                {item.label}
-                            </Link>
-                        ))}
-                    </div>
-                </div>
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <ResourcePageHeader
+                    title="Vouchers"
+                    description="Manage all vouchers with ease"
+                    action={
+                        <div className="flex flex-wrap gap-2">
+                            {createTypes.map((item) => (
+                                <Link
+                                    key={item.type}
+                                    href={route('vouchers.create', {
+                                        query: { type: item.type },
+                                    })}
+                                    className={`min-w-30 flex-1 rounded-md px-3 py-2 text-center text-sm font-medium text-white hover:opacity-90 sm:flex-none ${item.color}`}
+                                >
+                                    {item.label}
+                                </Link>
+                            ))}
+                        </div>
+                    }
+                />
+                <ResourceToolbar>
                     <input
                         type="text"
                         placeholder="Search vouchers..."
@@ -115,8 +119,11 @@ export default function Index() {
                         }}
                         options={transactionStatus}
                     />
-                </div>
-                <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border md:h-[calc(100vh-300px)]">
+                    <span className="text-sm text-muted-foreground">
+                        {vouchers.data.length} records
+                    </span>
+                </ResourceToolbar>
+                <ResourceTableCard className="h-[calc(100vh-360px)] md:h-[calc(100vh-300px)]">
                     <table className="w-full border-collapse">
                         <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
@@ -254,7 +261,7 @@ export default function Index() {
                             )}
                         </tbody>
                     </table>
-                </div>
+                </ResourceTableCard>
                 <DataTablePagination
                     perPage={data.per_page}
                     onPerPageChange={(value) => {

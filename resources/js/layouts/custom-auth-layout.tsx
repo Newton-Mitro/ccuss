@@ -176,18 +176,18 @@ export default function CustomAuthLayout({
      * Render
      * ------------------------------------------------------------------ */
     return (
-        <div className="flex h-screen bg-background text-foreground select-none">
+        <div className="app-shell flex h-screen bg-background text-foreground select-none">
             {/* Sidebar */}
             <aside
                 className={cn(
-                    'flex flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-300 print:hidden',
+                    'app-sidebar flex flex-col border-r border-sidebar-border/80 bg-sidebar text-sidebar-foreground shadow-[inset_-1px_0_0_rgba(255,255,255,0.03)] transition-all duration-300 print:hidden',
                     sidebarOpen ? 'w-72' : 'w-16',
                 )}
             >
                 {/* Logo */}
                 <Link
                     href={route('dashboard')}
-                    className="flex h-16 items-center gap-2 border-b pl-3"
+                    className="flex h-16 items-center gap-2 border-b border-sidebar-border/80 bg-gradient-to-r from-sidebar to-sidebar/80 pl-3"
                 >
                     <AppLogo className="h-10 w-10 rounded-full border p-1" />
 
@@ -216,31 +216,31 @@ export default function CustomAuthLayout({
                 {/* Search + controls */}
                 <div
                     className={cn(
-                        'flex items-center gap-2 px-4 py-3',
+                        'flex items-center gap-2 border-b border-sidebar-border/60 px-3 py-3',
                         !sidebarOpen && 'hidden',
                     )}
                 >
-                    <div className="flex flex-1 items-center gap-1 rounded border px-2 py-1">
+                    <div className="flex flex-1 items-center gap-1 rounded-xl border border-sidebar-border bg-sidebar/70 px-3 py-2 shadow-sm transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15">
                         <Search size={16} />
                         <input
                             type="text"
                             placeholder="Search menu..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full bg-background text-sm outline-none"
+                            className="w-full bg-transparent text-sm outline-none placeholder:text-sidebar-foreground/50"
                         />
                     </div>
                     <div className="">
                         <button
                             onClick={() => applyMenuAction('expand-all')}
-                            className="rounded p-1 hover:bg-muted"
+                            className="rounded-lg p-1.5 text-sidebar-foreground/70 transition-colors hover:bg-sidebar-hover hover:text-sidebar-foreground"
                             title="Expand all"
                         >
                             <ChevronsDown size={18} />
                         </button>
                         <button
                             onClick={() => applyMenuAction('collapse-all')}
-                            className="rounded p-1 hover:bg-muted"
+                            className="rounded-lg p-1.5 text-sidebar-foreground/70 transition-colors hover:bg-sidebar-hover hover:text-sidebar-foreground"
                             title="Collapse all"
                         >
                             <ChevronsUp size={18} />
@@ -270,12 +270,12 @@ export default function CustomAuthLayout({
                 {sidebarOpen && (
                     <div
                         className={cn(
-                            'mt-auto flex flex-col items-center justify-center border-t border-border bg-secondary px-4 py-3',
+                            'mt-auto flex flex-col items-center justify-center border-t border-sidebar-border/80 bg-sidebar/60 px-3 py-3',
                         )}
                     >
                         <div
                             className={cn(
-                                'mb-3 flex w-full items-start gap-3 rounded border bg-background px-3 py-2 text-left text-sm',
+                                'mb-3 flex w-full items-start gap-3 rounded-xl border bg-background/70 px-3 py-2.5 text-left text-sm shadow-sm',
                                 organization.active
                                     ? 'border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400'
                                     : 'border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400',
@@ -359,11 +359,11 @@ export default function CustomAuthLayout({
 
             {/* Main */}
             <div className="flex flex-1 flex-col">
-                <header className="flex h-16 items-center justify-between border-b bg-sidebar px-6 text-sidebar-foreground print:hidden">
+                <header className="flex h-16 items-center justify-between border-b border-border/80 bg-sidebar/80 px-4 text-sidebar-foreground shadow-sm backdrop-blur-xl md:px-6 print:hidden">
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => setSidebarOpen((v) => !v)}
-                            className="rounded p-1 hover:bg-muted"
+                            className="rounded-xl border border-border/70 bg-card/60 p-2 transition-colors hover:bg-muted"
                         >
                             <Menu size={18} />
                         </button>
@@ -375,7 +375,7 @@ export default function CustomAuthLayout({
                     <div className="flex items-center">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <button className="flex h-8 w-8 items-center gap-2 rounded-full border border-border bg-card px-2 py-1 transition-colors hover:bg-muted">
+                                <button className="flex h-9 w-9 items-center justify-center rounded-xl border border-border/80 bg-card/70 px-2 py-1 shadow-sm transition-colors hover:bg-muted">
                                     <Monitor size={18} />
                                 </button>
                             </DropdownMenuTrigger>
@@ -482,7 +482,7 @@ export default function CustomAuthLayout({
 
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <button className="flex items-center gap-2 rounded px-2 py-1">
+                                <button className="flex items-center gap-2 rounded-xl px-2 py-1 transition-colors hover:bg-muted/70">
                                     <Avatar className="h-8 w-8 overflow-hidden rounded-full border border-border bg-card">
                                         <AvatarImage
                                             src={auth?.user?.avatar}
@@ -571,7 +571,7 @@ export default function CustomAuthLayout({
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-auto p-6">
+                <main className="app-main flex-1 overflow-auto bg-background/80 p-4 md:p-6">
                     {children}
                     <Toaster
                         position="top-center"

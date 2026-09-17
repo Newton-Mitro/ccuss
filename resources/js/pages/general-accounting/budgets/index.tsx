@@ -1,4 +1,8 @@
-import HeadingSmall from '@/components/heading-small';
+import {
+    ResourcePageHeader,
+    ResourceTableCard,
+    StatusBadge,
+} from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
@@ -41,29 +45,32 @@ export default function BudgetIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Budgets" />
             <div className="space-y-4">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <HeadingSmall
-                        title="Budgets"
-                        description="Plan and monitor spending by account, cost center, and period."
-                    />
-                    <div className="flex gap-2">
-                        <Link
-                            href={route('financial-reports.budget-vs-actual')}
-                        >
-                            <Button variant="outline" size="sm">
-                                Budget vs Actual
-                            </Button>
-                        </Link>
-                        <Link href={route('budgets.create')}>
-                            <Button size="sm">
-                                <Plus className="mr-1 h-4 w-4" /> Create Budget
-                            </Button>
-                        </Link>
-                    </div>
-                </div>
-                <div className="overflow-auto rounded-md border bg-card">
+                <ResourcePageHeader
+                    title="Budgets"
+                    description="Plan and monitor spending by account, cost center, and period."
+                    action={
+                        <div className="flex gap-2">
+                            <Link
+                                href={route(
+                                    'financial-reports.budget-vs-actual',
+                                )}
+                            >
+                                <Button variant="outline" size="sm">
+                                    Budget vs Actual
+                                </Button>
+                            </Link>
+                            <Link href={route('budgets.create')}>
+                                <Button size="sm">
+                                    <Plus className="mr-1 h-4 w-4" /> Create
+                                    Budget
+                                </Button>
+                            </Link>
+                        </div>
+                    }
+                />
+                <ResourceTableCard>
                     <table className="w-full text-sm">
-                        <thead className="bg-muted text-left text-muted-foreground">
+                        <thead className="bg-muted/80 text-left text-muted-foreground">
                             <tr>
                                 <th className="p-3">Name</th>
                                 <th className="p-3">Fiscal year</th>
@@ -75,105 +82,110 @@ export default function BudgetIndex() {
                         </thead>
                         <tbody>
                             {budgets.data.map((budget) => (
-                                <tr key={budget.id} className="border-t">
-                                    <td className="p-3 font-medium">
+                                <tr
+                                    key={budget.id}
+                                    className="border-b border-border/80 even:bg-muted/40 hover:bg-primary/5"
+                                >
+                                    <td className="px-4 py-3 font-medium">
                                         {budget.name}
                                     </td>
-                                    <td className="p-3">
+                                    <td className="px-4 py-3">
                                         {budget.fiscal_year?.name}
                                     </td>
-                                    <td className="p-3">
+                                    <td className="px-4 py-3">
                                         {budget.entries_count}
                                     </td>
-                                    <td className="p-3">
+                                    <td className="px-4 py-3">
                                         {Number(
                                             budget.entries_sum_amount ?? 0,
                                         ).toFixed(2)}
                                     </td>
-                                    <td className="p-3">
-                                        <span
-                                            className={
+                                    <td className="px-4 py-3">
+                                        <StatusBadge
+                                            tone={
                                                 budget.status === 'ACTIVE'
-                                                    ? 'text-green-600'
+                                                    ? 'success'
                                                     : budget.status === 'CLOSED'
-                                                      ? 'text-muted-foreground'
-                                                      : 'text-amber-600'
+                                                      ? 'neutral'
+                                                      : 'warning'
                                             }
                                         >
                                             {budget.status}
-                                        </span>
+                                        </StatusBadge>
                                     </td>
-                                    <td className="flex gap-3 p-3">
-                                        <Link
-                                            href={route(
-                                                'budgets.show',
-                                                budget.id,
+                                    <td className="px-4 py-3">
+                                        <div className="flex items-center gap-1.5">
+                                            <Link
+                                                href={route(
+                                                    'budgets.show',
+                                                    budget.id,
+                                                )}
+                                                title="View budget"
+                                            >
+                                                <Eye className="h-4 w-4" />
+                                            </Link>
+                                            {budget.status === 'DRAFT' && (
+                                                <>
+                                                    <Link
+                                                        href={route(
+                                                            'budgets.edit',
+                                                            budget.id,
+                                                        )}
+                                                        title="Edit budget"
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </Link>
+                                                    <button
+                                                        title="Activate budget"
+                                                        onClick={() =>
+                                                            confirmAction(
+                                                                'Activate budget?',
+                                                                route(
+                                                                    'budgets.activate',
+                                                                    budget.id,
+                                                                ),
+                                                                'This budget will become active.',
+                                                            )
+                                                        }
+                                                    >
+                                                        <Check className="h-4 w-4 text-green-600" />
+                                                    </button>
+                                                    <button
+                                                        title="Delete budget"
+                                                        onClick={() =>
+                                                            router.delete(
+                                                                route(
+                                                                    'budgets.destroy',
+                                                                    budget.id,
+                                                                ),
+                                                                {
+                                                                    preserveScroll: true,
+                                                                },
+                                                            )
+                                                        }
+                                                    >
+                                                        <Trash2 className="h-4 w-4 text-destructive" />
+                                                    </button>
+                                                </>
                                             )}
-                                            title="View budget"
-                                        >
-                                            <Eye className="h-4 w-4" />
-                                        </Link>
-                                        {budget.status === 'DRAFT' && (
-                                            <>
-                                                <Link
-                                                    href={route(
-                                                        'budgets.edit',
-                                                        budget.id,
-                                                    )}
-                                                    title="Edit budget"
-                                                >
-                                                    <Pencil className="h-4 w-4" />
-                                                </Link>
+                                            {budget.status === 'ACTIVE' && (
                                                 <button
-                                                    title="Activate budget"
+                                                    title="Close budget"
                                                     onClick={() =>
                                                         confirmAction(
-                                                            'Activate budget?',
+                                                            'Close budget?',
                                                             route(
-                                                                'budgets.activate',
+                                                                'budgets.close',
                                                                 budget.id,
                                                             ),
-                                                            'This budget will become active.',
+                                                            'Closed budgets cannot be changed.',
                                                         )
                                                     }
                                                 >
-                                                    <Check className="h-4 w-4 text-green-600" />
+                                                    <Lock className="h-4 w-4" />
                                                 </button>
-                                                <button
-                                                    title="Delete budget"
-                                                    onClick={() =>
-                                                        router.delete(
-                                                            route(
-                                                                'budgets.destroy',
-                                                                budget.id,
-                                                            ),
-                                                            {
-                                                                preserveScroll: true,
-                                                            },
-                                                        )
-                                                    }
-                                                >
-                                                    <Trash2 className="h-4 w-4 text-destructive" />
-                                                </button>
-                                            </>
-                                        )}
-                                        {budget.status === 'ACTIVE' && (
-                                            <button
-                                                title="Close budget"
-                                                onClick={() =>
-                                                    confirmAction(
-                                                        'Close budget?',
-                                                        route(
-                                                            'budgets.close',
-                                                            budget.id,
-                                                        ),
-                                                        'Closed budgets cannot be changed.',
-                                                    )
-                                                }
-                                            >
-                                                <Lock className="h-4 w-4" />
-                                            </button>
-                                        )}
+                                            )}
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -184,7 +196,7 @@ export default function BudgetIndex() {
                             No budgets found.
                         </p>
                     )}
-                </div>
+                </ResourceTableCard>
             </div>
         </CustomAuthLayout>
     );

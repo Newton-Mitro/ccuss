@@ -1,5 +1,9 @@
 import DataTablePagination from '@/components/data-table-pagination';
-import HeadingSmall from '@/components/heading-small';
+import {
+    ResourcePageHeader,
+    ResourceTableCard,
+    StatusBadge,
+} from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
@@ -75,99 +79,209 @@ export default function CostCenterIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Cost Centers" />
             <div className="space-y-4">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <HeadingSmall
-                        title="Cost Centers"
-                        description="Track expenses by department, branch, project, or activity."
-                    />
-                    <Link href={route('cost-centers.create')}>
-                        <Button size="sm">
-                            <Plus className="mr-1 h-4 w-4" /> Add Cost Center
+                <ResourcePageHeader
+                    title="Cost Centers"
+                    description="Track expenses by department, branch, project, or activity."
+                    action={
+                        <Button asChild size="sm">
+                            <Link href={route('cost-centers.create')}>
+                                <Plus className="mr-1 h-4 w-4" /> Add Cost
+                                Center
+                            </Link>
                         </Button>
-                    </Link>
-                </div>
-
-                <Input
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                    placeholder="Search code or name..."
-                    className="w-full bg-card sm:w-80"
+                    }
                 />
 
-                <div className="overflow-auto rounded-md border bg-card">
-                    <table className="w-full text-sm">
-                        <thead className="bg-muted text-left text-muted-foreground">
-                            <tr>
-                                <th className="p-3">Code</th>
-                                <th className="p-3">Name</th>
-                                <th className="p-3">Parent</th>
-                                <th className="p-3">Level</th>
-                                <th className="p-3">Status</th>
-                                <th className="p-3">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <Input
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                        placeholder="Search code or name..."
+                        className="w-full bg-background sm:w-80"
+                    />
+                    <span className="text-sm text-muted-foreground">
+                        {costCenters.data.length} records
+                    </span>
+                </div>
+
+                {costCenters.data.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center rounded-md border bg-card py-16 text-center text-muted-foreground">
+                        <p className="text-base font-medium">
+                            No cost centers found
+                        </p>
+                        <p className="text-xs">
+                            Try adjusting your search or create a new cost
+                            center
+                        </p>
+                        <Link
+                            href={route('cost-centers.create')}
+                            className="mt-4 rounded bg-primary px-4 py-2 text-xs text-primary-foreground hover:bg-primary/90"
+                        >
+                            Create Cost Center
+                        </Link>
+                    </div>
+                ) : (
+                    <>
+                        <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
+                            <ResourceTableCard>
+                                <table className="w-full text-sm">
+                                    <thead className="bg-muted/80 text-left text-muted-foreground">
+                                        <tr>
+                                            <th className="border-b border-border px-4 py-3">
+                                                Code
+                                            </th>
+                                            <th className="border-b border-border px-4 py-3">
+                                                Name
+                                            </th>
+                                            <th className="border-b border-border px-4 py-3">
+                                                Parent
+                                            </th>
+                                            <th className="border-b border-border px-4 py-3">
+                                                Level
+                                            </th>
+                                            <th className="border-b border-border px-4 py-3">
+                                                Status
+                                            </th>
+                                            <th className="border-b border-border px-4 py-3">
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {costCenters.data.map((costCenter) => (
+                                            <tr
+                                                key={costCenter.id}
+                                                className="border-b border-border/80 even:bg-muted/40 hover:bg-primary/5"
+                                            >
+                                                <td className="px-4 py-3 font-mono">
+                                                    {costCenter.code}
+                                                </td>
+                                                <td className="px-4 py-3 font-medium">
+                                                    <span
+                                                        style={{
+                                                            paddingLeft: `${costCenter.level * 16}px`,
+                                                        }}
+                                                    >
+                                                        {costCenter.name}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3 text-muted-foreground">
+                                                    {costCenter.parent
+                                                        ? `${costCenter.parent.code} - ${costCenter.parent.name}`
+                                                        : '-'}
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    {costCenter.level}
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <StatusBadge
+                                                        tone={
+                                                            costCenter.status
+                                                                ? 'success'
+                                                                : 'danger'
+                                                        }
+                                                    >
+                                                        {costCenter.status
+                                                            ? 'Active'
+                                                            : 'Inactive'}
+                                                    </StatusBadge>
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <Link
+                                                            href={route(
+                                                                'cost-centers.edit',
+                                                                costCenter.id,
+                                                            )}
+                                                            title="Edit cost center"
+                                                        >
+                                                            <Pencil className="h-4 w-4" />
+                                                        </Link>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                destroy(
+                                                                    costCenter,
+                                                                )
+                                                            }
+                                                            title="Delete cost center"
+                                                        >
+                                                            <Trash2 className="h-4 w-4 text-destructive" />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </ResourceTableCard>
+                        </div>
+
+                        <div className="space-y-3 md:hidden">
                             {costCenters.data.map((costCenter) => (
-                                <tr key={costCenter.id} className="border-t">
-                                    <td className="p-3 font-mono">
-                                        {costCenter.code}
-                                    </td>
-                                    <td className="p-3">
-                                        <span
-                                            style={{
-                                                paddingLeft: `${costCenter.level * 16}px`,
-                                            }}
-                                        >
-                                            {costCenter.name}
-                                        </span>
-                                    </td>
-                                    <td className="p-3">
-                                        {costCenter.parent
-                                            ? `${costCenter.parent.code} - ${costCenter.parent.name}`
-                                            : '-'}
-                                    </td>
-                                    <td className="p-3">{costCenter.level}</td>
-                                    <td className="p-3">
-                                        <span
-                                            className={
+                                <div
+                                    key={costCenter.id}
+                                    className="space-y-3 rounded-md border bg-card p-3"
+                                >
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div>
+                                            <p className="font-medium">
+                                                {costCenter.name}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {costCenter.code} · Level{' '}
+                                                {costCenter.level}
+                                            </p>
+                                        </div>
+                                        <StatusBadge
+                                            tone={
                                                 costCenter.status
-                                                    ? 'text-green-600'
-                                                    : 'text-red-600'
+                                                    ? 'success'
+                                                    : 'danger'
                                             }
                                         >
                                             {costCenter.status
                                                 ? 'Active'
                                                 : 'Inactive'}
-                                        </span>
-                                    </td>
-                                    <td className="flex gap-3 p-3">
-                                        <Link
-                                            href={route(
-                                                'cost-centers.edit',
-                                                costCenter.id,
-                                            )}
-                                            title="Edit cost center"
-                                        >
-                                            <Pencil className="h-4 w-4" />
-                                        </Link>
-                                        <button
+                                        </StatusBadge>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        {costCenter.parent
+                                            ? `${costCenter.parent.code} - ${costCenter.parent.name}`
+                                            : 'No parent cost center'}
+                                    </p>
+                                    <div className="flex justify-end gap-2">
+                                        <Button
                                             type="button"
-                                            onClick={() => destroy(costCenter)}
-                                            title="Delete cost center"
+                                            variant="outline"
+                                            size="sm"
+                                            asChild
                                         >
-                                            <Trash2 className="h-4 w-4 text-destructive" />
-                                        </button>
-                                    </td>
-                                </tr>
+                                            <Link
+                                                href={route(
+                                                    'cost-centers.edit',
+                                                    costCenter.id,
+                                                )}
+                                            >
+                                                <Pencil className="h-4 w-4" />{' '}
+                                                Edit
+                                            </Link>
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => destroy(costCenter)}
+                                        >
+                                            <Trash2 className="h-4 w-4 text-destructive" />{' '}
+                                            Delete
+                                        </Button>
+                                    </div>
+                                </div>
                             ))}
-                        </tbody>
-                    </table>
-                    {costCenters.data.length === 0 && (
-                        <p className="p-6 text-center text-muted-foreground">
-                            No cost centers found.
-                        </p>
-                    )}
-                </div>
+                        </div>
+                    </>
+                )}
 
                 <DataTablePagination
                     links={costCenters.links}

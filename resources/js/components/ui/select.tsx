@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
 import InputError from "../input-error";
@@ -33,6 +34,12 @@ const Select: React.FC<SelectSearchProps> = ({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [openUpward, setOpenUpward] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({
+    top: 0,
+    left: 0,
+    width: 0,
+    bottom: 0,
+  });
 
   const ref = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -56,7 +63,11 @@ const Select: React.FC<SelectSearchProps> = ({
   // 👉 Detect click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
+      if (
+        ref.current &&
+        !ref.current.contains(event.target as Node) &&
+        !dropdownRef.current?.contains(event.target as Node)
+      ) {
         setOpen(false);
         setSearch("");
       }
@@ -84,6 +95,13 @@ const Select: React.FC<SelectSearchProps> = ({
       } else {
         setOpenUpward(false);
       }
+
+      setDropdownPosition({
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+        bottom: window.innerHeight - rect.top + 4,
+      });
     };
 
     calculatePosition();
@@ -125,13 +143,18 @@ const Select: React.FC<SelectSearchProps> = ({
       </button>
 
       {/* Dropdown */}
-      {open && !disabled && (
+      {open && !disabled && typeof document !== "undefined" &&
+        createPortal(
         <div
           ref={dropdownRef}
-          className={cn(
-            "absolute z-50 w-full rounded-md border border-border bg-card p-1 shadow-sm-xs",
-            openUpward ? "bottom-full mb-1" : "top-full mt-1"
-          )}
+          style={{
+            position: "fixed",
+            top: openUpward ? "auto" : dropdownPosition.top,
+            bottom: openUpward ? dropdownPosition.bottom : "auto",
+            left: dropdownPosition.left,
+            width: dropdownPosition.width,
+          }}
+          className="z-[100] rounded-md border border-border bg-card p-1 shadow-lg"
         >
           {/* Search */}
           <input
@@ -165,7 +188,8 @@ const Select: React.FC<SelectSearchProps> = ({
               </li>
             )}
           </ul>
-        </div>
+        </div>,
+        document.body,
       )}
 
       {/* Error */}

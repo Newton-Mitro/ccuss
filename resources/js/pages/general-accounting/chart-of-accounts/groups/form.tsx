@@ -1,5 +1,5 @@
-import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
+import { ResourcePageHeader } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -48,7 +48,7 @@ export default function AccountGroupForm({ accountGroup, parents = [] }: any) {
                 title={editing ? 'Edit Account Group' : 'Create Account Group'}
             />
             <div className="max-w-3xl space-y-4">
-                <HeadingSmall
+                <ResourcePageHeader
                     title={
                         editing ? 'Edit Account Group' : 'Create Account Group'
                     }
@@ -56,7 +56,7 @@ export default function AccountGroupForm({ accountGroup, parents = [] }: any) {
                 />
                 <form
                     onSubmit={submit}
-                    className="grid gap-4 rounded-md border bg-card p-6 md:grid-cols-2"
+                    className="grid gap-5 rounded-2xl border border-border/80 bg-card/90 p-5 shadow-sm md:grid-cols-2 md:p-6"
                 >
                     <div>
                         <Label>Code</Label>
@@ -118,9 +118,10 @@ export default function AccountGroupForm({ accountGroup, parents = [] }: any) {
                         />
                         <InputError message={errors.parent_id} />
                     </div>
-                    <label className="flex items-center gap-2">
+                    <label className="flex items-center gap-3 rounded-xl border border-border/70 bg-muted/35 px-3 py-2 text-sm text-muted-foreground">
                         <input
                             type="checkbox"
+                            className="h-4 w-4 accent-primary"
                             checked={data.status}
                             onChange={(e) =>
                                 setData('status', e.target.checked)

@@ -94,7 +94,7 @@ class VoucherController extends Controller
     {
         $this->authorizeOrganization($request, $voucher);
 
-        return Inertia::render('general-accounting/vouchers/edit/debit_voucher_edit_page', [
+        return Inertia::render('general-accounting/vouchers/edit/voucher_edit_page', [
             'voucher' => $voucher->load('entries.account'),
             'fiscalPeriods' => $this->fiscalPeriods($request),
             'accounts' => $this->accounts($request),

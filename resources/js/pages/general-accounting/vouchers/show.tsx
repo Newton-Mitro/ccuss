@@ -1,5 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowLeft, Edit2, Printer } from 'lucide-react';
+import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
@@ -30,12 +31,12 @@ export default function VoucherView() {
     const handleBack = () => window.history.back();
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Vouchers', href: '/voucher_entries' },
+        { title: 'Vouchers', href: route('vouchers.index') },
         { title: `Voucher ${voucher.voucher_no}`, href: '' },
     ];
 
-    const totals = getTotals(voucher.lines);
-    const disabledVoucherTypes = ['OPENING_BALANCE', 'CLOSING_BALANCE'];
+    const totals = getTotals(voucher.entries);
+    const disabledVoucherTypes = ['OPENING', 'CLOSING', 'SYSTEM'];
 
     const isDisabled = disabledVoucherTypes.includes(voucher.voucher_type);
 
@@ -64,7 +65,7 @@ export default function VoucherView() {
                         href={
                             isDisabled
                                 ? '#'
-                                : `/voucher_entries/${voucher.id}/edit`
+                                : route('vouchers.edit', voucher.id)
                         }
                         onClick={(e) => isDisabled && e.preventDefault()}
                         className={`flex items-center gap-1 rounded px-3 py-1.5 text-sm text-white ${
@@ -224,8 +225,8 @@ export default function VoucherView() {
                             </tr>
                         </thead>
                         <tbody>
-                            {voucher.lines.length > 0 ? (
-                                voucher.lines.map((line) => (
+                            {voucher.entries.length > 0 ? (
+                                voucher.entries.map((line) => (
                                     <tr
                                         key={line.id}
                                         className="border-b transition-colors even:bg-muted hover:bg-accent/20"
@@ -233,15 +234,11 @@ export default function VoucherView() {
                                         <td className="px-2 py-1">
                                             <div className="">
                                                 <div className="flex">
-                                                    {`
-                                                    ${line.ledger_account?.code} - ${line.ledger_account?.name} 
-                                                    ${line.subledger ? `'|' ${line.subledger?.account_no || ''} - - ${line.subledger?.name || ''}` : ''}  
-                                                    ${line.reference ? `'|' ${line.reference?.account_no || ''} - - ${line.reference?.name || ''}` : ''}  
-                                                    `}
+                                                    {`${line.account?.code || ''} - ${line.account?.name || ''}`}
                                                 </div>
-                                                {line.particulars ? (
+                                                {line.description ? (
                                                     <div className="-mt-1 text-sm text-muted-foreground">
-                                                        {line.particulars}
+                                                        {line.description}
                                                     </div>
                                                 ) : null}
                                             </div>

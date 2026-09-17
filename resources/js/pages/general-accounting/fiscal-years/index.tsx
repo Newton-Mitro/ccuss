@@ -3,7 +3,12 @@ import { Lock, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
-import HeadingSmall from '../../../components/heading-small';
+import {
+    ResourcePageHeader,
+    ResourceTableCard,
+    StatusBadge,
+} from '../../../components/resource-page-shell';
+import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
@@ -24,8 +29,21 @@ interface FiscalYearPageProps extends SharedData {
 export default function FiscalYearIndex() {
     const { fiscalYears, filters, retainedEarningsAccounts } =
         usePage<FiscalYearPageProps>().props;
-    const [retainedEarningsAccountId, setRetainedEarningsAccountId] =
-        useState('');
+    const [retainedEarningsAccountIds, setRetainedEarningsAccountIds] =
+        useState<Record<number, string>>({});
+
+    const getRetainedEarningsAccountId = (fiscalYearId: number) =>
+        retainedEarningsAccountIds[fiscalYearId] ?? '';
+
+    const setRetainedEarningsAccountId = (
+        fiscalYearId: number,
+        accountId: string,
+    ) => {
+        setRetainedEarningsAccountIds((current) => ({
+            ...current,
+            [fiscalYearId]: accountId,
+        }));
+    };
 
     useFlashToastHandler();
 
@@ -81,23 +99,19 @@ export default function FiscalYearIndex() {
             <Head title="Fiscal Years" />
 
             <div className="space-y-4 text-foreground">
-                {/* Header */}
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <HeadingSmall
-                        title="Fiscal Years"
-                        description="Manage fiscal years"
-                    />
+                <ResourcePageHeader
+                    title="Fiscal Years"
+                    description="Manage fiscal years and close periods with a consistent, theme-aware workflow."
+                    action={
+                        <Button asChild size="sm">
+                            <Link href={route('fiscal-years.create')}>
+                                <Plus className="h-4 w-4" />
+                                Create Fiscal Year
+                            </Link>
+                        </Button>
+                    }
+                />
 
-                    <Link
-                        href={route('fiscal-years.create')}
-                        className="flex items-center gap-1 rounded bg-primary px-3 py-1.5 text-sm text-primary-foreground hover:bg-primary/90"
-                    >
-                        <Plus className="h-4 w-4" />
-                        Create Fiscal Year
-                    </Link>
-                </div>
-
-                {/* Search */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <Input
                         type="text"
@@ -107,160 +121,328 @@ export default function FiscalYearIndex() {
                             setData('search', e.target.value);
                             setData('page', 1);
                         }}
-                        className="w-60 bg-card"
+                        className="w-full bg-background sm:w-72"
                     />
+
+                    <span className="text-sm text-muted-foreground">
+                        {fiscalYears.data.length} records
+                    </span>
                 </div>
 
-                {/* Table */}
-                <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border bg-card md:h-[calc(100vh-300px)]">
-                    <table className="w-full border-collapse">
-                        <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
-                            <tr>
-                                {[
-                                    'Code',
-                                    'Start Date',
-                                    'End Date',
-                                    'Status', // 🔥 replaced dual columns
-                                    'Actions',
-                                ].map((h) => (
-                                    <th
-                                        key={h}
-                                        className="border-b p-2 text-left text-sm font-medium text-muted-foreground"
-                                    >
-                                        {h}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
+                {fiscalYears.data.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center rounded-md border bg-card py-16 text-center text-muted-foreground">
+                        <p className="text-base font-medium">
+                            No fiscal years found
+                        </p>
+                        <p className="text-xs">
+                            Try adjusting your search or create a new fiscal
+                            year
+                        </p>
+                        <Link
+                            href={route('fiscal-years.create')}
+                            className="mt-4 rounded bg-primary px-4 py-2 text-xs text-primary-foreground hover:bg-primary/90"
+                        >
+                            Create Fiscal Year
+                        </Link>
+                    </div>
+                ) : (
+                    <>
+                        <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
+                            <ResourceTableCard>
+                                <table className="w-full border-collapse text-sm">
+                                    <thead className="sticky top-0 bg-muted/80 text-left text-muted-foreground backdrop-blur-sm">
+                                        <tr>
+                                            {[
+                                                'Code',
+                                                'Start Date',
+                                                'End Date',
+                                                'Status',
+                                                'Actions',
+                                            ].map((h) => (
+                                                <th
+                                                    key={h}
+                                                    className="border-b border-border px-4 py-3 font-medium"
+                                                >
+                                                    {h}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
 
-                        <tbody>
-                            {fiscalYears.data.length > 0 ? (
-                                fiscalYears.data.map((fy) => (
-                                    <tr
-                                        key={fy.id}
-                                        className="border-b transition-colors even:bg-muted hover:bg-accent/20"
-                                    >
-                                        <td className="px-2 py-1">{fy.name}</td>
+                                    <tbody>
+                                        {fiscalYears.data.map((fy) => (
+                                            <tr
+                                                key={fy.id}
+                                                className="border-b border-border/80 transition-colors even:bg-muted/40 hover:bg-primary/5"
+                                            >
+                                                <td className="px-4 py-3 font-medium text-foreground">
+                                                    {fy.name}
+                                                </td>
 
-                                        <td className="px-2 py-1">
-                                            {new Date(
-                                                fy.start_date,
-                                            ).toLocaleDateString()}
-                                        </td>
+                                                <td className="px-4 py-3 text-muted-foreground">
+                                                    {new Date(
+                                                        fy.start_date,
+                                                    ).toLocaleDateString()}
+                                                </td>
 
-                                        <td className="px-2 py-1">
-                                            {new Date(
-                                                fy.end_date,
-                                            ).toLocaleDateString()}
-                                        </td>
+                                                <td className="px-4 py-3 text-muted-foreground">
+                                                    {new Date(
+                                                        fy.end_date,
+                                                    ).toLocaleDateString()}
+                                                </td>
 
-                                        {/* 🔥 Unified status */}
-                                        <td className="px-2 py-1">
-                                            {fy.status === 'CLOSED' ? (
-                                                <span className="font-medium text-red-600">
-                                                    Closed
-                                                </span>
-                                            ) : (
-                                                <span className="font-medium text-green-600">
-                                                    Open
-                                                </span>
-                                            )}
-                                        </td>
+                                                <td className="px-4 py-3">
+                                                    {fy.status === 'CLOSED' ? (
+                                                        <StatusBadge tone="danger">
+                                                            Closed
+                                                        </StatusBadge>
+                                                    ) : (
+                                                        <StatusBadge tone="success">
+                                                            Open
+                                                        </StatusBadge>
+                                                    )}
+                                                </td>
 
-                                        <td className="flex gap-2 px-2 py-1">
+                                                <td className="px-4 py-3">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            asChild
+                                                            title="Edit fiscal year"
+                                                        >
+                                                            <Link
+                                                                href={route(
+                                                                    'fiscal-years.edit',
+                                                                    fy.id,
+                                                                )}
+                                                            >
+                                                                <Pencil className="h-4 w-4 text-emerald-600" />
+                                                            </Link>
+                                                        </Button>
+
+                                                        {!fy.is_closed && (
+                                                            <>
+                                                                <Select
+                                                                    value={getRetainedEarningsAccountId(
+                                                                        fy.id,
+                                                                    )}
+                                                                    onChange={(
+                                                                        value,
+                                                                    ) =>
+                                                                        setRetainedEarningsAccountId(
+                                                                            fy.id,
+                                                                            value,
+                                                                        )
+                                                                    }
+                                                                    options={[
+                                                                        {
+                                                                            value: '',
+                                                                            label: 'Retained earnings account',
+                                                                        },
+                                                                        ...retainedEarningsAccounts.map(
+                                                                            (
+                                                                                account,
+                                                                            ) => ({
+                                                                                value: String(
+                                                                                    account.id,
+                                                                                ),
+                                                                                label: `${account.code} - ${account.name}`,
+                                                                            }),
+                                                                        ),
+                                                                    ]}
+                                                                    className="w-60"
+                                                                />
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    title="Close fiscal year"
+                                                                    disabled={
+                                                                        processing ||
+                                                                        !getRetainedEarningsAccountId(
+                                                                            fy.id,
+                                                                        )
+                                                                    }
+                                                                    onClick={() =>
+                                                                        router.post(
+                                                                            route(
+                                                                                'fiscal-years.close-year',
+                                                                                fy.id,
+                                                                            ),
+                                                                            {
+                                                                                retained_earnings_account_id:
+                                                                                    getRetainedEarningsAccountId(
+                                                                                        fy.id,
+                                                                                    ),
+                                                                            },
+                                                                            {
+                                                                                preserveScroll: true,
+                                                                                preserveState: true,
+                                                                            },
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <Lock className="h-4 w-4 text-amber-600" />
+                                                                </Button>
+                                                            </>
+                                                        )}
+
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            disabled={
+                                                                processing
+                                                            }
+                                                            onClick={() =>
+                                                                handleDelete(
+                                                                    fy.id,
+                                                                    fy.name,
+                                                                )
+                                                            }
+                                                            title="Delete fiscal year"
+                                                        >
+                                                            <Trash2 className="h-4 w-4 text-red-600" />
+                                                        </Button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </ResourceTableCard>
+                        </div>
+
+                        <div className="space-y-3 md:hidden">
+                            {fiscalYears.data.map((fy) => (
+                                <div
+                                    key={fy.id}
+                                    className="space-y-3 rounded-md border bg-card p-3"
+                                >
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div>
+                                            <p className="font-medium">
+                                                {fy.name}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {new Date(
+                                                    fy.start_date,
+                                                ).toLocaleDateString()}{' '}
+                                                -{' '}
+                                                {new Date(
+                                                    fy.end_date,
+                                                ).toLocaleDateString()}
+                                            </p>
+                                        </div>
+                                        <StatusBadge
+                                            tone={
+                                                fy.status === 'CLOSED'
+                                                    ? 'danger'
+                                                    : 'success'
+                                            }
+                                        >
+                                            {fy.status === 'CLOSED'
+                                                ? 'Closed'
+                                                : 'Open'}
+                                        </StatusBadge>
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            asChild
+                                        >
                                             <Link
                                                 href={route(
                                                     'fiscal-years.edit',
                                                     fy.id,
                                                 )}
-                                                className="text-success"
-                                                title="Edit fiscal year"
                                             >
-                                                <Pencil className="h-5 w-5" />
+                                                <Pencil className="h-4 w-4" />{' '}
+                                                Edit
                                             </Link>
-
-                                            {!fy.is_closed && (
-                                                <>
-                                                    <Select
-                                                        value={
-                                                            retainedEarningsAccountId
-                                                        }
-                                                        onChange={
-                                                            setRetainedEarningsAccountId
-                                                        }
-                                                        options={[
-                                                            {
-                                                                value: '',
-                                                                label: 'Retained earnings account',
-                                                            },
-                                                            ...retainedEarningsAccounts.map(
-                                                                (account) => ({
-                                                                    value: String(
-                                                                        account.id,
-                                                                    ),
-                                                                    label: `${account.code} - ${account.name}`,
-                                                                }),
-                                                            ),
-                                                        ]}
-                                                        className="w-56"
-                                                    />
-                                                    <button
-                                                        type="button"
-                                                        title="Close fiscal year"
-                                                        disabled={
-                                                            processing ||
-                                                            !retainedEarningsAccountId
-                                                        }
-                                                        onClick={() =>
-                                                            router.post(
-                                                                route(
-                                                                    'fiscal-years.close-year',
-                                                                    fy.id,
-                                                                ),
-                                                                {
-                                                                    retained_earnings_account_id:
-                                                                        retainedEarningsAccountId,
-                                                                },
-                                                                {
-                                                                    preserveScroll: true,
-                                                                    preserveState: true,
-                                                                },
-                                                            )
-                                                        }
-                                                        className="text-amber-600 hover:text-amber-700 disabled:opacity-40"
-                                                    >
-                                                        <Lock className="h-5 w-5" />
-                                                    </button>
-                                                </>
-                                            )}
-
-                                            <button
-                                                type="button"
-                                                disabled={processing}
-                                                onClick={() =>
-                                                    handleDelete(fy.id, fy.name)
+                                        </Button>
+                                        {!fy.is_closed && (
+                                            <Select
+                                                value={getRetainedEarningsAccountId(
+                                                    fy.id,
+                                                )}
+                                                onChange={(value) =>
+                                                    setRetainedEarningsAccountId(
+                                                        fy.id,
+                                                        value,
+                                                    )
                                                 }
-                                                className="text-destructive hover:text-destructive/80 disabled:opacity-50"
-                                                title="Delete fiscal year"
-                                            >
-                                                <Trash2 className="h-5 w-5" />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td
-                                        colSpan={5}
-                                        className="px-4 py-6 text-center text-muted-foreground"
-                                    >
-                                        No fiscal years found.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                                options={[
+                                                    {
+                                                        value: '',
+                                                        label: 'Retained earnings account',
+                                                    },
+                                                    ...retainedEarningsAccounts.map(
+                                                        (account) => ({
+                                                            value: String(
+                                                                account.id,
+                                                            ),
+                                                            label: `${account.code} - ${account.name}`,
+                                                        }),
+                                                    ),
+                                                ]}
+                                                className="min-w-52 flex-1"
+                                            />
+                                        )}
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={
+                                                processing ||
+                                                fy.is_closed ||
+                                                !getRetainedEarningsAccountId(
+                                                    fy.id,
+                                                )
+                                            }
+                                            onClick={() =>
+                                                router.post(
+                                                    route(
+                                                        'fiscal-years.close-year',
+                                                        fy.id,
+                                                    ),
+                                                    {
+                                                        retained_earnings_account_id:
+                                                            getRetainedEarningsAccountId(
+                                                                fy.id,
+                                                            ),
+                                                    },
+                                                    {
+                                                        preserveScroll: true,
+                                                        preserveState: true,
+                                                    },
+                                                )
+                                            }
+                                        >
+                                            <Lock className="h-4 w-4" /> Close
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={processing}
+                                            onClick={() =>
+                                                handleDelete(fy.id, fy.name)
+                                            }
+                                        >
+                                            <Trash2 className="h-4 w-4 text-destructive" />{' '}
+                                            Delete
+                                        </Button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                )}
 
                 {/* Pagination */}
                 <DataTablePagination

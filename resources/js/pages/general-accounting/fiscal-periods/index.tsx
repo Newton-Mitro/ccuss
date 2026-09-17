@@ -3,7 +3,12 @@ import { Lock, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
-import HeadingSmall from '../../../components/heading-small';
+import {
+    ResourcePageHeader,
+    ResourceTableCard,
+    StatusBadge as ThemeStatusBadge,
+} from '../../../components/resource-page-shell';
+import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
@@ -82,47 +87,26 @@ export default function FiscalPeriodIndex() {
         { title: 'Fiscal Periods', href: route('fiscal-periods.index') },
     ];
 
-    // 🔥 Status badge (NEW)
-    const StatusBadge = ({ status }: { status: string }) => {
-        const styles: Record<string, string> = {
-            open: 'bg-green-100 text-green-700',
-            closed: 'bg-gray-100 text-gray-700',
-            locked: 'bg-red-100 text-red-700',
-        };
-
-        return (
-            <span
-                className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${styles[status]}`}
-            >
-                {status}
-            </span>
-        );
-    };
-
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Fiscal Periods" />
 
             <div className="space-y-4 text-foreground">
-                {/* Header */}
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <HeadingSmall
-                        title="Fiscal Periods"
-                        description="Manage fiscal periods"
-                    />
+                <ResourcePageHeader
+                    title="Fiscal Periods"
+                    description="Manage fiscal periods and their open or closed status."
+                    action={
+                        <Button asChild size="sm">
+                            <Link href={route('fiscal-periods.create')}>
+                                <Plus className="h-4 w-4" />
+                                <span className="hidden sm:inline">
+                                    Create Fiscal Period
+                                </span>
+                            </Link>
+                        </Button>
+                    }
+                />
 
-                    <Link
-                        href={route('fiscal-periods.create')}
-                        className="flex items-center gap-1 rounded bg-primary px-3 py-1.5 text-sm text-primary-foreground hover:bg-primary/90"
-                    >
-                        <Plus className="h-4 w-4" />
-                        <span className="hidden sm:inline">
-                            Create Fiscal Period
-                        </span>
-                    </Link>
-                </div>
-
-                {/* Filters */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <Input
                         type="text"
@@ -132,12 +116,12 @@ export default function FiscalPeriodIndex() {
                             setData('search', e.target.value);
                             setData('page', 1);
                         }}
-                        className="w-60 bg-card"
+                        className="w-full bg-background sm:w-72"
                     />
 
-                    <div className="w-60">
+                    <div className="w-full sm:w-60">
                         <Select
-                            className="bg-card"
+                            className="bg-background"
                             value={data.status}
                             onChange={(value) => {
                                 setData('status', value);
@@ -146,146 +130,291 @@ export default function FiscalPeriodIndex() {
                             options={periodStatuses}
                         />
                     </div>
+                    <span className="text-sm text-muted-foreground">
+                        {fiscalPeriods.data.length} records
+                    </span>
                 </div>
 
-                {/* Table */}
-                <div className="h-[calc(100vh-360px)] overflow-auto rounded-md border bg-card md:h-[calc(100vh-300px)]">
-                    <table className="w-full border-collapse">
-                        <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
-                            <tr>
-                                {[
-                                    'Period Name',
-                                    'Fiscal Year',
-                                    'Start Date',
-                                    'End Date',
-                                    'Status', // ✅ FIXED
-                                    'Actions',
-                                ].map((h) => (
-                                    <th
-                                        key={h}
-                                        className="border-b p-2 text-left text-sm font-medium text-muted-foreground"
-                                    >
-                                        {h}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
+                {fiscalPeriods.data.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center rounded-md border bg-card py-16 text-center text-muted-foreground">
+                        <p className="text-base font-medium">
+                            No fiscal periods found
+                        </p>
+                        <p className="text-xs">
+                            Try adjusting your filters or create a new fiscal
+                            period
+                        </p>
+                        <Link
+                            href={route('fiscal-periods.create')}
+                            className="mt-4 rounded bg-primary px-4 py-2 text-xs text-primary-foreground hover:bg-primary/90"
+                        >
+                            Create Fiscal Period
+                        </Link>
+                    </div>
+                ) : (
+                    <>
+                        <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
+                            <ResourceTableCard>
+                                <table className="w-full border-collapse">
+                                    <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
+                                        <tr>
+                                            {[
+                                                'Period Name',
+                                                'Fiscal Year',
+                                                'Start Date',
+                                                'End Date',
+                                                'Status', // ✅ FIXED
+                                                'Actions',
+                                            ].map((h) => (
+                                                <th
+                                                    key={h}
+                                                    className="border-b border-border px-4 py-3 font-medium"
+                                                >
+                                                    {h}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
 
-                        <tbody>
-                            {fiscalPeriods.data.length > 0 ? (
-                                fiscalPeriods.data.map((fp) => (
-                                    <tr
-                                        key={fp.id}
-                                        className="border-b transition-colors even:bg-muted hover:bg-accent/20"
-                                    >
-                                        <td className="px-2 py-1">{fp.name}</td>
+                                    <tbody>
+                                        {fiscalPeriods.data.map((fp) => (
+                                            <tr
+                                                key={fp.id}
+                                                className="border-b border-border/80 transition-colors even:bg-muted/40 hover:bg-primary/5"
+                                            >
+                                                <td className="px-4 py-3 font-medium">
+                                                    {fp.name}
+                                                </td>
 
-                                        <td className="px-2 py-1">
-                                            {fp.fiscal_year?.name || '-'}
-                                        </td>
+                                                <td className="px-4 py-3 text-muted-foreground">
+                                                    {fp.fiscal_year?.name ||
+                                                        '-'}
+                                                </td>
 
-                                        <td className="px-2 py-1">
-                                            {new Date(
-                                                fp.start_date,
-                                            ).toLocaleDateString()}
-                                        </td>
+                                                <td className="px-4 py-3 text-muted-foreground">
+                                                    {new Date(
+                                                        fp.start_date,
+                                                    ).toLocaleDateString()}
+                                                </td>
 
-                                        <td className="px-2 py-1">
-                                            {new Date(
-                                                fp.end_date,
-                                            ).toLocaleDateString()}
-                                        </td>
+                                                <td className="px-4 py-3 text-muted-foreground">
+                                                    {new Date(
+                                                        fp.end_date,
+                                                    ).toLocaleDateString()}
+                                                </td>
 
-                                        {/* 🔥 Status */}
-                                        <td className="px-2 py-1">
-                                            <StatusBadge status={fp.status} />
-                                        </td>
+                                                {/* 🔥 Status */}
+                                                <td className="px-4 py-3">
+                                                    <ThemeStatusBadge
+                                                        tone={
+                                                            fp.status === 'OPEN'
+                                                                ? 'success'
+                                                                : 'neutral'
+                                                        }
+                                                    >
+                                                        {fp.status}
+                                                    </ThemeStatusBadge>
+                                                </td>
 
-                                        <td className="flex gap-2 px-2 py-1">
+                                                <td className="px-4 py-3">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <Link
+                                                            href={route(
+                                                                'fiscal-periods.edit',
+                                                                fp.id,
+                                                            )}
+                                                            className="text-success"
+                                                            title="Edit fiscal period"
+                                                        >
+                                                            <Pencil className="h-5 w-5" />
+                                                        </Link>
+
+                                                        {fp.status ===
+                                                        'OPEN' ? (
+                                                            <button
+                                                                type="button"
+                                                                title="Close fiscal period"
+                                                                disabled={
+                                                                    processing
+                                                                }
+                                                                onClick={() =>
+                                                                    router.post(
+                                                                        route(
+                                                                            'fiscal-periods.close',
+                                                                            fp.id,
+                                                                        ),
+                                                                        {},
+                                                                        {
+                                                                            preserveScroll: true,
+                                                                            preserveState: true,
+                                                                        },
+                                                                    )
+                                                                }
+                                                                className="text-amber-600 hover:text-amber-700 disabled:opacity-40"
+                                                            >
+                                                                <Lock className="h-5 w-5" />
+                                                            </button>
+                                                        ) : (
+                                                            <button
+                                                                type="button"
+                                                                title="Reopen fiscal period"
+                                                                disabled={
+                                                                    processing
+                                                                }
+                                                                onClick={() =>
+                                                                    router.post(
+                                                                        route(
+                                                                            'fiscal-periods.reopen',
+                                                                            fp.id,
+                                                                        ),
+                                                                        {},
+                                                                        {
+                                                                            preserveScroll: true,
+                                                                            preserveState: true,
+                                                                        },
+                                                                    )
+                                                                }
+                                                                className="text-blue-600 hover:text-blue-700 disabled:opacity-40"
+                                                            >
+                                                                <RotateCcw className="h-5 w-5" />
+                                                            </button>
+                                                        )}
+
+                                                        <button
+                                                            type="button"
+                                                            disabled={
+                                                                processing
+                                                            }
+                                                            onClick={() =>
+                                                                handleDelete(
+                                                                    fp.id,
+                                                                    fp.name,
+                                                                )
+                                                            }
+                                                            className="text-destructive hover:text-destructive/80 disabled:opacity-50"
+                                                            title="Delete fiscal period"
+                                                        >
+                                                            <Trash2 className="h-5 w-5" />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </ResourceTableCard>
+                        </div>
+
+                        <div className="space-y-3 md:hidden">
+                            {fiscalPeriods.data.map((fp) => (
+                                <div
+                                    key={fp.id}
+                                    className="space-y-3 rounded-md border bg-card p-3"
+                                >
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div>
+                                            <p className="font-medium">
+                                                {fp.name}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {fp.fiscal_year?.name ||
+                                                    'No fiscal year'}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {new Date(
+                                                    fp.start_date,
+                                                ).toLocaleDateString()}{' '}
+                                                -{' '}
+                                                {new Date(
+                                                    fp.end_date,
+                                                ).toLocaleDateString()}
+                                            </p>
+                                        </div>
+                                        <ThemeStatusBadge
+                                            tone={
+                                                fp.status === 'OPEN'
+                                                    ? 'success'
+                                                    : 'neutral'
+                                            }
+                                        >
+                                            {fp.status}
+                                        </ThemeStatusBadge>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            asChild
+                                        >
                                             <Link
                                                 href={route(
                                                     'fiscal-periods.edit',
                                                     fp.id,
                                                 )}
-                                                className="text-success"
-                                                title="Edit fiscal period"
                                             >
-                                                <Pencil className="h-5 w-5" />
+                                                <Pencil className="h-4 w-4" />{' '}
+                                                Edit
                                             </Link>
-
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={processing}
+                                            onClick={() =>
+                                                fp.status === 'OPEN'
+                                                    ? router.post(
+                                                          route(
+                                                              'fiscal-periods.close',
+                                                              fp.id,
+                                                          ),
+                                                          {},
+                                                          {
+                                                              preserveScroll: true,
+                                                              preserveState: true,
+                                                          },
+                                                      )
+                                                    : router.post(
+                                                          route(
+                                                              'fiscal-periods.reopen',
+                                                              fp.id,
+                                                          ),
+                                                          {},
+                                                          {
+                                                              preserveScroll: true,
+                                                              preserveState: true,
+                                                          },
+                                                      )
+                                            }
+                                        >
                                             {fp.status === 'OPEN' ? (
-                                                <button
-                                                    type="button"
-                                                    title="Close fiscal period"
-                                                    disabled={processing}
-                                                    onClick={() =>
-                                                        router.post(
-                                                            route(
-                                                                'fiscal-periods.close',
-                                                                fp.id,
-                                                            ),
-                                                            {},
-                                                            {
-                                                                preserveScroll: true,
-                                                                preserveState: true,
-                                                            },
-                                                        )
-                                                    }
-                                                    className="text-amber-600 hover:text-amber-700 disabled:opacity-40"
-                                                >
-                                                    <Lock className="h-5 w-5" />
-                                                </button>
+                                                <Lock className="h-4 w-4" />
                                             ) : (
-                                                <button
-                                                    type="button"
-                                                    title="Reopen fiscal period"
-                                                    disabled={processing}
-                                                    onClick={() =>
-                                                        router.post(
-                                                            route(
-                                                                'fiscal-periods.reopen',
-                                                                fp.id,
-                                                            ),
-                                                            {},
-                                                            {
-                                                                preserveScroll: true,
-                                                                preserveState: true,
-                                                            },
-                                                        )
-                                                    }
-                                                    className="text-blue-600 hover:text-blue-700 disabled:opacity-40"
-                                                >
-                                                    <RotateCcw className="h-5 w-5" />
-                                                </button>
+                                                <RotateCcw className="h-4 w-4" />
                                             )}
-
-                                            <button
-                                                type="button"
-                                                disabled={processing}
-                                                onClick={() =>
-                                                    handleDelete(fp.id, fp.name)
-                                                }
-                                                className="text-destructive hover:text-destructive/80 disabled:opacity-50"
-                                                title="Delete fiscal period"
-                                            >
-                                                <Trash2 className="h-5 w-5" />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td
-                                        colSpan={6}
-                                        className="px-4 py-6 text-center text-muted-foreground"
-                                    >
-                                        No fiscal periods found.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                            {fp.status === 'OPEN'
+                                                ? 'Close'
+                                                : 'Reopen'}
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={processing}
+                                            onClick={() =>
+                                                handleDelete(fp.id, fp.name)
+                                            }
+                                        >
+                                            <Trash2 className="h-4 w-4 text-destructive" />{' '}
+                                            Delete
+                                        </Button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                )}
 
                 {/* Pagination */}
                 <DataTablePagination

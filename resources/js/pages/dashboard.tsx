@@ -16,6 +16,13 @@ import {
 } from 'chart.js';
 import { useEffect, useMemo, useState } from 'react';
 import { Bar, Doughnut, Line, Radar } from 'react-chartjs-2';
+import { ResourcePageHeader } from '../components/resource-page-shell';
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from '../components/ui/card';
 import CustomAuthLayout from '../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../types';
 
@@ -304,27 +311,32 @@ export default function DashboardPage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
             <div className="space-y-6 p-2 transition-colors duration-300 md:p-4">
+                <ResourcePageHeader
+                    title="Dashboard"
+                    description="A live overview of activity across your organization."
+                />
+
                 {/* KPI Cards */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
                     {kpiCards.map((card, idx) => (
                         <div
                             key={idx}
                             onClick={() => router.visit(card.route)}
-                            className="flex cursor-pointer items-center rounded-xl border bg-card p-4 transition-all hover:scale-[1.02] hover:shadow-md"
+                            className="group flex cursor-pointer items-center gap-3 rounded-2xl border bg-card/90 p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
                             style={{
                                 backgroundColor: `${card.color}15`,
                                 borderColor: `${card.color}40`,
                             }}
                         >
                             <i
-                                className={`fa-solid ${card.icon} mr-4 text-3xl sm:mr-6`}
+                                className={`fa-solid ${card.icon} rounded-xl p-3 text-xl transition-transform duration-200 group-hover:scale-110 sm:text-2xl`}
                                 style={{ color: card.color }}
                             />
                             <div>
-                                <div className="text-xl font-bold sm:text-2xl">
+                                <div className="text-xl font-bold tracking-tight sm:text-2xl">
                                     {card.value}
                                 </div>
-                                <div className="text-sm opacity-70">
+                                <div className="text-xs font-medium text-muted-foreground">
                                     {card.label}
                                 </div>
                             </div>
@@ -334,72 +346,100 @@ export default function DashboardPage() {
 
                 {/* Charts */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="rounded-xl border bg-card p-4">
-                        <h2 className="mb-3 text-lg font-semibold">
-                            Top Visited Routes
-                        </h2>
-                        <Bar data={routeVisitedData} options={chartOptions} />
-                    </div>
+                    <Card className="bg-card/90 shadow-sm">
+                        <CardHeader className="pb-0">
+                            <CardTitle className="text-base">
+                                Top Visited Routes
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Bar
+                                data={routeVisitedData}
+                                options={chartOptions}
+                            />
+                        </CardContent>
+                    </Card>
 
-                    <div className="rounded-xl border bg-card p-4">
-                        <h2 className="mb-3 text-lg font-semibold">
-                            Monthly Visitors
-                        </h2>
-                        <Line
-                            data={monthlyVisitorsData}
-                            options={chartOptions}
-                        />
-                    </div>
+                    <Card className="bg-card/90 shadow-sm">
+                        <CardHeader className="pb-0">
+                            <CardTitle className="text-base">
+                                Monthly Visitors
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Line
+                                data={monthlyVisitorsData}
+                                options={chartOptions}
+                            />
+                        </CardContent>
+                    </Card>
 
-                    <div className="rounded-xl border bg-card p-4">
-                        <h2 className="mb-3 text-lg font-semibold">
-                            Branches vs Customers
-                        </h2>
-                        <Doughnut data={doughnutData} options={chartOptions} />
-                    </div>
+                    <Card className="bg-card/90 shadow-sm">
+                        <CardHeader className="pb-0">
+                            <CardTitle className="text-base">
+                                Branches vs Customers
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Doughnut
+                                data={doughnutData}
+                                options={chartOptions}
+                            />
+                        </CardContent>
+                    </Card>
 
-                    <div className="rounded-xl border bg-card p-4">
-                        <h2 className="mb-3 text-lg font-semibold">
-                            KPI Radar
-                        </h2>
-                        <Radar data={radarData} options={chartOptions} />
-                    </div>
+                    <Card className="bg-card/90 shadow-sm">
+                        <CardHeader className="pb-0">
+                            <CardTitle className="text-base">
+                                KPI Radar
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Radar data={radarData} options={chartOptions} />
+                        </CardContent>
+                    </Card>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 bg-card md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     {/* 🧾 Audit Logs Section */}
-                    <div className="rounded-xl border p-4">
-                        <h2 className="mb-3 text-lg font-semibold">
-                            Audit Log Activity
-                        </h2>
-                        <div className="mb-6">
+                    <Card className="bg-card/90 shadow-sm">
+                        <CardHeader>
+                            <CardTitle className="text-base">
+                                Audit Log Activity
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
                             <Bar data={auditChartData} options={chartOptions} />
-                        </div>
-                    </div>
+                        </CardContent>
+                    </Card>
 
                     {/* Audit Logs */}
-                    <div className="rounded-xl border p-4">
-                        <h2 className="mb-3 text-lg font-semibold">
-                            Recent Audit Logs
-                        </h2>
-                        <ul className="space-y-2 text-sm">
-                            {auditLogs.map((log: any) => (
-                                <li
-                                    key={log.id}
-                                    className="flex flex-wrap justify-between border-b border-dashed border-muted-foreground/20 py-1"
-                                >
-                                    <span className="truncate">
-                                        {log.action}
-                                    </span>
-                                    <span className="ml-2 opacity-70">
-                                        {new Date(
-                                            log.created_at,
-                                        ).toLocaleTimeString()}
-                                    </span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                    <Card className="bg-card/90 shadow-sm">
+                        <CardHeader>
+                            <CardTitle className="text-base">
+                                Recent Audit Logs
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <ul className="space-y-2 text-sm">
+                                {auditLogs.map((log: any) => (
+                                    <li
+                                        key={log.id}
+                                        className="flex flex-wrap justify-between border-b border-dashed border-muted-foreground/20 py-1"
+                                    >
+                                        <span className="truncate">
+                                            {log.action}
+                                        </span>
+                                        <span className="ml-2 opacity-70">
+                                            {new Date(
+                                                log.created_at,
+                                            ).toLocaleTimeString()}
+                                        </span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
         </CustomAuthLayout>
