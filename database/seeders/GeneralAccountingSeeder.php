@@ -20,7 +20,7 @@ class GeneralAccountingSeeder extends Seeder
 {
     public function run(): void
     {
-        $organization = Organization::query()->where('code', 'ORG001')->firstOrFail();
+        $organization = Organization::query()->where('code', 'ORG-001')->firstOrFail();
         $user = User::query()->where('email', 'super.admin@email.com')->firstOrFail();
         $branchId = $organization->branches()->oldest('id')->value('id');
 

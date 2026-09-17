@@ -37,7 +37,7 @@ class DatabaseSeeder extends Seeder
         });
 
         $organization = Organization::query()
-            ->where('code', 'ORG001')
+            ->where('code', 'ORG-001')
             ->firstOrFail();
 
         $user->forceFill([

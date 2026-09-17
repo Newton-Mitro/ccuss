@@ -17,7 +17,7 @@ class FinancialServicesSeeder extends Seeder
 {
     public function run(): void
     {
-        $organization = Organization::query()->where('code', 'ORG001')->firstOrFail();
+        $organization = Organization::query()->where('code', 'ORG-001')->firstOrFail();
 
         $branchId = $organization->branches()->oldest('id')->value('id');
 
