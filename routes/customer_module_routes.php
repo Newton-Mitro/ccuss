@@ -2,10 +2,15 @@
 
 use App\CustomerModule\Controllers\CustomerAddressController;
 use App\CustomerModule\Controllers\CustomerController;
+use App\CustomerModule\Controllers\CustomerDashboardController;
 use App\CustomerModule\Controllers\CustomerFamilyRelationController;
 use App\CustomerModule\Controllers\CustomerIntroducerController;
 use App\CustomerModule\Controllers\KycDocumentController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/customer-kyc', [CustomerDashboardController::class, 'index'])
+    ->middleware(['auth', 'verified', 'organization', 'permission:customer.view'])
+    ->name('customer-kyc.dashboard');
 
 Route::middleware(['auth', 'verified', 'organization'])->group(function () {
 

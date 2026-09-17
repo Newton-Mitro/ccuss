@@ -5,8 +5,13 @@ use App\SystemAdministration\Controllers\BranchController;
 use App\SystemAdministration\Controllers\DatabaseBackupController;
 use App\SystemAdministration\Controllers\OrganizationController;
 use App\SystemAdministration\Controllers\RolePermissionController;
+use App\SystemAdministration\Controllers\SystemAdministrationDashboardController;
 use App\SystemAdministration\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/admin-dashboard', [SystemAdministrationDashboardController::class, 'index'])
+    ->middleware(['auth', 'verified', 'organization'])
+    ->name('admin-dashboard');
 
 Route::middleware(['auth', 'verified', 'organization'])->prefix('users')->name('users.')->group(function () {
     Route::get('/search', [UserController::class, 'searchUsers'])

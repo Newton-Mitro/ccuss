@@ -4,11 +4,13 @@ import { financialServicesMenu } from './financialServicesMenu';
 import { generalAccountingMenu } from './generalAccountingMenu';
 import { homeMenu } from './homeMenu';
 import { systemAdministrationMenu } from './systemAdministrationMenu';
+import { treasuryAndCashMenu } from './treasuryAndCashMenu';
 
 export const sidebarMenu: SidebarItem[] = [
     ...homeMenu,
     ...customerKycMenu,
     ...financialServicesMenu,
     ...generalAccountingMenu,
+    ...treasuryAndCashMenu,
     ...systemAdministrationMenu,
 ];

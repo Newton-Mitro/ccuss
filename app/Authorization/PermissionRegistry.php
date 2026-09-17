@@ -6,6 +6,7 @@ use App\Authorization\Permissions\CustomerPermissions;
 use App\Authorization\Permissions\FinancialServicesPermissions;
 use App\Authorization\Permissions\GeneralAccountingPermissions;
 use App\Authorization\Permissions\SystemAdministrationPermissions;
+use App\Authorization\Permissions\TreasuryPermissions;
 
 final class PermissionRegistry
 {
@@ -15,6 +16,7 @@ final class PermissionRegistry
             CustomerPermissions::definitions(),
             FinancialServicesPermissions::definitions(),
             GeneralAccountingPermissions::definitions(),
+            TreasuryPermissions::definitions(),
             SystemAdministrationPermissions::definitions(),
         );
     }

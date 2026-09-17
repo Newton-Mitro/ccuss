@@ -30,7 +30,7 @@ function Edit() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        put(`/branches/${branch.id}`, {
+        put(route('branches.update', branch.id), {
             preserveScroll: true,
             preserveState: true,
         });

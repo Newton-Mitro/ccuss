@@ -6,10 +6,15 @@ use App\GeneralAccounting\Controllers\CostCenterController;
 use App\GeneralAccounting\Controllers\BudgetController;
 use App\GeneralAccounting\Controllers\FiscalPeriodController;
 use App\GeneralAccounting\Controllers\FiscalYearController;
+use App\GeneralAccounting\Controllers\GeneralAccountingDashboardController;
 use App\GeneralAccounting\Controllers\LedgerAccountController;
 use App\GeneralAccounting\Controllers\PeriodEndController;
 use App\GeneralAccounting\Controllers\VoucherController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/general-accounting', [GeneralAccountingDashboardController::class, 'index'])
+    ->middleware(['auth', 'verified', 'organization', 'permission:accounting.view'])
+    ->name('general-accounting.dashboard');
 
 // Fiscal Years
 Route::middleware(['auth', 'verified', 'organization'])->group(function () {
