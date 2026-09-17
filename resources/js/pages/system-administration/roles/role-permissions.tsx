@@ -66,7 +66,6 @@ const RolePermissionForm = ({
         e.preventDefault();
         if (!selectedRole) return;
         put(route('roles.update-permissions', selectedRole.id), {
-            data,
             preserveScroll: true,
         });
     };

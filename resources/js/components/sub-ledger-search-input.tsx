@@ -13,9 +13,13 @@ export interface SubLedger {
 }
 
 interface SubLedgerSearchInputProps {
-    onSelect: (ledger: SubLedger) => void;
+    onSelect?: (ledger: SubLedger) => void;
     label?: string;
     placeholder?: string;
+    disabled?: boolean;
+    value?: string;
+    error?: string;
+    showErrorText?: boolean;
 }
 
 export const SubLedgerSearchInput: React.FC<SubLedgerSearchInputProps> = ({
@@ -120,7 +124,7 @@ export const SubLedgerSearchInput: React.FC<SubLedgerSearchInputProps> = ({
                             key={ledger.id}
                             className="cursor-pointer px-3 py-2 text-xs hover:bg-muted"
                             onClick={() => {
-                                onSelect(ledger);
+                                onSelect?.(ledger);
                                 setQuery(ledger.name);
                                 setShowDropdown(false);
                             }}

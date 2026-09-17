@@ -177,7 +177,7 @@ export default function AddressIndex() {
                                                         )}
                                                         pending={
                                                             address.verification_status ===
-                                                            'PENDING'
+                                                            'pending'
                                                         }
                                                     />
                                                 </div>
@@ -241,7 +241,7 @@ export default function AddressIndex() {
                                             )}
                                             pending={
                                                 address.verification_status ===
-                                                'PENDING'
+                                                'pending'
                                             }
                                         />
                                     </div>

@@ -60,3 +60,29 @@ export interface AccountBalance extends Timestamped {
     credit_total: number;
     closing_balance: number;
 }
+
+export interface VoucherLine {
+    id: number | string;
+    voucher_entry_id?: number | null;
+    ledger_account_id?: number | null;
+    ledger_account?: any | null;
+    subledger_id?: number | null;
+    subledger_type?: string | null;
+    subledger?: any | null;
+    reference_id?: number | null;
+    reference_type?: string | null;
+    reference?: any | null;
+    instrument_type?: string | null;
+    instrument_type_id?: number | string | null;
+    instrument_id?: number | string | null;
+    instrument_no?: string | null;
+    particulars?: string | null;
+    debit?: number | string | null;
+    credit?: number | string | null;
+    created_by?: number | null;
+    created_by_user?: any | null;
+    updated_by?: number | null;
+    updated_by_user?: any | null;
+    created_at?: string | null;
+    updated_at?: string | null;
+}

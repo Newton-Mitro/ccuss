@@ -16,6 +16,7 @@ export interface Audit extends Timestamped {
     // Actor & context
     user_id: number | null;
     user?: User | null;
+    creator?: User | null;
 
     // Action type
     event: AuditEvent;

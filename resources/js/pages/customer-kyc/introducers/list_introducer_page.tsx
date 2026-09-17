@@ -191,7 +191,7 @@ export default function IntroducersIndex() {
                                                             )}
                                                             pending={
                                                                 i.verification_status ===
-                                                                'PENDING'
+                                                                'pending'
                                                             }
                                                         />
                                                         <Tooltip>
@@ -298,7 +298,7 @@ export default function IntroducersIndex() {
                                             )}
                                             pending={
                                                 i.verification_status ===
-                                                'PENDING'
+                                                'pending'
                                             }
                                         />
                                         <Link

@@ -10,11 +10,13 @@ export interface PettyCashAccount extends Timestamped {
     subledger_account_id: number;
 
     upper_limit: string; // decimal from Laravel
+    current_balance?: number | string;
     balance?: string; // future-ready field for current balance, decimal from Laravel
     status: 'active' | 'inactive';
 
     // relations
     branch?: Branch;
+    ledger_account?: any;
     subledger_account?: any; // replace with LedgerAccount type if available
     employees?: PettyCashAdvanceAccount[];
 }

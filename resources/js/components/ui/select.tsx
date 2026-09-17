@@ -12,8 +12,8 @@ interface Option {
 interface SelectSearchProps {
   options: Option[];
   className?: string;
-  value?: string;
-  onChange?: (value: string) => void;
+  value?: string | number | null;
+  onChange?: (value: any) => void;
   placeholder?: string;
   error?: string;
   showErrorText?: boolean;
@@ -37,7 +37,9 @@ const Select: React.FC<SelectSearchProps> = ({
   const ref = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const selectedOption = options.find((opt) => opt.value === value);
+  const selectedOption = options.find(
+    (opt) => String(opt.value) === String(value ?? '')
+  );
 
   const filteredOptions = options.filter((opt) =>
     opt?.label?.toLowerCase().includes(search?.toLowerCase())

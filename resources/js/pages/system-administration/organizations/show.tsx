@@ -7,11 +7,11 @@ import HeadingSmall from '../../../components/heading-small';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
-import { BreadcrumbItem, SharedData } from '../../../types';
+import { BreadcrumbItem } from '../../../types';
 import { Branch } from '../../../types/branch';
 import { Organization } from '../../../types/organization';
 
-interface OrganizationPageProps extends SharedData {
+interface OrganizationPageProps extends Record<string, any> {
     organization: Organization & {
         branches: Branch[];
     };

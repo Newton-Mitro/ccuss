@@ -105,9 +105,11 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
         }).forEach(([key, value]) => {
             if (value !== null && value !== undefined) {
                 if (Array.isArray(value)) {
-                    value.forEach((v) => payload.append(`${key}[]`, v));
+                    value.forEach((v) => payload.append(`${key}[]`, String(v)));
+                } else if (value instanceof Blob) {
+                    payload.append(key, value);
                 } else {
-                    payload.append(key, value as any);
+                    payload.append(key, String(value));
                 }
             }
         });
@@ -115,12 +117,12 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
         if (isEdit) {
             payload.append('_method', 'PUT'); // ✅ method spoofing
 
-            router.post(`/users/${user.id}`, payload, {
+            router.post(`/users/${user.id}`, payload as any, {
                 preserveScroll: true,
                 forceFormData: true,
             });
         } else {
-            router.post('/users', payload, {
+            router.post('/users', payload as any, {
                 preserveScroll: true,
                 forceFormData: true,
             });

@@ -116,5 +116,21 @@ export function useAppearance() {
         setCookie('theme_color', newColor);
     }, []);
 
-    return { mode, color, updateMode, updateColor } as const;
+    const updateAppearance = useCallback(
+        (newAppearance: ThemeMode) => {
+            updateMode(newAppearance);
+        },
+        [updateMode],
+    );
+
+    const appearance = mode;
+
+    return {
+        mode,
+        color,
+        appearance,
+        updateMode,
+        updateColor,
+        updateAppearance,
+    } as const;
 }

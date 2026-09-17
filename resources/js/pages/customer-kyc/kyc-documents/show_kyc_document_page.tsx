@@ -270,7 +270,7 @@ const Show = () => {
                     </div>
 
                     {/* ACTIONS */}
-                    {document.verification_status === 'PENDING' && (
+                    {document.verification_status === 'pending' && (
                         <div className="flex gap-2 rounded-md border bg-card p-4">
                             <div className="">
                                 <Input

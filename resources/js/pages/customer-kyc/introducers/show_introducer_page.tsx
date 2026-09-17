@@ -282,7 +282,7 @@ export default function ShowIntroducer() {
                     </div>
 
                     {/* ACTIONS */}
-                    {introducer_request.verification_status === 'PENDING' && (
+                    {introducer_request.verification_status === 'pending' && (
                         <div className="flex gap-2 rounded-md border bg-card p-4">
                             <div className="">
                                 <Input

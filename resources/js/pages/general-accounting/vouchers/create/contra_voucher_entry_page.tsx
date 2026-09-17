@@ -60,7 +60,13 @@ interface VoucherFormData {
     narration: string;
     cash_ledger_id?: number;
     cash_subledger_id?: number;
+    particulars?: string;
+    debit?: number | string;
+    credit?: number | string;
+    instrument_type?: string;
+    instrument_no?: string;
     lines: VoucherLine[];
+    [key: string]: any;
 }
 
 /* -------------------------------------------------------
@@ -189,9 +195,17 @@ export default function ContraVoucherEntryPage() {
         post('/voucher_entries', { preserveScroll: true });
     };
 
-    const debitTotal = data.lines.reduce((sum, l) => sum + (l.debit || 0), 0);
-    const creditTotal = data.lines.reduce((sum, l) => sum + (l.credit || 0), 0);
-    const hasValidLines = data.lines.every((l) => (l.debit || l.credit) > 0);
+    const debitTotal = data.lines.reduce(
+        (sum, l) => sum + Number(l.debit || 0),
+        0,
+    );
+    const creditTotal = data.lines.reduce(
+        (sum, l) => sum + Number(l.credit || 0),
+        0,
+    );
+    const hasValidLines = data.lines.every(
+        (l) => Number(l.debit || l.credit || 0) > 0,
+    );
     const isBalanced =
         data.lines.length > 0 && debitTotal === creditTotal && hasValidLines;
 

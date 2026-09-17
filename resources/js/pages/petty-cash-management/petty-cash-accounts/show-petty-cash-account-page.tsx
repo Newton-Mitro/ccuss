@@ -101,7 +101,11 @@ const ShowPettyCashExpensePage = ({
                         Current Balance
                     </div>
                     <div className="text-sm font-medium text-primary">
-                        {formatBDTCurrency(pettyCash?.balance)}
+                        {formatBDTCurrency(
+                            pettyCash?.current_balance ??
+                                pettyCash?.balance ??
+                                0,
+                        )}
                     </div>
                 </div>
             </div>

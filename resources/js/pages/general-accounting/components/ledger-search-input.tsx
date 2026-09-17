@@ -7,8 +7,8 @@ import { Label } from '../../../components/ui/label';
 import { LedgerAccount } from '../../../types/finance_and_accounting';
 
 interface LedgerSearchInputProps {
-    value: string;
-    onSelect: (ledger: LedgerAccount) => void;
+    value?: string;
+    onSelect?: (ledger: LedgerAccount) => void;
     label?: string;
     placeholder?: string;
     error?: string;
@@ -121,7 +121,7 @@ export const LedgerSearchInput: React.FC<LedgerSearchInputProps> = ({
                             key={ledger.id}
                             className="cursor-pointer px-3 py-2 text-xs hover:bg-muted"
                             onClick={() => {
-                                onSelect(ledger);
+                                onSelect?.(ledger);
                                 setQuery(`${ledger.code} - ${ledger.name}`);
                                 setShowDropdown(false);
                             }}

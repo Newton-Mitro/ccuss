@@ -3,6 +3,8 @@ import { LucideIcon } from 'lucide-react';
 import { Organization } from './organization';
 import { User } from './user';
 
+export type { User } from './user';
+
 export interface Auth {
     user: User;
 }
