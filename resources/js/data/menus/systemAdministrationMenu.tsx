@@ -2,7 +2,7 @@ import { SidebarItem } from '../../types';
 
 export const systemAdministrationMenu: SidebarItem[] = [
     {
-        name: 'System Administration',
+        name: 'Administrative Tasks',
         icon: <i className="fa-solid fa-building-flag" />,
         children_expanded: false,
         permission: ['organizations.view'],

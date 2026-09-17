@@ -39,7 +39,17 @@ class FinancialTransactionController extends Controller
     public function create(Request $request): Response
     {
         return Inertia::render('financial-services/transactions/form', [
+            'transactionType' => $request->string('type')->upper()->value() ?: 'DEPOSIT',
             'accounts' => FinancialAccount::query()->where('organization_id', $this->organizationId($request))->whereIn('status', ['PENDING', 'ACTIVE'])->orderBy('account_no')->get(['id', 'account_no', 'name', 'account_type', 'balance']),
+        ]);
+    }
+
+    public function workflow(Request $request, string $workflow): Response
+    {
+        abort_unless(in_array($workflow, ['transfer', 'loan-disbursement', 'loan-repayment'], true), 404);
+
+        return Inertia::render('financial-services/transactions/workflow', [
+            'workflow' => $workflow,
         ]);
     }
 

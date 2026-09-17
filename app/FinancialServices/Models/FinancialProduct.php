@@ -16,6 +16,11 @@ class FinancialProduct extends Model
 {
     use HasFactory;
 
+    protected static function newFactory()
+    {
+        return \Database\Factories\FinancialProductFactory::new();
+    }
+
     protected $fillable = [
         'organization_id',
         'code',

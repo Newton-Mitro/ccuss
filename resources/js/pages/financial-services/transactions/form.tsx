@@ -18,10 +18,13 @@ interface Account {
 }
 
 export default function FinancialTransactionForm() {
-    const { accounts } = usePage<{ accounts: Account[] }>().props;
+    const { accounts, transactionType } = usePage<{
+        accounts: Account[];
+        transactionType?: string;
+    }>().props;
     const { data, setData, post, processing, errors } = useForm({
         financial_account_id: '',
-        transaction_type: 'DEPOSIT',
+        transaction_type: transactionType ?? 'DEPOSIT',
         transaction_date: new Date().toISOString().slice(0, 10),
         amount: '',
         currency: 'BDT',
@@ -39,11 +42,13 @@ export default function FinancialTransactionForm() {
     ];
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="New Financial Transaction" />
+            <Head
+                title={`${data.transaction_type === 'WITHDRAWAL' ? 'Withdrawal' : 'Deposit'} Transaction`}
+            />
             <div className="mx-auto max-w-3xl space-y-4">
                 <ResourcePageHeader
-                    title="New financial transaction"
-                    description="Create a deposit or withdrawal draft for an active account."
+                    title={`${data.transaction_type === 'WITHDRAWAL' ? 'Withdrawal' : 'Deposit'} transaction`}
+                    description="Create an operational transaction draft for an active account."
                 />
                 <form
                     onSubmit={submit}

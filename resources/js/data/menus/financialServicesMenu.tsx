@@ -8,6 +8,13 @@ export const financialServicesMenu: SidebarItem[] = [
         permission: ['financial.view'],
         children: [
             {
+                name: 'Dashboard',
+                icon: <i className="fa-solid fa-gauge-high" />,
+                path: '/financial-services',
+                match_path: 'financial-services',
+                permission: ['financial.view'],
+            },
+            {
                 name: 'Products',
                 icon: <i className="fa-solid fa-boxes-stacked" />,
                 permission: ['financial.products.view'],

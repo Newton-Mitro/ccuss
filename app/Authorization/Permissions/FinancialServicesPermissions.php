@@ -10,6 +10,7 @@ final class FinancialServicesPermissions
     {
         return [
             new PermissionDefinition('financial_services', 'View Financial Services', 'financial.view', 'view', 'Access financial products, accounts, and transactions'),
+            new PermissionDefinition('financial_services', 'View Financial Dashboard', 'financial.dashboard.view', 'view', 'View the financial services dashboard'),
             new PermissionDefinition('financial_products', 'View Financial Products', 'financial.products.view', 'view', 'View financial products'),
             new PermissionDefinition('financial_products', 'Create Financial Products', 'financial.products.create', 'create', 'Create financial products'),
             new PermissionDefinition('financial_products', 'Update Financial Products', 'financial.products.update', 'update', 'Update financial products'),

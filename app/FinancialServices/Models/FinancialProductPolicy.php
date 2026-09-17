@@ -11,6 +11,11 @@ class FinancialProductPolicy extends Model
 {
     use HasFactory;
 
+    protected static function newFactory()
+    {
+        return \Database\Factories\FinancialProductPolicyFactory::new();
+    }
+
     protected $fillable = [
         'financial_product_id',
         'minimum_opening_amount',

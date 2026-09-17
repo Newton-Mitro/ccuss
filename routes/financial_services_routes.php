@@ -3,6 +3,8 @@
 use App\FinancialServices\Controllers\FinancialProductController;
 use App\FinancialServices\Controllers\FinancialAccountController;
 use App\FinancialServices\Controllers\FinancialTransactionController;
+use App\FinancialServices\Controllers\FinancialProductPolicyController;
+use App\FinancialServices\Controllers\FinancialReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'organization'])->group(function () {
@@ -20,6 +22,8 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
         ->name('financial-products.create');
     Route::get('/financial-products/{financial_product}', [FinancialProductController::class, 'show'])
         ->name('financial-products.show');
+    Route::get('/financial-product-policies', [FinancialProductPolicyController::class, 'index'])
+        ->name('financial-product-policies.index');
 
     Route::get('/financial-accounts', [FinancialAccountController::class, 'index'])->name('financial-accounts.index');
     Route::get('/financial-accounts/create', [FinancialAccountController::class, 'create'])->name('financial-accounts.create');
@@ -27,11 +31,20 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/financial-accounts/{financial_account}', [FinancialAccountController::class, 'show'])->name('financial-accounts.show');
     Route::post('/financial-accounts/{financial_account}/activate', [FinancialAccountController::class, 'activate'])->name('financial-accounts.activate');
     Route::post('/financial-accounts/{financial_account}/close', [FinancialAccountController::class, 'close'])->name('financial-accounts.close');
+    Route::get('/financial-account-statements', [FinancialAccountController::class, 'statement'])->name('financial-account-statements.index');
 
     Route::get('/financial-transactions', [FinancialTransactionController::class, 'index'])->name('financial-transactions.index');
     Route::get('/financial-transactions/create', [FinancialTransactionController::class, 'create'])->name('financial-transactions.create');
+    Route::get('/financial-transactions/{workflow}/create', [FinancialTransactionController::class, 'workflow'])
+        ->where('workflow', 'transfer|loan-disbursement|loan-repayment')
+        ->name('financial-transactions.workflow');
     Route::post('/financial-transactions', [FinancialTransactionController::class, 'store'])->name('financial-transactions.store');
     Route::get('/financial-transactions/{financial_transaction}', [FinancialTransactionController::class, 'show'])->name('financial-transactions.show');
     Route::post('/financial-transactions/{financial_transaction}/post', [FinancialTransactionController::class, 'post'])->name('financial-transactions.post');
     Route::post('/financial-transactions/{financial_transaction}/reverse', [FinancialTransactionController::class, 'reverse'])->name('financial-transactions.reverse');
+
+    Route::get('/financial-services', [FinancialReportController::class, 'dashboard'])->name('financial-services.dashboard');
+    Route::get('/financial-reports/product-summary', [FinancialReportController::class, 'productSummary'])->name('financial-reports.product-summary');
+    Route::get('/financial-reports/account-balances', [FinancialReportController::class, 'accountBalances'])->name('financial-reports.account-balances');
+    Route::get('/financial-reports/transactions', [FinancialReportController::class, 'transactions'])->name('financial-reports.transactions');
 });

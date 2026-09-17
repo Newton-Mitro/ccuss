@@ -12,6 +12,11 @@ class FinancialProductAccountMapping extends Model
 {
     use HasFactory;
 
+    protected static function newFactory()
+    {
+        return \Database\Factories\FinancialProductAccountMappingFactory::new();
+    }
+
     protected $fillable = [
         'financial_product_id',
         'transaction_type',

@@ -12,6 +12,11 @@ class FinancialTransactionEntry extends Model
 {
     use HasFactory;
 
+    protected static function newFactory()
+    {
+        return \Database\Factories\FinancialTransactionEntryFactory::new();
+    }
+
     protected $fillable = [
         'financial_transaction_id',
         'financial_account_id',

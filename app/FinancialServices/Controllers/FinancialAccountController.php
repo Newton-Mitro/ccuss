@@ -69,6 +69,25 @@ class FinancialAccountController extends Controller
         ]);
     }
 
+    public function statement(Request $request): Response
+    {
+        $accounts = $this->accountService
+            ->queryForOrganization($this->organizationId($request))
+            ->orderBy('account_no')
+            ->get(['id', 'account_no', 'name', 'account_type']);
+
+        $account = $request->integer('account_id')
+            ? $this->accountService->queryForOrganization($this->organizationId($request))
+                ->with('transactions')
+                ->find($request->integer('account_id'))
+            : null;
+
+        return Inertia::render('financial-services/accounts/statement', [
+            'accounts' => $accounts,
+            'account' => $account,
+        ]);
+    }
+
     public function activate(Request $request, FinancialAccount $financialAccount)
     {
         $this->authorizeOrganization($request, $financialAccount);

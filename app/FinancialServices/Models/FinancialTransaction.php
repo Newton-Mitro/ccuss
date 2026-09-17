@@ -16,6 +16,11 @@ class FinancialTransaction extends Model
 {
     use HasFactory;
 
+    protected static function newFactory()
+    {
+        return \Database\Factories\FinancialTransactionFactory::new();
+    }
+
     protected $fillable = [
         'organization_id',
         'branch_id',
