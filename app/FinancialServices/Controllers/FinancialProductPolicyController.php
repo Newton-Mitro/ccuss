@@ -17,10 +17,12 @@ class FinancialProductPolicyController extends Controller
             ->with('policy')
             ->orderBy('category')
             ->orderBy('name')
-            ->get();
+            ->paginate($request->integer('per_page', 18))
+            ->withQueryString();
 
         return Inertia::render('financial-services/product-policies/index', [
             'products' => $products,
+            'filters' => $request->only(['per_page', 'page']),
         ]);
     }
 

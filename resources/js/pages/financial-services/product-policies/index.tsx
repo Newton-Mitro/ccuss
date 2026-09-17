@@ -5,9 +5,10 @@ import {
 } from '@/components/resource-page-shell';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { FileText, ShieldCheck } from 'lucide-react';
 import { route } from 'ziggy-js';
+import DataTablePagination from '../../../components/data-table-pagination';
 
 interface Policy {
     status?: string;
@@ -25,7 +26,13 @@ interface Product {
 }
 
 export default function ProductPoliciesIndex() {
-    const { products } = usePage<{ products: Product[] }>().props;
+    const { products } = usePage<{
+        products: {
+            data: Product[];
+            links: { url: string | null; label: string; active: boolean }[];
+            per_page: number;
+        };
+    }>().props;
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
         { title: 'Product Policies', href: '' },
@@ -38,7 +45,7 @@ export default function ProductPoliciesIndex() {
                     title="Product policies"
                     description="Operational rules and policy provenance for every financial product."
                 />
-                <div className="rounded-xl border border-sky-500/20 bg-sky-500/5 p-4 text-sm text-sky-900 dark:text-sky-100">
+                <div className="rounded-md border border-sky-500/20 bg-sky-500/5 p-4 text-sm text-sky-900 dark:text-sky-100">
                     <div className="flex gap-3">
                         <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0" />
                         <p>
@@ -48,25 +55,34 @@ export default function ProductPoliciesIndex() {
                         </p>
                     </div>
                 </div>
-                <ResourceTableCard>
+                <ResourceTableCard className="h-[calc(100vh-320px)] md:h-[calc(100vh-300px)]">
                     <table className="w-full min-w-190 text-sm">
-                        <thead className="bg-muted/70 text-left text-xs text-muted-foreground">
+                        <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
-                                <th className="px-3 py-2">Product</th>
-                                <th className="px-3 py-2">Category</th>
-                                <th className="px-3 py-2">Opening minimum</th>
-                                <th className="px-3 py-2">Deposit minimum</th>
-                                <th className="px-3 py-2">Version</th>
-                                <th className="px-3 py-2">Status</th>
+                                {[
+                                    'Product',
+                                    'Category',
+                                    'Opening minimum',
+                                    'Deposit minimum',
+                                    'Version',
+                                    'Status',
+                                ].map((heading) => (
+                                    <th
+                                        key={heading}
+                                        className="border-b p-2 text-left text-sm font-medium"
+                                    >
+                                        {heading}
+                                    </th>
+                                ))}
                             </tr>
                         </thead>
                         <tbody>
-                            {products.map((product) => (
+                            {products.data.map((product) => (
                                 <tr
                                     key={product.id}
-                                    className="border-b last:border-0 even:bg-muted/30"
+                                    className="border-b even:bg-muted hover:bg-accent/20"
                                 >
-                                    <td className="px-3 py-3">
+                                    <td className="px-2 py-1">
                                         <Link
                                             className="flex items-center gap-2 font-medium text-primary hover:underline"
                                             href={route(
@@ -78,21 +94,21 @@ export default function ProductPoliciesIndex() {
                                             {product.code} · {product.name}
                                         </Link>
                                     </td>
-                                    <td className="px-3 py-3">
+                                    <td className="px-2 py-1">
                                         {product.category.replaceAll('_', ' ')}
                                     </td>
-                                    <td className="px-3 py-3 tabular-nums">
+                                    <td className="px-2 py-1 tabular-nums">
                                         {product.policy
                                             ?.minimum_opening_amount ?? '-'}
                                     </td>
-                                    <td className="px-3 py-3 tabular-nums">
+                                    <td className="px-2 py-1 tabular-nums">
                                         {product.policy
                                             ?.minimum_deposit_amount ?? '-'}
                                     </td>
-                                    <td className="px-3 py-3">
+                                    <td className="px-2 py-1">
                                         {product.policy?.version ?? '-'}
                                     </td>
-                                    <td className="px-3 py-3">
+                                    <td className="px-2 py-1">
                                         <StatusBadge
                                             tone={
                                                 product.policy?.status ===
@@ -110,6 +126,17 @@ export default function ProductPoliciesIndex() {
                         </tbody>
                     </table>
                 </ResourceTableCard>
+                <DataTablePagination
+                    perPage={products.per_page}
+                    onPerPageChange={(perPage) =>
+                        router.get(
+                            route('financial-product-policies.index'),
+                            { per_page: perPage, page: 1 },
+                            { preserveState: true, preserveScroll: true },
+                        )
+                    }
+                    links={products.links}
+                />
             </div>
         </CustomAuthLayout>
     );

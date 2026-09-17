@@ -1,18 +1,22 @@
 export const transactionStatus = [
     {
-        label: 'Draft',
-        value: 'DRAFT',
+        label: 'All statuses',
+        value: 'all',
     },
     {
-        label: 'Approved',
-        value: 'approved',
+        label: 'Draft',
+        value: 'DRAFT',
     },
     {
         label: 'Posted',
         value: 'POSTED',
     },
     {
+        label: 'Reversed',
+        value: 'REVERSED',
+    },
+    {
         label: 'Cancelled',
-        value: 'cancelled',
+        value: 'CANCELLED',
     },
 ];

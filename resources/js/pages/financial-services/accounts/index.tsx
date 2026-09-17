@@ -11,6 +11,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Eye, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
+import DataTablePagination from '../../../components/data-table-pagination';
 
 interface Account {
     id: number;
@@ -24,7 +25,11 @@ interface Account {
 }
 
 interface Props extends SharedData {
-    accounts: { data: Account[] };
+    accounts: {
+        data: Account[];
+        links: { url: string | null; label: string; active: boolean }[];
+        per_page: number;
+    };
     filters: { search?: string };
 }
 
@@ -76,12 +81,12 @@ export default function FinancialAccountIndex() {
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}
                     placeholder="Search account number or holder..."
-                    className="w-full bg-background sm:w-96"
+                    className="w-full bg-card sm:w-96"
                 />
-                <ResourceTableCard>
+                <ResourceTableCard className="h-[calc(100vh-320px)] md:h-[calc(100vh-300px)]">
                     <div className="overflow-auto">
                         <table className="w-full min-w-190 text-sm">
-                            <thead className="bg-muted/80 text-left text-xs text-muted-foreground">
+                            <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                                 <tr>
                                     {[
                                         'Account',
@@ -94,7 +99,7 @@ export default function FinancialAccountIndex() {
                                     ].map((heading) => (
                                         <th
                                             key={heading}
-                                            className="border-b px-3 py-2"
+                                            className="border-b p-2 text-left text-sm font-medium"
                                         >
                                             {heading}
                                         </th>
@@ -105,29 +110,29 @@ export default function FinancialAccountIndex() {
                                 {accounts.data.map((account) => (
                                     <tr
                                         key={account.id}
-                                        className="border-b even:bg-muted/30 hover:bg-primary/5"
+                                        className="border-b even:bg-muted hover:bg-accent/20"
                                     >
-                                        <td className="px-3 py-2 font-mono text-xs">
+                                        <td className="px-2 py-1 font-mono text-xs">
                                             {account.account_no}
                                         </td>
-                                        <td className="px-3 py-2">
+                                        <td className="px-2 py-1">
                                             {account.holder?.name ??
                                                 account.name ??
                                                 '-'}
                                         </td>
-                                        <td className="px-3 py-2">
+                                        <td className="px-2 py-1">
                                             {account.product?.name ?? '-'}
                                         </td>
-                                        <td className="px-3 py-2">
+                                        <td className="px-2 py-1">
                                             {account.account_type.replaceAll(
                                                 '_',
                                                 ' ',
                                             )}
                                         </td>
-                                        <td className="px-3 py-2 text-right tabular-nums">
+                                        <td className="px-2 py-1 text-right tabular-nums">
                                             {Number(account.balance).toFixed(4)}
                                         </td>
-                                        <td className="px-3 py-2">
+                                        <td className="px-2 py-1">
                                             <StatusBadge
                                                 tone={
                                                     account.status === 'ACTIVE'
@@ -138,7 +143,7 @@ export default function FinancialAccountIndex() {
                                                 {account.status}
                                             </StatusBadge>
                                         </td>
-                                        <td className="px-3 py-2 text-right">
+                                        <td className="px-2 py-1 text-right">
                                             <Link
                                                 href={route(
                                                     'financial-accounts.show',
@@ -155,6 +160,17 @@ export default function FinancialAccountIndex() {
                         </table>
                     </div>
                 </ResourceTableCard>
+                <DataTablePagination
+                    perPage={accounts.per_page}
+                    onPerPageChange={(perPage) =>
+                        router.get(
+                            route('financial-accounts.index'),
+                            { search, per_page: perPage, page: 1 },
+                            { preserveState: true, preserveScroll: true },
+                        )
+                    }
+                    links={accounts.links}
+                />
             </div>
         </CustomAuthLayout>
     );

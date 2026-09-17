@@ -41,7 +41,7 @@ export default function BudgetEntries() {
                         <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
                             <ResourceTableCard>
                                 <table className="w-full text-sm">
-                                    <thead className="bg-muted/80 text-left text-muted-foreground">
+                                    <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                                         <tr>
                                             <th className="border-b border-border px-4 py-3">
                                                 Budget
@@ -67,7 +67,7 @@ export default function BudgetEntries() {
                                         {entries.data.map((entry: any) => (
                                             <tr
                                                 key={entry.id}
-                                                className="border-b border-border/80 even:bg-muted/40 hover:bg-primary/5"
+                                                className="border-b even:bg-muted hover:bg-accent/20"
                                             >
                                                 <td className="px-4 py-3 font-medium">
                                                     {entry.budget?.name}

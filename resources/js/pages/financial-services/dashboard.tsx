@@ -88,7 +88,7 @@ export default function FinancialServicesDashboard() {
                     {cards.map(({ label, value, icon: Icon, tone }) => (
                         <div
                             key={label}
-                            className="rounded-xl border bg-card p-4 shadow-sm"
+                            className="rounded-md border bg-card p-4"
                         >
                             <Icon className={`h-5 w-5 ${tone}`} />
                             <p className="mt-4 text-xs text-muted-foreground">

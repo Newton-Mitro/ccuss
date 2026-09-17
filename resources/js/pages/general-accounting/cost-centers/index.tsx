@@ -97,7 +97,7 @@ export default function CostCenterIndex() {
                         value={search}
                         onChange={(event) => setSearch(event.target.value)}
                         placeholder="Search code or name..."
-                        className="w-full bg-background sm:w-80"
+                        className="w-full bg-card sm:w-80"
                     />
                     <span className="text-sm text-muted-foreground">
                         {costCenters.data.length} records
@@ -125,7 +125,7 @@ export default function CostCenterIndex() {
                         <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
                             <ResourceTableCard>
                                 <table className="w-full text-sm">
-                                    <thead className="bg-muted/80 text-left text-muted-foreground">
+                                    <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                                         <tr>
                                             <th className="border-b border-border px-4 py-3">
                                                 Code

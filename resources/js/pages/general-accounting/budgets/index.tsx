@@ -1,3 +1,4 @@
+import DataTablePagination from '@/components/data-table-pagination';
 import {
     ResourcePageHeader,
     ResourceTableCard,
@@ -23,7 +24,11 @@ interface Budget {
 
 export default function BudgetIndex() {
     const { budgets } = usePage().props as unknown as {
-        budgets: { data: Budget[]; links: any[] };
+        budgets: {
+            data: Budget[];
+            links: { url: string | null; label: string; active: boolean }[];
+            per_page?: number;
+        };
     };
     useFlashToastHandler();
 
@@ -68,39 +73,48 @@ export default function BudgetIndex() {
                         </div>
                     }
                 />
-                <ResourceTableCard>
+                <ResourceTableCard className="h-[calc(100vh-320px)] md:h-[calc(100vh-300px)]">
                     <table className="w-full text-sm">
-                        <thead className="bg-muted/80 text-left text-muted-foreground">
+                        <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
-                                <th className="p-3">Name</th>
-                                <th className="p-3">Fiscal year</th>
-                                <th className="p-3">Entries</th>
-                                <th className="p-3">Total</th>
-                                <th className="p-3">Status</th>
-                                <th className="p-3">Actions</th>
+                                {[
+                                    'Name',
+                                    'Fiscal year',
+                                    'Entries',
+                                    'Total',
+                                    'Status',
+                                    'Actions',
+                                ].map((heading) => (
+                                    <th
+                                        key={heading}
+                                        className="border-b p-2 text-left text-sm font-medium"
+                                    >
+                                        {heading}
+                                    </th>
+                                ))}
                             </tr>
                         </thead>
                         <tbody>
                             {budgets.data.map((budget) => (
                                 <tr
                                     key={budget.id}
-                                    className="border-b border-border/80 even:bg-muted/40 hover:bg-primary/5"
+                                    className="border-b even:bg-muted hover:bg-accent/20"
                                 >
-                                    <td className="px-4 py-3 font-medium">
+                                    <td className="px-2 py-1 font-medium">
                                         {budget.name}
                                     </td>
-                                    <td className="px-4 py-3">
+                                    <td className="px-2 py-1">
                                         {budget.fiscal_year?.name}
                                     </td>
-                                    <td className="px-4 py-3">
+                                    <td className="px-2 py-1">
                                         {budget.entries_count}
                                     </td>
-                                    <td className="px-4 py-3">
+                                    <td className="px-2 py-1">
                                         {Number(
                                             budget.entries_sum_amount ?? 0,
                                         ).toFixed(2)}
                                     </td>
-                                    <td className="px-4 py-3">
+                                    <td className="px-2 py-1">
                                         <StatusBadge
                                             tone={
                                                 budget.status === 'ACTIVE'
@@ -113,7 +127,7 @@ export default function BudgetIndex() {
                                             {budget.status}
                                         </StatusBadge>
                                     </td>
-                                    <td className="px-4 py-3">
+                                    <td className="px-2 py-1">
                                         <div className="flex items-center gap-1.5">
                                             <Link
                                                 href={route(
@@ -197,6 +211,17 @@ export default function BudgetIndex() {
                         </p>
                     )}
                 </ResourceTableCard>
+                <DataTablePagination
+                    links={budgets.links}
+                    perPage={budgets.per_page ?? 18}
+                    onPerPageChange={(perPage) =>
+                        router.get(
+                            route('budgets.index'),
+                            { per_page: perPage, page: 1 },
+                            { preserveScroll: true, preserveState: true },
+                        )
+                    }
+                />
             </div>
         </CustomAuthLayout>
     );

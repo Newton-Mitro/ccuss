@@ -22,7 +22,10 @@ export function ResourcePageHeader({
             )}
         >
             <div className="space-y-1">
-                <h1 className="text-base font-medium text-foreground">
+                <p className="text-[10px] font-semibold tracking-[0.18em] text-primary/80 uppercase">
+                    Resource
+                </p>
+                <h1 className="text-2xl font-semibold tracking-tight text-foreground">
                     {title}
                 </h1>
                 {description && (

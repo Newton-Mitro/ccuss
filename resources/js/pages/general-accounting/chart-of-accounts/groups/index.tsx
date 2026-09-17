@@ -101,7 +101,7 @@ export default function AccountGroupIndex() {
                         <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
                             <ResourceTableCard>
                                 <table className="w-full border-collapse text-sm">
-                                    <thead className="bg-muted/80 text-left text-muted-foreground backdrop-blur-sm">
+                                    <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                                         <tr>
                                             <th className="border-b border-border px-4 py-3">
                                                 Code

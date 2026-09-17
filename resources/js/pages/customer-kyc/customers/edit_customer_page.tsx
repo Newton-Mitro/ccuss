@@ -450,7 +450,6 @@ const Edit = ({ customer }: EditProps) => {
                                 <Label className="text-xs">Status</Label>
                                 <Select
                                     value={data.status}
-                                    disabled
                                     onChange={(value) =>
                                         handleDataChange(
                                             'status',

@@ -13,7 +13,9 @@ import {
     ResourcePageHeader,
     ResourceTableCard,
     ResourceToolbar,
+    StatusBadge,
 } from '../../../components/resource-page-shell';
+import { Button } from '../../../components/ui/button';
 import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
@@ -69,10 +71,10 @@ export default function Index() {
     });
 
     const createTypes = [
-        { label: 'Payment', type: 'PAYMENT', color: 'bg-blue-600' },
-        { label: 'Receipt', type: 'RECEIPT', color: 'bg-green-600' },
-        { label: 'Journal', type: 'JOURNAL', color: 'bg-purple-600' },
-        { label: 'Contra', type: 'CONTRA', color: 'bg-gray-600' },
+        { label: 'Payment', type: 'PAYMENT' },
+        { label: 'Receipt', type: 'RECEIPT' },
+        { label: 'Journal', type: 'JOURNAL' },
+        { label: 'Contra', type: 'CONTRA' },
     ];
 
     return (
@@ -87,15 +89,20 @@ export default function Index() {
                     action={
                         <div className="flex flex-wrap gap-2">
                             {createTypes.map((item) => (
-                                <Link
+                                <Button
                                     key={item.type}
-                                    href={route('vouchers.create', {
-                                        query: { type: item.type },
-                                    })}
-                                    className={`min-w-30 flex-1 rounded-md px-3 py-2 text-center text-sm font-medium text-white hover:opacity-90 sm:flex-none ${item.color}`}
+                                    asChild
+                                    size="sm"
+                                    variant="outline"
                                 >
-                                    {item.label}
-                                </Link>
+                                    <Link
+                                        href={route('vouchers.create', {
+                                            query: { type: item.type },
+                                        })}
+                                    >
+                                        {item.label}
+                                    </Link>
+                                </Button>
                             ))}
                         </div>
                     }
@@ -109,7 +116,7 @@ export default function Index() {
                             setData('search', event.target.value);
                             setData('page', 1);
                         }}
-                        className="h-9 w-full max-w-sm rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+                        className="h-9 w-full max-w-sm rounded-md border bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
                     />
                     <Select
                         value={data.status}
@@ -123,7 +130,7 @@ export default function Index() {
                         {vouchers.data.length} records
                     </span>
                 </ResourceToolbar>
-                <ResourceTableCard className="h-[calc(100vh-360px)] md:h-[calc(100vh-300px)]">
+                <ResourceTableCard className="h-[calc(100vh-320px)] md:h-[calc(100vh-300px)]">
                     <table className="w-full border-collapse">
                         <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
@@ -141,7 +148,7 @@ export default function Index() {
                                 ].map((heading) => (
                                     <th
                                         key={heading}
-                                        className="border-b p-2 text-left text-sm font-medium text-muted-foreground"
+                                        className="border-b p-2 text-left text-sm font-medium"
                                     >
                                         {heading}
                                     </th>
@@ -194,7 +201,19 @@ export default function Index() {
                                                 {totalCredit.toFixed(2)}
                                             </td>
                                             <td className="px-2 py-1">
-                                                {voucher.status}
+                                                <StatusBadge
+                                                    tone={
+                                                        voucher.status ===
+                                                        'POSTED'
+                                                            ? 'success'
+                                                            : voucher.status ===
+                                                                'CANCELLED'
+                                                              ? 'danger'
+                                                              : 'warning'
+                                                    }
+                                                >
+                                                    {voucher.status}
+                                                </StatusBadge>
                                             </td>
                                             <td className="px-2 py-1">
                                                 <TooltipProvider>

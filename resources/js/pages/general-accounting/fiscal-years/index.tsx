@@ -121,7 +121,7 @@ export default function FiscalYearIndex() {
                             setData('search', e.target.value);
                             setData('page', 1);
                         }}
-                        className="w-full bg-background sm:w-72"
+                        className="w-full bg-card sm:w-72"
                     />
 
                     <span className="text-sm text-muted-foreground">
@@ -150,7 +150,7 @@ export default function FiscalYearIndex() {
                         <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
                             <ResourceTableCard>
                                 <table className="w-full border-collapse text-sm">
-                                    <thead className="sticky top-0 bg-muted/80 text-left text-muted-foreground backdrop-blur-sm">
+                                    <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                                         <tr>
                                             {[
                                                 'Code',

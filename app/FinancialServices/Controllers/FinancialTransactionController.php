@@ -26,13 +26,19 @@ class FinancialTransactionController extends Controller
         $transactions = $this->transactionService
             ->queryForOrganization($this->organizationId($request))
             ->with('financialAccount')
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = $request->string('search')->trim();
+                $query->where(fn($query) => $query
+                    ->where('transaction_no', 'like', "%{$search}%")
+                    ->orWhere('transaction_type', 'like', "%{$search}%"));
+            })
             ->latest('id')
             ->paginate($request->integer('per_page', 18))
             ->withQueryString();
 
         return Inertia::render('financial-services/transactions/index', [
             'transactions' => $transactions,
-            'filters' => $request->only(['per_page', 'page']),
+            'filters' => $request->only(['search', 'per_page', 'page']),
         ]);
     }
 

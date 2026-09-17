@@ -116,12 +116,12 @@ export default function FiscalPeriodIndex() {
                             setData('search', e.target.value);
                             setData('page', 1);
                         }}
-                        className="w-full bg-background sm:w-72"
+                        className="w-full bg-card sm:w-72"
                     />
 
                     <div className="w-full sm:w-60">
                         <Select
-                            className="bg-background"
+                            className="bg-card"
                             value={data.status}
                             onChange={(value) => {
                                 setData('status', value);
