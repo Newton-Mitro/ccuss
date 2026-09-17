@@ -8,6 +8,13 @@ export const generalAccountingMenu: SidebarItem[] = [
         permission: ['accounting.view'],
         children: [
             {
+                name: 'Dashboard',
+                icon: <i className="fa-solid fa-gauge-high" />,
+                path: '/general-accounting',
+                match_path: 'general-accounting',
+                permission: ['accounting.view'],
+            },
+            {
                 name: 'Accounting Setup',
                 icon: <i className="fa-solid fa-sliders" />,
                 children_expanded: false,

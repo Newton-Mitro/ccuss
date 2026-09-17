@@ -8,6 +8,13 @@ export const customerKycMenu: SidebarItem[] = [
         permission: ['customer.view'],
         children: [
             {
+                name: 'Dashboard',
+                icon: <i className="fa-solid fa-gauge-high" />,
+                path: '/customer-kyc',
+                match_path: 'customer-kyc',
+                permission: ['customer.view'],
+            },
+            {
                 name: 'Customers',
                 icon: <i className="fa-solid fa-users" />,
                 path: '/customers',

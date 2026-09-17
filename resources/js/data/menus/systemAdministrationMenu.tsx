@@ -8,6 +8,19 @@ export const systemAdministrationMenu: SidebarItem[] = [
         permission: ['organizations.view'],
         children: [
             {
+                name: 'Dashboard',
+                icon: <i className="fa-solid fa-gauge-high" />,
+                path: '/admin-dashboard',
+                match_path: 'admin-dashboard',
+                permission: [
+                    'organizations.view',
+                    'users.view',
+                    'role_permissions.view',
+                    'activity_logs.view',
+                    'database_backups.view',
+                ],
+            },
+            {
                 name: 'Switch Organization',
                 icon: <i className="fa-solid fa-building-wheat" />,
                 path: '/organizations',
