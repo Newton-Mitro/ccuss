@@ -1,6 +1,7 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import HeadingSmall from '../../../components/heading-small';
+import ReportExportActions from '../../../components/report-export-actions';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../types';
@@ -89,6 +90,13 @@ export default function ProfitAndLossPage() {
             <Head title="Profit & Loss Report" />
 
             <div className="space-y-3 text-foreground print:p-4 print:text-black">
+                <ReportExportActions
+                    report="profit-loss"
+                    query={{
+                        fiscal_year_id: fiscalYear,
+                        fiscal_period_id: fiscalPeriod,
+                    }}
+                />
                 {/* Header + Fiscal Year/Period + Print */}
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
                     <HeadingSmall

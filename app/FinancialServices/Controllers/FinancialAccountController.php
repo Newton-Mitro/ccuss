@@ -7,6 +7,7 @@ use App\FinancialServices\Application\FinancialAccountService;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Requests\StoreFinancialAccountRequest;
+use Carbon\CarbonImmutable;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -16,7 +17,7 @@ class FinancialAccountController extends Controller
 {
     public function __construct(private readonly FinancialAccountService $accountService)
     {
-        $this->middleware('permission:financial.accounts.view')->only(['index', 'show']);
+        $this->middleware('permission:financial.accounts.view')->only(['index', 'show', 'statement']);
         $this->middleware('permission:financial.accounts.create')->only(['create', 'store']);
         $this->middleware('permission:financial.accounts.update')->only('activate');
         $this->middleware('permission:financial.accounts.close')->only('close');
@@ -71,20 +72,71 @@ class FinancialAccountController extends Controller
 
     public function statement(Request $request): Response
     {
+        $period = $request->string('period')->lower()->value() ?: 'monthly';
+        abort_unless(in_array($period, ['monthly', 'quarterly', 'half_yearly', 'yearly'], true), 422);
+
+        $statementDate = CarbonImmutable::parse(
+            $request->input('date', now()->toDateString()),
+        );
+        [$periodStart, $periodEnd] = match ($period) {
+            'quarterly' => [
+                $statementDate->startOfQuarter()->startOfDay(),
+                $statementDate->endOfQuarter()->endOfDay(),
+            ],
+            'half_yearly' => $statementDate->month <= 6
+                ? [$statementDate->startOfYear()->startOfDay(), $statementDate->startOfYear()->addMonths(5)->endOfMonth()->endOfDay()]
+                : [$statementDate->startOfYear()->addMonths(6)->startOfDay(), $statementDate->endOfYear()->endOfDay()],
+            'yearly' => [
+                $statementDate->startOfYear()->startOfDay(),
+                $statementDate->endOfYear()->endOfDay(),
+            ],
+            default => [
+                $statementDate->startOfMonth()->startOfDay(),
+                $statementDate->endOfMonth()->endOfDay(),
+            ],
+        };
+
         $accounts = $this->accountService
             ->queryForOrganization($this->organizationId($request))
             ->orderBy('account_no')
             ->get(['id', 'account_no', 'name', 'account_type']);
 
-        $account = $request->integer('account_id')
-            ? $this->accountService->queryForOrganization($this->organizationId($request))
-                ->with('transactions')
-                ->find($request->integer('account_id'))
-            : null;
+        $account = null;
+        $totals = ['debit' => 0, 'credit' => 0, 'count' => 0];
+
+        if ($request->integer('account_id')) {
+            $account = $this->accountService
+                ->queryForOrganization($this->organizationId($request))
+                ->find($request->integer('account_id'));
+
+            if ($account) {
+                $transactions = $account->transactions()
+                    ->whereBetween('transaction_date', [$periodStart, $periodEnd])
+                    ->with('entries')
+                    ->latest('transaction_date')
+                    ->get();
+
+                $account->setRelation('transactions', $transactions);
+                $totals = [
+                    'debit' => $transactions->flatMap->entries
+                        ->where('direction', 'DEBIT')
+                        ->sum('amount'),
+                    'credit' => $transactions->flatMap->entries
+                        ->where('direction', 'CREDIT')
+                        ->sum('amount'),
+                    'count' => $transactions->count(),
+                ];
+            }
+        }
 
         return Inertia::render('financial-services/accounts/statement', [
             'accounts' => $accounts,
             'account' => $account,
+            'period' => $period,
+            'statementDate' => $statementDate->toDateString(),
+            'periodStart' => $periodStart->toDateString(),
+            'periodEnd' => $periodEnd->toDateString(),
+            'totals' => $totals,
         ]);
     }
 

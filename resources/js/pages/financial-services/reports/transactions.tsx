@@ -5,6 +5,7 @@ import {
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
+import ReportExportActions from '../../../components/report-export-actions';
 interface Transaction {
     id: number;
     transaction_no: string;
@@ -26,6 +27,7 @@ export default function TransactionReport() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Transaction Report" />
             <div className="space-y-4">
+                <ReportExportActions report="transactions" />
                 <ResourcePageHeader
                     title="Transaction report"
                     description="Operational movements across financial accounts."

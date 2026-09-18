@@ -1,6 +1,7 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import HeadingSmall from '../../../components/heading-small';
+import ReportExportActions from '../../../components/report-export-actions';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
@@ -100,6 +101,10 @@ export default function ShareholdersEquityPage() {
             <Head title="Statement of Shareholders’ Equity" />
 
             <div className="space-y-3 print:p-4 print:text-black">
+                <ReportExportActions
+                    report="shareholders-equity"
+                    query={{ fiscal_year_id: fiscalYear }}
+                />
                 {/* Header */}
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
                     <HeadingSmall

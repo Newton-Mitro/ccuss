@@ -5,6 +5,7 @@ import {
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
+import ReportExportActions from '../../../components/report-export-actions';
 
 interface Product {
     id: number;
@@ -43,6 +44,7 @@ function ReportTable({
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={title} />
             <div className="space-y-4">
+                <ReportExportActions report="product-summary" />
                 <ResourcePageHeader title={title} description={description} />
                 <ResourceTableCard>
                     <table className="w-full text-sm">

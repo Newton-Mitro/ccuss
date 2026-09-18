@@ -5,6 +5,7 @@ import {
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
+import ReportExportActions from '../../../components/report-export-actions';
 interface Account {
     id: number;
     account_no: string;
@@ -24,6 +25,7 @@ export default function AccountBalancesReport() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Account Balances" />
             <div className="space-y-4">
+                <ReportExportActions report="account-balances" />
                 <ResourcePageHeader
                     title="Account balances"
                     description="Current and available balances across financial accounts."

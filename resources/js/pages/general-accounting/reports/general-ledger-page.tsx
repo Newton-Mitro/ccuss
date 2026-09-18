@@ -1,6 +1,7 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import HeadingSmall from '../../../components/heading-small';
+import ReportExportActions from '../../../components/report-export-actions';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
@@ -69,6 +70,13 @@ export default function GeneralLedgerPage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="General Ledger" />
             <div className="space-y-4 text-foreground">
+                <ReportExportActions
+                    report="general-ledger"
+                    query={{
+                        account_id: accountId,
+                        fiscal_period_id: periodId,
+                    }}
+                />
                 <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
                     <HeadingSmall
                         title="General Ledger"
