@@ -10,7 +10,7 @@ final class SystemAdministrationPermissions
     {
         return [
             new PermissionDefinition(
-                module: 'users',
+                module: 'Users',
                 name: 'View Users',
                 slug: 'users.view',
                 action: 'view',
@@ -18,7 +18,7 @@ final class SystemAdministrationPermissions
             ),
 
             new PermissionDefinition(
-                module: 'users',
+                module: 'Users',
                 name: 'Create User',
                 slug: 'users.create',
                 action: 'create',
@@ -26,7 +26,7 @@ final class SystemAdministrationPermissions
             ),
 
             new PermissionDefinition(
-                module: 'users',
+                module: 'Users',
                 name: 'Update User',
                 slug: 'users.update',
                 action: 'update',
@@ -34,7 +34,7 @@ final class SystemAdministrationPermissions
             ),
 
             new PermissionDefinition(
-                module: 'users',
+                module: 'Users',
                 name: 'Delete User',
                 slug: 'users.delete',
                 action: 'delete',
@@ -42,7 +42,7 @@ final class SystemAdministrationPermissions
             ),
 
             new PermissionDefinition(
-                module: 'users',
+                module: 'Users',
                 name: 'Search Users',
                 slug: 'users.search',
                 action: 'search',
@@ -50,7 +50,7 @@ final class SystemAdministrationPermissions
             ),
 
             new PermissionDefinition(
-                module: 'role_permissions',
+                module: 'Role Permissions',
                 name: 'View Role Permissions',
                 slug: 'role_permissions.view',
                 action: 'view',
@@ -59,7 +59,7 @@ final class SystemAdministrationPermissions
             ),
 
             new PermissionDefinition(
-                module: 'role_permissions',
+                module: 'Role Permissions',
                 name: 'Update Role Permissions',
                 slug: 'role_permissions.update',
                 action: 'update',
@@ -68,7 +68,7 @@ final class SystemAdministrationPermissions
             ),
 
             new PermissionDefinition(
-                module: 'activity_logs',
+                module: 'Activity Logs',
                 name: 'View Activity Logs',
                 slug: 'activity_logs.view',
                 action: 'view',
@@ -77,7 +77,7 @@ final class SystemAdministrationPermissions
             ),
 
             new PermissionDefinition(
-                module: 'database_backups',
+                module: 'Database Backups',
                 name: 'View Database Backups',
                 slug: 'database_backups.view',
                 action: 'view',
@@ -86,7 +86,7 @@ final class SystemAdministrationPermissions
             ),
 
             new PermissionDefinition(
-                module: 'database_backups',
+                module: 'Database Backups',
                 name: 'Delete Database Backup',
                 slug: 'database_backups.delete',
                 action: 'delete',
@@ -95,7 +95,7 @@ final class SystemAdministrationPermissions
             ),
 
             new PermissionDefinition(
-                module: 'organizations',
+                module: 'Organizations',
                 name: 'View Organizations',
                 slug: 'organizations.view',
                 action: 'view',
@@ -104,7 +104,7 @@ final class SystemAdministrationPermissions
             ),
 
             new PermissionDefinition(
-                module: 'organizations',
+                module: 'Organizations',
                 name: 'Update Organization',
                 slug: 'organizations.update',
                 action: 'update',
@@ -113,7 +113,7 @@ final class SystemAdministrationPermissions
             ),
 
             new PermissionDefinition(
-                module: 'branches',
+                module: 'Branches',
                 name: 'View Branches',
                 slug: 'branches.view',
                 action: 'view',
@@ -122,7 +122,7 @@ final class SystemAdministrationPermissions
             ),
 
             new PermissionDefinition(
-                module: 'branches',
+                module: 'Branches',
                 name: 'Create Branch',
                 slug: 'branches.create',
                 action: 'create',
@@ -131,7 +131,7 @@ final class SystemAdministrationPermissions
             ),
 
             new PermissionDefinition(
-                module: 'branches',
+                module: 'Branches',
                 name: 'Update Branch',
                 slug: 'branches.update',
                 action: 'update',
@@ -140,7 +140,7 @@ final class SystemAdministrationPermissions
             ),
 
             new PermissionDefinition(
-                module: 'branches',
+                module: 'Branches',
                 name: 'Delete Branch',
                 slug: 'branches.delete',
                 action: 'delete',

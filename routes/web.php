@@ -32,5 +32,6 @@ require __DIR__ . '/report_export_routes.php';
 require __DIR__ . '/treasury_branch_day_routes.php';
 require __DIR__ . '/treasury_cash_management_routes.php';
 require __DIR__ . '/treasury_teller_session_routes.php';
+require __DIR__ . '/treasury_cash_transaction_routes.php';
 
 
