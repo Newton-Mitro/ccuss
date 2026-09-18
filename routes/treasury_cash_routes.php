@@ -1,0 +1,98 @@
+<?php
+
+use App\TreasuryAndCash\Controllers\BranchDayController;
+use App\TreasuryAndCash\Controllers\BankingController;
+use App\TreasuryAndCash\Controllers\CashManagementController;
+use App\TreasuryAndCash\Controllers\CashMovementController;
+use App\TreasuryAndCash\Controllers\PettyCashController;
+use Illuminate\Support\Facades\Route;
+
+Route::middleware(['auth', 'verified', 'organization'])
+    ->prefix('branch-days')
+    ->name('branch-days.')
+    ->group(function () {
+        Route::get('/', [BranchDayController::class, 'index'])
+            ->middleware('permission:branch_days.view')
+            ->name('index');
+        Route::post('/open', [BranchDayController::class, 'open'])
+            ->middleware('permission:branch_days.open')
+            ->name('open');
+        Route::post('/{branchDay}/close', [BranchDayController::class, 'close'])
+            ->middleware('permission:branch_days.close')
+            ->name('close');
+    });
+
+Route::middleware(['auth', 'verified', 'organization'])
+    ->group(function () {
+        Route::get('/vaults', [CashManagementController::class, 'vaults'])
+            ->middleware('permission:cash_management.view')
+            ->name('vaults.index');
+        Route::get('/tellers', [CashManagementController::class, 'tellers'])
+            ->middleware('permission:cash_management.view')
+            ->name('tellers.index');
+        Route::get('/teller-sessions', [CashManagementController::class, 'tellerSessions'])
+            ->middleware('permission:teller_sessions.view')
+            ->name('teller-sessions.index');
+    });
+
+Route::middleware(['auth', 'verified', 'organization'])
+    ->prefix('cash-movements')
+    ->name('cash-movements.')
+    ->group(function () {
+        Route::get('/teller-to-teller-transfer', [CashMovementController::class, 'tellerToTellerTransfer'])
+            ->name('teller-to-teller-transfer');
+        Route::post('/teller-to-teller-transfer', [CashMovementController::class, 'storeTellerToTellerTransfer'])
+            ->name('teller-to-teller-transfer.store');
+    });
+
+Route::middleware(['auth', 'verified', 'organization'])
+    ->prefix('cash-adjustments')
+    ->name('cash-adjustments.')
+    ->group(function () {
+        Route::get('/teller-cash-adjustment', [CashMovementController::class, 'tellerCashAdjustment'])
+            ->middleware('permission:cash_transactions.create')
+            ->name('teller-cash-adjustment');
+        Route::post('/teller-cash-adjustment', [CashMovementController::class, 'storeTellerCashAdjustment'])
+            ->middleware('permission:cash_transactions.create')
+            ->name('teller-cash-adjustment.store');
+    });
+
+Route::middleware(['auth', 'verified', 'organization'])
+    ->prefix('teller-transactions')
+    ->name('teller-transactions.')
+    ->group(function () {
+        Route::get('/deposit', [CashMovementController::class, 'deposit'])
+            ->middleware('permission:cash_transactions.create')
+            ->name('deposit');
+        Route::post('/deposit', [CashMovementController::class, 'storeDeposit'])
+            ->middleware('permission:cash_transactions.create')
+            ->name('deposit.store');
+        Route::get('/withdrawal', [CashMovementController::class, 'withdrawal'])
+            ->middleware('permission:cash_transactions.create')
+            ->name('withdrawal');
+        Route::post('/withdrawal', [CashMovementController::class, 'storeWithdrawal'])
+            ->middleware('permission:cash_transactions.create')
+            ->name('withdrawal.store');
+    });
+
+Route::middleware(['auth', 'verified', 'organization'])
+    ->group(function () {
+        Route::get('/petty-cash-accounts', [PettyCashController::class, 'accounts'])
+            ->middleware('permission:petty_cash.view')
+            ->name('petty-cash-accounts.index');
+        Route::get('/petty-cash-transactions/funding', [PettyCashController::class, 'funding'])
+            ->middleware('permission:petty_cash.create')
+            ->name('petty-cash-transactions.funding');
+        Route::post('/petty-cash-transactions/funding', [PettyCashController::class, 'storeFunding'])
+            ->middleware('permission:petty_cash.create')
+            ->name('petty-cash-transactions.funding.store');
+        Route::get('/petty-cash-transactions/expense', [PettyCashController::class, 'expense'])
+            ->middleware('permission:petty_cash.expense')
+            ->name('petty-cash-transactions.expense');
+        Route::post('/petty-cash-transactions/expense', [PettyCashController::class, 'storeExpense'])
+            ->middleware('permission:petty_cash.expense')
+            ->name('petty-cash-transactions.expense.store');
+        Route::get('/bank-accounts', [BankingController::class, 'accounts'])
+            ->middleware('permission:banking.view')
+            ->name('bank-accounts.index');
+    });

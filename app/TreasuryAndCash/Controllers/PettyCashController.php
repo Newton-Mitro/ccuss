@@ -1,0 +1,98 @@
+<?php
+
+namespace App\TreasuryAndCash\Controllers;
+
+use App\Http\Controllers\Controller;
+use App\TreasuryAndCash\Application\PettyCashDataService;
+use App\TreasuryAndCash\Application\PettyCashTransactionService;
+use App\TreasuryAndCash\Requests\StorePettyCashTransactionRequest;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class PettyCashController extends Controller
+{
+    public function __construct(
+        private readonly PettyCashDataService $pettyCashDataService,
+        private readonly PettyCashTransactionService $pettyCashTransactionService,
+    ) {
+        $this->middleware('permission:petty_cash.view')->only(['accounts']);
+        $this->middleware('permission:petty_cash.create')->only(['funding', 'storeFunding']);
+        $this->middleware('permission:petty_cash.expense')->only(['expense', 'storeExpense']);
+    }
+
+    public function accounts(Request $request): Response
+    {
+        $funds = $this->pettyCashDataService->listFunds(
+            $request->attributes->get('active_organization')->id,
+            $request->input('search'),
+            $request->input('per_page', 18),
+        );
+
+        return Inertia::render('treasury-cash/petty-cash/accounts/index', [
+            'funds' => $funds,
+            'filters' => $request->only(['search', 'per_page', 'page']),
+        ]);
+    }
+
+    public function funding(Request $request): Response
+    {
+        return $this->transactionForm($request, 'FUNDING');
+    }
+
+    public function expense(Request $request): Response
+    {
+        return $this->transactionForm($request, 'EXPENSE');
+    }
+
+    public function storeFunding(StorePettyCashTransactionRequest $request): RedirectResponse
+    {
+        return $this->storeTransaction($request, 'FUNDING', 'funding');
+    }
+
+    public function storeExpense(StorePettyCashTransactionRequest $request): RedirectResponse
+    {
+        return $this->storeTransaction($request, 'EXPENSE', 'expense');
+    }
+
+    private function transactionForm(Request $request, string $type): Response
+    {
+        $organization = $request->attributes->get('active_organization');
+        $user = $request->user();
+
+        abort_unless($user?->branch_id, 422, 'A branch assignment is required for petty cash transactions.');
+
+        return Inertia::render('treasury-cash/petty-cash/transactions/form', [
+            ...$this->pettyCashDataService->forTransaction($organization->id, $user->branch_id),
+            'transaction_type' => $type,
+        ]);
+    }
+
+    private function storeTransaction(
+        StorePettyCashTransactionRequest $request,
+        string $type,
+        string $routeType,
+    ): RedirectResponse {
+        $organization = $request->attributes->get('active_organization');
+        $user = $request->user();
+
+        abort_unless($user?->branch_id, 422, 'A branch assignment is required for petty cash transactions.');
+
+        try {
+            $transaction = $this->pettyCashTransactionService->create(
+                $organization->id,
+                $user->branch_id,
+                $user->id,
+                $type,
+                $request->validated(),
+            );
+        } catch (\RuntimeException $exception) {
+            return back()->withInput()->with('error', $exception->getMessage());
+        }
+
+        return redirect()
+            ->route('petty-cash-transactions.' . $routeType)
+            ->with('success', "Petty cash transaction {$transaction->transaction_no} created successfully.");
+    }
+}
