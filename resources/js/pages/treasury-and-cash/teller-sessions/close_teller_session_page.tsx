@@ -17,7 +17,7 @@ export default function CloseTellerSession() {
     const { session } = usePage<Props>().props;
 
     const { data, setData, processing, errors } = useForm({
-        counted_balance: '',
+        closing_cash: '',
         remarks: '',
     });
 
@@ -27,7 +27,7 @@ export default function CloseTellerSession() {
     const systemBalance = Number(session?.expected_balance || 0);
 
     // ✅ Safe numeric parsing
-    const counted = Number(data.counted_balance || 0);
+    const counted = Number(data.closing_cash || 0);
 
     // ✅ Difference
     const difference = counted - systemBalance;
@@ -37,7 +37,7 @@ export default function CloseTellerSession() {
 
         if (!session) return;
 
-        if (!data.counted_balance) {
+        if (!data.closing_cash) {
             alert('Please enter counted balance');
             return;
         }
@@ -46,13 +46,11 @@ export default function CloseTellerSession() {
             return;
         }
 
-        router.post(route('teller-sessions.close', session.id), {
-            data: {
-                counted_balance: counted,
-                difference,
-                remarks: data.remarks,
-            },
-        });
+        router.post(
+            route('teller-sessions.close', session.id),
+            { closing_cash: counted },
+            { preserveScroll: true },
+        );
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -116,17 +114,14 @@ export default function CloseTellerSession() {
                                 </label>
                                 <Input
                                     type="number"
-                                    value={data.counted_balance}
+                                    value={data.closing_cash}
                                     onChange={(e) =>
-                                        setData(
-                                            'counted_balance',
-                                            e.target.value,
-                                        )
+                                        setData('closing_cash', e.target.value)
                                     }
                                 />
-                                {errors.counted_balance && (
+                                {errors.closing_cash && (
                                     <p className="text-sm text-destructive">
-                                        {errors.counted_balance}
+                                        {errors.closing_cash}
                                     </p>
                                 )}
                             </div>
@@ -154,7 +149,7 @@ export default function CloseTellerSession() {
                                 </p>
                             )}
 
-                            {difference === 0 && data.counted_balance && (
+                            {difference === 0 && data.closing_cash && (
                                 <p className="text-sm text-green-600">
                                     ✅ Perfect balance match
                                 </p>

@@ -19,7 +19,7 @@ export default function OpenTellerSession() {
     const { data, setData, post, processing, errors } = useForm({
         teller_id: teller?.id || '',
         branch_day_id: branch_day?.id || '',
-        remarks: '',
+        opening_cash: 0,
     });
 
     useFlashToastHandler();
@@ -81,21 +81,25 @@ export default function OpenTellerSession() {
                             )}
                         </div>
 
-                        {/* 📝 Remarks */}
+                        {/* Opening cash */}
                         <div>
                             <label className="mb-1 block text-sm font-medium">
-                                Remarks (Optional)
+                                Opening Cash
                             </label>
                             <Input
-                                value={data.remarks}
+                                type="number"
+                                value={data.opening_cash}
                                 onChange={(e) =>
-                                    setData('remarks', e.target.value)
+                                    setData(
+                                        'opening_cash',
+                                        Number(e.target.value),
+                                    )
                                 }
-                                placeholder="Enter remarks"
+                                min="0"
                             />
-                            {errors.remarks && (
+                            {errors.opening_cash && (
                                 <p className="text-sm text-destructive">
-                                    {errors.remarks}
+                                    {errors.opening_cash}
                                 </p>
                             )}
                         </div>

@@ -19,12 +19,12 @@ export default function BranchDayStatusPage({ branch_day, sessions }: Props) {
     const handleClose = () => {
         if (!branch_day) return;
 
-        router.post(route('branch-days.close'), {
-            branch_day_id: branch_day.id,
-        });
+        router.put(route('branch-days.close', branch_day.id));
     };
 
-    const hasOpenSession = sessions.some((s) => s.status === 'open');
+    const hasOpenSession = sessions.some(
+        (s) => s.status.toUpperCase() === 'OPEN',
+    );
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Treasury & Cash', href: '' },
@@ -47,7 +47,7 @@ export default function BranchDayStatusPage({ branch_day, sessions }: Props) {
                     </p>
                 </div>
 
-                {branch_day?.status === 'open' && (
+                {branch_day?.status.toUpperCase() === 'OPEN' && (
                     <Button
                         onClick={handleClose}
                         disabled={hasOpenSession}
@@ -120,7 +120,8 @@ export default function BranchDayStatusPage({ branch_day, sessions }: Props) {
                         ) : (
                             <div className="space-y-1.5">
                                 {sessions.map((s) => {
-                                    const isActive = s.status === 'open';
+                                    const isActive =
+                                        s.status.toUpperCase() === 'OPEN';
 
                                     return (
                                         <div

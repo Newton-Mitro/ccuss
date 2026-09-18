@@ -4,12 +4,13 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Plus, StopCircle } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
+import { StatusBadge } from '../../../components/resource-page-shell';
 import { Input } from '../../../components/ui/input';
 import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
@@ -81,6 +82,7 @@ export default function Index() {
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
+            <Head title="Branch Days" />
             <div className="space-y-4 text-foreground">
                 {/* Header */}
                 <div className="flex items-center justify-between">
@@ -136,19 +138,14 @@ export default function Index() {
                                     setData('status', value);
                                     setData('page', 1);
                                 }}
-                                options={branchDayStatuses.map(
-                                    (branchDayStats) => ({
-                                        value: branchDayStats.value,
-                                        label: branchDayStats.label,
-                                    }),
-                                )}
-                            ></Select>
+                                options={branchDayStatuses}
+                            />
                         </div>
                     </div>
                 </div>
 
                 {/* Desktop Table */}
-                <div className="hidden h-[calc(100vh-360px)] overflow-auto rounded-md border border-border bg-card md:block">
+                <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border border-border bg-card md:block md:h-[calc(100vh-300px)]">
                     <table className="w-full border-collapse">
                         <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
@@ -193,15 +190,19 @@ export default function Index() {
                                                 '—'}
                                         </td>
                                         <td className="px-2 py-1">
-                                            <span
-                                                className={`rounded px-2 py-0.5 text-xs ${
-                                                    bd.status === 'open'
-                                                        ? 'bg-green-100 text-green-700'
-                                                        : 'bg-gray-200 text-gray-700'
-                                                }`}
+                                            <StatusBadge
+                                                tone={
+                                                    bd.status.toUpperCase() ===
+                                                    'OPEN'
+                                                        ? 'success'
+                                                        : bd.status.toUpperCase() ===
+                                                            'CLOSING'
+                                                          ? 'warning'
+                                                          : 'neutral'
+                                                }
                                             >
                                                 {bd.status}
-                                            </span>
+                                            </StatusBadge>
                                         </td>
                                         <td className="px-2 py-1">
                                             <TooltipProvider>
@@ -223,7 +224,8 @@ export default function Index() {
                                                         </TooltipContent>
                                                     </Tooltip>
 
-                                                    {bd.status === 'open' && (
+                                                    {bd.status.toUpperCase() ===
+                                                        'OPEN' && (
                                                         <Tooltip>
                                                             <TooltipTrigger
                                                                 asChild
@@ -278,15 +280,18 @@ export default function Index() {
                                         {bd.business_date}
                                     </p>
                                 </div>
-                                <span
-                                    className={`rounded-full px-2 py-0.5 text-xs ${
-                                        bd.status === 'open'
-                                            ? 'bg-green-100 text-green-700'
-                                            : 'bg-gray-200 text-gray-700'
-                                    }`}
+                                <StatusBadge
+                                    tone={
+                                        bd.status.toUpperCase() === 'OPEN'
+                                            ? 'success'
+                                            : bd.status.toUpperCase() ===
+                                                'CLOSING'
+                                              ? 'warning'
+                                              : 'neutral'
+                                    }
                                 >
                                     {bd.status}
-                                </span>
+                                </StatusBadge>
                             </div>
                             <div className="mt-2 flex justify-end gap-2">
                                 <Link
@@ -295,7 +300,7 @@ export default function Index() {
                                 >
                                     <Eye className="h-5 w-5" />
                                 </Link>
-                                {bd.status === 'open' && (
+                                {bd.status.toUpperCase() === 'OPEN' && (
                                     <button
                                         onClick={() =>
                                             handleClose(bd.id, bd.branch.name)

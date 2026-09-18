@@ -29,5 +29,8 @@ require __DIR__ . '/customer_module_routes.php';
 require __DIR__ . '/general_accounting_routes.php';
 require __DIR__ . '/financial_services_routes.php';
 require __DIR__ . '/report_export_routes.php';
+require __DIR__ . '/treasury_branch_day_routes.php';
+require __DIR__ . '/treasury_cash_management_routes.php';
+require __DIR__ . '/treasury_teller_session_routes.php';
 
 

@@ -21,7 +21,6 @@ import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { formatDate, formatDateTime } from '../../../lib/date_util';
 import formatUndersoreString from '../../../lib/formatUnderscoreString';
-import kycDocumentStatusConfig from '../../../lib/kycDocumentStatusConfig';
 import statusConfig, { Status } from '../../../lib/statusConfig';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { Customer } from '../../../types/customer_kyc_module';
@@ -348,8 +347,11 @@ export default function Show({ customer }: ShowProps) {
                                 handleDeleteCustomerAddress(addr.id);
                             }}
                         >
-                            <div className="text-sm font-semibold capitalize">
-                                {addr.type}
+                            <div className="flex items-center justify-between gap-2 text-sm font-semibold capitalize">
+                                <span>{addr.type}</span>
+                                <VerificationBadge
+                                    status={addr.verification_status}
+                                />
                             </div>
 
                             <div className="text-xs opacity-80">
@@ -440,8 +442,8 @@ export default function Show({ customer }: ShowProps) {
                                                     )}
                                                 </span>
 
-                                                <Badge
-                                                    text={
+                                                <VerificationBadge
+                                                    status={
                                                         rel.verification_status
                                                     }
                                                 />
@@ -537,8 +539,10 @@ export default function Show({ customer }: ShowProps) {
                                                 )}
                                             </span>
 
-                                            <Badge
-                                                text={intro.verification_status}
+                                            <VerificationBadge
+                                                status={
+                                                    intro.verification_status
+                                                }
                                             />
                                         </div>
                                     </div>
@@ -583,7 +587,7 @@ export default function Show({ customer }: ShowProps) {
                             }}
                         >
                             <div className="flex items-center gap-2 capitalize">
-                                <VerificationStatus
+                                <VerificationBadge
                                     status={doc.verification_status}
                                 />
                                 <div className="text-sm font-semibold">
@@ -742,16 +746,22 @@ const SectionHeader = ({
     </section>
 );
 
-const VerificationStatus = ({ status }: { status: Status }) => {
-    const config = kycDocumentStatusConfig[status];
-
-    if (!config) return null;
-
-    const Icon = config.icon;
+const VerificationBadge = ({ status }: { status?: string | null }) => {
+    const normalizedStatus = status?.toUpperCase();
+    const config = {
+        PENDING: 'bg-warning text-warning-foreground',
+        VERIFIED: 'bg-success text-success-foreground',
+        REJECTED: 'bg-destructive text-destructive-foreground',
+    }[normalizedStatus ?? ''];
 
     return (
-        <span className={`flex items-center gap-1 text-xs ${config.iconClass}`}>
-            <Icon size={18} />
+        <span
+            className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${config ?? 'bg-muted text-muted-foreground'}`}
+        >
+            {normalizedStatus
+                ? normalizedStatus.charAt(0) +
+                  normalizedStatus.slice(1).toLowerCase()
+                : 'Unknown'}
         </span>
     );
 };
