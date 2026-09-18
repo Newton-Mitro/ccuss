@@ -17,10 +17,10 @@ function grantBankingViewPermission(User $user): void
     );
 
     $permission = Permission::firstOrCreate(
-        ['slug' => 'banking.view'],
+        ['slug' => 'bank_accounts.view'],
         [
-            'module' => 'banking',
-            'name' => 'View Banking',
+            'module' => 'bank_accounts',
+            'name' => 'View Bank Accounts',
             'action' => 'view',
         ],
     );

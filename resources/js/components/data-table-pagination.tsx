@@ -11,7 +11,13 @@ interface LinkItem {
 interface Props {
     perPage: number;
     onPerPageChange: (value: number) => void;
-    links: LinkItem[];
+    links?: LinkItem[];
+    currentPage?: number;
+    totalPages?: number;
+    totalItems?: number;
+    onPageChange?: (value: number) => void;
+    onNext?: () => void;
+    onPrevious?: () => void;
     perPageOptions?: { value: number; label: number | string }[];
 }
 
@@ -57,9 +63,19 @@ const recordPerPage = [
 const DataTablePagination: React.FC<Props> = ({
     perPage,
     onPerPageChange,
-    links,
+    links = [],
+    currentPage,
+    totalPages,
+    onPageChange,
+    onNext,
+    onPrevious,
     perPageOptions = recordPerPage,
 }) => {
+    const usesNumericPagination =
+        links.length === 0 &&
+        currentPage !== undefined &&
+        totalPages !== undefined;
+
     return (
         <div className="flex items-center justify-between">
             {/* Per Page Selector */}
@@ -77,19 +93,57 @@ const DataTablePagination: React.FC<Props> = ({
 
             {/* Pagination Links */}
             <div className="flex gap-1">
-                {links.map((link, i) => (
-                    <Link
-                        key={i}
-                        href={link.url || '#'}
-                        preserveScroll
-                        className={`rounded px-3 py-1 text-sm ${
-                            link.active
-                                ? 'bg-primary text-primary-foreground'
-                                : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                        } ${!link.url ? 'pointer-events-none opacity-50' : ''}`}
-                        dangerouslySetInnerHTML={{ __html: link.label }}
-                    />
-                ))}
+                {usesNumericPagination ? (
+                    <>
+                        <button
+                            type="button"
+                            onClick={onPrevious}
+                            disabled={currentPage <= 1}
+                            className="rounded bg-muted px-3 py-1 text-sm text-muted-foreground hover:bg-muted/80 disabled:pointer-events-none disabled:opacity-50"
+                        >
+                            Previous
+                        </button>
+                        {Array.from(
+                            { length: totalPages },
+                            (_, index) => index + 1,
+                        ).map((page) => (
+                            <button
+                                key={page}
+                                type="button"
+                                onClick={() => onPageChange?.(page)}
+                                className={`rounded px-3 py-1 text-sm ${
+                                    page === currentPage
+                                        ? 'bg-primary text-primary-foreground'
+                                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                                }`}
+                            >
+                                {page}
+                            </button>
+                        ))}
+                        <button
+                            type="button"
+                            onClick={onNext}
+                            disabled={currentPage >= totalPages}
+                            className="rounded bg-muted px-3 py-1 text-sm text-muted-foreground hover:bg-muted/80 disabled:pointer-events-none disabled:opacity-50"
+                        >
+                            Next
+                        </button>
+                    </>
+                ) : (
+                    links.map((link, i) => (
+                        <Link
+                            key={i}
+                            href={link.url || '#'}
+                            preserveScroll
+                            className={`rounded px-3 py-1 text-sm ${
+                                link.active
+                                    ? 'bg-primary text-primary-foreground'
+                                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                            } ${!link.url ? 'pointer-events-none opacity-50' : ''}`}
+                            dangerouslySetInnerHTML={{ __html: link.label }}
+                        />
+                    ))
+                )}
             </div>
         </div>
     );

@@ -39,7 +39,7 @@ export const treasuryAndCashMenu: SidebarItem[] = [
                         icon: <i className="fa-solid fa-clock" />,
                         path: '/teller-sessions',
                         match_path: 'teller-sessions',
-                        permission: ['cash_management.view'],
+                        permission: ['teller_sessions.view'],
                     },
                     {
                         name: 'Cash Deposit',
@@ -60,7 +60,7 @@ export const treasuryAndCashMenu: SidebarItem[] = [
                         icon: <i className="fa-solid fa-right-left" />,
                         path: '/cash-movements/teller-to-teller-transfer',
                         match_path: 'cash-movements',
-                        permission: ['cash_transactions.create'],
+                        permission: ['cash_transfers.create'],
                     },
                     {
                         name: 'Cash Adjustment',
@@ -104,7 +104,7 @@ export const treasuryAndCashMenu: SidebarItem[] = [
                         icon: <i className="fa-solid fa-list" />,
                         path: '/bank-accounts',
                         match_path: 'bank-accounts',
-                        permission: ['banking.view'],
+                        permission: ['bank_accounts.view'],
                     },
                 ],
             },
@@ -119,7 +119,7 @@ export const treasuryAndCashMenu: SidebarItem[] = [
                         icon: <i className="fa-solid fa-book" />,
                         path: '/cheque-books',
                         match_path: 'cheque-books',
-                        permission: ['cheques.view'],
+                        permission: ['cheque_books.view'],
                     },
                     {
                         name: 'Cheques',

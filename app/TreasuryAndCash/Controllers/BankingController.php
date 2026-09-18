@@ -13,7 +13,7 @@ class BankingController extends Controller
     public function __construct(
         private readonly BankingDataService $bankingDataService,
     ) {
-        $this->middleware('permission:banking.view')->only(['accounts']);
+        $this->middleware('permission:bank_accounts.view')->only(['accounts']);
     }
 
     public function accounts(Request $request): Response

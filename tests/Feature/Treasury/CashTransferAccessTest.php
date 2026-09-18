@@ -17,10 +17,10 @@ function grantCashTransferCreatePermission(User $user): void
     );
 
     $permission = Permission::firstOrCreate(
-        ['slug' => 'cash_transactions.create'],
+        ['slug' => 'cash_transfers.create'],
         [
-            'module' => 'cash_transactions',
-            'name' => 'Create Cash Transactions',
+            'module' => 'cash_transfers',
+            'name' => 'Create Cash Transfers',
             'action' => 'create',
         ],
     );

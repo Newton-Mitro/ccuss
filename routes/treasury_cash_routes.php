@@ -4,6 +4,7 @@ use App\TreasuryAndCash\Controllers\BranchDayController;
 use App\TreasuryAndCash\Controllers\BankingController;
 use App\TreasuryAndCash\Controllers\CashManagementController;
 use App\TreasuryAndCash\Controllers\CashMovementController;
+use App\TreasuryAndCash\Controllers\ChequeController;
 use App\TreasuryAndCash\Controllers\PettyCashController;
 use Illuminate\Support\Facades\Route;
 
@@ -40,8 +41,10 @@ Route::middleware(['auth', 'verified', 'organization'])
     ->name('cash-movements.')
     ->group(function () {
         Route::get('/teller-to-teller-transfer', [CashMovementController::class, 'tellerToTellerTransfer'])
+            ->middleware('permission:cash_transfers.create')
             ->name('teller-to-teller-transfer');
         Route::post('/teller-to-teller-transfer', [CashMovementController::class, 'storeTellerToTellerTransfer'])
+            ->middleware('permission:cash_transfers.create')
             ->name('teller-to-teller-transfer.store');
     });
 
@@ -93,6 +96,12 @@ Route::middleware(['auth', 'verified', 'organization'])
             ->middleware('permission:petty_cash.expense')
             ->name('petty-cash-transactions.expense.store');
         Route::get('/bank-accounts', [BankingController::class, 'accounts'])
-            ->middleware('permission:banking.view')
+            ->middleware('permission:bank_accounts.view')
             ->name('bank-accounts.index');
+        Route::get('/cheque-books', [ChequeController::class, 'books'])
+            ->middleware('permission:cheque_books.view')
+            ->name('cheque-books.index');
+        Route::get('/cheques', [ChequeController::class, 'cheques'])
+            ->middleware('permission:cheques.view')
+            ->name('cheques.index');
     });

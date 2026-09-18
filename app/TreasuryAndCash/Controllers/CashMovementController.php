@@ -23,7 +23,10 @@ class CashMovementController extends Controller
         private readonly CashAdjustmentService $cashAdjustmentService,
         private readonly TellerCashTransactionService $tellerCashTransactionService,
     ) {
-        $this->middleware('permission:cash_transactions.create');
+        $this->middleware('permission:cash_transactions.create')
+            ->except(['tellerToTellerTransfer', 'storeTellerToTellerTransfer']);
+        $this->middleware('permission:cash_transfers.create')
+            ->only(['tellerToTellerTransfer', 'storeTellerToTellerTransfer']);
     }
 
     public function tellerToTellerTransfer(Request $request): Response
