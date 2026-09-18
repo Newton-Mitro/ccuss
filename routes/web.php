@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
-use App\SystemAdministration\Controllers\BranchController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -29,12 +28,5 @@ require __DIR__ . '/customer_module_routes.php';
 require __DIR__ . '/general_accounting_routes.php';
 require __DIR__ . '/financial_services_routes.php';
 require __DIR__ . '/report_export_routes.php';
-require __DIR__ . '/treasury_branch_day_routes.php';
-require __DIR__ . '/treasury_cash_management_routes.php';
-require __DIR__ . '/treasury_teller_session_routes.php';
-require __DIR__ . '/treasury_cash_transaction_routes.php';
-require __DIR__ . '/treasury_petty_cash_routes.php';
-require __DIR__ . '/treasury_banking_routes.php';
-require __DIR__ . '/treasury_cheque_routes.php';
 
 
