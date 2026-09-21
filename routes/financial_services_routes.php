@@ -5,6 +5,7 @@ use App\FinancialServices\Controllers\FinancialAccountController;
 use App\FinancialServices\Controllers\FinancialTransactionController;
 use App\FinancialServices\Controllers\FinancialProductPolicyController;
 use App\FinancialServices\Controllers\FinancialReportController;
+use App\FinancialServices\Controllers\CustomerCollectionController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'organization'])->group(function () {
@@ -47,4 +48,11 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/financial-reports/product-summary', [FinancialReportController::class, 'productSummary'])->name('financial-reports.product-summary');
     Route::get('/financial-reports/account-balances', [FinancialReportController::class, 'accountBalances'])->name('financial-reports.account-balances');
     Route::get('/financial-reports/transactions', [FinancialReportController::class, 'transactions'])->name('financial-reports.transactions');
+
+    Route::get('/customer-collection', [CustomerCollectionController::class, 'index'])
+        ->name('customer-collection.index');
+    Route::get('/customer-collection/search', [CustomerCollectionController::class, 'search'])
+        ->name('customer-collection.search');
+    Route::get('/customer-collection/{customer}/summary', [CustomerCollectionController::class, 'summary'])
+        ->name('customer-collection.summary');
 });

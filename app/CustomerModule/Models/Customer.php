@@ -4,6 +4,8 @@ namespace App\CustomerModule\Models;
 
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
+use App\FinancialServices\Models\DepositAccount;
+use App\FinancialServices\Models\LoanAccount;
 use App\SystemAdministration\Traits\Auditable;
 use App\Support\Traits\UppercaseEnumAttributes;
 use Database\Factories\CustomerFactory;
@@ -168,6 +170,16 @@ class Customer extends Model
     public function kycDocuments(): HasMany
     {
         return $this->hasMany(KycDocument::class);
+    }
+
+    public function depositAccounts(): HasMany
+    {
+        return $this->hasMany(DepositAccount::class);
+    }
+
+    public function loanAccounts(): HasMany
+    {
+        return $this->hasMany(LoanAccount::class);
     }
 
     public function photo(): HasOne

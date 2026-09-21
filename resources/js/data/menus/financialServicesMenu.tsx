@@ -73,6 +73,13 @@ export const financialServicesMenu: SidebarItem[] = [
                 ],
             },
             {
+                name: 'Customer Collection',
+                icon: <i className="fa-solid fa-hand-holding-dollar" />,
+                path: '/customer-collection',
+                match_path: 'customer-collection',
+                permission: ['financial.accounts.view'],
+            },
+            {
                 name: 'Transactions',
                 icon: <i className="fa-solid fa-money-bill-transfer" />,
                 permission: ['financial.transactions.view'],

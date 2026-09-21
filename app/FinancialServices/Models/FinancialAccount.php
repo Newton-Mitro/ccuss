@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\FinancialTransaction;
@@ -71,5 +72,25 @@ class FinancialAccount extends Model
     public function transactions(): HasMany
     {
         return $this->hasMany(FinancialTransaction::class);
+    }
+
+    public function depositAccount(): HasOne
+    {
+        return $this->hasOne(DepositAccount::class);
+    }
+
+    public function defaultEvents(): HasMany
+    {
+        return $this->hasMany(AccountDefaultEvent::class);
+    }
+
+    public function fines(): HasMany
+    {
+        return $this->hasMany(AccountFine::class);
+    }
+
+    public function interestProvisions(): HasMany
+    {
+        return $this->hasMany(InterestProvision::class);
     }
 }

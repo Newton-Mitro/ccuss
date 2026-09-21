@@ -2,12 +2,12 @@ import { Head, useForm, usePage } from '@inertiajs/react';
 import { SlidersHorizontal } from 'lucide-react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
-import HeadingSmall from '../../../../components/heading-small';
-import { Button } from '../../../../components/ui/button';
-import { Input } from '../../../../components/ui/input';
-import useFlashToastHandler from '../../../../hooks/use-flash-toast-handler';
-import CustomAuthLayout from '../../../../layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '../../../../types';
+import HeadingSmall from '../../../components/heading-small';
+import { Button } from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
+import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { BreadcrumbItem, SharedData } from '../../../types';
 
 interface TellerSessionOption {
     id: number;

@@ -168,7 +168,9 @@ export default function Show({ customer }: ShowProps) {
                         </p>
 
                         <div className="capitalize">
-                            <Badge text={customer.status} />
+                            <Badge
+                                text={customer.status.toLowerCase() as Status}
+                            />
                         </div>
                     </div>
                 </div>

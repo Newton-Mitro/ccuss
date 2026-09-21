@@ -2,12 +2,12 @@ import { Head, useForm, usePage } from '@inertiajs/react';
 import { CheckSquare } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-import DataTablePagination from '../../../../components/data-table-pagination';
-import HeadingSmall from '../../../../components/heading-small';
-import { Input } from '../../../../components/ui/input';
-import useFlashToastHandler from '../../../../hooks/use-flash-toast-handler';
-import CustomAuthLayout from '../../../../layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '../../../../types';
+import DataTablePagination from '../../../components/data-table-pagination';
+import HeadingSmall from '../../../components/heading-small';
+import { Input } from '../../../components/ui/input';
+import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
+import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { BreadcrumbItem, SharedData } from '../../../types';
 
 interface ChequeListItem {
     id: number;
