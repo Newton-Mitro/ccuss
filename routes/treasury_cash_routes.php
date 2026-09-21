@@ -95,6 +95,9 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::post('/petty-cash-transactions/expense', [PettyCashController::class, 'storeExpense'])
             ->middleware('permission:petty_cash.expense')
             ->name('petty-cash-transactions.expense.store');
+        Route::get('/banks', [BankingController::class, 'banks'])
+            ->middleware('permission:banks.view')
+            ->name('banks.index');
         Route::get('/bank-accounts', [BankingController::class, 'accounts'])
             ->middleware('permission:bank_accounts.view')
             ->name('bank-accounts.index');

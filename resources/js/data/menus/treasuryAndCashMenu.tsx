@@ -108,6 +108,13 @@ export const treasuryAndCashMenu: SidebarItem[] = [
                 permission: ['banking.view'],
                 children: [
                     {
+                        name: 'Banks',
+                        icon: <i className="fa-solid fa-bank" />,
+                        path: '/banks',
+                        match_path: 'banks',
+                        permission: ['banks.view'],
+                    },
+                    {
                         name: 'Bank Accounts',
                         icon: <i className="fa-solid fa-list" />,
                         path: '/bank-accounts',
