@@ -1,6 +1,5 @@
-import { Button } from '@/components/ui/button';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { WalletCards } from 'lucide-react';
+import { Head, useForm, usePage } from '@inertiajs/react';
+import { HandCoins } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../../components/data-table-pagination';
@@ -10,7 +9,7 @@ import useFlashToastHandler from '../../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../../types';
 
-interface PettyCashFundListItem {
+interface AdvanceAccountListItem {
     id: number;
     code: string;
     name: string;
@@ -18,13 +17,13 @@ interface PettyCashFundListItem {
     current_balance: string | number;
     method: 'IMPREST' | 'VARIABLE';
     status: 'ACTIVE' | 'INACTIVE' | 'CLOSED';
-    custodian?: { name: string } | null;
-    cash_location?: { branch?: { name: string; code: string } | null } | null;
+    custodian_name?: string | null;
+    branch_name?: string | null;
 }
 
-interface PettyCashIndexProps extends SharedData {
-    funds: {
-        data: PettyCashFundListItem[];
+interface AdvanceAccountIndexProps extends SharedData {
+    advance_accounts: {
+        data: AdvanceAccountListItem[];
         current_page: number;
         per_page: number;
         last_page: number;
@@ -34,7 +33,8 @@ interface PettyCashIndexProps extends SharedData {
 }
 
 export default function Index() {
-    const { funds, filters } = usePage<PettyCashIndexProps>().props;
+    const { advance_accounts, filters } =
+        usePage<AdvanceAccountIndexProps>().props;
     useFlashToastHandler();
 
     const { data, setData, get } = useForm({
@@ -45,7 +45,7 @@ export default function Index() {
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            get(route('petty-cash-accounts.index'), {
+            get(route('petty-cash-advance-accounts.index'), {
                 preserveState: true,
                 replace: true,
             });
@@ -57,29 +57,22 @@ export default function Index() {
         { title: 'Treasury & Cash', href: '' },
         { title: 'Petty Cash', href: '' },
         {
-            title: 'Petty Cash Accounts',
-            href: route('petty-cash-accounts.index'),
+            title: 'Advance Accounts',
+            href: route('petty-cash-advance-accounts.index'),
         },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Petty Cash Accounts" />
+            <Head title="Advance Accounts" />
             <div className="space-y-4 text-foreground">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <HeadingSmall
-                        title="Petty Cash Accounts"
-                        description="Review petty cash funds, custodians, limits, and available balances."
-                    />
-                    <Button asChild>
-                        <Link href={route('petty-cash-accounts.create')}>
-                            Create Fund
-                        </Link>
-                    </Button>
-                </div>
+                <HeadingSmall
+                    title="Advance Accounts"
+                    description="Track petty cash advance accounts, custodians, and balances for the active branch."
+                />
                 <Input
                     className="w-full bg-card sm:w-80"
-                    placeholder="Search fund, code, or branch..."
+                    placeholder="Search advance account or custodian..."
                     value={data.search}
                     onChange={(event) => {
                         setData('search', event.target.value);
@@ -92,7 +85,7 @@ export default function Index() {
                             <tr>
                                 {[
                                     '#',
-                                    'Fund',
+                                    'Account',
                                     'Branch',
                                     'Custodian',
                                     'Method',
@@ -110,50 +103,50 @@ export default function Index() {
                             </tr>
                         </thead>
                         <tbody>
-                            {funds.data.length > 0 ? (
-                                funds.data.map((fund, index) => (
+                            {advance_accounts.data.length > 0 ? (
+                                advance_accounts.data.map((account, index) => (
                                     <tr
-                                        key={fund.id}
+                                        key={account.id}
                                         className="border-b even:bg-muted/40 hover:bg-accent/20"
                                     >
                                         <td className="px-2 py-2">
-                                            {(funds.current_page - 1) *
-                                                funds.per_page +
+                                            {(advance_accounts.current_page -
+                                                1) *
+                                                advance_accounts.per_page +
                                                 index +
                                                 1}
                                         </td>
                                         <td className="px-2 py-2">
                                             <div className="flex items-center gap-2">
-                                                <WalletCards className="h-4 w-4 text-muted-foreground" />
+                                                <HandCoins className="h-4 w-4 text-muted-foreground" />
                                                 <div>
                                                     <div className="font-medium">
-                                                        {fund.name}
+                                                        {account.name}
                                                     </div>
                                                     <div className="text-xs text-muted-foreground">
-                                                        {fund.code}
+                                                        {account.code}
                                                     </div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-2 py-2">
-                                            {fund.cash_location?.branch?.name ??
-                                                '-'}
+                                            {account.branch_name ?? '-'}
                                         </td>
                                         <td className="px-2 py-2">
-                                            {fund.custodian?.name ?? '-'}
+                                            {account.custodian_name ?? '-'}
                                         </td>
                                         <td className="px-2 py-2">
-                                            {fund.method}
+                                            {account.method}
                                         </td>
                                         <td className="px-2 py-2">
-                                            {fund.current_balance}
+                                            {account.current_balance}
                                         </td>
                                         <td className="px-2 py-2">
-                                            {fund.fund_limit}
+                                            {account.fund_limit}
                                         </td>
                                         <td className="px-2 py-2">
                                             <span className="rounded-full border px-2 py-1 text-xs font-medium">
-                                                {fund.status}
+                                                {account.status}
                                             </span>
                                         </td>
                                     </tr>
@@ -164,8 +157,8 @@ export default function Index() {
                                         colSpan={8}
                                         className="px-4 py-10 text-center text-muted-foreground"
                                     >
-                                        No petty cash funds found for this
-                                        organization.
+                                        No petty cash advance accounts found for
+                                        this organization.
                                     </td>
                                 </tr>
                             )}
@@ -173,18 +166,23 @@ export default function Index() {
                     </table>
                 </div>
                 <DataTablePagination
-                    perPage={funds.per_page}
-                    currentPage={funds.current_page}
-                    totalItems={funds.total}
-                    totalPages={funds.last_page}
+                    perPage={advance_accounts.per_page}
+                    currentPage={advance_accounts.current_page}
+                    totalItems={advance_accounts.total}
+                    totalPages={advance_accounts.last_page}
                     onPerPageChange={(value) => {
                         setData('per_page', value);
                         setData('page', 1);
                     }}
                     onPageChange={(value) => setData('page', value)}
-                    onNext={() => setData('page', funds.current_page + 1)}
+                    onNext={() =>
+                        setData('page', advance_accounts.current_page + 1)
+                    }
                     onPrevious={() =>
-                        setData('page', Math.max(1, funds.current_page - 1))
+                        setData(
+                            'page',
+                            Math.max(1, advance_accounts.current_page - 1),
+                        )
                     }
                 />
             </div>

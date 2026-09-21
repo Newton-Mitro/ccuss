@@ -1,4 +1,5 @@
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Button } from '@/components/ui/button';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Landmark } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
@@ -59,10 +60,15 @@ export default function Index() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Banks" />
             <div className="space-y-4 text-foreground">
-                <HeadingSmall
-                    title="Banks"
-                    description="Review banks configured for the active organization and their account coverage."
-                />
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <HeadingSmall
+                        title="Banks"
+                        description="Review banks configured for the active organization and their account coverage."
+                    />
+                    <Button asChild>
+                        <Link href={route('banks.create')}>Create Bank</Link>
+                    </Button>
+                </div>
                 <Input
                     className="w-full bg-card sm:w-80"
                     placeholder="Search bank code or name..."

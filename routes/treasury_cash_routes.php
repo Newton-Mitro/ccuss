@@ -83,6 +83,15 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::get('/petty-cash-accounts', [PettyCashController::class, 'accounts'])
             ->middleware('permission:petty_cash.view')
             ->name('petty-cash-accounts.index');
+        Route::get('/petty-cash-accounts/create', [PettyCashController::class, 'create'])
+            ->middleware('permission:petty_cash.create')
+            ->name('petty-cash-accounts.create');
+        Route::post('/petty-cash-accounts', [PettyCashController::class, 'store'])
+            ->middleware('permission:petty_cash.create')
+            ->name('petty-cash-accounts.store');
+        Route::get('/petty-cash-advance-accounts', [PettyCashController::class, 'advanceAccounts'])
+            ->middleware('permission:petty_cash.view')
+            ->name('petty-cash-advance-accounts.index');
         Route::get('/petty-cash-transactions/funding', [PettyCashController::class, 'funding'])
             ->middleware('permission:petty_cash.create')
             ->name('petty-cash-transactions.funding');
@@ -98,6 +107,12 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::get('/banks', [BankingController::class, 'banks'])
             ->middleware('permission:banks.view')
             ->name('banks.index');
+        Route::get('/banks/create', [BankingController::class, 'create'])
+            ->middleware('permission:banks.create')
+            ->name('banks.create');
+        Route::post('/banks', [BankingController::class, 'store'])
+            ->middleware('permission:banks.create')
+            ->name('banks.store');
         Route::get('/bank-accounts', [BankingController::class, 'accounts'])
             ->middleware('permission:bank_accounts.view')
             ->name('bank-accounts.index');

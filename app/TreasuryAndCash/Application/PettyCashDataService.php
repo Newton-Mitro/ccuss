@@ -33,6 +33,27 @@ class PettyCashDataService
         return $query->paginate($perPage)->withQueryString();
     }
 
+    public function listAdvanceAccounts(int $organizationId, ?string $search = null, int $perPage = 18): LengthAwarePaginator
+    {
+        $paginator = $this->listFunds($organizationId, $search, $perPage);
+
+        $paginator->setCollection($paginator->getCollection()->map(function (PettyCashFund $fund) {
+            return [
+                'id' => $fund->id,
+                'code' => $fund->code,
+                'name' => $fund->name,
+                'fund_limit' => $fund->fund_limit,
+                'current_balance' => $fund->current_balance,
+                'method' => $fund->method,
+                'status' => $fund->status,
+                'custodian_name' => $fund->custodian?->name,
+                'branch_name' => $fund->cashLocation?->branch?->name,
+            ];
+        }));
+
+        return $paginator;
+    }
+
     public function forTransaction(int $organizationId, int $branchId): array
     {
         return [

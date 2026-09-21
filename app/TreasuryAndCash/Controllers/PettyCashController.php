@@ -17,8 +17,8 @@ class PettyCashController extends Controller
         private readonly PettyCashDataService $pettyCashDataService,
         private readonly PettyCashTransactionService $pettyCashTransactionService,
     ) {
-        $this->middleware('permission:petty_cash.view')->only(['accounts']);
-        $this->middleware('permission:petty_cash.create')->only(['funding', 'storeFunding']);
+        $this->middleware('permission:petty_cash.view')->only(['accounts', 'advanceAccounts']);
+        $this->middleware('permission:petty_cash.create')->only(['create', 'store', 'funding', 'storeFunding']);
         $this->middleware('permission:petty_cash.expense')->only(['expense', 'storeExpense']);
     }
 
@@ -34,6 +34,48 @@ class PettyCashController extends Controller
             'funds' => $funds,
             'filters' => $request->only(['search', 'per_page', 'page']),
         ]);
+    }
+
+    public function advanceAccounts(Request $request): Response
+    {
+        $advanceAccounts = $this->pettyCashDataService->listAdvanceAccounts(
+            $request->attributes->get('active_organization')->id,
+            $request->input('search'),
+            $request->input('per_page', 18),
+        );
+
+        return Inertia::render('treasury-cash/petty-cash/advance-accounts/index', [
+            'advance_accounts' => $advanceAccounts,
+            'filters' => $request->only(['search', 'per_page', 'page']),
+        ]);
+    }
+
+    public function create(Request $request): Response
+    {
+        return Inertia::render('treasury-cash/petty-cash/accounts/create', [
+            'cash_locations' => \App\TreasuryAndCash\Models\CashLocation::query()
+                ->where('organization_id', $request->attributes->get('active_organization')->id)
+                ->where('type', 'PETTY_CASH')
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get(['id', 'code', 'name']),
+        ]);
+    }
+
+    public function store(\App\TreasuryAndCash\Requests\StorePettyCashFundRequest $request): RedirectResponse
+    {
+        \App\TreasuryAndCash\Models\PettyCashFund::create([
+            'cash_location_id' => $request->validated('cash_location_id'),
+            'custodian_id' => $request->user()->id,
+            'code' => $request->validated('code'),
+            'name' => $request->validated('name'),
+            'fund_limit' => $request->validated('fund_limit'),
+            'current_balance' => $request->validated('current_balance', 0),
+            'method' => $request->validated('method', 'IMPREST'),
+            'status' => $request->validated('status', 'ACTIVE'),
+        ]);
+
+        return redirect()->route('petty-cash-accounts.index')->with('success', 'Petty cash fund created successfully.');
     }
 
     public function funding(Request $request): Response
