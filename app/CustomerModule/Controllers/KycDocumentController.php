@@ -161,9 +161,8 @@ class KycDocumentController extends Controller
         $kycDocument->update([
             'verification_status' => KycDocument::STATUS_VERIFIED,
             'verified_at' => now(),
-            'verified_by' => auth()->id(),
-            'rejection_reason' => null, // reset if previously rejected
         ]);
+        $customer->kycProfile?->recalculateVerificationCounts();
 
         return redirect()->back()->with('success', 'KYC document verified successfully.');
     }
@@ -182,9 +181,9 @@ class KycDocumentController extends Controller
         $kycDocument->update([
             'verification_status' => KycDocument::STATUS_REJECTED,
             'verified_at' => now(),
-            'verified_by' => auth()->id(),
-            'rejection_reason' => $request->rejection_reason,
+            'remarks' => $request->rejection_reason,
         ]);
+        $customer->kycProfile?->recalculateVerificationCounts();
 
         return redirect()->back()->with('success', 'KYC document rejected successfully.');
     }

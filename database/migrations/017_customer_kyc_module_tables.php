@@ -82,7 +82,8 @@ return new class extends Migration {
 
         Schema::create('kyc_profiles', function (Blueprint $table) {
             $table->id();
-            $table->integer('verification_value')->default(0);
+            $table->integer('primary_verified')->default(0);
+            $table->integer('other_verified')->default(0);
             $table->enum('kyc_level', [
                 'MINIMAL',     // basic (e.g., phone and email) + identity type -> 3
                 'BASIC',       // basic + photo -> 3+1

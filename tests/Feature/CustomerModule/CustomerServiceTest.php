@@ -5,7 +5,11 @@ use App\CustomerModule\Application\CustomerFamilyRelationService;
 use App\CustomerModule\Application\CustomerService;
 use App\CustomerModule\Application\KycDocumentService;
 use App\CustomerModule\Models\Customer;
+use App\CustomerModule\Models\CustomerAddress;
+use App\CustomerModule\Models\CustomerFamilyRelation;
+use App\CustomerModule\Models\CustomerIntroducer;
 use App\CustomerModule\Models\KycDocument;
+use App\CustomerModule\Models\KycProfile;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use Illuminate\Http\UploadedFile;
@@ -338,4 +342,44 @@ test('kyc document service replaces document files without allowing customer rea
         ->and($updated->file_path)->not->toBe($oldPath)
         ->and(Storage::disk('public')->exists($oldPath))->toBeFalse()
         ->and(Storage::disk('public')->exists($updated->file_path))->toBeTrue();
+});
+
+test('kyc profile counts verified primary and other records', function () {
+    $customer = Customer::factory()->individualMale()->create();
+    $relative = Customer::factory()->individualMale()->create();
+    $sibling = Customer::factory()->individualFemale()->create();
+
+    CustomerAddress::factory()->for($customer)->current()->verified()->create();
+    CustomerAddress::factory()->for($customer)->permanent()->verified()->create();
+    CustomerAddress::factory()->for($customer)->mailing()->verified()->create();
+
+    CustomerFamilyRelation::factory()->for($customer)->for($relative, 'relative')->father()->verified()->create();
+    CustomerFamilyRelation::factory()->for($customer)->for($sibling, 'relative')->sibling()->verified()->create();
+
+    CustomerIntroducer::factory()->for($customer, 'introducedCustomer')->verified()->create();
+
+    KycDocument::factory()->for($customer)->photo()->verified()->create();
+    KycDocument::factory()->for($customer)->nid()->verified()->create();
+    KycDocument::factory()->for($customer)->signature()->verified()->create();
+
+    $profile = KycProfile::factory()->for($customer)->create();
+    $profile->recalculateVerificationCounts();
+
+    expect($profile->fresh()->primary_verified)->toBe(6)
+        ->and($profile->fresh()->other_verified)->toBe(3)
+        ->and($profile->fresh()->kyc_level)->toBe(KycProfile::LEVEL_ENHANCED)
+        ->and($profile->fresh()->verificationValue)->toBe(9);
+});
+
+test('organization kyc uses business registration documents and ignores family relations', function () {
+    $customer = Customer::factory()->organization()->create();
+
+    KycDocument::factory()->for($customer)->photo()->verified()->create();
+    KycDocument::factory()->for($customer)->type(KycDocument::TRADE_LICENSE)->verified()->create();
+
+    $profile = KycProfile::factory()->for($customer)->create();
+    $profile->recalculateVerificationCounts();
+
+    expect($profile->fresh()->kyc_level)->toBe(KycProfile::LEVEL_BASIC)
+        ->and($profile->fresh()->primary_verified)->toBe(2);
 });

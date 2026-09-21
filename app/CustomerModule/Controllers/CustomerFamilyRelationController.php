@@ -157,9 +157,8 @@ class CustomerFamilyRelationController extends Controller
         $familyRelation->update([
             'verification_status' => CustomerFamilyRelation::STATUS_VERIFIED,
             'verified_at' => now(),
-            'verified_by' => auth()->id(),
-            'rejection_reason' => null,
         ]);
+        $customer->kycProfile?->recalculateVerificationCounts();
 
         return redirect()->back()->with('success', 'Family relation approved successfully.');
     }
@@ -178,9 +177,9 @@ class CustomerFamilyRelationController extends Controller
         $familyRelation->update([
             'verification_status' => CustomerFamilyRelation::STATUS_REJECTED,
             'verified_at' => now(),
-            'verified_by' => auth()->id(),
-            'rejection_reason' => $request->rejection_reason,
+            'remarks' => $request->rejection_reason,
         ]);
+        $customer->kycProfile?->recalculateVerificationCounts();
 
         return redirect()->back()->with('success', 'Family relation rejected successfully.');
     }

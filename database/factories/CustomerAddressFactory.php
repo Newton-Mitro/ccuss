@@ -14,8 +14,6 @@ class CustomerAddressFactory extends Factory
     {
         $status = fake()->randomElement([
             'PENDING',
-            'VERIFIED',
-            'REJECTED',
         ]);
 
         return [

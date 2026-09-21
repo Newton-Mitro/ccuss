@@ -577,11 +577,7 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::dropIfExists('teller_cash_transactions');
-
-
         Schema::dropIfExists('cash_adjustments');
-
-
         Schema::dropIfExists('branch_cash_summaries');
         Schema::dropIfExists('cheque_clearings');
         Schema::dropIfExists('cheque_transactions');
@@ -602,21 +598,14 @@ return new class extends Migration {
         Schema::dropIfExists('vaults');
         Schema::dropIfExists('cash_locations');
         Schema::dropIfExists('branch_days');
-
-
         Schema::table('accounts', function (Blueprint $table): void {
             $table->dropIndex(['accounts_organization_id_is_cash_account_index']);
             $table->dropColumn('is_cash_account');
         });
-
-
         Schema::dropIfExists('financial_product_policies');
-
-
         Schema::table('customer_introducers', function (Blueprint $table): void {
             $table->dropForeign('customer_introducers_account_id_foreign');
         });
-
         Schema::dropIfExists('financial_transaction_entries');
         Schema::dropIfExists('financial_transactions');
         Schema::dropIfExists('financial_accounts');

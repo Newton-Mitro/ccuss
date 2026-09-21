@@ -201,7 +201,8 @@ export interface CustomerIntroducer extends Timestamped {
 export interface KycProfile extends Timestamped {
     id: ID;
     customer_id: ID;
-    verification_value: number;
+    primary_verified: number;
+    other_verified: number;
     customer?: Customer | null;
     kyc_level: KycLevel;
     audits?: Audit[];

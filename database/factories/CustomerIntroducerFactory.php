@@ -14,8 +14,6 @@ class CustomerIntroducerFactory extends Factory
     {
         $status = fake()->randomElement([
             'PENDING',
-            'VERIFIED',
-            'REJECTED',
         ]);
 
         return [

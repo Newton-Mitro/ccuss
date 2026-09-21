@@ -50,7 +50,7 @@ class CustomerService
             $customer = $this->customerRepository->create($data);
             KycProfile::create([
                 'customer_id' => $customer->id,
-                'kyc_level' => KycProfile::LEVEL_BASIC,
+                'kyc_level' => KycProfile::LEVEL_MINIMAL,
             ]);
 
             if ($photo) {

@@ -14,27 +14,14 @@ class KycProfileFactory extends Factory
     {
         $levels = [
             'MINIMAL',
-            'BASIC',
-            'STANDARD',
-            'FULL',
-            'ENHANCED',
         ];
 
         $level = fake()->randomElement($levels);
 
-        $verificationValue = match ($level) {
-            'MINIMAL' => fake()->numberBetween(0, 3),
-            'BASIC' => fake()->numberBetween(4, 5),
-            'STANDARD' => fake()->numberBetween(6, 8),
-            'FULL' => fake()->numberBetween(9, 10),
-            'ENHANCED' => fake()->numberBetween(11, 15),
-        };
-
         return [
             'customer_id' => Customer::factory(),
-
-            'verification_value' => $verificationValue,
-
+            'primary_verified' => 0,
+            'other_verified' => 0,
             'kyc_level' => $level,
         ];
     }
@@ -43,7 +30,8 @@ class KycProfileFactory extends Factory
     {
         return $this->state(fn() => [
             'kyc_level' => 'MINIMAL',
-            'verification_value' => fake()->numberBetween(0, 3),
+            'primary_verified' => 0,
+            'other_verified' => 0,
         ]);
     }
 
@@ -51,7 +39,8 @@ class KycProfileFactory extends Factory
     {
         return $this->state(fn() => [
             'kyc_level' => 'BASIC',
-            'verification_value' => fake()->numberBetween(4, 5),
+            'primary_verified' => 0,
+            'other_verified' => 0,
         ]);
     }
 
@@ -59,7 +48,8 @@ class KycProfileFactory extends Factory
     {
         return $this->state(fn() => [
             'kyc_level' => 'STANDARD',
-            'verification_value' => fake()->numberBetween(6, 8),
+            'primary_verified' => 0,
+            'other_verified' => 0,
         ]);
     }
 
@@ -67,7 +57,8 @@ class KycProfileFactory extends Factory
     {
         return $this->state(fn() => [
             'kyc_level' => 'FULL',
-            'verification_value' => fake()->numberBetween(9, 10),
+            'primary_verified' => 0,
+            'other_verified' => 0,
         ]);
     }
 
@@ -75,7 +66,8 @@ class KycProfileFactory extends Factory
     {
         return $this->state(fn() => [
             'kyc_level' => 'ENHANCED',
-            'verification_value' => fake()->numberBetween(11, 15),
+            'primary_verified' => 0,
+            'other_verified' => 0,
         ]);
     }
 }

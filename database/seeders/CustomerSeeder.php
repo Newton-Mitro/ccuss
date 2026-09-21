@@ -98,7 +98,7 @@ class CustomerSeeder extends Seeder
                     'mime' => 'image/' . $photoExt,
                 ]);
 
-                KycDocument::factory()->for($customer)->type('TRADE_LICENSE')->create([
+                KycDocument::factory()->for($customer)->type('TRADE_LICENSE')->verified()->create([
                     'file_name' => $photoFileName,
                     'file_path' => "{$basePath}/{$photoFileName}",
                     'mime' => 'image/' . $photoExt,
@@ -118,19 +118,19 @@ class CustomerSeeder extends Seeder
                 // ======================
                 // 📄 KYC DOCUMENTS
                 // ======================
-                KycDocument::factory()->for($customer)->type('PHOTO')->verified()->create([
+                KycDocument::factory()->for($customer)->type('PHOTO')->pending()->create([
                     'file_name' => $photoFileName,
                     'file_path' => "{$basePath}/{$photoFileName}",
                     'mime' => 'image/' . $photoExt,
                 ]);
 
-                KycDocument::factory()->for($customer)->type('SIGNATURE')->verified()->create([
+                KycDocument::factory()->for($customer)->type('SIGNATURE')->pending()->create([
                     'file_name' => $signatureFileName,
                     'file_path' => "{$basePath}/{$signatureFileName}",
                     'mime' => 'image/' . $signatureExt,
                 ]);
 
-                KycDocument::factory()->for($customer)->type('NATIONAL_IDENTIFICATION_NUMBER')->create([
+                KycDocument::factory()->for($customer)->type('NATIONAL_IDENTIFICATION_NUMBER')->pending()->create([
                     'file_name' => $nidFileName,
                     'file_path' => "{$basePath}/{$nidFileName}",
                     'mime' => 'image/' . $nidExt,
@@ -141,15 +141,15 @@ class CustomerSeeder extends Seeder
             // 🏠 ADDRESSES
             // ======================
             foreach (['CURRENT', 'PERMANENT', 'MAILING'] as $addrType) {
-                CustomerAddress::factory()->for($customer)->create([
-                    'type' => $addrType
-                ]);
+                CustomerAddress::factory()->for($customer)
+                    ->{$addrType === 'CURRENT' || $addrType === 'PERMANENT' ? 'pending' : 'pending'}()
+                        ->create(['type' => $addrType]);
             }
 
             // ======================
             // 🧾 KYC PROFILE
             // ======================
-            KycProfile::factory()->for($customer)->create();
+            KycProfile::factory()->for($customer)->create()->recalculateVerificationCounts();
         }
 
         // ======================
@@ -169,6 +169,7 @@ class CustomerSeeder extends Seeder
                     'COLLEAGUE',
                     'OTHER'
                 ])->random(),
+                'verification_status' => CustomerIntroducer::STATUS_PENDING,
                 'verified_at' => now(),
             ]);
         }

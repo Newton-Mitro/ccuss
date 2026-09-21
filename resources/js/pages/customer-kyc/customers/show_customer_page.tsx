@@ -302,8 +302,19 @@ export default function Show({ customer }: ShowProps) {
                             )}
                         />
                         <BorderInfoBox
-                            label="Verification Value"
-                            value={customer.kyc_profile.verification_value}
+                            label="Primary Verified"
+                            value={customer.kyc_profile.primary_verified}
+                        />
+                        <BorderInfoBox
+                            label="Other Verified"
+                            value={customer.kyc_profile.other_verified}
+                        />
+                        <BorderInfoBox
+                            label="Total Verified"
+                            value={
+                                customer.kyc_profile.primary_verified +
+                                customer.kyc_profile.other_verified
+                            }
                         />
                     </div>
                 </SectionHeader>

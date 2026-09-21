@@ -22,12 +22,14 @@ class KycProfile extends Model
 
     protected $fillable = [
         'customer_id',
-        'verification_value',
+        'primary_verified',
+        'other_verified',
         'kyc_level',
     ];
 
     protected $casts = [
-        'verification_value' => 'integer',
+        'primary_verified' => 'integer',
+        'other_verified' => 'integer',
         'deleted_at' => 'datetime',
     ];
 
@@ -101,7 +103,136 @@ class KycProfile extends Model
 
     public function isVerified(): bool
     {
-        return $this->verification_value > 0;
+        return $this->verificationValue > 0;
+    }
+
+    public function getVerificationValueAttribute(): int
+    {
+        return (int) $this->primary_verified + (int) $this->other_verified;
+    }
+
+    public function recalculateVerificationCounts(): self
+    {
+        $customerId = $this->customer_id;
+
+        $hasPhoto = KycDocument::query()
+            ->where('customer_id', $customerId)
+            ->where('verification_status', KycDocument::STATUS_VERIFIED)
+            ->where('document_type', KycDocument::PHOTO)
+            ->exists();
+
+        $hasIdentificationDocument = KycDocument::query()
+            ->where('customer_id', $customerId)
+            ->where('verification_status', KycDocument::STATUS_VERIFIED)
+            ->whereIn('document_type', [
+                KycDocument::NATIONAL_ID,
+                KycDocument::SMART_NID,
+                KycDocument::PASSPORT,
+                KycDocument::DRIVING_LICENSE,
+                KycDocument::BIRTH_CERTIFICATE,
+                KycDocument::TRADE_LICENSE,
+                KycDocument::CERTIFICATE_OF_INCORPORATION,
+                KycDocument::MEMORANDUM_OF_ASSOCIATION,
+                KycDocument::ARTICLES_OF_ASSOCIATION,
+                KycDocument::PARTNERSHIP_DEED,
+            ])
+            ->exists();
+
+        $isOrganization = $this->customer()->where(
+            'type',
+            Customer::TYPE_ORGANIZATION,
+        )->exists();
+
+        $primaryAddresses = CustomerAddress::query()
+            ->where('customer_id', $customerId)
+            ->where('verification_status', CustomerAddress::STATUS_VERIFIED)
+            ->whereIn('type', [CustomerAddress::TYPE_CURRENT, CustomerAddress::TYPE_PERMANENT])
+            ->count();
+
+        $otherAddresses = CustomerAddress::query()
+            ->where('customer_id', $customerId)
+            ->where('verification_status', CustomerAddress::STATUS_VERIFIED)
+            ->whereNotIn('type', [CustomerAddress::TYPE_CURRENT, CustomerAddress::TYPE_PERMANENT])
+            ->count();
+
+        $primaryRelations = $isOrganization ? 0 : CustomerFamilyRelation::query()
+            ->where('customer_id', $customerId)
+            ->where('verification_status', CustomerFamilyRelation::STATUS_VERIFIED)
+            ->whereIn('relation_type', [CustomerFamilyRelation::FATHER, CustomerFamilyRelation::MOTHER])
+            ->count();
+
+        $otherRelations = $isOrganization ? 0 : CustomerFamilyRelation::query()
+            ->where('customer_id', $customerId)
+            ->where('verification_status', CustomerFamilyRelation::STATUS_VERIFIED)
+            ->whereNotIn('relation_type', [CustomerFamilyRelation::FATHER, CustomerFamilyRelation::MOTHER])
+            ->count();
+
+        $verifiedIntroducers = CustomerIntroducer::query()
+            ->where('introduced_customer_id', $customerId)
+            ->where('verification_status', CustomerIntroducer::STATUS_VERIFIED)
+            ->count();
+
+        $hasVerifiedIntroducer = $verifiedIntroducers > 0;
+
+        $hasCurrentAddress = CustomerAddress::query()
+            ->where('customer_id', $customerId)
+            ->where('verification_status', CustomerAddress::STATUS_VERIFIED)
+            ->where('type', CustomerAddress::TYPE_CURRENT)
+            ->exists();
+
+        $hasPermanentAddress = CustomerAddress::query()
+            ->where('customer_id', $customerId)
+            ->where('verification_status', CustomerAddress::STATUS_VERIFIED)
+            ->where('type', CustomerAddress::TYPE_PERMANENT)
+            ->exists();
+
+        $hasFamilyRelation = !$isOrganization && CustomerFamilyRelation::query()
+            ->where('customer_id', $customerId)
+            ->where('verification_status', CustomerFamilyRelation::STATUS_VERIFIED)
+            ->exists();
+
+        $primaryDocuments = KycDocument::query()
+            ->where('customer_id', $customerId)
+            ->where('verification_status', KycDocument::STATUS_VERIFIED)
+            ->whereIn('document_type', KycDocument::PRIMARY_DOCUMENT_TYPES)
+            ->count();
+
+        $otherDocuments = KycDocument::query()
+            ->where('customer_id', $customerId)
+            ->where('verification_status', KycDocument::STATUS_VERIFIED)
+            ->whereNotIn('document_type', KycDocument::PRIMARY_DOCUMENT_TYPES)
+            ->count();
+
+        $hasAdditionalDocument = $otherDocuments > 0;
+
+        $kycLevel = self::LEVEL_MINIMAL;
+
+        if ($hasPhoto && $hasIdentificationDocument) {
+            $kycLevel = self::LEVEL_BASIC;
+        }
+
+        if ($kycLevel === self::LEVEL_BASIC && $hasCurrentAddress && $hasPermanentAddress) {
+            $kycLevel = self::LEVEL_STANDARD;
+        }
+
+        if ($kycLevel === self::LEVEL_STANDARD && $hasVerifiedIntroducer) {
+            $kycLevel = self::LEVEL_FULL;
+        }
+
+        if ($kycLevel === self::LEVEL_FULL && ($hasFamilyRelation || $hasAdditionalDocument)) {
+            $kycLevel = self::LEVEL_ENHANCED;
+        }
+
+        $this->update([
+            'primary_verified' => $primaryAddresses
+                + $primaryRelations
+                + $verifiedIntroducers
+                + $primaryDocuments,
+            'other_verified' => $otherAddresses + $otherRelations + $otherDocuments,
+            'kyc_level' => $kycLevel,
+        ]);
+
+        return $this;
     }
 
     public function canTransact(): bool
@@ -125,7 +256,7 @@ class KycProfile extends Model
     {
         return min(
             100,
-            (int) round(($this->verification_value / 15) * 100)
+            (int) round(($this->verificationValue / 15) * 100)
         );
     }
 

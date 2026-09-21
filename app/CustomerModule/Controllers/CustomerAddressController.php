@@ -81,6 +81,7 @@ class CustomerAddressController extends Controller
             'verification_status' => CustomerAddress::STATUS_VERIFIED,
             'verified_at' => now(),
         ]);
+        $customer->kycProfile?->recalculateVerificationCounts();
 
         return redirect()->back()->with('success', 'Address approved successfully.');
     }
@@ -101,6 +102,7 @@ class CustomerAddressController extends Controller
             'verified_at' => now(),
             'remarks' => $request->string('rejection_reason')->toString(),
         ]);
+        $customer->kycProfile?->recalculateVerificationCounts();
 
         return redirect()->back()->with('success', 'Address rejected successfully.');
     }

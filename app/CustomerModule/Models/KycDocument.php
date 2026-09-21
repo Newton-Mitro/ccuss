@@ -82,6 +82,20 @@ class KycDocument extends Model
     public const PEP_DECLARATION = 'PEP_DECLARATION';
     public const FATCA_FORM = 'FATCA_FORM';
 
+    public const PRIMARY_DOCUMENT_TYPES = [
+        self::PHOTO,
+        self::NATIONAL_ID,
+        self::SMART_NID,
+        self::PASSPORT,
+        self::DRIVING_LICENSE,
+        self::BIRTH_CERTIFICATE,
+        self::TRADE_LICENSE,
+        self::CERTIFICATE_OF_INCORPORATION,
+        self::MEMORANDUM_OF_ASSOCIATION,
+        self::ARTICLES_OF_ASSOCIATION,
+        self::PARTNERSHIP_DEED,
+    ];
+
     public const DOCUMENT_TYPES = [
         self::NATIONAL_ID,
         self::SMART_NID,

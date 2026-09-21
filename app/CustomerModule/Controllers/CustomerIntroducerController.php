@@ -187,9 +187,9 @@ class CustomerIntroducerController extends Controller
         $introducer->update([
             'verification_status' => $data['verification_status'],
             'remarks' => $data['remarks'],
-            'verified_by' => auth()->id(),
             'verified_at' => now(),
         ]);
+        $introducer->introducedCustomer?->kycProfile?->recalculateVerificationCounts();
 
         return response()->json([
             'message' => 'Verification status updated.',
@@ -216,9 +216,8 @@ class CustomerIntroducerController extends Controller
         $introducer->update([
             'verification_status' => CustomerIntroducer::STATUS_VERIFIED,
             'verified_at' => now(),
-            'verified_by' => auth()->id(),
-            'rejection_reason' => null, // reset if previously rejected
         ]);
+        $customer->kycProfile?->recalculateVerificationCounts();
 
         return redirect()->back()->with('success', 'Introducer approved successfully.');
     }
@@ -237,9 +236,9 @@ class CustomerIntroducerController extends Controller
         $introducer->update([
             'verification_status' => CustomerIntroducer::STATUS_REJECTED,
             'verified_at' => now(),
-            'verified_by' => auth()->id(),
-            'rejection_reason' => $request->rejection_reason,
+            'remarks' => $request->rejection_reason,
         ]);
+        $customer->kycProfile?->recalculateVerificationCounts();
 
         return redirect()->back()->with('success', 'Introducer rejected successfully.');
     }
