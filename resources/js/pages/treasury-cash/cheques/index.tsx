@@ -1,6 +1,6 @@
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { CheckSquare } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
@@ -52,6 +52,9 @@ export default function Index() {
         page: Number(filters.page) || 1,
         per_page: Number(filters.per_page) || 18,
     });
+    const [issueChequeId, setIssueChequeId] = useState<number | null>(null);
+    const [issueAmount, setIssueAmount] = useState('');
+    const [issuePayee, setIssuePayee] = useState('');
 
     useEffect(() => {
         const timer = setTimeout(
@@ -101,6 +104,7 @@ export default function Index() {
                                     'Payee',
                                     'Amount',
                                     'Status',
+                                    'Actions',
                                 ].map((header) => (
                                     <th
                                         key={header}
@@ -153,12 +157,181 @@ export default function Index() {
                                                 {cheque.status}
                                             </span>
                                         </td>
+                                        <td className="px-2 py-2">
+                                            {cheque.status === 'UNUSED' &&
+                                            issueChequeId === cheque.id ? (
+                                                <div className="flex min-w-56 gap-1">
+                                                    <Input
+                                                        className="h-8"
+                                                        placeholder="Amount"
+                                                        type="number"
+                                                        value={issueAmount}
+                                                        onChange={(event) =>
+                                                            setIssueAmount(
+                                                                event.target
+                                                                    .value,
+                                                            )
+                                                        }
+                                                    />
+                                                    <Input
+                                                        className="h-8"
+                                                        placeholder="Payee"
+                                                        value={issuePayee}
+                                                        onChange={(event) =>
+                                                            setIssuePayee(
+                                                                event.target
+                                                                    .value,
+                                                            )
+                                                        }
+                                                    />
+                                                    <button
+                                                        className="rounded bg-primary px-2 text-xs text-primary-foreground"
+                                                        onClick={() =>
+                                                            router.post(
+                                                                route(
+                                                                    'cheques.issue',
+                                                                    cheque.id,
+                                                                ),
+                                                                {
+                                                                    amount: issueAmount,
+                                                                    payee: issuePayee,
+                                                                },
+                                                                {
+                                                                    preserveScroll: true,
+                                                                },
+                                                            )
+                                                        }
+                                                    >
+                                                        Issue
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-wrap gap-1">
+                                                    {cheque.status ===
+                                                        'UNUSED' && (
+                                                        <button
+                                                            className="rounded border px-2 py-1 text-xs"
+                                                            onClick={() =>
+                                                                setIssueChequeId(
+                                                                    cheque.id,
+                                                                )
+                                                            }
+                                                        >
+                                                            Issue
+                                                        </button>
+                                                    )}
+                                                    {cheque.status ===
+                                                        'ISSUED' && (
+                                                        <button
+                                                            className="rounded border px-2 py-1 text-xs"
+                                                            onClick={() =>
+                                                                router.post(
+                                                                    route(
+                                                                        'cheques.present',
+                                                                        cheque.id,
+                                                                    ),
+                                                                    {},
+                                                                    {
+                                                                        preserveScroll: true,
+                                                                    },
+                                                                )
+                                                            }
+                                                        >
+                                                            Present
+                                                        </button>
+                                                    )}
+                                                    {cheque.status ===
+                                                        'PRESENTED' && (
+                                                        <>
+                                                            <button
+                                                                className="rounded border px-2 py-1 text-xs"
+                                                                onClick={() =>
+                                                                    router.post(
+                                                                        route(
+                                                                            'cheques.clear',
+                                                                            cheque.id,
+                                                                        ),
+                                                                        {},
+                                                                        {
+                                                                            preserveScroll: true,
+                                                                        },
+                                                                    )
+                                                                }
+                                                            >
+                                                                Clear
+                                                            </button>
+                                                            <button
+                                                                className="rounded border px-2 py-1 text-xs"
+                                                                onClick={() =>
+                                                                    router.post(
+                                                                        route(
+                                                                            'cheques.bounce',
+                                                                            cheque.id,
+                                                                        ),
+                                                                        {},
+                                                                        {
+                                                                            preserveScroll: true,
+                                                                        },
+                                                                    )
+                                                                }
+                                                            >
+                                                                Bounce
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                    {(cheque.status ===
+                                                        'ISSUED' ||
+                                                        cheque.status ===
+                                                            'PRESENTED') && (
+                                                        <button
+                                                            className="rounded border px-2 py-1 text-xs"
+                                                            onClick={() =>
+                                                                router.post(
+                                                                    route(
+                                                                        'cheques.stop',
+                                                                        cheque.id,
+                                                                    ),
+                                                                    {},
+                                                                    {
+                                                                        preserveScroll: true,
+                                                                    },
+                                                                )
+                                                            }
+                                                        >
+                                                            Stop
+                                                        </button>
+                                                    )}
+                                                    {(cheque.status ===
+                                                        'UNUSED' ||
+                                                        cheque.status ===
+                                                            'ISSUED') && (
+                                                        <button
+                                                            className="rounded border px-2 py-1 text-xs"
+                                                            onClick={() =>
+                                                                router.post(
+                                                                    route(
+                                                                        'cheques.cancel',
+                                                                        cheque.id,
+                                                                    ),
+                                                                    {},
+                                                                    {
+                                                                        preserveScroll: true,
+                                                                    },
+                                                                )
+                                                            }
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={8}
+                                        colSpan={9}
                                         className="px-4 py-10 text-center text-muted-foreground"
                                     >
                                         No cheques found for this organization.

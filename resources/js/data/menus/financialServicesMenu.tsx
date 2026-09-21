@@ -15,7 +15,7 @@ export const financialServicesMenu: SidebarItem[] = [
                 permission: ['financial.view'],
             },
             {
-                name: 'Deposit, Share & Loan Products',
+                name: 'Product & Policy Setup',
                 icon: <i className="fa-solid fa-boxes-stacked" />,
                 permission: ['financial.products.view'],
                 children_expanded: false,
@@ -35,7 +35,7 @@ export const financialServicesMenu: SidebarItem[] = [
                         permission: ['financial.products.create'],
                     },
                     {
-                        name: 'Product Policies',
+                        name: 'Policy Management',
                         icon: <i className="fa-solid fa-file-shield" />,
                         path: '/financial-product-policies',
                         match_path: 'financial-product-policies',
@@ -44,7 +44,7 @@ export const financialServicesMenu: SidebarItem[] = [
                 ],
             },
             {
-                name: 'Subledger Accounts',
+                name: 'Deposit, Share & Loan Accounts',
                 icon: <i className="fa-solid fa-piggy-bank" />,
                 permission: ['financial.accounts.view'],
                 children_expanded: false,
@@ -80,13 +80,13 @@ export const financialServicesMenu: SidebarItem[] = [
                 permission: ['financial.accounts.view'],
             },
             {
-                name: 'Posting & Transactions',
+                name: 'Accounting Posting',
                 icon: <i className="fa-solid fa-money-bill-transfer" />,
                 permission: ['financial.transactions.view'],
                 children_expanded: false,
                 children: [
                     {
-                        name: 'Transaction List',
+                        name: 'Posting Queue',
                         icon: <i className="fa-solid fa-list" />,
                         path: '/financial-transactions',
                         match_path: 'financial-transactions',

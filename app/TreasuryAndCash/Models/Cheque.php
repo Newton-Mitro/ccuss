@@ -6,6 +6,7 @@ use App\TreasuryAndCash\Models\ChequeBook;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Cheque extends Model
 {
@@ -36,5 +37,10 @@ class Cheque extends Model
     public function chequeBook(): BelongsTo
     {
         return $this->belongsTo(ChequeBook::class);
+    }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(ChequeTransaction::class);
     }
 }

@@ -24,6 +24,12 @@ class ChequeBook extends Model
         'status',
     ];
 
+    public function canIssue(): bool
+    {
+        return in_array($this->status, ['AVAILABLE', 'IN_USE'], true)
+            && $this->cheques()->where('status', 'UNUSED')->exists();
+    }
+
     protected $casts = [
         'start_number' => 'integer',
         'end_number' => 'integer',

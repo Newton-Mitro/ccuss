@@ -8,11 +8,19 @@ export const treasuryAndCashMenu: SidebarItem[] = [
         permission: ['treasury.view'],
         children: [
             {
-                name: 'Branch Days',
+                name: 'Branch Operations',
                 icon: <i className="fa-solid fa-calendar-day" />,
-                path: '/branch-days',
-                match_path: 'branch-days',
+                children_expanded: false,
                 permission: ['branch_days.view'],
+                children: [
+                    {
+                        name: 'Open & Close Branch Day',
+                        icon: <i className="fa-solid fa-calendar-day" />,
+                        path: '/branch-days',
+                        match_path: 'branch-days',
+                        permission: ['branch_days.view'],
+                    },
+                ],
             },
             {
                 name: 'Cash Management',

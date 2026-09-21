@@ -10,6 +10,7 @@ use App\TreasuryAndCash\Models\Bank;
 use App\TreasuryAndCash\Models\BankAccount;
 use App\TreasuryAndCash\Models\Cheque;
 use App\TreasuryAndCash\Models\ChequeBook;
+use App\TreasuryAndCash\Application\ChequeService;
 
 function grantChequeViewPermission(User $user): void
 {
@@ -122,4 +123,34 @@ it('does not expose cheque pages without permission', function () {
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('cheques.index'))
         ->assertForbidden();
+});
+
+it('creates cheque leaves and enforces the cheque lifecycle', function () {
+    $fixture = chequeFixture();
+    $service = app(ChequeService::class);
+
+    $book = $service->createBook([
+        'bank_account_id' => $fixture['bankAccount']->id,
+        'book_no' => 'BOOK-002',
+        'prefix' => 'NEW-',
+        'start_number' => 10,
+        'end_number' => 12,
+        'issued_date' => '2026-09-21',
+    ], $fixture['user']->id);
+
+    expect($book->cheques)->toHaveCount(3);
+
+    $cheque = $book->cheques->first();
+    $service->transition($cheque, 'issue', $fixture['user']->id, [
+        'amount' => 1250,
+        'payee' => 'Supplier',
+    ]);
+    $service->transition($cheque->fresh(), 'present', $fixture['user']->id);
+    $service->transition($cheque->fresh(), 'clear', $fixture['user']->id);
+
+    expect($cheque->fresh()->status)->toBe('CLEARED')
+        ->and($cheque->transactions()->count())->toBe(3);
+
+    expect(fn() => $service->transition($cheque->fresh(), 'bounce', $fixture['user']->id))
+        ->toThrow(RuntimeException::class);
 });

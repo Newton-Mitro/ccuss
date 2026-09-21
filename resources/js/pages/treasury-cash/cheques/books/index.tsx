@@ -1,5 +1,5 @@
-import { Head, useForm, usePage } from '@inertiajs/react';
-import { BookOpenCheck } from 'lucide-react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { BookOpenCheck, Plus } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../../components/data-table-pagination';
@@ -72,6 +72,12 @@ export default function Index() {
                     title="Cheque Books"
                     description="Review cheque books assigned to the active organization bank accounts."
                 />
+                <Link
+                    href={route('cheque-books.create')}
+                    className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground"
+                >
+                    <Plus className="h-4 w-4" /> Create cheque book
+                </Link>
                 <Input
                     className="w-full bg-card sm:w-80"
                     placeholder="Search book, account, or bank..."

@@ -101,7 +101,22 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::get('/cheque-books', [ChequeController::class, 'books'])
             ->middleware('permission:cheque_books.view')
             ->name('cheque-books.index');
+        Route::get('/cheque-books/create', [ChequeController::class, 'createBook'])
+            ->middleware('permission:cheque_books.create')
+            ->name('cheque-books.create');
+        Route::post('/cheque-books', [ChequeController::class, 'storeBook'])
+            ->middleware('permission:cheque_books.create')
+            ->name('cheque-books.store');
         Route::get('/cheques', [ChequeController::class, 'cheques'])
             ->middleware('permission:cheques.view')
             ->name('cheques.index');
+        Route::put('/cheques/{cheque}', [ChequeController::class, 'update'])
+            ->middleware('permission:cheques.issue')
+            ->name('cheques.update');
+        Route::post('/cheques/{cheque}/issue', [ChequeController::class, 'issue'])->name('cheques.issue');
+        Route::post('/cheques/{cheque}/present', [ChequeController::class, 'present'])->name('cheques.present');
+        Route::post('/cheques/{cheque}/clear', [ChequeController::class, 'clear'])->name('cheques.clear');
+        Route::post('/cheques/{cheque}/bounce', [ChequeController::class, 'bounce'])->name('cheques.bounce');
+        Route::post('/cheques/{cheque}/stop', [ChequeController::class, 'stop'])->name('cheques.stop');
+        Route::post('/cheques/{cheque}/cancel', [ChequeController::class, 'cancel'])->name('cheques.cancel');
     });
