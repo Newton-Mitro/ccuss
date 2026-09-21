@@ -255,7 +255,7 @@ export default function Index() {
                         setData('page', 1);
                     }}
                 />
-                <div className="overflow-auto rounded-md border bg-card">
+                <div className="h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card">
                     <table className="w-full min-w-240 border-collapse text-sm">
                         <thead className="bg-muted text-muted-foreground">
                             <tr>

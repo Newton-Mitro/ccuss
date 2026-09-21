@@ -199,7 +199,7 @@ export default function Index() {
                     />
                 </div>
 
-                <div className="overflow-auto rounded-md border bg-card">
+                <div className="h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card">
                     <table className="w-full min-w-180 border-collapse text-sm">
                         <thead className="bg-muted text-muted-foreground">
                             <tr>

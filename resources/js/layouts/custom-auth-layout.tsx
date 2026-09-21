@@ -18,9 +18,10 @@ import {
     ChevronsUp,
     InfoIcon,
     LogOut,
-    Menu,
     Monitor,
     Moon,
+    PanelLeftClose,
+    PanelLeftOpen,
     Search,
     Sun,
     TriangleAlert,
@@ -176,42 +177,56 @@ export default function CustomAuthLayout({
      * Render
      * ------------------------------------------------------------------ */
     return (
-        <div className="app-shell flex h-screen bg-background text-foreground select-none">
+        <div className="app-shell relative flex h-screen overflow-hidden bg-background text-foreground select-none">
             {/* Sidebar */}
             <aside
                 className={cn(
-                    'app-sidebar flex flex-col border-r border-sidebar-border/80 bg-sidebar text-sidebar-foreground shadow-[inset_-1px_0_0_rgba(255,255,255,0.03)] transition-all duration-300 print:hidden',
+                    'app-sidebar z-40 flex h-screen shrink-0 flex-col overflow-hidden border-r border-sidebar-border/80 bg-sidebar text-sidebar-foreground shadow-xl shadow-black/10 transition-all duration-300 print:hidden',
+                    'absolute top-0 left-0',
                     sidebarOpen ? 'w-72' : 'w-16',
                 )}
             >
                 {/* Logo */}
-                <Link
-                    href={route('dashboard')}
-                    className="flex h-16 items-center gap-2 border-b border-sidebar-border/80 bg-gradient-to-r from-sidebar to-sidebar/80 pl-3"
-                >
-                    <AppLogo className="h-10 w-10 rounded-full border p-1" />
-
-                    <span
-                        className={cn(
-                            'font-semibold transition-opacity',
-                            sidebarOpen ? 'inline-block' : 'hidden w-0',
-                        )}
+                <div className="flex h-16 items-center gap-2 border-b border-sidebar-border/80 bg-linear-to-r from-sidebar to-sidebar/80 pl-3">
+                    <Link
+                        href={route('dashboard')}
+                        className="flex min-w-0 items-center gap-2"
                     >
-                        <div className="">
-                            <h1 className="-mb-1 text-lg font-semibold">
-                                <span className="text-primary">
-                                    {import.meta.env.VITE_APP_NAME_FIRST}
-                                </span>
-                                <span className="text-sidebar-foreground/90">
-                                    {import.meta.env.VITE_APP_NAME_SECOND}
-                                </span>
-                            </h1>
-                            <p className="text-xs font-light text-sidebar-foreground/70">
-                                {import.meta.env.VITE_APP_SHORT_TAG}
-                            </p>
-                        </div>
-                    </span>
-                </Link>
+                        <AppLogo className="h-10 w-10 rounded-full border p-1" />
+
+                        <span
+                            className={cn(
+                                'font-semibold transition-opacity',
+                                sidebarOpen ? 'inline-block' : 'hidden w-0',
+                            )}
+                        >
+                            <div className="">
+                                <h1 className="-mb-1 text-lg font-semibold">
+                                    <span className="text-primary">
+                                        {import.meta.env.VITE_APP_NAME_FIRST}
+                                    </span>
+                                    <span className="text-sidebar-foreground/90">
+                                        {import.meta.env.VITE_APP_NAME_SECOND}
+                                    </span>
+                                </h1>
+                                <p className="text-xs font-light text-sidebar-foreground/70">
+                                    {import.meta.env.VITE_APP_SHORT_TAG}
+                                </p>
+                            </div>
+                        </span>
+                    </Link>
+                    {sidebarOpen && (
+                        <button
+                            type="button"
+                            onClick={() => setSidebarOpen(false)}
+                            className="ml-auto rounded-lg p-2 text-sidebar-foreground/70 transition-colors hover:bg-sidebar-hover hover:text-sidebar-foreground"
+                            aria-label="Close sidebar"
+                            title="Close sidebar"
+                        >
+                            <PanelLeftClose className="h-4 w-4" />
+                        </button>
+                    )}
+                </div>
 
                 {/* Search + controls */}
                 <div
@@ -358,14 +373,18 @@ export default function CustomAuthLayout({
             </aside>
 
             {/* Main */}
-            <div className="flex flex-1 flex-col">
+            <div className="flex min-w-0 flex-1 flex-col md:pl-16">
                 <header className="flex h-16 items-center justify-between border-b border-border/80 bg-sidebar/80 px-4 text-sidebar-foreground shadow-sm backdrop-blur-xl md:px-6 print:hidden">
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => setSidebarOpen((v) => !v)}
                             className="rounded-xl border border-border/70 bg-card/60 p-2 transition-colors hover:bg-muted"
                         >
-                            <Menu size={18} />
+                            {sidebarOpen ? (
+                                <PanelLeftClose size={18} />
+                            ) : (
+                                <PanelLeftOpen size={18} />
+                            )}
                         </button>
                         {breadcrumbs && (
                             <Breadcrumbs breadcrumbs={breadcrumbs} />
