@@ -1,5 +1,10 @@
-import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { CheckCircle2, ReceiptText } from 'lucide-react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import {
+    ArrowDownToLine,
+    ArrowUpFromLine,
+    CheckCircle2,
+    ReceiptText,
+} from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../../components/data-table-pagination';
@@ -50,6 +55,8 @@ export default function Index() {
         ),
     ]);
     const canPost = permissions.has('petty_cash.expense');
+    const canFund = permissions.has('petty_cash.create');
+    const canExpense = permissions.has('petty_cash.expense');
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -74,10 +81,38 @@ export default function Index() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Petty Cash Transactions" />
             <div className="space-y-4 text-foreground">
-                <HeadingSmall
-                    title="Petty Cash Transactions"
-                    description="Review and post pending petty cash funding and expenses."
-                />
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <HeadingSmall
+                        title="Petty Cash Transactions"
+                        description="Review and post pending petty cash funding and expenses."
+                    />
+                    <div className="flex flex-wrap gap-2">
+                        {canFund && (
+                            <Button asChild variant="outline">
+                                <Link
+                                    href={route(
+                                        'petty-cash-transactions.funding',
+                                    )}
+                                >
+                                    <ArrowDownToLine className="h-4 w-4" />
+                                    Add funding
+                                </Link>
+                            </Button>
+                        )}
+                        {canExpense && (
+                            <Button asChild>
+                                <Link
+                                    href={route(
+                                        'petty-cash-transactions.expense',
+                                    )}
+                                >
+                                    <ArrowUpFromLine className="h-4 w-4" />
+                                    Add expense
+                                </Link>
+                            </Button>
+                        )}
+                    </div>
+                </div>
                 <Input
                     className="w-full bg-card sm:w-80"
                     placeholder="Search transaction, fund, payee, or status..."

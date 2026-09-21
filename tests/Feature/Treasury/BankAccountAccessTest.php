@@ -8,6 +8,7 @@ use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
 use App\TreasuryAndCash\Models\Bank;
 use App\TreasuryAndCash\Models\BankAccount;
+use App\TreasuryAndCash\Models\BankTransaction;
 
 function grantBankingViewPermission(User $user): void
 {
@@ -26,6 +27,29 @@ function grantBankingViewPermission(User $user): void
     );
 
     $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+}
+
+function grantBankTransactionPermissions(User $user): void
+{
+    $role = Role::firstOrCreate(
+        ['slug' => 'bank_transactions_test'],
+        ['name' => 'Bank Transactions Test'],
+    );
+
+    $permissions = collect([
+        ['slug' => 'bank_transactions.view', 'name' => 'View Bank Transactions', 'action' => 'view'],
+        ['slug' => 'bank_transactions.create', 'name' => 'Create Bank Transactions', 'action' => 'create'],
+    ])->map(fn(array $permission) => Permission::firstOrCreate(
+            ['slug' => $permission['slug']],
+            [
+                'module' => 'bank_transactions',
+                'name' => $permission['name'],
+                'action' => $permission['action'],
+            ],
+        ));
+
+    $role->permissions()->syncWithoutDetaching($permissions->pluck('id'));
     $user->roles()->syncWithoutDetaching([$role->id]);
 }
 
@@ -87,4 +111,41 @@ it('does not expose bank accounts without banking permission', function () {
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('bank-accounts.index'))
         ->assertForbidden();
+});
+
+it('creates and posts a bank transaction for an open branch day', function () {
+    $fixture = bankAccountFixture();
+    $branchDay = \App\TreasuryAndCash\Models\BranchDay::create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'business_date' => '2026-09-21',
+        'status' => 'OPEN',
+        'opened_at' => now(),
+        'opened_by' => $fixture['user']->id,
+    ]);
+    grantBankTransactionPermissions($fixture['user']);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('bank-transactions.store'), [
+            'bank_account_id' => $fixture['account']->id,
+            'type' => 'DEPOSIT',
+            'amount' => 500,
+            'transaction_date' => '2026-09-21',
+            'reference' => 'DEP-001',
+        ])
+        ->assertRedirect(route('bank-transactions.index'));
+
+    $transaction = BankTransaction::query()->firstOrFail();
+
+    expect($transaction->status)->toBe('PENDING')
+        ->and($transaction->branch_day_id)->toBe($branchDay->id);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('bank-transactions.post', $transaction))
+        ->assertRedirect(route('bank-transactions.index'));
+
+    expect($transaction->fresh()->status)->toBe('POSTED')
+        ->and($transaction->fresh()->balance_after)->toBe('25500.0000');
 });

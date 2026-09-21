@@ -147,13 +147,6 @@ export const generalAccountingMenu: SidebarItem[] = [
                         permission: ['accounting.budgets.view'],
                     },
                     {
-                        name: 'Create Budget',
-                        icon: <i className="fa-solid fa-plus" />,
-                        path: '/budgets/create',
-                        match_path: 'budgets/create',
-                        permission: ['accounting.budgets.create'],
-                    },
-                    {
                         name: 'Budget Entries',
                         icon: <i className="fa-solid fa-table-list" />,
                         path: '/budgets/entries',

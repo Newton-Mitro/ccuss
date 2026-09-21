@@ -28,13 +28,6 @@ export const financialServicesMenu: SidebarItem[] = [
                         permission: ['financial.products.view'],
                     },
                     {
-                        name: 'Create Product',
-                        icon: <i className="fa-solid fa-plus" />,
-                        path: '/financial-products/create',
-                        match_path: 'financial-products/create',
-                        permission: ['financial.products.create'],
-                    },
-                    {
                         name: 'Policy Management',
                         icon: <i className="fa-solid fa-file-shield" />,
                         path: '/financial-product-policies',
@@ -55,13 +48,6 @@ export const financialServicesMenu: SidebarItem[] = [
                         path: '/financial-accounts',
                         match_path: 'financial-accounts',
                         permission: ['financial.accounts.view'],
-                    },
-                    {
-                        name: 'Open Account',
-                        icon: <i className="fa-solid fa-plus" />,
-                        path: '/financial-accounts/create',
-                        match_path: 'financial-accounts/create',
-                        permission: ['financial.accounts.create'],
                     },
                     {
                         name: 'Account Statements',

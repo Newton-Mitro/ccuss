@@ -170,6 +170,18 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::post('/bank-accounts', [BankingController::class, 'storeAccount'])
             ->middleware('permission:bank_accounts.create')
             ->name('bank-accounts.store');
+        Route::get('/bank-transactions', [BankingController::class, 'transactions'])
+            ->middleware('permission:bank_transactions.view')
+            ->name('bank-transactions.index');
+        Route::get('/bank-transactions/create', [BankingController::class, 'createTransaction'])
+            ->middleware('permission:bank_transactions.create')
+            ->name('bank-transactions.create');
+        Route::post('/bank-transactions', [BankingController::class, 'storeTransaction'])
+            ->middleware('permission:bank_transactions.create')
+            ->name('bank-transactions.store');
+        Route::post('/bank-transactions/{transaction}/post', [BankingController::class, 'postTransaction'])
+            ->middleware('permission:bank_transactions.create')
+            ->name('bank-transactions.post');
         Route::get('/cheque-books', [ChequeController::class, 'books'])
             ->middleware('permission:cheque_books.view')
             ->name('cheque-books.index');

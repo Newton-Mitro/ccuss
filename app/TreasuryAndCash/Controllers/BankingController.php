@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\FinancialServices\Models\FinancialAccount;
 use App\SystemAdministration\Models\Branch;
 use App\TreasuryAndCash\Application\BankingDataService;
+use App\TreasuryAndCash\Application\BankTransactionService;
 use App\TreasuryAndCash\Models\Bank;
 use App\TreasuryAndCash\Models\BankAccount;
 use App\TreasuryAndCash\Requests\StoreBankRequest;
 use App\TreasuryAndCash\Requests\StoreBankAccountRequest;
+use App\TreasuryAndCash\Requests\StoreBankTransactionRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -19,11 +21,14 @@ class BankingController extends Controller
 {
     public function __construct(
         private readonly BankingDataService $bankingDataService,
+        private readonly BankTransactionService $bankTransactionService,
     ) {
         $this->middleware('permission:banks.view')->only(['banks']);
         $this->middleware('permission:banks.create')->only(['create', 'store']);
         $this->middleware('permission:bank_accounts.view')->only(['accounts']);
         $this->middleware('permission:bank_accounts.create')->only(['createAccount', 'storeAccount']);
+        $this->middleware('permission:bank_transactions.view')->only(['transactions']);
+        $this->middleware('permission:bank_transactions.create')->only(['createTransaction', 'storeTransaction', 'postTransaction']);
     }
 
     public function banks(Request $request): Response
@@ -104,5 +109,66 @@ class BankingController extends Controller
         ]);
 
         return redirect()->route('bank-accounts.index')->with('success', 'Bank account created successfully.');
+    }
+
+    public function transactions(Request $request): Response
+    {
+        return Inertia::render('treasury-cash/banking/transactions/index', [
+            'transactions' => $this->bankingDataService->listTransactions(
+                $request->attributes->get('active_organization')->id,
+                $request->input('search'),
+                $request->input('per_page', 18),
+            ),
+            'filters' => $request->only(['search', 'per_page', 'page']),
+        ]);
+    }
+
+    public function createTransaction(Request $request): Response
+    {
+        $organizationId = $request->attributes->get('active_organization')->id;
+
+        return Inertia::render('treasury-cash/banking/transactions/create', [
+            'bank_accounts' => BankAccount::query()
+                ->where('organization_id', $organizationId)
+                ->where('status', 'ACTIVE')
+                ->orderBy('account_name')
+                ->get(['id', 'account_name', 'account_number']),
+        ]);
+    }
+
+    public function storeTransaction(StoreBankTransactionRequest $request): RedirectResponse
+    {
+        $user = $request->user();
+        abort_unless($user?->branch_id, 422, 'A branch assignment is required for bank transactions.');
+
+        try {
+            $this->bankTransactionService->create(
+                $request->attributes->get('active_organization')->id,
+                $user->branch_id,
+                $request->validated(),
+            );
+        } catch (\RuntimeException $exception) {
+            return back()->withInput()->with('error', $exception->getMessage());
+        }
+
+        return redirect()->route('bank-transactions.index')->with('success', 'Bank transaction created successfully.');
+    }
+
+    public function postTransaction(Request $request, \App\TreasuryAndCash\Models\BankTransaction $transaction): RedirectResponse
+    {
+        $user = $request->user();
+        abort_unless($user?->branch_id, 422, 'A branch assignment is required for bank transactions.');
+
+        try {
+            $this->bankTransactionService->post(
+                $request->attributes->get('active_organization')->id,
+                $user->branch_id,
+                $transaction->id,
+            );
+        } catch (\RuntimeException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
+
+        return redirect()->route('bank-transactions.index')->with('success', 'Bank transaction posted successfully.');
     }
 }
