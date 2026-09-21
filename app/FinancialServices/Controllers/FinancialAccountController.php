@@ -50,7 +50,7 @@ class FinancialAccountController extends Controller
 
         return Inertia::render('financial-services/accounts/form', [
             'products' => FinancialProduct::query()->where('organization_id', $organizationId)->where('status', true)->orderBy('code')->get(['id', 'code', 'name', 'category']),
-            'customers' => Customer::query()->where('organization_id', $organizationId)->orderBy('name')->get(['id', 'customer_no', 'name']),
+            'customers' => Customer::query()->where('organization_id', $organizationId)->orderBy('name')->get(['id', 'customer_no', 'name', 'type', 'dob']),
         ]);
     }
 

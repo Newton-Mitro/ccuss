@@ -5,6 +5,8 @@ namespace App\FinancialServices\Application;
 use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
+use App\FinancialServices\Models\DepositAccount;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
 use RuntimeException;
 
@@ -28,7 +30,44 @@ class FinancialAccountService
         }
         $data['status'] = 'PENDING';
 
-        return FinancialAccount::create($data);
+        $jointHolderIds = $data['joint_holder_ids'] ?? [];
+        $guardianCustomerId = $data['guardian_customer_id'] ?? null;
+        unset($data['joint_holder_ids'], $data['guardian_customer_id']);
+
+        return DB::transaction(function () use ($data, $product, $jointHolderIds, $guardianCustomerId, $organizationId): FinancialAccount {
+            $account = FinancialAccount::create($data);
+
+            if ($product && in_array($product->category, ['SAVINGS', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT'], true)) {
+                $depositAccount = DepositAccount::create([
+                    'customer_id' => $account->holder_id,
+                    'financial_account_id' => $account->id,
+                    'financial_product_id' => $product->id,
+                    'account_kind' => $product->category,
+                    'status' => 'PENDING',
+                ]);
+
+                $primary = Customer::query()
+                    ->where('organization_id', $organizationId)
+                    ->findOrFail($account->holder_id);
+                $guardian = $guardianCustomerId
+                    ? Customer::query()->where('organization_id', $organizationId)->findOrFail($guardianCustomerId)
+                    : null;
+                $depositAccount->addHolder($primary, 'PRIMARY', $guardian);
+
+                foreach ($jointHolderIds as $jointHolderId) {
+                    if ((int) $jointHolderId === (int) $primary->id) {
+                        throw new RuntimeException('The primary holder cannot also be a joint holder.');
+                    }
+
+                    $jointHolder = Customer::query()
+                        ->where('organization_id', $organizationId)
+                        ->findOrFail($jointHolderId);
+                    $depositAccount->addHolder($jointHolder);
+                }
+            }
+
+            return $account;
+        });
     }
 
     public function activate(FinancialAccount $account): FinancialAccount

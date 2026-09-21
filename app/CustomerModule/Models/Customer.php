@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Customer extends Model
@@ -180,6 +181,16 @@ class Customer extends Model
     public function loanAccounts(): HasMany
     {
         return $this->hasMany(LoanAccount::class);
+    }
+
+    public function heldDepositAccounts(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            DepositAccount::class,
+            'deposit_account_holders',
+        )
+            ->withPivot(['role', 'ownership_percent', 'guardian_customer_id'])
+            ->withTimestamps();
     }
 
     public function photo(): HasOne

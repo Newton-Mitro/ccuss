@@ -6,7 +6,7 @@ import {
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { FileText, ShieldCheck } from 'lucide-react';
+import { Edit2, FileText, ShieldCheck } from 'lucide-react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 
@@ -109,17 +109,29 @@ export default function ProductPoliciesIndex() {
                                         {product.policy?.version ?? '-'}
                                     </td>
                                     <td className="px-2 py-1">
-                                        <StatusBadge
-                                            tone={
-                                                product.policy?.status ===
-                                                'ACTIVE'
-                                                    ? 'success'
-                                                    : 'neutral'
-                                            }
-                                        >
-                                            {product.policy?.status ??
-                                                'MISSING'}
-                                        </StatusBadge>
+                                        <div className="flex items-center justify-between gap-2">
+                                            <StatusBadge
+                                                tone={
+                                                    product.policy?.status ===
+                                                    'ACTIVE'
+                                                        ? 'success'
+                                                        : 'neutral'
+                                                }
+                                            >
+                                                {product.policy?.status ??
+                                                    'MISSING'}
+                                            </StatusBadge>
+                                            <Link
+                                                href={route(
+                                                    'financial-product-policies.edit',
+                                                    product.id,
+                                                )}
+                                                title="Configure policy"
+                                                className="text-muted-foreground hover:text-foreground"
+                                            >
+                                                <Edit2 className="h-4 w-4" />
+                                            </Link>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

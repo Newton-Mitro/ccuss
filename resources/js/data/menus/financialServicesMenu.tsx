@@ -15,13 +15,13 @@ export const financialServicesMenu: SidebarItem[] = [
                 permission: ['financial.view'],
             },
             {
-                name: 'Products',
+                name: 'Deposit, Share & Loan Products',
                 icon: <i className="fa-solid fa-boxes-stacked" />,
                 permission: ['financial.products.view'],
                 children_expanded: false,
                 children: [
                     {
-                        name: 'Product List',
+                        name: 'Product Catalog',
                         icon: <i className="fa-solid fa-list" />,
                         path: '/financial-products',
                         match_path: 'financial-products',
@@ -44,13 +44,13 @@ export const financialServicesMenu: SidebarItem[] = [
                 ],
             },
             {
-                name: 'Financial Accounts',
+                name: 'Subledger Accounts',
                 icon: <i className="fa-solid fa-piggy-bank" />,
                 permission: ['financial.accounts.view'],
                 children_expanded: false,
                 children: [
                     {
-                        name: 'Account List',
+                        name: 'All Accounts',
                         icon: <i className="fa-solid fa-list" />,
                         path: '/financial-accounts',
                         match_path: 'financial-accounts',
@@ -73,14 +73,14 @@ export const financialServicesMenu: SidebarItem[] = [
                 ],
             },
             {
-                name: 'Customer Collection',
+                name: 'Customer Collections',
                 icon: <i className="fa-solid fa-hand-holding-dollar" />,
                 path: '/customer-collection',
                 match_path: 'customer-collection',
                 permission: ['financial.accounts.view'],
             },
             {
-                name: 'Transactions',
+                name: 'Posting & Transactions',
                 icon: <i className="fa-solid fa-money-bill-transfer" />,
                 permission: ['financial.transactions.view'],
                 children_expanded: false,
@@ -130,7 +130,7 @@ export const financialServicesMenu: SidebarItem[] = [
                 ],
             },
             {
-                name: 'Reports',
+                name: 'Financial Reports',
                 icon: <i className="fa-solid fa-chart-line" />,
                 permission: ['financial.reports.view'],
                 children_expanded: false,

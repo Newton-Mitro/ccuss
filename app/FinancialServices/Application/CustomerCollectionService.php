@@ -17,6 +17,7 @@ class CustomerCollectionService
                     ->orWhere('name', 'like', "%{$search}%")
                     ->orWhere('primary_phone', 'like', "%{$search}%")
                     ->orWhereHas('depositAccounts.financialAccount', fn(Builder $account) => $account->where('account_no', 'like', "%{$search}%"))
+                    ->orWhereHas('heldDepositAccounts.financialAccount', fn(Builder $account) => $account->where('account_no', 'like', "%{$search}%"))
                     ->orWhereHas('loanAccounts', fn(Builder $loan) => $loan->where('loan_no', 'like', "%{$search}%"));
             })
             ->orderBy('name')
@@ -35,6 +36,10 @@ class CustomerCollectionService
     {
         $customer->load([
             'depositAccounts.financialAccount.product',
+            'heldDepositAccounts.financialAccount.product',
+            'heldDepositAccounts.shareAccount',
+            'heldDepositAccounts.fixedDeposit',
+            'heldDepositAccounts.recurringDeposit.installments',
             'depositAccounts.shareAccount',
             'depositAccounts.fixedDeposit',
             'depositAccounts.recurringDeposit.installments',
@@ -46,17 +51,21 @@ class CustomerCollectionService
 
         return [
             'customer' => $customer->only(['id', 'customer_no', 'name', 'primary_phone', 'primary_email']),
-            'deposit_accounts' => $customer->depositAccounts->map(fn($account): array => [
-                'id' => $account->id,
-                'account_no' => $account->financialAccount?->account_no,
-                'product' => $account->financialAccount?->product?->name,
-                'account_kind' => $account->account_kind,
-                'status' => $account->status,
-                'balance' => $account->financialAccount?->balance,
-                'fine_total' => $account->financialAccount?->fines()->whereIn('status', ['ASSESSED', 'POSTED', 'PARTIALLY_PAID'])->sum('assessed_amount'),
-                'fixed_deposit' => $account->fixedDeposit,
-                'recurring_deposit' => $account->recurringDeposit,
-            ])->values()->all(),
+            'deposit_accounts' => $customer->depositAccounts
+                ->concat($customer->heldDepositAccounts)
+                ->unique('id')
+                ->values()
+                ->map(fn($account): array => [
+                    'id' => $account->id,
+                    'account_no' => $account->financialAccount?->account_no,
+                    'product' => $account->financialAccount?->product?->name,
+                    'account_kind' => $account->account_kind,
+                    'status' => $account->status,
+                    'balance' => $account->financialAccount?->balance,
+                    'fine_total' => $account->financialAccount?->fines()->whereIn('status', ['ASSESSED', 'POSTED', 'PARTIALLY_PAID'])->sum('assessed_amount'),
+                    'fixed_deposit' => $account->fixedDeposit,
+                    'recurring_deposit' => $account->recurringDeposit,
+                ])->all(),
             'loan_accounts' => $customer->loanAccounts->map(fn($loan): array => [
                 'id' => $loan->id,
                 'loan_no' => $loan->loan_no,

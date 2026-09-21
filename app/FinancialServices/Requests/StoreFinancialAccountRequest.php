@@ -29,7 +29,7 @@ class StoreFinancialAccountRequest extends FormRequest
             ],
             'holder_type' => ['nullable', Rule::in(['customer'])],
             'holder_id' => [
-                'nullable',
+                'required_if:account_type,SAVINGS,FIXED_DEPOSIT,RECURRING_DEPOSIT,SHARE,LOAN',
                 'integer',
                 Rule::exists('customers', 'id')->where(fn($query) => $query->where('organization_id', $organizationId)),
             ],
@@ -37,6 +37,17 @@ class StoreFinancialAccountRequest extends FormRequest
             'name' => ['nullable', 'string', 'max:200'],
             'account_type' => ['required', Rule::in(['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT', 'LOAN', 'CASH', 'BANK', 'OTHER'])],
             'metadata' => ['nullable', 'array'],
+            'joint_holder_ids' => ['nullable', 'array'],
+            'joint_holder_ids.*' => [
+                'integer',
+                'distinct',
+                Rule::exists('customers', 'id')->where(fn($query) => $query->where('organization_id', $organizationId)),
+            ],
+            'guardian_customer_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('customers', 'id')->where(fn($query) => $query->where('organization_id', $organizationId)),
+            ],
         ];
     }
 }

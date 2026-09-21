@@ -24,6 +24,18 @@ return new class extends Migration {
             $table->index(['financial_product_id', 'status']);
         });
 
+        Schema::create('deposit_account_holders', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('deposit_account_id')->constrained('deposit_accounts')->cascadeOnDelete();
+            $table->foreignId('customer_id')->constrained('customers')->restrictOnDelete();
+            $table->enum('role', ['PRIMARY', 'JOINT'])->default('JOINT');
+            $table->decimal('ownership_percent', 8, 4)->default(100);
+            $table->foreignId('guardian_customer_id')->nullable()->constrained('customers')->restrictOnDelete();
+            $table->timestamps();
+            $table->unique(['deposit_account_id', 'customer_id'], 'deposit_account_holder_unique');
+            $table->index(['customer_id', 'role']);
+        });
+
         Schema::create('share_accounts', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('deposit_account_id')->unique()->constrained('deposit_accounts')->cascadeOnDelete();
@@ -55,6 +67,7 @@ return new class extends Migration {
     {
         Schema::dropIfExists('deposit_nominees');
         Schema::dropIfExists('share_accounts');
+        Schema::dropIfExists('deposit_account_holders');
         Schema::dropIfExists('deposit_accounts');
     }
 };

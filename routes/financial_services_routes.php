@@ -25,6 +25,10 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
         ->name('financial-products.show');
     Route::get('/financial-product-policies', [FinancialProductPolicyController::class, 'index'])
         ->name('financial-product-policies.index');
+    Route::get('/financial-products/{financial_product}/policy/edit', [FinancialProductPolicyController::class, 'edit'])
+        ->name('financial-product-policies.edit');
+    Route::post('/financial-products/{financial_product}/policy', [FinancialProductPolicyController::class, 'store'])
+        ->name('financial-product-policies.store');
 
     Route::get('/financial-accounts', [FinancialAccountController::class, 'index'])->name('financial-accounts.index');
     Route::get('/financial-accounts/create', [FinancialAccountController::class, 'create'])->name('financial-accounts.create');

@@ -10,6 +10,9 @@ use App\CustomerModule\Models\CustomerFamilyRelation;
 use App\CustomerModule\Models\CustomerIntroducer;
 use App\CustomerModule\Models\KycDocument;
 use App\CustomerModule\Models\KycProfile;
+use App\FinancialServices\Models\DepositAccount;
+use App\FinancialServices\Models\FinancialAccount;
+use App\FinancialServices\Models\FinancialProduct;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use Illuminate\Http\UploadedFile;
@@ -382,4 +385,69 @@ test('organization kyc uses business registration documents and ignores family r
 
     expect($profile->fresh()->kyc_level)->toBe(KycProfile::LEVEL_BASIC)
         ->and($profile->fresh()->primary_verified)->toBe(2);
+});
+
+test('deposit accounts support joint, minor, and organization holders', function () {
+    $organizationRecord = Organization::factory()->create();
+    $branch = Branch::factory()->create(['organization_id' => $organizationRecord->id]);
+    $customerAttributes = [
+        'organization_id' => $organizationRecord->id,
+        'branch_id' => $branch->id,
+    ];
+    $primary = Customer::factory()->individualMale()->create($customerAttributes);
+    $joint = Customer::factory()->individualFemale()->create($customerAttributes);
+    $minor = Customer::factory()->individualMale()->create(array_merge($customerAttributes, [
+        'dob' => now()->subYears(12)->toDateString(),
+    ]));
+    $guardian = Customer::factory()->individualFemale()->create($customerAttributes);
+    $organization = Customer::factory()->organization()->create($customerAttributes);
+
+    $product = FinancialProduct::factory()->create([
+        'organization_id' => $primary->organization_id,
+        'category' => 'SAVINGS',
+    ]);
+
+    $financialAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $primary->organization_id,
+        'financial_product_id' => $product->id,
+        'account_type' => 'SAVINGS',
+    ]);
+
+    $account = DepositAccount::create([
+        'customer_id' => $primary->id,
+        'financial_account_id' => $financialAccount->id,
+        'financial_product_id' => $product->id,
+        'account_kind' => 'SAVINGS',
+        'status' => 'ACTIVE',
+    ]);
+
+    $account->addHolder($primary, 'PRIMARY', null, 50);
+    $account->addHolder($joint, 'JOINT', null, 50);
+
+    expect($account->canHaveJointHolders())->toBeTrue()
+        ->and($account->holders()->count())->toBe(2);
+
+    $minorAccount = $account->replicate();
+    $minorAccount->customer_id = $minor->id;
+    $minorAccount->financial_account_id = FinancialAccount::factory()->active()->create([
+        'organization_id' => $primary->organization_id,
+        'financial_product_id' => $product->id,
+        'account_type' => 'SAVINGS',
+    ])->id;
+    $minorAccount->save();
+    $minorAccount->addHolder($minor, 'PRIMARY', $guardian);
+
+    expect($minorAccount->fresh()->isMinorAccount())->toBeTrue()
+        ->and($minorAccount->requiresGuardian())->toBeTrue();
+
+    $organizationAccount = $account->replicate();
+    $organizationAccount->customer_id = $organization->id;
+    $organizationAccount->financial_account_id = FinancialAccount::factory()->active()->create([
+        'organization_id' => $primary->organization_id,
+        'financial_product_id' => $product->id,
+        'account_type' => 'SAVINGS',
+    ])->id;
+    $organizationAccount->save();
+
+    expect($organizationAccount->fresh()->customer->type)->toBe(Customer::TYPE_ORGANIZATION);
 });

@@ -11,7 +11,13 @@ import { route } from 'ziggy-js';
 
 interface Props {
     products: { id: number; code: string; name: string; category: string }[];
-    customers: { id: number; customer_no: string; name: string }[];
+    customers: {
+        id: number;
+        customer_no: string;
+        name: string;
+        type: 'INDIVIDUAL' | 'ORGANIZATION';
+        dob?: string | null;
+    }[];
 }
 
 export default function FinancialAccountForm() {
@@ -24,7 +30,22 @@ export default function FinancialAccountForm() {
         name: '',
         account_type: 'SAVINGS',
         metadata: {},
+        joint_holder_ids: [] as string[],
+        guardian_customer_id: '',
     });
+    const primaryCustomer = customers.find(
+        (customer) => String(customer.id) === data.holder_id,
+    );
+    const selectedProduct = products.find(
+        (product) => String(product.id) === data.financial_product_id,
+    );
+    const selectedAccountType = selectedProduct?.category ?? data.account_type;
+    const isDepositAccount = [
+        'SAVINGS',
+        'FIXED_DEPOSIT',
+        'RECURRING_DEPOSIT',
+    ].includes(selectedAccountType);
+    const isMinorPrimary = primaryCustomer ? isMinor(primaryCustomer) : false;
     const submit = (event: React.FormEvent) => {
         event.preventDefault();
         post(route('financial-accounts.store'));
@@ -87,12 +108,98 @@ export default function FinancialAccountForm() {
                                     { value: '', label: 'Select customer' },
                                     ...customers.map((customer) => ({
                                         value: String(customer.id),
-                                        label: `${customer.customer_no} - ${customer.name}`,
+                                        label: `${customer.customer_no} - ${customer.name} (${customer.type.toLowerCase()})`,
                                     })),
                                 ]}
                             />
                             <InputError message={errors.holder_id} />
                         </div>
+                        {isDepositAccount && (
+                            <div className="space-y-2 sm:col-span-2">
+                                <Label>Joint holders</Label>
+                                <div className="grid gap-2 rounded-md border p-3 sm:grid-cols-2">
+                                    {customers
+                                        .filter(
+                                            (customer) =>
+                                                String(customer.id) !==
+                                                data.holder_id,
+                                        )
+                                        .map((customer) => (
+                                            <label
+                                                key={customer.id}
+                                                className="flex items-center gap-2 text-sm"
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={data.joint_holder_ids.includes(
+                                                        String(customer.id),
+                                                    )}
+                                                    onChange={(event) => {
+                                                        const id = String(
+                                                            customer.id,
+                                                        );
+                                                        const next = event
+                                                            .target.checked
+                                                            ? [
+                                                                  ...data.joint_holder_ids,
+                                                                  id,
+                                                              ]
+                                                            : data.joint_holder_ids.filter(
+                                                                  (holderId) =>
+                                                                      holderId !==
+                                                                      id,
+                                                              );
+                                                        setData(
+                                                            'joint_holder_ids',
+                                                            next,
+                                                        );
+                                                    }}
+                                                />
+                                                <span>
+                                                    {customer.customer_no} -{' '}
+                                                    {customer.name} (
+                                                    {customer.type.toLowerCase()}
+                                                    )
+                                                </span>
+                                            </label>
+                                        ))}
+                                </div>
+                                <InputError message={errors.joint_holder_ids} />
+                            </div>
+                        )}
+                        {isMinorPrimary && (
+                            <div>
+                                <Label>Guardian</Label>
+                                <Select
+                                    value={data.guardian_customer_id}
+                                    onChange={(value) =>
+                                        setData('guardian_customer_id', value)
+                                    }
+                                    options={[
+                                        {
+                                            value: '',
+                                            label: 'Select adult guardian',
+                                        },
+                                        ...customers
+                                            .filter(
+                                                (customer) =>
+                                                    customer.type ===
+                                                        'INDIVIDUAL' &&
+                                                    !isMinor(customer) &&
+                                                    String(customer.id) !==
+                                                        data.holder_id,
+                                            )
+                                            .map((customer) => ({
+                                                value: String(customer.id),
+                                                label: `${customer.customer_no} - ${customer.name}`,
+                                            })),
+                                    ]}
+                                />
+                                <InputError
+                                    message={errors.guardian_customer_id}
+                                />
+                            </div>
+                        )}
                         <div>
                             <Label>Account number</Label>
                             <Input
@@ -153,4 +260,20 @@ export default function FinancialAccountForm() {
             </div>
         </CustomAuthLayout>
     );
+}
+
+function isMinor(customer: Props['customers'][number]): boolean {
+    if (customer.type !== 'INDIVIDUAL' || !customer.dob) return false;
+
+    const birthDate = new Date(customer.dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const birthdayNotReached =
+        today.getMonth() < birthDate.getMonth() ||
+        (today.getMonth() === birthDate.getMonth() &&
+            today.getDate() < birthDate.getDate());
+
+    if (birthdayNotReached) age -= 1;
+
+    return age < 18;
 }
