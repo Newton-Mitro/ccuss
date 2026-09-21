@@ -149,6 +149,13 @@ export const treasuryAndCashMenu: SidebarItem[] = [
                         match_path: 'bank-accounts',
                         permission: ['bank_accounts.view'],
                     },
+                    {
+                        name: 'Bank Transactions',
+                        icon: <i className="fa-solid fa-receipt" />,
+                        path: '/bank-transactions',
+                        match_path: 'bank-transactions',
+                        permission: ['bank_transactions.view'],
+                    },
                 ],
             },
             {
