@@ -20,6 +20,8 @@ class PettyCashController extends Controller
         $this->middleware('permission:petty_cash.view')->only(['accounts', 'advanceAccounts']);
         $this->middleware('permission:petty_cash.create')->only(['create', 'store', 'funding', 'storeFunding']);
         $this->middleware('permission:petty_cash.expense')->only(['expense', 'storeExpense']);
+        $this->middleware('permission:petty_cash.view')->only(['transactions']);
+        $this->middleware('permission:petty_cash.expense')->only(['postTransaction']);
     }
 
     public function accounts(Request $request): Response
@@ -48,6 +50,41 @@ class PettyCashController extends Controller
             'advance_accounts' => $advanceAccounts,
             'filters' => $request->only(['search', 'per_page', 'page']),
         ]);
+    }
+
+    public function transactions(Request $request): Response
+    {
+        $organization = $request->attributes->get('active_organization');
+        $user = $request->user();
+
+        abort_unless($user?->branch_id, 422, 'A branch assignment is required for petty cash transactions.');
+
+        return Inertia::render('treasury-cash/petty-cash/transactions/index', [
+            'transactions' => $this->pettyCashDataService->listTransactions(
+                $organization->id,
+                $user->branch_id,
+                $request->input('search'),
+                $request->input('per_page', 18),
+            ),
+            'filters' => $request->only(['search', 'per_page', 'page']),
+        ]);
+    }
+
+    public function postTransaction(Request $request, \App\TreasuryAndCash\Models\PettyCashTransaction $transaction): RedirectResponse
+    {
+        $organization = $request->attributes->get('active_organization');
+        $user = $request->user();
+
+        abort_unless($user?->branch_id, 422, 'A branch assignment is required for petty cash transactions.');
+
+        try {
+            $this->pettyCashTransactionService->post($organization->id, $user->branch_id, $transaction->id);
+        } catch (\RuntimeException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
+
+        return redirect()->route('petty-cash-transactions.index')
+            ->with('success', 'Petty cash transaction posted successfully.');
     }
 
     public function create(Request $request): Response

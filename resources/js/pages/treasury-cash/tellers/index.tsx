@@ -1,9 +1,10 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { UserRound } from 'lucide-react';
+import { Plus, UserRound } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import HeadingSmall from '../../../components/heading-small';
+import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
@@ -34,8 +35,14 @@ interface TellerIndexProps extends SharedData {
 }
 
 export default function Index() {
-    const { tellers, filters } = usePage<TellerIndexProps>().props;
+    const { tellers, filters, auth } = usePage<TellerIndexProps>().props;
     useFlashToastHandler();
+    const canCreate = [
+        ...(auth.user.permissions ?? []).map((permission) => permission.slug),
+        ...auth.user.roles.flatMap((role) =>
+            (role.permissions ?? []).map((permission) => permission.slug),
+        ),
+    ].includes('cash_management.create');
 
     const { data, setData, get } = useForm({
         search: filters.search || '',
@@ -60,10 +67,23 @@ export default function Index() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Tellers" />
             <div className="space-y-4 text-foreground">
-                <HeadingSmall
-                    title="Tellers"
-                    description="Review teller assignments, branches, and operating limits."
-                />
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <HeadingSmall
+                        title="Tellers"
+                        description="Review teller assignments, branches, and operating limits."
+                    />
+                    {canCreate && (
+                        <Button
+                            type="button"
+                            onClick={() =>
+                                (window.location.href = route('tellers.create'))
+                            }
+                        >
+                            <Plus className="h-4 w-4" />
+                            Create teller
+                        </Button>
+                    )}
+                </div>
                 <Input
                     className="w-full bg-card sm:w-72"
                     placeholder="Search teller, code, or branch..."

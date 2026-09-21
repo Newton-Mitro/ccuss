@@ -61,6 +61,27 @@ class CashManagementDataService
         return $query->paginate($perPage)->withQueryString();
     }
 
+    public function tellerSessionOptions(int $organizationId, int $branchId): array
+    {
+        return [
+            'branch_day' => \App\TreasuryAndCash\Models\BranchDay::query()
+                ->where('organization_id', $organizationId)
+                ->where('branch_id', $branchId)
+                ->where('status', \App\TreasuryAndCash\Models\BranchDay::STATUS_OPEN)
+                ->latest('business_date')
+                ->first(['id', 'business_date']),
+            'tellers' => Teller::query()
+                ->where('status', 'ACTIVE')
+                ->whereHas('cashLocation', function ($query) use ($organizationId, $branchId) {
+                    $query->where('organization_id', $organizationId)
+                        ->where('branch_id', $branchId)
+                        ->where('is_active', true);
+                })
+                ->orderBy('name')
+                ->get(['id', 'code', 'name']),
+        ];
+    }
+
     private function applySearch($query, ?string $search): void
     {
         if (empty($search)) {

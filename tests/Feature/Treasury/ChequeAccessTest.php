@@ -125,6 +125,19 @@ it('does not expose cheque pages without permission', function () {
         ->assertForbidden();
 });
 
+it('does not allow cheque lifecycle actions without their specific permission', function () {
+    $fixture = chequeFixture();
+    grantChequeViewPermission($fixture['user']);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('cheques.issue', $fixture['cheque']), [
+            'amount' => 100,
+            'payee' => 'Supplier',
+        ])
+        ->assertForbidden();
+});
+
 it('creates cheque leaves and enforces the cheque lifecycle', function () {
     $fixture = chequeFixture();
     $service = app(ChequeService::class);

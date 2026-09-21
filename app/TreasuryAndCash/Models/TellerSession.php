@@ -18,6 +18,7 @@ class TellerSession extends Model
         'closed_by',
         'status',
         'opening_cash',
+        'opening_note',
         'closing_cash',
         'expected_cash',
         'cash_difference',

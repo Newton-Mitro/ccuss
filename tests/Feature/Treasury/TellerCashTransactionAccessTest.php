@@ -31,6 +31,46 @@ function grantTellerCashTransactionPermission(User $user): void
     $user->roles()->syncWithoutDetaching([$role->id]);
 }
 
+function grantTellerCashTransactionPostPermission(User $user): void
+{
+    $role = Role::firstOrCreate(
+        ['slug' => 'teller_cash_transaction_post_test'],
+        ['name' => 'Teller Cash Transaction Post Test'],
+    );
+
+    $permission = Permission::firstOrCreate(
+        ['slug' => 'cash_transactions.post'],
+        [
+            'module' => 'cash_transactions',
+            'name' => 'Post Cash Transactions',
+            'action' => 'post',
+        ],
+    );
+
+    $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+}
+
+function grantTellerCashTransactionViewPermission(User $user): void
+{
+    $role = Role::firstOrCreate(
+        ['slug' => 'teller_cash_transaction_view_test'],
+        ['name' => 'Teller Cash Transaction View Test'],
+    );
+
+    $permission = Permission::firstOrCreate(
+        ['slug' => 'cash_transactions.view'],
+        [
+            'module' => 'cash_transactions',
+            'name' => 'View Cash Transactions',
+            'action' => 'view',
+        ],
+    );
+
+    $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+}
+
 function tellerCashTransactionFixture(): array
 {
     $organization = Organization::factory()->create();
@@ -91,6 +131,19 @@ it('loads deposit and withdrawal forms with scoped teller sessions', function ()
     }
 });
 
+it('loads the teller transaction queue for users with view permission', function () {
+    $fixture = tellerCashTransactionFixture();
+    grantTellerCashTransactionViewPermission($fixture['user']);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('teller-transactions.index'))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page
+            ->component('treasury-cash/teller-transactions/index')
+            ->has('transactions.data', 0));
+});
+
 it('creates a pending teller cash deposit for an open session', function () {
     $fixture = tellerCashTransactionFixture();
     grantTellerCashTransactionPermission($fixture['user']);
@@ -113,4 +166,30 @@ it('creates a pending teller cash deposit for an open session', function () {
         ->and($transaction->status)->toBe('PENDING')
         ->and($transaction->amount)->toBe('300.0000')
         ->and($transaction->requested_by)->toBe($fixture['user']->id);
+});
+
+it('posts a pending deposit and updates the teller expected cash', function () {
+    $fixture = tellerCashTransactionFixture();
+    grantTellerCashTransactionPostPermission($fixture['user']);
+    $transaction = TellerCashTransaction::create([
+        'branch_day_id' => $fixture['branchDay']->id,
+        'cash_location_id' => $fixture['location']->id,
+        'teller_session_id' => $fixture['session']->id,
+        'transaction_no' => 'TELLER-POST-001',
+        'type' => 'DEPOSIT',
+        'amount' => 300,
+        'status' => 'PENDING',
+        'requested_by' => $fixture['user']->id,
+        'requested_at' => now(),
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('teller-transactions.post', $transaction))
+        ->assertRedirect(route('teller-transactions.index'));
+
+    expect($transaction->fresh()->status)->toBe('POSTED')
+        ->and($transaction->fresh()->posted_by)->toBe($fixture['user']->id)
+        ->and($transaction->fresh()->posted_at)->not->toBeNull()
+        ->and($fixture['session']->fresh()->expected_cash)->toBe('5300.0000');
 });

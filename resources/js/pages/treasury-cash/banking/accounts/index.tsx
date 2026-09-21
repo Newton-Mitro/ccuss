@@ -1,9 +1,10 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { Building2 } from 'lucide-react';
+import { Building2, Plus } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../../components/data-table-pagination';
 import HeadingSmall from '../../../../components/heading-small';
+import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import useFlashToastHandler from '../../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../../layouts/custom-auth-layout';
@@ -34,7 +35,7 @@ interface BankAccountIndexProps extends SharedData {
 }
 
 export default function Index() {
-    const { accounts, filters } = usePage<BankAccountIndexProps>().props;
+    const { accounts, filters, auth } = usePage<BankAccountIndexProps>().props;
     useFlashToastHandler();
 
     const { data, setData, get } = useForm({
@@ -58,15 +59,36 @@ export default function Index() {
         { title: 'Banking', href: '' },
         { title: 'Bank Accounts', href: route('bank-accounts.index') },
     ];
+    const permissions = new Set([
+        ...(auth.user.permissions ?? []).map((permission) => permission.slug),
+        ...auth.user.roles.flatMap((role) =>
+            (role.permissions ?? []).map((permission) => permission.slug),
+        ),
+    ]);
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Bank Accounts" />
             <div className="space-y-4 text-foreground">
-                <HeadingSmall
-                    title="Bank Accounts"
-                    description="Review bank accounts, branch assignments, and reconciliation settings."
-                />
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <HeadingSmall
+                        title="Bank Accounts"
+                        description="Review bank accounts, branch assignments, and reconciliation settings."
+                    />
+                    {permissions.has('bank_accounts.create') && (
+                        <Button
+                            type="button"
+                            onClick={() =>
+                                (window.location.href = route(
+                                    'bank-accounts.create',
+                                ))
+                            }
+                        >
+                            <Plus className="h-4 w-4" />
+                            Create bank account
+                        </Button>
+                    )}
+                </div>
                 <Input
                     className="w-full bg-card sm:w-80"
                     placeholder="Search account, bank, or branch..."

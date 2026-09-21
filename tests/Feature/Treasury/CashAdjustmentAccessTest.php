@@ -31,6 +31,46 @@ function grantCashAdjustmentCreatePermission(User $user): void
     $user->roles()->syncWithoutDetaching([$role->id]);
 }
 
+function grantCashAdjustmentPostPermission(User $user): void
+{
+    $role = Role::firstOrCreate(
+        ['slug' => 'cash_adjustment_post_test'],
+        ['name' => 'Cash Adjustment Post Test'],
+    );
+
+    $permission = Permission::firstOrCreate(
+        ['slug' => 'cash_transactions.post'],
+        [
+            'module' => 'cash_transactions',
+            'name' => 'Post Cash Transactions',
+            'action' => 'post',
+        ],
+    );
+
+    $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+}
+
+function grantCashAdjustmentViewPermission(User $user): void
+{
+    $role = Role::firstOrCreate(
+        ['slug' => 'cash_adjustment_view_test'],
+        ['name' => 'Cash Adjustment View Test'],
+    );
+
+    $permission = Permission::firstOrCreate(
+        ['slug' => 'cash_transactions.view'],
+        [
+            'module' => 'cash_transactions',
+            'name' => 'View Cash Transactions',
+            'action' => 'view',
+        ],
+    );
+
+    $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+}
+
 function cashAdjustmentFixture(): array
 {
     $organization = Organization::factory()->create();
@@ -88,6 +128,19 @@ it('loads the teller cash adjustment form with scoped sessions', function () {
             ->has('teller_sessions', 1));
 });
 
+it('loads the cash adjustment queue for users with view permission', function () {
+    $fixture = cashAdjustmentFixture();
+    grantCashAdjustmentViewPermission($fixture['user']);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('cash-adjustments.index'))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page
+            ->component('treasury-cash/cash-adjustments/index')
+            ->has('adjustments.data', 0));
+});
+
 it('creates a pending shortage adjustment for an open teller session', function () {
     $fixture = cashAdjustmentFixture();
     grantCashAdjustmentCreatePermission($fixture['user']);
@@ -111,4 +164,37 @@ it('creates a pending shortage adjustment for an open teller session', function 
         ->and($adjustment->type)->toBe('SHORTAGE')
         ->and($adjustment->status)->toBe('PENDING')
         ->and($adjustment->requested_by)->toBe($fixture['user']->id);
+});
+
+it('approves and posts a shortage adjustment against teller expected cash', function () {
+    $fixture = cashAdjustmentFixture();
+    grantCashAdjustmentPostPermission($fixture['user']);
+    $adjustment = CashAdjustment::create([
+        'branch_day_id' => $fixture['branchDay']->id,
+        'cash_location_id' => $fixture['location']->id,
+        'teller_session_id' => $fixture['session']->id,
+        'amount' => 75,
+        'type' => 'SHORTAGE',
+        'reason' => 'Cash count difference',
+        'status' => 'PENDING',
+        'requested_by' => $fixture['user']->id,
+        'requested_at' => now(),
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('cash-adjustments.index.approve', $adjustment))
+        ->assertRedirect(route('cash-adjustments.index'));
+
+    expect($adjustment->fresh()->status)->toBe('APPROVED')
+        ->and($adjustment->fresh()->approved_by)->toBe($fixture['user']->id)
+        ->and($adjustment->fresh()->approved_at)->not->toBeNull();
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('cash-adjustments.index.post', $adjustment))
+        ->assertRedirect(route('cash-adjustments.index'));
+
+    expect($adjustment->fresh()->status)->toBe('POSTED')
+        ->and($fixture['session']->fresh()->expected_cash)->toBe('4925.0000');
 });

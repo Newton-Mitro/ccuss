@@ -51,4 +51,54 @@ class CashTransferService
             ]);
         });
     }
+
+    public function approve(int $organizationId, int $branchId, int $userId, int $transferId): CashTransfer
+    {
+        $transfer = CashTransfer::query()
+            ->whereKey($transferId)
+            ->where('status', 'PENDING')
+            ->whereHas('branchDay', function ($branchDay) use ($organizationId, $branchId) {
+                $branchDay
+                    ->where('organization_id', $organizationId)
+                    ->where('branch_id', $branchId)
+                    ->where('status', BranchDay::STATUS_OPEN);
+            })
+            ->first();
+
+        if (!$transfer) {
+            throw new \RuntimeException('A pending transfer for the active branch and open branch day is required.');
+        }
+
+        $transfer->update([
+            'status' => 'APPROVED',
+            'approved_by' => $userId,
+        ]);
+
+        return $transfer->fresh();
+    }
+
+    public function complete(int $organizationId, int $branchId, int $transferId): CashTransfer
+    {
+        $transfer = CashTransfer::query()
+            ->whereKey($transferId)
+            ->where('status', 'APPROVED')
+            ->whereHas('branchDay', function ($branchDay) use ($organizationId, $branchId) {
+                $branchDay
+                    ->where('organization_id', $organizationId)
+                    ->where('branch_id', $branchId)
+                    ->where('status', BranchDay::STATUS_OPEN);
+            })
+            ->first();
+
+        if (!$transfer) {
+            throw new \RuntimeException('An approved transfer for the active branch and open branch day is required.');
+        }
+
+        $transfer->update([
+            'status' => 'COMPLETED',
+            'completed_at' => now(),
+        ]);
+
+        return $transfer->fresh();
+    }
 }

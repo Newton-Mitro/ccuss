@@ -45,4 +45,50 @@ class TellerCashTransactionService
             ]);
         });
     }
+
+    public function post(int $organizationId, int $branchId, int $userId, int $transactionId): TellerCashTransaction
+    {
+        return DB::transaction(function () use ($organizationId, $branchId, $userId, $transactionId) {
+            $transaction = TellerCashTransaction::query()
+                ->whereKey($transactionId)
+                ->where('status', 'PENDING')
+                ->whereHas('branchDay', function ($branchDay) use ($organizationId, $branchId) {
+                    $branchDay
+                        ->where('organization_id', $organizationId)
+                        ->where('branch_id', $branchId)
+                        ->where('status', 'OPEN');
+                })
+                ->with('tellerSession')
+                ->lockForUpdate()
+                ->first();
+
+            if (!$transaction || !$transaction->tellerSession || $transaction->tellerSession->status !== 'OPEN') {
+                throw new \RuntimeException('A pending transaction for an open teller session is required.');
+            }
+
+            $session = TellerSession::query()
+                ->whereKey($transaction->teller_session_id)
+                ->lockForUpdate()
+                ->firstOrFail();
+            $expectedCash = (float) ($session->expected_cash ?? $session->opening_cash);
+            $amount = (float) $transaction->amount;
+
+            if ($transaction->type === 'WITHDRAWAL' && $amount > $expectedCash) {
+                throw new \RuntimeException('The withdrawal amount exceeds the teller expected cash.');
+            }
+
+            $session->update([
+                'expected_cash' => $transaction->type === 'DEPOSIT'
+                    ? $expectedCash + $amount
+                    : $expectedCash - $amount,
+            ]);
+            $transaction->update([
+                'status' => 'POSTED',
+                'posted_by' => $userId,
+                'posted_at' => now(),
+            ]);
+
+            return $transaction->fresh();
+        });
+    }
 }

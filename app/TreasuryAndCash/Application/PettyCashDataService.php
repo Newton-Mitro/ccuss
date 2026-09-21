@@ -3,11 +3,40 @@
 namespace App\TreasuryAndCash\Application;
 
 use App\TreasuryAndCash\Models\PettyCashFund;
+use App\TreasuryAndCash\Models\PettyCashTransaction;
 use App\TreasuryAndCash\Models\BranchDay;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class PettyCashDataService
 {
+    public function listTransactions(int $organizationId, int $branchId, ?string $search = null, int $perPage = 18): LengthAwarePaginator
+    {
+        $query = PettyCashTransaction::query()
+            ->whereHas('branchDay', function ($branchDay) use ($organizationId, $branchId) {
+                $branchDay
+                    ->where('organization_id', $organizationId)
+                    ->where('branch_id', $branchId);
+            })
+            ->with(['pettyCashFund', 'branchDay'])
+            ->latest('created_at');
+
+        if (!empty($search)) {
+            $term = trim($search);
+            $query->where(function ($builder) use ($term) {
+                $builder->where('transaction_no', 'like', "%{$term}%")
+                    ->orWhere('type', 'like', "%{$term}%")
+                    ->orWhere('status', 'like', "%{$term}%")
+                    ->orWhere('payee', 'like', "%{$term}%")
+                    ->orWhereHas('pettyCashFund', function ($fund) use ($term) {
+                        $fund->where('name', 'like', "%{$term}%")
+                            ->orWhere('code', 'like', "%{$term}%");
+                    });
+            });
+        }
+
+        return $query->paginate($perPage)->withQueryString();
+    }
+
     public function listFunds(int $organizationId, ?string $search = null, int $perPage = 18): LengthAwarePaginator
     {
         $query = PettyCashFund::query()

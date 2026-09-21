@@ -39,6 +39,46 @@ function grantPettyCashTransactionPermission(User $user): void
     $user->roles()->syncWithoutDetaching([$role->id]);
 }
 
+function grantPettyCashPostPermission(User $user): void
+{
+    $role = Role::firstOrCreate(
+        ['slug' => 'petty_cash_post_test'],
+        ['name' => 'Petty Cash Post Test'],
+    );
+
+    $permission = Permission::firstOrCreate(
+        ['slug' => 'petty_cash.expense'],
+        [
+            'module' => 'petty_cash',
+            'name' => 'Record Petty Cash Expense',
+            'action' => 'expense',
+        ],
+    );
+
+    $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+}
+
+function grantPettyCashTransactionViewPermission(User $user): void
+{
+    $role = Role::firstOrCreate(
+        ['slug' => 'petty_cash_transaction_view_test'],
+        ['name' => 'Petty Cash Transaction View Test'],
+    );
+
+    $permission = Permission::firstOrCreate(
+        ['slug' => 'petty_cash.view'],
+        [
+            'module' => 'petty_cash',
+            'name' => 'View Petty Cash',
+            'action' => 'view',
+        ],
+    );
+
+    $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+}
+
 function pettyCashTransactionFixture(): array
 {
     $organization = Organization::factory()->create();
@@ -93,6 +133,19 @@ it('loads petty cash funding and expense forms with scoped funds', function () {
     }
 });
 
+it('loads the petty cash transaction queue for users with view permission', function () {
+    $fixture = pettyCashTransactionFixture();
+    grantPettyCashTransactionViewPermission($fixture['user']);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('petty-cash-transactions.index'))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page
+            ->component('treasury-cash/petty-cash/transactions/index')
+            ->has('transactions.data', 0));
+});
+
 it('creates a pending petty cash expense within the users open branch day', function () {
     $fixture = pettyCashTransactionFixture();
     grantPettyCashTransactionPermission($fixture['user']);
@@ -115,4 +168,27 @@ it('creates a pending petty cash expense within the users open branch day', func
         ->and($transaction->status)->toBe('PENDING')
         ->and($transaction->amount)->toBe('125.0000')
         ->and($transaction->created_by)->toBe($fixture['user']->id);
+});
+
+it('posts a petty cash expense and reduces the fund balance', function () {
+    $fixture = pettyCashTransactionFixture();
+    grantPettyCashPostPermission($fixture['user']);
+    $transaction = PettyCashTransaction::create([
+        'branch_day_id' => $fixture['branchDay']->id,
+        'petty_cash_fund_id' => $fixture['fund']->id,
+        'transaction_no' => 'PETTY-POST-001',
+        'type' => 'EXPENSE',
+        'amount' => 125,
+        'description' => 'Stationery purchase',
+        'status' => 'PENDING',
+        'created_by' => $fixture['user']->id,
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('petty-cash-transactions.post', $transaction))
+        ->assertRedirect(route('petty-cash-transactions.index'));
+
+    expect($transaction->fresh()->status)->toBe('POSTED')
+        ->and($fixture['fund']->fresh()->current_balance)->toBe('3375.0000');
 });

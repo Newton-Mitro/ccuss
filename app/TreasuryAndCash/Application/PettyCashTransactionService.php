@@ -56,4 +56,58 @@ class PettyCashTransactionService
             ]);
         });
     }
+
+    public function post(int $organizationId, int $branchId, int $transactionId): PettyCashTransaction
+    {
+        return DB::transaction(function () use ($organizationId, $branchId, $transactionId) {
+            $transaction = PettyCashTransaction::query()
+                ->whereKey($transactionId)
+                ->where('status', 'PENDING')
+                ->whereHas('branchDay', function ($branchDay) use ($organizationId, $branchId) {
+                    $branchDay
+                        ->where('organization_id', $organizationId)
+                        ->where('branch_id', $branchId)
+                        ->where('status', BranchDay::STATUS_OPEN);
+                })
+                ->lockForUpdate()
+                ->first();
+
+            if (!$transaction) {
+                throw new \RuntimeException('A pending petty cash transaction for the active branch is required.');
+            }
+
+            $fund = PettyCashFund::query()
+                ->whereKey($transaction->petty_cash_fund_id)
+                ->where('status', 'ACTIVE')
+                ->lockForUpdate()
+                ->first();
+
+            if (!$fund) {
+                throw new \RuntimeException('An active petty cash fund is required to post this transaction.');
+            }
+
+            $balance = (float) $fund->current_balance;
+            $amount = (float) $transaction->amount;
+
+            if (in_array($transaction->type, ['EXPENSE', 'RETURN'], true) && $amount > $balance) {
+                throw new \RuntimeException('The transaction amount cannot exceed the petty cash balance.');
+            }
+
+            if (
+                in_array($transaction->type, ['FUNDING', 'REPLENISHMENT'], true)
+                && $balance + $amount > (float) $fund->fund_limit
+            ) {
+                throw new \RuntimeException('The transaction would exceed the petty cash fund limit.');
+            }
+
+            $fund->update([
+                'current_balance' => in_array($transaction->type, ['FUNDING', 'REPLENISHMENT'], true)
+                    ? $balance + $amount
+                    : $balance - $amount,
+            ]);
+            $transaction->update(['status' => 'POSTED']);
+
+            return $transaction->fresh();
+        });
+    }
 }
