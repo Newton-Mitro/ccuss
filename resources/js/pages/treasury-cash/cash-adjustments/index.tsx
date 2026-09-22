@@ -1,14 +1,18 @@
+import DataTablePagination from '@/components/data-table-pagination';
+import {
+    ResourceEmptyState,
+    ResourcePageHeader,
+    StatusBadge,
+} from '@/components/resource-page-shell';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
+import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { BreadcrumbItem, SharedData } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { CheckCircle2, ClipboardCheck, SlidersHorizontal } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-import DataTablePagination from '../../../components/data-table-pagination';
-import HeadingSmall from '../../../components/heading-small';
-import { Button } from '../../../components/ui/button';
-import { Input } from '../../../components/ui/input';
-import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
-import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '../../../types';
 
 interface CashAdjustmentListItem {
     id: number;
@@ -75,7 +79,7 @@ export default function Index() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Cash Adjustment Queue" />
             <div className="space-y-4 text-foreground">
-                <HeadingSmall
+                <ResourcePageHeader
                     title="Cash Adjustment Queue"
                     description="Approve and post teller shortages and excesses after cash verification."
                 />
@@ -88,32 +92,37 @@ export default function Index() {
                         setData('page', 1);
                     }}
                 />
-                <div className="h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card">
-                    <table className="w-full min-w-240 border-collapse text-sm">
-                        <thead className="bg-muted text-muted-foreground">
-                            <tr>
-                                {[
-                                    '#',
-                                    'Teller',
-                                    'Business Date',
-                                    'Type',
-                                    'Amount',
-                                    'Reason',
-                                    'Status',
-                                    'Actions',
-                                ].map((header) => (
-                                    <th
-                                        key={header}
-                                        className="border-b p-2 text-left font-medium"
-                                    >
-                                        {header}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {adjustments.data.length > 0 ? (
-                                adjustments.data.map((adjustment, index) => (
+                {adjustments.data.length === 0 ? (
+                    <ResourceEmptyState
+                        title="No cash adjustments found"
+                        description="Teller shortages and excesses will appear here."
+                    />
+                ) : (
+                    <div className="h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card">
+                        <table className="w-full min-w-240 border-collapse text-sm">
+                            <thead className="bg-muted text-muted-foreground">
+                                <tr>
+                                    {[
+                                        '#',
+                                        'Teller',
+                                        'Business Date',
+                                        'Type',
+                                        'Amount',
+                                        'Reason',
+                                        'Status',
+                                        'Actions',
+                                    ].map((header) => (
+                                        <th
+                                            key={header}
+                                            className="border-b p-2 text-left font-medium"
+                                        >
+                                            {header}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {adjustments.data.map((adjustment, index) => (
                                     <tr
                                         key={adjustment.id}
                                         className="border-b even:bg-muted/40 hover:bg-accent/20"
@@ -160,9 +169,22 @@ export default function Index() {
                                             {adjustment.reason}
                                         </td>
                                         <td className="px-2 py-2">
-                                            <span className="rounded-full border px-2 py-1 text-xs font-medium">
+                                            <StatusBadge
+                                                tone={
+                                                    adjustment.status ===
+                                                    'POSTED'
+                                                        ? 'success'
+                                                        : adjustment.status ===
+                                                            'CANCELLED'
+                                                          ? 'danger'
+                                                          : adjustment.status ===
+                                                              'APPROVED'
+                                                            ? 'info'
+                                                            : 'warning'
+                                                }
+                                            >
                                                 {adjustment.status}
-                                            </span>
+                                            </StatusBadge>
                                         </td>
                                         <td className="px-2 py-2">
                                             <div className="flex items-center gap-1">
@@ -217,21 +239,11 @@ export default function Index() {
                                             </div>
                                         </td>
                                     </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td
-                                        colSpan={8}
-                                        className="px-4 py-10 text-center text-muted-foreground"
-                                    >
-                                        No cash adjustments found for this
-                                        branch.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
                 <DataTablePagination
                     perPage={adjustments.per_page}
                     currentPage={adjustments.current_page}

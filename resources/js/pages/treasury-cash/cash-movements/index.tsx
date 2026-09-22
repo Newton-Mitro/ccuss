@@ -1,14 +1,18 @@
+import DataTablePagination from '@/components/data-table-pagination';
+import {
+    ResourceEmptyState,
+    ResourcePageHeader,
+    StatusBadge,
+} from '@/components/resource-page-shell';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
+import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { BreadcrumbItem, SharedData } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { ArrowRightLeft, CheckCircle2, ClipboardCheck } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-import DataTablePagination from '../../../components/data-table-pagination';
-import HeadingSmall from '../../../components/heading-small';
-import { Button } from '../../../components/ui/button';
-import { Input } from '../../../components/ui/input';
-import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
-import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '../../../types';
 
 interface CashTransferListItem {
     id: number;
@@ -75,7 +79,7 @@ export default function Index() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Cash Transfer Queue" />
             <div className="space-y-4 text-foreground">
-                <HeadingSmall
+                <ResourcePageHeader
                     title="Cash Transfer Queue"
                     description="Approve and complete cash transfers between active branch locations."
                 />
@@ -88,32 +92,37 @@ export default function Index() {
                         setData('page', 1);
                     }}
                 />
-                <div className="h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card">
-                    <table className="w-full min-w-260 border-collapse text-sm">
-                        <thead className="bg-muted text-muted-foreground">
-                            <tr>
-                                {[
-                                    '#',
-                                    'Transfer',
-                                    'From',
-                                    'To',
-                                    'Business Date',
-                                    'Amount',
-                                    'Status',
-                                    'Actions',
-                                ].map((header) => (
-                                    <th
-                                        key={header}
-                                        className="border-b p-2 text-left font-medium"
-                                    >
-                                        {header}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {transfers.data.length > 0 ? (
-                                transfers.data.map((transfer, index) => (
+                {transfers.data.length === 0 ? (
+                    <ResourceEmptyState
+                        title="No cash transfers found"
+                        description="Cash transfers between branch locations will appear here."
+                    />
+                ) : (
+                    <div className="h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card">
+                        <table className="w-full min-w-260 border-collapse text-sm">
+                            <thead className="bg-muted text-muted-foreground">
+                                <tr>
+                                    {[
+                                        '#',
+                                        'Transfer',
+                                        'From',
+                                        'To',
+                                        'Business Date',
+                                        'Amount',
+                                        'Status',
+                                        'Actions',
+                                    ].map((header) => (
+                                        <th
+                                            key={header}
+                                            className="border-b p-2 text-left font-medium"
+                                        >
+                                            {header}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {transfers.data.map((transfer, index) => (
                                     <tr
                                         key={transfer.id}
                                         className="border-b even:bg-muted/40 hover:bg-accent/20"
@@ -153,9 +162,22 @@ export default function Index() {
                                             {transfer.amount}
                                         </td>
                                         <td className="px-2 py-2">
-                                            <span className="rounded-full border px-2 py-1 text-xs font-medium">
+                                            <StatusBadge
+                                                tone={
+                                                    transfer.status ===
+                                                    'COMPLETED'
+                                                        ? 'success'
+                                                        : transfer.status ===
+                                                            'CANCELLED'
+                                                          ? 'danger'
+                                                          : transfer.status ===
+                                                              'APPROVED'
+                                                            ? 'info'
+                                                            : 'warning'
+                                                }
+                                            >
                                                 {transfer.status}
-                                            </span>
+                                            </StatusBadge>
                                         </td>
                                         <td className="px-2 py-2">
                                             <div className="flex items-center gap-1">
@@ -210,20 +232,11 @@ export default function Index() {
                                             </div>
                                         </td>
                                     </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td
-                                        colSpan={8}
-                                        className="px-4 py-10 text-center text-muted-foreground"
-                                    >
-                                        No cash transfers found for this branch.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
                 <DataTablePagination
                     perPage={transfers.per_page}
                     currentPage={transfers.current_page}

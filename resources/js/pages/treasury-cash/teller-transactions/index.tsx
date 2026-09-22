@@ -1,14 +1,18 @@
+import DataTablePagination from '@/components/data-table-pagination';
+import {
+    ResourceEmptyState,
+    ResourcePageHeader,
+    StatusBadge,
+} from '@/components/resource-page-shell';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
+import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { BreadcrumbItem, SharedData } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { CheckCircle2, ReceiptText } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-import DataTablePagination from '../../../components/data-table-pagination';
-import HeadingSmall from '../../../components/heading-small';
-import { Button } from '../../../components/ui/button';
-import { Input } from '../../../components/ui/input';
-import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
-import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '../../../types';
 
 interface TellerCashTransactionListItem {
     id: number;
@@ -76,7 +80,7 @@ export default function Index() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Teller Transactions" />
             <div className="space-y-4 text-foreground">
-                <HeadingSmall
+                <ResourcePageHeader
                     title="Teller Transactions"
                     description="Review and post pending deposits and withdrawals for the active branch."
                 />
@@ -89,32 +93,37 @@ export default function Index() {
                         setData('page', 1);
                     }}
                 />
-                <div className="h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card">
-                    <table className="w-full min-w-240 border-collapse text-sm">
-                        <thead className="bg-muted text-muted-foreground">
-                            <tr>
-                                {[
-                                    '#',
-                                    'Transaction',
-                                    'Teller',
-                                    'Business Date',
-                                    'Type',
-                                    'Amount',
-                                    'Status',
-                                    'Actions',
-                                ].map((header) => (
-                                    <th
-                                        key={header}
-                                        className="border-b p-2 text-left font-medium"
-                                    >
-                                        {header}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {transactions.data.length > 0 ? (
-                                transactions.data.map((transaction, index) => (
+                {transactions.data.length === 0 ? (
+                    <ResourceEmptyState
+                        title="No teller transactions found"
+                        description="Teller deposits and withdrawals will appear here."
+                    />
+                ) : (
+                    <div className="h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card">
+                        <table className="w-full min-w-240 border-collapse text-sm">
+                            <thead className="bg-muted text-muted-foreground">
+                                <tr>
+                                    {[
+                                        '#',
+                                        'Transaction',
+                                        'Teller',
+                                        'Business Date',
+                                        'Type',
+                                        'Amount',
+                                        'Status',
+                                        'Actions',
+                                    ].map((header) => (
+                                        <th
+                                            key={header}
+                                            className="border-b p-2 text-left font-medium"
+                                        >
+                                            {header}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {transactions.data.map((transaction, index) => (
                                     <tr
                                         key={transaction.id}
                                         className="border-b even:bg-muted/40 hover:bg-accent/20"
@@ -156,9 +165,19 @@ export default function Index() {
                                             {transaction.amount}
                                         </td>
                                         <td className="px-2 py-2">
-                                            <span className="rounded-full border px-2 py-1 text-xs font-medium">
+                                            <StatusBadge
+                                                tone={
+                                                    transaction.status ===
+                                                    'POSTED'
+                                                        ? 'success'
+                                                        : transaction.status ===
+                                                            'CANCELLED'
+                                                          ? 'danger'
+                                                          : 'warning'
+                                                }
+                                            >
                                                 {transaction.status}
-                                            </span>
+                                            </StatusBadge>
                                         </td>
                                         <td className="px-2 py-2">
                                             {canPost &&
@@ -187,21 +206,11 @@ export default function Index() {
                                                 )}
                                         </td>
                                     </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td
-                                        colSpan={8}
-                                        className="px-4 py-10 text-center text-muted-foreground"
-                                    >
-                                        No teller transactions found for this
-                                        branch.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
                 <DataTablePagination
                     perPage={transactions.per_page}
                     currentPage={transactions.current_page}

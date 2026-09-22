@@ -1,13 +1,17 @@
+import DataTablePagination from '@/components/data-table-pagination';
+import {
+    ResourceEmptyState,
+    ResourcePageHeader,
+    StatusBadge,
+} from '@/components/resource-page-shell';
+import { Input } from '@/components/ui/input';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
+import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { BookOpenCheck, Plus } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-import DataTablePagination from '../../../../components/data-table-pagination';
-import HeadingSmall from '../../../../components/heading-small';
-import { Input } from '../../../../components/ui/input';
-import useFlashToastHandler from '../../../../hooks/use-flash-toast-handler';
-import CustomAuthLayout from '../../../../layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '../../../../types';
 
 interface ChequeBookListItem {
     id: number;
@@ -68,7 +72,7 @@ export default function Index() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Cheque Books" />
             <div className="space-y-4 text-foreground">
-                <HeadingSmall
+                <ResourcePageHeader
                     title="Cheque Books"
                     description="Review cheque books assigned to the active organization bank accounts."
                 />
@@ -87,31 +91,36 @@ export default function Index() {
                         setData('page', 1);
                     }}
                 />
-                <div className="h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card">
-                    <table className="w-full min-w-240 border-collapse text-sm">
-                        <thead className="bg-muted text-muted-foreground">
-                            <tr>
-                                {[
-                                    '#',
-                                    'Book',
-                                    'Bank Account',
-                                    'Range',
-                                    'Issued',
-                                    'Leaves',
-                                    'Status',
-                                ].map((header) => (
-                                    <th
-                                        key={header}
-                                        className="border-b p-2 text-left font-medium"
-                                    >
-                                        {header}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {books.data.length > 0 ? (
-                                books.data.map((book, index) => (
+                {books.data.length === 0 ? (
+                    <ResourceEmptyState
+                        title="No cheque books found"
+                        description="Create a cheque book to begin issuing cheques."
+                    />
+                ) : (
+                    <div className="h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card">
+                        <table className="w-full min-w-240 border-collapse text-sm">
+                            <thead className="bg-muted text-muted-foreground">
+                                <tr>
+                                    {[
+                                        '#',
+                                        'Book',
+                                        'Bank Account',
+                                        'Range',
+                                        'Issued',
+                                        'Leaves',
+                                        'Status',
+                                    ].map((header) => (
+                                        <th
+                                            key={header}
+                                            className="border-b p-2 text-left font-medium"
+                                        >
+                                            {header}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {books.data.map((book, index) => (
                                     <tr
                                         key={book.id}
                                         className="border-b even:bg-muted/40 hover:bg-accent/20"
@@ -158,26 +167,27 @@ export default function Index() {
                                             {book.leaf_count}
                                         </td>
                                         <td className="px-2 py-2">
-                                            <span className="rounded-full border px-2 py-1 text-xs font-medium">
+                                            <StatusBadge
+                                                tone={
+                                                    book.status ===
+                                                        'AVAILABLE' ||
+                                                    book.status === 'IN_USE'
+                                                        ? 'success'
+                                                        : book.status ===
+                                                            'EXHAUSTED'
+                                                          ? 'warning'
+                                                          : 'neutral'
+                                                }
+                                            >
                                                 {book.status}
-                                            </span>
+                                            </StatusBadge>
                                         </td>
                                     </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td
-                                        colSpan={7}
-                                        className="px-4 py-10 text-center text-muted-foreground"
-                                    >
-                                        No cheque books found for this
-                                        organization.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
                 <DataTablePagination
                     perPage={books.per_page}
                     currentPage={books.current_page}

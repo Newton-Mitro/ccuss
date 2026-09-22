@@ -1,10 +1,19 @@
+import DataTablePagination from '@/components/data-table-pagination';
+import {
+    ResourceEmptyState,
+    ResourcePageHeader,
+    StatusBadge,
+} from '@/components/resource-page-shell';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
+import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
+import { BreadcrumbItem, SharedData } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { CalendarDays, LockKeyhole, Plus } from 'lucide-react';
 import { FormEvent, useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
-import DataTablePagination from '../../../components/data-table-pagination';
-import HeadingSmall from '../../../components/heading-small';
-import { Button } from '../../../components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -14,11 +23,6 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '../../../components/ui/dialog';
-import { Input } from '../../../components/ui/input';
-import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
-import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { appSwal } from '../../../lib/appSwal';
-import { BreadcrumbItem, SharedData } from '../../../types';
 
 interface BranchDayListItem {
     id: number;
@@ -122,70 +126,77 @@ export default function Index() {
             <Head title="Branch Days" />
 
             <div className="space-y-4 text-foreground">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <HeadingSmall
-                        title="Branch Days"
-                        description="Track business-day activity across the active organization branches."
-                    />
-                    <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-                        <DialogTrigger asChild>
-                            <Button type="button">
-                                <Plus className="h-4 w-4" />
-                                Open branch day
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Open branch day</DialogTitle>
-                                <DialogDescription>
-                                    Open a business day for your assigned
-                                    branch.
-                                </DialogDescription>
-                            </DialogHeader>
-                            <form onSubmit={handleOpen} className="space-y-4">
-                                <div className="space-y-2">
-                                    <label
-                                        htmlFor="business_date"
-                                        className="text-sm font-medium"
-                                    >
-                                        Business date
-                                    </label>
-                                    <Input
-                                        id="business_date"
-                                        type="date"
-                                        value={businessDate}
-                                        onChange={(event) =>
-                                            setBusinessDate(event.target.value)
-                                        }
-                                        required
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label
-                                        htmlFor="opening_note"
-                                        className="text-sm font-medium"
-                                    >
-                                        Opening note
-                                    </label>
-                                    <Input
-                                        id="opening_note"
-                                        value={openingNote}
-                                        onChange={(event) =>
-                                            setOpeningNote(event.target.value)
-                                        }
-                                        placeholder="Optional note"
-                                        maxLength={2000}
-                                    />
-                                </div>
-                                <DialogFooter>
-                                    <Button type="submit">
-                                        Open branch day
-                                    </Button>
-                                </DialogFooter>
-                            </form>
-                        </DialogContent>
-                    </Dialog>
-                </div>
+                <ResourcePageHeader
+                    title="Branch Days"
+                    description="Track business-day activity across the active organization branches."
+                    action={
+                        <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+                            <DialogTrigger asChild>
+                                <Button type="button">
+                                    <Plus className="h-4 w-4" />
+                                    Open branch day
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Open branch day</DialogTitle>
+                                    <DialogDescription>
+                                        Open a business day for your assigned
+                                        branch.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <form
+                                    onSubmit={handleOpen}
+                                    className="space-y-4"
+                                >
+                                    <div className="space-y-2">
+                                        <label
+                                            htmlFor="business_date"
+                                            className="text-sm font-medium"
+                                        >
+                                            Business date
+                                        </label>
+                                        <Input
+                                            id="business_date"
+                                            type="date"
+                                            value={businessDate}
+                                            onChange={(event) =>
+                                                setBusinessDate(
+                                                    event.target.value,
+                                                )
+                                            }
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label
+                                            htmlFor="opening_note"
+                                            className="text-sm font-medium"
+                                        >
+                                            Opening note
+                                        </label>
+                                        <Input
+                                            id="opening_note"
+                                            value={openingNote}
+                                            onChange={(event) =>
+                                                setOpeningNote(
+                                                    event.target.value,
+                                                )
+                                            }
+                                            placeholder="Optional note"
+                                            maxLength={2000}
+                                        />
+                                    </div>
+                                    <DialogFooter>
+                                        <Button type="submit">
+                                            Open branch day
+                                        </Button>
+                                    </DialogFooter>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
+                    }
+                />
 
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <Input
@@ -199,31 +210,36 @@ export default function Index() {
                     />
                 </div>
 
-                <div className="h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card">
-                    <table className="w-full min-w-180 border-collapse text-sm">
-                        <thead className="bg-muted text-muted-foreground">
-                            <tr>
-                                {[
-                                    '#',
-                                    'Branch',
-                                    'Business Date',
-                                    'Status',
-                                    'Opened By',
-                                    'Closed By',
-                                    'Actions',
-                                ].map((header) => (
-                                    <th
-                                        key={header}
-                                        className="border-b p-2 text-left font-medium"
-                                    >
-                                        {header}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {branch_days.data.length > 0 ? (
-                                branch_days.data.map((branchDay, index) => (
+                {branch_days.data.length === 0 ? (
+                    <ResourceEmptyState
+                        title="No branch days found"
+                        description="Open a branch day to begin daily operations."
+                    />
+                ) : (
+                    <div className="h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card">
+                        <table className="w-full min-w-180 border-collapse text-sm">
+                            <thead className="bg-muted text-muted-foreground">
+                                <tr>
+                                    {[
+                                        '#',
+                                        'Branch',
+                                        'Business Date',
+                                        'Status',
+                                        'Opened By',
+                                        'Closed By',
+                                        'Actions',
+                                    ].map((header) => (
+                                        <th
+                                            key={header}
+                                            className="border-b p-2 text-left font-medium"
+                                        >
+                                            {header}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {branch_days.data.map((branchDay, index) => (
                                     <tr
                                         key={branchDay.id}
                                         className="border-b transition-colors even:bg-muted/40 hover:bg-accent/20"
@@ -253,9 +269,18 @@ export default function Index() {
                                             {branchDay.business_date}
                                         </td>
                                         <td className="px-2 py-2">
-                                            <span className="rounded-full border px-2 py-1 text-xs font-medium">
+                                            <StatusBadge
+                                                tone={
+                                                    branchDay.status === 'OPEN'
+                                                        ? 'success'
+                                                        : branchDay.status ===
+                                                            'CLOSING'
+                                                          ? 'warning'
+                                                          : 'neutral'
+                                                }
+                                            >
                                                 {branchDay.status}
-                                            </span>
+                                            </StatusBadge>
                                         </td>
                                         <td className="px-2 py-2">
                                             {branchDay.opened_by?.name ?? '-'}
@@ -279,21 +304,11 @@ export default function Index() {
                                             )}
                                         </td>
                                     </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td
-                                        colSpan={7}
-                                        className="px-4 py-10 text-center text-muted-foreground"
-                                    >
-                                        No branch days found for this
-                                        organization.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
 
                 <DataTablePagination
                     perPage={branch_days.per_page}

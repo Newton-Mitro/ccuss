@@ -1,13 +1,17 @@
+import DataTablePagination from '@/components/data-table-pagination';
+import {
+    ResourceEmptyState,
+    ResourcePageHeader,
+    StatusBadge,
+} from '@/components/resource-page-shell';
+import { Input } from '@/components/ui/input';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
+import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { BreadcrumbItem, SharedData } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { HandCoins } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-import DataTablePagination from '../../../../components/data-table-pagination';
-import HeadingSmall from '../../../../components/heading-small';
-import { Input } from '../../../../components/ui/input';
-import useFlashToastHandler from '../../../../hooks/use-flash-toast-handler';
-import CustomAuthLayout from '../../../../layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '../../../../types';
 
 interface AdvanceAccountListItem {
     id: number;
@@ -66,7 +70,7 @@ export default function Index() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Advance Accounts" />
             <div className="space-y-4 text-foreground">
-                <HeadingSmall
+                <ResourcePageHeader
                     title="Advance Accounts"
                     description="Track petty cash advance accounts, custodians, and balances for the active branch."
                 />
@@ -79,32 +83,37 @@ export default function Index() {
                         setData('page', 1);
                     }}
                 />
-                <div className="h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card">
-                    <table className="w-full min-w-240 border-collapse text-sm">
-                        <thead className="bg-muted text-muted-foreground">
-                            <tr>
-                                {[
-                                    '#',
-                                    'Account',
-                                    'Branch',
-                                    'Custodian',
-                                    'Method',
-                                    'Balance',
-                                    'Limit',
-                                    'Status',
-                                ].map((header) => (
-                                    <th
-                                        key={header}
-                                        className="border-b p-2 text-left font-medium"
-                                    >
-                                        {header}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {advance_accounts.data.length > 0 ? (
-                                advance_accounts.data.map((account, index) => (
+                {advance_accounts.data.length === 0 ? (
+                    <ResourceEmptyState
+                        title="No advance accounts found"
+                        description="Create an advance account to begin petty cash tracking."
+                    />
+                ) : (
+                    <div className="h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card">
+                        <table className="w-full min-w-240 border-collapse text-sm">
+                            <thead className="bg-muted text-muted-foreground">
+                                <tr>
+                                    {[
+                                        '#',
+                                        'Account',
+                                        'Branch',
+                                        'Custodian',
+                                        'Method',
+                                        'Balance',
+                                        'Limit',
+                                        'Status',
+                                    ].map((header) => (
+                                        <th
+                                            key={header}
+                                            className="border-b p-2 text-left font-medium"
+                                        >
+                                            {header}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {advance_accounts.data.map((account, index) => (
                                     <tr
                                         key={account.id}
                                         className="border-b even:bg-muted/40 hover:bg-accent/20"
@@ -145,26 +154,25 @@ export default function Index() {
                                             {account.fund_limit}
                                         </td>
                                         <td className="px-2 py-2">
-                                            <span className="rounded-full border px-2 py-1 text-xs font-medium">
+                                            <StatusBadge
+                                                tone={
+                                                    account.status === 'ACTIVE'
+                                                        ? 'success'
+                                                        : account.status ===
+                                                            'INACTIVE'
+                                                          ? 'warning'
+                                                          : 'neutral'
+                                                }
+                                            >
                                                 {account.status}
-                                            </span>
+                                            </StatusBadge>
                                         </td>
                                     </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td
-                                        colSpan={8}
-                                        className="px-4 py-10 text-center text-muted-foreground"
-                                    >
-                                        No petty cash advance accounts found for
-                                        this organization.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
                 <DataTablePagination
                     perPage={advance_accounts.per_page}
                     currentPage={advance_accounts.current_page}
