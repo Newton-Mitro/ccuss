@@ -31,17 +31,22 @@ interface Props extends SharedData {
         per_page: number;
     };
     filters: { search?: string };
+    category?: string | null;
 }
 
 export default function FinancialAccountIndex() {
-    const { accounts, filters } = usePage<Props>().props;
+    const { accounts, filters, category } = usePage<Props>().props;
     const [search, setSearch] = useState(filters.search ?? '');
+    const categoryLabel = category?.replaceAll('_', ' ') ?? 'All';
+    const indexRoute = category
+        ? route('financial-accounts.category', category)
+        : route('financial-accounts.index');
 
     useEffect(() => {
         const timeout = setTimeout(
             () =>
                 router.get(
-                    route('financial-accounts.index'),
+                    indexRoute,
                     { search },
                     {
                         preserveState: true,
@@ -52,26 +57,44 @@ export default function FinancialAccountIndex() {
             300,
         );
         return () => clearTimeout(timeout);
-    }, [search]);
+    }, [search, indexRoute]);
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
         {
-            title: 'Financial Accounts',
-            href: route('financial-accounts.index'),
+            title: category
+                ? `${categoryLabel} Management`
+                : 'Financial Accounts',
+            href: indexRoute,
         },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Financial Accounts" />
+            <Head title={`${categoryLabel} Account Management`} />
             <div className="space-y-4">
                 <ResourcePageHeader
-                    title="Financial Accounts"
-                    description="Manage member, deposit, loan, cash, and bank accounts."
+                    title={
+                        category
+                            ? `${categoryLabel} Management`
+                            : 'Financial Accounts'
+                    }
+                    description={
+                        category
+                            ? `Manage ${categoryLabel.toLowerCase()} accounts and member activity.`
+                            : 'Manage member, deposit, loan, cash, and bank accounts.'
+                    }
                     action={
                         <Button asChild size="sm">
-                            <Link href={route('financial-accounts.create')}>
+                            <Link
+                                href={
+                                    category
+                                        ? route('financial-accounts.create', {
+                                              category,
+                                          })
+                                        : route('financial-accounts.create')
+                                }
+                            >
                                 <Plus className="mr-1 h-4 w-4" /> Open account
                             </Link>
                         </Button>
@@ -164,7 +187,7 @@ export default function FinancialAccountIndex() {
                     perPage={accounts.per_page}
                     onPerPageChange={(perPage) =>
                         router.get(
-                            route('financial-accounts.index'),
+                            indexRoute,
                             { search, per_page: perPage, page: 1 },
                             { preserveState: true, preserveScroll: true },
                         )

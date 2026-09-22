@@ -195,7 +195,7 @@ export default function CustomAuthLayout({
      * Render
      * ------------------------------------------------------------------ */
     return (
-        <div className="app-shell relative flex h-screen overflow-hidden bg-background text-foreground select-none">
+        <div className="app-shell relative flex h-screen overflow-hidden bg-background text-foreground">
             {/* Sidebar */}
             <aside
                 className={cn(

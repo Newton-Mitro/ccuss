@@ -25,9 +25,22 @@ class FinancialAccountController extends Controller
 
     public function index(Request $request): Response
     {
+        return $this->accountIndex($request);
+    }
+
+    public function categoryIndex(Request $request, string $category): Response
+    {
+        abort_unless(in_array($category, ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT', 'LOAN'], true), 404);
+
+        return $this->accountIndex($request, $category);
+    }
+
+    private function accountIndex(Request $request, ?string $category = null): Response
+    {
         $accounts = $this->accountService
             ->queryForOrganization($this->organizationId($request))
             ->with(['product', 'holder'])
+            ->when($category, fn($query) => $query->where('account_type', $category))
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search')->trim();
                 $query->where(fn($query) => $query
@@ -41,16 +54,22 @@ class FinancialAccountController extends Controller
         return Inertia::render('financial-services/accounts/index', [
             'accounts' => $accounts,
             'filters' => $request->only(['search', 'per_page', 'page']),
+            'category' => $category,
         ]);
     }
 
     public function create(Request $request): Response
     {
         $organizationId = $this->organizationId($request);
+        $category = $request->string('category')->upper()->value();
+        $category = in_array($category, ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT', 'LOAN'], true)
+            ? $category
+            : null;
 
         return Inertia::render('financial-services/accounts/form', [
-            'products' => FinancialProduct::query()->where('organization_id', $organizationId)->where('status', true)->orderBy('code')->get(['id', 'code', 'name', 'category']),
+            'products' => FinancialProduct::query()->where('organization_id', $organizationId)->where('status', true)->when($category, fn($query) => $query->where('category', $category))->orderBy('code')->get(['id', 'code', 'name', 'category']),
             'customers' => Customer::query()->where('organization_id', $organizationId)->orderBy('name')->get(['id', 'customer_no', 'name', 'type', 'dob']),
+            'category' => $category,
         ]);
     }
 

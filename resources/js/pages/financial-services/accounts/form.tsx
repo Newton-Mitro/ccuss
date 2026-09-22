@@ -18,17 +18,18 @@ interface Props {
         type: 'INDIVIDUAL' | 'ORGANIZATION';
         dob?: string | null;
     }[];
+    category?: string | null;
 }
 
 export default function FinancialAccountForm() {
-    const { products, customers } = usePage<Props>().props;
+    const { products, customers, category } = usePage<Props>().props;
     const { data, setData, post, processing, errors } = useForm({
         financial_product_id: '',
         holder_type: 'customer',
         holder_id: '',
         account_no: '',
         name: '',
-        account_type: 'SAVINGS',
+        account_type: category ?? 'SAVINGS',
         metadata: {},
         joint_holder_ids: [] as string[],
         guardian_customer_id: '',
@@ -56,15 +57,30 @@ export default function FinancialAccountForm() {
             title: 'Financial Accounts',
             href: route('financial-accounts.index'),
         },
-        { title: 'Open Account', href: '' },
+        {
+            title: category
+                ? `Open ${category.replaceAll('_', ' ')} Account`
+                : 'Open Account',
+            href: '',
+        },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Open Financial Account" />
+            <Head
+                title={
+                    category
+                        ? `Open ${category.replaceAll('_', ' ')} Account`
+                        : 'Open Financial Account'
+                }
+            />
             <div className="mx-auto max-w-3xl space-y-4">
                 <ResourcePageHeader
-                    title="Open financial account"
+                    title={
+                        category
+                            ? `Open ${category.replaceAll('_', ' ')} account`
+                            : 'Open financial account'
+                    }
                     description="Create an account for a customer and financial product."
                 />
                 <form
@@ -239,16 +255,29 @@ export default function FinancialAccountForm() {
                                     'CASH',
                                     'BANK',
                                     'OTHER',
-                                ].map((value) => ({
-                                    value,
-                                    label: value.replaceAll('_', ' '),
-                                }))}
+                                ]
+                                    .filter(
+                                        (value) =>
+                                            !category || value === category,
+                                    )
+                                    .map((value) => ({
+                                        value,
+                                        label: value.replaceAll('_', ' '),
+                                    }))}
                             />
                         </div>
                     </div>
                     <div className="flex justify-end gap-2 border-t pt-3">
                         <Button asChild type="button" variant="outline">
-                            <Link href={route('financial-accounts.index')}>
+                            <Link
+                                href={
+                                    category
+                                        ? route('financial-accounts.category', {
+                                              category,
+                                          })
+                                        : route('financial-accounts.index')
+                                }
+                            >
                                 Cancel
                             </Link>
                         </Button>

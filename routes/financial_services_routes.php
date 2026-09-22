@@ -5,7 +5,6 @@ use App\FinancialServices\Controllers\FinancialAccountController;
 use App\FinancialServices\Controllers\FinancialTransactionController;
 use App\FinancialServices\Controllers\FinancialProductPolicyController;
 use App\FinancialServices\Controllers\FinancialReportController;
-use App\FinancialServices\Controllers\CustomerCollectionController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'organization'])->group(function () {
@@ -31,6 +30,9 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
         ->name('financial-product-policies.store');
 
     Route::get('/financial-accounts', [FinancialAccountController::class, 'index'])->name('financial-accounts.index');
+    Route::get('/financial-accounts/category/{category}', [FinancialAccountController::class, 'categoryIndex'])
+        ->where('category', 'SAVINGS|SHARE|FIXED_DEPOSIT|RECURRING_DEPOSIT|LOAN')
+        ->name('financial-accounts.category');
     Route::get('/financial-accounts/create', [FinancialAccountController::class, 'create'])->name('financial-accounts.create');
     Route::post('/financial-accounts', [FinancialAccountController::class, 'store'])->name('financial-accounts.store');
     Route::get('/financial-accounts/{financial_account}', [FinancialAccountController::class, 'show'])->name('financial-accounts.show');
@@ -42,6 +44,10 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/financial-transactions/{workflow}/create', [FinancialTransactionController::class, 'workflow'])
         ->where('workflow', 'transfer|loan-disbursement|loan-repayment')
         ->name('financial-transactions.workflow');
+    Route::post('/financial-transactions/transfer', [FinancialTransactionController::class, 'storeTransfer'])
+        ->name('financial-transactions.transfer.store');
+    Route::post('/financial-transactions/loan-disbursement', [FinancialTransactionController::class, 'storeLoanDisbursement'])
+        ->name('financial-transactions.loan-disbursement.store');
     Route::post('/financial-transactions', [FinancialTransactionController::class, 'store'])->name('financial-transactions.store');
     Route::get('/financial-transactions/{financial_transaction}', [FinancialTransactionController::class, 'show'])->name('financial-transactions.show');
     Route::post('/financial-transactions/{financial_transaction}/post', [FinancialTransactionController::class, 'post'])->name('financial-transactions.post');
@@ -52,10 +58,4 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/financial-reports/account-balances', [FinancialReportController::class, 'accountBalances'])->name('financial-reports.account-balances');
     Route::get('/financial-reports/transactions', [FinancialReportController::class, 'transactions'])->name('financial-reports.transactions');
 
-    Route::get('/customer-collection', [CustomerCollectionController::class, 'index'])
-        ->name('customer-collection.index');
-    Route::get('/customer-collection/search', [CustomerCollectionController::class, 'search'])
-        ->name('customer-collection.search');
-    Route::get('/customer-collection/{customer}/summary', [CustomerCollectionController::class, 'summary'])
-        ->name('customer-collection.summary');
 });

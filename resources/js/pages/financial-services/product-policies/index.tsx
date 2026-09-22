@@ -6,7 +6,7 @@ import {
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Edit2, FileText, ShieldCheck } from 'lucide-react';
+import { Edit2, FileText } from 'lucide-react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 
@@ -45,16 +45,7 @@ export default function ProductPoliciesIndex() {
                     title="Product policies"
                     description="Operational rules and policy provenance for every financial product."
                 />
-                <div className="rounded-md border border-sky-500/20 bg-sky-500/5 p-4 text-sm text-sky-900 dark:text-sky-100">
-                    <div className="flex gap-3">
-                        <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0" />
-                        <p>
-                            Rates and conditions should follow the latest
-                            approved internal policy. The AI reference catalog
-                            is a guide, not a binding contract.
-                        </p>
-                    </div>
-                </div>
+
                 <ResourceTableCard className="h-[calc(100vh-320px)] md:h-[calc(100vh-300px)]">
                     <table className="w-full min-w-190 text-sm">
                         <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">

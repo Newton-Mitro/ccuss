@@ -82,4 +82,9 @@ class LoanAccount extends Model
     {
         return $this->hasMany(LoanArrear::class);
     }
+
+    public function disbursements(): HasMany
+    {
+        return $this->hasMany(LoanDisbursement::class);
+    }
 }
