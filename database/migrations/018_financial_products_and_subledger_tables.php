@@ -63,7 +63,6 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
             $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('financial_account_id')->nullable()->constrained()->nullOnDelete();
             $table->string('transaction_no', 100);
             $table->string('transaction_type', 50);
             $table->dateTime('transaction_date');
@@ -78,7 +77,6 @@ return new class extends Migration {
             $table->timestamp('posted_at')->nullable();
             $table->timestamps();
             $table->unique(['organization_id', 'transaction_no']);
-            $table->index(['financial_account_id', 'transaction_date'], 'fin_tx_account_date_index');
         });
 
         Schema::create('financial_transaction_entries', function (Blueprint $table): void {

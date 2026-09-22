@@ -39,7 +39,6 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/financial-account-statements', [FinancialAccountController::class, 'statement'])->name('financial-account-statements.index');
 
     Route::get('/financial-transactions', [FinancialTransactionController::class, 'index'])->name('financial-transactions.index');
-    Route::get('/financial-transactions/create', [FinancialTransactionController::class, 'create'])->name('financial-transactions.create');
     Route::get('/financial-transactions/{workflow}/create', [FinancialTransactionController::class, 'workflow'])
         ->where('workflow', 'transfer|loan-disbursement|loan-repayment')
         ->name('financial-transactions.workflow');

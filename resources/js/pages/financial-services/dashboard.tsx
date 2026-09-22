@@ -29,7 +29,7 @@ interface Props {
         transaction_type: string;
         amount: string | number;
         status: string;
-        financial_account?: { account_no?: string } | null;
+        entries?: { financial_account?: { account_no?: string } | null }[];
     }[];
 }
 
@@ -138,8 +138,14 @@ export default function FinancialServicesDashboard() {
                                             {transaction.transaction_no}
                                         </td>
                                         <td className="px-3 py-2">
-                                            {transaction.financial_account
-                                                ?.account_no ?? '-'}
+                                            {transaction.entries
+                                                ?.map(
+                                                    (entry) =>
+                                                        entry.financial_account
+                                                            ?.account_no,
+                                                )
+                                                .filter(Boolean)
+                                                .join(', ') || '-'}
                                         </td>
                                         <td className="px-3 py-2">
                                             {transaction.transaction_type}

@@ -104,8 +104,8 @@ class ReportExportController extends Controller
             'transactions' => [
                 'Financial Transactions',
                 ['Number', 'Account', 'Date', 'Type', 'Amount', 'Status'],
-                FinancialTransaction::where('organization_id', $organizationId)->with('financialAccount')->latest('transaction_date')->get()
-                    ->map(fn($row) => [$row->transaction_no, $row->financialAccount?->account_no ?? '-', $row->transaction_date, $row->transaction_type, $row->amount, $row->status])->all(),
+                FinancialTransaction::where('organization_id', $organizationId)->with('entries.financialAccount')->latest('transaction_date')->get()
+                    ->map(fn($row) => [$row->transaction_no, $row->entries->pluck('financialAccount.account_no')->filter()->join(', ') ?: '-', $row->transaction_date, $row->transaction_type, $row->amount, $row->status])->all(),
             ],
             'account-statement' => $this->accountStatement($request, $organizationId),
             default => abort(404),

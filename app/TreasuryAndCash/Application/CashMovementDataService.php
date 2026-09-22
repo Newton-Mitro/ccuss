@@ -2,6 +2,7 @@
 
 namespace App\TreasuryAndCash\Application;
 
+use App\FinancialServices\Models\FinancialAccount;
 use App\TreasuryAndCash\Models\BranchDay;
 use App\TreasuryAndCash\Models\CashLocation;
 use App\TreasuryAndCash\Models\CashAdjustment;
@@ -128,6 +129,11 @@ class CashMovementDataService
                 ->with(['teller', 'branchDay'])
                 ->latest('opened_at')
                 ->get(['id', 'branch_day_id', 'teller_id', 'opening_cash', 'expected_cash']),
+            'financial_accounts' => FinancialAccount::query()
+                ->where('organization_id', $organizationId)
+                ->whereIn('status', ['PENDING', 'ACTIVE'])
+                ->orderBy('account_no')
+                ->get(['id', 'account_no', 'name', 'account_type', 'balance']),
         ];
     }
 
@@ -145,6 +151,11 @@ class CashMovementDataService
                 ->with(['teller', 'branchDay'])
                 ->latest('opened_at')
                 ->get(['id', 'branch_day_id', 'teller_id', 'opening_cash', 'expected_cash']),
+            'financial_accounts' => FinancialAccount::query()
+                ->where('organization_id', $organizationId)
+                ->whereIn('status', ['PENDING', 'ACTIVE'])
+                ->orderBy('account_no')
+                ->get(['id', 'account_no', 'name', 'account_type', 'balance']),
         ];
     }
 }

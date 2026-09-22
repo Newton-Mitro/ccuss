@@ -3,6 +3,7 @@
 namespace App\TreasuryAndCash\Models;
 
 use App\SystemAdministration\Models\User;
+use App\FinancialServices\Models\FinancialTransaction;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,6 +16,7 @@ class TellerCashTransaction extends Model
         'branch_day_id',
         'cash_location_id',
         'teller_session_id',
+        'financial_transaction_id',
         'transaction_no',
         'type',
         'amount',
@@ -46,6 +48,11 @@ class TellerCashTransaction extends Model
     public function tellerSession(): BelongsTo
     {
         return $this->belongsTo(TellerSession::class);
+    }
+
+    public function financialTransaction(): BelongsTo
+    {
+        return $this->belongsTo(FinancialTransaction::class);
     }
 
     public function requestedBy(): BelongsTo

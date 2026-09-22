@@ -3,12 +3,11 @@ import {
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Eye, Plus } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
@@ -20,7 +19,7 @@ interface Transaction {
     transaction_date: string;
     amount: string | number;
     status: string;
-    financial_account?: { account_no?: string } | null;
+    entries?: { financial_account?: { account_no?: string } | null }[];
 }
 
 export default function FinancialTransactionIndex() {
@@ -55,14 +54,6 @@ export default function FinancialTransactionIndex() {
                 <ResourcePageHeader
                     title="Financial Transactions"
                     description="Create, post, and reverse operational account movements."
-                    action={
-                        <Button asChild size="sm">
-                            <Link href={route('financial-transactions.create')}>
-                                <Plus className="mr-1 h-4 w-4" /> New
-                                transaction
-                            </Link>
-                        </Button>
-                    }
                 />
                 <Input
                     value={search}
@@ -103,8 +94,14 @@ export default function FinancialTransactionIndex() {
                                             {transaction.transaction_no}
                                         </td>
                                         <td className="px-2 py-1">
-                                            {transaction.financial_account
-                                                ?.account_no ?? '-'}
+                                            {transaction.entries
+                                                ?.map(
+                                                    (entry) =>
+                                                        entry.financial_account
+                                                            ?.account_no,
+                                                )
+                                                .filter(Boolean)
+                                                .join(', ') || '-'}
                                         </td>
                                         <td className="px-2 py-1">
                                             {transaction.transaction_type}

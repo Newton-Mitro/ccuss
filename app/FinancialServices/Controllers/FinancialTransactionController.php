@@ -3,7 +3,6 @@
 namespace App\FinancialServices\Controllers;
 
 use App\FinancialServices\Application\FinancialTransactionService;
-use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialTransaction;
 use App\FinancialServices\Requests\StoreFinancialTransactionRequest;
 use App\Http\Controllers\Controller;
@@ -16,7 +15,7 @@ class FinancialTransactionController extends Controller
     public function __construct(private readonly FinancialTransactionService $transactionService)
     {
         $this->middleware('permission:financial.transactions.view')->only(['index', 'show']);
-        $this->middleware('permission:financial.transactions.create')->only(['create', 'store']);
+        $this->middleware('permission:financial.transactions.create')->only('store');
         $this->middleware('permission:financial.transactions.post')->only('post');
         $this->middleware('permission:financial.transactions.reverse')->only('reverse');
     }
@@ -25,7 +24,7 @@ class FinancialTransactionController extends Controller
     {
         $transactions = $this->transactionService
             ->queryForOrganization($this->organizationId($request))
-            ->with('financialAccount')
+            ->with('entries.financialAccount')
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search')->trim();
                 $query->where(fn($query) => $query
@@ -39,14 +38,6 @@ class FinancialTransactionController extends Controller
         return Inertia::render('financial-services/transactions/index', [
             'transactions' => $transactions,
             'filters' => $request->only(['search', 'per_page', 'page']),
-        ]);
-    }
-
-    public function create(Request $request): Response
-    {
-        return Inertia::render('financial-services/transactions/form', [
-            'transactionType' => $request->string('type')->upper()->value() ?: 'DEPOSIT',
-            'accounts' => FinancialAccount::query()->where('organization_id', $this->organizationId($request))->whereIn('status', ['PENDING', 'ACTIVE'])->orderBy('account_no')->get(['id', 'account_no', 'name', 'account_type', 'balance']),
         ]);
     }
 
@@ -71,7 +62,7 @@ class FinancialTransactionController extends Controller
         $this->authorizeOrganization($request, $financialTransaction);
 
         return Inertia::render('financial-services/transactions/show', [
-            'transaction' => $financialTransaction->load(['financialAccount', 'entries']),
+            'transaction' => $financialTransaction->load(['entries.financialAccount']),
         ]);
     }
 

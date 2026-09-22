@@ -8,10 +8,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\FinancialTransaction;
+use App\FinancialServices\Models\FinancialTransactionEntry;
 
 class FinancialAccount extends Model
 {
@@ -69,9 +71,16 @@ class FinancialAccount extends Model
         return $this->morphTo();
     }
 
-    public function transactions(): HasMany
+    public function transactions(): HasManyThrough
     {
-        return $this->hasMany(FinancialTransaction::class);
+        return $this->hasManyThrough(
+            FinancialTransaction::class,
+            FinancialTransactionEntry::class,
+            'financial_account_id',
+            'id',
+            'id',
+            'financial_transaction_id',
+        );
     }
 
     public function depositAccount(): HasOne

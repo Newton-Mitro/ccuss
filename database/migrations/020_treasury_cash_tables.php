@@ -182,6 +182,7 @@ return new class extends Migration {
             $table->foreignId('branch_day_id')->constrained()->cascadeOnDelete();
             $table->foreignId('cash_location_id')->constrained()->restrictOnDelete();
             $table->foreignId('teller_session_id')->constrained()->restrictOnDelete();
+            $table->foreignId('financial_transaction_id')->nullable()->constrained('financial_transactions')->nullOnDelete();
             $table->string('transaction_no', 100);
             $table->enum('type', ['DEPOSIT', 'WITHDRAWAL']);
             $table->decimal('amount', 20, 4);

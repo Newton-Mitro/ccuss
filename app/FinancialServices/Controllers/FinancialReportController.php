@@ -23,7 +23,7 @@ class FinancialReportController extends Controller
                 'activeAccounts' => FinancialAccount::where('organization_id', $organizationId)->where('status', 'ACTIVE')->count(),
                 'postedTransactions' => FinancialTransaction::where('organization_id', $organizationId)->where('status', 'POSTED')->count(),
             ],
-            'recentTransactions' => FinancialTransaction::where('organization_id', $organizationId)->with('financialAccount')->latest('id')->limit(8)->get(),
+            'recentTransactions' => FinancialTransaction::where('organization_id', $organizationId)->with('entries.financialAccount')->latest('id')->limit(8)->get(),
         ]);
     }
 
@@ -52,7 +52,7 @@ class FinancialReportController extends Controller
     public function transactions(Request $request): Response
     {
         $transactions = FinancialTransaction::where('organization_id', $this->organizationId($request))
-            ->with('financialAccount')
+            ->with('entries.financialAccount')
             ->latest('transaction_date')
             ->paginate(25)
             ->withQueryString();

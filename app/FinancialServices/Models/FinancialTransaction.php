@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialTransactionEntry;
 
 class FinancialTransaction extends Model
@@ -24,7 +23,6 @@ class FinancialTransaction extends Model
     protected $fillable = [
         'organization_id',
         'branch_id',
-        'financial_account_id',
         'transaction_no',
         'transaction_type',
         'transaction_date',
@@ -54,11 +52,6 @@ class FinancialTransaction extends Model
     public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);
-    }
-
-    public function financialAccount(): BelongsTo
-    {
-        return $this->belongsTo(FinancialAccount::class);
     }
 
     public function source(): MorphTo

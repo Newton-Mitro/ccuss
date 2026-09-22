@@ -19,7 +19,11 @@ interface Transaction {
     status: string;
     description?: string;
     reference?: string;
-    financial_account?: { account_no?: string } | null;
+    entries?: {
+        financial_account?: { account_no?: string } | null;
+        direction: string;
+        amount: string | number;
+    }[];
 }
 
 export default function FinancialTransactionShow() {
@@ -35,7 +39,14 @@ export default function FinancialTransactionShow() {
             <div className="space-y-4">
                 <ResourcePageHeader
                     title={transaction.transaction_no}
-                    description={`${transaction.transaction_type} · ${transaction.financial_account?.account_no ?? '-'}`}
+                    description={`${transaction.transaction_type} · ${
+                        transaction.entries
+                            ?.map(
+                                (entry) => entry.financial_account?.account_no,
+                            )
+                            .filter(Boolean)
+                            .join(', ') || '-'
+                    }`}
                     action={
                         <div className="flex gap-2">
                             {transaction.status === 'PENDING' && (
@@ -113,6 +124,25 @@ export default function FinancialTransactionShow() {
                         {transaction.description}
                     </div>
                 )}
+                <div className="rounded-lg border bg-card p-3">
+                    <h2 className="mb-2 text-sm font-medium">Entries</h2>
+                    <div className="space-y-2 text-sm">
+                        {transaction.entries?.map((entry, index) => (
+                            <div
+                                key={index}
+                                className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0"
+                            >
+                                <span>
+                                    {entry.financial_account?.account_no ?? '-'}
+                                </span>
+                                <span className="tabular-nums">
+                                    {entry.direction}{' '}
+                                    {Number(entry.amount).toFixed(4)}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
                 <Link
                     className="text-sm text-primary hover:underline"
                     href={route('financial-transactions.index')}

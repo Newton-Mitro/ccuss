@@ -16,7 +16,6 @@ class FinancialTransactionFactory extends Factory
         return [
             'organization_id' => Organization::factory(),
             'branch_id' => null,
-            'financial_account_id' => FinancialAccount::factory(),
             'transaction_no' => strtoupper(fake()->unique()->bothify('FT-########')),
             'transaction_type' => fake()->randomElement(['DEPOSIT', 'WITHDRAWAL']),
             'transaction_date' => now()->subDays(fake()->numberBetween(0, 90)),
@@ -31,6 +30,22 @@ class FinancialTransactionFactory extends Factory
             'posted_by' => null,
             'posted_at' => null,
         ];
+    }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (FinancialTransaction $transaction): void {
+            $account = FinancialAccount::factory()->create([
+                'organization_id' => $transaction->organization_id,
+            ]);
+
+            $transaction->entries()->create([
+                'financial_account_id' => $account->id,
+                'direction' => $transaction->transaction_type === 'DEPOSIT' ? 'CREDIT' : 'DEBIT',
+                'amount' => $transaction->amount,
+                'line_no' => 1,
+            ]);
+        });
     }
 
     public function deposit(): static
