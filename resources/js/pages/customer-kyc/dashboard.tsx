@@ -15,9 +15,9 @@ import {
     CardTitle,
 } from '../../components/ui/card';
 import CustomAuthLayout from '../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../types';
+import { BreadcrumbItem, SharedData } from '../../types';
 
-interface Props {
+interface Props extends SharedData {
     stats: {
         customers: number;
         activeCustomers: number;

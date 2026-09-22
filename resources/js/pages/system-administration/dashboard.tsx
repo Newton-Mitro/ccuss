@@ -16,9 +16,9 @@ import {
     CardTitle,
 } from '../../components/ui/card';
 import CustomAuthLayout from '../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../types';
+import { BreadcrumbItem, SharedData } from '../../types';
 
-interface Props {
+interface Props extends SharedData {
     stats: {
         organizations: number;
         branches: number;
@@ -29,12 +29,12 @@ interface Props {
     };
 }
 
-const links = [
-    ['Organizations', 'organizations.index', Building2],
-    ['Branches', 'branches.index', GitBranch],
-    ['Users', 'users.index', Users],
-    ['Role permissions', 'roles.index', ShieldCheck],
-    ['Activity logs', 'audits.index', ClipboardList],
+const links: { label: string; href: string; icon: typeof Building2 }[] = [
+    { label: 'Organizations', href: 'organizations.index', icon: Building2 },
+    { label: 'Branches', href: 'branches.index', icon: GitBranch },
+    { label: 'Users', href: 'users.index', icon: Users },
+    { label: 'Role permissions', href: 'roles.index', icon: ShieldCheck },
+    { label: 'Activity logs', href: 'audits.index', icon: ClipboardList },
 ];
 
 export default function Dashboard() {
@@ -79,12 +79,11 @@ export default function Dashboard() {
                         <CardTitle>Administration workspace</CardTitle>
                     </CardHeader>
                     <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                        {links.map(([label, href, Icon]) => {
-                            const LinkIcon = Icon as typeof Building2;
+                        {links.map(({ label, href, icon: LinkIcon }) => {
                             return (
                                 <Link
-                                    key={label as string}
-                                    href={route(href as string)}
+                                    key={label}
+                                    href={route(href)}
                                     className="flex items-center justify-between rounded-md border p-4 hover:bg-muted"
                                 >
                                     <span className="flex items-center gap-2">

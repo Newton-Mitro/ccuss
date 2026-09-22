@@ -63,7 +63,6 @@ function CreateOrganization() {
             preserveScroll: true,
             preserveState: true,
             onError: (errors) => {
-                console.log(errors);
                 setError(errors);
             },
         });

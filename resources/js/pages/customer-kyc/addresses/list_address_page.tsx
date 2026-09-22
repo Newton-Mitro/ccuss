@@ -1,10 +1,15 @@
+import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
+import {
+    ResourceEmptyState,
+    ResourceRowActions,
+    ResourceTableViewport,
+} from '@/components/resource-page-shell';
+import { Input } from '@/components/ui/input';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-import DataTablePagination from '../../../components/data-table-pagination';
-import HeadingSmall from '../../../components/heading-small';
-import { Input } from '../../../components/ui/input';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
@@ -95,17 +100,77 @@ export default function AddressIndex() {
                 </div>
 
                 {isEmpty ? (
-                    <div className="flex flex-col items-center justify-center rounded-md border bg-card py-16 text-center text-muted-foreground">
-                        <p className="text-base font-medium">
-                            No pending addresses found
-                        </p>
-                        <p className="text-xs">
-                            Try adjusting your search criteria.
-                        </p>
-                    </div>
+                    <ResourceEmptyState
+                        title="No pending addresses found"
+                        description="Try adjusting your search criteria."
+                    />
                 ) : (
                     <>
-                        <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
+                        <ResourceTableViewport
+                            heightClassName="h-[calc(100vh-320px)]"
+                            mobile={
+                                <div className="space-y-3">
+                                    {paginated_data.data.map((address) => (
+                                        <div
+                                            key={address.id}
+                                            className="space-y-2 rounded-md border bg-card p-3"
+                                        >
+                                            <div className="flex justify-between gap-3">
+                                                <div className="min-w-0">
+                                                    <p className="truncate font-medium">
+                                                        {address.customer
+                                                            ?.name ?? 'Unknown'}
+                                                    </p>
+                                                    <p className="text-xs text-muted-foreground capitalize">
+                                                        {address.type} address
+                                                    </p>
+                                                </div>
+                                                <Badge
+                                                    text={
+                                                        address.verification_status
+                                                    }
+                                                />
+                                            </div>
+                                            <p className="text-xs text-muted-foreground">
+                                                {[
+                                                    address.line1,
+                                                    address.line2,
+                                                    address.district,
+                                                ]
+                                                    .filter(Boolean)
+                                                    .join(', ')}
+                                            </p>
+                                            <ResourceRowActions className="justify-end">
+                                                <AddressActions
+                                                    address={address}
+                                                    onDelete={handleDelete}
+                                                />
+                                                <ApprovalActions
+                                                    approveUrl={route(
+                                                        'customers.addresses.approve',
+                                                        [
+                                                            address.customer_id,
+                                                            address.id,
+                                                        ],
+                                                    )}
+                                                    rejectUrl={route(
+                                                        'customers.addresses.reject',
+                                                        [
+                                                            address.customer_id,
+                                                            address.id,
+                                                        ],
+                                                    )}
+                                                    pending={
+                                                        address.verification_status ===
+                                                        'PENDING'
+                                                    }
+                                                />
+                                            </ResourceRowActions>
+                                        </div>
+                                    ))}
+                                </div>
+                            }
+                        >
                             <table className="w-full border-collapse">
                                 <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                                     <tr>
@@ -186,68 +251,7 @@ export default function AddressIndex() {
                                     ))}
                                 </tbody>
                             </table>
-                        </div>
-
-                        <div className="space-y-3 md:hidden">
-                            {paginated_data.data.map((address) => (
-                                <div
-                                    key={address.id}
-                                    className="space-y-2 rounded-md border bg-card p-3"
-                                >
-                                    <div className="flex justify-between gap-3">
-                                        <div className="min-w-0">
-                                            <p className="truncate font-medium">
-                                                {address.customer?.name ??
-                                                    'Unknown'}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground capitalize">
-                                                {address.type} address
-                                            </p>
-                                        </div>
-                                        <Badge
-                                            text={address.verification_status}
-                                        />
-                                    </div>
-
-                                    <p className="text-xs text-muted-foreground">
-                                        {[
-                                            address.line1,
-                                            address.line2,
-                                            address.district,
-                                        ]
-                                            .filter(Boolean)
-                                            .join(', ')}
-                                    </p>
-
-                                    <div className="flex items-center justify-end gap-2">
-                                        <AddressActions
-                                            address={address}
-                                            onDelete={handleDelete}
-                                        />
-                                        <ApprovalActions
-                                            approveUrl={route(
-                                                'customers.addresses.approve',
-                                                [
-                                                    address.customer_id,
-                                                    address.id,
-                                                ],
-                                            )}
-                                            rejectUrl={route(
-                                                'customers.addresses.reject',
-                                                [
-                                                    address.customer_id,
-                                                    address.id,
-                                                ],
-                                            )}
-                                            pending={
-                                                address.verification_status ===
-                                                'PENDING'
-                                            }
-                                        />
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                        </ResourceTableViewport>
                     </>
                 )}
 
@@ -274,7 +278,7 @@ function AddressActions({
     onDelete: (address: CustomerAddress) => void;
 }) {
     return (
-        <div className="flex items-center gap-2">
+        <ResourceRowActions>
             <Link
                 href={route('customers.addresses.show', [
                     address.customer_id,
@@ -303,6 +307,6 @@ function AddressActions({
             >
                 <Trash2 className="h-5 w-5" />
             </button>
-        </div>
+        </ResourceRowActions>
     );
 }

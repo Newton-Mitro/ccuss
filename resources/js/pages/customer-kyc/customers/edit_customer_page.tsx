@@ -99,9 +99,7 @@ const Edit = ({ customer }: EditProps) => {
             {
                 forceFormData: true,
                 preserveScroll: true,
-                onError: (errors) => {
-                    console.log('Validation errors:', errors);
-                },
+                onError: (errors) => {},
             },
         );
     };

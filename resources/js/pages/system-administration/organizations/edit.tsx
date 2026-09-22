@@ -38,8 +38,6 @@ function EditOrganization() {
         logo: null as File | null,
     });
 
-    console.log(errors);
-
     const [photoPreview, setPhotoPreview] = useState<string | null>(
         organization.logo_url || null,
     );
@@ -76,7 +74,6 @@ function EditOrganization() {
                 forceFormData: true,
                 preserveScroll: true,
                 onError: (errors) => {
-                    console.log(errors);
                     setError(errors);
                 },
             },

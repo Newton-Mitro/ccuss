@@ -8,9 +8,13 @@ import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 
-import DataTablePagination from '../../../components/data-table-pagination';
-import HeadingSmall from '../../../components/heading-small';
-import { Input } from '../../../components/ui/input';
+import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
+import {
+    ResourceEmptyState,
+    ResourceTableViewport,
+} from '@/components/resource-page-shell';
+import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
@@ -112,20 +116,24 @@ export default function FamilyRelationIndex() {
                 {/* EMPTY STATE */}
                 {/* ===================== */}
                 {isEmpty ? (
-                    <div className="flex flex-col items-center justify-center rounded-md border bg-card py-16 text-center text-muted-foreground">
-                        <p className="text-base font-medium">
-                            No family relations found
-                        </p>
-                        <p className="text-xs">
-                            Try changing filters or add a new relation
-                        </p>
-                    </div>
+                    <ResourceEmptyState
+                        title="No family relations found"
+                        description="Try changing filters or add a new relation."
+                    />
                 ) : (
                     <>
                         {/* ===================== */}
                         {/* Desktop Table */}
                         {/* ===================== */}
-                        <div className="hidden h-[calc(100vh-360px)] overflow-auto rounded-md border bg-card md:block">
+                        <ResourceTableViewport
+                            heightClassName="h-[calc(100vh-360px)]"
+                            mobile={
+                                <FamilyRelationCards
+                                    relations={paginated_data.data}
+                                    onDelete={handleDelete}
+                                />
+                            }
+                        >
                             <table className="w-full border-collapse">
                                 <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                                     <tr>
@@ -262,75 +270,7 @@ export default function FamilyRelationIndex() {
                                     ))}
                                 </tbody>
                             </table>
-                        </div>
-
-                        {/* ===================== */}
-                        {/* Mobile Cards */}
-                        {/* ===================== */}
-                        <div className="space-y-3 md:hidden">
-                            {paginated_data.data.map((f) => (
-                                <div
-                                    key={f.id}
-                                    className="rounded-md border bg-card p-3"
-                                >
-                                    <div className="flex justify-between">
-                                        <div>
-                                            <p className="font-medium">
-                                                {f.relative?.name}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground">
-                                                {f.customer?.name || '—'}
-                                            </p>
-                                        </div>
-                                        <span className="text-xs">
-                                            <Badge
-                                                text={f.verification_status}
-                                            />
-                                        </span>
-                                    </div>
-
-                                    <div className="mt-2 text-xs text-muted-foreground">
-                                        📞 {f.relative?.primary_phone || '—'}
-                                    </div>
-
-                                    <div className="mt-2 flex items-center justify-end gap-2">
-                                        <ApprovalActions
-                                            approveUrl={route(
-                                                'customers.family-relations.approve',
-                                                [f.customer_id, f.id],
-                                            )}
-                                            rejectUrl={route(
-                                                'customers.family-relations.reject',
-                                                [f.customer_id, f.id],
-                                            )}
-                                            pending={
-                                                f.verification_status ===
-                                                'PENDING'
-                                            }
-                                        />
-                                        <Link
-                                            href={route(
-                                                'customers.family-relations.show',
-                                                [f.customer_id, f.id],
-                                            )}
-                                        >
-                                            <Eye className="h-5 w-5" />
-                                        </Link>
-                                        <Link
-                                            href={route(
-                                                'customers.family-relations.edit',
-                                                [f.customer_id, f.id],
-                                            )}
-                                        >
-                                            <Pencil className="h-5 w-5" />
-                                        </Link>
-                                        <button onClick={() => handleDelete(f)}>
-                                            <Trash2 className="h-5 w-5 text-destructive" />
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                        </ResourceTableViewport>
                     </>
                 )}
 
@@ -347,5 +287,77 @@ export default function FamilyRelationIndex() {
                 )}
             </div>
         </CustomAuthLayout>
+    );
+}
+
+function FamilyRelationCards({
+    relations,
+    onDelete,
+}: {
+    relations: CustomerFamilyRelation[];
+    onDelete: (relation: CustomerFamilyRelation) => void;
+}) {
+    return (
+        <div className="space-y-3">
+            {relations.map((relation) => (
+                <div
+                    key={relation.id}
+                    className="rounded-md border bg-card p-3"
+                >
+                    <div className="flex justify-between">
+                        <div>
+                            <p className="font-medium">
+                                {relation.relative?.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                                {relation.customer?.name || '—'}
+                            </p>
+                        </div>
+                        <Badge text={relation.verification_status} />
+                    </div>
+                    <div className="mt-2 text-xs text-muted-foreground">
+                        {relation.relative?.primary_phone || '—'}
+                    </div>
+                    <div className="mt-2 flex items-center justify-end gap-2">
+                        <ApprovalActions
+                            approveUrl={route(
+                                'customers.family-relations.approve',
+                                [relation.customer_id, relation.id],
+                            )}
+                            rejectUrl={route(
+                                'customers.family-relations.reject',
+                                [relation.customer_id, relation.id],
+                            )}
+                            pending={relation.verification_status === 'PENDING'}
+                        />
+                        <Link
+                            href={route('customers.family-relations.show', [
+                                relation.customer_id,
+                                relation.id,
+                            ])}
+                            title="View relation"
+                        >
+                            <Eye className="h-5 w-5" />
+                        </Link>
+                        <Link
+                            href={route('customers.family-relations.edit', [
+                                relation.customer_id,
+                                relation.id,
+                            ])}
+                            title="Edit relation"
+                        >
+                            <Pencil className="h-5 w-5" />
+                        </Link>
+                        <button
+                            type="button"
+                            onClick={() => onDelete(relation)}
+                            title="Delete relation"
+                        >
+                            <Trash2 className="h-5 w-5 text-destructive" />
+                        </button>
+                    </div>
+                </div>
+            ))}
+        </div>
     );
 }

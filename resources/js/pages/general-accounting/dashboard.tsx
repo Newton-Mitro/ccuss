@@ -16,9 +16,9 @@ import {
     CardTitle,
 } from '../../components/ui/card';
 import CustomAuthLayout from '../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../types';
+import { BreadcrumbItem, SharedData } from '../../types';
 
-interface Props {
+interface Props extends SharedData {
     stats: {
         accountGroups: number;
         ledgerAccounts: number;
@@ -30,11 +30,19 @@ interface Props {
     };
 }
 
-const links = [
-    ['Chart of accounts', 'account-groups.index', BookOpen],
-    ['Vouchers', 'vouchers.index', ClipboardList],
-    ['Budgets', 'budgets.index', Wallet],
-    ['Financial reports', 'financial-reports.trial-balance', FileText],
+const links: { label: string; href: string; icon: typeof BookOpen }[] = [
+    {
+        label: 'Chart of accounts',
+        href: 'account-groups.index',
+        icon: BookOpen,
+    },
+    { label: 'Vouchers', href: 'vouchers.index', icon: ClipboardList },
+    { label: 'Budgets', href: 'budgets.index', icon: Wallet },
+    {
+        label: 'Financial reports',
+        href: 'financial-reports.trial-balance',
+        icon: FileText,
+    },
 ];
 
 export default function Dashboard() {
@@ -83,12 +91,11 @@ export default function Dashboard() {
                         <CardTitle>Accounting workspace</CardTitle>
                     </CardHeader>
                     <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                        {links.map(([label, href, Icon]) => {
-                            const LinkIcon = Icon as typeof BookOpen;
+                        {links.map(({ label, href, icon: LinkIcon }) => {
                             return (
                                 <Link
-                                    key={label as string}
-                                    href={route(href as string)}
+                                    key={label}
+                                    href={route(href)}
                                     className="flex items-center justify-between rounded-md border p-4 hover:bg-muted"
                                 >
                                     <span className="flex items-center gap-2">

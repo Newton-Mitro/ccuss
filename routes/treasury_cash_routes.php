@@ -86,13 +86,13 @@ Route::middleware(['auth', 'verified', 'organization'])
     ->group(function () {
         Route::get('/', [CashMovementController::class, 'cashAdjustments'])
             ->middleware('permission:cash_transactions.view')
-            ->name('index');
+            ->name('list');
         Route::post('/{adjustment}/approve', [CashMovementController::class, 'approveCashAdjustment'])
             ->middleware('permission:cash_transactions.post')
-            ->name('index.approve');
+            ->name('list.approve');
         Route::post('/{adjustment}/post', [CashMovementController::class, 'postCashAdjustment'])
             ->middleware('permission:cash_transactions.post')
-            ->name('index.post');
+            ->name('list.post');
         Route::get('/teller-cash-adjustment', [CashMovementController::class, 'tellerCashAdjustment'])
             ->middleware('permission:cash_transactions.create')
             ->name('teller-cash-adjustment');

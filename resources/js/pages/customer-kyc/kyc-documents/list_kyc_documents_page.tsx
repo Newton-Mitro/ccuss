@@ -1,3 +1,8 @@
+import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
+import { ResourceEmptyState } from '@/components/resource-page-shell';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 import {
     Tooltip,
     TooltipProvider,
@@ -8,17 +13,13 @@ import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 
-import DataTablePagination from '../../../components/data-table-pagination';
-import HeadingSmall from '../../../components/heading-small';
-import { Input } from '../../../components/ui/input';
-import { Select } from '../../../components/ui/select';
-import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
-import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { appSwal } from '../../../lib/appSwal';
-import { Badge } from '../../../lib/statusConfig';
-import { BreadcrumbItem, SharedData } from '../../../types';
-import { KycDocument } from '../../../types/customer_kyc_module';
-import { PaginatedResponse } from '../../../types/paginated_response';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
+import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
+import { Badge } from '@/lib/statusConfig';
+import { BreadcrumbItem, SharedData } from '@/types';
+import { KycDocument } from '@/types/customer_kyc_module';
+import { PaginatedResponse } from '@/types/paginated_response';
 import ApprovalActions from '../components/approval-actions';
 import { documentTypes } from './data/document_types';
 
@@ -118,14 +119,10 @@ export default function KycDocumentsIndex() {
 
                 {/* ================= EMPTY STATE ================= */}
                 {isEmpty ? (
-                    <div className="flex flex-col items-center justify-center rounded-md border bg-card py-16 text-center text-muted-foreground">
-                        <p className="text-base font-medium">
-                            No KYC documents found
-                        </p>
-                        <p className="text-xs">
-                            Try changing filters or upload new documents
-                        </p>
-                    </div>
+                    <ResourceEmptyState
+                        title="No KYC documents found"
+                        description="Try changing filters or upload new documents."
+                    />
                 ) : (
                     <>
                         {/* ================= Desktop Table ================= */}

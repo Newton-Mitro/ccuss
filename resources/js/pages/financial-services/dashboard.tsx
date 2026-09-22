@@ -5,7 +5,7 @@ import {
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem } from '@/types';
+import { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowDownToLine,
@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { route } from 'ziggy-js';
 
-interface Props {
+interface Props extends SharedData {
     metrics: {
         products: number;
         accounts: number;

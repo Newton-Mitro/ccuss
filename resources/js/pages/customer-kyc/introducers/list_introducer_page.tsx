@@ -1,3 +1,7 @@
+import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
+import { ResourceEmptyState } from '@/components/resource-page-shell';
+import { Input } from '@/components/ui/input';
 import {
     Tooltip,
     TooltipProvider,
@@ -8,9 +12,6 @@ import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 
-import DataTablePagination from '../../../components/data-table-pagination';
-import HeadingSmall from '../../../components/heading-small';
-import { Input } from '../../../components/ui/input';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
@@ -102,16 +103,11 @@ export default function IntroducersIndex() {
                     </div>
                 </div>
 
-                {/* ================= EMPTY STATE ================= */}
                 {isEmpty ? (
-                    <div className="flex flex-col items-center justify-center rounded-md border bg-card py-16 text-center text-muted-foreground">
-                        <p className="text-base font-medium">
-                            No introducers found
-                        </p>
-                        <p className="text-xs">
-                            Try adjusting filters or add new records
-                        </p>
-                    </div>
+                    <ResourceEmptyState
+                        title="No introducers found"
+                        description="Try adjusting filters or add new records."
+                    />
                 ) : (
                     <>
                         {/* ================= Desktop Table ================= */}

@@ -1,21 +1,22 @@
+import DataTablePagination from '@/components/data-table-pagination';
+import {
+    ResourceEmptyState,
+    ResourcePageHeader,
+    ResourceTableCard,
+    StatusBadge,
+} from '@/components/resource-page-shell';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
+import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
+import { BreadcrumbItem, SharedData } from '@/types';
+import { FiscalYear } from '@/types/finance_and_accounting';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Lock, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
-import DataTablePagination from '../../../components/data-table-pagination';
-import {
-    ResourcePageHeader,
-    ResourceTableCard,
-    StatusBadge,
-} from '../../../components/resource-page-shell';
-import { Button } from '../../../components/ui/button';
-import { Input } from '../../../components/ui/input';
-import { Select } from '../../../components/ui/select';
-import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
-import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { appSwal } from '../../../lib/appSwal';
-import { BreadcrumbItem, SharedData } from '../../../types';
-import { FiscalYear } from '../../../types/finance_and_accounting';
 
 interface FiscalYearPageProps extends SharedData {
     fiscalYears: {
@@ -130,21 +131,10 @@ export default function FiscalYearIndex() {
                 </div>
 
                 {fiscalYears.data.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center rounded-md border bg-card py-16 text-center text-muted-foreground">
-                        <p className="text-base font-medium">
-                            No fiscal years found
-                        </p>
-                        <p className="text-xs">
-                            Try adjusting your search or create a new fiscal
-                            year
-                        </p>
-                        <Link
-                            href={route('fiscal-years.create')}
-                            className="mt-4 rounded bg-primary px-4 py-2 text-xs text-primary-foreground hover:bg-primary/90"
-                        >
-                            Create Fiscal Year
-                        </Link>
-                    </div>
+                    <ResourceEmptyState
+                        title="No fiscal years found"
+                        description="Try adjusting your search or create a new fiscal year."
+                    />
                 ) : (
                     <>
                         <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">

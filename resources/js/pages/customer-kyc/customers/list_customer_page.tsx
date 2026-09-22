@@ -1,3 +1,10 @@
+import DataTablePagination from '@/components/data-table-pagination';
+import {
+    ResourceEmptyState,
+    ResourcePageHeader,
+} from '@/components/resource-page-shell';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 import {
     Tooltip,
     TooltipContent,
@@ -9,17 +16,13 @@ import { Eye, Pencil, Trash2, UserPlus } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 
-import DataTablePagination from '../../../components/data-table-pagination';
-import HeadingSmall from '../../../components/heading-small';
-import { Input } from '../../../components/ui/input';
-import { Select } from '../../../components/ui/select';
-import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
-import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { appSwal } from '../../../lib/appSwal';
-import { Badge } from '../../../lib/statusConfig';
-import { BreadcrumbItem, SharedData } from '../../../types';
-import { Customer } from '../../../types/customer_kyc_module';
-import { PaginatedResponse } from '../../../types/paginated_response';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
+import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
+import { Badge } from '@/lib/statusConfig';
+import { BreadcrumbItem, SharedData } from '@/types';
+import { Customer } from '@/types/customer_kyc_module';
+import { PaginatedResponse } from '@/types/paginated_response';
 import { kycStatuses } from './data/customer_data_types';
 
 interface Props extends SharedData {
@@ -29,8 +32,6 @@ interface Props extends SharedData {
 
 export default function Index() {
     const { paginated_data, filters } = usePage<Props>().props;
-
-    console.log('paginated_data', paginated_data);
 
     useFlashToastHandler();
 
@@ -79,23 +80,21 @@ export default function Index() {
             <Head title="Customers" />
 
             <div className="space-y-4">
-                {/* Header */}
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <HeadingSmall
-                        title="Customers"
-                        description="Manage your customers."
-                    />
-
-                    <Link
-                        href={route('customers.create')}
-                        className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition hover:bg-primary/90"
-                    >
-                        <UserPlus className="h-4 w-4" />
-                        <span className="hidden sm:inline">
-                            Create Customer
-                        </span>
-                    </Link>
-                </div>
+                <ResourcePageHeader
+                    title="Customers"
+                    description="Manage your customers."
+                    action={
+                        <Link
+                            href={route('customers.create')}
+                            className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition hover:bg-primary/90"
+                        >
+                            <UserPlus className="h-4 w-4" />
+                            <span className="hidden sm:inline">
+                                Create Customer
+                            </span>
+                        </Link>
+                    }
+                />
 
                 {/* Filters */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -128,21 +127,10 @@ export default function Index() {
                 {/* EMPTY STATE */}
                 {/* ===================== */}
                 {isEmpty ? (
-                    <div className="flex flex-col items-center justify-center rounded-md border bg-card py-16 text-center text-muted-foreground">
-                        <p className="text-base font-medium">
-                            No customers found
-                        </p>
-                        <p className="text-xs">
-                            Try adjusting filters or create a new customer
-                        </p>
-
-                        <Link
-                            href={route('customers.create')}
-                            className="mt-4 rounded bg-primary px-4 py-2 text-xs text-primary-foreground hover:bg-primary/90"
-                        >
-                            Create Customer
-                        </Link>
-                    </div>
+                    <ResourceEmptyState
+                        title="No customers found"
+                        description="Try adjusting filters or create a new customer."
+                    />
                 ) : (
                     <>
                         {/* ===================== */}

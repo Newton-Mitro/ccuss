@@ -54,7 +54,7 @@ export default function Index() {
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            get(route('cash-adjustments.index'), {
+            get(route('cash-adjustments.list'), {
                 preserveState: true,
                 replace: true,
             });
@@ -67,7 +67,7 @@ export default function Index() {
         { title: 'Cash Management', href: '' },
         {
             title: 'Cash Adjustment Queue',
-            href: route('cash-adjustments.index'),
+            href: route('cash-adjustments.list'),
         },
     ];
 
@@ -176,7 +176,7 @@ export default function Index() {
                                                             onClick={() =>
                                                                 router.post(
                                                                     route(
-                                                                        'cash-adjustments.index.approve',
+                                                                        'cash-adjustments.list.approve',
                                                                         adjustment.id,
                                                                     ),
                                                                     {},
@@ -200,7 +200,7 @@ export default function Index() {
                                                             onClick={() =>
                                                                 router.post(
                                                                     route(
-                                                                        'cash-adjustments.index.post',
+                                                                        'cash-adjustments.list.post',
                                                                         adjustment.id,
                                                                     ),
                                                                     {},

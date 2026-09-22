@@ -80,6 +80,76 @@ export function ResourceTableCard({
     );
 }
 
+interface ResourceEmptyStateProps {
+    title: string;
+    description?: string;
+    className?: string;
+}
+
+export function ResourceEmptyState({
+    title,
+    description,
+    className,
+}: ResourceEmptyStateProps) {
+    return (
+        <div
+            className={cn(
+                'flex min-h-56 flex-col items-center justify-center rounded-md border border-dashed bg-card px-6 py-12 text-center',
+                className,
+            )}
+        >
+            <p className="text-sm font-medium text-foreground">{title}</p>
+            {description && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                    {description}
+                </p>
+            )}
+        </div>
+    );
+}
+
+interface ResourceTableViewportProps {
+    children: ReactNode;
+    mobile: ReactNode;
+    heightClassName?: string;
+}
+
+export function ResourceTableViewport({
+    children,
+    mobile,
+    heightClassName = 'h-[calc(100vh-320px)]',
+}: ResourceTableViewportProps) {
+    return (
+        <>
+            <div
+                className={cn(
+                    'hidden overflow-auto rounded-md border bg-card md:block',
+                    heightClassName,
+                )}
+            >
+                {children}
+            </div>
+            <div className="space-y-3 md:hidden">{mobile}</div>
+        </>
+    );
+}
+
+interface ResourceRowActionsProps {
+    children: ReactNode;
+    className?: string;
+}
+
+export function ResourceRowActions({
+    children,
+    className,
+}: ResourceRowActionsProps) {
+    return (
+        <div className={cn('flex items-center gap-2', className)}>
+            {children}
+        </div>
+    );
+}
+
 interface StatusBadgeProps {
     tone?: 'success' | 'warning' | 'danger' | 'neutral' | 'info';
     children: ReactNode;

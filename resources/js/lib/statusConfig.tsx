@@ -37,8 +37,9 @@ export type Status = keyof StatusConfig;
 
 export type StatusClass = StatusConfig[Status]['class'];
 
-const Badge = ({ text }: { text: Status }) => {
-    const config = statusConfig[text];
+const Badge = ({ text }: { text: Status | string }) => {
+    const normalizedText = text.toLowerCase() as Status;
+    const config = statusConfig[normalizedText];
 
     return (
         <span
