@@ -54,20 +54,24 @@ export interface UserFormPageProps extends SharedData {
     permissions?: Permission[];
 }
 
-export type BackupType = 'full' | 'database_only' | 'files_only';
-export type BackupStatus = 'running' | 'success' | 'failed';
+export type BackupType = 'FULL' | 'DATABASE_ONLY' | 'FILES_ONLY';
+export type BackupStatus = 'RUNNING' | 'SUCCESS' | 'FAILED';
 
 export interface BackupLog {
     id: number;
-    file_name: string;
-    file_size: number;
+    file_name?: string | null;
+    file_path?: string | null;
+    file_size?: number | null;
+    storage_disk?: string;
     backup_type: BackupType;
     status: BackupStatus;
-    started_at: string;
-    completed_at?: string;
-    duration_seconds?: number;
+    checksum?: string | null;
+    started_at?: string | null;
+    completed_at?: string | null;
+    duration_seconds?: number | null;
     message?: string;
     error?: string;
+    created_by?: number | null;
 }
 
 export interface BackupHistoryPageProps extends SharedData {

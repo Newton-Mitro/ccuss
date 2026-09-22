@@ -31,6 +31,8 @@ export interface User {
     phone?: string | null;
     branch_id?: number | null;
     organization_id?: number | null;
+    customer_id?: number | null;
+    employee_id?: number | null;
     organization?: Organization;
     organizations?: Organization[];
     branch?: Branch;
@@ -38,7 +40,8 @@ export interface User {
     permissions?: Permission[];
     email_verified_at?: string | null;
     avatar?: string | null;
-    status?: string | null;
+    photo_path?: string | null;
+    status?: 'ACTIVE' | 'INACTIVE' | null;
     created_at?: string;
     updated_at?: string;
 }

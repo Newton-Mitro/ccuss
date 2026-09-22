@@ -41,6 +41,8 @@ export interface Customer extends Timestamped {
     id: ID;
     customer_no: string;
     type: CustomerType;
+    branch_id?: ID | null;
+    organization_id?: ID | null;
 
     // Common fields
     name: string;
@@ -90,7 +92,7 @@ export interface KycDocument extends Timestamped {
     document_type: string;
     file_name: string;
     file_path: string;
-    file_type: string;
+    mime: string;
     alt_text?: string | null;
     url: string;
 
@@ -155,7 +157,7 @@ export interface CustomerFamilyRelation extends Timestamped {
     customer_id: ID;
     customer?: Customer | null;
 
-    relative_id?: ID | null;
+    relative_id: ID;
     relative?: Customer | null;
 
     relation_type: RelationType;
@@ -182,7 +184,7 @@ export interface CustomerIntroducer extends Timestamped {
     introduced_customer_id: ID;
     introduced_customer?: Customer | null;
 
-    introducer_customer_id: ID;
+    introducer_customer_id?: ID | null;
     introducer_customer?: Customer | null;
 
     introducer_account_id?: ID | null;

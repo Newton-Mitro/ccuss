@@ -131,7 +131,6 @@ export default function KycDocumentsIndex() {
                                 <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                                     <tr>
                                         {[
-                                            'Preview',
                                             'Customer',
                                             'Document Type',
                                             'Status',
@@ -154,14 +153,15 @@ export default function KycDocumentsIndex() {
                                             className="border-b even:bg-muted hover:bg-accent/20"
                                         >
                                             <td className="px-2 py-1">
-                                                <img
-                                                    src={i.url}
-                                                    className="h-6 w-6 rounded-full"
-                                                />
-                                            </td>
-
-                                            <td className="px-2 py-1">
-                                                {i.customer?.name ?? '—'}
+                                                <Link
+                                                    href={route(
+                                                        'customers.show',
+                                                        i.customer_id,
+                                                    )}
+                                                    className="text-primary hover:underline"
+                                                >
+                                                    {i.customer?.name ?? '—'}
+                                                </Link>
                                             </td>
 
                                             <td className="px-2 py-1 capitalize">
@@ -269,9 +269,15 @@ export default function KycDocumentsIndex() {
                                 >
                                     <div className="flex justify-between">
                                         <div>
-                                            <p className="font-medium">
+                                            <Link
+                                                href={route(
+                                                    'customers.show',
+                                                    i.customer_id,
+                                                )}
+                                                className="block font-medium text-primary hover:underline"
+                                            >
                                                 {i.customer?.name}
-                                            </p>
+                                            </Link>
                                             <p className="text-xs text-muted-foreground capitalize">
                                                 {i.document_type.replace(
                                                     /_/g,

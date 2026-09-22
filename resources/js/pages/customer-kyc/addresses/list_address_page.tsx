@@ -117,10 +117,16 @@ export default function AddressIndex() {
                                         >
                                             <div className="flex justify-between gap-3">
                                                 <div className="min-w-0">
-                                                    <p className="truncate font-medium">
+                                                    <Link
+                                                        href={route(
+                                                            'customers.show',
+                                                            address.customer_id,
+                                                        )}
+                                                        className="block truncate font-medium text-primary hover:underline"
+                                                    >
                                                         {address.customer
                                                             ?.name ?? 'Unknown'}
-                                                    </p>
+                                                    </Link>
                                                     <p className="text-xs text-muted-foreground capitalize">
                                                         {address.type} address
                                                     </p>
@@ -197,8 +203,16 @@ export default function AddressIndex() {
                                             className="border-b even:bg-muted hover:bg-accent/20"
                                         >
                                             <td className="px-2 py-1">
-                                                {address.customer?.name ??
-                                                    'Unknown'}
+                                                <Link
+                                                    href={route(
+                                                        'customers.show',
+                                                        address.customer_id,
+                                                    )}
+                                                    className="text-primary hover:underline"
+                                                >
+                                                    {address.customer?.name ??
+                                                        'Unknown'}
+                                                </Link>
                                             </td>
                                             <td className="px-2 py-1 capitalize">
                                                 {address.type}

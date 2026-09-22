@@ -34,11 +34,11 @@ export interface FiscalPeriodsPageProps extends SharedData {
 export interface FiscalPeriodFormPageProps extends SharedData {
     fiscalPeriod?: {
         id: number;
-        period_name: string;
+        name: string;
         fiscal_year_id: number;
         start_date: string;
         end_date: string;
-        status: 'open' | 'closed' | 'locked';
+        status: 'OPEN' | 'CLOSED';
     };
     fiscalYears: { id: number; code: string }[];
 }
@@ -46,10 +46,11 @@ export interface FiscalPeriodFormPageProps extends SharedData {
 export interface FiscalYearFormPageProps extends SharedData {
     fiscalYear?: {
         id: number;
-        code: string;
+        name: string;
         start_date: string;
         end_date: string;
-        is_closed: boolean;
+        status: 'OPEN' | 'CLOSED';
+        is_current: boolean;
     };
 }
 

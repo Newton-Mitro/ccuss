@@ -116,7 +116,6 @@ export default function IntroducersIndex() {
                                 <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                                     <tr>
                                         {[
-                                            'Introducer Photo',
                                             'Introduced Customer',
                                             'Introducer',
                                             'Relationship',
@@ -140,21 +139,32 @@ export default function IntroducersIndex() {
                                             className="border-b even:bg-muted hover:bg-accent/20"
                                         >
                                             <td className="px-2 py-1">
-                                                <img
-                                                    src={
-                                                        i.introducer_customer
-                                                            ?.photo?.url
-                                                    }
-                                                    className="h-6 w-6 rounded-full"
-                                                />
+                                                <Link
+                                                    href={route(
+                                                        'customers.show',
+                                                        i.introduced_customer_id,
+                                                    )}
+                                                    className="text-primary hover:underline"
+                                                >
+                                                    {i.introduced_customer
+                                                        ?.name ?? '—'}
+                                                </Link>
                                             </td>
                                             <td className="px-2 py-1">
-                                                {i.introduced_customer?.name ??
-                                                    '—'}
-                                            </td>
-                                            <td className="px-2 py-1">
-                                                {i.introducer_customer?.name ??
-                                                    '—'}
+                                                {i.introducer_customer_id ? (
+                                                    <Link
+                                                        href={route(
+                                                            'customers.show',
+                                                            i.introducer_customer_id,
+                                                        )}
+                                                        className="text-primary hover:underline"
+                                                    >
+                                                        {i.introducer_customer
+                                                            ?.name ?? '—'}
+                                                    </Link>
+                                                ) : (
+                                                    '—'
+                                                )}
                                             </td>
                                             <td className="px-2 py-1 capitalize">
                                                 {i.relationship_type.replace(
@@ -259,12 +269,33 @@ export default function IntroducersIndex() {
                                 >
                                     <div className="flex justify-between">
                                         <div>
-                                            <p className="font-medium">
+                                            <Link
+                                                href={route(
+                                                    'customers.show',
+                                                    i.introduced_customer_id,
+                                                )}
+                                                className="block font-medium text-primary hover:underline"
+                                            >
                                                 {i.introduced_customer?.name}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground">
-                                                {i.introducer_customer?.name}
-                                            </p>
+                                            </Link>
+                                            {i.introducer_customer_id ? (
+                                                <Link
+                                                    href={route(
+                                                        'customers.show',
+                                                        i.introducer_customer_id,
+                                                    )}
+                                                    className="block text-xs text-primary hover:underline"
+                                                >
+                                                    {
+                                                        i.introducer_customer
+                                                            ?.name
+                                                    }
+                                                </Link>
+                                            ) : (
+                                                <p className="text-xs text-muted-foreground">
+                                                    —
+                                                </p>
+                                            )}
                                         </div>
 
                                         <Badge text={i.verification_status} />

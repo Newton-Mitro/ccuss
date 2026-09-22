@@ -26,7 +26,7 @@ export interface BankTransactionListItem {
     reference?: string | null;
     description?: string | null;
     balance_after?: string | number | null;
-    status: 'PENDING' | 'POSTED' | 'CANCELLED';
+    status: 'PENDING' | 'POSTED' | 'RECONCILED' | 'CANCELLED';
     bank_account?: {
         account_name: string;
         account_number: string;

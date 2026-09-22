@@ -25,10 +25,10 @@ export default function FiscalYearForm() {
     const handleBack = () => window.history.back();
 
     const { data, setData, post, put, processing, errors } = useForm({
-        code: fiscalYear?.code || '',
+        name: fiscalYear?.name || '',
         start_date: fiscalYear?.start_date?.split('T')[0] || '',
         end_date: fiscalYear?.end_date?.split('T')[0] || '',
-        is_closed: fiscalYear?.is_closed ?? false, // ✅ ONLY SOURCE OF TRUTH
+        status: fiscalYear?.status ?? 'OPEN',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -86,15 +86,15 @@ export default function FiscalYearForm() {
             >
                 {/* Dates */}
                 <div className="grid grid-cols-2 gap-4">
-                    {/* Code */}
+                    {/* Name */}
                     <div>
-                        <Label className="text-xs">Fiscal Year Code</Label>
+                        <Label className="text-xs">Fiscal Year Name</Label>
                         <Input
-                            value={data.code}
-                            onChange={(e) => setData('code', e.target.value)}
+                            value={data.name}
+                            onChange={(e) => setData('name', e.target.value)}
                             className="h-8 text-sm"
                         />
-                        <InputError message={errors.code} />
+                        <InputError message={errors.name} />
                     </div>
 
                     <div>
@@ -121,22 +121,22 @@ export default function FiscalYearForm() {
 
                         <ToggleGroup
                             type="single"
-                            value={data.is_closed ? 'true' : 'false'}
+                            value={data.status}
                             onValueChange={(val) =>
-                                setData('is_closed', val === 'true')
+                                setData('status', val as 'OPEN' | 'CLOSED')
                             }
                             size="sm"
                             variant="outline"
                         >
                             <ToggleGroupItem
-                                value="false"
+                                value="OPEN"
                                 className="border-2 border-border"
                             >
                                 Open
                             </ToggleGroupItem>
 
                             <ToggleGroupItem
-                                value="true"
+                                value="CLOSED"
                                 className="border-2 border-border"
                             >
                                 Closed

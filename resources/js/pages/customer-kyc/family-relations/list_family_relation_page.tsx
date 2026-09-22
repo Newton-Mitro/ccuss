@@ -138,7 +138,6 @@ export default function FamilyRelationIndex() {
                                 <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                                     <tr>
                                         {[
-                                            'Relative Photo',
                                             'Customer',
                                             'Relative Name',
                                             'Phone',
@@ -163,16 +162,26 @@ export default function FamilyRelationIndex() {
                                             className="border-b even:bg-muted hover:bg-accent/20"
                                         >
                                             <td className="px-2 py-1">
-                                                <img
-                                                    src={f.relative?.photo?.url}
-                                                    className="h-6 w-6 rounded-full"
-                                                />
+                                                <Link
+                                                    href={route(
+                                                        'customers.show',
+                                                        f.customer_id,
+                                                    )}
+                                                    className="text-primary hover:underline"
+                                                >
+                                                    {f.customer?.name || '—'}
+                                                </Link>
                                             </td>
                                             <td className="px-2 py-1">
-                                                {f.customer?.name || '—'}
-                                            </td>
-                                            <td className="px-2 py-1">
-                                                {f.relative?.name}
+                                                <Link
+                                                    href={route(
+                                                        'customers.show',
+                                                        f.relative_id,
+                                                    )}
+                                                    className="text-primary hover:underline"
+                                                >
+                                                    {f.relative?.name || '—'}
+                                                </Link>
                                             </td>
                                             <td className="px-2 py-1">
                                                 {f.relative?.primary_phone ||
@@ -306,12 +315,24 @@ function FamilyRelationCards({
                 >
                     <div className="flex justify-between">
                         <div>
-                            <p className="font-medium">
-                                {relation.relative?.name}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
+                            <Link
+                                href={route(
+                                    'customers.show',
+                                    relation.relative_id,
+                                )}
+                                className="block font-medium text-primary hover:underline"
+                            >
+                                {relation.relative?.name || '—'}
+                            </Link>
+                            <Link
+                                href={route(
+                                    'customers.show',
+                                    relation.customer_id,
+                                )}
+                                className="block text-xs text-primary hover:underline"
+                            >
                                 {relation.customer?.name || '—'}
-                            </p>
+                            </Link>
                         </div>
                         <Badge text={relation.verification_status} />
                     </div>

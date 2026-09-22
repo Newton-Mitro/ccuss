@@ -23,11 +23,11 @@ export default function FiscalPeriodForm() {
     const handleBack = () => window.history.back();
 
     const { data, setData, post, put, processing, errors } = useForm({
-        period_name: fiscalPeriod?.period_name || '',
+        name: fiscalPeriod?.name || '',
         fiscal_year_id: fiscalPeriod?.fiscal_year_id || undefined,
         start_date: fiscalPeriod?.start_date?.split('T')[0] || '',
         end_date: fiscalPeriod?.end_date?.split('T')[0] || '',
-        status: fiscalPeriod?.status || 'open', // ✅ FIXED
+        status: fiscalPeriod?.status || 'OPEN',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -107,13 +107,11 @@ export default function FiscalPeriodForm() {
                     <div>
                         <Label className="text-xs">Period Name</Label>
                         <Input
-                            value={data.period_name}
-                            onChange={(e) =>
-                                setData('period_name', e.target.value)
-                            }
+                            value={data.name}
+                            onChange={(e) => setData('name', e.target.value)}
                             className="h-8 text-sm"
                         />
-                        <InputError message={errors.period_name} />
+                        <InputError message={errors.name} />
                     </div>
 
                     {/* Fiscal Year */}
@@ -156,10 +154,7 @@ export default function FiscalPeriodForm() {
                         <Select
                             value={data.status}
                             onChange={(value) =>
-                                setData(
-                                    'status',
-                                    value as 'open' | 'closed' | 'locked',
-                                )
+                                setData('status', value as 'OPEN' | 'CLOSED')
                             }
                             options={statusOptions}
                         />

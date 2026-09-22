@@ -3,13 +3,34 @@ import type { ListFilters } from '@/types/base_types';
 
 export interface FinancialProduct {
     id: number;
+    organization_id?: number;
     code: string;
     name: string;
-    category: string;
-    balance_type: string;
+    category:
+        | 'SAVINGS'
+        | 'SHARE'
+        | 'FIXED_DEPOSIT'
+        | 'RECURRING_DEPOSIT'
+        | 'LOAN'
+        | 'OTHER';
+    balance_type: 'ASSET' | 'LIABILITY' | 'EQUITY';
     interest_rate: string | number;
-    interest_calculation?: string;
-    interest_frequency?: string;
+    interest_calculation?:
+        | 'NONE'
+        | 'SIMPLE'
+        | 'COMPOUND'
+        | 'FLAT'
+        | 'REDUCING_BALANCE';
+    interest_frequency?:
+        | 'NONE'
+        | 'DAILY'
+        | 'MONTHLY'
+        | 'QUARTERLY'
+        | 'HALF_YEARLY'
+        | 'YEARLY'
+        | 'MATURITY';
+    settings?: Record<string, unknown> | null;
+    is_system?: boolean;
     status: boolean;
 }
 
@@ -40,8 +61,9 @@ export interface FinancialAccountOption {
 
 export interface FinancialTransactionEntry {
     financial_account?: { account_no?: string } | null;
-    direction?: string;
+    direction?: 'DEBIT' | 'CREDIT';
     amount?: string | number;
+    balance_after?: string | number | null;
 }
 
 export interface FinancialTransaction {
@@ -51,7 +73,7 @@ export interface FinancialTransaction {
     transaction_date: string;
     amount: string | number;
     currency?: string;
-    status: string;
+    status: 'PENDING' | 'POSTED' | 'REVERSED' | 'CANCELLED';
     description?: string;
     reference?: string;
     entries?: FinancialTransactionEntry[];
@@ -77,12 +99,33 @@ export interface FinancialTransactionFormPageProps extends SharedData {
 
 export interface FinancialAccountDetail {
     id: number;
+    organization_id?: number;
+    branch_id?: number | null;
+    financial_product_id?: number | null;
     account_no: string;
     name?: string;
-    account_type: string;
-    status?: string;
+    account_type:
+        | 'SAVINGS'
+        | 'SHARE'
+        | 'FIXED_DEPOSIT'
+        | 'RECURRING_DEPOSIT'
+        | 'LOAN'
+        | 'CASH'
+        | 'BANK'
+        | 'OTHER';
+    status?:
+        | 'PENDING'
+        | 'ACTIVE'
+        | 'DORMANT'
+        | 'FROZEN'
+        | 'CLOSED'
+        | 'WRITTEN_OFF';
     balance?: string | number;
     available_balance?: string | number;
+    interest_accrued?: string | number;
+    opened_at?: string | null;
+    closed_at?: string | null;
+    metadata?: Record<string, unknown> | null;
     holder?: { name?: string } | null;
     product?: { name?: string } | null;
 }

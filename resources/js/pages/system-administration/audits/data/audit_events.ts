@@ -1,14 +1,14 @@
 export const auditEvents = [
     {
         label: 'Create',
-        value: 'create',
+        value: 'CREATED',
     },
     {
         label: 'Update',
-        value: 'update',
+        value: 'UPDATED',
     },
     {
         label: 'Delete',
-        value: 'delete',
+        value: 'DELETED',
     },
 ];

@@ -1,7 +1,7 @@
 import { Timestamped } from './base_types';
 import { User } from './user';
 
-export type AuditEvent = 'created' | 'updated' | 'deleted';
+export type AuditEvent = 'CREATED' | 'UPDATED' | 'DELETED';
 
 export interface Audit extends Timestamped {
     id: number;

@@ -18,6 +18,7 @@ export interface Organization {
     state?: string | null;
     postal_code?: string | null;
     country?: string | null;
+    logo_path?: string | null;
     logo_url?: string | null;
     report_header_line1?: string | null;
     report_header_line2?: string | null;

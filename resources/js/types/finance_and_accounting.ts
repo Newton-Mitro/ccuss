@@ -26,28 +26,43 @@ export interface FiscalPeriod extends Timestamped {
 }
 
 // Account
+export type AccountType =
+    | 'ASSET'
+    | 'LIABILITY'
+    | 'EQUITY'
+    | 'INCOME'
+    | 'EXPENSE';
+
 export interface LedgerAccount extends Timestamped {
     id: number;
     organization_id: number;
+    account_group_id: number;
 
     code: string;
     name: string;
     description?: string | null;
 
-    type: 'asset' | 'liability' | 'equity' | 'income' | 'expense';
+    type: AccountType;
+    normal_balance: 'DEBIT' | 'CREDIT';
+    level: number;
 
-    is_group: boolean;
     is_control_account: boolean;
-    is_active: boolean;
-
-    subledger_type?: string | null;
-    subledger_sub_type?: string | null;
+    is_reconcilable: boolean;
+    is_cash_account?: boolean;
+    is_system: boolean;
+    status: boolean;
 
     parent_id?: number | null;
 
-    // 🔹 Relationships (optional when loaded)
     parent?: LedgerAccount | null;
     children?: LedgerAccount[];
+
+    // Optional resource projections retained for existing accounting pages.
+    is_group?: boolean;
+    is_active?: boolean;
+    subledger_type?: string | null;
+    subledger_sub_type?: string | null;
+    children_recursive?: LedgerAccount[];
 }
 
 // Account Balance
@@ -63,6 +78,8 @@ export interface AccountBalance extends Timestamped {
 
 export interface VoucherLine {
     id: number | string;
+    voucher_id?: number | null;
+    account_id?: number | null;
     voucher_entry_id?: number | null;
     ledger_account_id?: number | null;
     ledger_account?: any | null;
