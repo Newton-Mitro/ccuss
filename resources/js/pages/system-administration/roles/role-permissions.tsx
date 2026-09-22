@@ -1,3 +1,4 @@
+import type { RolePermissionPageProps } from '@/types/system-administration';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { CheckCheck, Loader2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
@@ -13,19 +14,14 @@ import {
 } from '../../../components/ui/tooltip';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '../../../types';
-import { Permission, Role } from '../../../types/user';
-
-interface RolePermissionFormProps extends SharedData {
-    roles: Role[];
-    permissions: Permission[];
-}
+import { BreadcrumbItem } from '../../../types';
+import type { Permission, Role } from '../../../types/user';
 
 const RolePermissionForm = ({
     roles,
     permissions,
-}: RolePermissionFormProps) => {
-    const { auth } = usePage<RolePermissionFormProps>().props;
+}: RolePermissionPageProps) => {
+    const { auth } = usePage<RolePermissionPageProps>().props;
 
     const systemAdminRole = auth.user.roles.filter(
         (r) => r.slug == 'system_administrator',

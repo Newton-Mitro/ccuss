@@ -1,3 +1,4 @@
+import type { BranchIndexPageProps } from '@/types/system-administration';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, MapPin, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
@@ -9,25 +10,11 @@ import { Input } from '../../../components/ui/input';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
-import { BreadcrumbItem, SharedData } from '../../../types';
-import { Branch } from '../../../types/branch';
-
-interface BranchIndexProps extends SharedData {
-    branches: {
-        data: Branch[];
-        links: { url: string | null; label: string; active: boolean }[];
-        current_page: number;
-        per_page: number;
-    };
-    filters: {
-        search?: string;
-        page?: number;
-        per_page?: number;
-    };
-}
+import { BreadcrumbItem } from '../../../types';
+import type { Branch } from '../../../types/branch';
 
 export default function Index() {
-    const { branches, filters } = usePage<BranchIndexProps>().props;
+    const { branches, filters } = usePage<BranchIndexPageProps>().props;
 
     useFlashToastHandler();
 

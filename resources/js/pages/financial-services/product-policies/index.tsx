@@ -5,34 +5,14 @@ import {
 } from '@/components/resource-page-shell';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
+import type { ProductPoliciesPageProps } from '@/types/financial-services';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Edit2, FileText } from 'lucide-react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 
-interface Policy {
-    status?: string;
-    version?: string;
-    minimum_opening_amount?: string | number | null;
-    minimum_deposit_amount?: string | number | null;
-    effective_from?: string | null;
-}
-interface Product {
-    id: number;
-    code: string;
-    name: string;
-    category: string;
-    policy?: Policy | null;
-}
-
 export default function ProductPoliciesIndex() {
-    const { products } = usePage<{
-        products: {
-            data: Product[];
-            links: { url: string | null; label: string; active: boolean }[];
-            per_page: number;
-        };
-    }>().props;
+    const { products } = usePage<ProductPoliciesPageProps>().props;
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
         { title: 'Product Policies', href: '' },

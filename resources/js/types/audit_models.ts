@@ -22,8 +22,8 @@ export interface Audit extends Timestamped {
     event: AuditEvent;
 
     // Change snapshots
-    old_values: Record<string, any> | null;
-    new_values: Record<string, any> | null;
+    old_values: Record<string, unknown> | null;
+    new_values: Record<string, unknown> | null;
 
     // Request metadata
     url: string | null;
@@ -34,8 +34,8 @@ export interface Audit extends Timestamped {
 export type AuditChange = {
     model: string;
     event: AuditEvent;
-    old: Record<string, any> | null;
-    new: Record<string, any> | null;
+    old: Record<string, unknown> | null;
+    new: Record<string, unknown> | null;
 };
 
 export type AuditBatch = {

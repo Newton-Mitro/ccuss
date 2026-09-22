@@ -1,3 +1,4 @@
+import type { CustomerPageProps } from '@/types/customer-kyc-pages';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, ListFilter, Loader2 } from 'lucide-react';
 import React, { useState } from 'react';
@@ -11,9 +12,8 @@ import { Label } from '../../../components/ui/label';
 import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '../../../types';
+import { BreadcrumbItem } from '../../../types';
 import {
-    Customer,
     CustomerStatus,
     CustomerType,
     Gender,
@@ -34,11 +34,7 @@ import {
     religions,
 } from './data/customer_data_types';
 
-interface EditProps extends SharedData {
-    customer: Customer;
-}
-
-const Edit = ({ customer }: EditProps) => {
+const Edit = ({ customer }: CustomerPageProps) => {
     useFlashToastHandler();
 
     const handleBack = () => window.history.back();

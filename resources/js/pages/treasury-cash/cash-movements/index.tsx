@@ -8,34 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type { CashTransferIndexProps } from '@/types/treasury-cash/cash-movements';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { ArrowRightLeft, CheckCircle2, ClipboardCheck } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-
-interface CashTransferListItem {
-    id: number;
-    transfer_no: string;
-    amount: string | number;
-    status: 'PENDING' | 'APPROVED' | 'COMPLETED' | 'CANCELLED';
-    note?: string | null;
-    requested_at?: string | null;
-    branch_day?: { business_date: string } | null;
-    from_cash_location?: { code: string; name: string } | null;
-    to_cash_location?: { code: string; name: string } | null;
-}
-
-interface CashTransferIndexProps extends SharedData {
-    transfers: {
-        data: CashTransferListItem[];
-        current_page: number;
-        per_page: number;
-        last_page: number;
-        total: number;
-    };
-    filters: { search?: string; page?: number; per_page?: number };
-}
 
 export default function Index() {
     const { transfers, filters, auth } =

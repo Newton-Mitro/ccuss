@@ -2,6 +2,7 @@ import { ResourcePageHeader } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import type { GeneralLedgerAccountsPageProps } from '@/types/general-accounting';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     ChevronDownIcon,
@@ -18,30 +19,13 @@ import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import { appSwal } from '../../../lib/appSwal';
-import { SharedData } from '../../../types';
-import { LedgerAccount } from '../../../types/finance_and_accounting';
 import { TYPE_COLORS } from './utils';
-
-/* ---------------------------------------------
-| Types
---------------------------------------------- */
-interface GlAccountsIndexProps extends SharedData {
-    glAccounts: {
-        data: LedgerAccount[];
-        links: { url: string | null; label: string; active: boolean }[];
-        per_page?: number;
-    };
-    fiscalYears: any[];
-    fiscalPeriods: any[];
-    fiscal_year_id: number | null;
-    fiscal_period_id: number | null;
-}
 
 /* ---------------------------------------------
 | Component
 --------------------------------------------- */
 export default function GlAccountsIndex() {
-    const { glAccounts } = usePage<GlAccountsIndexProps>().props;
+    const { glAccounts } = usePage<GeneralLedgerAccountsPageProps>().props;
     const accountRows = glAccounts?.data ?? [];
 
     useFlashToastHandler();

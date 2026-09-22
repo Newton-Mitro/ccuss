@@ -11,25 +11,16 @@ import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
-import { BreadcrumbItem, SharedData } from '@/types';
-import { FiscalYear } from '@/types/finance_and_accounting';
+import { BreadcrumbItem } from '@/types';
+import type { FiscalYearsPageProps } from '@/types/general-accounting';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Lock, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
-interface FiscalYearPageProps extends SharedData {
-    fiscalYears: {
-        data: FiscalYear[];
-        links: { url: string | null; label: string; active: boolean }[];
-    };
-    retainedEarningsAccounts: { id: number; code: string; name: string }[];
-    filters: Record<string, string>;
-}
-
 export default function FiscalYearIndex() {
     const { fiscalYears, filters, retainedEarningsAccounts } =
-        usePage<FiscalYearPageProps>().props;
+        usePage<FiscalYearsPageProps>().props;
     const [retainedEarningsAccountIds, setRetainedEarningsAccountIds] =
         useState<Record<number, string>>({});
 

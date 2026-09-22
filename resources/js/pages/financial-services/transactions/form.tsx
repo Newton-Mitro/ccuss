@@ -6,22 +6,13 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
+import type { FinancialTransactionFormPageProps } from '@/types/financial-services';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
-interface Account {
-    id: number;
-    account_no: string;
-    name?: string;
-    account_type: string;
-    balance: string | number;
-}
-
 export default function FinancialTransactionForm() {
-    const { accounts, transactionType } = usePage<{
-        accounts: Account[];
-        transactionType?: string;
-    }>().props;
+    const { accounts, transactionType } =
+        usePage<FinancialTransactionFormPageProps>().props;
     const { data, setData, post, processing, errors } = useForm({
         financial_account_id: '',
         transaction_type: transactionType ?? 'DEPOSIT',

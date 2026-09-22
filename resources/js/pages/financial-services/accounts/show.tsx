@@ -5,24 +5,13 @@ import {
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
+import type { FinancialAccountShowPageProps } from '@/types/financial-services';
 import { Head, router, usePage } from '@inertiajs/react';
 import { Check, Lock } from 'lucide-react';
 import { route } from 'ziggy-js';
 
-interface Account {
-    id: number;
-    account_no: string;
-    name?: string;
-    account_type: string;
-    status: string;
-    balance: string | number;
-    available_balance: string | number;
-    holder?: { name?: string } | null;
-    product?: { name?: string } | null;
-}
-
 export default function FinancialAccountShow() {
-    const { account } = usePage<{ account: Account }>().props;
+    const { account } = usePage<FinancialAccountShowPageProps>().props;
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
         {

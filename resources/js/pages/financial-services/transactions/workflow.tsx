@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
+import type { FinancialTransactionWorkflowPageProps } from '@/types/financial-services';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { ArrowRightLeft, CircleDollarSign, Construction } from 'lucide-react';
 import { route } from 'ziggy-js';
@@ -38,12 +39,7 @@ export default function TransactionWorkflow() {
         accounts = [],
         loan_accounts = [],
         payout_accounts = [],
-    } = usePage<{
-        workflow: string;
-        accounts?: Account[];
-        loan_accounts?: LoanAccount[];
-        payout_accounts?: Account[];
-    }>().props;
+    } = usePage<FinancialTransactionWorkflowPageProps>().props;
     const detail = details[workflow] ?? details.transfer;
     const Icon = detail.icon;
     const { data, setData, post, processing, errors } = useForm({
@@ -377,20 +373,4 @@ export default function TransactionWorkflow() {
             </div>
         </CustomAuthLayout>
     );
-}
-
-interface Account {
-    id: number;
-    account_no: string;
-    name?: string | null;
-    account_type: string;
-    balance: string | number;
-}
-
-interface LoanAccount {
-    id: number;
-    loan_no: string;
-    principal_amount: string | number;
-    disbursed_amount: string | number;
-    customer?: { name?: string } | null;
 }

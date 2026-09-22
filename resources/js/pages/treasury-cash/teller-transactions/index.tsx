@@ -8,36 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type { TellerCashTransactionIndexProps } from '@/types/treasury-cash/teller-transactions';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { CheckCircle2, ReceiptText } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-
-interface TellerCashTransactionListItem {
-    id: number;
-    transaction_no: string;
-    type: 'DEPOSIT' | 'WITHDRAWAL';
-    amount: string | number;
-    status: 'PENDING' | 'POSTED' | 'CANCELLED';
-    reference?: string | null;
-    requested_at?: string | null;
-    teller_session?: {
-        teller?: { code: string; name: string } | null;
-    } | null;
-    branch_day?: { business_date: string } | null;
-}
-
-interface TellerCashTransactionIndexProps extends SharedData {
-    transactions: {
-        data: TellerCashTransactionListItem[];
-        current_page: number;
-        per_page: number;
-        last_page: number;
-        total: number;
-    };
-    filters: { search?: string; page?: number; per_page?: number };
-}
 
 export default function Index() {
     const { transactions, filters, auth } =

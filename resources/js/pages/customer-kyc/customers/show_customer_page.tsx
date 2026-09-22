@@ -1,3 +1,4 @@
+import type { CustomerPageProps } from '@/types/customer-kyc-pages';
 import { Head, Link, router } from '@inertiajs/react';
 import {
     Clock,
@@ -22,14 +23,9 @@ import { appSwal } from '../../../lib/appSwal';
 import { formatDate, formatDateTime } from '../../../lib/date_util';
 import formatUndersoreString from '../../../lib/formatUnderscoreString';
 import statusConfig, { Status } from '../../../lib/statusConfig';
-import { BreadcrumbItem, SharedData } from '../../../types';
-import { Customer } from '../../../types/customer_kyc_module';
+import { BreadcrumbItem } from '../../../types';
 
-interface ShowProps extends SharedData {
-    customer: Customer;
-}
-
-export default function Show({ customer }: ShowProps) {
+export default function Show({ customer }: CustomerPageProps) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customer & KYC', href: '' },
         { title: 'Customers', href: route('customers.index') },

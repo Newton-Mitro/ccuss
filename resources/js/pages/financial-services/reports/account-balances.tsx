@@ -4,19 +4,11 @@ import {
 } from '@/components/resource-page-shell';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
+import type { AccountBalancesReportPageProps } from '@/types/financial-services';
 import { Head, usePage } from '@inertiajs/react';
 import ReportExportActions from '../../../components/report-export-actions';
-interface Account {
-    id: number;
-    account_no: string;
-    account_type: string;
-    status: string;
-    balance: string | number;
-    available_balance: string | number;
-    product?: { name?: string } | null;
-}
 export default function AccountBalancesReport() {
-    const { accounts } = usePage<{ accounts: { data: Account[] } }>().props;
+    const { accounts } = usePage<AccountBalancesReportPageProps>().props;
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
         { title: 'Account Balances', href: '' },

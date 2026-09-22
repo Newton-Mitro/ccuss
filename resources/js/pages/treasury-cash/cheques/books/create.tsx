@@ -4,20 +4,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
+import type { ChequeBookCreatePageProps } from '@/types/treasury-cash/forms';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
-interface BankAccountOption {
-    id: number;
-    account_name: string;
-    account_number: string;
-    bank?: { name: string } | null;
-}
-
 export default function CreateChequeBook() {
-    const { bank_accounts } = usePage<{
-        bank_accounts: BankAccountOption[];
-    }>().props;
+    const { bank_accounts } = usePage<ChequeBookCreatePageProps>().props;
     const { data, setData, post, processing, errors } = useForm({
         bank_account_id: '',
         book_no: '',

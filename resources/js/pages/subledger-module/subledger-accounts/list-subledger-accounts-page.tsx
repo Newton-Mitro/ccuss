@@ -15,30 +15,12 @@ import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type { SubledgerAccountsPageProps } from '@/types/subledger-pages';
 import { Select } from '../../../components/ui/select';
 
-interface Account {
-    id: number;
-    account_number: string;
-    name: string | null;
-    type: string;
-    status: string;
-    branch?: { name: string };
-    subledger?: { name: string };
-    accountable_type: string;
-}
-
-interface PageProps extends SharedData {
-    accounts: {
-        data: Account[];
-        links: { url: string | null; label: string; active: boolean }[];
-    };
-    filters: Record<string, string>;
-}
-
 export default function Index() {
-    const { accounts, filters } = usePage<PageProps>().props;
+    const { accounts, filters } = usePage<SubledgerAccountsPageProps>().props;
 
     useFlashToastHandler();
 

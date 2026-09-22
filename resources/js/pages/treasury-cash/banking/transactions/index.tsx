@@ -8,50 +8,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type { BankTransactionIndexPageProps } from '@/types/treasury-cash/forms';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { CheckCircle2, Plus, ReceiptText } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 
-interface BankTransactionListItem {
-    id: number;
-    transaction_no: string;
-    type:
-        | 'DEPOSIT'
-        | 'WITHDRAWAL'
-        | 'TRANSFER_IN'
-        | 'TRANSFER_OUT'
-        | 'CHARGE'
-        | 'INTEREST'
-        | 'ADJUSTMENT';
-    amount: string | number;
-    transaction_date: string;
-    reference?: string | null;
-    description?: string | null;
-    balance_after?: string | number | null;
-    status: 'PENDING' | 'POSTED' | 'CANCELLED';
-    bank_account?: {
-        account_name: string;
-        account_number: string;
-        bank?: { name: string; code: string } | null;
-    } | null;
-}
-
-interface BankTransactionIndexProps extends SharedData {
-    transactions: {
-        data: BankTransactionListItem[];
-        current_page: number;
-        per_page: number;
-        last_page: number;
-        total: number;
-    };
-    filters: { search?: string; page?: number; per_page?: number };
-}
-
 export default function Index() {
     const { transactions, filters, auth } =
-        usePage<BankTransactionIndexProps>().props;
+        usePage<BankTransactionIndexPageProps>().props;
     useFlashToastHandler();
 
     const { data, setData, get } = useForm({

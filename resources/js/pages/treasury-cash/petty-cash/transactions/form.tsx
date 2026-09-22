@@ -1,3 +1,4 @@
+import type { PettyCashTransactionFormPageProps } from '@/types/treasury-cash/forms';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { HandCoins } from 'lucide-react';
 import { FormEvent } from 'react';
@@ -7,25 +8,11 @@ import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import useFlashToastHandler from '../../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../../layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '../../../../types';
-
-interface PettyCashFundOption {
-    id: number;
-    code: string;
-    name: string;
-    current_balance: string | number;
-    fund_limit: string | number;
-}
-
-interface PettyCashTransactionProps extends SharedData {
-    transaction_type: 'FUNDING' | 'EXPENSE';
-    branch_day: { business_date: string; status: string } | null;
-    funds: PettyCashFundOption[];
-}
+import { BreadcrumbItem } from '../../../../types';
 
 export default function Form() {
     const { transaction_type, branch_day, funds } =
-        usePage<PettyCashTransactionProps>().props;
+        usePage<PettyCashTransactionFormPageProps>().props;
     const isFunding = transaction_type === 'FUNDING';
     const routeType = isFunding ? 'funding' : 'expense';
     const { data, setData, post, processing, errors } = useForm({

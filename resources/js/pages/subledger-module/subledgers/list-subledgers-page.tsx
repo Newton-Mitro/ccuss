@@ -19,20 +19,12 @@ import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type { SubledgersPageProps } from '@/types/subledger-pages';
 import formatUndersoreString from '../../../lib/formatUnderscoreString';
-import { Subledger } from '../../../types/subledger_module';
-
-interface SubledgerPageProps extends SharedData {
-    subledgers: {
-        data: Subledger[];
-        links: { url: string | null; label: string; active: boolean }[];
-    };
-    filters: Record<string, string>;
-}
 
 export default function Index() {
-    const { subledgers, filters } = usePage<SubledgerPageProps>().props;
+    const { subledgers, filters } = usePage<SubledgersPageProps>().props;
 
     useFlashToastHandler();
 

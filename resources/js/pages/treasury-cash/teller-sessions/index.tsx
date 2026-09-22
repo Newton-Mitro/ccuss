@@ -8,7 +8,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type {
+    TellerSessionIndexProps,
+    TellerSessionListItem,
+} from '@/types/treasury-cash/teller-sessions';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { Banknote, Clock3, LockKeyhole, Plus } from 'lucide-react';
 import { FormEvent, useEffect, useState } from 'react';
@@ -22,37 +26,6 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '../../../components/ui/dialog';
-
-interface TellerSessionListItem {
-    id: number;
-    status: 'OPEN' | 'CLOSING' | 'CLOSED';
-    opening_cash: string | number;
-    closing_cash?: string | number | null;
-    expected_cash?: string | number | null;
-    cash_difference?: string | number | null;
-    opened_at?: string | null;
-    closed_at?: string | null;
-    teller?: { code: string; name: string } | null;
-    branch_day?: {
-        business_date: string;
-        branch?: { name: string; code: string } | null;
-    } | null;
-    opened_by?: { name: string } | null;
-    closed_by?: { name: string } | null;
-}
-
-interface TellerSessionIndexProps extends SharedData {
-    teller_sessions: {
-        data: TellerSessionListItem[];
-        current_page: number;
-        per_page: number;
-        last_page: number;
-        total: number;
-    };
-    branch_day?: { id: number; business_date: string } | null;
-    tellers: { id: number; code: string; name: string }[];
-    filters: { search?: string; page?: number; per_page?: number };
-}
 
 export default function Index() {
     const { teller_sessions, branch_day, tellers, filters, auth } =

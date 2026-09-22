@@ -7,34 +7,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type { FinancialProductsPageProps } from '@/types/financial-services';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 
-interface Product {
-    id: number;
-    code: string;
-    name: string;
-    category: string;
-    balance_type: string;
-    interest_rate: string | number;
-    status: boolean;
-}
-
-interface Props extends SharedData {
-    products: {
-        data: Product[];
-        links: { url: string | null; label: string; active: boolean }[];
-        per_page: number;
-    };
-    filters: { search?: string };
-}
-
 export default function FinancialProductIndex() {
-    const { products, filters } = usePage<Props>().props;
+    const { products, filters } = usePage<FinancialProductsPageProps>().props;
     const [search, setSearch] = useState(filters.search ?? '');
     useFlashToastHandler();
 

@@ -6,23 +6,12 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
+import type { FinancialProductFormPageProps } from '@/types/financial-services';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
-interface Product {
-    id: number;
-    code: string;
-    name: string;
-    category: string;
-    balance_type: string;
-    interest_rate: string | number;
-    interest_calculation: string;
-    interest_frequency: string;
-    status: boolean;
-}
-
 export default function FinancialProductForm() {
-    const { product } = usePage<{ product?: Product }>().props;
+    const { product } = usePage<FinancialProductFormPageProps>().props;
     const editing = Boolean(product);
     const { data, setData, post, put, processing, errors } = useForm({
         code: product?.code ?? '',

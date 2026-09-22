@@ -1,3 +1,4 @@
+import type { VoucherViewPageProps } from '@/types/general-accounting';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowLeft, Edit2, Printer } from 'lucide-react';
 import { route } from 'ziggy-js';
@@ -7,16 +8,10 @@ import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { formatDate, formatDateTime } from '../../../lib/date_util';
 import { takaToText } from '../../../lib/taka_to_text';
-import { BreadcrumbItem, SharedData } from '../../../types';
-
-interface VoucherViewProps extends SharedData {
-    voucher: any;
-    flash: { success?: string; error?: string };
-    backUrl: string;
-}
+import { BreadcrumbItem } from '../../../types';
 
 export default function VoucherView() {
-    const { voucher } = usePage<VoucherViewProps>().props;
+    const { voucher } = usePage<VoucherViewPageProps>().props;
 
     useFlashToastHandler();
 

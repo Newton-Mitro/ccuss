@@ -4,19 +4,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
+import type { PettyCashAccountCreatePageProps } from '@/types/treasury-cash/forms';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
-interface CashLocationOption {
-    id: number;
-    code: string;
-    name: string;
-}
-
 export default function CreatePettyCashAccount() {
-    const { cash_locations } = usePage<{
-        cash_locations: CashLocationOption[];
-    }>().props;
+    const { cash_locations } = usePage<PettyCashAccountCreatePageProps>().props;
     const { data, setData, post, processing, errors } = useForm({
         cash_location_id: '',
         code: '',

@@ -6,31 +6,16 @@ import {
 import { Input } from '@/components/ui/input';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
+import type { FinancialTransactionsPageProps } from '@/types/financial-services';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Eye } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 
-interface Transaction {
-    id: number;
-    transaction_no: string;
-    transaction_type: string;
-    transaction_date: string;
-    amount: string | number;
-    status: string;
-    entries?: { financial_account?: { account_no?: string } | null }[];
-}
-
 export default function FinancialTransactionIndex() {
-    const { transactions, filters } = usePage<{
-        transactions: {
-            data: Transaction[];
-            links: { url: string | null; label: string; active: boolean }[];
-            per_page: number;
-        };
-        filters: { search?: string };
-    }>().props;
+    const { transactions, filters } =
+        usePage<FinancialTransactionsPageProps>().props;
     const [search, setSearch] = useState(filters.search ?? '');
 
     useEffect(() => {

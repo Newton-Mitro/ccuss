@@ -1,16 +1,12 @@
+import type { AuditBatchPageProps } from '@/types/system-administration';
 import { Head } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatDateTime } from '../../../lib/date_util';
 import { BreadcrumbItem } from '../../../types';
-import { AuditBatch } from '../../../types/audit_models';
 
-interface BatchPageProps {
-    batch: AuditBatch;
-}
-
-export default function Batch({ batch }: BatchPageProps) {
+export default function Batch({ batch }: AuditBatchPageProps) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'System Administration', href: '' },
         { title: 'Audit Logs', href: route('audits.index') },

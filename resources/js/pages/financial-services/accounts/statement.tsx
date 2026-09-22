@@ -8,28 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
+import type { AccountStatementPageProps } from '@/types/financial-services';
 import { Head, router, usePage } from '@inertiajs/react';
 import { FileText } from 'lucide-react';
 import { route } from 'ziggy-js';
-
-interface Account {
-    id: number;
-    account_no: string;
-    name?: string;
-    account_type: string;
-}
-interface Movement {
-    id: number;
-    transaction_no: string;
-    transaction_type: string;
-    amount: string | number;
-    status: string;
-    transaction_date: string;
-}
-interface SelectedAccount extends Account {
-    transactions?: Movement[];
-    balance?: string | number;
-}
 
 const statementPeriods = [
     { value: 'monthly', label: 'Monthly' },
@@ -47,15 +29,7 @@ export default function AccountStatement() {
         periodStart,
         periodEnd,
         totals,
-    } = usePage<{
-        accounts: Account[];
-        account?: SelectedAccount | null;
-        period: string;
-        statementDate: string;
-        periodStart: string;
-        periodEnd: string;
-        totals: { debit: number; credit: number; count: number };
-    }>().props;
+    } = usePage<AccountStatementPageProps>().props;
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
         { title: 'Account Statements', href: '' },

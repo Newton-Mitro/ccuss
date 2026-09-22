@@ -1,3 +1,4 @@
+import type { TellerCashTransactionFormPageProps } from '@/types/treasury-cash/forms';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { ArrowDownToLine, ArrowUpFromLine } from 'lucide-react';
 import { FormEvent, useState } from 'react';
@@ -7,34 +8,14 @@ import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '../../../types';
-
-interface TellerSessionOption {
-    id: number;
-    teller?: { name: string; code: string } | null;
-    branch_day?: { business_date: string } | null;
-}
-
-interface FinancialAccountOption {
-    id: number;
-    account_no: string;
-    name?: string | null;
-    account_type: string;
-    balance: string | number;
-}
-
-interface TellerCashTransactionProps extends SharedData {
-    transaction_type: 'DEPOSIT' | 'WITHDRAWAL';
-    teller_sessions: TellerSessionOption[];
-    financial_accounts: FinancialAccountOption[];
-}
+import { BreadcrumbItem } from '../../../types';
 
 export default function Form() {
     const {
         transaction_type,
         teller_sessions,
         financial_accounts = [],
-    } = usePage<TellerCashTransactionProps>().props;
+    } = usePage<TellerCashTransactionFormPageProps>().props;
     const isDeposit = transaction_type === 'DEPOSIT';
     const routeType = isDeposit ? 'deposit' : 'withdrawal';
     const { data, setData, post, processing, errors } = useForm({

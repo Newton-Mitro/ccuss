@@ -8,34 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type { PettyCashIndexProps } from '@/types/treasury-cash/petty-cash-accounts';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { WalletCards } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-
-interface PettyCashFundListItem {
-    id: number;
-    code: string;
-    name: string;
-    fund_limit: string | number;
-    current_balance: string | number;
-    method: 'IMPREST' | 'VARIABLE';
-    status: 'ACTIVE' | 'INACTIVE' | 'CLOSED';
-    custodian?: { name: string } | null;
-    cash_location?: { branch?: { name: string; code: string } | null } | null;
-}
-
-interface PettyCashIndexProps extends SharedData {
-    funds: {
-        data: PettyCashFundListItem[];
-        current_page: number;
-        per_page: number;
-        last_page: number;
-        total: number;
-    };
-    filters: { search?: string; page?: number; per_page?: number };
-}
 
 export default function Index() {
     const { funds, filters } = usePage<PettyCashIndexProps>().props;

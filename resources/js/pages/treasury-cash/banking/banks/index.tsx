@@ -8,31 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type { BankIndexProps } from '@/types/treasury-cash/banks';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Landmark } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-
-interface BankListItem {
-    id: number;
-    code: string;
-    name: string;
-    short_name?: string | null;
-    status: boolean;
-    accounts_count?: number;
-}
-
-interface BankIndexProps extends SharedData {
-    banks: {
-        data: BankListItem[];
-        current_page: number;
-        per_page: number;
-        last_page: number;
-        total: number;
-    };
-    filters: { search?: string; page?: number; per_page?: number };
-}
 
 export default function Index() {
     const { banks, filters } = usePage<BankIndexProps>().props;

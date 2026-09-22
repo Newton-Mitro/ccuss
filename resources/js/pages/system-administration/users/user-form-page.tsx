@@ -1,3 +1,4 @@
+import type { UserFormPageProps } from '@/types/system-administration';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Key, Loader2 } from 'lucide-react';
 import React, { useState } from 'react';
@@ -10,15 +11,7 @@ import { Label } from '../../../components/ui/label';
 import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '../../../types';
-import { Organization } from '../../../types/organization';
-import { Role, User } from '../../../types/user';
-
-interface UserFormPageProps extends SharedData {
-    user?: User;
-    roles: Role[];
-    organizations: Organization[];
-}
+import { BreadcrumbItem } from '../../../types';
 
 const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
     useFlashToastHandler();

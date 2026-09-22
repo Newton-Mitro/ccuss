@@ -7,46 +7,12 @@ import {
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type { ChequeIndexProps } from '@/types/treasury-cash/cheques';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { CheckSquare } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
-
-interface ChequeListItem {
-    id: number;
-    cheque_no: string;
-    status:
-        | 'UNUSED'
-        | 'ISSUED'
-        | 'PRESENTED'
-        | 'CLEARED'
-        | 'BOUNCED'
-        | 'STOPPED'
-        | 'CANCELLED'
-        | 'EXPIRED';
-    cheque_date?: string | null;
-    amount?: string | number | null;
-    payee?: string | null;
-    cheque_book?: {
-        book_no: string;
-        bank_account?: {
-            account_name: string;
-            bank?: { name: string } | null;
-        } | null;
-    } | null;
-}
-
-interface ChequeIndexProps extends SharedData {
-    cheques: {
-        data: ChequeListItem[];
-        current_page: number;
-        per_page: number;
-        last_page: number;
-        total: number;
-    };
-    filters: { search?: string; page?: number; per_page?: number };
-}
 
 export default function Index() {
     const { cheques, filters } = usePage<ChequeIndexProps>().props;

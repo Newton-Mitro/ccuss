@@ -8,35 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type { BankAccountIndexProps } from '@/types/treasury-cash/bank-accounts';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { Building2, Plus } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-
-interface BankAccountListItem {
-    id: number;
-    account_name: string;
-    account_number: string;
-    routing_number?: string | null;
-    account_type: 'CURRENT' | 'SAVINGS' | 'FDR' | 'OTHER';
-    opening_balance: string | number;
-    is_reconcilable: boolean;
-    status: 'ACTIVE' | 'INACTIVE' | 'CLOSED';
-    bank?: { name: string; code: string } | null;
-    branch?: { name: string; code: string } | null;
-}
-
-interface BankAccountIndexProps extends SharedData {
-    accounts: {
-        data: BankAccountListItem[];
-        current_page: number;
-        per_page: number;
-        last_page: number;
-        total: number;
-    };
-    filters: { search?: string; page?: number; per_page?: number };
-}
 
 export default function Index() {
     const { accounts, filters, auth } = usePage<BankAccountIndexProps>().props;

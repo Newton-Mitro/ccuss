@@ -4,21 +4,11 @@ import {
 } from '@/components/resource-page-shell';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
+import type { TransactionsReportPageProps } from '@/types/financial-services';
 import { Head, usePage } from '@inertiajs/react';
 import ReportExportActions from '../../../components/report-export-actions';
-interface Transaction {
-    id: number;
-    transaction_no: string;
-    transaction_type: string;
-    transaction_date: string;
-    amount: string | number;
-    status: string;
-    entries?: { financial_account?: { account_no?: string } | null }[];
-}
 export default function TransactionReport() {
-    const { transactions } = usePage<{
-        transactions: { data: Transaction[] };
-    }>().props;
+    const { transactions } = usePage<TransactionsReportPageProps>().props;
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
         { title: 'Transaction Report', href: '' },

@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type { PettyCashTransactionIndexProps } from '@/types/treasury-cash/petty-cash-transactions';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowDownToLine,
@@ -18,29 +19,6 @@ import {
 } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-
-interface PettyCashTransactionListItem {
-    id: number;
-    transaction_no: string;
-    type: 'FUNDING' | 'EXPENSE' | 'REPLENISHMENT' | 'RETURN' | 'ADJUSTMENT';
-    amount: string | number;
-    status: 'PENDING' | 'POSTED' | 'CANCELLED';
-    payee?: string | null;
-    description?: string | null;
-    branch_day?: { business_date: string } | null;
-    petty_cash_fund?: { code: string; name: string } | null;
-}
-
-interface PettyCashTransactionIndexProps extends SharedData {
-    transactions: {
-        data: PettyCashTransactionListItem[];
-        current_page: number;
-        per_page: number;
-        last_page: number;
-        total: number;
-    };
-    filters: { search?: string; page?: number; per_page?: number };
-}
 
 export default function Index() {
     const { transactions, filters, auth } =

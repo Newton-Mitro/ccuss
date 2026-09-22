@@ -4,6 +4,10 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import type {
+    VoucherIndexPageProps,
+    VoucherListItem,
+} from '@/types/general-accounting';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil } from 'lucide-react';
 import { useEffect } from 'react';
@@ -19,31 +23,10 @@ import { Button } from '../../../components/ui/button';
 import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { SharedData } from '../../../types';
 import { transactionStatus } from './data/transaction_statuses';
 
-interface Voucher {
-    id: number;
-    voucher_no: string;
-    voucher_type: string;
-    voucher_date: string;
-    status: string;
-    fiscal_year?: { code?: string };
-    fiscal_period?: { name?: string; period_name?: string };
-    branch?: { name: string };
-    entries?: { debit: number; credit: number }[];
-}
-
-interface VoucherPageProps extends SharedData {
-    vouchers: {
-        data: Voucher[];
-        links: { url: string | null; label: string; active: boolean }[];
-    };
-    filters: Record<string, string>;
-}
-
 export default function Index() {
-    const { vouchers, filters } = usePage<VoucherPageProps>().props;
+    const { vouchers, filters } = usePage<VoucherIndexPageProps>().props;
     const { data, setData, get } = useForm({
         search: filters.search || '',
         status: filters.status || 'all',
@@ -63,7 +46,7 @@ export default function Index() {
         return () => clearTimeout(delay);
     }, [data.search, data.status, data.per_page, data.page]);
 
-    const getTotals = (entries: Voucher['entries']) => ({
+    const getTotals = (entries: VoucherListItem['entries']) => ({
         totalDebit:
             entries?.reduce((sum, entry) => sum + Number(entry.debit), 0) || 0,
         totalCredit:

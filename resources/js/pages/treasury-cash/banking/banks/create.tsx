@@ -4,13 +4,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
+import type { BankCreatePageProps } from '@/types/treasury-cash/forms';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
 export default function CreateBank() {
-    const { organization } = usePage<{
-        organization?: { id: number; name: string };
-    }>().props;
+    const { organization } = usePage<BankCreatePageProps>().props;
     const { data, setData, post, processing, errors } = useForm({
         code: '',
         name: '',

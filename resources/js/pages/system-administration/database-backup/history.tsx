@@ -17,35 +17,18 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import type {
+    BackupHistoryPageProps,
+    BackupLog,
+} from '@/types/system-administration';
 import DataTablePagination from '../../../components/data-table-pagination';
 import { Input } from '../../../components/ui/input';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import { appSwal } from '../../../lib/appSwal';
-import { BreadcrumbItem, SharedData } from '../../../types';
-
-interface BackupLog {
-    id: number;
-    file_name: string;
-    file_size: number;
-    backup_type: 'full' | 'database_only' | 'files_only';
-    status: 'running' | 'success' | 'failed';
-    started_at: string;
-    completed_at?: string;
-    duration_seconds?: number;
-    message?: string;
-    error?: string;
-}
-
-interface BackupPageProps extends SharedData {
-    logs: {
-        data: BackupLog[];
-        links: { url: string | null; label: string; active: boolean }[];
-    };
-    filters: { search?: string; per_page?: number; page?: number };
-}
+import { BreadcrumbItem } from '../../../types';
 
 export default function History() {
-    const { logs, filters } = usePage<BackupPageProps>().props;
+    const { logs, filters } = usePage<BackupHistoryPageProps>().props;
 
     const { data, setData, get } = useForm({
         search: filters.search || '',

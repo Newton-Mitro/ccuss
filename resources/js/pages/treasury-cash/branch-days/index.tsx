@@ -9,7 +9,11 @@ import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type {
+    BranchDayIndexProps,
+    BranchDayListItem,
+} from '@/types/treasury-cash/branch-days';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { CalendarDays, LockKeyhole, Plus } from 'lucide-react';
 import { FormEvent, useEffect, useState } from 'react';
@@ -23,31 +27,6 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '../../../components/ui/dialog';
-
-interface BranchDayListItem {
-    id: number;
-    business_date: string;
-    status: 'OPEN' | 'CLOSING' | 'CLOSED';
-    opened_at?: string | null;
-    closed_at?: string | null;
-    branch?: { id: number; name: string; code: string } | null;
-    opened_by?: { id: number; name: string } | null;
-    closed_by?: { id: number; name: string } | null;
-}
-
-interface BranchDayIndexProps extends SharedData {
-    branch_days: {
-        data: BranchDayListItem[];
-        links: { url: string | null; label: string; active: boolean }[];
-        current_page: number;
-        per_page: number;
-    };
-    filters: {
-        search?: string;
-        page?: number;
-        per_page?: number;
-    };
-}
 
 export default function Index() {
     const { branch_days, filters } = usePage<BranchDayIndexProps>().props;

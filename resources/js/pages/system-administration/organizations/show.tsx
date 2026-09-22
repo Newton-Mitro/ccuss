@@ -2,23 +2,17 @@ import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { route } from 'ziggy-js';
 
+import type { OrganizationShowPageProps } from '@/types/system-administration';
 import BolderLessInfoBox from '../../../components/borderless-info-box';
 import HeadingSmall from '../../../components/heading-small';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem } from '../../../types';
-import { Branch } from '../../../types/branch';
-import { Organization } from '../../../types/organization';
-
-interface OrganizationPageProps extends Record<string, any> {
-    organization: Organization & {
-        branches: Branch[];
-    };
-}
+import type { Branch } from '../../../types/branch';
 
 function Show() {
-    const { organization } = usePage<OrganizationPageProps>().props;
+    const { organization } = usePage<OrganizationShowPageProps>().props;
 
     const { delete: destroy, processing } = useForm();
 

@@ -8,34 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type { VaultIndexProps } from '@/types/treasury-cash/vaults';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { Plus, Vault as VaultIcon } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-
-interface VaultListItem {
-    id: number;
-    code: string;
-    name: string;
-    status: 'ACTIVE' | 'INACTIVE' | 'CLOSED';
-    maximum_balance?: string | number | null;
-    cash_location?: {
-        code: string;
-        name: string;
-        branch?: { name: string; code: string } | null;
-    } | null;
-}
-
-interface VaultIndexProps extends SharedData {
-    vaults: {
-        data: VaultListItem[];
-        current_page: number;
-        per_page: number;
-        last_page: number;
-    };
-    filters: { search?: string; page?: number; per_page?: number };
-}
 
 export default function Index() {
     const { vaults, filters, auth } = usePage<VaultIndexProps>().props;

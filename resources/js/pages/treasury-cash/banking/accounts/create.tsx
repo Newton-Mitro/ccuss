@@ -1,3 +1,4 @@
+import type { BankAccountCreatePageProps } from '@/types/treasury-cash/forms';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { Building2 } from 'lucide-react';
 import { FormEvent } from 'react';
@@ -7,17 +8,11 @@ import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import useFlashToastHandler from '../../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../../layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '../../../../types';
-
-interface BankAccountCreateProps extends SharedData {
-    banks: { id: number; code: string; name: string }[];
-    financial_accounts: { id: number; account_no: string; name: string }[];
-    branches: { id: number; code: string; name: string }[];
-}
+import { BreadcrumbItem } from '../../../../types';
 
 export default function Create() {
     const { banks, financial_accounts, branches } =
-        usePage<BankAccountCreateProps>().props;
+        usePage<BankAccountCreatePageProps>().props;
     const { data, setData, post, processing, errors } = useForm({
         bank_id: '',
         financial_account_id: '',

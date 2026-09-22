@@ -1,3 +1,4 @@
+import type { TellerTransferPageProps } from '@/types/treasury-cash/forms';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { ArrowRightLeft } from 'lucide-react';
 import { FormEvent } from 'react';
@@ -7,22 +8,11 @@ import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '../../../types';
-
-interface CashLocationOption {
-    id: number;
-    code: string;
-    name: string;
-    type: string;
-}
-
-interface TellerTransferProps extends SharedData {
-    branch_day: { id: number; business_date: string; status: string } | null;
-    cash_locations: CashLocationOption[];
-}
+import { BreadcrumbItem } from '../../../types';
 
 export default function TellerToTellerTransfer() {
-    const { branch_day, cash_locations } = usePage<TellerTransferProps>().props;
+    const { branch_day, cash_locations } =
+        usePage<TellerTransferPageProps>().props;
     const { data, setData, post, processing, errors } = useForm({
         from_cash_location_id: '',
         to_cash_location_id: '',

@@ -5,24 +5,13 @@ import {
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
+import type { FinancialProductPageProps } from '@/types/financial-services';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Pencil } from 'lucide-react';
 import { route } from 'ziggy-js';
 
-interface Product {
-    id: number;
-    code: string;
-    name: string;
-    category: string;
-    balance_type: string;
-    interest_rate: string | number;
-    interest_calculation: string;
-    interest_frequency: string;
-    status: boolean;
-}
-
 export default function FinancialProductShow() {
-    const { product } = usePage<{ product: Product }>().props;
+    const { product } = usePage<FinancialProductPageProps>().props;
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
         { title: 'Products', href: route('financial-products.index') },

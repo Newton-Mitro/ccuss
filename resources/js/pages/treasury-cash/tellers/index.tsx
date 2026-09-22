@@ -8,35 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type { TellerIndexProps } from '@/types/teller';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { Plus, UserRound } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-
-interface TellerListItem {
-    id: number;
-    code: string;
-    name: string;
-    status: 'ACTIVE' | 'INACTIVE' | 'CLOSED';
-    maximum_cash?: string | number | null;
-    user?: { name: string; email: string } | null;
-    cash_location?: {
-        code: string;
-        name: string;
-        branch?: { name: string; code: string } | null;
-    } | null;
-}
-
-interface TellerIndexProps extends SharedData {
-    tellers: {
-        data: TellerListItem[];
-        current_page: number;
-        per_page: number;
-        last_page: number;
-    };
-    filters: { search?: string; page?: number; per_page?: number };
-}
 
 export default function Index() {
     const { tellers, filters, auth } = usePage<TellerIndexProps>().props;

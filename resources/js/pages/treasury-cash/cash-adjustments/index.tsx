@@ -8,35 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type { CashAdjustmentIndexProps } from '@/types/treasury-cash/cash-adjustments';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { CheckCircle2, ClipboardCheck, SlidersHorizontal } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-
-interface CashAdjustmentListItem {
-    id: number;
-    amount: string | number;
-    type: 'SHORTAGE' | 'EXCESS';
-    reason: string;
-    status: 'PENDING' | 'APPROVED' | 'POSTED' | 'CANCELLED';
-    requested_at?: string | null;
-    branch_day?: { business_date: string } | null;
-    teller_session?: {
-        teller?: { code: string; name: string } | null;
-    } | null;
-}
-
-interface CashAdjustmentIndexProps extends SharedData {
-    adjustments: {
-        data: CashAdjustmentListItem[];
-        current_page: number;
-        per_page: number;
-        last_page: number;
-        total: number;
-    };
-    filters: { search?: string; page?: number; per_page?: number };
-}
 
 export default function Index() {
     const { adjustments, filters, auth } =

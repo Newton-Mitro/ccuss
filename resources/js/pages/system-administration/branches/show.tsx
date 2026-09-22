@@ -1,17 +1,13 @@
+import type { BranchShowPageProps } from '@/types/system-administration';
 import { Head } from '@inertiajs/react';
 import { ArrowLeft, Clock, Hash, MapPin } from 'lucide-react';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '../../../types';
-import { Branch } from '../../../types/branch';
+import { BreadcrumbItem } from '../../../types';
 
-interface ShowProps extends SharedData {
-    branch: Branch;
-}
-
-export default function Show({ branch }: ShowProps) {
+export default function Show({ branch }: BranchShowPageProps) {
     useFlashToastHandler();
 
     const breadcrumbs: BreadcrumbItem[] = [

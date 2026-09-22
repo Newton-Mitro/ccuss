@@ -4,6 +4,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import type { AuditsPageProps } from '@/types/system-administration';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { Archive, ListChecks } from 'lucide-react';
 import { useEffect } from 'react';
@@ -14,22 +15,8 @@ import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatDateTime } from '../../../lib/date_util';
-import { BreadcrumbItem, SharedData } from '../../../types';
-import { Audit } from '../../../types/audit_models';
+import { BreadcrumbItem } from '../../../types';
 import { auditEvents } from './data/audit_events';
-
-interface AuditsPageProps extends SharedData {
-    audits: {
-        data: Audit[];
-        links: { url: string | null; label: string; active: boolean }[];
-    };
-    filters: {
-        event?: string;
-        user_id?: number;
-        page?: number;
-        per_page?: number;
-    };
-}
 
 export default function Index() {
     const { audits, filters } = usePage<AuditsPageProps>().props;

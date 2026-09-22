@@ -1,3 +1,4 @@
+import type { FiscalPeriodFormPageProps } from '@/types/general-accounting';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, ListFilter, Loader2 } from 'lucide-react';
 import React from 'react';
@@ -11,22 +12,11 @@ import { Label } from '../../../components/ui/label';
 import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '../../../types';
-
-interface FiscalPeriodProps extends SharedData {
-    fiscalPeriod?: {
-        id: number;
-        period_name: string;
-        fiscal_year_id: number;
-        start_date: string;
-        end_date: string;
-        status: 'open' | 'closed' | 'locked'; // ✅ FIXED
-    };
-    fiscalYears: { id: number; code: string }[];
-}
+import { BreadcrumbItem } from '../../../types';
 
 export default function FiscalPeriodForm() {
-    const { fiscalPeriod, fiscalYears } = usePage<FiscalPeriodProps>().props;
+    const { fiscalPeriod, fiscalYears } =
+        usePage<FiscalPeriodFormPageProps>().props;
 
     useFlashToastHandler();
 

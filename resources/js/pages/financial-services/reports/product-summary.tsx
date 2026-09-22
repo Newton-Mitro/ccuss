@@ -4,19 +4,15 @@ import {
 } from '@/components/resource-page-shell';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
+import type {
+    ProductSummaryItem,
+    ProductSummaryReportPageProps,
+} from '@/types/financial-services';
 import { Head, usePage } from '@inertiajs/react';
 import ReportExportActions from '../../../components/report-export-actions';
 
-interface Product {
-    id: number;
-    code: string;
-    name: string;
-    category: string;
-    financial_accounts_count: number;
-    financial_accounts_sum_balance: string | number | null;
-}
 export default function ProductSummaryReport() {
-    const { products } = usePage<{ products: Product[] }>().props;
+    const { products } = usePage<ProductSummaryReportPageProps>().props;
     return (
         <ReportTable
             title="Product summary"
@@ -38,7 +34,7 @@ function ReportTable({
     title: string;
     description: string;
     breadcrumbs: BreadcrumbItem[];
-    products: Product[];
+    products: ProductSummaryItem[];
 }) {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>

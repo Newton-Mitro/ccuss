@@ -1,3 +1,4 @@
+import type { CashAdjustmentFormPageProps } from '@/types/treasury-cash/forms';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { SlidersHorizontal } from 'lucide-react';
 import { FormEvent } from 'react';
@@ -7,22 +8,10 @@ import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '../../../types';
-
-interface TellerSessionOption {
-    id: number;
-    opening_cash: string | number;
-    expected_cash?: string | number | null;
-    teller?: { name: string; code: string } | null;
-    branch_day?: { business_date: string } | null;
-}
-
-interface CashAdjustmentProps extends SharedData {
-    teller_sessions: TellerSessionOption[];
-}
+import { BreadcrumbItem } from '../../../types';
 
 export default function TellerCashAdjustment() {
-    const { teller_sessions } = usePage<CashAdjustmentProps>().props;
+    const { teller_sessions } = usePage<CashAdjustmentFormPageProps>().props;
     const { data, setData, post, processing, errors } = useForm({
         teller_session_id: '',
         amount: '',

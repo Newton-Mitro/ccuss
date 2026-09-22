@@ -7,34 +7,12 @@ import {
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type { AdvanceAccountIndexProps } from '@/types/treasury-cash/advance-accounts';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { HandCoins } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-
-interface AdvanceAccountListItem {
-    id: number;
-    code: string;
-    name: string;
-    fund_limit: string | number;
-    current_balance: string | number;
-    method: 'IMPREST' | 'VARIABLE';
-    status: 'ACTIVE' | 'INACTIVE' | 'CLOSED';
-    custodian_name?: string | null;
-    branch_name?: string | null;
-}
-
-interface AdvanceAccountIndexProps extends SharedData {
-    advance_accounts: {
-        data: AdvanceAccountListItem[];
-        current_page: number;
-        per_page: number;
-        last_page: number;
-        total: number;
-    };
-    filters: { search?: string; page?: number; per_page?: number };
-}
 
 export default function Index() {
     const { advance_accounts, filters } =

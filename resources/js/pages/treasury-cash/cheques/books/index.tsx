@@ -7,39 +7,12 @@ import {
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type { ChequeBookIndexProps } from '@/types/treasury-cash/cheque-books';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { BookOpenCheck, Plus } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-
-interface ChequeBookListItem {
-    id: number;
-    book_no: string;
-    prefix?: string | null;
-    start_number: number;
-    end_number: number;
-    current_number?: number | null;
-    leaf_count: number;
-    issued_date?: string | null;
-    status: 'AVAILABLE' | 'IN_USE' | 'EXHAUSTED' | 'CANCELLED';
-    bank_account?: {
-        account_name: string;
-        account_number: string;
-        bank?: { name: string } | null;
-    } | null;
-}
-
-interface ChequeBookIndexProps extends SharedData {
-    books: {
-        data: ChequeBookListItem[];
-        current_page: number;
-        per_page: number;
-        last_page: number;
-        total: number;
-    };
-    filters: { search?: string; page?: number; per_page?: number };
-}
 
 export default function Index() {
     const { books, filters } = usePage<ChequeBookIndexProps>().props;

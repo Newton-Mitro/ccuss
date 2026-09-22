@@ -1,3 +1,4 @@
+import type { FiscalYearFormPageProps } from '@/types/general-accounting';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
 import React from 'react';
@@ -14,20 +15,10 @@ import {
 } from '../../../components/ui/toggle-group';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '../../../types';
-
-interface FiscalYearProps extends SharedData {
-    fiscalYear?: {
-        id: number;
-        code: string;
-        start_date: string;
-        end_date: string;
-        is_closed: boolean; // ✅ FIXED
-    };
-}
+import { BreadcrumbItem } from '../../../types';
 
 export default function FiscalYearForm() {
-    const { fiscalYear } = usePage<FiscalYearProps>().props;
+    const { fiscalYear } = usePage<FiscalYearFormPageProps>().props;
 
     useFlashToastHandler();
 

@@ -1,3 +1,4 @@
+import type { UserFormPageProps } from '@/types/system-administration';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Key, Loader2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
@@ -15,16 +16,8 @@ import {
 } from '../../../components/ui/tooltip';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '../../../types';
-import { Organization } from '../../../types/organization';
-import { Permission, Role, User } from '../../../types/user';
-
-interface UserFormPageProps extends SharedData {
-    user?: User;
-    roles: Role[];
-    organizations: Organization[];
-    permissions: Permission[];
-}
+import { BreadcrumbItem } from '../../../types';
+import type { Permission, Role } from '../../../types/user';
 
 const UserForm = ({
     user,

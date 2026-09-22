@@ -1,3 +1,4 @@
+import type { TellerCreatePageProps } from '@/types/treasury-cash/forms';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { UserRound } from 'lucide-react';
 import { FormEvent } from 'react';
@@ -7,14 +8,10 @@ import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '../../../types';
-
-interface TellerCreateProps extends SharedData {
-    users: { id: number; name: string; email: string }[];
-}
+import { BreadcrumbItem } from '../../../types';
 
 export default function Create() {
-    const { users } = usePage<TellerCreateProps>().props;
+    const { users } = usePage<TellerCreatePageProps>().props;
     const { data, setData, post, processing, errors } = useForm({
         user_id: '',
         code: '',

@@ -5,29 +5,13 @@ import {
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
+import type { FinancialTransactionPageProps } from '@/types/financial-services';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Check, RotateCcw } from 'lucide-react';
 import { route } from 'ziggy-js';
 
-interface Transaction {
-    id: number;
-    transaction_no: string;
-    transaction_type: string;
-    transaction_date: string;
-    amount: string | number;
-    currency: string;
-    status: string;
-    description?: string;
-    reference?: string;
-    entries?: {
-        financial_account?: { account_no?: string } | null;
-        direction: string;
-        amount: string | number;
-    }[];
-}
-
 export default function FinancialTransactionShow() {
-    const { transaction } = usePage<{ transaction: Transaction }>().props;
+    const { transaction } = usePage<FinancialTransactionPageProps>().props;
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
         { title: 'Transactions', href: route('financial-transactions.index') },

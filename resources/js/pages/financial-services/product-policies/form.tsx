@@ -6,48 +6,15 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
+import type { ProductPolicyFormPageProps } from '@/types/financial-services';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
-
-interface Product {
-    id: number;
-    code: string;
-    name: string;
-    category: string;
-}
-
-interface Policy {
-    minimum_opening_amount?: string | number | null;
-    minimum_deposit_amount?: string | number | null;
-    maximum_deposit_amount?: string | number | null;
-    maximum_loan_amount?: string | number | null;
-    loan_to_value_percent?: string | number | null;
-    interest_rebate_percent?: string | number | null;
-    source_url?: string | null;
-    source_checked_at?: string | null;
-    effective_from?: string | null;
-    effective_until?: string | null;
-    version?: string | null;
-    status?: string;
-    notes?: string | null;
-    deposit_amount_rules?: unknown;
-    tenure_rules?: unknown;
-    loan_ceiling_rules?: unknown;
-    repayment_rules?: unknown;
-    eligibility_rules?: unknown;
-    security_rules?: unknown;
-    documentation_requirements?: unknown;
-    maturity_examples?: unknown;
-}
 
 const jsonValue = (value: unknown) =>
     value ? JSON.stringify(value, null, 2) : '';
 
 export default function FinancialProductPolicyForm() {
-    const { product, policy } = usePage<{
-        product: Product;
-        policy?: Policy | null;
-    }>().props;
+    const { product, policy } = usePage<ProductPolicyFormPageProps>().props;
     const { data, setData, post, processing, errors } = useForm({
         minimum_opening_amount: String(policy?.minimum_opening_amount ?? ''),
         minimum_deposit_amount: String(policy?.minimum_deposit_amount ?? ''),
