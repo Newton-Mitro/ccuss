@@ -53,13 +53,18 @@ class GeneralAccountingSeeder extends Seeder
             $accounts = [];
             foreach ([
                 ['1100', 'Cash on Hand', '1000', 'ASSET', 'DEBIT', true],
-                ['1200', 'Bank Account', '1000', 'ASSET', 'DEBIT', true],
-                ['2100', 'Accounts Payable', '2000', 'LIABILITY', 'CREDIT', false],
-                ['3100', 'Retained Earnings', '3000', 'EQUITY', 'CREDIT', false],
-                ['4100', 'Service Income', '4000', 'INCOME', 'CREDIT', false],
+                ['1200', 'Bank Accounts', '1000', 'ASSET', 'DEBIT', true],
+                ['1300', 'Loan Receivables', '1000', 'ASSET', 'DEBIT', false],
+                ['2100', 'Savings Deposits', '2000', 'LIABILITY', 'CREDIT', false],
+                ['2200', 'Fixed Deposits', '2000', 'LIABILITY', 'CREDIT', false],
+                ['2300', 'Recurring Deposits', '2000', 'LIABILITY', 'CREDIT', false],
+                ['3100', 'Share Capital', '3000', 'EQUITY', 'CREDIT', false],
+                ['4100', 'Loan Interest Income', '4000', 'INCOME', 'CREDIT', false],
+                ['4200', 'Service and Account Fee Income', '4000', 'INCOME', 'CREDIT', false],
                 ['5100', 'Operating Expense', '5000', 'EXPENSE', 'DEBIT', false],
+                ['5200', 'Member Interest Expense', '5000', 'EXPENSE', 'DEBIT', false],
             ] as [$code, $name, $groupCode, $type, $normalBalance, $isCash]) {
-                $accounts[$code] = LedgerAccount::query()->firstOrCreate(
+                $accounts[$code] = LedgerAccount::query()->updateOrCreate(
                     [
                         'organization_id' => $organization->id,
                         'code' => $code,
@@ -100,7 +105,7 @@ class GeneralAccountingSeeder extends Seeder
                 );
             }
 
-            $fiscalYear = FiscalYear::query()->firstOrCreate(
+            $fiscalYear = FiscalYear::query()->updateOrCreate(
                 [
                     'organization_id' => $organization->id,
                     'name' => '2025-2026',
