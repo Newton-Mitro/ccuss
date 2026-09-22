@@ -6,7 +6,12 @@ use App\TreasuryAndCash\Controllers\CashManagementController;
 use App\TreasuryAndCash\Controllers\CashMovementController;
 use App\TreasuryAndCash\Controllers\ChequeController;
 use App\TreasuryAndCash\Controllers\PettyCashController;
+use App\TreasuryAndCash\Controllers\TreasuryDashboardController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/treasury-cash', [TreasuryDashboardController::class, 'index'])
+    ->middleware(['auth', 'verified', 'organization', 'permission:treasury.view'])
+    ->name('treasury-cash.dashboard');
 
 Route::middleware(['auth', 'verified', 'organization'])
     ->prefix('branch-days')

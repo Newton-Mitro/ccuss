@@ -16,6 +16,7 @@ import {
     CheckCircle2,
     ChevronsDown,
     ChevronsUp,
+    Columns2,
     InfoIcon,
     LogOut,
     Monitor,
@@ -42,6 +43,7 @@ import { BreadcrumbItem, SharedData, SidebarItem } from '../types';
 const STORAGE_KEY = 'app_sidebar_open_menus_v1';
 const SIDEBAR_SCROLL_KEY = 'app_sidebar_scroll_v1';
 const SIDEBAR_OPEN_KEY = 'app_sidebar_open_state_v1';
+const SIDEBAR_FLOATING_KEY = 'app_sidebar_floating_v1';
 
 interface CustomAuthLayoutProps {
     children: React.ReactNode;
@@ -66,6 +68,15 @@ export default function CustomAuthLayout({
             return v ? JSON.parse(v) : true;
         } catch {
             return true;
+        }
+    });
+
+    const [sidebarFloating, setSidebarFloating] = useState<boolean>(() => {
+        try {
+            const value = localStorage.getItem(SIDEBAR_FLOATING_KEY);
+            return value ? JSON.parse(value) : false;
+        } catch {
+            return false;
         }
     });
 
@@ -98,6 +109,13 @@ export default function CustomAuthLayout({
     useEffect(() => {
         localStorage.setItem(SIDEBAR_OPEN_KEY, JSON.stringify(sidebarOpen));
     }, [sidebarOpen]);
+
+    useEffect(() => {
+        localStorage.setItem(
+            SIDEBAR_FLOATING_KEY,
+            JSON.stringify(sidebarFloating),
+        );
+    }, [sidebarFloating]);
 
     /* ------------------------------------------------------------------
      * Sidebar scroll preservation
@@ -182,7 +200,7 @@ export default function CustomAuthLayout({
             <aside
                 className={cn(
                     'app-sidebar z-40 flex h-screen shrink-0 flex-col overflow-hidden border-r border-sidebar-border/80 bg-sidebar text-sidebar-foreground shadow-xl shadow-black/10 transition-all duration-300 print:hidden',
-                    'absolute top-0 left-0',
+                    sidebarFloating ? 'absolute top-0 left-0' : 'relative',
                     sidebarOpen ? 'w-72' : 'w-16',
                 )}
             >
@@ -373,18 +391,44 @@ export default function CustomAuthLayout({
             </aside>
 
             {/* Main */}
-            <div className="flex min-w-0 flex-1 flex-col md:pl-16">
+            <div
+                className={cn(
+                    'flex min-w-0 flex-1 flex-col',
+                    sidebarFloating && 'md:pl-16',
+                )}
+            >
                 <header className="flex h-16 items-center justify-between border-b border-border/80 bg-sidebar/80 px-4 text-sidebar-foreground shadow-sm backdrop-blur-xl md:px-6 print:hidden">
                     <div className="flex items-center gap-3">
                         <button
+                            type="button"
                             onClick={() => setSidebarOpen((v) => !v)}
                             className="rounded-xl border border-border/70 bg-card/60 p-2 transition-colors hover:bg-muted"
+                            aria-label={
+                                sidebarOpen ? 'Close sidebar' : 'Open sidebar'
+                            }
                         >
                             {sidebarOpen ? (
                                 <PanelLeftClose size={18} />
                             ) : (
                                 <PanelLeftOpen size={18} />
                             )}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setSidebarFloating((v) => !v)}
+                            className="rounded-xl border border-border/70 bg-card/60 p-2 transition-colors hover:bg-muted"
+                            aria-label={
+                                sidebarFloating
+                                    ? 'Use side-by-side sidebar'
+                                    : 'Use floating sidebar'
+                            }
+                            title={
+                                sidebarFloating
+                                    ? 'Use side-by-side sidebar'
+                                    : 'Use floating sidebar'
+                            }
+                        >
+                            <Columns2 size={18} />
                         </button>
                         {breadcrumbs && (
                             <Breadcrumbs breadcrumbs={breadcrumbs} />

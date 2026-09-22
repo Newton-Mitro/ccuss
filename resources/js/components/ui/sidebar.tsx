@@ -29,6 +29,7 @@ const SIDEBAR_WIDTH = "16rem"
 const SIDEBAR_WIDTH_MOBILE = "18rem"
 const SIDEBAR_WIDTH_ICON = "3rem"
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
+const SIDEBAR_VARIANT_COOKIE_NAME = "sidebar_variant"
 
 type SidebarContext = {
   state: "expanded" | "collapsed"
@@ -38,6 +39,8 @@ type SidebarContext = {
   setOpenMobile: (open: boolean) => void
   isMobile: boolean
   toggleSidebar: () => void
+  variant: "sidebar" | "floating" | "inset"
+  setVariant: (variant: "sidebar" | "floating" | "inset") => void
 }
 
 const SidebarContext = React.createContext<SidebarContext | null>(null)
@@ -58,11 +61,13 @@ function SidebarProvider({
   className,
   style,
   children,
+  variant = "inset",
   ...props
 }: React.ComponentProps<"div"> & {
   defaultOpen?: boolean
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  variant?: "sidebar" | "floating" | "inset"
 }) {
   const isMobile = useIsMobile()
   const [openMobile, setOpenMobile] = React.useState(false)
@@ -70,6 +75,7 @@ function SidebarProvider({
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
   const [_open, _setOpen] = React.useState(defaultOpen)
+  const [sidebarVariant, setSidebarVariant] = React.useState(variant)
   const open = openProp ?? _open
   const setOpen = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
@@ -90,6 +96,14 @@ function SidebarProvider({
   const toggleSidebar = React.useCallback(() => {
     return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open)
   }, [isMobile, setOpen, setOpenMobile])
+
+  const setVariant = React.useCallback(
+    (nextVariant: "sidebar" | "floating" | "inset") => {
+      setSidebarVariant(nextVariant)
+      document.cookie = `${SIDEBAR_VARIANT_COOKIE_NAME}=${nextVariant}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+    },
+    []
+  )
 
   // Adds a keyboard shortcut to toggle the sidebar.
   React.useEffect(() => {
@@ -120,8 +134,10 @@ function SidebarProvider({
       openMobile,
       setOpenMobile,
       toggleSidebar,
+      variant: sidebarVariant,
+      setVariant,
     }),
-    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar, sidebarVariant, setVariant]
   )
 
   return (
@@ -151,7 +167,7 @@ function SidebarProvider({
 
 function Sidebar({
   side = "left",
-  variant = "sidebar",
+  variant: sidebarVariantProp,
   collapsible = "offcanvas",
   className,
   children,
@@ -161,7 +177,8 @@ function Sidebar({
   variant?: "sidebar" | "floating" | "inset"
   collapsible?: "offcanvas" | "icon" | "none"
 }) {
-  const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+  const { isMobile, state, openMobile, setOpenMobile, variant: providerVariant } = useSidebar()
+  const variant = sidebarVariantProp ?? providerVariant
 
   if (collapsible === "none") {
     return (
@@ -270,6 +287,34 @@ function SidebarTrigger({
     >
       <PanelLeftIcon />
       <span className="sr-only">Toggle Sidebar</span>
+    </Button>
+  )
+}
+
+function SidebarVariantToggle({
+  className,
+  ...props
+}: React.ComponentProps<typeof Button>) {
+  const { variant, setVariant } = useSidebar()
+  const isFloating = variant === "floating"
+
+  return (
+    <Button
+      data-sidebar="variant-toggle"
+      data-slot="sidebar-variant-toggle"
+      variant="ghost"
+      size="icon"
+      aria-label={isFloating ? "Use side-by-side sidebar" : "Use floating sidebar"}
+      aria-pressed={isFloating}
+      title={isFloating ? "Use side-by-side sidebar" : "Use floating sidebar"}
+      className={cn("h-7 w-7", className)}
+      onClick={() => setVariant(isFloating ? "inset" : "floating")}
+      {...props}
+    >
+      <PanelLeftIcon />
+      <span className="sr-only">
+        {isFloating ? "Use side-by-side sidebar" : "Use floating sidebar"}
+      </span>
     </Button>
   )
 }
@@ -724,5 +769,6 @@ export {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
+  SidebarVariantToggle,
   useSidebar,
 }
