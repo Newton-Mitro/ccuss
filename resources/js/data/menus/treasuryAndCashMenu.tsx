@@ -105,6 +105,13 @@ export const treasuryAndCashMenu: SidebarItem[] = [
                         match_path: 'cash-adjustments',
                         permission: ['cash_transactions.view'],
                     },
+                    {
+                        name: 'Cash Counts',
+                        icon: <i className="fa-solid fa-money-check-dollar" />,
+                        path: '/cash-counts',
+                        match_path: 'cash-counts',
+                        permission: ['cash_transactions.view'],
+                    },
                 ],
             },
             {

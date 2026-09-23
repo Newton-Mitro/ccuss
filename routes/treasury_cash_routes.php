@@ -4,6 +4,7 @@ use App\TreasuryAndCash\Controllers\BranchDayController;
 use App\TreasuryAndCash\Controllers\BankingController;
 use App\TreasuryAndCash\Controllers\CashManagementController;
 use App\TreasuryAndCash\Controllers\CashMovementController;
+use App\TreasuryAndCash\Controllers\CashCountController;
 use App\TreasuryAndCash\Controllers\ChequeController;
 use App\TreasuryAndCash\Controllers\PettyCashController;
 use App\TreasuryAndCash\Controllers\TreasuryDashboardController;
@@ -30,6 +31,15 @@ Route::middleware(['auth', 'verified', 'organization'])
 
 Route::middleware(['auth', 'verified', 'organization'])
     ->group(function () {
+        Route::get('/cash-counts', [CashCountController::class, 'index'])
+            ->middleware('permission:cash_transactions.view')
+            ->name('cash-counts.index');
+        Route::post('/cash-counts', [CashCountController::class, 'store'])
+            ->middleware('permission:cash_transactions.create')
+            ->name('cash-counts.store');
+        Route::post('/cash-denominations', [CashCountController::class, 'storeDenomination'])
+            ->middleware('permission:cash_transactions.create')
+            ->name('cash-denominations.store');
         Route::get('/vaults', [CashManagementController::class, 'vaults'])
             ->middleware('permission:cash_management.view')
             ->name('vaults.index');
