@@ -50,6 +50,13 @@ export const financialServicesMenu: SidebarItem[] = [
                         match_path: 'account-default-rules',
                         permission: ['financial.products.view'],
                     },
+                    {
+                        name: 'Fine Queue',
+                        icon: <i className="fa-solid fa-receipt" />,
+                        path: '/account-fines',
+                        match_path: 'account-fines',
+                        permission: ['financial.accounts.view'],
+                    },
                 ],
             },
             {

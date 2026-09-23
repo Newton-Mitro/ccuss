@@ -7,6 +7,7 @@ use App\FinancialServices\Controllers\FinancialProductPolicyController;
 use App\FinancialServices\Controllers\FinancialReportController;
 use App\FinancialServices\Controllers\LoanApplicationController;
 use App\FinancialServices\Controllers\AccountDefaultRuleController;
+use App\FinancialServices\Controllers\AccountFineController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'organization'])->group(function () {
@@ -40,6 +41,8 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::post('/account-default-rules', [AccountDefaultRuleController::class, 'store'])->name('account-default-rules.store');
     Route::put('/account-default-rules/{account_default_rule}', [AccountDefaultRuleController::class, 'update'])->name('account-default-rules.update');
     Route::delete('/account-default-rules/{account_default_rule}', [AccountDefaultRuleController::class, 'destroy'])->name('account-default-rules.destroy');
+    Route::get('/account-fines', [AccountFineController::class, 'index'])->name('account-fines.index');
+    Route::post('/account-fines/{account_fine}/waive', [AccountFineController::class, 'waive'])->name('account-fines.waive');
 
     Route::get('/financial-accounts', [FinancialAccountController::class, 'index'])->name('financial-accounts.index');
     Route::get('/financial-accounts/category/{category}', [FinancialAccountController::class, 'categoryIndex'])
@@ -67,7 +70,7 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
 
     Route::get('/financial-transactions', [FinancialTransactionController::class, 'index'])->name('financial-transactions.index');
     Route::get('/financial-transactions/{workflow}/create', [FinancialTransactionController::class, 'workflow'])
-        ->where('workflow', 'transfer|loan-disbursement|loan-repayment')
+        ->where('workflow', 'transfer|loan-disbursement|loan-repayment|fine-payment')
         ->name('financial-transactions.workflow');
     Route::post('/financial-transactions/transfer', [FinancialTransactionController::class, 'storeTransfer'])
         ->name('financial-transactions.transfer.store');
@@ -75,6 +78,8 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
         ->name('financial-transactions.loan-disbursement.store');
     Route::post('/financial-transactions/loan-repayment', [FinancialTransactionController::class, 'storeLoanRepayment'])
         ->name('financial-transactions.loan-repayment.store');
+    Route::post('/financial-transactions/fine-payment', [FinancialTransactionController::class, 'storeFinePayment'])
+        ->name('financial-transactions.fine-payment.store');
     Route::post('/financial-transactions', [FinancialTransactionController::class, 'store'])->name('financial-transactions.store');
     Route::get('/financial-transactions/{financial_transaction}', [FinancialTransactionController::class, 'show'])->name('financial-transactions.show');
     Route::post('/financial-transactions/{financial_transaction}/post', [FinancialTransactionController::class, 'post'])->name('financial-transactions.post');

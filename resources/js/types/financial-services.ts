@@ -481,4 +481,14 @@ export interface FinancialTransactionWorkflowPageProps extends SharedData {
     accounts?: FinancialWorkflowAccount[];
     loan_accounts?: FinancialWorkflowLoanAccount[];
     payout_accounts?: FinancialWorkflowAccount[];
+    fines?: FinancialWorkflowFine[];
+}
+
+export interface FinancialWorkflowFine {
+    id: number;
+    assessed_amount: string | number;
+    paid_amount: string | number;
+    waived_amount: string | number;
+    status: string;
+    financial_account?: { account_no?: string; name?: string | null } | null;
 }

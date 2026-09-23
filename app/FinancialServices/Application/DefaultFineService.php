@@ -57,7 +57,7 @@ class DefaultFineService
             throw new RuntimeException('Only assessed or partially paid fines can be waived.');
         }
         $fine->update([
-            'waived_amount' => (float) $fine->assessed_amount,
+            'waived_amount' => max(0, (float) $fine->assessed_amount - (float) $fine->paid_amount),
             'status' => 'WAIVED',
             'waived_by' => $userId,
             'waived_at' => now(),

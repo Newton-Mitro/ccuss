@@ -2,9 +2,13 @@
 
 use App\FinancialServices\Application\FinancialTransactionService;
 use App\FinancialServices\Application\LoanScheduleService;
+use App\FinancialServices\Application\DefaultFineService;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\FinancialTransaction;
+use App\FinancialServices\Models\AccountDefaultEvent;
+use App\FinancialServices\Models\AccountDefaultRule;
+use App\FinancialServices\Models\AccountFine;
 use App\FinancialServices\Models\LoanAccount;
 use App\FinancialServices\Models\LoanDisbursement;
 use App\CustomerModule\Models\Customer;
@@ -240,4 +244,70 @@ it('allocates, posts, and reverses a loan repayment idempotently', function () {
 
     expect($loan->schedules()->first()->fresh()->status)->toBe('PENDING')
         ->and($loan->repayments()->first()->fresh()->status)->toBe('REVERSED');
+});
+
+it('posts and reverses a fine payment while preserving the fine balance', function () {
+    $organization = Organization::factory()->create();
+    $branch = Branch::factory()->create(['organization_id' => $organization->id]);
+    $user = User::factory()->create(['organization_id' => $organization->id, 'branch_id' => $branch->id]);
+    $product = FinancialProduct::factory()->create([
+        'organization_id' => $organization->id,
+        'category' => 'SAVINGS',
+        'balance_type' => 'LIABILITY',
+    ]);
+    $account = FinancialAccount::factory()->active()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+        'financial_product_id' => $product->id,
+        'account_type' => 'SAVINGS',
+        'balance' => 100,
+        'available_balance' => 100,
+    ]);
+    $rule = AccountDefaultRule::create([
+        'organization_id' => $organization->id,
+        'account_type' => 'SAVINGS',
+        'name' => 'Late savings payment',
+        'fine_calculation' => 'FIXED',
+        'fine_amount' => 10,
+        'effective_from' => now()->toDateString(),
+    ]);
+    $event = AccountDefaultEvent::create([
+        'financial_account_id' => $account->id,
+        'account_default_rule_id' => $rule->id,
+        'due_date' => now()->subDay()->toDateString(),
+        'assessed_at' => now()->toDateString(),
+        'days_overdue' => 1,
+        'status' => 'OPEN',
+    ]);
+    $fine = AccountFine::create([
+        'financial_account_id' => $account->id,
+        'account_default_event_id' => $event->id,
+        'assessed_at' => now()->toDateString(),
+        'assessed_amount' => 10,
+        'paid_amount' => 0,
+        'waived_amount' => 0,
+        'status' => 'ASSESSED',
+    ]);
+    $service = app(FinancialTransactionService::class);
+    $data = [
+        'account_fine_id' => $fine->id,
+        'amount' => 10,
+        'payment_date' => now()->toDateString(),
+        'idempotency_key' => (string) Str::uuid(),
+    ];
+
+    $first = $service->createFinePayment($data, $organization->id, $user->id);
+    $retry = $service->createFinePayment($data, $organization->id, $user->id);
+    $service->post($first, $organization->id, $user->id);
+
+    expect($retry->id)->toBe($first->id)
+        ->and($fine->fresh()->paid_amount)->toBe('10.0000')
+        ->and($fine->fresh()->status)->toBe('PAID');
+
+    $service->reverse($first->fresh(), $organization->id);
+
+    expect($fine->fresh()->paid_amount)->toBe('0.0000')
+        ->and($fine->fresh()->status)->toBe('ASSESSED');
+
+    expect(app(DefaultFineService::class)->waiveFine($fine->fresh(), $user->id)->status)->toBe('WAIVED');
 });

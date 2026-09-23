@@ -32,6 +32,12 @@ const details: Record<
             'Collect and allocate a repayment across the scheduled loan components.',
         icon: CircleDollarSign,
     },
+    'fine-payment': {
+        title: 'Fine payment',
+        description:
+            'Collect an assessed account fine through a financial transaction.',
+        icon: CircleDollarSign,
+    },
 };
 export default function TransactionWorkflow() {
     const {
@@ -39,6 +45,7 @@ export default function TransactionWorkflow() {
         accounts = [],
         loan_accounts = [],
         payout_accounts = [],
+        fines = [],
     } = usePage<FinancialTransactionWorkflowPageProps>().props;
     const detail = details[workflow] ?? details.transfer;
     const Icon = detail.icon;
@@ -55,6 +62,8 @@ export default function TransactionWorkflow() {
         payout_account_id: '',
         disbursed_at: new Date().toISOString().slice(0, 10),
         repayment_date: new Date().toISOString().slice(0, 10),
+        account_fine_id: '',
+        payment_date: new Date().toISOString().slice(0, 10),
         note: '',
     });
     const breadcrumbs: BreadcrumbItem[] = [
@@ -78,6 +87,11 @@ export default function TransactionWorkflow() {
     const submitLoanRepayment = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         post(route('financial-transactions.loan-repayment.store'));
+    };
+
+    const submitFinePayment = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        post(route('financial-transactions.fine-payment.store'));
     };
 
     if (workflow === 'transfer') {
@@ -377,6 +391,85 @@ export default function TransactionWorkflow() {
                                 {workflow === 'loan-disbursement'
                                     ? 'Create disbursement draft'
                                     : 'Create repayment draft'}
+                            </Button>
+                        </div>
+                    </form>
+                </div>
+            </CustomAuthLayout>
+        );
+    }
+
+    if (workflow === 'fine-payment') {
+        return (
+            <CustomAuthLayout breadcrumbs={breadcrumbs}>
+                <Head title={detail.title} />
+                <div className="mx-auto max-w-3xl space-y-4">
+                    <ResourcePageHeader
+                        title={detail.title}
+                        description={detail.description}
+                    />
+                    <form
+                        onSubmit={submitFinePayment}
+                        className="space-y-4 rounded-xl border bg-card p-4 shadow-sm"
+                    >
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <Label>Fine</Label>
+                                <Select
+                                    value={data.account_fine_id}
+                                    onChange={(value) =>
+                                        setData('account_fine_id', value)
+                                    }
+                                    options={[
+                                        {
+                                            value: '',
+                                            label: 'Select assessed fine',
+                                        },
+                                        ...fines.map((fine) => ({
+                                            value: String(fine.id),
+                                            label: `#${fine.id} · ${fine.financial_account?.account_no ?? 'Account'} · Outstanding ${Number(fine.assessed_amount) - Number(fine.paid_amount) - Number(fine.waived_amount)}`,
+                                        })),
+                                    ]}
+                                />
+                            </div>
+                            <div>
+                                <Label>Amount</Label>
+                                <Input
+                                    type="number"
+                                    min="0.0001"
+                                    step="0.0001"
+                                    value={data.amount}
+                                    onChange={(event) =>
+                                        setData('amount', event.target.value)
+                                    }
+                                />
+                            </div>
+                            <div>
+                                <Label>Payment date</Label>
+                                <Input
+                                    type="date"
+                                    value={data.payment_date}
+                                    onChange={(event) =>
+                                        setData(
+                                            'payment_date',
+                                            event.target.value,
+                                        )
+                                    }
+                                />
+                            </div>
+                            <div>
+                                <Label>Reference</Label>
+                                <Input
+                                    value={data.reference}
+                                    onChange={(event) =>
+                                        setData('reference', event.target.value)
+                                    }
+                                />
+                            </div>
+                        </div>
+                        <div className="flex justify-end">
+                            <Button type="submit" disabled={processing}>
+                                Create fine payment draft
                             </Button>
                         </div>
                     </form>

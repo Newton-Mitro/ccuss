@@ -8,6 +8,7 @@ use App\FinancialServices\Models\FinancialTransaction;
 use App\FinancialServices\Models\LoanAccount;
 use App\FinancialServices\Models\LoanDisbursement;
 use App\FinancialServices\Models\LoanRepayment;
+use App\FinancialServices\Models\AccountFine;
 use App\FinancialServices\Models\RecurringDepositInstallment;
 use App\TreasuryAndCash\Models\BranchDay;
 use Illuminate\Database\Eloquent\Builder;
@@ -77,7 +78,9 @@ class FinancialTransactionService
 
             $transaction->entries()->create([
                 'financial_account_id' => $account->id,
-                'direction' => $data['transaction_type'] === 'DEPOSIT' ? 'CREDIT' : 'DEBIT',
+                'direction' => in_array($data['transaction_type'], ['DEPOSIT', 'FINE_PAYMENT'], true)
+                    ? ($data['transaction_type'] === 'DEPOSIT' ? 'CREDIT' : $this->directionForDecrease($account))
+                    : 'DEBIT',
                 'amount' => $data['amount'],
                 'description' => $data['description'] ?? null,
                 'line_no' => 1,
@@ -293,6 +296,38 @@ class FinancialTransactionService
         });
     }
 
+    public function createFinePayment(array $data, int $organizationId, int $userId): FinancialTransaction
+    {
+        $fine = AccountFine::query()
+            ->with('financialAccount')
+            ->whereHas('financialAccount', fn($query) => $query->where('organization_id', $organizationId))
+            ->lockForUpdate()
+            ->findOrFail($data['account_fine_id']);
+        $outstanding = (float) $fine->assessed_amount - (float) $fine->waived_amount - (float) $fine->paid_amount;
+        if ($fine->status === 'WAIVED' || $outstanding <= 0) {
+            throw new RuntimeException('This fine has no payable balance.');
+        }
+        if ((float) $data['amount'] > $outstanding) {
+            throw new RuntimeException('The fine payment exceeds the outstanding fine amount.');
+        }
+
+        $transaction = $this->create([
+            'financial_account_id' => $fine->financial_account_id,
+            'transaction_type' => 'FINE_PAYMENT',
+            'transaction_date' => $data['payment_date'],
+            'amount' => $data['amount'],
+            'reference' => $data['reference'] ?? null,
+            'description' => 'Fine payment',
+            'idempotency_key' => $data['idempotency_key'] ?? null,
+            'source_type' => AccountFine::class,
+            'source_id' => $fine->id,
+        ], $organizationId, $userId);
+
+        $fine->update(['financial_transaction_id' => $transaction->id]);
+
+        return $transaction->fresh(['entries.financialAccount', 'source']);
+    }
+
     public function createLoanRepayment(array $data, int $organizationId, int $userId): FinancialTransaction
     {
         return DB::transaction(function () use ($data, $organizationId, $userId) {
@@ -417,6 +452,15 @@ class FinancialTransactionService
                 $this->postLoanRepayment($transaction->source);
             }
 
+            if ($transaction->source instanceof AccountFine) {
+                $fine = AccountFine::query()->lockForUpdate()->findOrFail($transaction->source->id);
+                $paidAmount = (float) $fine->paid_amount + (float) $transaction->amount;
+                $fine->update([
+                    'paid_amount' => $paidAmount,
+                    'status' => $paidAmount + (float) $fine->waived_amount >= (float) $fine->assessed_amount ? 'PAID' : 'PARTIALLY_PAID',
+                ]);
+            }
+
             if ($transaction->source instanceof RecurringDepositInstallment) {
                 $installment = RecurringDepositInstallment::query()
                     ->with('recurringDeposit')
@@ -485,6 +529,12 @@ class FinancialTransactionService
 
             if ($transaction->source instanceof LoanRepayment) {
                 $this->reverseLoanRepayment($transaction->source);
+            }
+
+            if ($transaction->source instanceof AccountFine) {
+                $fine = AccountFine::query()->lockForUpdate()->findOrFail($transaction->source->id);
+                $paidAmount = max(0, (float) $fine->paid_amount - (float) $transaction->amount);
+                $fine->update(['paid_amount' => $paidAmount, 'status' => $paidAmount > 0 ? 'PARTIALLY_PAID' : 'ASSESSED']);
             }
 
             return $transaction->fresh(['entries.financialAccount']);

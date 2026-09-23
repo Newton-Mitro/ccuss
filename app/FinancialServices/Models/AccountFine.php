@@ -19,6 +19,7 @@ class AccountFine extends Model
         'rate',
         'assessed_amount',
         'waived_amount',
+        'paid_amount',
         'status',
         'assessed_by',
         'waived_by',
@@ -32,6 +33,7 @@ class AccountFine extends Model
         'rate' => 'decimal:6',
         'assessed_amount' => 'decimal:4',
         'waived_amount' => 'decimal:4',
+        'paid_amount' => 'decimal:4',
         'waived_at' => 'datetime',
     ];
 
