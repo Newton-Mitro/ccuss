@@ -73,6 +73,21 @@ export default function LoanApplicationShow() {
                     </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
+                    {application.status === 'APPROVED' &&
+                        !application.loan_account && (
+                            <Button
+                                onClick={() =>
+                                    router.post(
+                                        route(
+                                            'loan-applications.create-account',
+                                            application.id,
+                                        ),
+                                    )
+                                }
+                            >
+                                Create loan account
+                            </Button>
+                        )}
                     {application.status === 'DRAFT' && (
                         <Button onClick={() => action('submit')}>
                             Submit for review
@@ -127,6 +142,17 @@ export default function LoanApplicationShow() {
                         </>
                     )}
                 </div>
+                {application.loan_account && (
+                    <div className="rounded-lg border bg-card p-4 text-sm">
+                        <p className="text-xs text-muted-foreground">
+                            Loan account
+                        </p>
+                        <p className="font-semibold">
+                            {application.loan_account.loan_no} ·{' '}
+                            {application.loan_account.status}
+                        </p>
+                    </div>
+                )}
                 <Button asChild variant="outline">
                     <Link href={route('loan-applications.index')}>
                         Back to applications

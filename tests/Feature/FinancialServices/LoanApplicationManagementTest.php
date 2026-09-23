@@ -4,7 +4,7 @@ use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Application\LoanApplicationService;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\FinancialProductPolicy;
-use App\FinancialServices\Models\LoanApplication;
+use App\FinancialServices\Models\FinancialAccount;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\User;
@@ -92,4 +92,27 @@ it('rejects a loan application after review', function () {
 
     expect($rejected->status)->toBe('REJECTED')
         ->and($rejected->decision_note)->toBe('Insufficient security');
+});
+
+it('creates one linked financial and loan account after approval', function () {
+    $fixture = loanApplicationFixture();
+    $service = app(LoanApplicationService::class);
+    $application = $service->create([
+        'branch_id' => $fixture['branch']->id,
+        'customer_id' => $fixture['customer']->id,
+        'financial_product_id' => $fixture['product']->id,
+        'requested_amount' => 5000,
+        'requested_term_months' => 12,
+    ], $fixture['organization']->id);
+    $service->submit($application);
+    $service->approve($application, [], $fixture['user']->id);
+
+    $loan = $service->createLoanAccount($application->fresh());
+
+    expect($loan->loan_no)->toBe('LN-' . str_pad((string) $application->id, 8, '0', STR_PAD_LEFT))
+        ->and($loan->status)->toBe('APPROVED')
+        ->and(FinancialAccount::query()->whereKey($loan->financial_account_id)->value('account_type'))->toBe('LOAN');
+
+    expect(fn() => $service->createLoanAccount($application->fresh()))
+        ->toThrow(RuntimeException::class, 'already has a loan account');
 });

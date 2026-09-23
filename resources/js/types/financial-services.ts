@@ -78,6 +78,7 @@ export interface LoanApplication {
     decision_note?: string | null;
     customer?: { name?: string; customer_no?: string };
     product?: { code?: string; name?: string };
+    loan_account?: { id: number; loan_no: string; status: string } | null;
 }
 
 export interface LoanApplicationIndexPageProps extends SharedData {

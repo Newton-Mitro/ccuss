@@ -82,6 +82,7 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::post('/loan-applications/{loan_application}/review', [LoanApplicationController::class, 'review'])->name('loan-applications.review');
     Route::post('/loan-applications/{loan_application}/approve', [LoanApplicationController::class, 'approve'])->name('loan-applications.approve');
     Route::post('/loan-applications/{loan_application}/reject', [LoanApplicationController::class, 'reject'])->name('loan-applications.reject');
+    Route::post('/loan-applications/{loan_application}/create-account', [LoanApplicationController::class, 'createLoanAccount'])->name('loan-applications.create-account');
     Route::get('/financial-reports/product-summary', [FinancialReportController::class, 'productSummary'])->name('financial-reports.product-summary');
     Route::get('/financial-reports/account-balances', [FinancialReportController::class, 'accountBalances'])->name('financial-reports.account-balances');
     Route::get('/financial-reports/transactions', [FinancialReportController::class, 'transactions'])->name('financial-reports.transactions');

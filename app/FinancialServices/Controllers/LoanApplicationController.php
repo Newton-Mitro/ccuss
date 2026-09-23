@@ -19,7 +19,7 @@ class LoanApplicationController extends Controller
     {
         $this->middleware('permission:financial.loan-applications.view')->only(['index', 'show']);
         $this->middleware('permission:financial.loan-applications.create')->only(['create', 'store', 'submit']);
-        $this->middleware('permission:financial.loan-applications.manage')->only(['review', 'approve', 'reject']);
+        $this->middleware('permission:financial.loan-applications.manage')->only(['review', 'approve', 'reject', 'createLoanAccount']);
     }
 
     public function index(Request $request): Response
@@ -93,6 +93,14 @@ class LoanApplicationController extends Controller
         $this->service->reject($loanApplication, $request->validated());
 
         return back()->with('success', 'Loan application rejected.');
+    }
+
+    public function createLoanAccount(Request $request, LoanApplication $loanApplication)
+    {
+        $this->authorizeOrganization($request, $loanApplication);
+        $loanAccount = $this->service->createLoanAccount($loanApplication);
+
+        return back()->with('success', "Loan account {$loanAccount->loan_no} created successfully.");
     }
 
     private function organizationId(Request $request): int
