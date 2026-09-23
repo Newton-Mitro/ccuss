@@ -29,7 +29,7 @@ export default function LoanApplicationForm() {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="New Loan Application" />
-            <div className="mx-auto max-w-3xl space-y-4">
+            <div className="max-w-3xl space-y-4">
                 <ResourcePageHeader
                     title="New loan application"
                     description="Create a draft loan request for review."

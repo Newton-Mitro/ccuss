@@ -74,7 +74,7 @@ export default function FinancialAccountForm() {
                         : 'Open Financial Account'
                 }
             />
-            <div className="mx-auto max-w-3xl space-y-4">
+            <div className="max-w-3xl space-y-4">
                 <ResourcePageHeader
                     title={
                         category

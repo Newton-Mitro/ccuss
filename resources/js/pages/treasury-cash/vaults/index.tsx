@@ -11,7 +11,7 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
 import type { VaultIndexProps } from '@/types/treasury-cash/vaults';
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { Plus, Vault as VaultIcon } from 'lucide-react';
+import { Pencil, Plus, Vault as VaultIcon } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 
@@ -91,6 +91,7 @@ export default function Index() {
                                         'Branch',
                                         'Status',
                                         'Maximum Balance',
+                                        'Actions',
                                     ].map((header) => (
                                         <th
                                             key={header}
@@ -143,6 +144,23 @@ export default function Index() {
                                         </td>
                                         <td className="px-2 py-2">
                                             {vault.maximum_balance ?? '-'}
+                                        </td>
+                                        <td className="px-2 py-2">
+                                            <Button
+                                                asChild
+                                                variant="ghost"
+                                                size="icon"
+                                                title="Edit vault"
+                                            >
+                                                <a
+                                                    href={route(
+                                                        'vaults.edit',
+                                                        vault.id,
+                                                    )}
+                                                >
+                                                    <Pencil className="h-4 w-4" />
+                                                </a>
+                                            </Button>
                                         </td>
                                     </tr>
                                 ))}

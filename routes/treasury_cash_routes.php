@@ -64,6 +64,12 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::post('/vaults', [CashManagementController::class, 'storeVault'])
             ->middleware('permission:cash_management.create')
             ->name('vaults.store');
+        Route::get('/vaults/{vault}/edit', [CashManagementController::class, 'editVault'])
+            ->middleware('permission:cash_management.update')
+            ->name('vaults.edit');
+        Route::put('/vaults/{vault}', [CashManagementController::class, 'updateVault'])
+            ->middleware('permission:cash_management.update')
+            ->name('vaults.update');
         Route::get('/tellers', [CashManagementController::class, 'tellers'])
             ->middleware('permission:cash_management.view')
             ->name('tellers.index');
@@ -73,6 +79,12 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::post('/tellers', [CashManagementController::class, 'storeTeller'])
             ->middleware('permission:cash_management.create')
             ->name('tellers.store');
+        Route::get('/tellers/{teller}/edit', [CashManagementController::class, 'editTeller'])
+            ->middleware('permission:cash_management.update')
+            ->name('tellers.edit');
+        Route::put('/tellers/{teller}', [CashManagementController::class, 'updateTeller'])
+            ->middleware('permission:cash_management.update')
+            ->name('tellers.update');
         Route::get('/teller-sessions', [CashManagementController::class, 'tellerSessions'])
             ->middleware('permission:teller_sessions.view')
             ->name('teller-sessions.index');

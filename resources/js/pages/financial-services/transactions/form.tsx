@@ -37,7 +37,7 @@ export default function FinancialTransactionForm() {
             <Head
                 title={`${data.transaction_type === 'WITHDRAWAL' ? 'Withdrawal' : 'Deposit'} Transaction`}
             />
-            <div className="mx-auto max-w-3xl space-y-4">
+            <div className="max-w-3xl space-y-4">
                 <ResourcePageHeader
                     title={`${data.transaction_type === 'WITHDRAWAL' ? 'Withdrawal' : 'Deposit'} transaction`}
                     description="Create an operational transaction draft for an active account."

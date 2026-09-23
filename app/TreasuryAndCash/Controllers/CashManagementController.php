@@ -28,6 +28,7 @@ class CashManagementController extends Controller
     ) {
         $this->middleware('permission:cash_management.view')->only(['vaults', 'tellers']);
         $this->middleware('permission:cash_management.create')->only(['createVault', 'storeVault', 'createTeller', 'storeTeller']);
+        $this->middleware('permission:cash_management.update')->only(['editVault', 'updateVault', 'editTeller', 'updateTeller']);
         $this->middleware('permission:teller_sessions.view')->only(['tellerSessions']);
         $this->middleware('permission:teller_sessions.open')->only(['openSession']);
         $this->middleware('permission:teller_sessions.close')->only(['closeSession']);
@@ -95,6 +96,30 @@ class CashManagementController extends Controller
         return redirect()->route('vaults.index')->with('success', 'Vault created successfully.');
     }
 
+    public function editVault(Request $request, Vault $vault): Response
+    {
+        $this->authorizeCashLocation($request, $vault->cashLocation);
+
+        return Inertia::render('treasury-cash/vaults/create', ['vault' => $vault->load('cashLocation')]);
+    }
+
+    public function updateVault(StoreVaultRequest $request, Vault $vault): RedirectResponse
+    {
+        $this->authorizeCashLocation($request, $vault->cashLocation);
+        $data = $request->validated();
+
+        DB::transaction(function () use ($vault, $data): void {
+            $vault->update($data);
+            $vault->cashLocation()->update([
+                'code' => $data['code'],
+                'name' => $data['name'],
+                'is_active' => $data['status'] === 'ACTIVE',
+            ]);
+        });
+
+        return redirect()->route('vaults.index')->with('success', 'Vault updated successfully.');
+    }
+
     public function createTeller(Request $request): Response
     {
         $user = $request->user();
@@ -146,6 +171,47 @@ class CashManagementController extends Controller
         });
 
         return redirect()->route('tellers.index')->with('success', 'Teller created successfully.');
+    }
+
+    public function editTeller(Request $request, Teller $teller): Response
+    {
+        $this->authorizeCashLocation($request, $teller->cashLocation);
+        $user = $request->user();
+
+        return Inertia::render('treasury-cash/tellers/create', [
+            'teller' => $teller->load('cashLocation'),
+            'users' => User::query()
+                ->where('organization_id', $request->attributes->get('active_organization')->id)
+                ->where('branch_id', $user->branch_id)
+                ->orderBy('name')
+                ->get(['id', 'name', 'email']),
+        ]);
+    }
+
+    public function updateTeller(StoreTellerRequest $request, Teller $teller): RedirectResponse
+    {
+        $this->authorizeCashLocation($request, $teller->cashLocation);
+        $data = $request->validated();
+
+        DB::transaction(function () use ($teller, $data): void {
+            $teller->update($data);
+            $teller->cashLocation()->update([
+                'code' => $data['code'],
+                'name' => $data['name'],
+                'is_active' => $data['status'] === 'ACTIVE',
+            ]);
+        });
+
+        return redirect()->route('tellers.index')->with('success', 'Teller updated successfully.');
+    }
+
+    private function authorizeCashLocation(Request $request, CashLocation $location): void
+    {
+        abort_unless(
+            $location->organization_id === $request->attributes->get('active_organization')->id
+            && $location->branch_id === $request->user()?->branch_id,
+            404,
+        );
     }
 
     public function tellerSessions(Request $request): Response

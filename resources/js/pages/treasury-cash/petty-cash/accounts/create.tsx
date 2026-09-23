@@ -33,7 +33,7 @@ export default function CreatePettyCashAccount() {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Petty Cash Fund" />
-            <div className="mx-auto max-w-2xl space-y-4">
+            <div className="max-w-2xl space-y-4">
                 <div>
                     <h1 className="text-lg font-semibold">
                         Create petty cash fund

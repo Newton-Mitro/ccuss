@@ -26,9 +26,11 @@ export default function FinancialProductForm() {
 
     const submit = (event: React.FormEvent) => {
         event.preventDefault();
-        editing
-            ? put(route('financial-products.update', product!.id))
-            : post(route('financial-products.store'));
+        if (editing) {
+            put(route('financial-products.update', product!.id));
+        } else {
+            post(route('financial-products.store'));
+        }
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -44,7 +46,7 @@ export default function FinancialProductForm() {
                     editing ? 'Edit Financial Product' : 'New Financial Product'
                 }
             />
-            <div className="mx-auto max-w-3xl space-y-4">
+            <div className="max-w-3xl space-y-4">
                 <ResourcePageHeader
                     title={
                         editing

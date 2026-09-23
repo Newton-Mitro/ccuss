@@ -29,7 +29,7 @@ export default function CreateChequeBook() {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Cheque Book" />
-            <div className="mx-auto max-w-2xl space-y-4">
+            <div className="max-w-2xl space-y-4">
                 <div>
                     <h1 className="text-lg font-semibold">
                         Create cheque book

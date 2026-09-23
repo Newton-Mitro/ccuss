@@ -58,7 +58,7 @@ export default function FinancialProductPolicyForm() {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Policy: ${product.name}`} />
-            <div className="mx-auto max-w-5xl space-y-4">
+            <div className="max-w-5xl space-y-4">
                 <ResourcePageHeader
                     title={`Policy for ${product.code} · ${product.name}`}
                     description="Configure the approved operating rules for this financial product."

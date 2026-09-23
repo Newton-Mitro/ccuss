@@ -98,7 +98,7 @@ export default function TransactionWorkflow() {
         return (
             <CustomAuthLayout breadcrumbs={breadcrumbs}>
                 <Head title={detail.title} />
-                <div className="mx-auto max-w-3xl space-y-4">
+                <div className="max-w-3xl space-y-4">
                     <ResourcePageHeader
                         title={detail.title}
                         description={detail.description}
@@ -235,7 +235,7 @@ export default function TransactionWorkflow() {
         return (
             <CustomAuthLayout breadcrumbs={breadcrumbs}>
                 <Head title={detail.title} />
-                <div className="mx-auto max-w-3xl space-y-4">
+                <div className="max-w-3xl space-y-4">
                     <ResourcePageHeader
                         title={detail.title}
                         description={detail.description}
@@ -403,7 +403,7 @@ export default function TransactionWorkflow() {
         return (
             <CustomAuthLayout breadcrumbs={breadcrumbs}>
                 <Head title={detail.title} />
-                <div className="mx-auto max-w-3xl space-y-4">
+                <div className="max-w-3xl space-y-4">
                     <ResourcePageHeader
                         title={detail.title}
                         description={detail.description}
@@ -481,7 +481,7 @@ export default function TransactionWorkflow() {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={detail.title} />
-            <div className="mx-auto max-w-2xl space-y-5">
+            <div className="max-w-2xl space-y-5">
                 <ResourcePageHeader
                     title={detail.title}
                     description={detail.description}
