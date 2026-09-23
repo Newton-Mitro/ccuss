@@ -25,6 +25,7 @@ class Voucher extends Model
         'branch_id',
         'fiscal_year_id',
         'fiscal_period_id',
+        'financial_transaction_id',
         'voucher_no',
         'voucher_type',
         'voucher_date',
@@ -63,6 +64,11 @@ class Voucher extends Model
     public function entries(): HasMany
     {
         return $this->hasMany(VoucherEntry::class);
+    }
+
+    public function financialTransaction(): BelongsTo
+    {
+        return $this->belongsTo(\App\FinancialServices\Models\FinancialTransaction::class);
     }
 
     public function creator(): BelongsTo

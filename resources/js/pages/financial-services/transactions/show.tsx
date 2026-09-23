@@ -108,6 +108,35 @@ export default function FinancialTransactionShow() {
                         {transaction.description}
                     </div>
                 )}
+                {transaction.voucher && (
+                    <div className="rounded-lg border bg-card p-3 text-sm">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                            <span>
+                                Accounting voucher:{' '}
+                                {transaction.voucher.voucher_no}
+                            </span>
+                            <StatusBadge
+                                tone={
+                                    transaction.voucher.status === 'POSTED'
+                                        ? 'success'
+                                        : 'neutral'
+                                }
+                            >
+                                {transaction.voucher.status}
+                            </StatusBadge>
+                        </div>
+                        <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+                            {transaction.voucher.entries?.map(
+                                (entry, index) => (
+                                    <div key={index}>
+                                        {entry.account?.code ?? '-'} · Debit{' '}
+                                        {entry.debit} · Credit {entry.credit}
+                                    </div>
+                                ),
+                            )}
+                        </div>
+                    </div>
+                )}
                 <div className="rounded-lg border bg-card p-3">
                     <h2 className="mb-2 text-sm font-medium">Entries</h2>
                     <div className="space-y-2 text-sm">

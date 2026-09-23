@@ -228,6 +228,16 @@ export interface FinancialTransaction {
     description?: string;
     reference?: string;
     entries?: FinancialTransactionEntry[];
+    voucher?: {
+        id: number;
+        voucher_no: string;
+        status: string;
+        entries?: {
+            debit: string | number;
+            credit: string | number;
+            account?: { code?: string; name?: string } | null;
+        }[];
+    } | null;
 }
 
 export interface FinancialTransactionsPageProps extends SharedData {

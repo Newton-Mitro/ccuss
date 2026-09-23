@@ -16,12 +16,15 @@ use App\FinancialServices\Models\RecurringDepositInstallment;
 use App\TreasuryAndCash\Models\BranchDay;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use App\GeneralAccounting\Application\FinancialTransactionAccountingService;
 use RuntimeException;
 
 class FinancialTransactionService
 {
-    public function __construct(private readonly FinancialProductPolicyService $policyService)
-    {
+    public function __construct(
+        private readonly FinancialProductPolicyService $policyService,
+        private readonly FinancialTransactionAccountingService $accountingService,
+    ) {
     }
 
     public function create(array $data, int $organizationId, int $userId): FinancialTransaction
@@ -516,6 +519,8 @@ class FinancialTransactionService
                 }
             }
 
+            $this->accountingService->post($transaction->fresh(['entries.financialAccount.product']), $userId);
+
             return $transaction->fresh(['entries.financialAccount']);
         });
     }
@@ -582,6 +587,8 @@ class FinancialTransactionService
                 $allocation->update(['status' => 'REVERSED', 'financial_transaction_id' => null]);
                 $allocation->declaration()->update(['status' => 'APPROVED']);
             }
+
+            $this->accountingService->reverse($transaction);
 
             return $transaction->fresh(['entries.financialAccount']);
         });

@@ -149,7 +149,7 @@ class FinancialTransactionController extends Controller
         $this->authorizeOrganization($request, $financialTransaction);
 
         return Inertia::render('financial-services/transactions/show', [
-            'transaction' => $financialTransaction->load(['entries.financialAccount']),
+            'transaction' => $financialTransaction->load(['entries.financialAccount', 'voucher.entries.account']),
         ]);
     }
 

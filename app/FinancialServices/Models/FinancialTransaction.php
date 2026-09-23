@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\FinancialServices\Models\FinancialTransactionEntry;
 
 class FinancialTransaction extends Model
@@ -63,5 +64,10 @@ class FinancialTransaction extends Model
     public function entries(): HasMany
     {
         return $this->hasMany(FinancialTransactionEntry::class);
+    }
+
+    public function voucher(): HasOne
+    {
+        return $this->hasOne(\App\GeneralAccounting\Models\Voucher::class);
     }
 }
