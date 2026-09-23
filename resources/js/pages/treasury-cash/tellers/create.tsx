@@ -1,8 +1,9 @@
 import type { TellerCreatePageProps } from '@/types/treasury-cash/forms';
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { ArrowLeft, Check, UserRound } from 'lucide-react';
+import { ArrowLeft, Check } from 'lucide-react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
+import { ResourcePageHeader } from '../../../components/resource-page-shell';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
@@ -41,23 +42,10 @@ export default function Create({ teller }: any) {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={editing ? 'Edit Teller' : 'Create Teller'} />
             <div className="max-w-3xl space-y-6 text-foreground">
-                <div className="flex items-start gap-4 rounded-xl border border-sky-200 bg-sky-50 p-5 dark:border-sky-900 dark:bg-sky-950/30">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-sky-600 text-white shadow-sm">
-                        <UserRound className="h-5 w-5" />
-                    </div>
-                    <div>
-                        <p className="text-xs font-semibold tracking-[0.16em] text-sky-700 uppercase dark:text-sky-300">
-                            Cash operations
-                        </p>
-                        <h1 className="mt-1 text-xl font-semibold tracking-tight">
-                            {editing ? 'Edit teller' : 'Create a teller'}
-                        </h1>
-                        <p className="mt-1 text-sm text-sky-900/70 dark:text-sky-100/70">
-                            Assign a cashier to the branch and define a safe
-                            operating limit.
-                        </p>
-                    </div>
-                </div>
+                <ResourcePageHeader
+                    title={editing ? 'Edit Teller' : 'Create Teller'}
+                    description="Assign a cashier to the branch and define a safe operating limit."
+                />
                 <form
                     onSubmit={submit}
                     className="overflow-hidden rounded-xl border bg-card shadow-sm"

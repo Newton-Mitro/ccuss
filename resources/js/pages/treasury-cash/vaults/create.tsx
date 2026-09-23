@@ -1,7 +1,8 @@
 import { Head, useForm } from '@inertiajs/react';
-import { ArrowLeft, Check, Vault } from 'lucide-react';
+import { ArrowLeft, Check } from 'lucide-react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
+import { ResourcePageHeader } from '../../../components/resource-page-shell';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
@@ -38,23 +39,10 @@ export default function Create({ vault }: any) {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={editing ? 'Edit Vault' : 'Create Vault'} />
             <div className="max-w-3xl space-y-6 text-foreground">
-                <div className="flex items-start gap-4 rounded-xl border border-emerald-200 bg-emerald-50 p-5 dark:border-emerald-900 dark:bg-emerald-950/30">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-sm">
-                        <Vault className="h-5 w-5" />
-                    </div>
-                    <div>
-                        <p className="text-xs font-semibold tracking-[0.16em] text-emerald-700 uppercase dark:text-emerald-300">
-                            Cash location
-                        </p>
-                        <h1 className="mt-1 text-xl font-semibold tracking-tight">
-                            {editing ? 'Edit vault' : 'Create a vault'}
-                        </h1>
-                        <p className="mt-1 text-sm text-emerald-900/70 dark:text-emerald-100/70">
-                            Configure a secure branch cash location and its
-                            operating ceiling.
-                        </p>
-                    </div>
-                </div>
+                <ResourcePageHeader
+                    title={editing ? 'Edit Vault' : 'Create Vault'}
+                    description="Configure a secure branch cash location and its operating ceiling."
+                />
                 <form
                     onSubmit={submit}
                     className="overflow-hidden rounded-xl border bg-card shadow-sm"
