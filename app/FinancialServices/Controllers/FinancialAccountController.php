@@ -7,8 +7,11 @@ use App\FinancialServices\Application\FinancialAccountService;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\DepositNominee;
+use App\FinancialServices\Models\ShareAccount;
 use App\FinancialServices\Requests\StoreFinancialAccountRequest;
 use App\FinancialServices\Requests\StoreDepositNomineeRequest;
+use App\FinancialServices\Requests\StoreFinancialAccountHolderRequest;
+use App\FinancialServices\Requests\StoreShareAccountRequest;
 use Carbon\CarbonImmutable;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -24,6 +27,8 @@ class FinancialAccountController extends Controller
         $this->middleware('permission:financial.accounts.update')->only('activate');
         $this->middleware('permission:financial.accounts.close')->only('close');
         $this->middleware('permission:financial.accounts.nominees.manage')->only(['storeNominee', 'updateNominee', 'destroyNominee']);
+        $this->middleware('permission:financial.accounts.holders.manage')->only(['storeHolder', 'updateHolder', 'destroyHolder']);
+        $this->middleware('permission:financial.accounts.membership.manage')->only(['storeShareAccount', 'updateShareAccount']);
     }
 
     public function index(Request $request): Response
@@ -100,6 +105,10 @@ class FinancialAccountController extends Controller
                 'loanAccount.arrears',
                 'transactions',
             ]),
+            'customers' => Customer::query()
+                ->where('organization_id', $this->organizationId($request))
+                ->orderBy('name')
+                ->get(['id', 'customer_no', 'name', 'type', 'dob']),
         ]);
     }
 
@@ -225,6 +234,67 @@ class FinancialAccountController extends Controller
         return back()->with('success', 'Nominee removed successfully.');
     }
 
+    public function storeHolder(StoreFinancialAccountHolderRequest $request, FinancialAccount $financialAccount)
+    {
+        $this->authorizeHolderAccount($request, $financialAccount);
+        $holder = Customer::query()->where('organization_id', $this->organizationId($request))->findOrFail($request->integer('customer_id'));
+        $this->validateHolderAllocation($request, $financialAccount);
+        $financialAccount->addHolder($holder, $request->string('role')->value(), $this->guardian($request), (float) $request->input('ownership_percent'));
+        $this->ensurePrimaryHolder($financialAccount, $holder, $request->string('role')->value());
+
+        return back()->with('success', 'Account holder added successfully.');
+    }
+
+    public function updateHolder(StoreFinancialAccountHolderRequest $request, FinancialAccount $financialAccount, Customer $holder)
+    {
+        $this->authorizeHolderAccount($request, $financialAccount);
+        abort_unless($financialAccount->holders()->whereKey($holder->id)->exists(), 404);
+        $this->validateHolderAllocation($request, $financialAccount, $holder);
+        $role = $request->string('role')->value();
+        $financialAccount->addHolder($holder, $role, $this->guardian($request), (float) $request->input('ownership_percent'));
+        $this->ensurePrimaryHolder($financialAccount, $holder, $role);
+
+        return back()->with('success', 'Account holder updated successfully.');
+    }
+
+    public function destroyHolder(Request $request, FinancialAccount $financialAccount, Customer $holder)
+    {
+        $this->authorizeHolderAccount($request, $financialAccount);
+        abort_unless($financialAccount->holders()->whereKey($holder->id)->exists(), 404);
+        abort_if($financialAccount->holders()->wherePivot('role', 'PRIMARY')->whereKey($holder->id)->exists(), 422, 'The primary holder cannot be removed.');
+        $financialAccount->holders()->detach($holder->id);
+
+        return back()->with('success', 'Account holder removed successfully.');
+    }
+
+    public function storeShareAccount(StoreShareAccountRequest $request, FinancialAccount $financialAccount)
+    {
+        $this->authorizeShareAccount($request, $financialAccount);
+        abort_if($financialAccount->shareAccount()->exists(), 422, 'This share account already has membership details.');
+        $customerId = (int) $financialAccount->holder_id;
+        $membershipNo = $request->input('membership_no') ?: 'MEM-' . str_pad((string) $financialAccount->id, 8, '0', STR_PAD_LEFT);
+        abort_if(ShareAccount::query()->where('membership_no', $membershipNo)->exists(), 422, 'The membership number is already in use.');
+
+        $financialAccount->shareAccount()->create([
+            ...$request->validated(),
+            'customer_id' => $customerId,
+            'membership_no' => $membershipNo,
+        ]);
+
+        return back()->with('success', 'Share membership registered successfully.');
+    }
+
+    public function updateShareAccount(StoreShareAccountRequest $request, FinancialAccount $financialAccount, ShareAccount $shareAccount)
+    {
+        $this->authorizeShareAccount($request, $financialAccount);
+        abort_unless($shareAccount->financial_account_id === $financialAccount->id, 404);
+        $membershipNo = $request->input('membership_no') ?: $shareAccount->membership_no;
+        abort_if(ShareAccount::query()->where('membership_no', $membershipNo)->whereKeyNot($shareAccount->id)->exists(), 422, 'The membership number is already in use.');
+        $shareAccount->update([...$request->validated(), 'membership_no' => $membershipNo]);
+
+        return back()->with('success', 'Share membership updated successfully.');
+    }
+
     private function organizationId(Request $request): int
     {
         return (int) $request->attributes->get('active_organization')->id;
@@ -249,5 +319,43 @@ class FinancialAccountController extends Controller
             ->sum('share_percent');
 
         abort_if($existingTotal + (float) $request->validated('share_percent') > 100, 422, 'Nominee share percentages cannot exceed 100%.');
+    }
+
+    private function authorizeHolderAccount(Request $request, FinancialAccount $account): void
+    {
+        $this->authorizeOrganization($request, $account);
+        abort_unless(in_array($account->account_type, ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT'], true), 422, 'This account does not support holder maintenance.');
+        abort_if($account->status === 'CLOSED', 422, 'Closed accounts cannot change holders.');
+    }
+
+    private function validateHolderAllocation(StoreFinancialAccountHolderRequest $request, FinancialAccount $account, ?Customer $current = null): void
+    {
+        $existingTotal = (float) $account->holders()
+            ->when($current, fn($query) => $query->whereKeyNot($current->id))
+            ->sum('ownership_percent');
+
+        abort_if($existingTotal + (float) $request->input('ownership_percent') > 100, 422, 'Holder ownership percentages cannot exceed 100%.');
+    }
+
+    private function guardian(StoreFinancialAccountHolderRequest $request): ?Customer
+    {
+        $guardianId = $request->integer('guardian_customer_id');
+
+        return $guardianId ? Customer::query()->where('organization_id', $this->organizationId($request))->findOrFail($guardianId) : null;
+    }
+
+    private function ensurePrimaryHolder(FinancialAccount $account, Customer $holder, string $role): void
+    {
+        if ($role === 'PRIMARY') {
+            $account->holders()->whereKeyNot($holder->id)->update(['role' => 'JOINT']);
+        }
+    }
+
+    private function authorizeShareAccount(Request $request, FinancialAccount $account): void
+    {
+        $this->authorizeOrganization($request, $account);
+        abort_unless($account->account_type === 'SHARE', 422, 'Membership details are only available for share accounts.');
+        abort_unless($account->holder_type === Customer::class && $account->holder_id, 422, 'A share account must have a customer holder.');
+        abort_if($account->status === 'CLOSED', 422, 'Closed accounts cannot change membership details.');
     }
 }

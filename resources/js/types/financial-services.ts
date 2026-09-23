@@ -230,6 +230,13 @@ export interface LoanAccount {
 
 export interface FinancialAccountShowPageProps extends SharedData {
     account: FinancialAccountDetail;
+    customers: Array<{
+        id: number;
+        customer_no: string;
+        name: string;
+        type: string;
+        dob?: string | null;
+    }>;
 }
 
 export interface AccountStatementMovement {

@@ -47,6 +47,11 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::post('/financial-accounts/{financial_account}/nominees', [FinancialAccountController::class, 'storeNominee'])->name('financial-accounts.nominees.store');
     Route::put('/financial-accounts/{financial_account}/nominees/{nominee}', [FinancialAccountController::class, 'updateNominee'])->name('financial-accounts.nominees.update');
     Route::delete('/financial-accounts/{financial_account}/nominees/{nominee}', [FinancialAccountController::class, 'destroyNominee'])->name('financial-accounts.nominees.destroy');
+    Route::post('/financial-accounts/{financial_account}/holders', [FinancialAccountController::class, 'storeHolder'])->name('financial-accounts.holders.store');
+    Route::put('/financial-accounts/{financial_account}/holders/{holder}', [FinancialAccountController::class, 'updateHolder'])->name('financial-accounts.holders.update');
+    Route::delete('/financial-accounts/{financial_account}/holders/{holder}', [FinancialAccountController::class, 'destroyHolder'])->name('financial-accounts.holders.destroy');
+    Route::post('/financial-accounts/{financial_account}/membership', [FinancialAccountController::class, 'storeShareAccount'])->name('financial-accounts.membership.store');
+    Route::put('/financial-accounts/{financial_account}/membership/{shareAccount}', [FinancialAccountController::class, 'updateShareAccount'])->name('financial-accounts.membership.update');
     Route::get('/financial-account-statements', [FinancialAccountController::class, 'statement'])->name('financial-account-statements.index');
 
     Route::get('/financial-transactions', [FinancialTransactionController::class, 'index'])->name('financial-transactions.index');
