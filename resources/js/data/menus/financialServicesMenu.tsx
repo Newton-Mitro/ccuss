@@ -57,6 +57,20 @@ export const financialServicesMenu: SidebarItem[] = [
                         match_path: 'account-fines',
                         permission: ['financial.accounts.view'],
                     },
+                    {
+                        name: 'Interest Provisions',
+                        icon: <i className="fa-solid fa-percent" />,
+                        path: '/interest-provisions',
+                        match_path: 'interest-provisions',
+                        permission: ['financial.accounts.view'],
+                    },
+                    {
+                        name: 'Share Dividends',
+                        icon: <i className="fa-solid fa-chart-line" />,
+                        path: '/dividends',
+                        match_path: 'dividends',
+                        permission: ['financial.accounts.view'],
+                    },
                 ],
             },
             {

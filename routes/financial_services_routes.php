@@ -8,6 +8,8 @@ use App\FinancialServices\Controllers\FinancialReportController;
 use App\FinancialServices\Controllers\LoanApplicationController;
 use App\FinancialServices\Controllers\AccountDefaultRuleController;
 use App\FinancialServices\Controllers\AccountFineController;
+use App\FinancialServices\Controllers\InterestProvisionController;
+use App\FinancialServices\Controllers\DividendController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'organization'])->group(function () {
@@ -41,6 +43,14 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::post('/account-default-rules', [AccountDefaultRuleController::class, 'store'])->name('account-default-rules.store');
     Route::put('/account-default-rules/{account_default_rule}', [AccountDefaultRuleController::class, 'update'])->name('account-default-rules.update');
     Route::delete('/account-default-rules/{account_default_rule}', [AccountDefaultRuleController::class, 'destroy'])->name('account-default-rules.destroy');
+    Route::get('/interest-provisions', [InterestProvisionController::class, 'index'])->name('interest-provisions.index');
+    Route::post('/interest-provisions/calculate', [InterestProvisionController::class, 'calculate'])->name('interest-provisions.calculate');
+    Route::post('/interest-provisions/{interest_provision}/approve', [InterestProvisionController::class, 'approve'])->name('interest-provisions.approve');
+    Route::post('/interest-provisions/{interest_provision}/reject', [InterestProvisionController::class, 'reject'])->name('interest-provisions.reject');
+    Route::get('/dividends', [DividendController::class, 'index'])->name('dividends.index');
+    Route::post('/dividends', [DividendController::class, 'store'])->name('dividends.store');
+    Route::post('/dividends/{share_dividend_declaration}/calculate', [DividendController::class, 'calculate'])->name('dividends.calculate');
+    Route::post('/dividends/{share_dividend_declaration}/approve', [DividendController::class, 'approve'])->name('dividends.approve');
     Route::get('/account-fines', [AccountFineController::class, 'index'])->name('account-fines.index');
     Route::post('/account-fines/{account_fine}/waive', [AccountFineController::class, 'waive'])->name('account-fines.waive');
 
