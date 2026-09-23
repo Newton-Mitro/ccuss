@@ -15,6 +15,7 @@ class LoanSchedule extends Model
 
     protected $fillable = [
         'loan_account_id',
+        'schedule_version',
         'installment_no',
         'due_date',
         'opening_principal',
@@ -25,11 +26,13 @@ class LoanSchedule extends Model
         'total_due',
         'total_paid',
         'status',
+        'generation_inputs',
         'paid_at',
     ];
 
     protected $casts = [
         'due_date' => 'date',
+        'schedule_version' => 'integer',
         'opening_principal' => 'decimal:4',
         'scheduled_principal' => 'decimal:4',
         'scheduled_interest' => 'decimal:4',
@@ -38,6 +41,7 @@ class LoanSchedule extends Model
         'total_due' => 'decimal:4',
         'total_paid' => 'decimal:4',
         'paid_at' => 'datetime',
+        'generation_inputs' => 'array',
     ];
 
     public function loanAccount(): BelongsTo

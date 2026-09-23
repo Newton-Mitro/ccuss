@@ -25,6 +25,9 @@ class AccountDefaultRule extends Model
         'extends_maturity',
         'maturity_extension_days',
         'is_active',
+        'effective_from',
+        'effective_to',
+        'maximum_fine',
     ];
 
     protected $casts = [
@@ -32,6 +35,9 @@ class AccountDefaultRule extends Model
         'fine_rate' => 'decimal:6',
         'extends_maturity' => 'boolean',
         'is_active' => 'boolean',
+        'effective_from' => 'date',
+        'effective_to' => 'date',
+        'maximum_fine' => 'decimal:4',
     ];
 
     public function organization(): BelongsTo

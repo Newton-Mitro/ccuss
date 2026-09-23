@@ -2,9 +2,13 @@
 
 use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Application\LoanApplicationService;
+use App\FinancialServices\Application\LoanScheduleService;
+use App\FinancialServices\Application\DefaultFineService;
+use App\FinancialServices\Models\AccountDefaultRule;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\FinancialProductPolicy;
 use App\FinancialServices\Models\FinancialAccount;
+use App\FinancialServices\Models\LoanProtectionPolicy;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\User;
@@ -145,4 +149,100 @@ it('registers and verifies loan collateral for the owning application', function
 
     expect(fn() => $service->verifyCollateral($otherApplication, $collateral, false))
         ->toThrow(RuntimeException::class, 'does not belong');
+
+    expect($service->releaseCollateral($application, $collateral)->status)->toBe('RELEASED');
+});
+
+it('manages guarantor invitations with organization and duplicate checks', function () {
+    $fixture = loanApplicationFixture();
+    $guarantor = Customer::factory()->individualFemale()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+    ]);
+    $service = app(LoanApplicationService::class);
+    $application = $service->create([
+        'customer_id' => $fixture['customer']->id,
+        'financial_product_id' => $fixture['product']->id,
+        'requested_amount' => 5000,
+        'requested_term_months' => 12,
+    ], $fixture['organization']->id);
+
+    $invitation = $service->addGuarantor($application, $guarantor->id);
+    expect($service->decideGuarantor($application, $invitation, true)->status)->toBe('ACCEPTED');
+    expect(fn() => $service->addGuarantor($application, $guarantor->id))
+        ->toThrow(RuntimeException::class, 'already a guarantor');
+    expect(fn() => $service->addGuarantor($application, $fixture['customer']->id))
+        ->toThrow(RuntimeException::class, 'cannot be their own guarantor');
+});
+
+it('configures and activates required loan protection', function () {
+    $fixture = loanApplicationFixture();
+    $service = app(LoanApplicationService::class);
+    $application = $service->create([
+        'customer_id' => $fixture['customer']->id,
+        'financial_product_id' => $fixture['product']->id,
+        'requested_amount' => 5000,
+        'requested_term_months' => 12,
+    ], $fixture['organization']->id);
+    $service->submit($application);
+    $service->approve($application, [], $fixture['user']->id);
+    $service->createLoanAccount($application->fresh());
+
+    expect(fn() => $service->setProtectionStatus($application->fresh(), 'ACTIVE'))
+        ->toThrow(RuntimeException::class, 'No protection policy');
+
+    $policy = $service->configureProtection($application->fresh(), [
+        'required' => true,
+        'coverage_amount' => 10000,
+        'initial_fee' => 25,
+        'renewal_fee' => 10,
+        'renewal_frequency' => 'YEARLY',
+        'next_renewal_at' => now()->addYear()->toDateString(),
+    ]);
+    expect($policy)->toBeInstanceOf(LoanProtectionPolicy::class)
+        ->and($service->setProtectionStatus($application->fresh(), 'ACTIVE')->status)->toBe('ACTIVE');
+});
+
+it('generates a reproducible reducing-balance schedule across month boundaries', function () {
+    $fixture = loanApplicationFixture();
+    $fixture['product']->update(['interest_calculation' => 'REDUCING_BALANCE', 'interest_rate' => 12]);
+    $service = app(LoanApplicationService::class);
+    $application = $service->create([
+        'customer_id' => $fixture['customer']->id,
+        'financial_product_id' => $fixture['product']->id,
+        'requested_amount' => 1000,
+        'requested_term_months' => 3,
+    ], $fixture['organization']->id);
+    $service->submit($application);
+    $service->approve($application, [], $fixture['user']->id);
+    $loan = $service->createLoanAccount($application->fresh());
+
+    $schedules = app(LoanScheduleService::class)->generate($loan, ['frequency' => 'MONTHLY', 'start_date' => '2026-01-31']);
+
+    expect($schedules)->toHaveCount(3)
+        ->and($schedules[0]->due_date->toDateString())->toBe('2026-02-28')
+        ->and((float) $schedules[2]->scheduled_principal)->toBeGreaterThan(0)
+        ->and($schedules[0]->generation_inputs['frequency'])->toBe('MONTHLY');
+
+    $arrears = app(LoanScheduleService::class)->assessArrears($loan, '2026-03-01');
+    expect($arrears)->toHaveCount(1)
+        ->and($arrears[0]->status)->toBe('OPEN')
+        ->and(app(LoanScheduleService::class)->assessArrears($loan, '2026-03-01'))->toHaveCount(1);
+
+    expect(app(LoanScheduleService::class)->resolveArrear($arrears[0], 'WAIVED', $fixture['user']->id)->resolution_type)->toBe('WAIVED');
+
+    $rule = app(DefaultFineService::class)->createRule([
+        'account_type' => 'LOAN',
+        'name' => 'Late loan payment',
+        'grace_days' => 0,
+        'fine_calculation' => 'PERCENTAGE',
+        'fine_rate' => 10,
+        'maximum_fine' => 25,
+        'effective_from' => '2026-01-01',
+    ], $fixture['organization']->id);
+    $events = app(DefaultFineService::class)->assessOrganization($fixture['organization']->id, '2026-03-01');
+    expect($rule)->toBeInstanceOf(AccountDefaultRule::class)
+        ->and($events)->toHaveCount(1)
+        ->and($events[0]->fines->first()->assessed_amount)->toBe('25.0000')
+        ->and(app(DefaultFineService::class)->assessOrganization($fixture['organization']->id, '2026-03-01'))->toHaveCount(1);
 });

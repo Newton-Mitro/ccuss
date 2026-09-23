@@ -4,6 +4,7 @@ namespace App\FinancialServices\Models;
 
 use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Models\LoanAccount;
+use App\FinancialServices\Models\LoanGuarantor;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -56,5 +57,10 @@ class LoanApplication extends Model
     public function collaterals(): HasMany
     {
         return $this->hasMany(LoanCollateral::class);
+    }
+
+    public function guarantors(): HasMany
+    {
+        return $this->hasMany(LoanGuarantor::class);
     }
 }

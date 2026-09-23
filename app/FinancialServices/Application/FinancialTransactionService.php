@@ -7,7 +7,9 @@ use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialTransaction;
 use App\FinancialServices\Models\LoanAccount;
 use App\FinancialServices\Models\LoanDisbursement;
+use App\FinancialServices\Models\LoanRepayment;
 use App\FinancialServices\Models\RecurringDepositInstallment;
+use App\TreasuryAndCash\Models\BranchDay;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -228,6 +230,7 @@ class FinancialTransactionService
             $loan = LoanAccount::query()
                 ->whereHas('financialAccount', fn($query) => $query->where('organization_id', $organizationId))
                 ->whereIn('status', ['APPROVED', 'PARTIALLY_DISBURSED'])
+                ->with(['financialAccount', 'application.collaterals', 'application.guarantors', 'application.loanAccount.protectionPolicy'])
                 ->lockForUpdate()
                 ->findOrFail($data['loan_account_id']);
             $payoutAccount = FinancialAccount::query()
@@ -237,6 +240,8 @@ class FinancialTransactionService
                 ->findOrFail($data['payout_account_id']);
             $amount = (float) $data['amount'];
             $remaining = (float) $loan->principal_amount - (float) $loan->disbursed_amount;
+
+            $this->validateLoanDisbursement($loan, $data['disbursed_at']);
 
             if ($amount > $remaining) {
                 throw new RuntimeException('The disbursement amount exceeds the remaining approved loan amount.');
@@ -285,6 +290,69 @@ class FinancialTransactionService
             ]);
 
             return $transaction->fresh(['entries.financialAccount', 'source']);
+        });
+    }
+
+    public function createLoanRepayment(array $data, int $organizationId, int $userId): FinancialTransaction
+    {
+        return DB::transaction(function () use ($data, $organizationId, $userId) {
+            $existing = $this->findIdempotentTransaction($data['idempotency_key'] ?? null, $organizationId);
+            if ($existing) {
+                if ($existing->transaction_type !== 'LOAN_REPAYMENT' || (float) $existing->amount !== (float) $data['amount'] * 2) {
+                    throw new RuntimeException('The idempotency key is already used for a different transaction.');
+                }
+
+                return $existing;
+            }
+
+            $loan = LoanAccount::query()
+                ->whereHas('financialAccount', fn($query) => $query->where('organization_id', $organizationId))
+                ->whereIn('status', ['ACTIVE', 'PARTIALLY_DISBURSED'])
+                ->with(['financialAccount', 'schedules.components'])
+                ->lockForUpdate()
+                ->findOrFail($data['loan_account_id']);
+            $payoutAccount = FinancialAccount::query()
+                ->where('organization_id', $organizationId)
+                ->whereIn('account_type', ['CASH', 'BANK'])
+                ->whereIn('status', ['PENDING', 'ACTIVE'])
+                ->findOrFail($data['payout_account_id']);
+            $amount = (float) $data['amount'];
+            $allocations = $this->repaymentAllocations($loan, $amount, $data['repayment_date'], (bool) ($data['allow_advance'] ?? false));
+            if (round(collect($allocations)->sum('amount'), 4) < round($amount, 4)) {
+                throw new RuntimeException('The repayment exceeds the outstanding scheduled balance.');
+            }
+
+            $transaction = $this->createMultiLine(
+                [
+                    'transaction_type' => 'LOAN_REPAYMENT',
+                    'transaction_date' => $data['repayment_date'],
+                    'reference' => $data['reference'] ?? null,
+                    'description' => 'Loan repayment',
+                    'idempotency_key' => $data['idempotency_key'] ?? null,
+                ],
+                [
+                    ['financial_account_id' => $payoutAccount->id, 'direction' => $this->directionForIncrease($payoutAccount), 'amount' => $amount, 'description' => 'Loan repayment received'],
+                    ['financial_account_id' => $loan->financial_account_id, 'direction' => $this->directionForDecrease($loan->financialAccount), 'amount' => $amount, 'description' => 'Loan balance repayment'],
+                ],
+                $organizationId,
+                $userId,
+                $loan->financialAccount->branch_id,
+            );
+            $repayment = LoanRepayment::create([
+                'loan_account_id' => $loan->id,
+                'financial_transaction_id' => $transaction->id,
+                'amount' => $amount,
+                'repayment_date' => $data['repayment_date'],
+                'status' => 'PENDING',
+                'reference' => $data['reference'] ?? null,
+                'created_by' => $userId,
+            ]);
+            foreach ($allocations as $allocation) {
+                $repayment->allocations()->create($allocation);
+            }
+            $transaction->update(['source_type' => LoanRepayment::class, 'source_id' => $repayment->id]);
+
+            return $transaction->fresh(['entries.financialAccount', 'source.allocations']);
         });
     }
 
@@ -345,6 +413,10 @@ class FinancialTransactionService
                 $disbursement->update(['status' => 'POSTED']);
             }
 
+            if ($transaction->source instanceof LoanRepayment) {
+                $this->postLoanRepayment($transaction->source);
+            }
+
             if ($transaction->source instanceof RecurringDepositInstallment) {
                 $installment = RecurringDepositInstallment::query()
                     ->with('recurringDeposit')
@@ -381,7 +453,7 @@ class FinancialTransactionService
                 throw new RuntimeException('Only posted transactions can be reversed.');
             }
 
-            $transaction->load('entries');
+            $transaction->load(['entries', 'source']);
             foreach ($transaction->entries->sortBy('line_no') as $entry) {
                 $account = FinancialAccount::query()
                     ->with('product')
@@ -397,6 +469,24 @@ class FinancialTransactionService
             }
             $transaction->update(['status' => 'REVERSED']);
 
+            if ($transaction->source instanceof LoanDisbursement) {
+                $disbursement = $transaction->source;
+                $loan = LoanAccount::query()->lockForUpdate()->findOrFail($disbursement->loan_account_id);
+                $disbursedAmount = max(0, (float) $loan->disbursed_amount - (float) $disbursement->amount);
+                $loan->update([
+                    'disbursed_amount' => $disbursedAmount,
+                    'disbursed_at' => $disbursedAmount > 0 ? $loan->disbursed_at : null,
+                    'status' => $disbursedAmount >= (float) $loan->principal_amount
+                        ? 'ACTIVE'
+                        : ($disbursedAmount > 0 ? 'PARTIALLY_DISBURSED' : 'APPROVED'),
+                ]);
+                $disbursement->update(['status' => 'CANCELLED']);
+            }
+
+            if ($transaction->source instanceof LoanRepayment) {
+                $this->reverseLoanRepayment($transaction->source);
+            }
+
             return $transaction->fresh(['entries.financialAccount']);
         });
     }
@@ -406,11 +496,104 @@ class FinancialTransactionService
         return FinancialTransaction::query()->where('organization_id', $organizationId);
     }
 
+    private function repaymentAllocations(LoanAccount $loan, float $amount, string $repaymentDate, bool $allowAdvance): array
+    {
+        $remaining = $amount;
+        $allocations = [];
+        $schedules = $loan->schedules
+            ->filter(fn($schedule) => !in_array($schedule->status, ['PAID', 'WAIVED'], true))
+            ->filter(fn($schedule) => $allowAdvance || $schedule->due_date->toDateString() <= $repaymentDate)
+            ->sortBy('due_date');
+
+        foreach ($schedules as $schedule) {
+            foreach (['FEE', 'PROTECTION_FEE', 'INTEREST', 'PRINCIPAL'] as $type) {
+                $component = $schedule->components->firstWhere('type', $type);
+                if (!$component) {
+                    continue;
+                }
+                $outstanding = max(0, (float) $component->amount_due - (float) $component->amount_paid);
+                $allocated = min($remaining, $outstanding);
+                if ($allocated > 0) {
+                    $allocations[] = [
+                        'loan_schedule_id' => $schedule->id,
+                        'loan_schedule_component_id' => $component->id,
+                        'amount' => round($allocated, 4),
+                    ];
+                    $remaining = round($remaining - $allocated, 4);
+                }
+                if ($remaining <= 0) {
+                    return $allocations;
+                }
+            }
+        }
+
+        return $allocations;
+    }
+
+    private function postLoanRepayment(LoanRepayment $repayment): void
+    {
+        $repayment->load(['allocations.component', 'allocations.schedule']);
+        foreach ($repayment->allocations as $allocation) {
+            $component = $allocation->component;
+            $paid = min((float) $component->amount_due, (float) $component->amount_paid + (float) $allocation->amount);
+            $component->update(['amount_paid' => $paid, 'status' => $paid >= (float) $component->amount_due ? 'PAID' : 'PARTIAL']);
+            $schedule = $allocation->schedule->fresh('components');
+            $totalPaid = $schedule->components->sum(fn($item) => (float) $item->amount_paid);
+            $fullyPaid = $totalPaid >= (float) $schedule->total_due;
+            $schedule->update(['total_paid' => $totalPaid, 'status' => $fullyPaid ? 'PAID' : 'PARTIAL', 'paid_at' => $fullyPaid ? now() : null]);
+        }
+        $repayment->update(['status' => 'POSTED']);
+    }
+
+    private function reverseLoanRepayment(LoanRepayment $repayment): void
+    {
+        $repayment->load(['allocations.component', 'allocations.schedule']);
+        foreach ($repayment->allocations as $allocation) {
+            $component = $allocation->component;
+            $paid = max(0, (float) $component->amount_paid - (float) $allocation->amount);
+            $component->update(['amount_paid' => $paid, 'status' => $paid <= 0 ? 'PENDING' : 'PARTIAL']);
+            $schedule = $allocation->schedule->fresh('components');
+            $totalPaid = $schedule->components->sum(fn($item) => (float) $item->amount_paid);
+            $schedule->update(['total_paid' => $totalPaid, 'status' => $totalPaid <= 0 ? 'PENDING' : 'PARTIAL', 'paid_at' => null]);
+        }
+        $repayment->update(['status' => 'REVERSED']);
+    }
+
     private function nextNumber(int $organizationId): string
     {
         $next = ((int) FinancialTransaction::query()->where('organization_id', $organizationId)->lockForUpdate()->max('id')) + 1;
 
         return sprintf('FT-%06d', $next);
+    }
+
+    private function validateLoanDisbursement(LoanAccount $loan, string $disbursedAt): void
+    {
+        $application = $loan->application;
+        if ($application) {
+            if ($application->status !== 'APPROVED') {
+                throw new RuntimeException('The loan application must be approved before disbursement.');
+            }
+            if ($application->collaterals->contains(fn($collateral) => $collateral->status === 'PENDING')) {
+                throw new RuntimeException('All collateral must be verified or rejected before disbursement.');
+            }
+            if ($application->guarantors->contains(fn($guarantor) => $guarantor->status === 'PENDING')) {
+                throw new RuntimeException('All guarantor invitations must be decided before disbursement.');
+            }
+            $protection = $loan->protectionPolicy;
+            if ($protection?->required && $protection->status !== 'ACTIVE') {
+                throw new RuntimeException('Required loan protection must be active before disbursement.');
+            }
+        }
+
+        if (
+            $loan->financialAccount->branch_id && !BranchDay::query()
+                ->where('branch_id', $loan->financialAccount->branch_id)
+                ->whereDate('business_date', $disbursedAt)
+                ->where('status', BranchDay::STATUS_OPEN)
+                ->exists()
+        ) {
+            throw new RuntimeException('The branch day must be open for the disbursement date.');
+        }
     }
 
     private function balanceAfterEntry(FinancialAccount $account, string $direction, float $amount): float

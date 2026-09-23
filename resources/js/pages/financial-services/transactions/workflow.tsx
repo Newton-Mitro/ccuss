@@ -7,7 +7,7 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
 import type { FinancialTransactionWorkflowPageProps } from '@/types/financial-services';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { ArrowRightLeft, CircleDollarSign, Construction } from 'lucide-react';
+import { ArrowRightLeft, CircleDollarSign } from 'lucide-react';
 import { route } from 'ziggy-js';
 
 const details: Record<
@@ -29,8 +29,8 @@ const details: Record<
     'loan-repayment': {
         title: 'Loan repayment',
         description:
-            'Allocate a repayment between principal, interest, and the receiving cash or bank account.',
-        icon: Construction,
+            'Collect and allocate a repayment across the scheduled loan components.',
+        icon: CircleDollarSign,
     },
 };
 export default function TransactionWorkflow() {
@@ -54,6 +54,7 @@ export default function TransactionWorkflow() {
         loan_account_id: '',
         payout_account_id: '',
         disbursed_at: new Date().toISOString().slice(0, 10),
+        repayment_date: new Date().toISOString().slice(0, 10),
         note: '',
     });
     const breadcrumbs: BreadcrumbItem[] = [
@@ -72,6 +73,11 @@ export default function TransactionWorkflow() {
     ) => {
         event.preventDefault();
         post(route('financial-transactions.loan-disbursement.store'));
+    };
+
+    const submitLoanRepayment = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        post(route('financial-transactions.loan-repayment.store'));
     };
 
     if (workflow === 'transfer') {
@@ -211,7 +217,7 @@ export default function TransactionWorkflow() {
         );
     }
 
-    if (workflow === 'loan-disbursement') {
+    if (workflow === 'loan-disbursement' || workflow === 'loan-repayment') {
         return (
             <CustomAuthLayout breadcrumbs={breadcrumbs}>
                 <Head title={detail.title} />
@@ -221,7 +227,11 @@ export default function TransactionWorkflow() {
                         description={detail.description}
                     />
                     <form
-                        onSubmit={submitLoanDisbursement}
+                        onSubmit={
+                            workflow === 'loan-disbursement'
+                                ? submitLoanDisbursement
+                                : submitLoanRepayment
+                        }
                         className="space-y-4 rounded-xl border bg-card p-4 shadow-sm"
                     >
                         <div className="grid gap-3 sm:grid-cols-2">
@@ -235,7 +245,10 @@ export default function TransactionWorkflow() {
                                     options={[
                                         {
                                             value: '',
-                                            label: 'Select approved loan',
+                                            label:
+                                                workflow === 'loan-disbursement'
+                                                    ? 'Select approved loan'
+                                                    : 'Select active loan',
                                         },
                                         ...loan_accounts.map((loan) => ({
                                             value: String(loan.id),
@@ -291,13 +304,23 @@ export default function TransactionWorkflow() {
                                 )}
                             </div>
                             <div>
-                                <Label>Disbursement date</Label>
+                                <Label>
+                                    {workflow === 'loan-disbursement'
+                                        ? 'Disbursement date'
+                                        : 'Repayment date'}
+                                </Label>
                                 <Input
                                     type="date"
-                                    value={data.disbursed_at}
+                                    value={
+                                        workflow === 'loan-disbursement'
+                                            ? data.disbursed_at
+                                            : data.repayment_date
+                                    }
                                     onChange={(event) =>
                                         setData(
-                                            'disbursed_at',
+                                            workflow === 'loan-disbursement'
+                                                ? 'disbursed_at'
+                                                : 'repayment_date',
                                             event.target.value,
                                         )
                                     }
@@ -313,11 +336,24 @@ export default function TransactionWorkflow() {
                                 />
                             </div>
                             <div>
-                                <Label>Note</Label>
+                                <Label>
+                                    {workflow === 'loan-disbursement'
+                                        ? 'Note'
+                                        : 'Reference'}
+                                </Label>
                                 <Input
-                                    value={data.note}
+                                    value={
+                                        workflow === 'loan-disbursement'
+                                            ? data.note
+                                            : data.reference
+                                    }
                                     onChange={(event) =>
-                                        setData('note', event.target.value)
+                                        setData(
+                                            workflow === 'loan-disbursement'
+                                                ? 'note'
+                                                : 'reference',
+                                            event.target.value,
+                                        )
                                     }
                                 />
                             </div>
@@ -338,7 +374,9 @@ export default function TransactionWorkflow() {
                                     payout_accounts.length === 0
                                 }
                             >
-                                Create disbursement draft
+                                {workflow === 'loan-disbursement'
+                                    ? 'Create disbursement draft'
+                                    : 'Create repayment draft'}
                             </Button>
                         </div>
                     </form>

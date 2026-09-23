@@ -9,6 +9,7 @@ use App\FinancialServices\Models\LoanAccount;
 use App\FinancialServices\Requests\StoreFinancialTransactionRequest;
 use App\FinancialServices\Requests\StoreFinancialTransferRequest;
 use App\FinancialServices\Requests\StoreLoanDisbursementRequest;
+use App\FinancialServices\Requests\StoreLoanRepaymentRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -19,7 +20,7 @@ class FinancialTransactionController extends Controller
     public function __construct(private readonly FinancialTransactionService $transactionService)
     {
         $this->middleware('permission:financial.transactions.view')->only(['index', 'show']);
-        $this->middleware('permission:financial.transactions.create')->only(['store', 'storeTransfer', 'storeLoanDisbursement']);
+        $this->middleware('permission:financial.transactions.create')->only(['store', 'storeTransfer', 'storeLoanDisbursement', 'storeLoanRepayment']);
         $this->middleware('permission:financial.transactions.post')->only('post');
         $this->middleware('permission:financial.transactions.reverse')->only('reverse');
     }
@@ -58,16 +59,16 @@ class FinancialTransactionController extends Controller
                     ->orderBy('account_no')
                     ->get(['id', 'account_no', 'name', 'account_type', 'balance'])
                 : [],
-            'loan_accounts' => $workflow === 'loan-disbursement'
+            'loan_accounts' => in_array($workflow, ['loan-disbursement', 'loan-repayment'], true)
                 ? LoanAccount::query()
                     ->whereHas('financialAccount', fn($query) => $query
                         ->where('organization_id', $this->organizationId($request)))
-                    ->whereIn('status', ['APPROVED', 'PARTIALLY_DISBURSED'])
+                    ->whereIn('status', $workflow === 'loan-disbursement' ? ['APPROVED', 'PARTIALLY_DISBURSED'] : ['ACTIVE', 'PARTIALLY_DISBURSED'])
                     ->with('customer:id,name')
                     ->orderBy('loan_no')
                     ->get(['id', 'loan_no', 'customer_id', 'principal_amount', 'disbursed_amount'])
                 : [],
-            'payout_accounts' => $workflow === 'loan-disbursement'
+            'payout_accounts' => in_array($workflow, ['loan-disbursement', 'loan-repayment'], true)
                 ? FinancialAccount::query()
                     ->where('organization_id', $this->organizationId($request))
                     ->whereIn('account_type', ['CASH', 'BANK'])
@@ -100,6 +101,18 @@ class FinancialTransactionController extends Controller
 
         return redirect()->route('financial-transactions.show', $transaction)
             ->with('success', 'Loan disbursement created successfully.');
+    }
+
+    public function storeLoanRepayment(StoreLoanRepaymentRequest $request)
+    {
+        $transaction = $this->transactionService->createLoanRepayment(
+            $request->validated(),
+            $this->organizationId($request),
+            $request->user()->id,
+        );
+
+        return redirect()->route('financial-transactions.show', $transaction)
+            ->with('success', 'Loan repayment created successfully.');
     }
 
     public function store(StoreFinancialTransactionRequest $request)

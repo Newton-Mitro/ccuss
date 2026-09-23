@@ -7,6 +7,8 @@ use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\LoanApplication;
 use App\FinancialServices\Models\LoanAccount;
 use App\FinancialServices\Models\LoanCollateral;
+use App\FinancialServices\Models\LoanGuarantor;
+use App\FinancialServices\Models\LoanProtectionPolicy;
 use App\CustomerModule\Models\Customer;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
@@ -149,9 +151,7 @@ class LoanApplicationService
 
     public function verifyCollateral(LoanApplication $application, LoanCollateral $collateral, bool $approved, ?string $notes = null): LoanCollateral
     {
-        if ($collateral->loan_application_id !== $application->id) {
-            throw new RuntimeException('The collateral does not belong to this application.');
-        }
+        $this->ensureApplicationChild($application, $collateral->loan_application_id, 'collateral');
 
         $collateral->update([
             'status' => $approved ? 'VERIFIED' : 'REJECTED',
@@ -160,6 +160,95 @@ class LoanApplicationService
         ]);
 
         return $collateral->refresh();
+    }
+
+    public function releaseCollateral(LoanApplication $application, LoanCollateral $collateral, ?string $notes = null): LoanCollateral
+    {
+        $this->ensureApplicationChild($application, $collateral->loan_application_id, 'collateral');
+        if ($collateral->status !== 'VERIFIED') {
+            throw new RuntimeException('Only verified collateral can be released.');
+        }
+
+        $collateral->update(['status' => 'RELEASED', 'notes' => $notes ?? $collateral->notes]);
+
+        return $collateral->refresh();
+    }
+
+    public function addGuarantor(LoanApplication $application, int $customerId, ?string $notes = null): LoanGuarantor
+    {
+        if (in_array($application->status, ['REJECTED', 'CANCELLED'], true)) {
+            throw new RuntimeException('A guarantor cannot be added to a closed application.');
+        }
+
+        $customer = Customer::query()
+            ->where('organization_id', $application->organization_id)
+            ->whereKey($customerId)
+            ->firstOrFail();
+        if ($customer->id === $application->customer_id) {
+            throw new RuntimeException('The applicant cannot be their own guarantor.');
+        }
+        if ($application->guarantors()->where('customer_id', $customer->id)->whereIn('status', ['PENDING', 'ACCEPTED'])->exists()) {
+            throw new RuntimeException('This customer is already a guarantor for the application.');
+        }
+
+        return $application->guarantors()->create(['customer_id' => $customer->id, 'status' => 'PENDING', 'notes' => $notes]);
+    }
+
+    public function decideGuarantor(LoanApplication $application, LoanGuarantor $guarantor, bool $accepted, ?string $notes = null): LoanGuarantor
+    {
+        $this->ensureApplicationChild($application, $guarantor->loan_application_id, 'guarantor');
+        if ($guarantor->status !== 'PENDING') {
+            throw new RuntimeException('Only pending guarantor invitations can be decided.');
+        }
+
+        $guarantor->update([
+            'status' => $accepted ? 'ACCEPTED' : 'REJECTED',
+            'accepted_at' => $accepted ? now() : null,
+            'notes' => $notes ?? $guarantor->notes,
+        ]);
+
+        return $guarantor->refresh();
+    }
+
+    public function configureProtection(LoanApplication $application, array $data): LoanProtectionPolicy
+    {
+        $loanAccount = $application->loanAccount;
+        if (!$loanAccount) {
+            throw new RuntimeException('Create the loan account before configuring protection.');
+        }
+        if (in_array($loanAccount->status, ['CLOSED', 'CANCELLED'], true)) {
+            throw new RuntimeException('Protection cannot be configured for a closed loan account.');
+        }
+
+        return $loanAccount->protectionPolicy()->updateOrCreate([], [
+            ...$data,
+            'status' => 'PENDING',
+        ]);
+    }
+
+    public function setProtectionStatus(LoanApplication $application, string $status): LoanProtectionPolicy
+    {
+        $policy = $application->loanAccount?->protectionPolicy;
+        if (!$policy) {
+            throw new RuntimeException('No protection policy is configured for this loan account.');
+        }
+        if (!in_array($status, ['ACTIVE', 'CANCELLED'], true)) {
+            throw new RuntimeException('Invalid protection status.');
+        }
+        if ($status === 'ACTIVE' && $policy->required && (float) $policy->coverage_amount <= 0) {
+            throw new RuntimeException('Required protection must have a positive coverage amount.');
+        }
+
+        $policy->update(['status' => $status]);
+
+        return $policy->refresh();
+    }
+
+    private function ensureApplicationChild(LoanApplication $application, ?int $applicationId, string $child): void
+    {
+        if ($applicationId !== $application->id) {
+            throw new RuntimeException("The {$child} does not belong to this application.");
+        }
     }
 
     public function queryForOrganization(int $organizationId): Builder

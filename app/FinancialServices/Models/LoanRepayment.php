@@ -32,6 +32,11 @@ class LoanRepayment extends Model
         return $this->belongsTo(LoanAccount::class);
     }
 
+    public function financialTransaction(): BelongsTo
+    {
+        return $this->belongsTo(FinancialTransaction::class);
+    }
+
     public function allocations(): HasMany
     {
         return $this->hasMany(LoanRepaymentAllocation::class);

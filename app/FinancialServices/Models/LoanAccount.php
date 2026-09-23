@@ -4,6 +4,7 @@ namespace App\FinancialServices\Models;
 
 use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Models\LoanProtectionPolicy;
+use App\FinancialServices\Models\LoanGuarantor;
 use App\FinancialServices\Models\LoanArrear;
 use App\FinancialServices\Models\LoanSchedule;
 use App\FinancialServices\Models\LoanRepayment;
@@ -66,6 +67,16 @@ class LoanAccount extends Model
     public function protectionPolicy(): HasOne
     {
         return $this->hasOne(LoanProtectionPolicy::class);
+    }
+
+    public function collaterals(): HasMany
+    {
+        return $this->hasMany(LoanCollateral::class);
+    }
+
+    public function guarantors(): HasMany
+    {
+        return $this->hasMany(LoanGuarantor::class);
     }
 
     public function schedules(): HasMany

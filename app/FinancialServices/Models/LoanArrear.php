@@ -20,6 +20,10 @@ class LoanArrear extends Model
         'fee_overdue',
         'total_overdue',
         'status',
+        'resolution_type',
+        'resolution_note',
+        'resolved_at',
+        'resolved_by',
     ];
 
     protected $casts = [
@@ -28,6 +32,7 @@ class LoanArrear extends Model
         'interest_overdue' => 'decimal:4',
         'fee_overdue' => 'decimal:4',
         'total_overdue' => 'decimal:4',
+        'resolved_at' => 'datetime',
     ];
 
     public function loanAccount(): BelongsTo

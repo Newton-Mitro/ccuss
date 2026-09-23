@@ -23,3 +23,13 @@ Schedule::command('backup:cleanup')
     ->dailyAt('03:00')
     ->name('cleanup-backups')
     ->withoutOverlapping();
+
+Schedule::command('loans:assess-arrears')
+    ->dailyAt('00:15')
+    ->name('loan-arrears-assessment')
+    ->withoutOverlapping();
+
+Schedule::command('accounts:assess-defaults')
+    ->dailyAt('00:30')
+    ->name('account-default-assessment')
+    ->withoutOverlapping();

@@ -73,13 +73,24 @@ export interface LoanApplication {
     requested_term_months?: number | null;
     purpose?: string | null;
     status: string;
+    resolution_type?: string | null;
     applied_at?: string | null;
     approved_at?: string | null;
     decision_note?: string | null;
     customer?: { name?: string; customer_no?: string };
     product?: { code?: string; name?: string };
-    loan_account?: { id: number; loan_no: string; status: string } | null;
+    loan_account?: {
+        id: number;
+        loan_no: string;
+        status: string;
+        protection_policy?: LoanProtectionPolicy | null;
+        disbursements?: LoanDisbursement[];
+        schedules?: LoanSchedule[];
+        arrears?: LoanArrear[];
+        repayments?: LoanRepayment[];
+    } | null;
     collaterals?: LoanCollateral[];
+    guarantors?: LoanGuarantor[];
 }
 
 export interface LoanCollateral {
@@ -90,6 +101,83 @@ export interface LoanCollateral {
     secured_value?: string | number | null;
     status: string;
     notes?: string | null;
+}
+
+export interface LoanGuarantor {
+    id: number;
+    customer_id: number;
+    customer?: { name?: string; customer_no?: string };
+    status: string;
+    notes?: string | null;
+}
+
+export interface LoanProtectionPolicy {
+    id: number;
+    required: boolean;
+    coverage_amount?: string | number | null;
+    initial_fee?: string | number | null;
+    renewal_fee?: string | number | null;
+    renewal_frequency: string;
+    next_renewal_at?: string | null;
+    status: string;
+}
+
+export interface LoanDisbursement {
+    id: number;
+    amount: string | number;
+    disbursed_at: string;
+    status: string;
+    financial_transaction?: {
+        id: number;
+        transaction_no: string;
+        status: string;
+        reference?: string | null;
+    } | null;
+}
+
+export interface LoanSchedule {
+    id: number;
+    installment_no: number;
+    due_date: string;
+    scheduled_principal: string | number;
+    scheduled_interest: string | number;
+    scheduled_fee: string | number;
+    scheduled_protection_fee: string | number;
+    total_due: string | number;
+    total_paid: string | number;
+    status: string;
+    components?: {
+        type: string;
+        amount_due: string | number;
+        amount_paid: string | number;
+        status: string;
+    }[];
+}
+
+export interface LoanArrear {
+    id: number;
+    loan_schedule_id: number;
+    as_of_date: string;
+    days_overdue: number;
+    total_overdue: string | number;
+    status: string;
+}
+
+export interface LoanRepayment {
+    id: number;
+    amount: string | number;
+    repayment_date: string;
+    status: string;
+    reference?: string | null;
+    financial_transaction?: {
+        id: number;
+        transaction_no: string;
+        status: string;
+    } | null;
+    allocations?: {
+        amount: string | number;
+        component?: { type: string } | null;
+    }[];
 }
 
 export interface LoanApplicationIndexPageProps extends SharedData {
@@ -107,6 +195,7 @@ export interface LoanApplicationFormPageProps extends SharedData {
 
 export interface LoanApplicationShowPageProps extends SharedData {
     application: LoanApplication;
+    guarantorCustomers: { id: number; customer_no: string; name: string }[];
 }
 
 export interface FinancialProductFormPageProps extends SharedData {

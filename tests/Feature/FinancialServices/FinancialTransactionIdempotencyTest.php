@@ -1,6 +1,7 @@
 <?php
 
 use App\FinancialServices\Application\FinancialTransactionService;
+use App\FinancialServices\Application\LoanScheduleService;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\FinancialTransaction;
@@ -10,6 +11,7 @@ use App\CustomerModule\Models\Customer;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\User;
+use App\TreasuryAndCash\Models\BranchDay;
 use Illuminate\Support\Str;
 
 it('returns the original draft when a transaction is retried with the same idempotency key', function () {
@@ -104,6 +106,14 @@ it('does not duplicate the loan disbursement record when a draft is retried', fu
     $organization = Organization::factory()->create();
     $branch = Branch::factory()->create(['organization_id' => $organization->id]);
     $user = User::factory()->create(['organization_id' => $organization->id, 'branch_id' => $branch->id]);
+    BranchDay::create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+        'business_date' => now()->toDateString(),
+        'status' => BranchDay::STATUS_OPEN,
+        'opened_at' => now(),
+        'opened_by' => $user->id,
+    ]);
     $customer = Customer::factory()->individualMale()->create([
         'organization_id' => $organization->id,
         'branch_id' => $branch->id,
@@ -126,6 +136,8 @@ it('does not duplicate the loan disbursement record when a draft is retried', fu
         'branch_id' => $branch->id,
         'financial_product_id' => null,
         'account_type' => 'CASH',
+        'balance' => 1000,
+        'available_balance' => 1000,
     ]);
     $loan = LoanAccount::create([
         'customer_id' => $customer->id,
@@ -153,4 +165,79 @@ it('does not duplicate the loan disbursement record when a draft is retried', fu
 
     expect($retry->id)->toBe($first->id)
         ->and(LoanDisbursement::query()->where('loan_account_id', $loan->id)->count())->toBe(1);
+
+    $service->post($first, $organization->id, $user->id);
+    $service->reverse($first->fresh(), $organization->id);
+
+    expect($loan->fresh()->disbursed_amount)->toBe('0.0000')
+        ->and($loan->fresh()->status)->toBe('APPROVED')
+        ->and(LoanDisbursement::query()->where('loan_account_id', $loan->id)->value('status'))->toBe('CANCELLED');
+});
+
+it('allocates, posts, and reverses a loan repayment idempotently', function () {
+    $organization = Organization::factory()->create();
+    $branch = Branch::factory()->create(['organization_id' => $organization->id]);
+    $user = User::factory()->create(['organization_id' => $organization->id, 'branch_id' => $branch->id]);
+    BranchDay::create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+        'business_date' => now()->toDateString(),
+        'status' => BranchDay::STATUS_OPEN,
+        'opened_at' => now(),
+        'opened_by' => $user->id,
+    ]);
+    $customer = Customer::factory()->individualMale()->create(['organization_id' => $organization->id, 'branch_id' => $branch->id]);
+    $loanProduct = FinancialProduct::factory()->loan()->create([
+        'organization_id' => $organization->id,
+        'interest_rate' => 0,
+    ]);
+    $loanFinancialAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+        'financial_product_id' => $loanProduct->id,
+        'holder_type' => Customer::class,
+        'holder_id' => $customer->id,
+        'account_type' => 'LOAN',
+        'balance' => 1000,
+        'available_balance' => 1000,
+    ]);
+    $payoutAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+        'account_type' => 'CASH',
+    ]);
+    $loan = LoanAccount::create([
+        'customer_id' => $customer->id,
+        'financial_account_id' => $loanFinancialAccount->id,
+        'financial_product_id' => $loanProduct->id,
+        'loan_no' => 'LOAN-REPAYMENT-001',
+        'principal_amount' => 1000,
+        'disbursed_amount' => 1000,
+        'contractual_rate' => 0,
+        'interest_calculation' => 'SIMPLE',
+        'term_months' => 1,
+        'status' => 'ACTIVE',
+    ]);
+    app(LoanScheduleService::class)->generate($loan, ['frequency' => 'MONTHLY', 'start_date' => now()->subMonth()->toDateString()]);
+    $service = app(FinancialTransactionService::class);
+    $data = [
+        'loan_account_id' => $loan->id,
+        'payout_account_id' => $payoutAccount->id,
+        'amount' => 1000,
+        'repayment_date' => now()->toDateString(),
+        'idempotency_key' => (string) Str::uuid(),
+    ];
+
+    $first = $service->createLoanRepayment($data, $organization->id, $user->id);
+    $retry = $service->createLoanRepayment($data, $organization->id, $user->id);
+    $service->post($first, $organization->id, $user->id);
+
+    expect($retry->id)->toBe($first->id)
+        ->and($loan->schedules()->first()->fresh()->status)->toBe('PAID')
+        ->and($loan->repayments()->first()->fresh()->status)->toBe('POSTED');
+
+    $service->reverse($first->fresh(), $organization->id);
+
+    expect($loan->schedules()->first()->fresh()->status)->toBe('PENDING')
+        ->and($loan->repayments()->first()->fresh()->status)->toBe('REVERSED');
 });

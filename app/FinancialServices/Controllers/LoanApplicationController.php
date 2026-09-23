@@ -4,12 +4,17 @@ namespace App\FinancialServices\Controllers;
 
 use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Application\LoanApplicationService;
+use App\FinancialServices\Application\LoanScheduleService;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\LoanApplication;
 use App\FinancialServices\Models\LoanCollateral;
+use App\FinancialServices\Models\LoanGuarantor;
+use App\FinancialServices\Models\LoanArrear;
 use App\FinancialServices\Requests\DecideLoanApplicationRequest;
 use App\FinancialServices\Requests\StoreLoanApplicationRequest;
 use App\FinancialServices\Requests\StoreLoanCollateralRequest;
+use App\FinancialServices\Requests\StoreLoanGuarantorRequest;
+use App\FinancialServices\Requests\StoreLoanProtectionRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -17,11 +22,11 @@ use Inertia\Response;
 
 class LoanApplicationController extends Controller
 {
-    public function __construct(private readonly LoanApplicationService $service)
+    public function __construct(private readonly LoanApplicationService $service, private readonly LoanScheduleService $scheduleService)
     {
         $this->middleware('permission:financial.loan-applications.view')->only(['index', 'show']);
         $this->middleware('permission:financial.loan-applications.create')->only(['create', 'store', 'submit']);
-        $this->middleware('permission:financial.loan-applications.manage')->only(['review', 'approve', 'reject', 'createLoanAccount', 'storeCollateral', 'verifyCollateral']);
+        $this->middleware('permission:financial.loan-applications.manage')->only(['review', 'approve', 'reject', 'createLoanAccount', 'generateSchedule', 'assessArrears', 'resolveArrear', 'storeCollateral', 'verifyCollateral', 'releaseCollateral', 'storeGuarantor', 'decideGuarantor', 'storeProtection', 'activateProtection', 'cancelProtection']);
     }
 
     public function index(Request $request): Response
@@ -61,7 +66,12 @@ class LoanApplicationController extends Controller
         $this->authorizeOrganization($request, $loanApplication);
 
         return Inertia::render('financial-services/loan-applications/show', [
-            'application' => $loanApplication->load(['customer', 'product', 'loanAccount', 'collaterals']),
+            'application' => $loanApplication->load(['customer', 'product', 'loanAccount.protectionPolicy', 'loanAccount.disbursements.financialTransaction', 'loanAccount.repayments.financialTransaction', 'loanAccount.repayments.allocations.component', 'loanAccount.schedules.components', 'loanAccount.arrears', 'collaterals', 'guarantors.customer']),
+            'guarantorCustomers' => Customer::query()
+                ->where('organization_id', $this->organizationId($request))
+                ->where('id', '!=', $loanApplication->customer_id)
+                ->orderBy('name')
+                ->get(['id', 'customer_no', 'name']),
         ]);
     }
 
@@ -105,6 +115,38 @@ class LoanApplicationController extends Controller
         return back()->with('success', "Loan account {$loanAccount->loan_no} created successfully.");
     }
 
+    public function generateSchedule(Request $request, LoanApplication $loanApplication)
+    {
+        $this->authorizeOrganization($request, $loanApplication);
+        abort_unless($loanApplication->loanAccount, 422, 'Create the loan account before generating a schedule.');
+        $this->scheduleService->generate($loanApplication->loanAccount, $request->only(['frequency', 'term_months', 'start_date']));
+
+        return back()->with('success', 'Loan repayment schedule generated successfully.');
+    }
+
+    public function assessArrears(Request $request, LoanApplication $loanApplication)
+    {
+        $this->authorizeOrganization($request, $loanApplication);
+        abort_unless($loanApplication->loanAccount, 422, 'Create the loan account before assessing arrears.');
+        $this->scheduleService->assessArrears($loanApplication->loanAccount, $request->string('as_of_date')->value() ?: null);
+
+        return back()->with('success', 'Loan arrears assessed successfully.');
+    }
+
+    public function resolveArrear(Request $request, LoanApplication $loanApplication, LoanArrear $arrear)
+    {
+        $this->authorizeOrganization($request, $loanApplication);
+        abort_unless($arrear->loanAccount?->application_id === $loanApplication->id, 404);
+        $this->scheduleService->resolveArrear(
+            $arrear,
+            $request->string('resolution')->upper()->value(),
+            $request->user()->id,
+            $request->string('note')->value() ?: null,
+        );
+
+        return back()->with('success', 'Loan arrear resolution recorded.');
+    }
+
     public function storeCollateral(StoreLoanCollateralRequest $request, LoanApplication $loanApplication)
     {
         $this->authorizeOrganization($request, $loanApplication);
@@ -120,6 +162,54 @@ class LoanApplicationController extends Controller
         $this->service->verifyCollateral($loanApplication, $collateral, $approved, $request->string('notes')->value() ?: null);
 
         return back()->with('success', $approved ? 'Collateral verified.' : 'Collateral rejected.');
+    }
+
+    public function releaseCollateral(Request $request, LoanApplication $loanApplication, LoanCollateral $collateral)
+    {
+        $this->authorizeOrganization($request, $loanApplication);
+        $this->service->releaseCollateral($loanApplication, $collateral, $request->string('notes')->value() ?: null);
+
+        return back()->with('success', 'Collateral released.');
+    }
+
+    public function storeGuarantor(StoreLoanGuarantorRequest $request, LoanApplication $loanApplication)
+    {
+        $this->authorizeOrganization($request, $loanApplication);
+        $this->service->addGuarantor($loanApplication, $request->integer('customer_id'), $request->string('notes')->value() ?: null);
+
+        return back()->with('success', 'Guarantor invitation created.');
+    }
+
+    public function decideGuarantor(Request $request, LoanApplication $loanApplication, LoanGuarantor $guarantor)
+    {
+        $this->authorizeOrganization($request, $loanApplication);
+        $this->service->decideGuarantor($loanApplication, $guarantor, $request->boolean('accepted'), $request->string('notes')->value() ?: null);
+
+        return back()->with('success', 'Guarantor decision recorded.');
+    }
+
+    public function storeProtection(StoreLoanProtectionRequest $request, LoanApplication $loanApplication)
+    {
+        $this->authorizeOrganization($request, $loanApplication);
+        $this->service->configureProtection($loanApplication, $request->validated());
+
+        return back()->with('success', 'Protection policy saved.');
+    }
+
+    public function activateProtection(Request $request, LoanApplication $loanApplication)
+    {
+        $this->authorizeOrganization($request, $loanApplication);
+        $this->service->setProtectionStatus($loanApplication, 'ACTIVE');
+
+        return back()->with('success', 'Protection policy activated.');
+    }
+
+    public function cancelProtection(Request $request, LoanApplication $loanApplication)
+    {
+        $this->authorizeOrganization($request, $loanApplication);
+        $this->service->setProtectionStatus($loanApplication, 'CANCELLED');
+
+        return back()->with('success', 'Protection policy cancelled.');
     }
 
     private function organizationId(Request $request): int
