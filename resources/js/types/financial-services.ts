@@ -79,6 +79,17 @@ export interface LoanApplication {
     customer?: { name?: string; customer_no?: string };
     product?: { code?: string; name?: string };
     loan_account?: { id: number; loan_no: string; status: string } | null;
+    collaterals?: LoanCollateral[];
+}
+
+export interface LoanCollateral {
+    id: number;
+    type: string;
+    description: string;
+    assessed_value?: string | number | null;
+    secured_value?: string | number | null;
+    status: string;
+    notes?: string | null;
 }
 
 export interface LoanApplicationIndexPageProps extends SharedData {

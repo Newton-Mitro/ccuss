@@ -116,3 +116,33 @@ it('creates one linked financial and loan account after approval', function () {
     expect(fn() => $service->createLoanAccount($application->fresh()))
         ->toThrow(RuntimeException::class, 'already has a loan account');
 });
+
+it('registers and verifies loan collateral for the owning application', function () {
+    $fixture = loanApplicationFixture();
+    $service = app(LoanApplicationService::class);
+    $application = $service->create([
+        'customer_id' => $fixture['customer']->id,
+        'financial_product_id' => $fixture['product']->id,
+        'requested_amount' => 5000,
+        'requested_term_months' => 12,
+    ], $fixture['organization']->id);
+    $collateral = $service->addCollateral($application, [
+        'type' => 'PROPERTY',
+        'description' => 'Residential property',
+        'assessed_value' => 10000,
+        'secured_value' => 7500,
+    ]);
+
+    expect($collateral->status)->toBe('PENDING');
+    expect($service->verifyCollateral($application, $collateral, true)->status)->toBe('VERIFIED');
+
+    $otherApplication = $service->create([
+        'customer_id' => $fixture['customer']->id,
+        'financial_product_id' => $fixture['product']->id,
+        'requested_amount' => 1000,
+        'requested_term_months' => 6,
+    ], $fixture['organization']->id);
+
+    expect(fn() => $service->verifyCollateral($otherApplication, $collateral, false))
+        ->toThrow(RuntimeException::class, 'does not belong');
+});

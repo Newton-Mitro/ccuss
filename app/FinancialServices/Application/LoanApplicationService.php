@@ -6,6 +6,7 @@ use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\LoanApplication;
 use App\FinancialServices\Models\LoanAccount;
+use App\FinancialServices\Models\LoanCollateral;
 use App\CustomerModule\Models\Customer;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
@@ -132,6 +133,33 @@ class LoanApplicationService
                 'status' => 'APPROVED',
             ]);
         });
+    }
+
+    public function addCollateral(LoanApplication $application, array $data): LoanCollateral
+    {
+        if (in_array($application->status, ['REJECTED', 'CANCELLED'], true)) {
+            throw new RuntimeException('Collateral cannot be added to a closed application.');
+        }
+
+        return $application->collaterals()->create([
+            ...$data,
+            'status' => 'PENDING',
+        ]);
+    }
+
+    public function verifyCollateral(LoanApplication $application, LoanCollateral $collateral, bool $approved, ?string $notes = null): LoanCollateral
+    {
+        if ($collateral->loan_application_id !== $application->id) {
+            throw new RuntimeException('The collateral does not belong to this application.');
+        }
+
+        $collateral->update([
+            'status' => $approved ? 'VERIFIED' : 'REJECTED',
+            'verified_at' => now()->toDateString(),
+            'notes' => $notes ?? $collateral->notes,
+        ]);
+
+        return $collateral->refresh();
     }
 
     public function queryForOrganization(int $organizationId): Builder

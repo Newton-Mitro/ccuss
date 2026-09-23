@@ -6,8 +6,10 @@ use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Application\LoanApplicationService;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\LoanApplication;
+use App\FinancialServices\Models\LoanCollateral;
 use App\FinancialServices\Requests\DecideLoanApplicationRequest;
 use App\FinancialServices\Requests\StoreLoanApplicationRequest;
+use App\FinancialServices\Requests\StoreLoanCollateralRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -19,7 +21,7 @@ class LoanApplicationController extends Controller
     {
         $this->middleware('permission:financial.loan-applications.view')->only(['index', 'show']);
         $this->middleware('permission:financial.loan-applications.create')->only(['create', 'store', 'submit']);
-        $this->middleware('permission:financial.loan-applications.manage')->only(['review', 'approve', 'reject', 'createLoanAccount']);
+        $this->middleware('permission:financial.loan-applications.manage')->only(['review', 'approve', 'reject', 'createLoanAccount', 'storeCollateral', 'verifyCollateral']);
     }
 
     public function index(Request $request): Response
@@ -59,7 +61,7 @@ class LoanApplicationController extends Controller
         $this->authorizeOrganization($request, $loanApplication);
 
         return Inertia::render('financial-services/loan-applications/show', [
-            'application' => $loanApplication->load(['customer', 'product', 'loanAccount']),
+            'application' => $loanApplication->load(['customer', 'product', 'loanAccount', 'collaterals']),
         ]);
     }
 
@@ -101,6 +103,23 @@ class LoanApplicationController extends Controller
         $loanAccount = $this->service->createLoanAccount($loanApplication);
 
         return back()->with('success', "Loan account {$loanAccount->loan_no} created successfully.");
+    }
+
+    public function storeCollateral(StoreLoanCollateralRequest $request, LoanApplication $loanApplication)
+    {
+        $this->authorizeOrganization($request, $loanApplication);
+        $this->service->addCollateral($loanApplication, $request->validated());
+
+        return back()->with('success', 'Loan collateral added successfully.');
+    }
+
+    public function verifyCollateral(Request $request, LoanApplication $loanApplication, LoanCollateral $collateral)
+    {
+        $this->authorizeOrganization($request, $loanApplication);
+        $approved = $request->boolean('approved');
+        $this->service->verifyCollateral($loanApplication, $collateral, $approved, $request->string('notes')->value() ?: null);
+
+        return back()->with('success', $approved ? 'Collateral verified.' : 'Collateral rejected.');
     }
 
     private function organizationId(Request $request): int
