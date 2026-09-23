@@ -23,6 +23,28 @@ class FinancialTransactionService
             ->where('organization_id', $organizationId)
             ->findOrFail($data['financial_account_id']);
 
+        if (!empty($data['idempotency_key'])) {
+            $existing = FinancialTransaction::query()
+                ->where('organization_id', $organizationId)
+                ->where('idempotency_key', $data['idempotency_key'])
+                ->with('entries')
+                ->first();
+
+            if ($existing) {
+                $entry = $existing->entries->first();
+                if (
+                    !$entry
+                    || $entry->financial_account_id !== $account->id
+                    || $existing->transaction_type !== $data['transaction_type']
+                    || (float) $existing->amount !== (float) $data['amount']
+                ) {
+                    throw new RuntimeException('The idempotency key is already used for a different transaction.');
+                }
+
+                return $existing;
+            }
+        }
+
         if (!in_array($account->status, ['PENDING', 'ACTIVE'], true)) {
             throw new RuntimeException('Transactions cannot be created for this account status.');
         }
@@ -37,6 +59,7 @@ class FinancialTransactionService
                 'organization_id' => $organizationId,
                 'branch_id' => $account->branch_id,
                 'transaction_no' => $this->nextNumber($organizationId),
+                'idempotency_key' => $data['idempotency_key'] ?? null,
                 'transaction_type' => $data['transaction_type'],
                 'transaction_date' => $data['transaction_date'],
                 'amount' => $data['amount'],

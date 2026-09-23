@@ -24,6 +24,7 @@ class FinancialTransaction extends Model
         'organization_id',
         'branch_id',
         'transaction_no',
+        'idempotency_key',
         'transaction_type',
         'transaction_date',
         'amount',

@@ -14,6 +14,7 @@ export default function FinancialTransactionForm() {
     const { accounts, transactionType } =
         usePage<FinancialTransactionFormPageProps>().props;
     const { data, setData, post, processing, errors } = useForm({
+        idempotency_key: crypto.randomUUID(),
         financial_account_id: '',
         transaction_type: transactionType ?? 'DEPOSIT',
         transaction_date: new Date().toISOString().slice(0, 10),

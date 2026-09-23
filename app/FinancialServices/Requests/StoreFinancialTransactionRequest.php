@@ -23,6 +23,7 @@ class StoreFinancialTransactionRequest extends FormRequest
                 Rule::exists('financial_accounts', 'id')->where(fn($query) => $query->where('organization_id', $organizationId)),
             ],
             'transaction_type' => ['required', Rule::in(['DEPOSIT', 'WITHDRAWAL'])],
+            'idempotency_key' => ['nullable', 'uuid'],
             'transaction_date' => ['required', 'date'],
             'amount' => ['required', 'numeric', 'gt:0'],
             'currency' => ['nullable', 'string', 'max:10'],
