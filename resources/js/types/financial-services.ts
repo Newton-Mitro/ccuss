@@ -32,6 +32,23 @@ export interface FinancialProduct {
     settings?: Record<string, unknown> | null;
     is_system?: boolean;
     status: boolean;
+    account_mappings?: FinancialProductAccountMapping[];
+}
+
+export interface FinancialProductAccountMapping {
+    id: number;
+    transaction_type: string;
+    debit_account_id?: number | null;
+    credit_account_id?: number | null;
+    status: boolean;
+    debit_account?: { code?: string; name?: string } | null;
+    credit_account?: { code?: string; name?: string } | null;
+}
+
+export interface LedgerAccountOption {
+    id: number;
+    code: string;
+    name: string;
 }
 
 export interface FinancialProductsPageProps extends SharedData {
@@ -45,6 +62,7 @@ export interface FinancialProductsPageProps extends SharedData {
 
 export interface FinancialProductPageProps extends SharedData {
     product: FinancialProduct;
+    ledgerAccounts: LedgerAccountOption[];
 }
 
 export interface FinancialProductFormPageProps extends SharedData {
@@ -128,6 +146,86 @@ export interface FinancialAccountDetail {
     metadata?: Record<string, unknown> | null;
     holder?: { name?: string } | null;
     product?: { name?: string } | null;
+    holders?: FinancialAccountHolder[];
+    nominees?: DepositNominee[];
+    share_account?: ShareAccount | null;
+    fixed_deposit?: FixedDeposit | null;
+    recurring_deposit?: RecurringDeposit | null;
+    loan_account?: LoanAccount | null;
+    transactions?: FinancialTransaction[];
+}
+
+export interface FinancialAccountHolder {
+    id: number;
+    name?: string;
+    customer_no?: string;
+    type?: string;
+    pivot?: {
+        role?: 'PRIMARY' | 'JOINT';
+        ownership_percent?: string | number;
+        guardian_customer_id?: number | null;
+    };
+}
+
+export interface DepositNominee {
+    id: number;
+    name: string;
+    relationship: string;
+    phone?: string | null;
+    identification_type?: string | null;
+    identification_number?: string | null;
+    share_percent?: string | number;
+    is_primary?: boolean;
+}
+
+export interface ShareAccount {
+    id: number;
+    customer_id: number;
+    member_since?: string | null;
+    membership_no?: string | null;
+    membership_status?: 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'CLOSED';
+}
+
+export interface FixedDeposit {
+    id: number;
+    principal_amount?: string | number;
+    contractual_rate?: string | number;
+    term_months?: number;
+    started_at?: string | null;
+    maturity_date?: string | null;
+    maturity_amount?: string | number | null;
+    maturity_instruction?: string;
+    status?: string;
+}
+
+export interface RecurringDeposit {
+    id: number;
+    installment_amount?: string | number;
+    installment_frequency?: string;
+    total_installments?: number;
+    paid_installments?: number;
+    started_at?: string | null;
+    maturity_date?: string | null;
+    status?: string;
+    installments?: Array<{
+        id: number;
+        installment_no: number;
+        due_date: string;
+        status: string;
+    }>;
+}
+
+export interface LoanAccount {
+    id: number;
+    loan_no?: string;
+    principal_amount?: string | number;
+    disbursed_amount?: string | number;
+    contractual_rate?: string | number;
+    term_months?: number;
+    maturity_date?: string | null;
+    status?: string;
+    schedules?: Array<{ id: number; due_date: string; status: string }>;
+    arrears?: Array<{ id: number; amount?: string | number; status?: string }>;
 }
 
 export interface FinancialAccountShowPageProps extends SharedData {

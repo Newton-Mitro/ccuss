@@ -15,6 +15,7 @@ final class FinancialServicesPermissions
             new PermissionDefinition('Financial Products', 'Create Financial Products', 'financial.products.create', 'create', 'Create financial products'),
             new PermissionDefinition('Financial Products', 'Update Financial Products', 'financial.products.update', 'update', 'Update financial products'),
             new PermissionDefinition('Financial Products', 'Delete Financial Products', 'financial.products.delete', 'delete', 'Delete financial products'),
+            new PermissionDefinition('Financial Products', 'Manage Product Account Mappings', 'financial.products.mappings.manage', 'manage', 'Manage product-to-ledger account mappings'),
             new PermissionDefinition('Financial Policies', 'View Product Policies', 'financial.policies.view', 'view', 'View product policies'),
             new PermissionDefinition('Financial Policies', 'Manage Product Policies', 'financial.policies.manage', 'manage', 'Manage product policies'),
             new PermissionDefinition('Financial Accounts', 'View Financial Accounts', 'financial.accounts.view', 'view', 'View financial accounts'),

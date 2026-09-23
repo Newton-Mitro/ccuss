@@ -4,6 +4,9 @@ namespace App\FinancialServices\Controllers;
 
 use App\FinancialServices\Application\FinancialProductService;
 use App\FinancialServices\Models\FinancialProduct;
+use App\FinancialServices\Models\FinancialProductAccountMapping;
+use App\GeneralAccounting\Models\LedgerAccount;
+use App\FinancialServices\Requests\StoreFinancialProductAccountMappingRequest;
 use App\FinancialServices\Requests\StoreFinancialProductRequest;
 use App\FinancialServices\Requests\UpdateFinancialProductRequest;
 use App\Http\Controllers\Controller;
@@ -19,6 +22,7 @@ class FinancialProductController extends Controller
         $this->middleware('permission:financial.products.create')->only(['create', 'store']);
         $this->middleware('permission:financial.products.update')->only(['edit', 'update']);
         $this->middleware('permission:financial.products.delete')->only('destroy');
+        $this->middleware('permission:financial.products.mappings.manage')->only(['storeMapping', 'updateMapping', 'destroyMapping']);
     }
 
     public function index(Request $request): Response
@@ -61,8 +65,39 @@ class FinancialProductController extends Controller
         $this->authorizeOrganization($request, $financialProduct);
 
         return Inertia::render('financial-services/products/show', [
-            'product' => $financialProduct->load(['policy', 'accountMappings']),
+            'product' => $financialProduct->load(['policy', 'accountMappings.debitAccount', 'accountMappings.creditAccount']),
+            'ledgerAccounts' => LedgerAccount::query()
+                ->where('organization_id', $this->organizationId($request))
+                ->where('status', true)
+                ->orderBy('code')
+                ->get(['id', 'code', 'name']),
         ]);
+    }
+
+    public function storeMapping(StoreFinancialProductAccountMappingRequest $request, FinancialProduct $financialProduct)
+    {
+        $this->authorizeOrganization($request, $financialProduct);
+        $financialProduct->accountMappings()->create($request->validated());
+
+        return back()->with('success', 'Product account mapping created successfully.');
+    }
+
+    public function updateMapping(StoreFinancialProductAccountMappingRequest $request, FinancialProduct $financialProduct, FinancialProductAccountMapping $mapping)
+    {
+        $this->authorizeOrganization($request, $financialProduct);
+        abort_unless($mapping->financial_product_id === $financialProduct->id, 404);
+        $mapping->update($request->validated());
+
+        return back()->with('success', 'Product account mapping updated successfully.');
+    }
+
+    public function destroyMapping(Request $request, FinancialProduct $financialProduct, FinancialProductAccountMapping $mapping)
+    {
+        $this->authorizeOrganization($request, $financialProduct);
+        abort_unless($mapping->financial_product_id === $financialProduct->id, 404);
+        $mapping->delete();
+
+        return back()->with('success', 'Product account mapping deleted successfully.');
     }
 
     public function edit(Request $request, FinancialProduct $financialProduct): Response

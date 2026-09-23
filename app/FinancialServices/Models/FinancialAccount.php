@@ -5,6 +5,7 @@ namespace App\FinancialServices\Models;
 use App\CustomerModule\Models\Customer;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
+use App\FinancialServices\Models\DepositNominee;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -100,6 +101,31 @@ class FinancialAccount extends Model
         return $this->belongsToMany(Customer::class, 'deposit_account_holders', 'financial_account_id')
             ->withPivot(['role', 'ownership_percent', 'guardian_customer_id'])
             ->withTimestamps();
+    }
+
+    public function nominees(): HasMany
+    {
+        return $this->hasMany(DepositNominee::class);
+    }
+
+    public function shareAccount(): HasOne
+    {
+        return $this->hasOne(ShareAccount::class);
+    }
+
+    public function fixedDeposit(): HasOne
+    {
+        return $this->hasOne(FixedDeposit::class);
+    }
+
+    public function recurringDeposit(): HasOne
+    {
+        return $this->hasOne(RecurringDeposit::class);
+    }
+
+    public function loanAccount(): HasOne
+    {
+        return $this->hasOne(LoanAccount::class);
     }
 
     public function canHaveJointHolders(): bool

@@ -85,7 +85,18 @@ class FinancialAccountController extends Controller
         $this->authorizeOrganization($request, $financialAccount);
 
         return Inertia::render('financial-services/accounts/show', [
-            'account' => $financialAccount->load(['product', 'holder', 'transactions']),
+            'account' => $financialAccount->load([
+                'product',
+                'holder',
+                'holders',
+                'nominees',
+                'shareAccount',
+                'fixedDeposit',
+                'recurringDeposit.installments',
+                'loanAccount.schedules.components',
+                'loanAccount.arrears',
+                'transactions',
+            ]),
         ]);
     }
 

@@ -36,7 +36,7 @@ class FinancialAccountService
         return DB::transaction(function () use ($data, $product, $jointHolderIds, $guardianCustomerId, $organizationId): FinancialAccount {
             $account = FinancialAccount::create($data);
 
-            if ($product && in_array($product->category, ['SAVINGS', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT'], true)) {
+            if ($product && in_array($product->category, ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT'], true)) {
                 $primary = Customer::query()
                     ->where('organization_id', $organizationId)
                     ->findOrFail($account->holder_id);

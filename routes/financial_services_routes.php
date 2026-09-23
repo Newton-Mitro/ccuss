@@ -22,6 +22,12 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
         ->name('financial-products.create');
     Route::get('/financial-products/{financial_product}', [FinancialProductController::class, 'show'])
         ->name('financial-products.show');
+    Route::post('/financial-products/{financial_product}/account-mappings', [FinancialProductController::class, 'storeMapping'])
+        ->name('financial-products.account-mappings.store');
+    Route::put('/financial-products/{financial_product}/account-mappings/{mapping}', [FinancialProductController::class, 'updateMapping'])
+        ->name('financial-products.account-mappings.update');
+    Route::delete('/financial-products/{financial_product}/account-mappings/{mapping}', [FinancialProductController::class, 'destroyMapping'])
+        ->name('financial-products.account-mappings.destroy');
     Route::get('/financial-product-policies', [FinancialProductPolicyController::class, 'index'])
         ->name('financial-product-policies.index');
     Route::get('/financial-products/{financial_product}/policy/edit', [FinancialProductPolicyController::class, 'edit'])

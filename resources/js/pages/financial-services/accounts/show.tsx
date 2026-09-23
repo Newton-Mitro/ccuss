@@ -93,6 +93,234 @@ export default function FinancialAccountShow() {
                         </p>
                     </div>
                 </div>
+                <div className="grid gap-4 lg:grid-cols-2">
+                    <section className="rounded-lg border bg-card p-4">
+                        <h2 className="text-sm font-semibold">Holders</h2>
+                        <div className="mt-3 divide-y">
+                            {(account.holders ?? []).map((holder) => (
+                                <div
+                                    key={holder.id}
+                                    className="flex items-center justify-between py-2 text-sm"
+                                >
+                                    <div>
+                                        <p className="font-medium">
+                                            {holder.name ?? holder.customer_no}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {holder.pivot?.role ?? 'HOLDER'}
+                                        </p>
+                                    </div>
+                                    <span className="text-muted-foreground tabular-nums">
+                                        {holder.pivot?.ownership_percent ?? 0}%
+                                    </span>
+                                </div>
+                            ))}
+                            {!account.holders?.length && (
+                                <p className="py-2 text-sm text-muted-foreground">
+                                    No additional holder records.
+                                </p>
+                            )}
+                        </div>
+                    </section>
+
+                    <section className="rounded-lg border bg-card p-4">
+                        <h2 className="text-sm font-semibold">Nominees</h2>
+                        <div className="mt-3 divide-y">
+                            {(account.nominees ?? []).map((nominee) => (
+                                <div
+                                    key={nominee.id}
+                                    className="flex items-center justify-between py-2 text-sm"
+                                >
+                                    <div>
+                                        <p className="font-medium">
+                                            {nominee.name}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {nominee.relationship}
+                                            {nominee.is_primary
+                                                ? ' · Primary'
+                                                : ''}
+                                        </p>
+                                    </div>
+                                    <span className="text-muted-foreground tabular-nums">
+                                        {nominee.share_percent ?? 0}%
+                                    </span>
+                                </div>
+                            ))}
+                            {!account.nominees?.length && (
+                                <p className="py-2 text-sm text-muted-foreground">
+                                    No nominee records.
+                                </p>
+                            )}
+                        </div>
+                    </section>
+                </div>
+                {account.share_account && (
+                    <section className="rounded-lg border bg-card p-4">
+                        <h2 className="text-sm font-semibold">Membership</h2>
+                        <div className="mt-3 grid gap-3 text-sm sm:grid-cols-3">
+                            <div>
+                                <p className="text-xs text-muted-foreground">
+                                    Membership number
+                                </p>
+                                <p className="font-medium">
+                                    {account.share_account.membership_no ??
+                                        'Not assigned'}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground">
+                                    Status
+                                </p>
+                                <p className="font-medium">
+                                    {account.share_account.membership_status ??
+                                        'PENDING'}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground">
+                                    Member since
+                                </p>
+                                <p className="font-medium">
+                                    {account.share_account.member_since ??
+                                        'Not set'}
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+                )}
+                {account.fixed_deposit && (
+                    <section className="rounded-lg border bg-card p-4">
+                        <h2 className="text-sm font-semibold">Fixed deposit</h2>
+                        <div className="mt-3 grid gap-3 text-sm sm:grid-cols-4">
+                            <div>
+                                <p className="text-xs text-muted-foreground">
+                                    Principal
+                                </p>
+                                <p className="font-medium">
+                                    {account.fixed_deposit.principal_amount ??
+                                        0}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground">
+                                    Rate
+                                </p>
+                                <p className="font-medium">
+                                    {account.fixed_deposit.contractual_rate ??
+                                        0}
+                                    %
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground">
+                                    Maturity
+                                </p>
+                                <p className="font-medium">
+                                    {account.fixed_deposit.maturity_date ??
+                                        'Not set'}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground">
+                                    Status
+                                </p>
+                                <p className="font-medium">
+                                    {account.fixed_deposit.status ?? 'PENDING'}
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+                )}
+                {account.recurring_deposit && (
+                    <section className="rounded-lg border bg-card p-4">
+                        <h2 className="text-sm font-semibold">
+                            Recurring deposit
+                        </h2>
+                        <div className="mt-3 grid gap-3 text-sm sm:grid-cols-4">
+                            <div>
+                                <p className="text-xs text-muted-foreground">
+                                    Installment
+                                </p>
+                                <p className="font-medium">
+                                    {account.recurring_deposit
+                                        .installment_amount ?? 0}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground">
+                                    Frequency
+                                </p>
+                                <p className="font-medium">
+                                    {account.recurring_deposit
+                                        .installment_frequency ?? 'Not set'}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground">
+                                    Progress
+                                </p>
+                                <p className="font-medium">
+                                    {account.recurring_deposit
+                                        .paid_installments ?? 0}{' '}
+                                    /{' '}
+                                    {account.recurring_deposit
+                                        .total_installments ?? 0}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground">
+                                    Status
+                                </p>
+                                <p className="font-medium">
+                                    {account.recurring_deposit.status ??
+                                        'PENDING'}
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+                )}
+                {account.loan_account && (
+                    <section className="rounded-lg border bg-card p-4">
+                        <h2 className="text-sm font-semibold">Loan</h2>
+                        <div className="mt-3 grid gap-3 text-sm sm:grid-cols-4">
+                            <div>
+                                <p className="text-xs text-muted-foreground">
+                                    Loan number
+                                </p>
+                                <p className="font-medium">
+                                    {account.loan_account.loan_no ??
+                                        'Not assigned'}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground">
+                                    Principal
+                                </p>
+                                <p className="font-medium">
+                                    {account.loan_account.principal_amount ?? 0}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground">
+                                    Maturity
+                                </p>
+                                <p className="font-medium">
+                                    {account.loan_account.maturity_date ??
+                                        'Not set'}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground">
+                                    Status
+                                </p>
+                                <p className="font-medium">
+                                    {account.loan_account.status ?? 'PENDING'}
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+                )}
             </div>
         </CustomAuthLayout>
     );

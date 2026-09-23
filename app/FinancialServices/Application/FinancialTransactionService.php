@@ -2,6 +2,7 @@
 
 namespace App\FinancialServices\Application;
 
+use App\FinancialServices\Application\FinancialProductPolicyService;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialTransaction;
 use App\FinancialServices\Models\LoanAccount;
@@ -12,6 +13,10 @@ use RuntimeException;
 
 class FinancialTransactionService
 {
+    public function __construct(private readonly FinancialProductPolicyService $policyService)
+    {
+    }
+
     public function create(array $data, int $organizationId, int $userId): FinancialTransaction
     {
         $account = FinancialAccount::query()
@@ -20,6 +25,11 @@ class FinancialTransactionService
 
         if (!in_array($account->status, ['PENDING', 'ACTIVE'], true)) {
             throw new RuntimeException('Transactions cannot be created for this account status.');
+        }
+
+        if ($data['transaction_type'] === 'DEPOSIT') {
+            $account->loadMissing('product');
+            $this->policyService->validateDeposit($account, (float) $data['amount']);
         }
 
         return DB::transaction(function () use ($data, $account, $organizationId, $userId) {
