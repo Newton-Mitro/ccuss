@@ -51,6 +51,9 @@ return new class extends Migration {
             $table->decimal('interest_accrued', 20, 4)->default(0);
             $table->date('opened_at')->nullable();
             $table->date('closed_at')->nullable();
+            $table->date('last_operated_at')->nullable();
+            $table->date('membership_eligible_at')->nullable();
+            $table->text('closure_reason')->nullable();
             $table->json('metadata')->nullable();
             $table->timestamps();
             $table->unique(['organization_id', 'account_no']);

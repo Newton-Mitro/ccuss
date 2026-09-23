@@ -9,7 +9,7 @@ return new class extends Migration {
     {
         Schema::create('fixed_deposits', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('deposit_account_id')->unique()->constrained('deposit_accounts')->cascadeOnDelete();
+            $table->foreignId('financial_account_id')->unique()->constrained('financial_accounts')->cascadeOnDelete();
             $table->decimal('principal_amount', 20, 4);
             $table->decimal('contractual_rate', 12, 6);
             $table->unsignedInteger('term_months');
@@ -26,7 +26,7 @@ return new class extends Migration {
 
         Schema::create('recurring_deposits', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('deposit_account_id')->unique()->constrained('deposit_accounts')->cascadeOnDelete();
+            $table->foreignId('financial_account_id')->unique()->constrained('financial_accounts')->cascadeOnDelete();
             $table->decimal('installment_amount', 20, 4);
             $table->enum('installment_frequency', ['WEEKLY', 'MONTHLY', 'QUARTERLY'])->default('MONTHLY');
             $table->unsignedInteger('total_installments');

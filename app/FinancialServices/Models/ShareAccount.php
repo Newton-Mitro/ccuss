@@ -13,7 +13,7 @@ class ShareAccount extends Model
     use HasFactory;
 
     protected $fillable = [
-        'deposit_account_id',
+        'financial_account_id',
         'customer_id',
         'member_since',
         'membership_no',
@@ -24,9 +24,9 @@ class ShareAccount extends Model
         'member_since' => 'date',
     ];
 
-    public function depositAccount(): BelongsTo
+    public function financialAccount(): BelongsTo
     {
-        return $this->belongsTo(DepositAccount::class);
+        return $this->belongsTo(FinancialAccount::class);
     }
 
     public function customer(): BelongsTo

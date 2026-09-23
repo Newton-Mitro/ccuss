@@ -10,7 +10,6 @@ use App\CustomerModule\Models\CustomerFamilyRelation;
 use App\CustomerModule\Models\CustomerIntroducer;
 use App\CustomerModule\Models\KycDocument;
 use App\CustomerModule\Models\KycProfile;
-use App\FinancialServices\Models\DepositAccount;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
 use App\SystemAdministration\Models\Branch;
@@ -413,13 +412,8 @@ test('deposit accounts support joint, minor, and organization holders', function
         'account_type' => 'SAVINGS',
     ]);
 
-    $account = DepositAccount::create([
-        'customer_id' => $primary->id,
-        'financial_account_id' => $financialAccount->id,
-        'financial_product_id' => $product->id,
-        'account_kind' => 'SAVINGS',
-        'status' => 'ACTIVE',
-    ]);
+    $account = $financialAccount;
+    $account->update(['holder_type' => Customer::class, 'holder_id' => $primary->id]);
 
     $account->addHolder($primary, 'PRIMARY', null, 50);
     $account->addHolder($joint, 'JOINT', null, 50);
@@ -427,27 +421,25 @@ test('deposit accounts support joint, minor, and organization holders', function
     expect($account->canHaveJointHolders())->toBeTrue()
         ->and($account->holders()->count())->toBe(2);
 
-    $minorAccount = $account->replicate();
-    $minorAccount->customer_id = $minor->id;
-    $minorAccount->financial_account_id = FinancialAccount::factory()->active()->create([
+    $minorAccount = FinancialAccount::factory()->active()->create([
         'organization_id' => $primary->organization_id,
         'financial_product_id' => $product->id,
+        'holder_type' => Customer::class,
+        'holder_id' => $minor->id,
         'account_type' => 'SAVINGS',
-    ])->id;
-    $minorAccount->save();
+    ]);
     $minorAccount->addHolder($minor, 'PRIMARY', $guardian);
 
     expect($minorAccount->fresh()->isMinorAccount())->toBeTrue()
         ->and($minorAccount->requiresGuardian())->toBeTrue();
 
-    $organizationAccount = $account->replicate();
-    $organizationAccount->customer_id = $organization->id;
-    $organizationAccount->financial_account_id = FinancialAccount::factory()->active()->create([
+    $organizationAccount = FinancialAccount::factory()->active()->create([
         'organization_id' => $primary->organization_id,
         'financial_product_id' => $product->id,
+        'holder_type' => Customer::class,
+        'holder_id' => $organization->id,
         'account_type' => 'SAVINGS',
-    ])->id;
-    $organizationAccount->save();
+    ]);
 
     expect($organizationAccount->fresh()->customer->type)->toBe(Customer::TYPE_ORGANIZATION);
 });

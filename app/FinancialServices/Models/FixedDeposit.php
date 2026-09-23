@@ -11,7 +11,7 @@ class FixedDeposit extends Model
     use HasFactory;
 
     protected $fillable = [
-        'deposit_account_id',
+        'financial_account_id',
         'principal_amount',
         'contractual_rate',
         'term_months',
@@ -33,8 +33,8 @@ class FixedDeposit extends Model
         'closed_at' => 'date',
     ];
 
-    public function depositAccount(): BelongsTo
+    public function financialAccount(): BelongsTo
     {
-        return $this->belongsTo(DepositAccount::class);
+        return $this->belongsTo(FinancialAccount::class);
     }
 }

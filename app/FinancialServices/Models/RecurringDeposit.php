@@ -13,7 +13,7 @@ class RecurringDeposit extends Model
     use HasFactory;
 
     protected $fillable = [
-        'deposit_account_id',
+        'financial_account_id',
         'installment_amount',
         'installment_frequency',
         'total_installments',
@@ -34,9 +34,9 @@ class RecurringDeposit extends Model
         'closed_at' => 'date',
     ];
 
-    public function depositAccount(): BelongsTo
+    public function financialAccount(): BelongsTo
     {
-        return $this->belongsTo(DepositAccount::class);
+        return $this->belongsTo(FinancialAccount::class);
     }
 
     public function installments(): HasMany

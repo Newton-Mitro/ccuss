@@ -2,11 +2,13 @@
 
 namespace App\FinancialServices\Models;
 
+use App\CustomerModule\Models\Customer;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -39,6 +41,9 @@ class FinancialAccount extends Model
         'interest_accrued',
         'opened_at',
         'closed_at',
+        'last_operated_at',
+        'membership_eligible_at',
+        'closure_reason',
         'metadata',
     ];
 
@@ -48,6 +53,8 @@ class FinancialAccount extends Model
         'interest_accrued' => 'decimal:4',
         'opened_at' => 'date',
         'closed_at' => 'date',
+        'last_operated_at' => 'date',
+        'membership_eligible_at' => 'date',
         'metadata' => 'array',
     ];
 
@@ -71,6 +78,11 @@ class FinancialAccount extends Model
         return $this->morphTo();
     }
 
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class, 'holder_id');
+    }
+
     public function transactions(): HasManyThrough
     {
         return $this->hasManyThrough(
@@ -83,9 +95,68 @@ class FinancialAccount extends Model
         );
     }
 
-    public function depositAccount(): HasOne
+    public function holders(): BelongsToMany
     {
-        return $this->hasOne(DepositAccount::class);
+        return $this->belongsToMany(Customer::class, 'deposit_account_holders', 'financial_account_id')
+            ->withPivot(['role', 'ownership_percent', 'guardian_customer_id'])
+            ->withTimestamps();
+    }
+
+    public function canHaveJointHolders(): bool
+    {
+        return in_array($this->account_type, [
+            'SAVINGS',
+            'FIXED_DEPOSIT',
+            'RECURRING_DEPOSIT',
+        ], true);
+    }
+
+    public function isMinorAccount(): bool
+    {
+        return $this->holder instanceof Customer
+            && $this->holder->type === Customer::TYPE_INDIVIDUAL
+            && $this->holder->dob !== null
+            && $this->holder->dob->age < 18;
+    }
+
+    public function requiresGuardian(): bool
+    {
+        return $this->isMinorAccount();
+    }
+
+    public function addHolder(
+        Customer $holder,
+        string $role = 'JOINT',
+        ?Customer $guardian = null,
+        float $ownershipPercent = 100,
+    ): void {
+        if ($role === 'JOINT' && !$this->canHaveJointHolders()) {
+            throw new \InvalidArgumentException('Share accounts cannot have joint holders.');
+        }
+
+        if ($ownershipPercent <= 0 || $ownershipPercent > 100) {
+            throw new \InvalidArgumentException('Ownership percentage must be greater than 0 and no more than 100.');
+        }
+
+        $isMinorHolder = $holder->type === Customer::TYPE_INDIVIDUAL
+            && $holder->dob !== null
+            && $holder->dob->age < 18;
+
+        $isMinorGuardian = $guardian?->type === Customer::TYPE_INDIVIDUAL
+            && $guardian->dob !== null
+            && $guardian->dob->age >= 18;
+
+        if ($isMinorHolder && (!$guardian || $guardian->id === $holder->id || !$isMinorGuardian)) {
+            throw new \InvalidArgumentException('A minor account holder requires an adult individual guardian.');
+        }
+
+        $this->holders()->syncWithoutDetaching([
+            $holder->id => [
+                'role' => $role,
+                'ownership_percent' => $ownershipPercent,
+                'guardian_customer_id' => $guardian?->id,
+            ],
+        ]);
     }
 
     public function defaultEvents(): HasMany

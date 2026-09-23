@@ -9,7 +9,6 @@ use App\FinancialServices\Models\FinancialProductAccountMapping;
 use App\FinancialServices\Models\FinancialProductPolicy;
 use App\FinancialServices\Models\FinancialTransaction;
 use App\FinancialServices\Models\FinancialTransactionEntry;
-use App\FinancialServices\Models\DepositAccount;
 use App\FinancialServices\Models\FixedDeposit;
 use App\FinancialServices\Models\ShareAccount;
 use App\GeneralAccounting\Models\LedgerAccount;
@@ -202,18 +201,11 @@ class FinancialServicesSeeder extends Seeder
                 ]);
 
                 $savingsProduct = FinancialProduct::query()->where('code', 'SAV-REG')->where('organization_id', $organization->id)->firstOrFail();
-                $deposit = DepositAccount::query()->firstOrCreate(
-                    ['financial_account_id' => $account->id],
-                    [
-                        'customer_id' => $customer->id,
-                        'financial_product_id' => $savingsProduct->id,
-                        'account_kind' => 'SAVINGS',
-                        'status' => 'ACTIVE',
-                        'opened_at' => now()->subMonths(7)->toDateString(),
-                        'last_operated_at' => now()->subDays($index + 1)->toDateString(),
-                    ],
-                );
-                $deposit->addHolder($customer, 'PRIMARY');
+                $account->update([
+                    'opened_at' => now()->subMonths(7)->toDateString(),
+                    'last_operated_at' => now()->subDays($index + 1)->toDateString(),
+                ]);
+                $account->addHolder($customer, 'PRIMARY');
             }
 
             $seededSavingsCount = $customers->count();
@@ -272,19 +264,12 @@ class FinancialServicesSeeder extends Seeder
                     ],
                 ],
             );
-            $legacySavingsDeposit = DepositAccount::query()->updateOrCreate(
-                ['financial_account_id' => $legacySavingsAccount->id],
-                [
-                    'customer_id' => $legacyCustomer->id,
-                    'financial_product_id' => $legacySavingsProduct->id,
-                    'account_kind' => 'SAVINGS',
-                    'status' => 'ACTIVE',
-                    'opened_at' => '2019-04-15',
-                    'last_operated_at' => '2025-06-28',
-                    'membership_eligible_at' => '2019-10-15',
-                ],
-            );
-            $legacySavingsDeposit->addHolder($legacyCustomer, 'PRIMARY');
+            $legacySavingsAccount->update([
+                'opened_at' => '2019-04-15',
+                'last_operated_at' => '2025-06-28',
+                'membership_eligible_at' => '2019-10-15',
+            ]);
+            $legacySavingsAccount->addHolder($legacyCustomer, 'PRIMARY');
 
             $legacyFixedProduct = FinancialProduct::query()
                 ->where('organization_id', $organization->id)
@@ -317,20 +302,13 @@ class FinancialServicesSeeder extends Seeder
                     ],
                 ],
             );
-            $legacyFixedDeposit = DepositAccount::query()->updateOrCreate(
-                ['financial_account_id' => $legacyFixedAccount->id],
-                [
-                    'customer_id' => $legacyCustomer->id,
-                    'financial_product_id' => $legacyFixedProduct->id,
-                    'account_kind' => 'FIXED_DEPOSIT',
-                    'status' => 'ACTIVE',
-                    'opened_at' => '2024-01-01',
-                    'last_operated_at' => '2025-06-30',
-                ],
-            );
-            $legacyFixedDeposit->addHolder($legacyCustomer, 'PRIMARY');
+            $legacyFixedAccount->update([
+                'opened_at' => '2024-01-01',
+                'last_operated_at' => '2025-06-30',
+            ]);
+            $legacyFixedAccount->addHolder($legacyCustomer, 'PRIMARY');
             FixedDeposit::query()->updateOrCreate(
-                ['deposit_account_id' => $legacyFixedDeposit->id],
+                ['financial_account_id' => $legacyFixedAccount->id],
                 [
                     'principal_amount' => $legacyFixedDepositPrincipal,
                     'contractual_rate' => 8.5,
@@ -383,9 +361,9 @@ class FinancialServicesSeeder extends Seeder
                     'balance' => $shareOpeningAmount,
                     'available_balance' => $shareOpeningAmount,
                 ]);
-                $shareDeposit = DepositAccount::query()->firstOrCreate(['financial_account_id' => $shareAccount->id], ['customer_id' => $shareCustomer->id, 'financial_product_id' => $shareProduct->id, 'account_kind' => 'SHARE', 'status' => 'ACTIVE', 'opened_at' => now()->subMonths(6)->toDateString()]);
-                $shareDeposit->addHolder($shareCustomer, 'PRIMARY');
-                ShareAccount::query()->firstOrCreate(['deposit_account_id' => $shareDeposit->id], ['customer_id' => $shareCustomer->id, 'member_since' => now()->subMonths(6)->toDateString(), 'membership_no' => sprintf('MEM-%05d', $shareCustomer->id), 'membership_status' => 'ACTIVE']);
+                $shareAccount->update(['opened_at' => now()->subMonths(6)->toDateString()]);
+                $shareAccount->addHolder($shareCustomer, 'PRIMARY');
+                ShareAccount::query()->firstOrCreate(['financial_account_id' => $shareAccount->id], ['customer_id' => $shareCustomer->id, 'member_since' => now()->subMonths(6)->toDateString(), 'membership_no' => sprintf('MEM-%05d', $shareCustomer->id), 'membership_status' => 'ACTIVE']);
 
                 $shareTransaction = FinancialTransaction::query()->updateOrCreate(
                     [

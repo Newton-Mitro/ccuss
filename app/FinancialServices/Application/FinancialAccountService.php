@@ -5,7 +5,6 @@ namespace App\FinancialServices\Application;
 use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
-use App\FinancialServices\Models\DepositAccount;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
 use RuntimeException;
@@ -38,21 +37,13 @@ class FinancialAccountService
             $account = FinancialAccount::create($data);
 
             if ($product && in_array($product->category, ['SAVINGS', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT'], true)) {
-                $depositAccount = DepositAccount::create([
-                    'customer_id' => $account->holder_id,
-                    'financial_account_id' => $account->id,
-                    'financial_product_id' => $product->id,
-                    'account_kind' => $product->category,
-                    'status' => 'PENDING',
-                ]);
-
                 $primary = Customer::query()
                     ->where('organization_id', $organizationId)
                     ->findOrFail($account->holder_id);
                 $guardian = $guardianCustomerId
                     ? Customer::query()->where('organization_id', $organizationId)->findOrFail($guardianCustomerId)
                     : null;
-                $depositAccount->addHolder($primary, 'PRIMARY', $guardian);
+                $account->addHolder($primary, 'PRIMARY', $guardian);
 
                 foreach ($jointHolderIds as $jointHolderId) {
                     if ((int) $jointHolderId === (int) $primary->id) {
@@ -62,7 +53,7 @@ class FinancialAccountService
                     $jointHolder = Customer::query()
                         ->where('organization_id', $organizationId)
                         ->findOrFail($jointHolderId);
-                    $depositAccount->addHolder($jointHolder);
+                    $account->addHolder($jointHolder);
                 }
             }
 

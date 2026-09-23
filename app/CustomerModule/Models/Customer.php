@@ -4,7 +4,7 @@ namespace App\CustomerModule\Models;
 
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
-use App\FinancialServices\Models\DepositAccount;
+use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\LoanAccount;
 use App\SystemAdministration\Traits\Auditable;
 use App\Support\Traits\UppercaseEnumAttributes;
@@ -175,7 +175,9 @@ class Customer extends Model
 
     public function depositAccounts(): HasMany
     {
-        return $this->hasMany(DepositAccount::class);
+        return $this->hasMany(FinancialAccount::class, 'holder_id')
+            ->where('holder_type', self::class)
+            ->whereIn('account_type', ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT']);
     }
 
     public function loanAccounts(): HasMany
@@ -186,8 +188,10 @@ class Customer extends Model
     public function heldDepositAccounts(): BelongsToMany
     {
         return $this->belongsToMany(
-            DepositAccount::class,
+            FinancialAccount::class,
             'deposit_account_holders',
+            'customer_id',
+            'financial_account_id',
         )
             ->withPivot(['role', 'ownership_percent', 'guardian_customer_id'])
             ->withTimestamps();
