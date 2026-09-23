@@ -2,7 +2,7 @@ import { SidebarItem } from '../../types';
 
 export const customerKycMenu: SidebarItem[] = [
     {
-        name: 'Customer & KYC',
+        name: 'Customers & KYC',
         icon: <i className="fa-solid fa-user-group" />,
         children_expanded: false,
         permission: ['customer.view'],
@@ -15,14 +15,14 @@ export const customerKycMenu: SidebarItem[] = [
                 permission: ['customer.view'],
             },
             {
-                name: 'Customers',
+                name: 'Customer Directory',
                 icon: <i className="fa-solid fa-users" />,
                 path: '/customers',
                 match_path: 'customers',
                 permission: ['customer.view'],
             },
             {
-                name: 'KYC Verification Queue',
+                name: 'Verification Queues',
                 icon: <i className="fa-solid fa-shield-halved" />,
                 children_expanded: false,
                 permission: [

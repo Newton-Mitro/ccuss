@@ -15,7 +15,7 @@ export const treasuryAndCashMenu: SidebarItem[] = [
                 permission: ['treasury.view'],
             },
             {
-                name: 'Branch Operations',
+                name: 'Branch Day',
                 icon: <i className="fa-solid fa-calendar-day" />,
                 children_expanded: false,
                 permission: ['branch_days.view'],
@@ -30,7 +30,7 @@ export const treasuryAndCashMenu: SidebarItem[] = [
                 ],
             },
             {
-                name: 'Cash Management',
+                name: 'Cash Operations',
                 icon: <i className="fa-solid fa-cash-register" />,
                 children_expanded: false,
                 permission: ['cash_management.view'],
@@ -119,20 +119,6 @@ export const treasuryAndCashMenu: SidebarItem[] = [
                         match_path: 'branch-cash-summaries',
                         permission: ['cash_transactions.view'],
                     },
-                    {
-                        name: 'Bank Reconciliations',
-                        icon: <i className="fa-solid fa-scale-balanced" />,
-                        path: '/bank-reconciliations',
-                        match_path: 'bank-reconciliations',
-                        permission: ['bank_transactions.view'],
-                    },
-                    {
-                        name: 'Cheque Clearings',
-                        icon: <i className="fa-solid fa-money-check" />,
-                        path: '/cheque-clearings',
-                        match_path: 'cheque-clearings',
-                        permission: ['cheques.view'],
-                    },
                 ],
             },
             {
@@ -191,6 +177,13 @@ export const treasuryAndCashMenu: SidebarItem[] = [
                         match_path: 'bank-transactions',
                         permission: ['bank_transactions.view'],
                     },
+                    {
+                        name: 'Reconciliations',
+                        icon: <i className="fa-solid fa-scale-balanced" />,
+                        path: '/bank-reconciliations',
+                        match_path: 'bank-reconciliations',
+                        permission: ['bank_transactions.view'],
+                    },
                 ],
             },
             {
@@ -211,6 +204,13 @@ export const treasuryAndCashMenu: SidebarItem[] = [
                         icon: <i className="fa-solid fa-money-check-dollar" />,
                         path: '/cheques',
                         match_path: 'cheques',
+                        permission: ['cheques.view'],
+                    },
+                    {
+                        name: 'Clearing Queue',
+                        icon: <i className="fa-solid fa-money-check" />,
+                        path: '/cheque-clearings',
+                        match_path: 'cheque-clearings',
                         permission: ['cheques.view'],
                     },
                 ],

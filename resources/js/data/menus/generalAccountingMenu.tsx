@@ -15,7 +15,7 @@ export const generalAccountingMenu: SidebarItem[] = [
                 permission: ['accounting.view'],
             },
             {
-                name: 'Accounting Setup',
+                name: 'Foundation',
                 icon: <i className="fa-solid fa-sliders" />,
                 children_expanded: false,
                 permission: ['accounting.view'],
@@ -77,7 +77,7 @@ export const generalAccountingMenu: SidebarItem[] = [
                 ],
             },
             {
-                name: 'Voucher Entry',
+                name: 'Vouchers',
                 icon: <i className="fa-solid fa-receipt" />,
                 children_expanded: false,
                 permission: ['accounting.voucher.view'],
@@ -134,7 +134,7 @@ export const generalAccountingMenu: SidebarItem[] = [
                 ],
             },
             {
-                name: 'Budgets',
+                name: 'Planning',
                 icon: <i className="fa-solid fa-wallet" />,
                 children_expanded: false,
                 permission: ['accounting.budgets.view'],
@@ -163,7 +163,7 @@ export const generalAccountingMenu: SidebarItem[] = [
                 ],
             },
             {
-                name: 'Financial Reports',
+                name: 'Reports',
                 icon: <i className="fa-solid fa-file-invoice-dollar" />,
                 children_expanded: false,
                 permission: ['accounting.reports.view'],
@@ -213,7 +213,7 @@ export const generalAccountingMenu: SidebarItem[] = [
                 ],
             },
             {
-                name: 'Period-End Operations',
+                name: 'Period End',
                 icon: <i className="fa-solid fa-lock" />,
                 children_expanded: false,
                 permission: ['accounting.period_end.view'],

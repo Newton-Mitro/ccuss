@@ -15,7 +15,7 @@ export const financialServicesMenu: SidebarItem[] = [
                 permission: ['financial.view'],
             },
             {
-                name: 'Product Configuration',
+                name: 'Product Setup',
                 icon: <i className="fa-solid fa-boxes-stacked" />,
                 permission: ['financial.products.view'],
                 children_expanded: false,
@@ -41,40 +41,10 @@ export const financialServicesMenu: SidebarItem[] = [
                         match_path: 'financial-products',
                         permission: ['financial.products.mappings.manage'],
                     },
-                    {
-                        name: 'Default Rules',
-                        icon: (
-                            <i className="fa-solid fa-triangle-exclamation" />
-                        ),
-                        path: '/account-default-rules',
-                        match_path: 'account-default-rules',
-                        permission: ['financial.products.view'],
-                    },
-                    {
-                        name: 'Fine Queue',
-                        icon: <i className="fa-solid fa-receipt" />,
-                        path: '/account-fines',
-                        match_path: 'account-fines',
-                        permission: ['financial.accounts.view'],
-                    },
-                    {
-                        name: 'Interest Provisions',
-                        icon: <i className="fa-solid fa-percent" />,
-                        path: '/interest-provisions',
-                        match_path: 'interest-provisions',
-                        permission: ['financial.accounts.view'],
-                    },
-                    {
-                        name: 'Share Dividends',
-                        icon: <i className="fa-solid fa-chart-line" />,
-                        path: '/dividends',
-                        match_path: 'dividends',
-                        permission: ['financial.accounts.view'],
-                    },
                 ],
             },
             {
-                name: 'Deposit Operations',
+                name: 'Deposits & Shares',
                 icon: <i className="fa-solid fa-piggy-bank" />,
                 permission: ['financial.accounts.view'],
                 children_expanded: false,
@@ -125,7 +95,7 @@ export const financialServicesMenu: SidebarItem[] = [
                 ],
             },
             {
-                name: 'Lending',
+                name: 'Loans',
                 icon: <i className="fa-solid fa-hand-holding-dollar" />,
                 permission: ['financial.loan-applications.view'],
                 children_expanded: false,
@@ -145,7 +115,7 @@ export const financialServicesMenu: SidebarItem[] = [
                         permission: ['financial.accounts.view'],
                     },
                     {
-                        name: 'Loan Disbursement',
+                        name: 'Disbursement Entry',
                         icon: <i className="fa-solid fa-arrow-up-right-dots" />,
                         path: '/financial-transactions/loan-disbursement/create',
                         match_path: 'financial-transactions/loan-disbursement',
@@ -154,7 +124,7 @@ export const financialServicesMenu: SidebarItem[] = [
                 ],
             },
             {
-                name: 'Transaction Operations',
+                name: 'Transaction Desk',
                 icon: <i className="fa-solid fa-money-bill-transfer" />,
                 permission: ['financial.transactions.view'],
                 children_expanded: false,
@@ -173,10 +143,62 @@ export const financialServicesMenu: SidebarItem[] = [
                         match_path: 'financial-transactions/transfer',
                         permission: ['financial.transactions.create'],
                     },
+                    {
+                        name: 'Loan Repayments',
+                        icon: <i className="fa-solid fa-hand-holding-dollar" />,
+                        path: '/financial-transactions/loan-repayment/create',
+                        match_path: 'financial-transactions/loan-repayment',
+                        permission: ['financial.transactions.create'],
+                    },
+                    {
+                        name: 'Fine Payments',
+                        icon: <i className="fa-solid fa-receipt" />,
+                        path: '/financial-transactions/fine-payment/create',
+                        match_path: 'financial-transactions/fine-payment',
+                        permission: ['financial.transactions.create'],
+                    },
                 ],
             },
             {
-                name: 'Financial Reports',
+                name: 'Controls & Returns',
+                icon: <i className="fa-solid fa-shield-halved" />,
+                permission: ['financial.accounts.view'],
+                children_expanded: false,
+                children: [
+                    {
+                        name: 'Default Rules',
+                        icon: (
+                            <i className="fa-solid fa-triangle-exclamation" />
+                        ),
+                        path: '/account-default-rules',
+                        match_path: 'account-default-rules',
+                        permission: ['financial.products.view'],
+                    },
+                    {
+                        name: 'Fine Queue',
+                        icon: <i className="fa-solid fa-receipt" />,
+                        path: '/account-fines',
+                        match_path: 'account-fines',
+                        permission: ['financial.accounts.view'],
+                    },
+                    {
+                        name: 'Interest Provisions',
+                        icon: <i className="fa-solid fa-percent" />,
+                        path: '/interest-provisions',
+                        match_path: 'interest-provisions',
+                        permission: ['financial.accounts.view'],
+                    },
+                    {
+                        name: 'Share Dividends',
+                        icon: <i className="fa-solid fa-chart-line" />,
+                        path: '/dividends',
+                        match_path: 'dividends',
+                        permission: ['financial.accounts.view'],
+                    },
+                ],
+            },
+            {
+                name: 'Reports',
                 icon: <i className="fa-solid fa-chart-line" />,
                 permission: ['financial.reports.view'],
                 children_expanded: false,

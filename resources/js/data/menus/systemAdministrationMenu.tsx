@@ -2,7 +2,7 @@ import { SidebarItem } from '../../types';
 
 export const systemAdministrationMenu: SidebarItem[] = [
     {
-        name: 'Administrative Tasks',
+        name: 'Administration',
         icon: <i className="fa-solid fa-building-flag" />,
         children_expanded: false,
         permission: ['organizations.view', 'branches.view'],
@@ -21,7 +21,7 @@ export const systemAdministrationMenu: SidebarItem[] = [
                 ],
             },
             {
-                name: 'Organization',
+                name: 'Organization & Access',
                 icon: <i className="fa-solid fa-building" />,
                 children_expanded: false,
                 permission: ['organizations.view', 'branches.view'],
@@ -36,7 +36,7 @@ export const systemAdministrationMenu: SidebarItem[] = [
                 ],
             },
             {
-                name: 'Users, Roles & Permissions',
+                name: 'Users & Permissions',
                 icon: <i className="fa-solid fa-users"></i>,
                 children_expanded: false,
                 permission: ['users.view', 'role_permissions.view'],
@@ -58,7 +58,7 @@ export const systemAdministrationMenu: SidebarItem[] = [
                 ],
             },
             {
-                name: 'Audit & Backup',
+                name: 'Audit & Backups',
                 icon: <i className="fa-solid fa-clipboard-list" />,
                 children_expanded: false,
                 permission: ['activity_logs.view', 'database_backups.view'],
