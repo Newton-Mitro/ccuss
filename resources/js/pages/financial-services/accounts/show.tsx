@@ -965,6 +965,7 @@ export default function FinancialAccountShow() {
                                         <th className="px-2 py-2">No.</th>
                                         <th className="px-2 py-2">Due date</th>
                                         <th className="px-2 py-2">Status</th>
+                                        <th className="px-2 py-2" />
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y">
@@ -981,6 +982,109 @@ export default function FinancialAccountShow() {
                                             </td>
                                             <td className="px-2 py-2">
                                                 {installment.status}
+                                            </td>
+                                            <td className="px-2 py-2 text-right">
+                                                {[
+                                                    'PENDING',
+                                                    'PARTIAL',
+                                                ].includes(
+                                                    installment.status,
+                                                ) &&
+                                                    !installment.financial_transaction_id && (
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() =>
+                                                                router.post(
+                                                                    route(
+                                                                        'financial-accounts.recurring-deposit.installments.pay',
+                                                                        [
+                                                                            account.id,
+                                                                            account
+                                                                                .recurring_deposit!
+                                                                                .id,
+                                                                            installment.id,
+                                                                        ],
+                                                                    ),
+                                                                    {
+                                                                        amount: (
+                                                                            Number(
+                                                                                installment.amount_due ??
+                                                                                    0,
+                                                                            ) -
+                                                                            Number(
+                                                                                installment.amount_paid ??
+                                                                                    0,
+                                                                            )
+                                                                        ).toFixed(
+                                                                            4,
+                                                                        ),
+                                                                        transaction_date:
+                                                                            new Date()
+                                                                                .toISOString()
+                                                                                .slice(
+                                                                                    0,
+                                                                                    10,
+                                                                                ),
+                                                                        idempotency_key:
+                                                                            crypto.randomUUID(),
+                                                                    },
+                                                                )
+                                                            }
+                                                        >
+                                                            Pay due
+                                                        </Button>
+                                                    )}
+                                                {installment.status ===
+                                                    'PENDING' && (
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() =>
+                                                            router.post(
+                                                                route(
+                                                                    'financial-accounts.recurring-deposit.installments.miss',
+                                                                    [
+                                                                        account.id,
+                                                                        account
+                                                                            .recurring_deposit!
+                                                                            .id,
+                                                                        installment.id,
+                                                                    ],
+                                                                ),
+                                                            )
+                                                        }
+                                                    >
+                                                        Mark missed
+                                                    </Button>
+                                                )}
+                                                {['PENDING', 'MISSED'].includes(
+                                                    installment.status,
+                                                ) && (
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() =>
+                                                            router.post(
+                                                                route(
+                                                                    'financial-accounts.recurring-deposit.installments.waive',
+                                                                    [
+                                                                        account.id,
+                                                                        account
+                                                                            .recurring_deposit!
+                                                                            .id,
+                                                                        installment.id,
+                                                                    ],
+                                                                ),
+                                                            )
+                                                        }
+                                                    >
+                                                        Waive
+                                                    </Button>
+                                                )}
                                             </td>
                                         </tr>
                                     ))}

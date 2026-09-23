@@ -212,6 +212,9 @@ export interface RecurringDeposit {
         installment_no: number;
         due_date: string;
         status: string;
+        amount_due?: string | number;
+        amount_paid?: string | number;
+        financial_transaction_id?: number | null;
     }>;
 }
 

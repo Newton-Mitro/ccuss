@@ -6,6 +6,8 @@ use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Application\FinancialAccountService;
 use App\FinancialServices\Application\FixedDepositService;
 use App\FinancialServices\Application\RecurringDepositService;
+use App\FinancialServices\Models\RecurringDeposit;
+use App\FinancialServices\Models\RecurringDepositInstallment;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\DepositNominee;
@@ -16,6 +18,7 @@ use App\FinancialServices\Requests\StoreFinancialAccountHolderRequest;
 use App\FinancialServices\Requests\StoreShareAccountRequest;
 use App\FinancialServices\Requests\StoreFixedDepositRequest;
 use App\FinancialServices\Requests\StoreRecurringDepositRequest;
+use App\FinancialServices\Requests\StoreRecurringDepositPaymentRequest;
 use Carbon\CarbonImmutable;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -38,6 +41,8 @@ class FinancialAccountController extends Controller
         $this->middleware('permission:financial.accounts.membership.manage')->only(['storeShareAccount', 'updateShareAccount']);
         $this->middleware('permission:financial.accounts.fixed-deposits.manage')->only('storeFixedDeposit');
         $this->middleware('permission:financial.accounts.recurring-deposits.manage')->only('storeRecurringDeposit');
+        $this->middleware('permission:financial.accounts.recurring-deposits.manage')->only(['markRecurringInstallmentMissed', 'waiveRecurringInstallment']);
+        $this->middleware('permission:financial.accounts.recurring-deposits.manage')->only('payRecurringInstallment');
     }
 
     public function index(Request $request): Response
@@ -320,6 +325,37 @@ class FinancialAccountController extends Controller
         return back()->with('success', 'Recurring-deposit contract opened successfully.');
     }
 
+    public function markRecurringInstallmentMissed(Request $request, FinancialAccount $financialAccount, RecurringDeposit $recurringDeposit, RecurringDepositInstallment $installment)
+    {
+        $this->authorizeRecurringInstallment($request, $financialAccount, $recurringDeposit);
+        $this->recurringDepositService->markMissed($recurringDeposit, $installment);
+
+        return back()->with('success', 'Installment marked missed.');
+    }
+
+    public function waiveRecurringInstallment(Request $request, FinancialAccount $financialAccount, RecurringDeposit $recurringDeposit, RecurringDepositInstallment $installment)
+    {
+        $this->authorizeRecurringInstallment($request, $financialAccount, $recurringDeposit);
+        $this->recurringDepositService->waive($recurringDeposit, $installment);
+
+        return back()->with('success', 'Installment waived.');
+    }
+
+    public function payRecurringInstallment(StoreRecurringDepositPaymentRequest $request, FinancialAccount $financialAccount, RecurringDeposit $recurringDeposit, RecurringDepositInstallment $installment)
+    {
+        $this->authorizeRecurringInstallment($request, $financialAccount, $recurringDeposit);
+        $transaction = $this->recurringDepositService->collectPayment(
+            $recurringDeposit,
+            $installment,
+            $request->validated(),
+            $this->organizationId($request),
+            $request->user()->id,
+        );
+
+        return redirect()->route('financial-transactions.show', $transaction)
+            ->with('success', 'Recurring-deposit installment payment draft created.');
+    }
+
     private function organizationId(Request $request): int
     {
         return (int) $request->attributes->get('active_organization')->id;
@@ -382,5 +418,13 @@ class FinancialAccountController extends Controller
         abort_unless($account->account_type === 'SHARE', 422, 'Membership details are only available for share accounts.');
         abort_unless($account->holder_type === Customer::class && $account->holder_id, 422, 'A share account must have a customer holder.');
         abort_if($account->status === 'CLOSED', 422, 'Closed accounts cannot change membership details.');
+    }
+
+    private function authorizeRecurringInstallment(Request $request, FinancialAccount $account, RecurringDeposit $recurringDeposit): void
+    {
+        $this->authorizeOrganization($request, $account);
+        abort_unless($account->account_type === 'RECURRING_DEPOSIT', 422, 'Installments are only available for recurring-deposit accounts.');
+        abort_unless($recurringDeposit->financial_account_id === $account->id, 404);
+        abort_if($account->status === 'CLOSED', 422, 'Closed accounts cannot change installments.');
     }
 }

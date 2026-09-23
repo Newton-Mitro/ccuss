@@ -12,6 +12,7 @@ class RecurringDepositInstallment extends Model
 
     protected $fillable = [
         'recurring_deposit_id',
+        'financial_transaction_id',
         'installment_no',
         'due_date',
         'amount_due',
@@ -32,5 +33,10 @@ class RecurringDepositInstallment extends Model
     public function recurringDeposit(): BelongsTo
     {
         return $this->belongsTo(RecurringDeposit::class);
+    }
+
+    public function financialTransaction(): BelongsTo
+    {
+        return $this->belongsTo(FinancialTransaction::class);
     }
 }

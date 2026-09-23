@@ -54,6 +54,9 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::put('/financial-accounts/{financial_account}/membership/{shareAccount}', [FinancialAccountController::class, 'updateShareAccount'])->name('financial-accounts.membership.update');
     Route::post('/financial-accounts/{financial_account}/fixed-deposit', [FinancialAccountController::class, 'storeFixedDeposit'])->name('financial-accounts.fixed-deposit.store');
     Route::post('/financial-accounts/{financial_account}/recurring-deposit', [FinancialAccountController::class, 'storeRecurringDeposit'])->name('financial-accounts.recurring-deposit.store');
+    Route::post('/financial-accounts/{financial_account}/recurring-deposit/{recurringDeposit}/installments/{installment}/miss', [FinancialAccountController::class, 'markRecurringInstallmentMissed'])->name('financial-accounts.recurring-deposit.installments.miss');
+    Route::post('/financial-accounts/{financial_account}/recurring-deposit/{recurringDeposit}/installments/{installment}/waive', [FinancialAccountController::class, 'waiveRecurringInstallment'])->name('financial-accounts.recurring-deposit.installments.waive');
+    Route::post('/financial-accounts/{financial_account}/recurring-deposit/{recurringDeposit}/installments/{installment}/pay', [FinancialAccountController::class, 'payRecurringInstallment'])->name('financial-accounts.recurring-deposit.installments.pay');
     Route::get('/financial-account-statements', [FinancialAccountController::class, 'statement'])->name('financial-account-statements.index');
 
     Route::get('/financial-transactions', [FinancialTransactionController::class, 'index'])->name('financial-transactions.index');

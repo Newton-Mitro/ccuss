@@ -2,6 +2,7 @@
 
 use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Application\RecurringDepositService;
+use App\FinancialServices\Application\FinancialTransactionService;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\RecurringDeposit;
@@ -90,4 +91,52 @@ it('rejects a second recurring-deposit contract for the same account', function 
         'total_installments' => 2,
         'started_at' => '2026-02-01',
     ]))->toThrow(RuntimeException::class, 'already has');
+});
+
+it('supports missed and waived installment transitions with due-date guards', function () {
+    $fixture = recurringDepositFixture();
+    $service = app(RecurringDepositService::class);
+    $contract = $service->open($fixture['account'], [
+        'installment_amount' => 100,
+        'installment_frequency' => 'MONTHLY',
+        'total_installments' => 3,
+        'started_at' => now()->subMonth()->toDateString(),
+        'maturity_extension_days' => 0,
+        'grace_days' => 0,
+    ]);
+    $pastInstallment = $contract->installments->first();
+    $futureInstallment = $contract->installments->last();
+
+    expect(fn() => $service->markMissed($contract, $futureInstallment))
+        ->toThrow(RuntimeException::class, 'due pending');
+
+    expect($service->markMissed($contract, $pastInstallment)->status)->toBe('MISSED')
+        ->and($service->waive($contract, $pastInstallment)->status)->toBe('WAIVED');
+});
+
+it('links installment payments and marks them paid only after posting', function () {
+    $fixture = recurringDepositFixture();
+    $service = app(RecurringDepositService::class);
+    $transactionService = app(FinancialTransactionService::class);
+    $contract = $service->open($fixture['account'], [
+        'installment_amount' => 100,
+        'installment_frequency' => 'MONTHLY',
+        'total_installments' => 1,
+        'started_at' => now()->toDateString(),
+    ]);
+    $installment = $contract->installments->first();
+
+    $transaction = $service->collectPayment($contract, $installment, [
+        'amount' => 100,
+        'transaction_date' => now()->toDateString(),
+        'idempotency_key' => (string) \Illuminate\Support\Str::uuid(),
+    ], $fixture['organization']->id, $fixture['user']->id);
+
+    expect($installment->fresh()->financial_transaction_id)->toBe($transaction->id)
+        ->and($installment->fresh()->status)->toBe('PENDING');
+
+    $transactionService->post($transaction, $fixture['organization']->id, $fixture['user']->id);
+
+    expect($installment->fresh()->status)->toBe('PAID')
+        ->and((float) $fixture['account']->fresh()->balance)->toBe(100.0);
 });

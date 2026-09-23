@@ -7,6 +7,7 @@ use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialTransaction;
 use App\FinancialServices\Models\LoanAccount;
 use App\FinancialServices\Models\LoanDisbursement;
+use App\FinancialServices\Models\RecurringDepositInstallment;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -67,6 +68,8 @@ class FinancialTransactionService
                 'status' => 'PENDING',
                 'reference' => $data['reference'] ?? null,
                 'description' => $data['description'] ?? null,
+                'source_type' => $data['source_type'] ?? null,
+                'source_id' => $data['source_id'] ?? null,
                 'created_by' => $userId,
             ]);
 
@@ -340,6 +343,27 @@ class FinancialTransactionService
                         : 'PARTIALLY_DISBURSED',
                 ]);
                 $disbursement->update(['status' => 'POSTED']);
+            }
+
+            if ($transaction->source instanceof RecurringDepositInstallment) {
+                $installment = RecurringDepositInstallment::query()
+                    ->with('recurringDeposit')
+                    ->lockForUpdate()
+                    ->findOrFail($transaction->source->id);
+                $amountPaid = (float) $installment->amount_paid + (float) $transaction->amount;
+                if ($amountPaid > (float) $installment->amount_due) {
+                    throw new RuntimeException('The installment payment exceeds the amount due.');
+                }
+
+                $isPaid = $amountPaid >= (float) $installment->amount_due;
+                $installment->update([
+                    'amount_paid' => $amountPaid,
+                    'status' => $isPaid ? 'PAID' : 'PARTIAL',
+                    'paid_at' => $isPaid ? now() : null,
+                ]);
+                if ($isPaid) {
+                    $installment->recurringDeposit()->increment('paid_installments');
+                }
             }
 
             return $transaction->fresh(['entries.financialAccount']);
