@@ -10,6 +10,7 @@ use App\GeneralAccounting\Models\FiscalPeriod;
 use App\GeneralAccounting\Models\FiscalYear;
 use App\GeneralAccounting\Models\LedgerAccount;
 use App\GeneralAccounting\Models\Voucher;
+use App\SystemAdministration\Models\AuditLog;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\User;
 
@@ -32,6 +33,8 @@ it('links a mapped posted transaction to one voucher and reverses the link', fun
     $voucher = $transaction->fresh()->voucher;
 
     expect($voucher)->not->toBeNull()->and($voucher->entries)->toHaveCount(2)->and(Voucher::query()->where('financial_transaction_id', $transaction->id)->count())->toBe(1);
+    expect(AuditLog::query()->where('auditable_type', FinancialTransaction::class)->where('auditable_id', $transaction->id)->where('organization_id', $organization->id)->exists())->toBeTrue()
+        ->and(AuditLog::query()->where('auditable_type', Voucher::class)->where('auditable_id', $voucher->id)->where('organization_id', $organization->id)->exists())->toBeTrue();
 
     expect(fn() => $service->post($transaction->fresh(), $organization->id, $user->id))
         ->toThrow(RuntimeException::class, 'Only pending');

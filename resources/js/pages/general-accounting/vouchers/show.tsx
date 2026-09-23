@@ -181,6 +181,27 @@ export default function VoucherView() {
                         </span>
                         <p className="text-sm">{voucher.status || '-'}</p>
                     </div>
+                    {voucher.financial_transaction && (
+                        <div>
+                            <span className="text-xs text-muted-foreground">
+                                Financial Transaction
+                            </span>
+                            <p className="text-sm">
+                                <Link
+                                    className="text-primary hover:underline"
+                                    href={route(
+                                        'financial-transactions.show',
+                                        voucher.financial_transaction.id,
+                                    )}
+                                >
+                                    {
+                                        voucher.financial_transaction
+                                            .transaction_no
+                                    }
+                                </Link>
+                            </p>
+                        </div>
+                    )}
 
                     {voucher.narration && (
                         <div className="col-span-1 md:col-span-2">

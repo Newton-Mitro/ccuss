@@ -11,10 +11,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\FinancialServices\Models\FinancialTransactionEntry;
+use App\SystemAdministration\Traits\Auditable;
 
 class FinancialTransaction extends Model
 {
     use HasFactory;
+    use Auditable;
 
     protected static function newFactory()
     {
