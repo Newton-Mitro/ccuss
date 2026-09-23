@@ -1,14 +1,19 @@
 <?php
 
+use App\CustomerModule\Models\Customer;
+use App\CustomerModule\Models\KycDocument;
+use App\FinancialServices\Application\FinancialAccountService;
 use App\FinancialServices\Application\FinancialTransactionService;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\FinancialProductPolicy;
 use App\SystemAdministration\Models\Organization;
+use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\User;
 
 it('enforces active product deposit limits when creating transactions', function () {
     $organization = Organization::factory()->create();
+    Branch::factory()->create(['organization_id' => $organization->id]);
     $user = User::factory()->create(['organization_id' => $organization->id]);
     $product = FinancialProduct::factory()->create([
         'organization_id' => $organization->id,
@@ -67,4 +72,48 @@ it('ignores draft product policies during transaction validation', function () {
     ], $organization->id, $user->id);
 
     expect($transaction->status)->toBe('PENDING');
+});
+
+it('enforces customer eligibility and verified KYC requirements when opening accounts', function () {
+    $organization = Organization::factory()->create();
+    Branch::factory()->create(['organization_id' => $organization->id]);
+    $customer = Customer::factory()->individualMale()->create(['organization_id' => $organization->id]);
+    $product = FinancialProduct::factory()->create(['organization_id' => $organization->id]);
+    FinancialProductPolicy::factory()->create([
+        'financial_product_id' => $product->id,
+        'eligibility_rules' => ['customer_types' => ['ORGANIZATION']],
+        'documentation_requirements' => ['IDENTITY' => true],
+        'status' => 'ACTIVE',
+        'effective_from' => now()->subDay()->toDateString(),
+    ]);
+
+    expect(fn() => app(FinancialAccountService::class)->create([
+        'financial_product_id' => $product->id,
+        'holder_type' => Customer::class,
+        'holder_id' => $customer->id,
+        'account_no' => 'POLICY-ELIGIBILITY-001',
+        'account_type' => $product->category,
+    ], $organization->id))->toThrow(\Illuminate\Validation\ValidationException::class, 'not eligible');
+
+    $product->policy()->update(['eligibility_rules' => null]);
+    expect(fn() => app(FinancialAccountService::class)->create([
+        'financial_product_id' => $product->id,
+        'holder_type' => Customer::class,
+        'holder_id' => $customer->id,
+        'account_no' => 'POLICY-KYC-001',
+        'account_type' => $product->category,
+    ], $organization->id))->toThrow(\Illuminate\Validation\ValidationException::class, 'KYC');
+
+    KycDocument::factory()->verified()->create([
+        'customer_id' => $customer->id,
+        'document_type' => KycDocument::NATIONAL_ID,
+    ]);
+
+    expect(app(FinancialAccountService::class)->create([
+        'financial_product_id' => $product->id,
+        'holder_type' => Customer::class,
+        'holder_id' => $customer->id,
+        'account_no' => 'POLICY-KYC-002',
+        'account_type' => $product->category,
+    ], $organization->id))->toBeInstanceOf(FinancialAccount::class);
 });

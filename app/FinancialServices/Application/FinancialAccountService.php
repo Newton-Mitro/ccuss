@@ -11,6 +11,10 @@ use RuntimeException;
 
 class FinancialAccountService
 {
+    public function __construct(private readonly FinancialProductPolicyService $policyService)
+    {
+    }
+
     public function create(array $data, int $organizationId): FinancialAccount
     {
         $product = isset($data['financial_product_id'])
@@ -27,6 +31,14 @@ class FinancialAccountService
         if (($data['holder_type'] ?? null) === 'customer') {
             $data['holder_type'] = Customer::class;
         }
+
+        if ($product && ($data['holder_type'] ?? null) === Customer::class && !empty($data['holder_id'])) {
+            $customer = Customer::query()
+                ->where('organization_id', $organizationId)
+                ->findOrFail($data['holder_id']);
+            $this->policyService->validateAccountOpening($product, $customer);
+        }
+
         $data['status'] = 'PENDING';
 
         $jointHolderIds = $data['joint_holder_ids'] ?? [];
