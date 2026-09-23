@@ -33,7 +33,7 @@ function Create() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'System Administration', href: '' },
+        { title: 'Administrative Tasks', href: '' },
         ...(organization
             ? [
                   {

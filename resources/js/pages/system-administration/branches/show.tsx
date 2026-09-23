@@ -11,7 +11,7 @@ export default function Show({ branch }: BranchShowPageProps) {
     useFlashToastHandler();
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'System Administration', href: '' },
+        { title: 'Administrative Tasks', href: '' },
         ...(branch.organization
             ? [
                   {

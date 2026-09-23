@@ -55,7 +55,7 @@ export default function Index() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'System Administration', href: '' },
+        { title: 'Administrative Tasks', href: '' },
         { title: 'Branches', href: route('branches.index') },
     ];
 

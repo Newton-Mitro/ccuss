@@ -90,7 +90,7 @@ const RolePermissionForm = ({
     );
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'System Administration', href: '' },
+        { title: 'Administrative Tasks', href: '' },
         { title: 'Roles', href: route('roles.index') },
         { title: 'Role Permissions', href: '' },
     ];

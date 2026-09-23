@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\TreasuryAndCash\Models\ChequeClearing;
 
 class Cheque extends Model
 {
@@ -42,5 +43,10 @@ class Cheque extends Model
     public function transactions(): HasMany
     {
         return $this->hasMany(ChequeTransaction::class);
+    }
+
+    public function clearings(): HasMany
+    {
+        return $this->hasMany(ChequeClearing::class);
     }
 }

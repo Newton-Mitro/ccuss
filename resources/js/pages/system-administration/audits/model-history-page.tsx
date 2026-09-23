@@ -12,7 +12,7 @@ export default function ModelHistory({
     batches,
 }: ModelHistoryPageProps) {
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'System Administration', href: '' },
+        { title: 'Administrative Tasks', href: '' },
         { title: 'Audit Logs', href: route('audits.index') },
         { title: `${auditableType} #${auditableId}`, href: '#' },
     ];

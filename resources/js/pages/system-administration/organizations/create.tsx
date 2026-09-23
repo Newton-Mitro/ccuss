@@ -69,7 +69,7 @@ function CreateOrganization() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'System Administration', href: '' },
+        { title: 'Administrative Tasks', href: '' },
         { title: 'Organizations', href: route('organizations.index') },
         { title: 'Add Organization', href: '' },
     ];

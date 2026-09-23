@@ -63,7 +63,7 @@ export default function AssignOrganizationPage() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'System Administration', href: '' },
+        { title: 'Administrative Tasks', href: '' },
         { title: 'Users', href: route('users.index') },
         { title: `Assign Organization: ${user.name}`, href: '' },
     ];

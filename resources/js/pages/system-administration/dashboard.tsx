@@ -45,10 +45,10 @@ export default function Dashboard() {
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="System Administration Dashboard" />
+            <Head title="Administrative Tasks Dashboard" />
             <div className="space-y-6 text-foreground">
                 <ResourcePageHeader
-                    title="System Administration"
+                    title="Administrative Tasks"
                     description="Monitor organizations, access, and system history."
                 />
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

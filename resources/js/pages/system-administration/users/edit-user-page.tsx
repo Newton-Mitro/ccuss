@@ -150,7 +150,7 @@ const UserForm = ({
     );
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'System Administration', href: '' },
+        { title: 'Administrative Tasks', href: '' },
         { title: 'Users', href: route('users.index') },
         { title: isEdit ? `Edit ${user.name}` : 'Create User', href: '' },
     ];

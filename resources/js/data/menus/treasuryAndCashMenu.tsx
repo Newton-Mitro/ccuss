@@ -112,6 +112,27 @@ export const treasuryAndCashMenu: SidebarItem[] = [
                         match_path: 'cash-counts',
                         permission: ['cash_transactions.view'],
                     },
+                    {
+                        name: 'Branch Cash Summaries',
+                        icon: <i className="fa-solid fa-chart-column" />,
+                        path: '/branch-cash-summaries',
+                        match_path: 'branch-cash-summaries',
+                        permission: ['cash_transactions.view'],
+                    },
+                    {
+                        name: 'Bank Reconciliations',
+                        icon: <i className="fa-solid fa-scale-balanced" />,
+                        path: '/bank-reconciliations',
+                        match_path: 'bank-reconciliations',
+                        permission: ['bank_transactions.view'],
+                    },
+                    {
+                        name: 'Cheque Clearings',
+                        icon: <i className="fa-solid fa-money-check" />,
+                        path: '/cheque-clearings',
+                        match_path: 'cheque-clearings',
+                        permission: ['cheques.view'],
+                    },
                 ],
             },
             {

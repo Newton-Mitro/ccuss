@@ -77,7 +77,7 @@ export default function History() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'System Administration', href: '' },
+        { title: 'Administrative Tasks', href: '' },
         { title: 'History', href: '' },
     ];
 

@@ -43,7 +43,7 @@ export default function Index() {
     }, [data.event, data.page, data.per_page]);
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'System Administration', href: '' },
+        { title: 'Administrative Tasks', href: '' },
         { title: 'Audit Logs', href: route('audits.index') },
     ];
 

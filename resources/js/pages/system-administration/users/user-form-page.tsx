@@ -133,7 +133,7 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
     const allRoles = [...systemAdminRole, ...filteredRoles];
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'System Administration', href: '' },
+        { title: 'Administrative Tasks', href: '' },
         { title: 'Users', href: route('users.index') },
         { title: isEdit ? `Edit ${user.name}` : 'Create User', href: '' },
     ];

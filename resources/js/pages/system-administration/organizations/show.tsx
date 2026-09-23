@@ -20,7 +20,7 @@ function Show() {
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'System Administration',
+            title: 'Administrative Tasks',
             href: '',
         },
         {

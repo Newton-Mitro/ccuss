@@ -8,7 +8,7 @@ import { BreadcrumbItem } from '../../../types';
 
 export default function Batch({ batch }: AuditBatchPageProps) {
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'System Administration', href: '' },
+        { title: 'Administrative Tasks', href: '' },
         { title: 'Audit Logs', href: route('audits.index') },
         { title: `Batch ${batch.batch_id}`, href: '#' },
     ];
