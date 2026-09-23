@@ -4,6 +4,8 @@ namespace App\FinancialServices\Controllers;
 
 use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Application\FinancialAccountService;
+use App\FinancialServices\Application\FixedDepositService;
+use App\FinancialServices\Application\RecurringDepositService;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\DepositNominee;
@@ -12,6 +14,8 @@ use App\FinancialServices\Requests\StoreFinancialAccountRequest;
 use App\FinancialServices\Requests\StoreDepositNomineeRequest;
 use App\FinancialServices\Requests\StoreFinancialAccountHolderRequest;
 use App\FinancialServices\Requests\StoreShareAccountRequest;
+use App\FinancialServices\Requests\StoreFixedDepositRequest;
+use App\FinancialServices\Requests\StoreRecurringDepositRequest;
 use Carbon\CarbonImmutable;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -20,8 +24,11 @@ use Inertia\Response;
 
 class FinancialAccountController extends Controller
 {
-    public function __construct(private readonly FinancialAccountService $accountService)
-    {
+    public function __construct(
+        private readonly FinancialAccountService $accountService,
+        private readonly FixedDepositService $fixedDepositService,
+        private readonly RecurringDepositService $recurringDepositService,
+    ) {
         $this->middleware('permission:financial.accounts.view')->only(['index', 'show', 'statement']);
         $this->middleware('permission:financial.accounts.create')->only(['create', 'store']);
         $this->middleware('permission:financial.accounts.update')->only('activate');
@@ -29,6 +36,8 @@ class FinancialAccountController extends Controller
         $this->middleware('permission:financial.accounts.nominees.manage')->only(['storeNominee', 'updateNominee', 'destroyNominee']);
         $this->middleware('permission:financial.accounts.holders.manage')->only(['storeHolder', 'updateHolder', 'destroyHolder']);
         $this->middleware('permission:financial.accounts.membership.manage')->only(['storeShareAccount', 'updateShareAccount']);
+        $this->middleware('permission:financial.accounts.fixed-deposits.manage')->only('storeFixedDeposit');
+        $this->middleware('permission:financial.accounts.recurring-deposits.manage')->only('storeRecurringDeposit');
     }
 
     public function index(Request $request): Response
@@ -293,6 +302,22 @@ class FinancialAccountController extends Controller
         $shareAccount->update([...$request->validated(), 'membership_no' => $membershipNo]);
 
         return back()->with('success', 'Share membership updated successfully.');
+    }
+
+    public function storeFixedDeposit(StoreFixedDepositRequest $request, FinancialAccount $financialAccount)
+    {
+        $this->authorizeOrganization($request, $financialAccount);
+        $this->fixedDepositService->open($financialAccount, $request->validated());
+
+        return back()->with('success', 'Fixed-deposit contract opened successfully.');
+    }
+
+    public function storeRecurringDeposit(StoreRecurringDepositRequest $request, FinancialAccount $financialAccount)
+    {
+        $this->authorizeOrganization($request, $financialAccount);
+        $this->recurringDepositService->open($financialAccount, $request->validated());
+
+        return back()->with('success', 'Recurring-deposit contract opened successfully.');
     }
 
     private function organizationId(Request $request): int

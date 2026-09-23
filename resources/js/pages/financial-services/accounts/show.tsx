@@ -58,6 +58,33 @@ export default function FinancialAccountShow() {
         membership_status:
             account.share_account?.membership_status ?? 'PENDING',
     });
+    const {
+        data: fixedData,
+        setData: setFixedData,
+        post: postFixedDeposit,
+        processing: fixedProcessing,
+        errors: fixedErrors,
+    } = useForm({
+        principal_amount: '',
+        contractual_rate: '',
+        term_months: '12',
+        started_at: new Date().toISOString().slice(0, 10),
+        maturity_instruction: 'PAYOUT',
+    });
+    const {
+        data: recurringData,
+        setData: setRecurringData,
+        post: postRecurringDeposit,
+        processing: recurringProcessing,
+        errors: recurringErrors,
+    } = useForm({
+        installment_amount: '',
+        installment_frequency: 'MONTHLY',
+        total_installments: '12',
+        started_at: new Date().toISOString().slice(0, 10),
+        maturity_extension_days: '0',
+        grace_days: '0',
+    });
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
         {
@@ -161,6 +188,22 @@ export default function FinancialAccountShow() {
                 options,
             );
         }
+    };
+
+    const submitFixedDeposit = (event: React.FormEvent) => {
+        event.preventDefault();
+        postFixedDeposit(
+            route('financial-accounts.fixed-deposit.store', account.id),
+            { preserveScroll: true },
+        );
+    };
+
+    const submitRecurringDeposit = (event: React.FormEvent) => {
+        event.preventDefault();
+        postRecurringDeposit(
+            route('financial-accounts.recurring-deposit.store', account.id),
+            { preserveScroll: true },
+        );
     };
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
@@ -749,6 +792,123 @@ export default function FinancialAccountShow() {
                         </div>
                     </section>
                 )}
+                {account.account_type === 'FIXED_DEPOSIT' &&
+                    !account.fixed_deposit && (
+                        <section className="rounded-lg border bg-card p-4">
+                            <h2 className="text-sm font-semibold">
+                                Open fixed deposit
+                            </h2>
+                            <form
+                                onSubmit={submitFixedDeposit}
+                                className="mt-3 grid gap-3 border-t pt-3 sm:grid-cols-2"
+                            >
+                                <div>
+                                    <Label>Principal amount</Label>
+                                    <Input
+                                        type="number"
+                                        min="0.0001"
+                                        step="0.0001"
+                                        value={fixedData.principal_amount}
+                                        onChange={(event) =>
+                                            setFixedData(
+                                                'principal_amount',
+                                                event.target.value,
+                                            )
+                                        }
+                                    />
+                                    <InputError
+                                        message={fixedErrors.principal_amount}
+                                    />
+                                </div>
+                                <div>
+                                    <Label>Contractual rate (%)</Label>
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        step="0.000001"
+                                        value={fixedData.contractual_rate}
+                                        onChange={(event) =>
+                                            setFixedData(
+                                                'contractual_rate',
+                                                event.target.value,
+                                            )
+                                        }
+                                    />
+                                    <InputError
+                                        message={fixedErrors.contractual_rate}
+                                    />
+                                </div>
+                                <div>
+                                    <Label>Term (months)</Label>
+                                    <Input
+                                        type="number"
+                                        min="1"
+                                        step="1"
+                                        value={fixedData.term_months}
+                                        onChange={(event) =>
+                                            setFixedData(
+                                                'term_months',
+                                                event.target.value,
+                                            )
+                                        }
+                                    />
+                                    <InputError
+                                        message={fixedErrors.term_months}
+                                    />
+                                </div>
+                                <div>
+                                    <Label>Started at</Label>
+                                    <Input
+                                        type="date"
+                                        value={fixedData.started_at}
+                                        onChange={(event) =>
+                                            setFixedData(
+                                                'started_at',
+                                                event.target.value,
+                                            )
+                                        }
+                                    />
+                                    <InputError
+                                        message={fixedErrors.started_at}
+                                    />
+                                </div>
+                                <div>
+                                    <Label>Maturity instruction</Label>
+                                    <Select
+                                        value={fixedData.maturity_instruction}
+                                        onChange={(value) =>
+                                            setFixedData(
+                                                'maturity_instruction',
+                                                value,
+                                            )
+                                        }
+                                        options={[
+                                            'PAYOUT',
+                                            'RENEW_PRINCIPAL',
+                                            'RENEW_PRINCIPAL_AND_INTEREST',
+                                        ].map((value) => ({
+                                            value,
+                                            label: value.replaceAll('_', ' '),
+                                        }))}
+                                    />
+                                    <InputError
+                                        message={
+                                            fixedErrors.maturity_instruction
+                                        }
+                                    />
+                                </div>
+                                <div className="flex items-end justify-end">
+                                    <Button
+                                        type="submit"
+                                        disabled={fixedProcessing}
+                                    >
+                                        <Plus className="mr-1 h-4 w-4" /> Open
+                                        contract
+                                    </Button>
+                                </div>
+                            </form>
+                        </section>
+                    )}
                 {account.recurring_deposit && (
                     <section className="rounded-lg border bg-card p-4">
                         <h2 className="text-sm font-semibold">
@@ -795,8 +955,185 @@ export default function FinancialAccountShow() {
                                 </p>
                             </div>
                         </div>
+                        <div className="mt-4 overflow-x-auto border-t pt-3">
+                            <h3 className="mb-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                                Installment schedule
+                            </h3>
+                            <table className="w-full text-left text-sm">
+                                <thead className="border-b text-xs text-muted-foreground">
+                                    <tr>
+                                        <th className="px-2 py-2">No.</th>
+                                        <th className="px-2 py-2">Due date</th>
+                                        <th className="px-2 py-2">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y">
+                                    {(
+                                        account.recurring_deposit
+                                            .installments ?? []
+                                    ).map((installment) => (
+                                        <tr key={installment.id}>
+                                            <td className="px-2 py-2">
+                                                {installment.installment_no}
+                                            </td>
+                                            <td className="px-2 py-2">
+                                                {installment.due_date}
+                                            </td>
+                                            <td className="px-2 py-2">
+                                                {installment.status}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </section>
                 )}
+                {account.account_type === 'RECURRING_DEPOSIT' &&
+                    !account.recurring_deposit && (
+                        <section className="rounded-lg border bg-card p-4">
+                            <h2 className="text-sm font-semibold">
+                                Open recurring deposit
+                            </h2>
+                            <form
+                                onSubmit={submitRecurringDeposit}
+                                className="mt-3 grid gap-3 border-t pt-3 sm:grid-cols-2"
+                            >
+                                <div>
+                                    <Label>Installment amount</Label>
+                                    <Input
+                                        type="number"
+                                        min="0.0001"
+                                        step="0.0001"
+                                        value={recurringData.installment_amount}
+                                        onChange={(event) =>
+                                            setRecurringData(
+                                                'installment_amount',
+                                                event.target.value,
+                                            )
+                                        }
+                                    />
+                                    <InputError
+                                        message={
+                                            recurringErrors.installment_amount
+                                        }
+                                    />
+                                </div>
+                                <div>
+                                    <Label>Frequency</Label>
+                                    <Select
+                                        value={
+                                            recurringData.installment_frequency
+                                        }
+                                        onChange={(value) =>
+                                            setRecurringData(
+                                                'installment_frequency',
+                                                value,
+                                            )
+                                        }
+                                        options={[
+                                            'WEEKLY',
+                                            'MONTHLY',
+                                            'QUARTERLY',
+                                        ].map((value) => ({
+                                            value,
+                                            label: value,
+                                        }))}
+                                    />
+                                    <InputError
+                                        message={
+                                            recurringErrors.installment_frequency
+                                        }
+                                    />
+                                </div>
+                                <div>
+                                    <Label>Total installments</Label>
+                                    <Input
+                                        type="number"
+                                        min="1"
+                                        step="1"
+                                        value={recurringData.total_installments}
+                                        onChange={(event) =>
+                                            setRecurringData(
+                                                'total_installments',
+                                                event.target.value,
+                                            )
+                                        }
+                                    />
+                                    <InputError
+                                        message={
+                                            recurringErrors.total_installments
+                                        }
+                                    />
+                                </div>
+                                <div>
+                                    <Label>Started at</Label>
+                                    <Input
+                                        type="date"
+                                        value={recurringData.started_at}
+                                        onChange={(event) =>
+                                            setRecurringData(
+                                                'started_at',
+                                                event.target.value,
+                                            )
+                                        }
+                                    />
+                                    <InputError
+                                        message={recurringErrors.started_at}
+                                    />
+                                </div>
+                                <div>
+                                    <Label>Extension days</Label>
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        step="1"
+                                        value={
+                                            recurringData.maturity_extension_days
+                                        }
+                                        onChange={(event) =>
+                                            setRecurringData(
+                                                'maturity_extension_days',
+                                                event.target.value,
+                                            )
+                                        }
+                                    />
+                                    <InputError
+                                        message={
+                                            recurringErrors.maturity_extension_days
+                                        }
+                                    />
+                                </div>
+                                <div>
+                                    <Label>Grace days</Label>
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        step="1"
+                                        value={recurringData.grace_days}
+                                        onChange={(event) =>
+                                            setRecurringData(
+                                                'grace_days',
+                                                event.target.value,
+                                            )
+                                        }
+                                    />
+                                    <InputError
+                                        message={recurringErrors.grace_days}
+                                    />
+                                </div>
+                                <div className="flex items-end justify-end sm:col-span-2">
+                                    <Button
+                                        type="submit"
+                                        disabled={recurringProcessing}
+                                    >
+                                        <Plus className="mr-1 h-4 w-4" /> Open
+                                        contract
+                                    </Button>
+                                </div>
+                            </form>
+                        </section>
+                    )}
                 {account.loan_account && (
                     <section className="rounded-lg border bg-card p-4">
                         <h2 className="text-sm font-semibold">Loan</h2>

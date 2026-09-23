@@ -25,6 +25,8 @@ final class FinancialServicesPermissions
             new PermissionDefinition('Financial Accounts', 'Manage Account Nominees', 'financial.accounts.nominees.manage', 'manage', 'Manage deposit account nominees'),
             new PermissionDefinition('Financial Accounts', 'Manage Account Holders', 'financial.accounts.holders.manage', 'manage', 'Manage deposit account holders'),
             new PermissionDefinition('Financial Accounts', 'Manage Share Memberships', 'financial.accounts.membership.manage', 'manage', 'Manage share account memberships'),
+            new PermissionDefinition('Financial Accounts', 'Manage Fixed Deposits', 'financial.accounts.fixed-deposits.manage', 'manage', 'Manage fixed-deposit contracts'),
+            new PermissionDefinition('Financial Accounts', 'Manage Recurring Deposits', 'financial.accounts.recurring-deposits.manage', 'manage', 'Manage recurring-deposit contracts'),
             new PermissionDefinition('Financial Transactions', 'View Financial Transactions', 'financial.transactions.view', 'view', 'View financial transactions'),
             new PermissionDefinition('Financial Transactions', 'Create Financial Transactions', 'financial.transactions.create', 'create', 'Create financial transactions'),
             new PermissionDefinition('Financial Transactions', 'Post Financial Transactions', 'financial.transactions.post', 'post', 'Post financial transactions'),

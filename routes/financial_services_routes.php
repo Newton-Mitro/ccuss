@@ -52,6 +52,8 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::delete('/financial-accounts/{financial_account}/holders/{holder}', [FinancialAccountController::class, 'destroyHolder'])->name('financial-accounts.holders.destroy');
     Route::post('/financial-accounts/{financial_account}/membership', [FinancialAccountController::class, 'storeShareAccount'])->name('financial-accounts.membership.store');
     Route::put('/financial-accounts/{financial_account}/membership/{shareAccount}', [FinancialAccountController::class, 'updateShareAccount'])->name('financial-accounts.membership.update');
+    Route::post('/financial-accounts/{financial_account}/fixed-deposit', [FinancialAccountController::class, 'storeFixedDeposit'])->name('financial-accounts.fixed-deposit.store');
+    Route::post('/financial-accounts/{financial_account}/recurring-deposit', [FinancialAccountController::class, 'storeRecurringDeposit'])->name('financial-accounts.recurring-deposit.store');
     Route::get('/financial-account-statements', [FinancialAccountController::class, 'statement'])->name('financial-account-statements.index');
 
     Route::get('/financial-transactions', [FinancialTransactionController::class, 'index'])->name('financial-transactions.index');
