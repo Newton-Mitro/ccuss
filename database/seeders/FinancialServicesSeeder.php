@@ -10,7 +10,12 @@ use App\FinancialServices\Models\FinancialProductPolicy;
 use App\FinancialServices\Models\FinancialTransaction;
 use App\FinancialServices\Models\FinancialTransactionEntry;
 use App\FinancialServices\Models\FixedDeposit;
+use App\FinancialServices\Models\LoanAccount;
+use App\FinancialServices\Models\LoanApplication;
+use App\FinancialServices\Models\RecurringDeposit;
+use App\FinancialServices\Models\RecurringDepositInstallment;
 use App\FinancialServices\Models\ShareAccount;
+use App\FinancialServices\Application\LoanScheduleService;
 use App\GeneralAccounting\Models\LedgerAccount;
 use App\SystemAdministration\Models\Organization;
 use Illuminate\Database\Seeder;
@@ -37,6 +42,7 @@ class FinancialServicesSeeder extends Seeder
                 ['FDR-12M', 'Twelve Month Fixed Deposit', 'FIXED_DEPOSIT', 'LIABILITY', '8.500000', 'COMPOUND', 'MATURITY', 10000],
                 ['RD-24M', 'Twenty Four Month Recurring Deposit', 'RECURRING_DEPOSIT', 'LIABILITY', '7.000000', 'COMPOUND', 'MONTHLY', 500],
                 ['LN-GEN', 'General Loan', 'LOAN', 'ASSET', '12.000000', 'REDUCING_BALANCE', 'MONTHLY', 0],
+                ['OTH-GEN', 'Other Financial Product', 'OTHER', 'LIABILITY', '0.000000', 'NONE', 'NONE', 0],
             ];
 
             foreach ($products as [$code, $name, $category, $balanceType, $rate, $calculation, $frequency, $minimumOpening]) {
@@ -124,6 +130,131 @@ class FinancialServicesSeeder extends Seeder
                     'organization_id' => $organization->id,
                     'type' => 'INDIVIDUAL',
                 ]);
+            }
+
+            $loanCustomer = $customers->first();
+            $loanProduct = FinancialProduct::query()
+                ->where('organization_id', $organization->id)
+                ->where('code', 'LN-GEN')
+                ->firstOrFail();
+            $loanApplication = LoanApplication::query()->updateOrCreate(
+                [
+                    'organization_id' => $organization->id,
+                    'application_no' => 'APP-SEED-0001',
+                ],
+                [
+                    'branch_id' => $branchId,
+                    'customer_id' => $loanCustomer->id,
+                    'financial_product_id' => $loanProduct->id,
+                    'requested_amount' => 50000,
+                    'approved_amount' => 50000,
+                    'requested_term_months' => 24,
+                    'purpose' => 'Seeded general loan for financial services workflows',
+                    'status' => 'APPROVED',
+                    'applied_at' => now()->subMonths(7)->toDateString(),
+                    'approved_at' => now()->subMonths(6),
+                    'decision_note' => 'Seeded approved loan application',
+                ],
+            );
+            $loanFinancialAccount = FinancialAccount::query()->updateOrCreate(
+                [
+                    'organization_id' => $organization->id,
+                    'account_no' => 'LOAN-SEED-0001',
+                ],
+                [
+                    'branch_id' => $branchId,
+                    'financial_product_id' => $loanProduct->id,
+                    'holder_type' => Customer::class,
+                    'holder_id' => $loanCustomer->id,
+                    'name' => $loanCustomer->name . ' General Loan',
+                    'account_type' => 'LOAN',
+                    'status' => 'ACTIVE',
+                    'balance' => 50000,
+                    'available_balance' => 50000,
+                    'opened_at' => now()->subMonths(6)->toDateString(),
+                    'metadata' => ['seeded' => true],
+                ],
+            );
+
+            $loanAccount = LoanAccount::query()->updateOrCreate(
+                ['loan_no' => 'LN-SEED-0001'],
+                [
+                    'customer_id' => $loanCustomer->id,
+                    'financial_account_id' => $loanFinancialAccount->id,
+                    'financial_product_id' => $loanProduct->id,
+                    'loan_application_id' => $loanApplication->id,
+                    'principal_amount' => 50000,
+                    'disbursed_amount' => 50000,
+                    'contractual_rate' => $loanProduct->interest_rate,
+                    'interest_calculation' => 'REDUCING_BALANCE',
+                    'term_months' => 24,
+                    'approved_at' => now()->subMonths(6)->toDateString(),
+                    'disbursed_at' => now()->subMonths(6)->toDateString(),
+                    'maturity_date' => now()->addMonths(18)->toDateString(),
+                    'status' => 'ACTIVE',
+                ],
+            );
+            app(LoanScheduleService::class)->generate($loanAccount, [
+                'frequency' => 'MONTHLY',
+                'term_months' => 24,
+                'start_date' => now()->subMonths(6)->toDateString(),
+            ]);
+
+            $recurringDepositProduct = FinancialProduct::query()
+                ->where('organization_id', $organization->id)
+                ->where('code', 'RD-24M')
+                ->firstOrFail();
+            $recurringDepositAccount = FinancialAccount::query()->updateOrCreate(
+                [
+                    'organization_id' => $organization->id,
+                    'account_no' => 'RD-SEED-0001',
+                ],
+                [
+                    'branch_id' => $branchId,
+                    'financial_product_id' => $recurringDepositProduct->id,
+                    'holder_type' => Customer::class,
+                    'holder_id' => $loanCustomer->id,
+                    'name' => $loanCustomer->name . ' Recurring Deposit',
+                    'account_type' => 'RECURRING_DEPOSIT',
+                    'status' => 'ACTIVE',
+                    'balance' => 30000,
+                    'available_balance' => 30000,
+                    'opened_at' => now()->subMonths(6)->toDateString(),
+                    'metadata' => ['seeded' => true],
+                ],
+            );
+
+            $recurringDeposit = RecurringDeposit::query()->updateOrCreate(
+                ['financial_account_id' => $recurringDepositAccount->id],
+                [
+                    'installment_amount' => 5000,
+                    'installment_frequency' => 'MONTHLY',
+                    'total_installments' => 24,
+                    'paid_installments' => 6,
+                    'started_at' => now()->subMonths(6)->toDateString(),
+                    'maturity_date' => now()->addMonths(18)->toDateString(),
+                    'maturity_extension_days' => 0,
+                    'grace_days' => 7,
+                    'status' => 'ACTIVE',
+                ],
+            );
+
+            foreach (range(1, 24) as $installmentNo) {
+                $isPaid = $installmentNo <= 6;
+                RecurringDepositInstallment::query()->updateOrCreate(
+                    [
+                        'recurring_deposit_id' => $recurringDeposit->id,
+                        'installment_no' => $installmentNo,
+                    ],
+                    [
+                        'due_date' => now()->subMonths(6)->addMonths($installmentNo - 1)->toDateString(),
+                        'amount_due' => 5000,
+                        'amount_paid' => $isPaid ? 5000 : 0,
+                        'fine_amount' => 0,
+                        'status' => $isPaid ? 'PAID' : 'PENDING',
+                        'paid_at' => $isPaid ? now()->subMonths(6)->addMonths($installmentNo - 1) : null,
+                    ],
+                );
             }
 
             $savingsProduct = FinancialProduct::query()

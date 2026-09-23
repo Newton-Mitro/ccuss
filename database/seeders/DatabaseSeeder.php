@@ -33,6 +33,7 @@ class DatabaseSeeder extends Seeder
                 GeneralAccountingSeeder::class,
                 CustomerSeeder::class,
                 FinancialServicesSeeder::class,
+                TreasuryAndCashSeeder::class,
             ]);
         });
 

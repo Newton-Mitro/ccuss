@@ -167,10 +167,19 @@ export default function Index() {
                                             className="border-b even:bg-muted hover:bg-accent/20"
                                         >
                                             <td className="px-2 py-1">
-                                                <img
-                                                    src={c.photo.url}
-                                                    className="h-6 w-6 rounded-full"
-                                                />
+                                                {c.photo?.url ? (
+                                                    <img
+                                                        src={c.photo.url}
+                                                        alt={c.name}
+                                                        className="h-6 w-6 rounded-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
+                                                        {c.name
+                                                            .charAt(0)
+                                                            .toUpperCase()}
+                                                    </div>
+                                                )}
                                             </td>
                                             <td className="px-2 py-1">
                                                 {c.customer_no}
