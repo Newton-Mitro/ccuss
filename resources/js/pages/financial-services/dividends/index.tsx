@@ -198,6 +198,30 @@ export default function DividendsIndex() {
                                             .join(' · ')}
                                     </p>
                                 )}
+                                {declaration.status === 'APPROVED' &&
+                                    declaration.allocations
+                                        ?.filter(
+                                            (allocation) =>
+                                                allocation.status ===
+                                                'CALCULATED',
+                                        )
+                                        .map((allocation) => (
+                                            <Button
+                                                key={allocation.id}
+                                                size="sm"
+                                                onClick={() =>
+                                                    router.post(
+                                                        route(
+                                                            'dividend-allocations.post',
+                                                            allocation.id,
+                                                        ),
+                                                    )
+                                                }
+                                            >
+                                                Post{' '}
+                                                {allocation.dividend_amount}
+                                            </Button>
+                                        ))}
                             </div>
                         ))}
                     </div>

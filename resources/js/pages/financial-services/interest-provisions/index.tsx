@@ -145,6 +145,21 @@ export default function InterestProvisionsIndex() {
                                             </Button>
                                         </>
                                     )}
+                                    {provision.status === 'APPROVED' && (
+                                        <Button
+                                            size="sm"
+                                            onClick={() =>
+                                                router.post(
+                                                    route(
+                                                        'interest-provisions.post',
+                                                        provision.id,
+                                                    ),
+                                                )
+                                            }
+                                        >
+                                            Post
+                                        </Button>
+                                    )}
                                 </div>
                             </div>
                         ))}

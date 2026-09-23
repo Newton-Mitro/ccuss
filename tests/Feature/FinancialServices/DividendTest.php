@@ -10,6 +10,7 @@ use App\CustomerModule\Models\Customer;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\User;
+use App\FinancialServices\Application\FinancialTransactionService;
 
 it('calculates idempotent dividends for active share members', function () {
     $organization = Organization::factory()->create();
@@ -33,6 +34,13 @@ it('calculates idempotent dividends for active share members', function () {
         ->and((float) $calculated->total_dividend_amount)->toBe(50.0)
         ->and($retry->allocations)->toHaveCount(1)
         ->and($service->approve($calculated->fresh(), $user->id)->status)->toBe('APPROVED');
+    $allocation = $retry->allocations->first()->fresh();
+    $transaction = $service->createPosting($allocation, $organization->id, $user->id);
+    app(FinancialTransactionService::class)->post($transaction, $organization->id, $user->id);
+    expect($allocation->fresh()->status)->toBe('POSTED')
+        ->and($declaration->fresh()->status)->toBe('POSTED');
+    app(FinancialTransactionService::class)->reverse($transaction->fresh(), $organization->id);
+    expect($allocation->fresh()->status)->toBe('REVERSED');
     expect(fn() => $service->createDeclaration(['fiscal_year_id' => $fiscalYear->id, 'dividend_rate' => 4], $organization->id))
         ->toThrow(RuntimeException::class, 'already exists');
 });

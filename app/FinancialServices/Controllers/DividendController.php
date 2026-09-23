@@ -4,6 +4,7 @@ namespace App\FinancialServices\Controllers;
 
 use App\FinancialServices\Application\DividendService;
 use App\FinancialServices\Models\ShareDividendDeclaration;
+use App\FinancialServices\Models\ShareDividendAllocation;
 use App\GeneralAccounting\Models\FiscalYear;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -15,7 +16,7 @@ class DividendController extends Controller
     public function __construct(private readonly DividendService $service)
     {
         $this->middleware('permission:financial.accounts.view')->only('index');
-        $this->middleware('permission:financial.accounts.manage')->only(['store', 'calculate', 'approve']);
+        $this->middleware('permission:financial.accounts.manage')->only(['store', 'calculate', 'approve', 'post']);
     }
 
     public function index(Request $request): Response
@@ -50,6 +51,15 @@ class DividendController extends Controller
         $this->service->approve($shareDividendDeclaration, $request->user()->id);
 
         return back()->with('success', 'Dividend declaration approved.');
+    }
+
+    public function post(Request $request, ShareDividendAllocation $shareDividendAllocation)
+    {
+        $shareDividendAllocation->load('declaration');
+        abort_unless($shareDividendAllocation->declaration->organization_id === $this->organizationId($request), 404);
+        $transaction = $this->service->createPosting($shareDividendAllocation, $this->organizationId($request), $request->user()->id);
+
+        return redirect()->route('financial-transactions.show', $transaction)->with('success', 'Dividend allocation posting created.');
     }
 
     private function organizationId(Request $request): int

@@ -4,12 +4,18 @@ namespace App\FinancialServices\Application;
 
 use App\FinancialServices\Models\ShareAccount;
 use App\FinancialServices\Models\ShareDividendDeclaration;
+use App\FinancialServices\Models\ShareDividendAllocation;
+use App\FinancialServices\Application\FinancialTransactionService;
 use App\GeneralAccounting\Models\FiscalYear;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class DividendService
 {
+    public function __construct(private readonly FinancialTransactionService $transactionService)
+    {
+    }
+
     public function createDeclaration(array $data, int $organizationId): ShareDividendDeclaration
     {
         $fiscalYear = FiscalYear::query()
@@ -84,5 +90,24 @@ class DividendService
         $declaration->update(['status' => 'APPROVED', 'approved_by' => $userId, 'approved_at' => now()]);
 
         return $declaration->refresh();
+    }
+
+    public function createPosting(ShareDividendAllocation $allocation, int $organizationId, int $userId): \App\FinancialServices\Models\FinancialTransaction
+    {
+        if ($allocation->status !== 'CALCULATED' || $allocation->declaration()->value('status') !== 'APPROVED') {
+            throw new RuntimeException('Only approved dividend allocations can be posted.');
+        }
+        $allocation->loadMissing('shareAccount.financialAccount');
+
+        return $this->transactionService->create([
+            'financial_account_id' => $allocation->shareAccount->financial_account_id,
+            'transaction_type' => 'DIVIDEND_ALLOCATION',
+            'transaction_date' => now()->toDateString(),
+            'amount' => $allocation->dividend_amount,
+            'idempotency_key' => 'dividend-allocation-' . $allocation->id,
+            'source_type' => ShareDividendAllocation::class,
+            'source_id' => $allocation->id,
+            'description' => 'Share dividend allocation',
+        ], $organizationId, $userId);
     }
 }

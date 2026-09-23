@@ -4,11 +4,16 @@ namespace App\FinancialServices\Application;
 
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\InterestProvision;
+use App\FinancialServices\Application\FinancialTransactionService;
 use Carbon\CarbonImmutable;
 use RuntimeException;
 
 class InterestProvisionService
 {
+    public function __construct(private readonly FinancialTransactionService $transactionService)
+    {
+    }
+
     public function calculateOrganization(int $organizationId, string $periodStart, string $periodEnd, int $userId): array
     {
         $start = CarbonImmutable::parse($periodStart);
@@ -75,5 +80,24 @@ class InterestProvisionService
         $provision->update(['status' => 'REVERSED', 'note' => $note]);
 
         return $provision->refresh();
+    }
+
+    public function createPosting(InterestProvision $provision, int $organizationId, int $userId, ?string $idempotencyKey = null): \App\FinancialServices\Models\FinancialTransaction
+    {
+        if ($provision->status !== 'APPROVED') {
+            throw new RuntimeException('Only approved interest provisions can be posted.');
+        }
+        $provision->loadMissing('financialAccount');
+
+        return $this->transactionService->create([
+            'financial_account_id' => $provision->financial_account_id,
+            'transaction_type' => 'INTEREST_PROVISION',
+            'transaction_date' => $provision->period_end->toDateString(),
+            'amount' => $provision->provisioned_amount,
+            'idempotency_key' => $idempotencyKey ?? 'interest-provision-' . $provision->id,
+            'source_type' => InterestProvision::class,
+            'source_id' => $provision->id,
+            'description' => 'Interest provision ' . $provision->period_start->toDateString() . ' to ' . $provision->period_end->toDateString(),
+        ], $organizationId, $userId);
     }
 }

@@ -9,6 +9,9 @@ use App\FinancialServices\Models\LoanAccount;
 use App\FinancialServices\Models\LoanDisbursement;
 use App\FinancialServices\Models\LoanRepayment;
 use App\FinancialServices\Models\AccountFine;
+use App\FinancialServices\Models\InterestProvision;
+use App\FinancialServices\Models\InterestPosting;
+use App\FinancialServices\Models\ShareDividendAllocation;
 use App\FinancialServices\Models\RecurringDepositInstallment;
 use App\TreasuryAndCash\Models\BranchDay;
 use Illuminate\Database\Eloquent\Builder;
@@ -78,9 +81,12 @@ class FinancialTransactionService
 
             $transaction->entries()->create([
                 'financial_account_id' => $account->id,
-                'direction' => in_array($data['transaction_type'], ['DEPOSIT', 'FINE_PAYMENT'], true)
-                    ? ($data['transaction_type'] === 'DEPOSIT' ? 'CREDIT' : $this->directionForDecrease($account))
-                    : 'DEBIT',
+                'direction' => match ($data['transaction_type']) {
+                    'DEPOSIT' => 'CREDIT',
+                    'FINE_PAYMENT' => $this->directionForDecrease($account),
+                    'INTEREST_PROVISION', 'DIVIDEND_ALLOCATION' => $this->directionForIncrease($account),
+                    default => 'DEBIT',
+                },
                 'amount' => $data['amount'],
                 'description' => $data['description'] ?? null,
                 'line_no' => 1,
@@ -461,6 +467,34 @@ class FinancialTransactionService
                 ]);
             }
 
+            if ($transaction->source instanceof InterestProvision) {
+                $provision = InterestProvision::query()->lockForUpdate()->findOrFail($transaction->source->id);
+                if ($provision->status !== 'APPROVED') {
+                    throw new RuntimeException('Only approved interest provisions can be posted.');
+                }
+                $provision->update(['status' => 'POSTED', 'financial_transaction_id' => $transaction->id]);
+                InterestPosting::create([
+                    'interest_provision_id' => $provision->id,
+                    'financial_transaction_id' => $transaction->id,
+                    'amount' => $transaction->amount,
+                    'posted_at' => now()->toDateString(),
+                    'status' => 'POSTED',
+                    'posted_by' => $userId,
+                ]);
+            }
+
+            if ($transaction->source instanceof ShareDividendAllocation) {
+                $allocation = ShareDividendAllocation::query()->lockForUpdate()->findOrFail($transaction->source->id);
+                if ($allocation->status !== 'CALCULATED') {
+                    throw new RuntimeException('Only calculated dividend allocations can be posted.');
+                }
+                $allocation->update(['status' => 'POSTED', 'financial_transaction_id' => $transaction->id]);
+                $declaration = $allocation->declaration()->lockForUpdate()->firstOrFail();
+                if (!$declaration->allocations()->where('status', '!=', 'POSTED')->exists()) {
+                    $declaration->update(['status' => 'POSTED']);
+                }
+            }
+
             if ($transaction->source instanceof RecurringDepositInstallment) {
                 $installment = RecurringDepositInstallment::query()
                     ->with('recurringDeposit')
@@ -535,6 +569,18 @@ class FinancialTransactionService
                 $fine = AccountFine::query()->lockForUpdate()->findOrFail($transaction->source->id);
                 $paidAmount = max(0, (float) $fine->paid_amount - (float) $transaction->amount);
                 $fine->update(['paid_amount' => $paidAmount, 'status' => $paidAmount > 0 ? 'PARTIALLY_PAID' : 'ASSESSED']);
+            }
+
+            if ($transaction->source instanceof InterestProvision) {
+                $provision = InterestProvision::query()->lockForUpdate()->findOrFail($transaction->source->id);
+                $provision->update(['status' => 'REVERSED', 'financial_transaction_id' => null]);
+                InterestPosting::query()->where('financial_transaction_id', $transaction->id)->update(['status' => 'REVERSED']);
+            }
+
+            if ($transaction->source instanceof ShareDividendAllocation) {
+                $allocation = ShareDividendAllocation::query()->lockForUpdate()->findOrFail($transaction->source->id);
+                $allocation->update(['status' => 'REVERSED', 'financial_transaction_id' => null]);
+                $allocation->declaration()->update(['status' => 'APPROVED']);
             }
 
             return $transaction->fresh(['entries.financialAccount']);

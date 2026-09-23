@@ -14,7 +14,7 @@ class InterestProvisionController extends Controller
     public function __construct(private readonly InterestProvisionService $service)
     {
         $this->middleware('permission:financial.accounts.view')->only('index');
-        $this->middleware('permission:financial.accounts.manage')->only(['calculate', 'approve', 'reject']);
+        $this->middleware('permission:financial.accounts.manage')->only(['calculate', 'approve', 'reject', 'post']);
     }
 
     public function index(Request $request): Response
@@ -53,6 +53,14 @@ class InterestProvisionController extends Controller
         $this->service->reject($interestProvision, $request->string('note')->value() ?: null);
 
         return back()->with('success', 'Interest provision rejected.');
+    }
+
+    public function post(Request $request, InterestProvision $interestProvision)
+    {
+        $this->authorizeOrganization($request, $interestProvision);
+        $transaction = $this->service->createPosting($interestProvision, $this->organizationId($request), $request->user()->id);
+
+        return redirect()->route('financial-transactions.show', $transaction)->with('success', 'Interest provision posting created.');
     }
 
     private function organizationId(Request $request): int

@@ -47,10 +47,12 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::post('/interest-provisions/calculate', [InterestProvisionController::class, 'calculate'])->name('interest-provisions.calculate');
     Route::post('/interest-provisions/{interest_provision}/approve', [InterestProvisionController::class, 'approve'])->name('interest-provisions.approve');
     Route::post('/interest-provisions/{interest_provision}/reject', [InterestProvisionController::class, 'reject'])->name('interest-provisions.reject');
+    Route::post('/interest-provisions/{interest_provision}/post', [InterestProvisionController::class, 'post'])->name('interest-provisions.post');
     Route::get('/dividends', [DividendController::class, 'index'])->name('dividends.index');
     Route::post('/dividends', [DividendController::class, 'store'])->name('dividends.store');
     Route::post('/dividends/{share_dividend_declaration}/calculate', [DividendController::class, 'calculate'])->name('dividends.calculate');
     Route::post('/dividends/{share_dividend_declaration}/approve', [DividendController::class, 'approve'])->name('dividends.approve');
+    Route::post('/dividend-allocations/{share_dividend_allocation}/post', [DividendController::class, 'post'])->name('dividend-allocations.post');
     Route::get('/account-fines', [AccountFineController::class, 'index'])->name('account-fines.index');
     Route::post('/account-fines/{account_fine}/waive', [AccountFineController::class, 'waive'])->name('account-fines.waive');
 
