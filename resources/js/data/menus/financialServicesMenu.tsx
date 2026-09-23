@@ -79,6 +79,13 @@ export const financialServicesMenu: SidebarItem[] = [
                         permission: ['financial.accounts.view'],
                     },
                     {
+                        name: 'Loan Applications',
+                        icon: <i className="fa-solid fa-file-signature" />,
+                        path: '/loan-applications',
+                        match_path: 'loan-applications',
+                        permission: ['financial.loan-applications.view'],
+                    },
+                    {
                         name: 'All Accounts',
                         icon: <i className="fa-solid fa-list" />,
                         path: '/financial-accounts',

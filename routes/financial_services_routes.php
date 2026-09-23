@@ -5,6 +5,7 @@ use App\FinancialServices\Controllers\FinancialAccountController;
 use App\FinancialServices\Controllers\FinancialTransactionController;
 use App\FinancialServices\Controllers\FinancialProductPolicyController;
 use App\FinancialServices\Controllers\FinancialReportController;
+use App\FinancialServices\Controllers\LoanApplicationController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'organization'])->group(function () {
@@ -73,6 +74,14 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::post('/financial-transactions/{financial_transaction}/reverse', [FinancialTransactionController::class, 'reverse'])->name('financial-transactions.reverse');
 
     Route::get('/financial-services', [FinancialReportController::class, 'dashboard'])->name('financial-services.dashboard');
+    Route::get('/loan-applications', [LoanApplicationController::class, 'index'])->name('loan-applications.index');
+    Route::get('/loan-applications/create', [LoanApplicationController::class, 'create'])->name('loan-applications.create');
+    Route::post('/loan-applications', [LoanApplicationController::class, 'store'])->name('loan-applications.store');
+    Route::get('/loan-applications/{loan_application}', [LoanApplicationController::class, 'show'])->name('loan-applications.show');
+    Route::post('/loan-applications/{loan_application}/submit', [LoanApplicationController::class, 'submit'])->name('loan-applications.submit');
+    Route::post('/loan-applications/{loan_application}/review', [LoanApplicationController::class, 'review'])->name('loan-applications.review');
+    Route::post('/loan-applications/{loan_application}/approve', [LoanApplicationController::class, 'approve'])->name('loan-applications.approve');
+    Route::post('/loan-applications/{loan_application}/reject', [LoanApplicationController::class, 'reject'])->name('loan-applications.reject');
     Route::get('/financial-reports/product-summary', [FinancialReportController::class, 'productSummary'])->name('financial-reports.product-summary');
     Route::get('/financial-reports/account-balances', [FinancialReportController::class, 'accountBalances'])->name('financial-reports.account-balances');
     Route::get('/financial-reports/transactions', [FinancialReportController::class, 'transactions'])->name('financial-reports.transactions');

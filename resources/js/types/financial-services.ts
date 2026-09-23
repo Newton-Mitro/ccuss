@@ -65,6 +65,38 @@ export interface FinancialProductPageProps extends SharedData {
     ledgerAccounts: LedgerAccountOption[];
 }
 
+export interface LoanApplication {
+    id: number;
+    application_no: string;
+    requested_amount: string | number;
+    approved_amount?: string | number | null;
+    requested_term_months?: number | null;
+    purpose?: string | null;
+    status: string;
+    applied_at?: string | null;
+    approved_at?: string | null;
+    decision_note?: string | null;
+    customer?: { name?: string; customer_no?: string };
+    product?: { code?: string; name?: string };
+}
+
+export interface LoanApplicationIndexPageProps extends SharedData {
+    applications: {
+        data: LoanApplication[];
+        links: { url: string | null; label: string; active: boolean }[];
+    };
+    filters: { status?: string; page?: number; per_page?: number };
+}
+
+export interface LoanApplicationFormPageProps extends SharedData {
+    customers: { id: number; customer_no: string; name: string }[];
+    products: { id: number; code: string; name: string }[];
+}
+
+export interface LoanApplicationShowPageProps extends SharedData {
+    application: LoanApplication;
+}
+
 export interface FinancialProductFormPageProps extends SharedData {
     product?: FinancialProduct;
 }
