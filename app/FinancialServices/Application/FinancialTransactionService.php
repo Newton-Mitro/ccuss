@@ -90,6 +90,27 @@ class FinancialTransactionService
         ?int $branchId = null,
     ): FinancialTransaction {
         return DB::transaction(function () use ($data, $entries, $organizationId, $userId, $branchId) {
+            $total = collect($entries)->sum(fn(array $entry): float => (float) $entry['amount']);
+            $existing = $this->findIdempotentTransaction($data['idempotency_key'] ?? null, $organizationId);
+            if ($existing) {
+                $existingEntries = $existing->entries->sortBy('line_no')->values();
+                $sameEntries = $existingEntries->count() === count($entries)
+                    && collect($entries)->values()->every(function (array $entry, int $index) use ($existingEntries): bool {
+                        $existingEntry = $existingEntries->get($index);
+
+                        return $existingEntry
+                            && $existingEntry->financial_account_id === (int) $entry['financial_account_id']
+                            && $existingEntry->direction === $entry['direction']
+                            && (float) $existingEntry->amount === (float) $entry['amount'];
+                    });
+
+                if ($existing->transaction_type !== $data['transaction_type'] || (float) $existing->amount !== $total || !$sameEntries) {
+                    throw new RuntimeException('The idempotency key is already used for a different transaction.');
+                }
+
+                return $existing;
+            }
+
             $accountIds = collect($entries)->pluck('financial_account_id')->unique()->values();
             $accounts = FinancialAccount::query()
                 ->where('organization_id', $organizationId)
@@ -107,7 +128,6 @@ class FinancialTransactionService
                 }
             }
 
-            $total = collect($entries)->sum(fn(array $entry): float => (float) $entry['amount']);
             $debitTotal = collect($entries)
                 ->where('direction', 'DEBIT')
                 ->sum(fn(array $entry): float => (float) $entry['amount']);
@@ -123,6 +143,7 @@ class FinancialTransactionService
                 'organization_id' => $organizationId,
                 'branch_id' => $branchId,
                 'transaction_no' => $this->nextNumber($organizationId),
+                'idempotency_key' => $data['idempotency_key'] ?? null,
                 'transaction_type' => $data['transaction_type'],
                 'transaction_date' => $data['transaction_date'],
                 'amount' => $total,
@@ -167,6 +188,7 @@ class FinancialTransactionService
                 'currency' => $data['currency'] ?? 'BDT',
                 'reference' => $data['reference'] ?? null,
                 'description' => $data['description'] ?? null,
+                'idempotency_key' => $data['idempotency_key'] ?? null,
             ],
             [
                 [
@@ -191,6 +213,15 @@ class FinancialTransactionService
     public function createLoanDisbursement(array $data, int $organizationId, int $userId): FinancialTransaction
     {
         return DB::transaction(function () use ($data, $organizationId, $userId) {
+            $existing = $this->findIdempotentTransaction($data['idempotency_key'] ?? null, $organizationId);
+            if ($existing) {
+                if ($existing->transaction_type !== 'LOAN_DISBURSEMENT' || (float) $existing->amount !== (float) $data['amount'] * 2) {
+                    throw new RuntimeException('The idempotency key is already used for a different transaction.');
+                }
+
+                return $existing;
+            }
+
             $loan = LoanAccount::query()
                 ->whereHas('financialAccount', fn($query) => $query->where('organization_id', $organizationId))
                 ->whereIn('status', ['APPROVED', 'PARTIALLY_DISBURSED'])
@@ -214,6 +245,7 @@ class FinancialTransactionService
                     'transaction_date' => $data['disbursed_at'],
                     'reference' => $data['reference'] ?? null,
                     'description' => $data['note'] ?? null,
+                    'idempotency_key' => $data['idempotency_key'] ?? null,
                 ],
                 [
                     [
@@ -251,6 +283,19 @@ class FinancialTransactionService
 
             return $transaction->fresh(['entries.financialAccount', 'source']);
         });
+    }
+
+    private function findIdempotentTransaction(?string $idempotencyKey, int $organizationId): ?FinancialTransaction
+    {
+        if (!$idempotencyKey) {
+            return null;
+        }
+
+        return FinancialTransaction::query()
+            ->where('organization_id', $organizationId)
+            ->where('idempotency_key', $idempotencyKey)
+            ->with('entries')
+            ->first();
     }
 
     public function post(FinancialTransaction $transaction, int $organizationId, int $userId): FinancialTransaction

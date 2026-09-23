@@ -1,17 +1,33 @@
+import InputError from '@/components/input-error';
 import {
     ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
 import type { FinancialAccountShowPageProps } from '@/types/financial-services';
-import { Head, router, usePage } from '@inertiajs/react';
-import { Check, Lock } from 'lucide-react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Check, Lock, Pencil, Plus, Trash2, X } from 'lucide-react';
+import { useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function FinancialAccountShow() {
     const { account } = usePage<FinancialAccountShowPageProps>().props;
+    const [editingNomineeId, setEditingNomineeId] = useState<number | null>(
+        null,
+    );
+    const { data, setData, post, put, processing, errors, reset } = useForm({
+        name: '',
+        relationship: '',
+        phone: '',
+        identification_type: '',
+        identification_number: '',
+        share_percent: '100',
+        is_primary: true,
+    });
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
         {
@@ -20,6 +36,45 @@ export default function FinancialAccountShow() {
         },
         { title: account.account_no, href: '' },
     ];
+
+    const submitNominee = (event: React.FormEvent) => {
+        event.preventDefault();
+        const options = {
+            onSuccess: () => {
+                reset();
+                setEditingNomineeId(null);
+            },
+        };
+        if (editingNomineeId) {
+            put(
+                route('financial-accounts.nominees.update', [
+                    account.id,
+                    editingNomineeId,
+                ]),
+                options,
+            );
+        } else {
+            post(
+                route('financial-accounts.nominees.store', account.id),
+                options,
+            );
+        }
+    };
+
+    const editNominee = (
+        nominee: NonNullable<typeof account.nominees>[number],
+    ) => {
+        setEditingNomineeId(nominee.id);
+        setData({
+            name: nominee.name,
+            relationship: nominee.relationship,
+            phone: nominee.phone ?? '',
+            identification_type: nominee.identification_type ?? '',
+            identification_number: nominee.identification_number ?? '',
+            share_percent: String(nominee.share_percent ?? 0),
+            is_primary: nominee.is_primary ?? false,
+        });
+    };
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={account.account_no} />
@@ -145,6 +200,36 @@ export default function FinancialAccountShow() {
                                     <span className="text-muted-foreground tabular-nums">
                                         {nominee.share_percent ?? 0}%
                                     </span>
+                                    <div className="flex gap-1">
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => editNominee(nominee)}
+                                        >
+                                            <Pencil className="mr-1 h-4 w-4" />{' '}
+                                            Edit
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() =>
+                                                router.delete(
+                                                    route(
+                                                        'financial-accounts.nominees.destroy',
+                                                        [
+                                                            account.id,
+                                                            nominee.id,
+                                                        ],
+                                                    ),
+                                                )
+                                            }
+                                        >
+                                            <Trash2 className="mr-1 h-4 w-4" />{' '}
+                                            Remove
+                                        </Button>
+                                    </div>
                                 </div>
                             ))}
                             {!account.nominees?.length && (
@@ -153,6 +238,129 @@ export default function FinancialAccountShow() {
                                 </p>
                             )}
                         </div>
+                        <form
+                            onSubmit={submitNominee}
+                            className="mt-3 space-y-3 border-t pt-3"
+                        >
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                <div>
+                                    <Label>Name</Label>
+                                    <Input
+                                        value={data.name}
+                                        onChange={(event) =>
+                                            setData('name', event.target.value)
+                                        }
+                                    />
+                                    <InputError message={errors.name} />
+                                </div>
+                                <div>
+                                    <Label>Relationship</Label>
+                                    <Input
+                                        value={data.relationship}
+                                        onChange={(event) =>
+                                            setData(
+                                                'relationship',
+                                                event.target.value,
+                                            )
+                                        }
+                                    />
+                                    <InputError message={errors.relationship} />
+                                </div>
+                                <div>
+                                    <Label>Phone</Label>
+                                    <Input
+                                        value={data.phone}
+                                        onChange={(event) =>
+                                            setData('phone', event.target.value)
+                                        }
+                                    />
+                                    <InputError message={errors.phone} />
+                                </div>
+                                <div>
+                                    <Label>Share percentage</Label>
+                                    <Input
+                                        type="number"
+                                        min="0.0001"
+                                        max="100"
+                                        step="0.0001"
+                                        value={data.share_percent}
+                                        onChange={(event) =>
+                                            setData(
+                                                'share_percent',
+                                                event.target.value,
+                                            )
+                                        }
+                                    />
+                                    <InputError
+                                        message={errors.share_percent}
+                                    />
+                                </div>
+                                <div>
+                                    <Label>Identification type</Label>
+                                    <Input
+                                        value={data.identification_type}
+                                        onChange={(event) =>
+                                            setData(
+                                                'identification_type',
+                                                event.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
+                                <div>
+                                    <Label>Identification number</Label>
+                                    <Input
+                                        value={data.identification_number}
+                                        onChange={(event) =>
+                                            setData(
+                                                'identification_number',
+                                                event.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between gap-2">
+                                <label className="flex items-center gap-2 text-sm">
+                                    <input
+                                        type="checkbox"
+                                        checked={data.is_primary}
+                                        onChange={(event) =>
+                                            setData(
+                                                'is_primary',
+                                                event.target.checked,
+                                            )
+                                        }
+                                    />{' '}
+                                    Primary nominee
+                                </label>
+                                <div className="flex gap-2">
+                                    {editingNomineeId && (
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                                reset();
+                                                setEditingNomineeId(null);
+                                            }}
+                                        >
+                                            <X className="mr-1 h-4 w-4" />{' '}
+                                            Cancel
+                                        </Button>
+                                    )}
+                                    <Button
+                                        type="submit"
+                                        size="sm"
+                                        disabled={processing}
+                                    >
+                                        <Plus className="mr-1 h-4 w-4" />{' '}
+                                        {editingNomineeId ? 'Update' : 'Add'}{' '}
+                                        nominee
+                                    </Button>
+                                </div>
+                            </div>
+                        </form>
                     </section>
                 </div>
                 {account.share_account && (

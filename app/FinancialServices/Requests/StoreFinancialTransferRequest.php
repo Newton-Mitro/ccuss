@@ -17,6 +17,7 @@ class StoreFinancialTransferRequest extends FormRequest
         $organizationId = (int) $this->attributes->get('active_organization')?->id;
 
         return [
+            'idempotency_key' => ['nullable', 'uuid'],
             'source_account_id' => [
                 'required',
                 'integer',

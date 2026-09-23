@@ -22,6 +22,7 @@ final class FinancialServicesPermissions
             new PermissionDefinition('Financial Accounts', 'Create Financial Accounts', 'financial.accounts.create', 'create', 'Open financial accounts'),
             new PermissionDefinition('Financial Accounts', 'Update Financial Accounts', 'financial.accounts.update', 'update', 'Update financial accounts'),
             new PermissionDefinition('Financial Accounts', 'Close Financial Accounts', 'financial.accounts.close', 'close', 'Close financial accounts'),
+            new PermissionDefinition('Financial Accounts', 'Manage Account Nominees', 'financial.accounts.nominees.manage', 'manage', 'Manage deposit account nominees'),
             new PermissionDefinition('Financial Transactions', 'View Financial Transactions', 'financial.transactions.view', 'view', 'View financial transactions'),
             new PermissionDefinition('Financial Transactions', 'Create Financial Transactions', 'financial.transactions.create', 'create', 'Create financial transactions'),
             new PermissionDefinition('Financial Transactions', 'Post Financial Transactions', 'financial.transactions.post', 'post', 'Post financial transactions'),

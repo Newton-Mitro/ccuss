@@ -6,7 +6,9 @@ use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Application\FinancialAccountService;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
+use App\FinancialServices\Models\DepositNominee;
 use App\FinancialServices\Requests\StoreFinancialAccountRequest;
+use App\FinancialServices\Requests\StoreDepositNomineeRequest;
 use Carbon\CarbonImmutable;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -21,6 +23,7 @@ class FinancialAccountController extends Controller
         $this->middleware('permission:financial.accounts.create')->only(['create', 'store']);
         $this->middleware('permission:financial.accounts.update')->only('activate');
         $this->middleware('permission:financial.accounts.close')->only('close');
+        $this->middleware('permission:financial.accounts.nominees.manage')->only(['storeNominee', 'updateNominee', 'destroyNominee']);
     }
 
     public function index(Request $request): Response
@@ -186,6 +189,42 @@ class FinancialAccountController extends Controller
         return back()->with('success', 'Financial account closed successfully.');
     }
 
+    public function storeNominee(StoreDepositNomineeRequest $request, FinancialAccount $financialAccount)
+    {
+        $this->authorizeNomineeAccount($request, $financialAccount);
+        $this->validateNomineeAllocation($request, $financialAccount);
+        $nominee = $financialAccount->nominees()->create($request->validated());
+
+        if ($nominee->is_primary) {
+            $financialAccount->nominees()->whereKeyNot($nominee->id)->update(['is_primary' => false]);
+        }
+
+        return back()->with('success', 'Nominee added successfully.');
+    }
+
+    public function updateNominee(StoreDepositNomineeRequest $request, FinancialAccount $financialAccount, DepositNominee $nominee)
+    {
+        $this->authorizeNomineeAccount($request, $financialAccount);
+        abort_unless($nominee->financial_account_id === $financialAccount->id, 404);
+        $this->validateNomineeAllocation($request, $financialAccount, $nominee);
+        $nominee->update($request->validated());
+
+        if ($nominee->is_primary) {
+            $financialAccount->nominees()->whereKeyNot($nominee->id)->update(['is_primary' => false]);
+        }
+
+        return back()->with('success', 'Nominee updated successfully.');
+    }
+
+    public function destroyNominee(Request $request, FinancialAccount $financialAccount, DepositNominee $nominee)
+    {
+        $this->authorizeNomineeAccount($request, $financialAccount);
+        abort_unless($nominee->financial_account_id === $financialAccount->id, 404);
+        $nominee->delete();
+
+        return back()->with('success', 'Nominee removed successfully.');
+    }
+
     private function organizationId(Request $request): int
     {
         return (int) $request->attributes->get('active_organization')->id;
@@ -194,5 +233,21 @@ class FinancialAccountController extends Controller
     private function authorizeOrganization(Request $request, FinancialAccount $account): void
     {
         abort_unless($account->organization_id === $this->organizationId($request), 404);
+    }
+
+    private function authorizeNomineeAccount(Request $request, FinancialAccount $account): void
+    {
+        $this->authorizeOrganization($request, $account);
+        abort_unless(in_array($account->account_type, ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT'], true), 422);
+        abort_if($account->status === 'CLOSED', 422, 'Closed accounts cannot change nominees.');
+    }
+
+    private function validateNomineeAllocation(StoreDepositNomineeRequest $request, FinancialAccount $account, ?DepositNominee $current = null): void
+    {
+        $existingTotal = (float) $account->nominees()
+            ->when($current, fn($query) => $query->whereKeyNot($current->id))
+            ->sum('share_percent');
+
+        abort_if($existingTotal + (float) $request->validated('share_percent') > 100, 422, 'Nominee share percentages cannot exceed 100%.');
     }
 }

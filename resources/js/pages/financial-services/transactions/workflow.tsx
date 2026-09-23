@@ -43,6 +43,7 @@ export default function TransactionWorkflow() {
     const detail = details[workflow] ?? details.transfer;
     const Icon = detail.icon;
     const { data, setData, post, processing, errors } = useForm({
+        idempotency_key: crypto.randomUUID(),
         source_account_id: '',
         destination_account_id: '',
         transaction_date: new Date().toISOString().slice(0, 10),
