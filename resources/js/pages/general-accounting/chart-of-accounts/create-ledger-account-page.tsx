@@ -2,8 +2,8 @@ import { Head, useForm } from '@inertiajs/react';
 import React from 'react';
 import { route } from 'ziggy-js';
 
-import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
+import { ResourcePageHeader } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,26 +11,22 @@ import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
-import {
-    subledgerSubTypes,
-    subledgerTypes,
-} from '../../subledger-module/subledgers/data/type-sub-type';
 import { accountTypes } from './data/account-type';
 
-export default function Create({ parents }: any) {
+export default function Create({ accountGroups = [], parents = [] }: any) {
     useFlashToastHandler();
 
     const { data, setData, post, processing, errors } = useForm({
         code: '',
         name: '',
-        description: '',
         type: '',
-        is_group: false,
-        is_control_account: false,
-        subledger_type: '',
-        subledger_sub_type: '',
+        normal_balance: 'DEBIT',
+        account_group_id: '',
         parent_id: '',
-        is_active: true,
+        is_control_account: false,
+        is_reconcilable: false,
+        is_system: false,
+        status: true,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -50,23 +46,22 @@ export default function Create({ parents }: any) {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Ledger Account" />
 
-            <div className="text-foreground">
-                <HeadingSmall
+            <div className="max-w-4xl space-y-4 text-foreground">
+                <ResourcePageHeader
                     title="Create Ledger Account"
-                    description="Define a new general ledger account in your chart of accounts."
+                    description="Define the account's classification, hierarchy, and reconciliation behavior."
                 />
 
                 <form
                     onSubmit={handleSubmit}
                     className="mt-4 space-y-4 rounded-xl border bg-card p-8"
                 >
-                    {/* 🔹 Basic Info */}
                     <div>
-                        <h3 className="text-lg font-semibold text-muted-foreground">
-                            Basic Information
+                        <h3 className="text-sm font-semibold text-muted-foreground">
+                            Basic information
                         </h3>
 
-                        <div className="grid gap-4 md:grid-cols-4">
+                        <div className="mt-3 grid gap-4 md:grid-cols-2">
                             <div>
                                 <Label>Code</Label>
                                 <Input
@@ -74,8 +69,7 @@ export default function Create({ parents }: any) {
                                     onChange={(e) =>
                                         setData('code', e.target.value)
                                     }
-                                    placeholder="1001"
-                                    className="h-8 text-sm"
+                                    placeholder="1100"
                                 />
                                 <InputError message={errors.code} />
                             </div>
@@ -87,8 +81,7 @@ export default function Create({ parents }: any) {
                                     onChange={(e) =>
                                         setData('name', e.target.value)
                                     }
-                                    placeholder="Cash Account"
-                                    className="h-8 text-sm"
+                                    placeholder="Cash on hand"
                                 />
                                 <InputError message={errors.name} />
                             </div>
@@ -110,7 +103,38 @@ export default function Create({ parents }: any) {
                             </div>
 
                             <div>
-                                <Label>Parent Account</Label>
+                                <Label>Account group</Label>
+                                <Select
+                                    value={data.account_group_id}
+                                    onChange={(value) =>
+                                        setData('account_group_id', value)
+                                    }
+                                    options={[
+                                        { value: '', label: 'Select group' },
+                                        ...accountGroups.map((p: any) => ({
+                                            value: p.id,
+                                            label: `${p.code} - ${p.name}`,
+                                        })),
+                                    ]}
+                                />
+                                <InputError message={errors.account_group_id} />
+                            </div>
+                            <div>
+                                <Label>Normal balance</Label>
+                                <Select
+                                    value={data.normal_balance}
+                                    onChange={(value) =>
+                                        setData('normal_balance', value)
+                                    }
+                                    options={[
+                                        { value: 'DEBIT', label: 'Debit' },
+                                        { value: 'CREDIT', label: 'Credit' },
+                                    ]}
+                                />
+                                <InputError message={errors.normal_balance} />
+                            </div>
+                            <div>
+                                <Label>Parent account</Label>
                                 <Select
                                     value={data.parent_id}
                                     onChange={(value) =>
@@ -129,137 +153,68 @@ export default function Create({ parents }: any) {
                         </div>
                     </div>
 
-                    {/* 🔹 Account Settings */}
                     <div>
-                        <h3 className="text-lg font-semibold text-muted-foreground">
-                            Account Settings
+                        <h3 className="text-sm font-semibold text-muted-foreground">
+                            Account settings
                         </h3>
 
-                        <div className="grid gap-4 md:grid-cols-4">
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    checked={data.is_group}
-                                    onChange={(e) => {
-                                        const checked = e.target.checked;
-                                        setData('is_group', checked);
-
-                                        // 🔒 enforce rule
-                                        if (checked) {
-                                            setData(
-                                                'is_control_account',
-                                                false,
-                                            );
-                                            setData('subledger_type', '');
-                                            setData('subledger_sub_type', '');
-                                        }
-                                    }}
-                                />
-                                <Label>Group Account</Label>
-                            </div>
-
-                            <div className="flex items-center gap-2">
+                        <div className="mt-3 grid gap-3 md:grid-cols-2">
+                            <label className="flex items-center gap-2 rounded-md border p-3 text-sm">
                                 <input
                                     type="checkbox"
                                     checked={data.is_control_account}
-                                    onChange={(e) => {
-                                        const checked = e.target.checked;
-                                        setData('is_control_account', checked);
-
-                                        if (checked) {
-                                            setData('is_group', false);
-                                            setData('subledger_type', '');
-                                            setData('subledger_sub_type', '');
-                                        }
-                                    }}
-                                />
-                                <Label>Control Account</Label>
-                            </div>
-
-                            <div className="flex items-center gap-2 pt-4">
-                                <input
-                                    type="checkbox"
-                                    checked={data.is_active}
                                     onChange={(e) =>
-                                        setData('is_active', e.target.checked)
+                                        setData(
+                                            'is_control_account',
+                                            e.target.checked,
+                                        )
                                     }
                                 />
-                                <Label>Active</Label>
-                            </div>
+                                <span>Control account</span>
+                            </label>
+                            <label className="flex items-center gap-2 rounded-md border p-3 text-sm">
+                                <input
+                                    type="checkbox"
+                                    checked={data.is_reconcilable}
+                                    onChange={(e) =>
+                                        setData(
+                                            'is_reconcilable',
+                                            e.target.checked,
+                                        )
+                                    }
+                                />
+                                <span>Reconcilable</span>
+                            </label>
+                            <label className="flex items-center gap-2 rounded-md border p-3 text-sm">
+                                <input
+                                    type="checkbox"
+                                    checked={data.is_system}
+                                    onChange={(e) =>
+                                        setData('is_system', e.target.checked)
+                                    }
+                                />
+                                <span>System account</span>
+                            </label>
+                            <label className="flex items-center gap-2 rounded-md border p-3 text-sm">
+                                <input
+                                    type="checkbox"
+                                    checked={data.status}
+                                    onChange={(e) =>
+                                        setData('status', e.target.checked)
+                                    }
+                                />
+                                <span>Active</span>
+                            </label>
                         </div>
                     </div>
 
-                    {/* 🔹 Subledger Config */}
-                    {!data.is_group && data.is_control_account && (
-                        <div>
-                            <h3 className="text-lg font-semibold text-muted-foreground">
-                                Subledger Configuration
-                            </h3>
-
-                            <div className="grid gap-4 md:grid-cols-3">
-                                <div>
-                                    <Label>Subledger Type</Label>
-                                    <Select
-                                        value={data.subledger_type}
-                                        onChange={(value) =>
-                                            setData('subledger_type', value)
-                                        }
-                                        options={[
-                                            { value: null, label: 'None' },
-                                            ...subledgerTypes,
-                                        ]}
-                                    />
-                                    <InputError
-                                        message={errors.subledger_type}
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label>Subledger Sub Type</Label>
-                                    <Select
-                                        value={data.subledger_sub_type}
-                                        onChange={(value) =>
-                                            setData('subledger_sub_type', value)
-                                        }
-                                        options={[
-                                            { value: null, label: 'None' },
-                                            ...subledgerSubTypes.filter((t) => {
-                                                return (
-                                                    t.type ===
-                                                    data.subledger_type
-                                                );
-                                            }),
-                                        ]}
-                                    />
-                                    <InputError
-                                        message={errors.subledger_sub_type}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* 🔹 Description */}
-                    <div>
-                        <Label>Description</Label>
-                        <Input
-                            value={data.description}
-                            onChange={(e) =>
-                                setData('description', e.target.value)
-                            }
-                            className="h-8 text-sm"
-                        />
-                        <InputError message={errors.description} />
-                    </div>
-
-                    {/* 🔹 Submit */}
                     <div className="flex justify-end">
                         <Button
                             type="submit"
                             disabled={processing}
                             className="w-48"
                         >
-                            {processing ? 'Saving...' : 'Create Ledger Account'}
+                            {processing ? 'Saving...' : 'Create ledger account'}
                         </Button>
                     </div>
                 </form>

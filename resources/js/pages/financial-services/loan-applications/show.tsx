@@ -9,12 +9,14 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import type { BreadcrumbItem } from '@/types';
 import type { LoanApplicationShowPageProps } from '@/types/financial-services';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function LoanApplicationShow() {
     const { application, guarantorCustomers } =
         usePage<LoanApplicationShowPageProps>().props;
-    const { data, setData, post, processing } = useForm({
+    const [arrearNote, setArrearNote] = useState('');
+    const { data, setData, processing } = useForm({
         approved_amount: String(
             application.approved_amount ?? application.requested_amount,
         ),
@@ -231,6 +233,19 @@ export default function LoanApplicationShow() {
                                     </Button>
                                 </div>
                             </div>
+                            <div className="mt-2">
+                                <Label htmlFor="arrear-resolution-note">
+                                    Resolution note
+                                </Label>
+                                <Input
+                                    id="arrear-resolution-note"
+                                    value={arrearNote}
+                                    onChange={(event) =>
+                                        setArrearNote(event.target.value)
+                                    }
+                                    placeholder="Optional note for arrear resolution"
+                                />
+                            </div>
                             {(application.loan_account.schedules ?? []).length >
                                 0 && (
                                 <div className="mt-2 overflow-x-auto">
@@ -242,6 +257,7 @@ export default function LoanApplicationShow() {
                                                 <th>Principal</th>
                                                 <th>Interest</th>
                                                 <th>Total</th>
+                                                <th>Version</th>
                                                 <th>Status</th>
                                             </tr>
                                         </thead>
@@ -272,6 +288,10 @@ export default function LoanApplicationShow() {
                                                         </td>
                                                         <td>
                                                             {schedule.total_due}
+                                                        </td>
+                                                        <td>
+                                                            {schedule.schedule_version ??
+                                                                '-'}
                                                         </td>
                                                         <td>
                                                             {schedule.status}
@@ -323,6 +343,7 @@ export default function LoanApplicationShow() {
                                                                     ),
                                                                     {
                                                                         resolution,
+                                                                        note: arrearNote,
                                                                     },
                                                                 )
                                                             }
@@ -334,6 +355,18 @@ export default function LoanApplicationShow() {
                                                         </Button>
                                                     ))}
                                                 </div>
+                                                {arrear.resolution_type && (
+                                                    <p className="mt-1 text-muted-foreground">
+                                                        Resolution:{' '}
+                                                        {arrear.resolution_type.replace(
+                                                            '_',
+                                                            ' ',
+                                                        )}
+                                                        {arrear.resolution_note
+                                                            ? ` · ${arrear.resolution_note}`
+                                                            : ''}
+                                                    </p>
+                                                )}
                                             </div>
                                         ))}
                                 </div>

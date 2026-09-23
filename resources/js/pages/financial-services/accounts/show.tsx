@@ -11,13 +11,32 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
 import type { FinancialAccountShowPageProps } from '@/types/financial-services';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { Check, Lock, Pencil, Plus, Trash2, X } from 'lucide-react';
+import {
+    Check,
+    CircleDollarSign,
+    Lock,
+    Pencil,
+    Plus,
+    Trash2,
+    X,
+} from 'lucide-react';
 import { useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function FinancialAccountShow() {
     const { account, customers } =
         usePage<FinancialAccountShowPageProps>().props;
+    const canManageHolders = [
+        'SAVINGS',
+        'SHARE',
+        'FIXED_DEPOSIT',
+        'RECURRING_DEPOSIT',
+    ].includes(account.account_type);
+    const canManageNominees = [
+        'SAVINGS',
+        'FIXED_DEPOSIT',
+        'RECURRING_DEPOSIT',
+    ].includes(account.account_type);
     const [editingNomineeId, setEditingNomineeId] = useState<number | null>(
         null,
     );
@@ -278,351 +297,190 @@ export default function FinancialAccountShow() {
                         </p>
                     </div>
                 </div>
-                <div className="grid gap-4 lg:grid-cols-2">
-                    <section className="rounded-lg border bg-card p-4">
-                        <h2 className="text-sm font-semibold">Holders</h2>
-                        <div className="mt-3 divide-y">
-                            {(account.holders ?? []).map((holder) => (
-                                <div
-                                    key={holder.id}
-                                    className="flex items-center justify-between py-2 text-sm"
-                                >
-                                    <div>
-                                        <p className="font-medium">
-                                            {holder.name ?? holder.customer_no}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">
-                                            {holder.pivot?.role ?? 'HOLDER'}
-                                        </p>
-                                    </div>
-                                    <span className="text-muted-foreground tabular-nums">
-                                        {holder.pivot?.ownership_percent ?? 0}%
-                                    </span>
-                                    <div className="flex gap-1">
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => editHolder(holder)}
-                                        >
-                                            <Pencil className="mr-1 h-4 w-4" />{' '}
-                                            Edit
-                                        </Button>
-                                        {holder.pivot?.role !== 'PRIMARY' && (
+                {canManageHolders && (
+                    <div className="grid gap-4 lg:grid-cols-2">
+                        <section className="rounded-lg border bg-card p-4">
+                            <h2 className="text-sm font-semibold">Holders</h2>
+                            <div className="mt-3 divide-y">
+                                {(account.holders ?? []).map((holder) => (
+                                    <div
+                                        key={holder.id}
+                                        className="flex items-center justify-between py-2 text-sm"
+                                    >
+                                        <div>
+                                            <p className="font-medium">
+                                                {holder.name ??
+                                                    holder.customer_no}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {holder.pivot?.role ?? 'HOLDER'}
+                                            </p>
+                                        </div>
+                                        <span className="text-muted-foreground tabular-nums">
+                                            {holder.pivot?.ownership_percent ??
+                                                0}
+                                            %
+                                        </span>
+                                        <div className="flex gap-1">
                                             <Button
                                                 type="button"
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() =>
-                                                    router.delete(
-                                                        route(
-                                                            'financial-accounts.holders.destroy',
-                                                            [
-                                                                account.id,
-                                                                holder.id,
-                                                            ],
-                                                        ),
-                                                    )
+                                                    editHolder(holder)
                                                 }
                                             >
-                                                <Trash2 className="mr-1 h-4 w-4" />{' '}
-                                                Remove
+                                                <Pencil className="mr-1 h-4 w-4" />{' '}
+                                                Edit
                                             </Button>
-                                        )}
+                                            {holder.pivot?.role !==
+                                                'PRIMARY' && (
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        router.delete(
+                                                            route(
+                                                                'financial-accounts.holders.destroy',
+                                                                [
+                                                                    account.id,
+                                                                    holder.id,
+                                                                ],
+                                                            ),
+                                                        )
+                                                    }
+                                                >
+                                                    <Trash2 className="mr-1 h-4 w-4" />{' '}
+                                                    Remove
+                                                </Button>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                            {!account.holders?.length && (
-                                <p className="py-2 text-sm text-muted-foreground">
-                                    No additional holder records.
-                                </p>
-                            )}
-                        </div>
-                        <form
-                            onSubmit={submitHolder}
-                            className="mt-3 space-y-3 border-t pt-3"
-                        >
-                            <div className="grid gap-3 sm:grid-cols-2">
-                                <div>
-                                    <Label>Customer</Label>
-                                    <Select
-                                        value={holderData.customer_id}
-                                        onChange={(value) =>
-                                            setHolderData('customer_id', value)
-                                        }
-                                        disabled={Boolean(editingHolderId)}
-                                        options={[
-                                            {
-                                                value: '',
-                                                label: 'Select customer',
-                                            },
-                                            ...customers
-                                                .filter(
-                                                    (customer) =>
-                                                        !account.holders?.some(
-                                                            (holder) =>
-                                                                holder.id ===
-                                                                    customer.id &&
-                                                                holder.id !==
-                                                                    editingHolderId,
-                                                        ),
-                                                )
-                                                .map((customer) => ({
-                                                    value: String(customer.id),
-                                                    label: `${customer.customer_no} - ${customer.name}`,
-                                                })),
-                                        ]}
-                                    />
-                                    <InputError
-                                        message={holderErrors.customer_id}
-                                    />
-                                </div>
-                                <div>
-                                    <Label>Role</Label>
-                                    <Select
-                                        value={holderData.role}
-                                        onChange={(value) =>
-                                            setHolderData('role', value)
-                                        }
-                                        options={[
-                                            { value: 'JOINT', label: 'Joint' },
-                                            {
-                                                value: 'PRIMARY',
-                                                label: 'Primary',
-                                            },
-                                        ]}
-                                    />
-                                    <InputError message={holderErrors.role} />
-                                </div>
-                                <div>
-                                    <Label>Ownership percentage</Label>
-                                    <Input
-                                        type="number"
-                                        min="0.0001"
-                                        max="100"
-                                        step="0.0001"
-                                        value={holderData.ownership_percent}
-                                        onChange={(event) =>
-                                            setHolderData(
-                                                'ownership_percent',
-                                                event.target.value,
-                                            )
-                                        }
-                                    />
-                                    <InputError
-                                        message={holderErrors.ownership_percent}
-                                    />
-                                </div>
-                                <div>
-                                    <Label>Guardian customer ID</Label>
-                                    <Input
-                                        value={holderData.guardian_customer_id}
-                                        onChange={(event) =>
-                                            setHolderData(
-                                                'guardian_customer_id',
-                                                event.target.value,
-                                            )
-                                        }
-                                        placeholder="Required for minor holders"
-                                    />
-                                    <InputError
-                                        message={
-                                            holderErrors.guardian_customer_id
-                                        }
-                                    />
-                                </div>
-                            </div>
-                            <div className="flex justify-end gap-2">
-                                {editingHolderId && (
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => {
-                                            resetHolder();
-                                            setEditingHolderId(null);
-                                        }}
-                                    >
-                                        <X className="mr-1 h-4 w-4" /> Cancel
-                                    </Button>
+                                ))}
+                                {!account.holders?.length && (
+                                    <p className="py-2 text-sm text-muted-foreground">
+                                        No additional holder records.
+                                    </p>
                                 )}
-                                <Button
-                                    type="submit"
-                                    size="sm"
-                                    disabled={holderProcessing}
-                                >
-                                    <Plus className="mr-1 h-4 w-4" />{' '}
-                                    {editingHolderId ? 'Update' : 'Add'} holder
-                                </Button>
                             </div>
-                        </form>
-                    </section>
-
-                    <section className="rounded-lg border bg-card p-4">
-                        <h2 className="text-sm font-semibold">Nominees</h2>
-                        <div className="mt-3 divide-y">
-                            {(account.nominees ?? []).map((nominee) => (
-                                <div
-                                    key={nominee.id}
-                                    className="flex items-center justify-between py-2 text-sm"
-                                >
+                            <form
+                                onSubmit={submitHolder}
+                                className="mt-3 space-y-3 border-t pt-3"
+                            >
+                                <div className="grid gap-3 sm:grid-cols-2">
                                     <div>
-                                        <p className="font-medium">
-                                            {nominee.name}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">
-                                            {nominee.relationship}
-                                            {nominee.is_primary
-                                                ? ' · Primary'
-                                                : ''}
-                                        </p>
-                                    </div>
-                                    <span className="text-muted-foreground tabular-nums">
-                                        {nominee.share_percent ?? 0}%
-                                    </span>
-                                    <div className="flex gap-1">
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => editNominee(nominee)}
-                                        >
-                                            <Pencil className="mr-1 h-4 w-4" />{' '}
-                                            Edit
-                                        </Button>
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() =>
-                                                router.delete(
-                                                    route(
-                                                        'financial-accounts.nominees.destroy',
-                                                        [
-                                                            account.id,
-                                                            nominee.id,
-                                                        ],
-                                                    ),
+                                        <Label>Customer</Label>
+                                        <Select
+                                            value={holderData.customer_id}
+                                            onChange={(value) =>
+                                                setHolderData(
+                                                    'customer_id',
+                                                    value,
                                                 )
                                             }
-                                        >
-                                            <Trash2 className="mr-1 h-4 w-4" />{' '}
-                                            Remove
-                                        </Button>
+                                            disabled={Boolean(editingHolderId)}
+                                            options={[
+                                                {
+                                                    value: '',
+                                                    label: 'Select customer',
+                                                },
+                                                ...customers
+                                                    .filter(
+                                                        (customer) =>
+                                                            !account.holders?.some(
+                                                                (holder) =>
+                                                                    holder.id ===
+                                                                        customer.id &&
+                                                                    holder.id !==
+                                                                        editingHolderId,
+                                                            ),
+                                                    )
+                                                    .map((customer) => ({
+                                                        value: String(
+                                                            customer.id,
+                                                        ),
+                                                        label: `${customer.customer_no} - ${customer.name}`,
+                                                    })),
+                                            ]}
+                                        />
+                                        <InputError
+                                            message={holderErrors.customer_id}
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label>Role</Label>
+                                        <Select
+                                            value={holderData.role}
+                                            onChange={(value) =>
+                                                setHolderData('role', value)
+                                            }
+                                            options={[
+                                                {
+                                                    value: 'JOINT',
+                                                    label: 'Joint',
+                                                },
+                                                {
+                                                    value: 'PRIMARY',
+                                                    label: 'Primary',
+                                                },
+                                            ]}
+                                        />
+                                        <InputError
+                                            message={holderErrors.role}
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label>Ownership percentage</Label>
+                                        <Input
+                                            type="number"
+                                            min="0.0001"
+                                            max="100"
+                                            step="0.0001"
+                                            value={holderData.ownership_percent}
+                                            onChange={(event) =>
+                                                setHolderData(
+                                                    'ownership_percent',
+                                                    event.target.value,
+                                                )
+                                            }
+                                        />
+                                        <InputError
+                                            message={
+                                                holderErrors.ownership_percent
+                                            }
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label>Guardian customer ID</Label>
+                                        <Input
+                                            value={
+                                                holderData.guardian_customer_id
+                                            }
+                                            onChange={(event) =>
+                                                setHolderData(
+                                                    'guardian_customer_id',
+                                                    event.target.value,
+                                                )
+                                            }
+                                            placeholder="Required for minor holders"
+                                        />
+                                        <InputError
+                                            message={
+                                                holderErrors.guardian_customer_id
+                                            }
+                                        />
                                     </div>
                                 </div>
-                            ))}
-                            {!account.nominees?.length && (
-                                <p className="py-2 text-sm text-muted-foreground">
-                                    No nominee records.
-                                </p>
-                            )}
-                        </div>
-                        <form
-                            onSubmit={submitNominee}
-                            className="mt-3 space-y-3 border-t pt-3"
-                        >
-                            <div className="grid gap-3 sm:grid-cols-2">
-                                <div>
-                                    <Label>Name</Label>
-                                    <Input
-                                        value={data.name}
-                                        onChange={(event) =>
-                                            setData('name', event.target.value)
-                                        }
-                                    />
-                                    <InputError message={errors.name} />
-                                </div>
-                                <div>
-                                    <Label>Relationship</Label>
-                                    <Input
-                                        value={data.relationship}
-                                        onChange={(event) =>
-                                            setData(
-                                                'relationship',
-                                                event.target.value,
-                                            )
-                                        }
-                                    />
-                                    <InputError message={errors.relationship} />
-                                </div>
-                                <div>
-                                    <Label>Phone</Label>
-                                    <Input
-                                        value={data.phone}
-                                        onChange={(event) =>
-                                            setData('phone', event.target.value)
-                                        }
-                                    />
-                                    <InputError message={errors.phone} />
-                                </div>
-                                <div>
-                                    <Label>Share percentage</Label>
-                                    <Input
-                                        type="number"
-                                        min="0.0001"
-                                        max="100"
-                                        step="0.0001"
-                                        value={data.share_percent}
-                                        onChange={(event) =>
-                                            setData(
-                                                'share_percent',
-                                                event.target.value,
-                                            )
-                                        }
-                                    />
-                                    <InputError
-                                        message={errors.share_percent}
-                                    />
-                                </div>
-                                <div>
-                                    <Label>Identification type</Label>
-                                    <Input
-                                        value={data.identification_type}
-                                        onChange={(event) =>
-                                            setData(
-                                                'identification_type',
-                                                event.target.value,
-                                            )
-                                        }
-                                    />
-                                </div>
-                                <div>
-                                    <Label>Identification number</Label>
-                                    <Input
-                                        value={data.identification_number}
-                                        onChange={(event) =>
-                                            setData(
-                                                'identification_number',
-                                                event.target.value,
-                                            )
-                                        }
-                                    />
-                                </div>
-                            </div>
-                            <div className="flex items-center justify-between gap-2">
-                                <label className="flex items-center gap-2 text-sm">
-                                    <input
-                                        type="checkbox"
-                                        checked={data.is_primary}
-                                        onChange={(event) =>
-                                            setData(
-                                                'is_primary',
-                                                event.target.checked,
-                                            )
-                                        }
-                                    />{' '}
-                                    Primary nominee
-                                </label>
-                                <div className="flex gap-2">
-                                    {editingNomineeId && (
+                                <div className="flex justify-end gap-2">
+                                    {editingHolderId && (
                                         <Button
                                             type="button"
                                             variant="outline"
                                             size="sm"
                                             onClick={() => {
-                                                reset();
-                                                setEditingNomineeId(null);
+                                                resetHolder();
+                                                setEditingHolderId(null);
                                             }}
                                         >
                                             <X className="mr-1 h-4 w-4" />{' '}
@@ -632,17 +490,224 @@ export default function FinancialAccountShow() {
                                     <Button
                                         type="submit"
                                         size="sm"
-                                        disabled={processing}
+                                        disabled={holderProcessing}
                                     >
                                         <Plus className="mr-1 h-4 w-4" />{' '}
-                                        {editingNomineeId ? 'Update' : 'Add'}{' '}
-                                        nominee
+                                        {editingHolderId ? 'Update' : 'Add'}{' '}
+                                        holder
                                     </Button>
                                 </div>
-                            </div>
-                        </form>
-                    </section>
-                </div>
+                            </form>
+                        </section>
+
+                        {canManageNominees && (
+                            <section className="rounded-lg border bg-card p-4">
+                                <h2 className="text-sm font-semibold">
+                                    Nominees
+                                </h2>
+                                <div className="mt-3 divide-y">
+                                    {(account.nominees ?? []).map((nominee) => (
+                                        <div
+                                            key={nominee.id}
+                                            className="flex items-center justify-between py-2 text-sm"
+                                        >
+                                            <div>
+                                                <p className="font-medium">
+                                                    {nominee.name}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {nominee.relationship}
+                                                    {nominee.is_primary
+                                                        ? ' · Primary'
+                                                        : ''}
+                                                </p>
+                                            </div>
+                                            <span className="text-muted-foreground tabular-nums">
+                                                {nominee.share_percent ?? 0}%
+                                            </span>
+                                            <div className="flex gap-1">
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        editNominee(nominee)
+                                                    }
+                                                >
+                                                    <Pencil className="mr-1 h-4 w-4" />{' '}
+                                                    Edit
+                                                </Button>
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        router.delete(
+                                                            route(
+                                                                'financial-accounts.nominees.destroy',
+                                                                [
+                                                                    account.id,
+                                                                    nominee.id,
+                                                                ],
+                                                            ),
+                                                        )
+                                                    }
+                                                >
+                                                    <Trash2 className="mr-1 h-4 w-4" />{' '}
+                                                    Remove
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {!account.nominees?.length && (
+                                        <p className="py-2 text-sm text-muted-foreground">
+                                            No nominee records.
+                                        </p>
+                                    )}
+                                </div>
+                                <form
+                                    onSubmit={submitNominee}
+                                    className="mt-3 space-y-3 border-t pt-3"
+                                >
+                                    <div className="grid gap-3 sm:grid-cols-2">
+                                        <div>
+                                            <Label>Name</Label>
+                                            <Input
+                                                value={data.name}
+                                                onChange={(event) =>
+                                                    setData(
+                                                        'name',
+                                                        event.target.value,
+                                                    )
+                                                }
+                                            />
+                                            <InputError message={errors.name} />
+                                        </div>
+                                        <div>
+                                            <Label>Relationship</Label>
+                                            <Input
+                                                value={data.relationship}
+                                                onChange={(event) =>
+                                                    setData(
+                                                        'relationship',
+                                                        event.target.value,
+                                                    )
+                                                }
+                                            />
+                                            <InputError
+                                                message={errors.relationship}
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label>Phone</Label>
+                                            <Input
+                                                value={data.phone}
+                                                onChange={(event) =>
+                                                    setData(
+                                                        'phone',
+                                                        event.target.value,
+                                                    )
+                                                }
+                                            />
+                                            <InputError
+                                                message={errors.phone}
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label>Share percentage</Label>
+                                            <Input
+                                                type="number"
+                                                min="0.0001"
+                                                max="100"
+                                                step="0.0001"
+                                                value={data.share_percent}
+                                                onChange={(event) =>
+                                                    setData(
+                                                        'share_percent',
+                                                        event.target.value,
+                                                    )
+                                                }
+                                            />
+                                            <InputError
+                                                message={errors.share_percent}
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label>Identification type</Label>
+                                            <Input
+                                                value={data.identification_type}
+                                                onChange={(event) =>
+                                                    setData(
+                                                        'identification_type',
+                                                        event.target.value,
+                                                    )
+                                                }
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label>Identification number</Label>
+                                            <Input
+                                                value={
+                                                    data.identification_number
+                                                }
+                                                onChange={(event) =>
+                                                    setData(
+                                                        'identification_number',
+                                                        event.target.value,
+                                                    )
+                                                }
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between gap-2">
+                                        <label className="flex items-center gap-2 text-sm">
+                                            <input
+                                                type="checkbox"
+                                                checked={data.is_primary}
+                                                onChange={(event) =>
+                                                    setData(
+                                                        'is_primary',
+                                                        event.target.checked,
+                                                    )
+                                                }
+                                            />{' '}
+                                            Primary nominee
+                                        </label>
+                                        <div className="flex gap-2">
+                                            {editingNomineeId && (
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        reset();
+                                                        setEditingNomineeId(
+                                                            null,
+                                                        );
+                                                    }}
+                                                >
+                                                    <X className="mr-1 h-4 w-4" />{' '}
+                                                    Cancel
+                                                </Button>
+                                            )}
+                                            <Button
+                                                type="submit"
+                                                size="sm"
+                                                disabled={processing}
+                                            >
+                                                <Plus className="mr-1 h-4 w-4" />{' '}
+                                                {editingNomineeId
+                                                    ? 'Update'
+                                                    : 'Add'}{' '}
+                                                nominee
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </section>
+                        )}
+                    </div>
+                )}
                 {account.account_type === 'SHARE' && (
                     <section className="rounded-lg border bg-card p-4">
                         <h2 className="text-sm font-semibold">Membership</h2>
@@ -752,7 +817,7 @@ export default function FinancialAccountShow() {
                 {account.fixed_deposit && (
                     <section className="rounded-lg border bg-card p-4">
                         <h2 className="text-sm font-semibold">Fixed deposit</h2>
-                        <div className="mt-3 grid gap-3 text-sm sm:grid-cols-4">
+                        <div className="mt-3 grid gap-3 text-sm sm:grid-cols-3 lg:grid-cols-6">
                             <div>
                                 <p className="text-xs text-muted-foreground">
                                     Principal
@@ -779,6 +844,26 @@ export default function FinancialAccountShow() {
                                 <p className="font-medium">
                                     {account.fixed_deposit.maturity_date ??
                                         'Not set'}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground">
+                                    Maturity amount
+                                </p>
+                                <p className="font-medium tabular-nums">
+                                    {account.fixed_deposit.maturity_amount ??
+                                        'Not calculated'}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground">
+                                    Instruction
+                                </p>
+                                <p className="font-medium">
+                                    {account.fixed_deposit.maturity_instruction?.replaceAll(
+                                        '_',
+                                        ' ',
+                                    ) ?? 'Not set'}
                                 </p>
                             </div>
                             <div>
@@ -1240,7 +1325,20 @@ export default function FinancialAccountShow() {
                     )}
                 {account.loan_account && (
                     <section className="rounded-lg border bg-card p-4">
-                        <h2 className="text-sm font-semibold">Loan</h2>
+                        <div className="flex items-center justify-between gap-3">
+                            <h2 className="text-sm font-semibold">Loan</h2>
+                            <Button asChild size="sm">
+                                <Link
+                                    href={route(
+                                        'financial-transactions.workflow',
+                                        'loan-repayment',
+                                    )}
+                                >
+                                    <CircleDollarSign className="mr-1 h-4 w-4" />
+                                    Record repayment
+                                </Link>
+                            </Button>
+                        </div>
                         <div className="mt-3 grid gap-3 text-sm sm:grid-cols-4">
                             <div>
                                 <p className="text-xs text-muted-foreground">
@@ -1277,6 +1375,96 @@ export default function FinancialAccountShow() {
                                 </p>
                             </div>
                         </div>
+                        {account.loan_account.schedules?.length ? (
+                            <div className="mt-4 overflow-x-auto">
+                                <h3 className="mb-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                                    Repayment schedule
+                                </h3>
+                                <table className="w-full min-w-[680px] text-sm">
+                                    <thead className="border-b text-left text-xs text-muted-foreground">
+                                        <tr>
+                                            <th className="p-2">Installment</th>
+                                            <th className="p-2">Due date</th>
+                                            <th className="p-2">Principal</th>
+                                            <th className="p-2">Interest</th>
+                                            <th className="p-2">Total due</th>
+                                            <th className="p-2">Paid</th>
+                                            <th className="p-2">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {account.loan_account.schedules.map(
+                                            (schedule) => (
+                                                <tr
+                                                    key={schedule.id}
+                                                    className="border-b last:border-0"
+                                                >
+                                                    <td className="p-2">
+                                                        {
+                                                            schedule.installment_no
+                                                        }
+                                                    </td>
+                                                    <td className="p-2">
+                                                        {schedule.due_date}
+                                                    </td>
+                                                    <td className="p-2">
+                                                        {schedule.scheduled_principal ??
+                                                            0}
+                                                    </td>
+                                                    <td className="p-2">
+                                                        {schedule.scheduled_interest ??
+                                                            0}
+                                                    </td>
+                                                    <td className="p-2 font-medium">
+                                                        {schedule.total_due ??
+                                                            0}
+                                                    </td>
+                                                    <td className="p-2">
+                                                        {schedule.total_paid ??
+                                                            0}
+                                                    </td>
+                                                    <td className="p-2">
+                                                        {schedule.status}
+                                                    </td>
+                                                </tr>
+                                            ),
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : null}
+                        {account.loan_account.arrears?.length ? (
+                            <div className="mt-4 border-t pt-4">
+                                <h3 className="mb-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                                    Arrears
+                                </h3>
+                                <div className="grid gap-2 sm:grid-cols-3">
+                                    {account.loan_account.arrears.map(
+                                        (arrear) => (
+                                            <div
+                                                key={arrear.id}
+                                                className="rounded-md border p-3 text-sm"
+                                            >
+                                                <div className="flex justify-between gap-2">
+                                                    <span>
+                                                        {arrear.as_of_date}
+                                                    </span>
+                                                    <span className="font-medium">
+                                                        {arrear.status}
+                                                    </span>
+                                                </div>
+                                                <p className="mt-1 text-muted-foreground">
+                                                    {arrear.days_overdue ?? 0}{' '}
+                                                    days overdue ·{' '}
+                                                    {arrear.total_overdue ?? 0}{' '}
+                                                    outstanding
+                                                </p>
+                                            </div>
+                                        ),
+                                    )}
+                                </div>
+                            </div>
+                        ) : null}
                     </section>
                 )}
             </div>

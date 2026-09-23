@@ -28,6 +28,9 @@ class FiscalYearController extends Controller
     public function index(Request $request): Response
     {
         $fiscalYears = $this->organizationQuery($request)
+            ->when($request->filled('search'), function ($query) use ($request): void {
+                $query->where('name', 'like', '%' . $request->string('search')->toString() . '%');
+            })
             ->latest('start_date')
             ->paginate($request->integer('per_page', 18))
             ->withQueryString();

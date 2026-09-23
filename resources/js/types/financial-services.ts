@@ -138,6 +138,7 @@ export interface LoanDisbursement {
 export interface LoanSchedule {
     id: number;
     installment_no: number;
+    schedule_version?: number;
     due_date: string;
     scheduled_principal: string | number;
     scheduled_interest: string | number;
@@ -146,6 +147,7 @@ export interface LoanSchedule {
     total_due: string | number;
     total_paid: string | number;
     status: string;
+    generation_inputs?: Record<string, unknown> | null;
     components?: {
         type: string;
         amount_due: string | number;
@@ -161,6 +163,9 @@ export interface LoanArrear {
     days_overdue: number;
     total_overdue: string | number;
     status: string;
+    resolution_type?: string | null;
+    resolution_note?: string | null;
+    resolved_at?: string | null;
 }
 
 export interface LoanRepayment {
@@ -370,8 +375,40 @@ export interface LoanAccount {
     term_months?: number;
     maturity_date?: string | null;
     status?: string;
-    schedules?: Array<{ id: number; due_date: string; status: string }>;
-    arrears?: Array<{ id: number; amount?: string | number; status?: string }>;
+    schedules?: LoanSchedule[];
+    arrears?: LoanArrear[];
+}
+
+export interface LoanSchedule {
+    id: number;
+    installment_no: number;
+    due_date: string;
+    opening_principal?: string | number;
+    scheduled_principal?: string | number;
+    scheduled_interest?: string | number;
+    scheduled_fee?: string | number;
+    scheduled_protection_fee?: string | number;
+    total_due?: string | number;
+    total_paid?: string | number;
+    status: string;
+    components?: Array<{
+        id: number;
+        type: string;
+        amount_due?: string | number;
+        amount_paid?: string | number;
+        status: string;
+    }>;
+}
+
+export interface LoanArrear {
+    id: number;
+    as_of_date: string;
+    days_overdue?: number;
+    principal_overdue?: string | number;
+    interest_overdue?: string | number;
+    fee_overdue?: string | number;
+    total_overdue?: string | number;
+    status: string;
 }
 
 export interface FinancialAccountShowPageProps extends SharedData {

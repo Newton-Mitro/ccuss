@@ -32,6 +32,18 @@ class FiscalPeriodController extends Controller
                 'organization_id',
                 $request->attributes->get('active_organization')->id,
             ))
+            ->when($request->filled('search'), function ($query) use ($request): void {
+                $search = $request->string('search')->toString();
+                $query->where(function ($periodQuery) use ($search): void {
+                    $periodQuery
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhereHas('fiscalYear', fn($yearQuery) => $yearQuery->where('name', 'like', "%{$search}%"));
+                });
+            })
+            ->when(
+                $request->filled('status') && $request->string('status')->lower()->value() !== 'all',
+                fn($query) => $query->where('status', $request->string('status')->upper()->value()),
+            )
             ->with('fiscalYear')
             ->latest('start_date')
             ->paginate($request->integer('per_page', 18))

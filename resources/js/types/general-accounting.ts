@@ -16,6 +16,7 @@ export interface GeneralLedgerAccount extends LedgerAccount {
 
 export interface GeneralLedgerAccountsPageProps extends SharedData {
     glAccounts: AccountingPagination<GeneralLedgerAccount>;
+    filters: AccountingFilters;
     fiscalYears: FiscalYear[];
     fiscalPeriods: FiscalPeriod[];
     fiscal_year_id: number | null;

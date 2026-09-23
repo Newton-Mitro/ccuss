@@ -12,26 +12,26 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
 
-import {
-    subledgerSubTypes,
-    subledgerTypes,
-} from '../../subledger-module/subledgers/data/type-sub-type';
 import { accountTypes } from './data/account-type';
 
-export default function Edit({ ledger, parents }: any) {
+export default function Edit({
+    ledger,
+    parents = [],
+    accountGroups = [],
+}: any) {
     useFlashToastHandler();
 
     const { data, setData, put, processing, errors } = useForm({
         code: ledger.code || '',
         name: ledger.name || '',
-        description: ledger.description || '',
-        type: ledger.type || '',
-        is_group: !!ledger.is_group,
-        is_control_account: !!ledger.is_control_account,
-        subledger_type: ledger.subledger_type || '',
-        subledger_sub_type: ledger.subledger_sub_type || '',
+        type: ledger.type || ledger.account_type || '',
+        normal_balance: ledger.normal_balance || 'DEBIT',
+        account_group_id: ledger.account_group_id || '',
         parent_id: ledger.parent_id || '',
-        is_active: !!ledger.is_active,
+        is_control_account: !!ledger.is_control_account,
+        is_reconcilable: !!ledger.is_reconcilable,
+        is_system: !!ledger.is_system,
+        status: ledger.status ?? true,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -61,13 +61,12 @@ export default function Edit({ ledger, parents }: any) {
                     onSubmit={handleSubmit}
                     className="mt-4 space-y-4 rounded-xl border bg-card p-8"
                 >
-                    {/* 🔹 Basic Info */}
                     <div>
-                        <h3 className="text-lg font-semibold text-muted-foreground">
-                            Basic Information
+                        <h3 className="text-sm font-semibold text-muted-foreground">
+                            Basic information
                         </h3>
 
-                        <div className="grid gap-4 md:grid-cols-4">
+                        <div className="mt-3 grid gap-4 md:grid-cols-2">
                             <div>
                                 <Label>Code</Label>
                                 <Input
@@ -93,7 +92,7 @@ export default function Edit({ ledger, parents }: any) {
                             </div>
 
                             <div>
-                                <Label>Account Type</Label>
+                                <Label>Ledger account type</Label>
                                 <Select
                                     value={data.type}
                                     onChange={(value) => setData('type', value)}
@@ -109,7 +108,38 @@ export default function Edit({ ledger, parents }: any) {
                             </div>
 
                             <div>
-                                <Label>Parent Account</Label>
+                                <Label>Account group</Label>
+                                <Select
+                                    value={data.account_group_id}
+                                    onChange={(value) =>
+                                        setData('account_group_id', value)
+                                    }
+                                    options={[
+                                        { value: '', label: 'Select group' },
+                                        ...accountGroups.map((group: any) => ({
+                                            value: group.id,
+                                            label: `${group.code} - ${group.name}`,
+                                        })),
+                                    ]}
+                                />
+                                <InputError message={errors.account_group_id} />
+                            </div>
+                            <div>
+                                <Label>Normal balance</Label>
+                                <Select
+                                    value={data.normal_balance}
+                                    onChange={(value) =>
+                                        setData('normal_balance', value)
+                                    }
+                                    options={[
+                                        { value: 'DEBIT', label: 'Debit' },
+                                        { value: 'CREDIT', label: 'Credit' },
+                                    ]}
+                                />
+                                <InputError message={errors.normal_balance} />
+                            </div>
+                            <div>
+                                <Label>Parent account</Label>
                                 <Select
                                     value={data.parent_id}
                                     onChange={(value) =>
@@ -132,137 +162,70 @@ export default function Edit({ ledger, parents }: any) {
                         </div>
                     </div>
 
-                    {/* 🔹 Account Settings */}
                     <div>
-                        <h3 className="text-lg font-semibold text-muted-foreground">
-                            Account Settings
+                        <h3 className="text-sm font-semibold text-muted-foreground">
+                            Account settings
                         </h3>
 
-                        <div className="grid gap-4 md:grid-cols-4">
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    checked={data.is_group}
-                                    onChange={(e) => {
-                                        const checked = e.target.checked;
-                                        setData('is_group', checked);
-
-                                        // 🔒 enforce rule
-                                        if (checked) {
-                                            setData(
-                                                'is_control_account',
-                                                false,
-                                            );
-                                            setData('subledger_type', '');
-                                            setData('subledger_sub_type', '');
-                                        }
-                                    }}
-                                />
-                                <Label>Group Account</Label>
-                            </div>
-
-                            <div className="flex items-center gap-2">
+                        <div className="mt-3 grid gap-3 md:grid-cols-2">
+                            <label className="flex items-center gap-2 rounded-md border p-3 text-sm">
                                 <input
                                     type="checkbox"
                                     checked={data.is_control_account}
-                                    onChange={(e) => {
-                                        const checked = e.target.checked;
-                                        setData('is_control_account', checked);
-
-                                        if (checked) {
-                                            setData('is_group', false);
-                                            setData('subledger_type', '');
-                                            setData('subledger_sub_type', '');
-                                        }
-                                    }}
-                                />
-                                <Label>Control Account</Label>
-                            </div>
-
-                            <div className="flex items-center gap-2 pt-4">
-                                <input
-                                    type="checkbox"
-                                    checked={data.is_active}
                                     onChange={(e) =>
-                                        setData('is_active', e.target.checked)
+                                        setData(
+                                            'is_control_account',
+                                            e.target.checked,
+                                        )
                                     }
                                 />
-                                <Label>Active</Label>
-                            </div>
+                                <span>Control account</span>
+                            </label>
+                            <label className="flex items-center gap-2 rounded-md border p-3 text-sm">
+                                <input
+                                    type="checkbox"
+                                    checked={data.is_reconcilable}
+                                    onChange={(e) =>
+                                        setData(
+                                            'is_reconcilable',
+                                            e.target.checked,
+                                        )
+                                    }
+                                />
+                                <span>Reconcilable</span>
+                            </label>
+                            <label className="flex items-center gap-2 rounded-md border p-3 text-sm">
+                                <input
+                                    type="checkbox"
+                                    checked={data.is_system}
+                                    onChange={(e) =>
+                                        setData('is_system', e.target.checked)
+                                    }
+                                />
+                                <span>System account</span>
+                            </label>
+                            <label className="flex items-center gap-2 rounded-md border p-3 text-sm">
+                                <input
+                                    type="checkbox"
+                                    checked={data.status}
+                                    onChange={(e) =>
+                                        setData('status', e.target.checked)
+                                    }
+                                />
+                                <span>Active</span>
+                            </label>
                         </div>
                     </div>
 
-                    {/* 🔹 Subledger Config */}
-                    {!data.is_group && data.is_control_account && (
-                        <div>
-                            <h3 className="text-lg font-semibold text-muted-foreground">
-                                Subledger Configuration
-                            </h3>
-
-                            <div className="grid gap-4 md:grid-cols-3">
-                                <div>
-                                    <Label>Subledger Type</Label>
-                                    <Select
-                                        value={data.subledger_type}
-                                        onChange={(value) =>
-                                            setData('subledger_type', value)
-                                        }
-                                        options={[
-                                            { value: '', label: 'None' },
-                                            ...subledgerTypes,
-                                        ]}
-                                    />
-                                    <InputError
-                                        message={errors.subledger_type}
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label>Subledger Sub Type</Label>
-                                    <Select
-                                        value={data.subledger_sub_type}
-                                        onChange={(value) =>
-                                            setData('subledger_sub_type', value)
-                                        }
-                                        options={[
-                                            { value: null, label: 'None' },
-                                            ...subledgerSubTypes.filter((t) => {
-                                                return (
-                                                    t.type ===
-                                                    data.subledger_type
-                                                );
-                                            }),
-                                        ]}
-                                    />
-                                    <InputError
-                                        message={errors.subledger_sub_type}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* 🔹 Description */}
-                    <div>
-                        <Label>Description</Label>
-                        <Input
-                            value={data.description}
-                            onChange={(e) =>
-                                setData('description', e.target.value)
-                            }
-                            className="h-8 text-sm"
-                        />
-                        <InputError message={errors.description} />
-                    </div>
-
-                    {/* 🔹 Submit */}
                     <div className="flex justify-end">
                         <Button
                             type="submit"
                             disabled={processing}
                             className="w-48"
                         >
-                            {processing ? 'Updating...' : 'Update Ledger'}
+                            {processing
+                                ? 'Updating...'
+                                : 'Update ledger account'}
                         </Button>
                     </div>
                 </form>

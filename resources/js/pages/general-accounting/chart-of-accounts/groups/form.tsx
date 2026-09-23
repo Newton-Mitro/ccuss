@@ -28,9 +28,11 @@ export default function AccountGroupForm({ accountGroup, parents = [] }: any) {
     const submit = (event: React.FormEvent) => {
         event.preventDefault();
         const options = { preserveScroll: true };
-        editing
-            ? put(route('account-groups.update', accountGroup.id), options)
-            : post(route('account-groups.store'), options);
+        if (editing) {
+            put(route('account-groups.update', accountGroup.id), options);
+        } else {
+            post(route('account-groups.store'), options);
+        }
     };
 
     const breadcrumbs: BreadcrumbItem[] = [

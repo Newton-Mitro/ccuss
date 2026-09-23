@@ -89,70 +89,83 @@ export default function FinancialProductIndex() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {products.data.map((product) => (
-                                    <tr
-                                        key={product.id}
-                                        className="border-b even:bg-muted hover:bg-accent/20"
-                                    >
-                                        <td className="px-2 py-1 font-mono text-xs">
-                                            {product.code}
-                                        </td>
-                                        <td className="px-2 py-1 font-medium">
-                                            {product.name}
-                                        </td>
-                                        <td className="px-2 py-1">
-                                            {product.category.replaceAll(
-                                                '_',
-                                                ' ',
-                                            )}
-                                        </td>
-                                        <td className="px-2 py-1">
-                                            {product.balance_type}
-                                        </td>
-                                        <td className="px-2 py-1 tabular-nums">
-                                            {product.interest_rate}%
-                                        </td>
-                                        <td className="px-2 py-1">
-                                            <StatusBadge
-                                                tone={
-                                                    product.status
-                                                        ? 'success'
-                                                        : 'neutral'
-                                                }
-                                            >
-                                                {product.status
-                                                    ? 'Active'
-                                                    : 'Inactive'}
-                                            </StatusBadge>
-                                        </td>
-                                        <td className="px-2 py-1">
-                                            <div className="flex justify-end gap-2">
-                                                <Link
-                                                    href={route(
-                                                        'financial-products.show',
-                                                        product.id,
-                                                    )}
-                                                    className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                                                    aria-label="View product"
-                                                    title="View product"
-                                                >
-                                                    <Eye className="h-4 w-4 text-info" />
-                                                </Link>
-                                                <Link
-                                                    href={route(
-                                                        'financial-products.edit',
-                                                        product.id,
-                                                    )}
-                                                    className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                                                    aria-label="Edit product"
-                                                    title="Edit product"
-                                                >
-                                                    <Pencil className="h-4 w-4 text-success" />
-                                                </Link>
-                                            </div>
+                                {products.data.length === 0 ? (
+                                    <tr>
+                                        <td
+                                            colSpan={7}
+                                            className="px-4 py-12 text-center text-sm text-muted-foreground"
+                                        >
+                                            No financial products found. Try a
+                                            different search or create a new
+                                            product.
                                         </td>
                                     </tr>
-                                ))}
+                                ) : (
+                                    products.data.map((product) => (
+                                        <tr
+                                            key={product.id}
+                                            className="border-b even:bg-muted hover:bg-accent/20"
+                                        >
+                                            <td className="px-2 py-1 font-mono text-xs">
+                                                {product.code}
+                                            </td>
+                                            <td className="px-2 py-1 font-medium">
+                                                {product.name}
+                                            </td>
+                                            <td className="px-2 py-1">
+                                                {product.category.replaceAll(
+                                                    '_',
+                                                    ' ',
+                                                )}
+                                            </td>
+                                            <td className="px-2 py-1">
+                                                {product.balance_type}
+                                            </td>
+                                            <td className="px-2 py-1 tabular-nums">
+                                                {product.interest_rate}%
+                                            </td>
+                                            <td className="px-2 py-1">
+                                                <StatusBadge
+                                                    tone={
+                                                        product.status
+                                                            ? 'success'
+                                                            : 'neutral'
+                                                    }
+                                                >
+                                                    {product.status
+                                                        ? 'Active'
+                                                        : 'Inactive'}
+                                                </StatusBadge>
+                                            </td>
+                                            <td className="px-2 py-1">
+                                                <div className="flex justify-end gap-2">
+                                                    <Link
+                                                        href={route(
+                                                            'financial-products.show',
+                                                            product.id,
+                                                        )}
+                                                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                                                        aria-label="View product"
+                                                        title="View product"
+                                                    >
+                                                        <Eye className="h-4 w-4 text-info" />
+                                                    </Link>
+                                                    <Link
+                                                        href={route(
+                                                            'financial-products.edit',
+                                                            product.id,
+                                                        )}
+                                                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                                                        aria-label="Edit product"
+                                                        title="Edit product"
+                                                    >
+                                                        <Pencil className="h-4 w-4 text-success" />
+                                                    </Link>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
                             </tbody>
                         </table>
                     </div>

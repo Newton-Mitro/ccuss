@@ -27,6 +27,14 @@ class LedgerAccountController extends Controller
     public function index(Request $request): Response
     {
         $accounts = $this->organizationQuery($request)
+            ->when($request->filled('search'), function ($query) use ($request): void {
+                $search = $request->string('search')->toString();
+                $query->where(function ($accountQuery) use ($search): void {
+                    $accountQuery
+                        ->where('code', 'like', "%{$search}%")
+                        ->orWhere('name', 'like', "%{$search}%");
+                });
+            })
             ->with(['group', 'parent', 'children'])
             ->orderBy('code')
             ->paginate($request->integer('per_page', 50))

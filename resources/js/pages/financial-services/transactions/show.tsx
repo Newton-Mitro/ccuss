@@ -113,7 +113,15 @@ export default function FinancialTransactionShow() {
                         <div className="flex flex-wrap items-center justify-between gap-2">
                             <span>
                                 Accounting voucher:{' '}
-                                {transaction.voucher.voucher_no}
+                                <Link
+                                    className="font-medium text-primary hover:underline"
+                                    href={route(
+                                        'vouchers.show',
+                                        transaction.voucher.id,
+                                    )}
+                                >
+                                    {transaction.voucher.voucher_no}
+                                </Link>
                             </span>
                             <StatusBadge
                                 tone={

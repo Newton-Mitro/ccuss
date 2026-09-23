@@ -25,14 +25,12 @@ class AccountGroupController extends Controller
     public function index(Request $request): Response
     {
         $groups = $this->organizationQuery($request)
-            ->with(['parent', 'children'])
+            ->withCount(['children', 'accounts'])
             ->orderBy('code')
-            ->paginate($request->integer('per_page', 18))
-            ->withQueryString();
+            ->get();
 
         return Inertia::render('general-accounting/chart-of-accounts/groups/index', [
             'accountGroups' => $groups,
-            'filters' => $request->only(['search', 'per_page', 'page']),
         ]);
     }
 

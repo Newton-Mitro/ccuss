@@ -1,9 +1,10 @@
 import { ResourcePageHeader } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import type { GeneralLedgerAccountsPageProps } from '@/types/general-accounting';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
     ChevronDownIcon,
     ChevronRightIcon,
@@ -25,8 +26,15 @@ import { TYPE_COLORS } from './utils';
 | Component
 --------------------------------------------- */
 export default function GlAccountsIndex() {
-    const { glAccounts } = usePage<GeneralLedgerAccountsPageProps>().props;
+    const { glAccounts, filters } =
+        usePage<GeneralLedgerAccountsPageProps>().props;
     const accountRows = glAccounts?.data ?? [];
+
+    const { data, setData, get } = useForm({
+        search: filters.search || '',
+        per_page: Number(filters.per_page) || 50,
+        page: Number(filters.page) || 1,
+    });
 
     useFlashToastHandler();
 
@@ -66,6 +74,17 @@ export default function GlAccountsIndex() {
     useEffect(() => {
         setExpandedIds(allExpandableIds);
     }, [allExpandableIds]);
+
+    useEffect(() => {
+        const delay = setTimeout(() => {
+            get(route('ledger-accounts.index'), {
+                preserveScroll: true,
+                preserveState: true,
+            });
+        }, 400);
+
+        return () => clearTimeout(delay);
+    }, [data.search, data.per_page, data.page]);
 
     /* ---------------------------------------------
     | Actions
@@ -158,6 +177,8 @@ export default function GlAccountsIndex() {
                                             acc.id,
                                         )}
                                         className="text-info"
+                                        aria-label={`View ${acc.code} ${acc.name}`}
+                                        title="View account"
                                         onClick={(e) => e.stopPropagation()}
                                     >
                                         <ScanEye className="h-4 w-4" />
@@ -168,6 +189,8 @@ export default function GlAccountsIndex() {
                                             acc.id,
                                         )}
                                         className="text-warning"
+                                        aria-label={`Edit ${acc.code} ${acc.name}`}
+                                        title="Edit account"
                                         onClick={(e) => e.stopPropagation()}
                                     >
                                         <PenSquare className="h-4 w-4" />
@@ -175,11 +198,14 @@ export default function GlAccountsIndex() {
 
                                     {!hasChildren && (
                                         <button
+                                            type="button"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 handleDelete(acc.id, acc.name);
                                             }}
                                             className="text-destructive"
+                                            aria-label={`Delete ${acc.code} ${acc.name}`}
+                                            title="Delete account"
                                         >
                                             <Trash2 className="h-4 w-4" />
                                         </button>
@@ -222,8 +248,13 @@ export default function GlAccountsIndex() {
                                 variant="outline"
                                 onClick={expandAll}
                                 className="bg-card"
+                                aria-label="Expand all account groups"
+                                title="Expand all account groups"
                             >
                                 <ChevronDownIcon className="h-4 w-4" />
+                                <span className="hidden sm:inline">
+                                    Expand all
+                                </span>
                             </Button>
 
                             <Button
@@ -231,8 +262,13 @@ export default function GlAccountsIndex() {
                                 variant="outline"
                                 onClick={collapseAll}
                                 className="bg-card"
+                                aria-label="Collapse all account groups"
+                                title="Collapse all account groups"
                             >
                                 <ChevronUpIcon className="h-4 w-4" />
+                                <span className="hidden sm:inline">
+                                    Collapse all
+                                </span>
                             </Button>
 
                             <Link
@@ -245,14 +281,31 @@ export default function GlAccountsIndex() {
                     }
                 />
 
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <Input
+                        type="search"
+                        placeholder="Search by account code or name..."
+                        value={data.search}
+                        onChange={(event) => {
+                            setData('search', event.target.value);
+                            setData('page', 1);
+                        }}
+                        className="w-full bg-card sm:w-96"
+                    />
+                    <span className="text-sm text-muted-foreground">
+                        {glAccounts.total ?? accountRows.length} accounts
+                    </span>
+                </div>
+
                 {accountRows.length === 0 ? (
                     <div className="flex flex-col items-center justify-center rounded-md border bg-card py-16 text-center text-muted-foreground">
                         <p className="text-base font-medium">
                             No ledger accounts found
                         </p>
                         <p className="text-xs">
-                            Create a ledger account to build your chart of
-                            accounts.
+                            {data.search
+                                ? 'Try a different code or account name.'
+                                : 'Create a ledger account to build your chart of accounts.'}
                         </p>
                         <Link
                             href={route('ledger-accounts.create')}
@@ -272,7 +325,11 @@ export default function GlAccountsIndex() {
                             onPerPageChange={(perPage) =>
                                 router.get(
                                     route('ledger-accounts.index'),
-                                    { per_page: perPage },
+                                    {
+                                        search: data.search,
+                                        per_page: perPage,
+                                        page: 1,
+                                    },
                                     {
                                         preserveScroll: true,
                                         preserveState: true,

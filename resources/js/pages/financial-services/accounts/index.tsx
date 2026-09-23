@@ -130,55 +130,71 @@ export default function FinancialAccountIndex() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {accounts.data.map((account) => (
-                                    <tr
-                                        key={account.id}
-                                        className="border-b even:bg-muted hover:bg-accent/20"
-                                    >
-                                        <td className="px-2 py-1 font-mono text-xs">
-                                            {account.account_no}
-                                        </td>
-                                        <td className="px-2 py-1">
-                                            {account.holder?.name ??
-                                                account.name ??
-                                                '-'}
-                                        </td>
-                                        <td className="px-2 py-1">
-                                            {account.product?.name ?? '-'}
-                                        </td>
-                                        <td className="px-2 py-1">
-                                            {account.account_type.replaceAll(
-                                                '_',
-                                                ' ',
-                                            )}
-                                        </td>
-                                        <td className="px-2 py-1 text-right tabular-nums">
-                                            {Number(account.balance).toFixed(4)}
-                                        </td>
-                                        <td className="px-2 py-1">
-                                            <StatusBadge
-                                                tone={
-                                                    account.status === 'ACTIVE'
-                                                        ? 'success'
-                                                        : 'neutral'
-                                                }
-                                            >
-                                                {account.status}
-                                            </StatusBadge>
-                                        </td>
-                                        <td className="px-2 py-1 text-right">
-                                            <Link
-                                                href={route(
-                                                    'financial-accounts.show',
-                                                    account.id,
-                                                )}
-                                                title="View account"
-                                            >
-                                                <Eye className="ml-auto h-4 w-4" />
-                                            </Link>
+                                {accounts.data.length === 0 ? (
+                                    <tr>
+                                        <td
+                                            colSpan={7}
+                                            className="px-4 py-12 text-center text-sm text-muted-foreground"
+                                        >
+                                            No financial accounts found. Try a
+                                            different search or open a new
+                                            account.
                                         </td>
                                     </tr>
-                                ))}
+                                ) : (
+                                    accounts.data.map((account) => (
+                                        <tr
+                                            key={account.id}
+                                            className="border-b even:bg-muted hover:bg-accent/20"
+                                        >
+                                            <td className="px-2 py-1 font-mono text-xs">
+                                                {account.account_no}
+                                            </td>
+                                            <td className="px-2 py-1">
+                                                {account.holder?.name ??
+                                                    account.name ??
+                                                    '-'}
+                                            </td>
+                                            <td className="px-2 py-1">
+                                                {account.product?.name ?? '-'}
+                                            </td>
+                                            <td className="px-2 py-1">
+                                                {account.account_type.replaceAll(
+                                                    '_',
+                                                    ' ',
+                                                )}
+                                            </td>
+                                            <td className="px-2 py-1 text-right tabular-nums">
+                                                {Number(
+                                                    account.balance,
+                                                ).toFixed(4)}
+                                            </td>
+                                            <td className="px-2 py-1">
+                                                <StatusBadge
+                                                    tone={
+                                                        account.status ===
+                                                        'ACTIVE'
+                                                            ? 'success'
+                                                            : 'neutral'
+                                                    }
+                                                >
+                                                    {account.status}
+                                                </StatusBadge>
+                                            </td>
+                                            <td className="px-2 py-1 text-right">
+                                                <Link
+                                                    href={route(
+                                                        'financial-accounts.show',
+                                                        account.id,
+                                                    )}
+                                                    title="View account"
+                                                >
+                                                    <Eye className="ml-auto h-4 w-4" />
+                                                </Link>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
                             </tbody>
                         </table>
                     </div>

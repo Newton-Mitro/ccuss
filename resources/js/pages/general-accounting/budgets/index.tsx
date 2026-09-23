@@ -95,114 +95,127 @@ export default function BudgetIndex() {
                             </tr>
                         </thead>
                         <tbody>
-                            {budgets.data.map((budget) => (
-                                <tr
-                                    key={budget.id}
-                                    className="border-b even:bg-muted hover:bg-accent/20"
-                                >
-                                    <td className="px-2 py-1 font-medium">
-                                        {budget.name}
-                                    </td>
-                                    <td className="px-2 py-1">
-                                        {budget.fiscal_year?.name}
-                                    </td>
-                                    <td className="px-2 py-1">
-                                        {budget.entries_count}
-                                    </td>
-                                    <td className="px-2 py-1">
-                                        {Number(
-                                            budget.entries_sum_amount ?? 0,
-                                        ).toFixed(2)}
-                                    </td>
-                                    <td className="px-2 py-1">
-                                        <StatusBadge
-                                            tone={
-                                                budget.status === 'ACTIVE'
-                                                    ? 'success'
-                                                    : budget.status === 'CLOSED'
-                                                      ? 'neutral'
-                                                      : 'warning'
-                                            }
-                                        >
-                                            {budget.status}
-                                        </StatusBadge>
-                                    </td>
-                                    <td className="px-2 py-1">
-                                        <div className="flex items-center gap-1.5">
-                                            <Link
-                                                href={route(
-                                                    'budgets.show',
-                                                    budget.id,
-                                                )}
-                                                title="View budget"
-                                            >
-                                                <Eye className="h-4 w-4" />
-                                            </Link>
-                                            {budget.status === 'DRAFT' && (
-                                                <>
-                                                    <Link
-                                                        href={route(
-                                                            'budgets.edit',
-                                                            budget.id,
-                                                        )}
-                                                        title="Edit budget"
-                                                    >
-                                                        <Pencil className="h-4 w-4" />
-                                                    </Link>
-                                                    <button
-                                                        title="Activate budget"
-                                                        onClick={() =>
-                                                            confirmAction(
-                                                                'Activate budget?',
-                                                                route(
-                                                                    'budgets.activate',
-                                                                    budget.id,
-                                                                ),
-                                                                'This budget will become active.',
-                                                            )
-                                                        }
-                                                    >
-                                                        <Check className="h-4 w-4 text-green-600" />
-                                                    </button>
-                                                    <button
-                                                        title="Delete budget"
-                                                        onClick={() =>
-                                                            router.delete(
-                                                                route(
-                                                                    'budgets.destroy',
-                                                                    budget.id,
-                                                                ),
-                                                                {
-                                                                    preserveScroll: true,
-                                                                },
-                                                            )
-                                                        }
-                                                    >
-                                                        <Trash2 className="h-4 w-4 text-destructive" />
-                                                    </button>
-                                                </>
-                                            )}
-                                            {budget.status === 'ACTIVE' && (
-                                                <button
-                                                    title="Close budget"
-                                                    onClick={() =>
-                                                        confirmAction(
-                                                            'Close budget?',
-                                                            route(
-                                                                'budgets.close',
-                                                                budget.id,
-                                                            ),
-                                                            'Closed budgets cannot be changed.',
-                                                        )
-                                                    }
-                                                >
-                                                    <Lock className="h-4 w-4" />
-                                                </button>
-                                            )}
-                                        </div>
+                            {budgets.data.length === 0 ? (
+                                <tr>
+                                    <td
+                                        colSpan={6}
+                                        className="px-4 py-12 text-center text-sm text-muted-foreground"
+                                    >
+                                        No budgets found. Create a budget to
+                                        start tracking planned spending.
                                     </td>
                                 </tr>
-                            ))}
+                            ) : (
+                                budgets.data.map((budget) => (
+                                    <tr
+                                        key={budget.id}
+                                        className="border-b even:bg-muted hover:bg-accent/20"
+                                    >
+                                        <td className="px-2 py-1 font-medium">
+                                            {budget.name}
+                                        </td>
+                                        <td className="px-2 py-1">
+                                            {budget.fiscal_year?.name}
+                                        </td>
+                                        <td className="px-2 py-1">
+                                            {budget.entries_count}
+                                        </td>
+                                        <td className="px-2 py-1">
+                                            {Number(
+                                                budget.entries_sum_amount ?? 0,
+                                            ).toFixed(2)}
+                                        </td>
+                                        <td className="px-2 py-1">
+                                            <StatusBadge
+                                                tone={
+                                                    budget.status === 'ACTIVE'
+                                                        ? 'success'
+                                                        : budget.status ===
+                                                            'CLOSED'
+                                                          ? 'neutral'
+                                                          : 'warning'
+                                                }
+                                            >
+                                                {budget.status}
+                                            </StatusBadge>
+                                        </td>
+                                        <td className="px-2 py-1">
+                                            <div className="flex items-center gap-1.5">
+                                                <Link
+                                                    href={route(
+                                                        'budgets.show',
+                                                        budget.id,
+                                                    )}
+                                                    title="View budget"
+                                                >
+                                                    <Eye className="h-4 w-4" />
+                                                </Link>
+                                                {budget.status === 'DRAFT' && (
+                                                    <>
+                                                        <Link
+                                                            href={route(
+                                                                'budgets.edit',
+                                                                budget.id,
+                                                            )}
+                                                            title="Edit budget"
+                                                        >
+                                                            <Pencil className="h-4 w-4" />
+                                                        </Link>
+                                                        <button
+                                                            title="Activate budget"
+                                                            onClick={() =>
+                                                                confirmAction(
+                                                                    'Activate budget?',
+                                                                    route(
+                                                                        'budgets.activate',
+                                                                        budget.id,
+                                                                    ),
+                                                                    'This budget will become active.',
+                                                                )
+                                                            }
+                                                        >
+                                                            <Check className="h-4 w-4 text-green-600" />
+                                                        </button>
+                                                        <button
+                                                            title="Delete budget"
+                                                            onClick={() =>
+                                                                router.delete(
+                                                                    route(
+                                                                        'budgets.destroy',
+                                                                        budget.id,
+                                                                    ),
+                                                                    {
+                                                                        preserveScroll: true,
+                                                                    },
+                                                                )
+                                                            }
+                                                        >
+                                                            <Trash2 className="h-4 w-4 text-destructive" />
+                                                        </button>
+                                                    </>
+                                                )}
+                                                {budget.status === 'ACTIVE' && (
+                                                    <button
+                                                        title="Close budget"
+                                                        onClick={() =>
+                                                            confirmAction(
+                                                                'Close budget?',
+                                                                route(
+                                                                    'budgets.close',
+                                                                    budget.id,
+                                                                ),
+                                                                'Closed budgets cannot be changed.',
+                                                            )
+                                                        }
+                                                    >
+                                                        <Lock className="h-4 w-4" />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                     {budgets.data.length === 0 && (

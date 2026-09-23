@@ -1,4 +1,3 @@
-import DataTablePagination from '@/components/data-table-pagination';
 import {
     ResourcePageHeader,
     ResourceTableCard,
@@ -10,7 +9,8 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import { route } from 'ziggy-js';
 
 interface AccountGroup {
@@ -20,20 +20,46 @@ interface AccountGroup {
     type: string;
     normal_balance: string;
     status: boolean;
-    parent?: { name: string } | null;
+    parent_id?: number | null;
+    level: number;
+    children_count: number;
+    accounts_count: number;
 }
 
 interface Props extends SharedData {
-    accountGroups: {
-        data: AccountGroup[];
-        links: { url: string | null; label: string; active: boolean }[];
-        per_page?: number;
-    };
+    accountGroups:
+        | {
+              data?: AccountGroup[];
+          }
+        | AccountGroup[];
 }
 
 export default function AccountGroupIndex() {
     const { accountGroups } = usePage<Props>().props;
+    const groups = Array.isArray(accountGroups)
+        ? accountGroups
+        : (accountGroups.data ?? []);
+    const [expanded, setExpanded] = useState<number[]>([]);
     useFlashToastHandler();
+
+    const childrenByParent = groups.reduce<Record<string, AccountGroup[]>>(
+        (result, group) => {
+            const key = String(group.parent_id ?? 'root');
+            result[key] ??= [];
+            result[key].push(group);
+            return result;
+        },
+        {},
+    );
+    const rootGroups = childrenByParent.root ?? [];
+
+    const toggle = (id: number) => {
+        setExpanded((current) =>
+            current.includes(id)
+                ? current.filter((groupId) => groupId !== id)
+                : [...current, id],
+        );
+    };
 
     const destroy = (group: AccountGroup) => {
         appSwal
@@ -76,11 +102,11 @@ export default function AccountGroupIndex() {
 
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <span className="text-sm text-muted-foreground">
-                        {accountGroups.data.length} groups
+                        {groups.length} groups
                     </span>
                 </div>
 
-                {accountGroups.data.length === 0 ? (
+                {groups.length === 0 ? (
                     <div className="flex flex-col items-center justify-center rounded-md border bg-card py-16 text-center text-muted-foreground">
                         <p className="text-base font-medium">
                             No account groups found
@@ -97,158 +123,113 @@ export default function AccountGroupIndex() {
                         </Link>
                     </div>
                 ) : (
-                    <>
-                        <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
-                            <ResourceTableCard>
-                                <table className="w-full border-collapse text-sm">
-                                    <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
-                                        <tr>
-                                            <th className="border-b border-border px-4 py-3">
-                                                Code
-                                            </th>
-                                            <th className="border-b border-border px-4 py-3">
-                                                Name
-                                            </th>
-                                            <th className="border-b border-border px-4 py-3">
-                                                Type
-                                            </th>
-                                            <th className="border-b border-border px-4 py-3">
-                                                Normal balance
-                                            </th>
-                                            <th className="border-b border-border px-4 py-3">
-                                                Parent
-                                            </th>
-                                            <th className="border-b border-border px-4 py-3">
-                                                Actions
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {accountGroups.data.map((group) => (
-                                            <tr
-                                                key={group.id}
-                                                className="border-b even:bg-muted hover:bg-accent/20"
+                    <ResourceTableCard className="overflow-auto p-3 md:p-5">
+                        <div className="space-y-1">
+                            {rootGroups.map((group) => {
+                                const renderGroup = (
+                                    item: AccountGroup,
+                                    depth = 0,
+                                ): React.ReactNode => {
+                                    const children =
+                                        childrenByParent[String(item.id)] ?? [];
+                                    const isExpanded = expanded.includes(
+                                        item.id,
+                                    );
+                                    return (
+                                        <div key={item.id}>
+                                            <div
+                                                className="flex items-center gap-2 rounded-md border-b px-2 py-2 hover:bg-accent/20"
+                                                style={{
+                                                    paddingLeft: `${depth * 1.5 + 0.5}rem`,
+                                                }}
                                             >
-                                                <td className="px-2 py-1 font-mono text-foreground">
-                                                    {group.code}
-                                                </td>
-                                                <td className="px-2 py-1 font-medium text-foreground">
-                                                    {group.name}
-                                                </td>
-                                                <td className="px-2 py-1">
-                                                    <StatusBadge tone="info">
-                                                        {group.type}
-                                                    </StatusBadge>
-                                                </td>
-                                                <td className="px-2 py-1 text-muted-foreground">
-                                                    {group.normal_balance}
-                                                </td>
-                                                <td className="px-2 py-1 text-muted-foreground">
-                                                    {group.parent?.name ?? '-'}
-                                                </td>
-                                                <td className="px-2 py-1">
-                                                    <div className="flex items-center gap-1.5">
-                                                        <Button
-                                                            asChild
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            title="Edit account group"
-                                                        >
-                                                            <Link
-                                                                href={route(
-                                                                    'account-groups.edit',
-                                                                    group.id,
-                                                                )}
-                                                            >
-                                                                <Pencil className="h-4 w-4 text-emerald-600" />
-                                                            </Link>
-                                                        </Button>
-
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            onClick={() =>
-                                                                destroy(group)
-                                                            }
-                                                            title="Delete account group"
-                                                        >
-                                                            <Trash2 className="h-4 w-4 text-red-600" />
-                                                        </Button>
+                                                <button
+                                                    type="button"
+                                                    className="flex h-7 w-7 items-center justify-center"
+                                                    onClick={() =>
+                                                        children.length &&
+                                                        toggle(item.id)
+                                                    }
+                                                    aria-label={
+                                                        isExpanded
+                                                            ? 'Collapse group'
+                                                            : 'Expand group'
+                                                    }
+                                                >
+                                                    {children.length ? (
+                                                        isExpanded ? (
+                                                            <ChevronDown className="h-4 w-4" />
+                                                        ) : (
+                                                            <ChevronRight className="h-4 w-4" />
+                                                        )
+                                                    ) : (
+                                                        <span className="h-4 w-4" />
+                                                    )}
+                                                </button>
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        <span className="font-mono text-xs">
+                                                            {item.code}
+                                                        </span>
+                                                        <span className="font-medium">
+                                                            {item.name}
+                                                        </span>
+                                                        <StatusBadge tone="info">
+                                                            {item.type}
+                                                        </StatusBadge>
                                                     </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </ResourceTableCard>
-                        </div>
-
-                        <div className="space-y-3 md:hidden">
-                            {accountGroups.data.map((group) => (
-                                <div
-                                    key={group.id}
-                                    className="space-y-3 rounded-md border bg-card p-3"
-                                >
-                                    <div className="flex items-start justify-between gap-3">
-                                        <div>
-                                            <p className="font-medium">
-                                                {group.name}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground">
-                                                {group.code} ·{' '}
-                                                {group.normal_balance}
-                                            </p>
-                                        </div>
-                                        <StatusBadge tone="info">
-                                            {group.type}
-                                        </StatusBadge>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground">
-                                        Parent: {group.parent?.name ?? 'None'}
-                                    </p>
-                                    <div className="flex justify-end gap-2">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            asChild
-                                        >
-                                            <Link
-                                                href={route(
-                                                    'account-groups.edit',
-                                                    group.id,
+                                                    <p className="text-xs text-muted-foreground">
+                                                        {item.normal_balance} ·{' '}
+                                                        {item.accounts_count}{' '}
+                                                        ledger accounts ·{' '}
+                                                        {item.children_count}{' '}
+                                                        child groups
+                                                    </p>
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <Button
+                                                        asChild
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        title="Edit account group"
+                                                    >
+                                                        <Link
+                                                            href={route(
+                                                                'account-groups.edit',
+                                                                item.id,
+                                                            )}
+                                                        >
+                                                            <Pencil className="h-4 w-4 text-emerald-600" />
+                                                        </Link>
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() =>
+                                                            destroy(item)
+                                                        }
+                                                        title="Delete account group"
+                                                    >
+                                                        <Trash2 className="h-4 w-4 text-red-600" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                            {isExpanded &&
+                                                children.map((child) =>
+                                                    renderGroup(
+                                                        child,
+                                                        depth + 1,
+                                                    ),
                                                 )}
-                                            >
-                                                <Pencil className="h-4 w-4" />{' '}
-                                                Edit
-                                            </Link>
-                                        </Button>
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => destroy(group)}
-                                        >
-                                            <Trash2 className="h-4 w-4 text-destructive" />{' '}
-                                            Delete
-                                        </Button>
-                                    </div>
-                                </div>
-                            ))}
+                                        </div>
+                                    );
+                                };
+                                return renderGroup(group);
+                            })}
                         </div>
-                    </>
+                    </ResourceTableCard>
                 )}
-                <DataTablePagination
-                    links={accountGroups.links}
-                    perPage={accountGroups.per_page ?? 18}
-                    onPerPageChange={(perPage) =>
-                        router.get(
-                            route('account-groups.index'),
-                            { per_page: perPage },
-                            { preserveScroll: true, preserveState: true },
-                        )
-                    }
-                />
             </div>
         </CustomAuthLayout>
     );
