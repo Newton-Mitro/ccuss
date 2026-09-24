@@ -58,7 +58,7 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/account-fines', [AccountFineController::class, 'index'])->name('account-fines.index');
     Route::post('/account-fines/{account_fine}/waive', [AccountFineController::class, 'waive'])->name('account-fines.waive');
 
-    Route::get('/financial-accounts', [FinancialAccountController::class, 'index'])->name('financial-accounts.index');
+    Route::get('/all-financial-accounts', [FinancialAccountController::class, 'index'])->name('financial-accounts.index');
     Route::get('/financial-accounts/category/{category}', [FinancialAccountController::class, 'categoryIndex'])
         ->where('category', 'SAVINGS|SHARE|FIXED_DEPOSIT|RECURRING_DEPOSIT|LOAN')
         ->name('financial-accounts.category');

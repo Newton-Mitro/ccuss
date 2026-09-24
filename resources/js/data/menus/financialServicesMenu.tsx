@@ -15,6 +15,13 @@ export const financialServicesMenu: SidebarItem[] = [
                 permission: ['financial.view'],
             },
             {
+                name: 'All Financial Accounts',
+                icon: <i className="fa-solid fa-list" />,
+                path: '/all-financial-accounts',
+                match_path: 'all-financial-accounts',
+                permission: ['financial.accounts.view'],
+            },
+            {
                 name: 'Product Setup',
                 icon: <i className="fa-solid fa-boxes-stacked" />,
                 permission: ['financial.products.view'],
@@ -49,13 +56,6 @@ export const financialServicesMenu: SidebarItem[] = [
                 permission: ['financial.accounts.view'],
                 children_expanded: false,
                 children: [
-                    {
-                        name: 'All Deposit Accounts',
-                        icon: <i className="fa-solid fa-list" />,
-                        path: '/financial-accounts',
-                        match_path: 'financial-accounts',
-                        permission: ['financial.accounts.view'],
-                    },
                     {
                         name: 'Savings Accounts',
                         icon: <i className="fa-solid fa-piggy-bank" />,
