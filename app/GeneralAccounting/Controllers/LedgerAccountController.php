@@ -114,6 +114,27 @@ class LedgerAccountController extends Controller
         return redirect()->route('ledger-accounts.index')->with('success', 'Ledger account deleted successfully.');
     }
 
+    public function reorder(Request $request, LedgerAccount $ledgerAccount)
+    {
+        $this->authorizeOrganization($request, $ledgerAccount);
+
+        $data = $request->validate([
+            'account_group_id' => ['nullable', 'integer', 'exists:account_groups,id'],
+            'parent_id' => ['nullable', 'integer', 'exists:accounts,id'],
+        ]);
+
+        if (($data['parent_id'] ?? null) !== null && (int) $data['parent_id'] === $ledgerAccount->id) {
+            return back()->with('error', 'An account cannot be its own parent.');
+        }
+
+        $ledgerAccount->account_group_id = $data['account_group_id'] ?? $ledgerAccount->account_group_id;
+        $ledgerAccount->parent_id = $data['parent_id'] ?? null;
+        $ledgerAccount->level = $this->parentLevel($ledgerAccount->parent_id);
+        $ledgerAccount->save();
+
+        return redirect()->route('ledger-accounts.index')->with('success', 'Ledger account moved successfully.');
+    }
+
     public function ledgerSearch(Request $request): JsonResponse
     {
         $search = trim((string) $request->query('search', ''));
@@ -152,5 +173,14 @@ class LedgerAccountController extends Controller
             $account->organization_id === $request->attributes->get('active_organization')->id,
             404,
         );
+    }
+
+    private function parentLevel(?int $parentId): int
+    {
+        if ($parentId === null) {
+            return 0;
+        }
+
+        return (int) LedgerAccount::query()->whereKey($parentId)->value('level') + 1;
     }
 }

@@ -37,35 +37,9 @@ export const generalAccountingMenu: SidebarItem[] = [
                     {
                         name: 'Chart of Accounts',
                         icon: <i className="fa-solid fa-list" />,
-                        children_expanded: false,
+                        path: '/ledger-accounts',
+                        match_path: 'ledger-accounts',
                         permission: ['accounting.coa.view'],
-                        children: [
-                            {
-                                name: 'Account Groups',
-                                icon: <i className="fa-solid fa-sitemap" />,
-                                path: '/account-groups',
-                                match_path: 'account-groups',
-                                permission: ['accounting.coa.view'],
-                            },
-                            {
-                                name: 'Ledger Accounts',
-                                icon: <i className="fa-solid fa-list" />,
-                                path: '/ledger-accounts?view=ledgers',
-                                match_path: 'ledger-accounts',
-                                permission: ['accounting.coa.view'],
-                            },
-                            {
-                                name: 'Opening Balances',
-                                icon: (
-                                    <i className="fa-solid fa-scale-balanced" />
-                                ),
-                                path: '/opening-balances',
-                                match_path: 'opening-balances',
-                                permission: [
-                                    'accounting.opening_balances.view',
-                                ],
-                            },
-                        ],
                     },
                     {
                         name: 'Cost Centers',

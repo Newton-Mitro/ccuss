@@ -392,7 +392,6 @@
     select:focus,
     textarea:focus {
         border-color: var(--ring);
-        box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 18%, transparent);
         outline: none;
     }
 
@@ -485,8 +484,6 @@
     /* Shared page surfaces used by the resource pages. */
     .app-main [class~='bg-card'] {
         border-color: color-mix(in oklch, var(--border) 88%, var(--primary));
-        box-shadow: 0 10px 30px
-            color-mix(in oklch, var(--foreground) 4%, transparent);
     }
 
     .app-main [class~='rounded-md'][class~='border'],
@@ -585,7 +582,6 @@
     /* Focus state */
     .ck.ck-focused {
         border-color: var(--ring) !important;
-        box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent);
         outline: none !important;
     }
 

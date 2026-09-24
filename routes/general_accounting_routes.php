@@ -68,9 +68,13 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
             'update' => 'account-groups.update',
             'destroy' => 'account-groups.destroy',
         ]);
+    Route::put('/account-groups/{account_group}/reorder', [AccountGroupController::class, 'reorder'])
+        ->name('account-groups.reorder');
 
     Route::resource('ledger-accounts', LedgerAccountController::class)
         ->middleware('permission:accounting.coa.view');
+    Route::put('/ledger-accounts/{ledger_account}/reorder', [LedgerAccountController::class, 'reorder'])
+        ->name('ledger-accounts.reorder');
 
     Route::get('/api/search-ledger', [LedgerAccountController::class, 'ledgerSearch'])
         ->name('ledger-accounts.search');

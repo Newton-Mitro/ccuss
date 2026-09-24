@@ -93,6 +93,25 @@ class AccountGroupController extends Controller
         return redirect()->route('account-groups.index')->with('success', 'Account group deleted successfully.');
     }
 
+    public function reorder(Request $request, AccountGroup $accountGroup)
+    {
+        $this->authorizeOrganization($request, $accountGroup);
+
+        $data = $request->validate([
+            'parent_id' => ['nullable', 'integer', 'exists:account_groups,id'],
+        ]);
+
+        if (($data['parent_id'] ?? null) !== null && (int) $data['parent_id'] === $accountGroup->id) {
+            return back()->with('error', 'A group cannot be its own parent.');
+        }
+
+        $accountGroup->parent_id = $data['parent_id'] ?? null;
+        $accountGroup->level = $this->parentLevel($accountGroup->parent_id);
+        $accountGroup->save();
+
+        return redirect()->route('ledger-accounts.index')->with('success', 'Account group moved successfully.');
+    }
+
     private function organizationQuery(Request $request)
     {
         return AccountGroup::query()->where(
@@ -107,5 +126,14 @@ class AccountGroupController extends Controller
             $group->organization_id === $request->attributes->get('active_organization')->id,
             404,
         );
+    }
+
+    private function parentLevel(?int $parentId): int
+    {
+        if ($parentId === null) {
+            return 0;
+        }
+
+        return (int) AccountGroup::query()->whereKey($parentId)->value('level') + 1;
     }
 }

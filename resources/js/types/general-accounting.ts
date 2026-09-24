@@ -14,8 +14,22 @@ export interface GeneralLedgerAccount extends LedgerAccount {
     children_recursive?: GeneralLedgerAccount[];
 }
 
+export interface AccountGroupSummary {
+    id: number;
+    code: string;
+    name: string;
+    type: string;
+    normal_balance: string;
+    status: boolean;
+    parent_id?: number | null;
+    level: number;
+    children_count: number;
+    accounts_count: number;
+}
+
 export interface GeneralLedgerAccountsPageProps extends SharedData {
     glAccounts: AccountingPagination<GeneralLedgerAccount>;
+    accountGroups: AccountGroupSummary[] | { data?: AccountGroupSummary[] };
     filters: AccountingFilters;
     fiscalYears: FiscalYear[];
     fiscalPeriods: FiscalPeriod[];
