@@ -135,13 +135,6 @@ export const treasuryAndCashMenu: SidebarItem[] = [
                         permission: ['petty_cash.view'],
                     },
                     {
-                        name: 'Advance Accounts',
-                        icon: <i className="fa-solid fa-hand-holding-dollar" />,
-                        path: '/petty-cash-advance-accounts',
-                        match_path: 'petty-cash-advance-accounts',
-                        permission: ['petty_cash.view'],
-                    },
-                    {
                         name: 'Transactions',
                         icon: <i className="fa-solid fa-receipt" />,
                         path: '/petty-cash-transactions',

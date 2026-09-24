@@ -173,9 +173,6 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::post('/petty-cash-accounts', [PettyCashController::class, 'store'])
             ->middleware('permission:petty_cash.create')
             ->name('petty-cash-accounts.store');
-        Route::get('/petty-cash-advance-accounts', [PettyCashController::class, 'advanceAccounts'])
-            ->middleware('permission:petty_cash.view')
-            ->name('petty-cash-advance-accounts.index');
         Route::get('/petty-cash-transactions/funding', [PettyCashController::class, 'funding'])
             ->middleware('permission:petty_cash.create')
             ->name('petty-cash-transactions.funding');

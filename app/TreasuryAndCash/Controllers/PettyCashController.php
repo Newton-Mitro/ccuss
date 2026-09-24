@@ -17,7 +17,7 @@ class PettyCashController extends Controller
         private readonly PettyCashDataService $pettyCashDataService,
         private readonly PettyCashTransactionService $pettyCashTransactionService,
     ) {
-        $this->middleware('permission:petty_cash.view')->only(['accounts', 'advanceAccounts']);
+        $this->middleware('permission:petty_cash.view')->only(['accounts']);
         $this->middleware('permission:petty_cash.create')->only(['create', 'store', 'funding', 'storeFunding']);
         $this->middleware('permission:petty_cash.expense')->only(['expense', 'storeExpense']);
         $this->middleware('permission:petty_cash.view')->only(['transactions']);
@@ -34,20 +34,6 @@ class PettyCashController extends Controller
 
         return Inertia::render('treasury-cash/petty-cash/accounts/index', [
             'funds' => $funds,
-            'filters' => $request->only(['search', 'per_page', 'page']),
-        ]);
-    }
-
-    public function advanceAccounts(Request $request): Response
-    {
-        $advanceAccounts = $this->pettyCashDataService->listAdvanceAccounts(
-            $request->attributes->get('active_organization')->id,
-            $request->input('search'),
-            $request->input('per_page', 18),
-        );
-
-        return Inertia::render('treasury-cash/petty-cash/advance-accounts/index', [
-            'advance_accounts' => $advanceAccounts,
             'filters' => $request->only(['search', 'per_page', 'page']),
         ]);
     }
