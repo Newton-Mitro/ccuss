@@ -45,7 +45,7 @@ export default function Create({ vault }: any) {
                 />
                 <form
                     onSubmit={submit}
-                    className="overflow-hidden rounded-xl border bg-card shadow-sm"
+                    className="overflow-hidden rounded-xl border bg-card"
                 >
                     <section className="border-b p-5 sm:p-6">
                         <h2 className="font-semibold">Vault identity</h2>

@@ -48,7 +48,7 @@ export default function Create({ teller }: any) {
                 />
                 <form
                     onSubmit={submit}
-                    className="overflow-hidden rounded-xl border bg-card shadow-sm"
+                    className="overflow-hidden rounded-xl border bg-card"
                 >
                     <section className="border-b p-5 sm:p-6">
                         <h2 className="font-semibold">Teller identity</h2>

@@ -65,7 +65,7 @@ export default function FinancialProductPolicyForm() {
                 />
                 <form
                     onSubmit={submit}
-                    className="space-y-5 rounded-xl border bg-card p-4 shadow-sm"
+                    className="space-y-5 rounded-xl border bg-card p-4"
                 >
                     <section className="space-y-3">
                         <h2 className="font-semibold">Limits and rates</h2>

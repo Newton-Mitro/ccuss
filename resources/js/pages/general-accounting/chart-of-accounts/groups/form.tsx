@@ -58,7 +58,7 @@ export default function AccountGroupForm({ accountGroup, parents = [] }: any) {
                 />
                 <form
                     onSubmit={submit}
-                    className="grid gap-5 rounded-2xl border border-border/80 bg-card/90 p-5 shadow-sm md:grid-cols-2 md:p-6"
+                    className="grid gap-5 rounded-2xl border border-border/80 bg-card/90 p-5 md:grid-cols-2 md:p-6"
                 >
                     <div>
                         <Label>Code</Label>

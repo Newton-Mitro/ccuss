@@ -85,7 +85,7 @@ export default function FinancialAccountForm() {
                 />
                 <form
                     onSubmit={submit}
-                    className="space-y-4 rounded-xl border bg-card p-4 shadow-sm"
+                    className="space-y-4 rounded-xl border bg-card p-4"
                 >
                     <div className="grid gap-3 sm:grid-cols-2">
                         <div>

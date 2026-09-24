@@ -52,7 +52,7 @@ export default function Create({ glAccounts }: any) {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="mt-4 space-y-6 rounded-2xl border border-border/80 bg-card p-5 shadow-sm sm:p-6"
+                    className="mt-4 space-y-6 rounded-2xl border border-border/80 bg-card p-5 sm:p-6"
                 >
                     {/* 🔹 Basic Details */}
                     <div>

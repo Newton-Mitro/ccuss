@@ -322,7 +322,7 @@ export default function DashboardPage() {
                         <div
                             key={idx}
                             onClick={() => router.visit(card.route)}
-                            className="group flex cursor-pointer items-center gap-3 rounded-2xl border bg-card/90 p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+                            className="group flex cursor-pointer items-center gap-3 rounded-2xl border bg-card/90 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
                             style={{
                                 backgroundColor: `${card.color}15`,
                                 borderColor: `${card.color}40`,
@@ -346,7 +346,7 @@ export default function DashboardPage() {
 
                 {/* Charts */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <Card className="bg-card/90 shadow-sm">
+                    <Card className="bg-card/90">
                         <CardHeader className="pb-0">
                             <CardTitle className="text-base">
                                 Top Visited Routes
@@ -360,7 +360,7 @@ export default function DashboardPage() {
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-card/90 shadow-sm">
+                    <Card className="bg-card/90">
                         <CardHeader className="pb-0">
                             <CardTitle className="text-base">
                                 Monthly Visitors
@@ -374,7 +374,7 @@ export default function DashboardPage() {
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-card/90 shadow-sm">
+                    <Card className="bg-card/90">
                         <CardHeader className="pb-0">
                             <CardTitle className="text-base">
                                 Branches vs Customers
@@ -388,7 +388,7 @@ export default function DashboardPage() {
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-card/90 shadow-sm">
+                    <Card className="bg-card/90">
                         <CardHeader className="pb-0">
                             <CardTitle className="text-base">
                                 KPI Radar
@@ -402,7 +402,7 @@ export default function DashboardPage() {
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     {/* 🧾 Audit Logs Section */}
-                    <Card className="bg-card/90 shadow-sm">
+                    <Card className="bg-card/90">
                         <CardHeader>
                             <CardTitle className="text-base">
                                 Audit Log Activity
@@ -414,7 +414,7 @@ export default function DashboardPage() {
                     </Card>
 
                     {/* Audit Logs */}
-                    <Card className="bg-card/90 shadow-sm">
+                    <Card className="bg-card/90">
                         <CardHeader>
                             <CardTitle className="text-base">
                                 Recent Audit Logs

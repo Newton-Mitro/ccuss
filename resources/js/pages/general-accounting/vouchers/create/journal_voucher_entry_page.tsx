@@ -442,7 +442,7 @@ export default function JournalVoucherEntryPage() {
 
                 <form
                     onSubmit={submit}
-                    className="space-y-2 rounded-xl border border-border/80 bg-card p-2 shadow-sm sm:p-3"
+                    className="space-y-2 rounded-xl border border-border/80 bg-card p-2 sm:p-3"
                 >
                     <div className="grid items-stretch gap-2 lg:grid-cols-[minmax(240px,0.7fr)_minmax(0,1.8fr)]">
                         {/* Voucher Details */}
@@ -728,7 +728,7 @@ export default function JournalVoucherEntryPage() {
                                 Add a debit or credit line above to begin.
                             </div>
                         ) : (
-                            <div className="h-[min(380px,calc(100vh/3))] overflow-auto rounded-md border bg-background shadow-inner">
+                            <div className="h-[min(380px,calc(100vh/3))] overflow-auto rounded-md border bg-background">
                                 <table className="w-full min-w-212.5 border-collapse text-sm">
                                     <thead className="bg-muted text-left text-muted-foreground">
                                         <tr>

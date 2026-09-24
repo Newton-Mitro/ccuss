@@ -105,7 +105,7 @@ export default function TransactionWorkflow() {
                     />
                     <form
                         onSubmit={submitTransfer}
-                        className="space-y-4 rounded-xl border bg-card p-4 shadow-sm"
+                        className="space-y-4 rounded-xl border bg-card p-4"
                     >
                         <div className="grid gap-3 sm:grid-cols-2">
                             <div>
@@ -246,7 +246,7 @@ export default function TransactionWorkflow() {
                                 ? submitLoanDisbursement
                                 : submitLoanRepayment
                         }
-                        className="space-y-4 rounded-xl border bg-card p-4 shadow-sm"
+                        className="space-y-4 rounded-xl border bg-card p-4"
                     >
                         <div className="grid gap-3 sm:grid-cols-2">
                             <div>
@@ -410,7 +410,7 @@ export default function TransactionWorkflow() {
                     />
                     <form
                         onSubmit={submitFinePayment}
-                        className="space-y-4 rounded-xl border bg-card p-4 shadow-sm"
+                        className="space-y-4 rounded-xl border bg-card p-4"
                     >
                         <div className="grid gap-3 sm:grid-cols-2">
                             <div>
@@ -486,7 +486,7 @@ export default function TransactionWorkflow() {
                     title={detail.title}
                     description={detail.description}
                 />
-                <div className="rounded-2xl border border-primary/20 bg-primary/5 p-8 text-center shadow-sm">
+                <div className="rounded-2xl border border-primary/20 bg-primary/5 p-8 text-center">
                     <Icon className="mx-auto h-10 w-10 text-primary" />
                     <h2 className="mt-4 text-lg font-semibold">
                         Workflow ready for configuration

@@ -199,7 +199,7 @@ export default function CustomAuthLayout({
             {/* Sidebar */}
             <aside
                 className={cn(
-                    'app-sidebar z-40 flex h-screen shrink-0 flex-col overflow-hidden border-r border-sidebar-border/80 bg-sidebar text-sidebar-foreground shadow-xl shadow-black/10 transition-all duration-300 print:hidden',
+                    'app-sidebar z-40 flex h-screen shrink-0 flex-col overflow-hidden border-r border-sidebar-border/80 bg-sidebar text-sidebar-foreground transition-all duration-300 print:hidden',
                     sidebarFloating ? 'absolute top-0 left-0' : 'relative',
                     sidebarOpen ? 'w-72' : 'w-16',
                 )}
@@ -253,7 +253,7 @@ export default function CustomAuthLayout({
                         !sidebarOpen && 'hidden',
                     )}
                 >
-                    <div className="flex flex-1 items-center gap-1 rounded-xl border border-sidebar-border bg-sidebar/70 px-3 py-2 shadow-sm transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15">
+                    <div className="flex flex-1 items-center gap-1 rounded-xl border border-sidebar-border bg-sidebar/70 px-3 py-2 transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15">
                         <Search size={16} />
                         <input
                             type="text"
@@ -308,7 +308,7 @@ export default function CustomAuthLayout({
                     >
                         <div
                             className={cn(
-                                'mb-3 flex w-full items-start gap-3 rounded-xl border bg-background/70 px-3 py-2.5 text-left text-sm shadow-sm',
+                                'mb-3 flex w-full items-start gap-3 rounded-xl border bg-background/70 px-3 py-2.5 text-left text-sm',
                                 organization.active
                                     ? 'border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400'
                                     : 'border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400',
@@ -397,7 +397,7 @@ export default function CustomAuthLayout({
                     sidebarFloating && 'md:pl-16',
                 )}
             >
-                <header className="flex h-16 items-center justify-between border-b border-border/80 bg-sidebar/80 px-4 text-sidebar-foreground shadow-sm backdrop-blur-xl md:px-6 print:hidden">
+                <header className="flex h-16 items-center justify-between border-b border-border/80 bg-sidebar/80 px-4 text-sidebar-foreground backdrop-blur-xl md:px-6 print:hidden">
                     <div className="flex items-center gap-3">
                         <button
                             type="button"
@@ -438,7 +438,7 @@ export default function CustomAuthLayout({
                     <div className="flex items-center">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <button className="flex h-9 w-9 items-center justify-center rounded-xl border border-border/80 bg-card/70 px-2 py-1 shadow-sm transition-colors hover:bg-muted">
+                                <button className="flex h-9 w-9 items-center justify-center rounded-xl border border-border/80 bg-card/70 px-2 py-1 transition-colors hover:bg-muted">
                                     <Monitor size={18} />
                                 </button>
                             </DropdownMenuTrigger>
@@ -644,7 +644,7 @@ export default function CustomAuthLayout({
                                 color: 'var(--accent-foreground)',
                             },
                             className:
-                                'rounded-xl shadow-lg text-accent-foreground bg-accent',
+                                'rounded-xl text-accent-foreground bg-accent',
                             success: {
                                 style: {
                                     background: 'var(--card)',

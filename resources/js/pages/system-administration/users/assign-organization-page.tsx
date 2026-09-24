@@ -91,7 +91,7 @@ export default function AssignOrganizationPage() {
                 </div>
 
                 <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-                    <div className="rounded-xl border bg-card p-5 shadow-sm">
+                    <div className="rounded-xl border bg-card p-5">
                         <div className="mb-5 flex items-center gap-3">
                             <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-primary ring-1 ring-primary/20">
                                 {user.avatar ? (
@@ -184,7 +184,7 @@ export default function AssignOrganizationPage() {
                         </form>
                     </div>
 
-                    <div className="rounded-xl border bg-card p-5 shadow-sm">
+                    <div className="rounded-xl border bg-card p-5">
                         <div className="mb-4 flex items-center gap-2 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                             <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                             User details
