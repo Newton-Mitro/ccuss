@@ -119,13 +119,17 @@ class ReportExportController extends Controller
             'account-balances' => [
                 'Account Balances',
                 ['Account', 'Product', 'Type', 'Status', 'Balance', 'Available Balance'],
-                FinancialAccount::where('organization_id', $organizationId)->with('product')->orderByDesc('balance')->get()
+                FinancialAccount::where('organization_id', $organizationId)
+                    ->when($request->integer('product_id') > 0, fn($query) => $query->where('financial_product_id', $request->integer('product_id')))
+                    ->with('product')->orderByDesc('balance')->get()
                     ->map(fn($row) => [$row->account_no, $row->product?->name ?? $row->account_type, $row->account_type, $row->status, $row->balance, $row->available_balance])->all(),
             ],
             'transactions' => [
                 'Financial Transactions',
                 ['Number', 'Account', 'Date', 'Type', 'Amount', 'Status'],
-                FinancialTransaction::where('organization_id', $organizationId)->with('entries.financialAccount')->latest('transaction_date')->get()
+                FinancialTransaction::where('organization_id', $organizationId)
+                    ->when(in_array($request->string('status')->toString(), ['PENDING', 'POSTED', 'REVERSED', 'CANCELLED'], true), fn($query) => $query->where('status', $request->string('status')->toString()))
+                    ->with('entries.financialAccount')->latest('transaction_date')->get()
                     ->map(fn($row) => [$row->transaction_no, $row->entries->pluck('financialAccount.account_no')->filter()->join(', ') ?: '-', $row->transaction_date, $row->transaction_type, $row->amount, $row->status])->all(),
             ],
             'account-statement' => $this->accountStatement($request, $organizationId),
@@ -322,13 +326,14 @@ class ReportExportController extends Controller
             'fiscal_year_id' => 'Fiscal year',
             'fiscal_period_id' => 'Fiscal period',
             'account_id' => 'Account',
+            'status' => 'Status',
             'period' => 'Period',
             'date' => 'Date',
             'from' => 'From',
             'to' => 'To',
         ];
 
-        return collect($request->only(['fiscal_year_id', 'fiscal_period_id', 'account_id', 'period', 'date', 'from', 'to']))
+        return collect($request->only(['fiscal_year_id', 'fiscal_period_id', 'account_id', 'status', 'period', 'date', 'from', 'to']))
             ->filter(fn($value) => $value !== null && $value !== '')
             ->map(function ($value, $key) use ($fiscalYearId, $fiscalPeriodId, $fiscalYear, $fiscalPeriod, $labels) {
                 $displayValue = match ($key) {

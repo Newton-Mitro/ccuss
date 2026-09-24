@@ -427,6 +427,9 @@ export interface AccountStatementMovement {
     transaction_no: string;
     transaction_type: string;
     amount: string | number;
+    debit: string | number;
+    credit: string | number;
+    running_balance: string | number;
     status: string;
     transaction_date: string;
 }
@@ -444,6 +447,8 @@ export interface AccountStatementPageProps extends SharedData {
     periodStart: string;
     periodEnd: string;
     totals: { debit: number; credit: number; count: number };
+    openingBalance: string | number | null;
+    closingBalance: string | number | null;
 }
 
 export interface ProductPolicy {
@@ -491,7 +496,13 @@ export interface ProductPoliciesPageProps extends SharedData {
 }
 
 export interface AccountBalancesReportPageProps extends SharedData {
-    accounts: { data: FinancialAccountDetail[] };
+    accounts: {
+        data: FinancialAccountDetail[];
+        links: { url: string | null; label: string; active: boolean }[];
+        per_page: number;
+    };
+    products: { id: number; code: string; name: string }[];
+    filters: { product_id?: string | number; per_page?: string | number };
 }
 
 export interface ProductSummaryItem extends FinancialProduct {
@@ -504,7 +515,16 @@ export interface ProductSummaryReportPageProps extends SharedData {
 }
 
 export interface TransactionsReportPageProps extends SharedData {
-    transactions: { data: FinancialTransaction[] };
+    transactions: {
+        data: FinancialTransaction[];
+        links: { url: string | null; label: string; active: boolean }[];
+        per_page: number;
+    };
+    filters: {
+        status?: string;
+        page?: number;
+        per_page?: number;
+    };
 }
 
 export interface FinancialWorkflowAccount {

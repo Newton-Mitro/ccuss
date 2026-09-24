@@ -1,3 +1,4 @@
+import DataTablePagination from '@/components/data-table-pagination';
 import {
     ResourcePageHeader,
     ResourceTableCard,
@@ -5,22 +6,58 @@ import {
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
 import type { TransactionsReportPageProps } from '@/types/financial-services';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
+import { route } from 'ziggy-js';
 import ReportExportActions from '../../../components/report-export-actions';
+import { Select } from '../../../components/ui/select';
+
 export default function TransactionReport() {
-    const { transactions } = usePage<TransactionsReportPageProps>().props;
+    const { transactions, filters } =
+        usePage<TransactionsReportPageProps>().props;
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
         { title: 'Transaction Report', href: '' },
     ];
+
+    const updateReport = (query: {
+        status?: string;
+        per_page: number;
+        page: number;
+    }) =>
+        router.get(route('financial-reports.transactions'), query, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Transaction Report" />
             <div className="space-y-4">
-                <ReportExportActions report="transactions" />
+                <ReportExportActions
+                    report="transactions"
+                    query={{ status: filters.status || undefined }}
+                />
                 <ResourcePageHeader
                     title="Transaction report"
                     description="Operational movements across financial accounts."
+                />
+                <Select
+                    className="w-full bg-card sm:w-56"
+                    value={filters.status ?? ''}
+                    onChange={(status) =>
+                        updateReport({
+                            status: status || undefined,
+                            per_page: transactions.per_page,
+                            page: 1,
+                        })
+                    }
+                    options={[
+                        { value: '', label: 'All statuses' },
+                        { value: 'PENDING', label: 'Pending' },
+                        { value: 'POSTED', label: 'Posted' },
+                        { value: 'REVERSED', label: 'Reversed' },
+                        { value: 'CANCELLED', label: 'Cancelled' },
+                    ]}
                 />
                 <ResourceTableCard>
                     <table className="w-full text-sm">
@@ -70,6 +107,17 @@ export default function TransactionReport() {
                         </tbody>
                     </table>
                 </ResourceTableCard>
+                <DataTablePagination
+                    perPage={transactions.per_page}
+                    links={transactions.links}
+                    onPerPageChange={(perPage) =>
+                        updateReport({
+                            status: filters.status || undefined,
+                            per_page: perPage,
+                            page: 1,
+                        })
+                    }
+                />
             </div>
         </CustomAuthLayout>
     );

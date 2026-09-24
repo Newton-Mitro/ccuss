@@ -5,10 +5,14 @@ import {
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
 import type { AccountBalancesReportPageProps } from '@/types/financial-services';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
+import { route } from 'ziggy-js';
+import DataTablePagination from '../../../components/data-table-pagination';
 import ReportExportActions from '../../../components/report-export-actions';
+import { Select } from '../../../components/ui/select';
 export default function AccountBalancesReport() {
-    const { accounts } = usePage<AccountBalancesReportPageProps>().props;
+    const { accounts, products, filters } =
+        usePage<AccountBalancesReportPageProps>().props;
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
         { title: 'Account Balances', href: '' },
@@ -17,11 +21,40 @@ export default function AccountBalancesReport() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Account Balances" />
             <div className="space-y-4">
-                <ReportExportActions report="account-balances" />
+                <ReportExportActions
+                    report="account-balances"
+                    query={{
+                        product_id: filters.product_id || undefined,
+                    }}
+                />
                 <ResourcePageHeader
                     title="Account balances"
                     description="Current and available balances across financial accounts."
                 />
+                <div className="flex flex-wrap items-center gap-2">
+                    <Select
+                        className="w-full bg-card sm:w-72"
+                        value={String(filters.product_id ?? '')}
+                        onChange={(value) =>
+                            router.get(
+                                route('financial-reports.account-balances'),
+                                {
+                                    product_id: value || undefined,
+                                    per_page: accounts.per_page,
+                                    page: 1,
+                                },
+                                { preserveState: true, preserveScroll: true },
+                            )
+                        }
+                        options={[
+                            { value: '', label: 'All products' },
+                            ...products.map((product) => ({
+                                value: String(product.id),
+                                label: `${product.code} · ${product.name}`,
+                            })),
+                        ]}
+                    />
+                </div>
                 <ResourceTableCard>
                     <table className="w-full text-sm">
                         <thead className="bg-muted/70 text-left text-xs text-muted-foreground">
@@ -66,6 +99,21 @@ export default function AccountBalancesReport() {
                         </tbody>
                     </table>
                 </ResourceTableCard>
+                <DataTablePagination
+                    perPage={accounts.per_page}
+                    links={accounts.links}
+                    onPerPageChange={(perPage) =>
+                        router.get(
+                            route('financial-reports.account-balances'),
+                            {
+                                product_id: filters.product_id || undefined,
+                                per_page: perPage,
+                                page: 1,
+                            },
+                            { preserveState: true, preserveScroll: true },
+                        )
+                    }
+                />
             </div>
         </CustomAuthLayout>
     );

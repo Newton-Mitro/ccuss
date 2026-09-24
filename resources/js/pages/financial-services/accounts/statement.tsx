@@ -1,7 +1,9 @@
 import ReportExportActions from '@/components/report-export-actions';
 import {
+    ResourceEmptyState,
     ResourcePageHeader,
     ResourceTableCard,
+    StatusBadge,
 } from '@/components/resource-page-shell';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,7 +12,13 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
 import type { AccountStatementPageProps } from '@/types/financial-services';
 import { Head, router, usePage } from '@inertiajs/react';
-import { FileText } from 'lucide-react';
+import {
+    ArrowDownLeft,
+    ArrowUpRight,
+    CalendarDays,
+    FileText,
+    WalletCards,
+} from 'lucide-react';
 import { route } from 'ziggy-js';
 
 const statementPeriods = [
@@ -19,6 +27,19 @@ const statementPeriods = [
     { value: 'half_yearly', label: 'Half-yearly' },
     { value: 'yearly', label: 'Yearly' },
 ];
+
+const formatAmount = (value: string | number | null | undefined) =>
+    Number(value ?? 0).toLocaleString(undefined, {
+        minimumFractionDigits: 4,
+        maximumFractionDigits: 4,
+    });
+
+const statusTone = (status: string) => {
+    if (status === 'POSTED') return 'success' as const;
+    if (status === 'CANCELLED' || status === 'REVERSED')
+        return 'danger' as const;
+    return 'warning' as const;
+};
 
 export default function AccountStatement() {
     const {
@@ -29,6 +50,8 @@ export default function AccountStatement() {
         periodStart,
         periodEnd,
         totals,
+        openingBalance,
+        closingBalance,
     } = usePage<AccountStatementPageProps>().props;
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
@@ -40,7 +63,7 @@ export default function AccountStatement() {
             <div className="space-y-4">
                 <ResourcePageHeader
                     title="Account statements"
-                    description="Review the operational movement history for a financial account."
+                    description="Follow every movement from opening balance to closing balance."
                 />
                 {account && (
                     <ReportExportActions
@@ -52,9 +75,11 @@ export default function AccountStatement() {
                         }}
                     />
                 )}
-                <div className="grid max-w-4xl gap-3 rounded-md border bg-card p-4 sm:grid-cols-3">
+                <div className="grid gap-3 rounded-lg border bg-card p-4 shadow-sm sm:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)]">
                     <div>
-                        <Label>Financial account</Label>
+                        <Label className="text-xs font-medium text-muted-foreground">
+                            Financial account
+                        </Label>
                         <Select
                             value={account ? String(account.id) : ''}
                             onChange={(value) =>
@@ -81,7 +106,9 @@ export default function AccountStatement() {
                         />
                     </div>
                     <div>
-                        <Label>Statement period</Label>
+                        <Label className="text-xs font-medium text-muted-foreground">
+                            Statement period
+                        </Label>
                         <Select
                             value={period}
                             onChange={(value) =>
@@ -102,7 +129,9 @@ export default function AccountStatement() {
                         />
                     </div>
                     <div>
-                        <Label>Reference date</Label>
+                        <Label className="text-xs font-medium text-muted-foreground">
+                            Reference date
+                        </Label>
                         <Input
                             type="date"
                             value={statementDate}
@@ -126,94 +155,184 @@ export default function AccountStatement() {
                 </div>
                 {account ? (
                     <>
-                        <div className="grid gap-3 sm:grid-cols-3">
-                            <div className="rounded-md border bg-card p-3">
-                                <p className="text-xs text-muted-foreground">
-                                    Period
-                                </p>
-                                <p className="font-medium">
-                                    {periodStart} to {periodEnd}
-                                </p>
-                            </div>
-                            <div className="rounded-md border bg-card p-3">
-                                <p className="text-xs text-muted-foreground">
-                                    Debit
-                                </p>
-                                <p className="font-semibold tabular-nums">
-                                    {Number(totals.debit).toFixed(4)}
-                                </p>
-                            </div>
-                            <div className="rounded-md border bg-card p-3">
-                                <p className="text-xs text-muted-foreground">
-                                    Credit
-                                </p>
-                                <p className="font-semibold tabular-nums">
-                                    {Number(totals.credit).toFixed(4)}
-                                </p>
-                            </div>
-                        </div>
-                        <ResourceTableCard className="h-[calc(100vh-440px)] md:h-[calc(100vh-420px)]">
-                            <div className="flex items-center gap-3 border-b p-4">
-                                <FileText className="h-5 w-5 text-primary" />
+                        <div className="flex flex-col gap-4 rounded-lg border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                    <WalletCards className="h-5 w-5" />
+                                </div>
                                 <div>
-                                    <p className="font-semibold">
+                                    <p className="font-mono text-sm font-semibold">
                                         {account.account_no}
                                     </p>
-                                    <p className="text-xs text-muted-foreground">
+                                    <p className="text-sm text-muted-foreground">
                                         {account.name ?? account.account_type}
                                     </p>
                                 </div>
                             </div>
-                            <table className="w-full text-sm">
-                                <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
-                                    <tr>
-                                        <th className="border-b p-2 text-left text-sm font-medium">
-                                            Date
-                                        </th>
-                                        <th className="border-b p-2 text-left text-sm font-medium">
-                                            Transaction
-                                        </th>
-                                        <th className="border-b p-2 text-left text-sm font-medium">
-                                            Type
-                                        </th>
-                                        <th className="border-b p-2 text-left text-sm font-medium">
-                                            Amount
-                                        </th>
-                                        <th className="border-b p-2 text-left text-sm font-medium">
-                                            Status
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {(account.transactions ?? []).map(
-                                        (movement) => (
-                                            <tr
-                                                key={movement.id}
-                                                className="border-b even:bg-muted hover:bg-accent/20"
-                                            >
-                                                <td className="px-2 py-1">
-                                                    {movement.transaction_date}
-                                                </td>
-                                                <td className="px-2 py-1 font-mono text-xs">
-                                                    {movement.transaction_no}
-                                                </td>
-                                                <td className="px-2 py-1">
-                                                    {movement.transaction_type}
-                                                </td>
-                                                <td className="px-2 py-1 text-right tabular-nums">
-                                                    {Number(
-                                                        movement.amount,
-                                                    ).toFixed(4)}
-                                                </td>
-                                                <td className="px-2 py-1">
-                                                    {movement.status}
-                                                </td>
-                                            </tr>
-                                        ),
-                                    )}
-                                </tbody>
-                            </table>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <CalendarDays className="h-4 w-4" />
+                                <span>{periodStart}</span>
+                                <span aria-hidden="true">to</span>
+                                <span>{periodEnd}</span>
+                            </div>
+                        </div>
+                        <div className="grid gap-3 sm:grid-cols-3">
+                            <div className="rounded-lg border border-sky-500/20 bg-sky-500/5 p-4">
+                                <div className="flex items-center gap-2 text-xs font-medium text-sky-700 dark:text-sky-300">
+                                    <WalletCards className="h-4 w-4" />
+                                    Opening balance
+                                </div>
+                                <p className="mt-2 text-xl font-semibold tabular-nums">
+                                    {formatAmount(openingBalance)}
+                                </p>
+                            </div>
+                            <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4">
+                                <div className="flex items-center gap-2 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                                    <ArrowDownLeft className="h-4 w-4" />
+                                    Total credits
+                                </div>
+                                <p className="mt-2 text-xl font-semibold tabular-nums">
+                                    {formatAmount(totals.credit)}
+                                </p>
+                            </div>
+                            <div className="rounded-lg border border-violet-500/20 bg-violet-500/5 p-4">
+                                <div className="flex items-center gap-2 text-xs font-medium text-violet-700 dark:text-violet-300">
+                                    <ArrowUpRight className="h-4 w-4" />
+                                    Closing balance
+                                </div>
+                                <p className="mt-2 text-xl font-semibold tabular-nums">
+                                    {formatAmount(closingBalance)}
+                                </p>
+                            </div>
+                        </div>
+                        <ResourceTableCard>
+                            <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-3">
+                                <div className="flex items-center gap-2">
+                                    <FileText className="h-4 w-4 text-primary" />
+                                    <p className="text-sm font-semibold">
+                                        Account activity
+                                    </p>
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                    {totals.count} movement
+                                    {totals.count === 1 ? '' : 's'}
+                                </p>
+                            </div>
+                            <div className="max-h-[calc(100vh-530px)] overflow-auto">
+                                <table className="w-full min-w-190 text-sm">
+                                    <thead className="sticky top-0 z-10 bg-muted text-xs text-muted-foreground">
+                                        <tr>
+                                            <th className="border-b p-3 text-left font-medium">
+                                                Date
+                                            </th>
+                                            <th className="border-b p-3 text-left font-medium">
+                                                Description
+                                            </th>
+                                            <th className="border-b p-3 text-right font-medium">
+                                                Debit
+                                            </th>
+                                            <th className="border-b p-3 text-right font-medium">
+                                                Credit
+                                            </th>
+                                            <th className="border-b p-3 text-right font-medium">
+                                                Balance
+                                            </th>
+                                            <th className="border-b p-3 text-left font-medium">
+                                                Status
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr className="border-b bg-muted/20">
+                                            <td className="p-3 text-muted-foreground">
+                                                {periodStart}
+                                            </td>
+                                            <td className="p-3 font-medium">
+                                                Opening balance
+                                            </td>
+                                            <td className="p-3 text-right text-muted-foreground tabular-nums">
+                                                -
+                                            </td>
+                                            <td className="p-3 text-right text-muted-foreground tabular-nums">
+                                                -
+                                            </td>
+                                            <td className="p-3 text-right font-medium tabular-nums">
+                                                {formatAmount(openingBalance)}
+                                            </td>
+                                            <td className="p-3">
+                                                <StatusBadge>
+                                                    Opening
+                                                </StatusBadge>
+                                            </td>
+                                        </tr>
+                                        {(account.transactions ?? []).map(
+                                            (movement) => (
+                                                <tr
+                                                    key={movement.id}
+                                                    className="border-b even:bg-muted/30 hover:bg-accent/20"
+                                                >
+                                                    <td className="p-3 whitespace-nowrap text-muted-foreground">
+                                                        {
+                                                            movement.transaction_date
+                                                        }
+                                                    </td>
+                                                    <td className="p-3">
+                                                        <p className="font-mono text-xs font-medium">
+                                                            {
+                                                                movement.transaction_no
+                                                            }
+                                                        </p>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            {
+                                                                movement.transaction_type
+                                                            }
+                                                        </p>
+                                                    </td>
+                                                    <td className="p-3 text-right tabular-nums">
+                                                        {Number(
+                                                            movement.debit,
+                                                        ) > 0
+                                                            ? formatAmount(
+                                                                  movement.debit,
+                                                              )
+                                                            : '-'}
+                                                    </td>
+                                                    <td className="p-3 text-right tabular-nums">
+                                                        {Number(
+                                                            movement.credit,
+                                                        ) > 0
+                                                            ? formatAmount(
+                                                                  movement.credit,
+                                                              )
+                                                            : '-'}
+                                                    </td>
+                                                    <td className="p-3 text-right font-medium tabular-nums">
+                                                        {formatAmount(
+                                                            movement.running_balance,
+                                                        )}
+                                                    </td>
+                                                    <td className="p-3">
+                                                        <StatusBadge
+                                                            tone={statusTone(
+                                                                movement.status,
+                                                            )}
+                                                        >
+                                                            {movement.status}
+                                                        </StatusBadge>
+                                                    </td>
+                                                </tr>
+                                            ),
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </ResourceTableCard>
+                        {account.transactions?.length === 0 && (
+                            <ResourceEmptyState
+                                title="No activity in this period"
+                                description="Try a different reference date or statement period."
+                            />
+                        )}
                     </>
                 ) : (
                     <div className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">

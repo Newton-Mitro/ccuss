@@ -159,29 +159,59 @@ class FinancialAccountController extends Controller
 
         $account = null;
         $totals = ['debit' => 0, 'credit' => 0, 'count' => 0];
+        $openingBalance = null;
+        $closingBalance = null;
 
         if ($request->integer('account_id')) {
             $account = $this->accountService
                 ->queryForOrganization($this->organizationId($request))
+                ->with('product')
                 ->find($request->integer('account_id'));
 
             if ($account) {
+                $isAsset = $account->product?->balance_type === 'ASSET' || $account->account_type === 'BANK';
+                $entryDelta = static function ($entry) use ($isAsset): float {
+                    $amount = (float) $entry->amount;
+                    $increases = $isAsset ? $entry->direction === 'DEBIT' : $entry->direction === 'CREDIT';
+
+                    return $increases ? $amount : -$amount;
+                };
+                $openingBalance = $account->transactions()
+                    ->where('transaction_date', '<', $periodStart)
+                    ->with('entries')
+                    ->get()
+                    ->flatMap->entries
+                    ->sum($entryDelta);
                 $transactions = $account->transactions()
                     ->whereBetween('transaction_date', [$periodStart, $periodEnd])
                     ->with('entries')
-                    ->latest('transaction_date')
+                    ->orderBy('transaction_date')
+                    ->orderBy('id')
                     ->get();
 
-                $account->setRelation('transactions', $transactions);
+                $runningBalance = (float) $openingBalance;
+                $statementTransactions = $transactions->map(function ($transaction) use ($account, $entryDelta, &$runningBalance) {
+                    $entries = $transaction->entries->where('financial_account_id', $account->id);
+                    $debit = (float) $entries->where('direction', 'DEBIT')->sum('amount');
+                    $credit = (float) $entries->where('direction', 'CREDIT')->sum('amount');
+                    $runningBalance += $entries->sum($entryDelta);
+
+                    return array_merge($transaction->toArray(), [
+                        'debit' => $debit,
+                        'credit' => $credit,
+                        'running_balance' => $runningBalance,
+                    ]);
+                });
+
+                $account->setRelation('transactions', $statementTransactions);
                 $totals = [
-                    'debit' => $transactions->flatMap->entries
-                        ->where('direction', 'DEBIT')
-                        ->sum('amount'),
-                    'credit' => $transactions->flatMap->entries
-                        ->where('direction', 'CREDIT')
-                        ->sum('amount'),
-                    'count' => $transactions->count(),
+                    'debit' => $statementTransactions
+                        ->sum('debit'),
+                    'credit' => $statementTransactions
+                        ->sum('credit'),
+                    'count' => $statementTransactions->count(),
                 ];
+                $closingBalance = $runningBalance;
             }
         }
 
@@ -193,6 +223,8 @@ class FinancialAccountController extends Controller
             'periodStart' => $periodStart->toDateString(),
             'periodEnd' => $periodEnd->toDateString(),
             'totals' => $totals,
+            'openingBalance' => $openingBalance,
+            'closingBalance' => $closingBalance,
         ]);
     }
 
