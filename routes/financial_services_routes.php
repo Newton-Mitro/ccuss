@@ -25,6 +25,8 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
 
     Route::get('/financial-products/create', [FinancialProductController::class, 'create'])
         ->name('financial-products.create');
+    Route::get('/financial-product-account-mappings', [FinancialProductController::class, 'mappings'])
+        ->name('financial-product-account-mappings.index');
     Route::get('/financial-products/{financial_product}', [FinancialProductController::class, 'show'])
         ->name('financial-products.show');
     Route::post('/financial-products/{financial_product}/account-mappings', [FinancialProductController::class, 'storeMapping'])

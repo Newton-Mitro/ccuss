@@ -18,7 +18,7 @@ class FinancialProductController extends Controller
 {
     public function __construct(private readonly FinancialProductService $productService)
     {
-        $this->middleware('permission:financial.products.view')->only(['index', 'show']);
+        $this->middleware('permission:financial.products.view')->only(['index', 'show', 'mappings']);
         $this->middleware('permission:financial.products.create')->only(['create', 'store']);
         $this->middleware('permission:financial.products.update')->only(['edit', 'update']);
         $this->middleware('permission:financial.products.delete')->only('destroy');
@@ -42,6 +42,42 @@ class FinancialProductController extends Controller
         return Inertia::render('financial-services/products/index', [
             'products' => $products,
             'filters' => $request->only(['search', 'per_page', 'page']),
+        ]);
+    }
+
+    public function mappings(Request $request): Response
+    {
+        $organizationId = $this->organizationId($request);
+        $status = $request->string('status')->toString();
+
+        $mappings = FinancialProductAccountMapping::query()
+            ->whereHas('product', fn($query) => $query->where('organization_id', $organizationId))
+            ->with(['product', 'debitAccount', 'creditAccount'])
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = $request->string('search')->trim();
+                $query->where(function ($query) use ($search) {
+                    $query->where('transaction_type', 'like', "%{$search}%")
+                        ->orWhereHas('product', fn($product) => $product
+                            ->where('code', 'like', "%{$search}%")
+                            ->orWhere('name', 'like', "%{$search}%"));
+                });
+            })
+            ->when($request->integer('product_id') > 0, fn($query) => $query->where('financial_product_id', $request->integer('product_id')))
+            ->when(in_array($status, ['active', 'inactive'], true), fn($query) => $query->where('status', $status === 'active'))
+            ->orderBy(FinancialProduct::query()->select('code')->whereColumn('financial_products.id', 'financial_product_account_mappings.financial_product_id'))
+            ->orderBy('transaction_type')
+            ->paginate($request->integer('per_page') ?: 18)
+            ->withQueryString();
+
+        $products = FinancialProduct::query()
+            ->where('organization_id', $organizationId)
+            ->orderBy('code')
+            ->get(['id', 'code', 'name']);
+
+        return Inertia::render('financial-services/product-account-mappings/index', [
+            'mappings' => $mappings,
+            'products' => $products,
+            'filters' => $request->only(['search', 'product_id', 'status', 'per_page', 'page']),
         ]);
     }
 

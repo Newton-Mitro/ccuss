@@ -65,6 +65,27 @@ export interface FinancialProductPageProps extends SharedData {
     ledgerAccounts: LedgerAccountOption[];
 }
 
+export interface FinancialProductAccountMappingsPageProps extends SharedData {
+    mappings: {
+        data: (FinancialProductAccountMapping & {
+            product: Pick<
+                FinancialProduct,
+                'id' | 'code' | 'name' | 'category'
+            >;
+        })[];
+        links: { url: string | null; label: string; active: boolean }[];
+        per_page: number;
+    };
+    products: { id: number; code: string; name: string }[];
+    filters: {
+        search?: string;
+        product_id?: string | number;
+        status?: string;
+        per_page?: string | number;
+        page?: string | number;
+    };
+}
+
 export interface LoanApplication {
     id: number;
     application_no: string;

@@ -70,12 +70,9 @@ export function ResourceTableCard({
     return (
         <div
             data-slot="resource-table-card"
-            className={cn(
-                'overflow-hidden rounded-md border bg-card',
-                className,
-            )}
+            className={cn('overflow-auto rounded-md border bg-card', className)}
         >
-            <div className="overflow-auto">{children}</div>
+            {children}
         </div>
     );
 }

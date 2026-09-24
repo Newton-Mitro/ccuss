@@ -82,16 +82,28 @@ export default function FinancialProductShow() {
                     title={product.name}
                     description={`${product.code} · ${product.category.replaceAll('_', ' ')}`}
                     action={
-                        <Button asChild size="sm">
-                            <Link
-                                href={route(
-                                    'financial-products.edit',
-                                    product.id,
-                                )}
-                            >
-                                <Pencil className="mr-1 h-4 w-4" /> Edit
-                            </Link>
-                        </Button>
+                        <div className="flex flex-wrap gap-2">
+                            <Button asChild size="sm" variant="outline">
+                                <Link
+                                    href={route(
+                                        'financial-product-account-mappings.index',
+                                        { query: { product_id: product.id } },
+                                    )}
+                                >
+                                    Account mappings
+                                </Link>
+                            </Button>
+                            <Button asChild size="sm">
+                                <Link
+                                    href={route(
+                                        'financial-products.edit',
+                                        product.id,
+                                    )}
+                                >
+                                    <Pencil className="mr-1 h-4 w-4" /> Edit
+                                </Link>
+                            </Button>
+                        </div>
                     }
                 />
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

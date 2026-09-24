@@ -37,8 +37,8 @@ export const financialServicesMenu: SidebarItem[] = [
                     {
                         name: 'Account Mappings',
                         icon: <i className="fa-solid fa-diagram-project" />,
-                        path: '/financial-products',
-                        match_path: 'financial-products',
+                        path: '/financial-product-account-mappings',
+                        match_path: 'financial-product-account-mappings',
                         permission: ['financial.products.mappings.manage'],
                     },
                 ],

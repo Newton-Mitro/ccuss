@@ -10,7 +10,7 @@ export const sidebarMenu: SidebarItem[] = [
     ...homeMenu,
     ...customerKycMenu,
     ...financialServicesMenu,
-    ...generalAccountingMenu,
     ...treasuryAndCashMenu,
+    ...generalAccountingMenu,
     ...systemAdministrationMenu,
 ];
