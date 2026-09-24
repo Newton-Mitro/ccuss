@@ -24,8 +24,6 @@ return new class extends Migration {
             $table->string('postal_code', 20)->nullable();
             $table->string('country', 100)->nullable();
             $table->string('logo_path', 255)->nullable()->comment('Logo used in report headers');
-            $table->string('report_header_line1', 255)->nullable()->comment('Optional custom header line');
-            $table->string('report_header_line2', 255)->nullable();
             $table->string('report_footer', 255)->nullable();
             $table->timestamps();
             $table->softDeletes();

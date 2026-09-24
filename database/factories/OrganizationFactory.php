@@ -30,8 +30,6 @@ class OrganizationFactory extends Factory
             'postal_code' => fake()->postcode(),
             'country' => fake()->country(),
             'logo_path' => null,
-            'report_header_line1' => $name,
-            'report_header_line2' => 'Financial Services',
             'report_footer' => 'This is a system generated report.',
             'created_at' => now(),
             'updated_at' => now(),

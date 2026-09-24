@@ -7,11 +7,14 @@ use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\FinancialTransaction;
 use App\GeneralAccounting\Application\AccountingReportService;
+use App\GeneralAccounting\Models\FiscalPeriod;
+use App\GeneralAccounting\Models\FiscalYear;
 use App\GeneralAccounting\Models\LedgerAccount;
 use App\Http\Controllers\Controller;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -39,9 +42,23 @@ class ReportExportController extends Controller
         $summary = $this->summary($report, $rows);
         $filename = str($report)->slug('_') . '_' . now()->format('Ymd_His');
         $organization = $request->attributes->get('active_organization');
-        $organizationInfo = collect([$organization->full_address, $organization->phone, $organization->email])
+        $organizationAddress = $organization->full_address;
+        $organizationContact = collect([$organization->phone, $organization->email])
             ->filter()
             ->implode(' | ');
+        $organizationInfo = collect([$organizationAddress, $organizationContact])
+            ->filter()
+            ->implode(' | ');
+        $organizationLogoPath = $organization->logo_path
+            ? Storage::disk('public')->path($organization->logo_path)
+            : null;
+        $orientation = in_array($report, [
+            'trial-balance',
+            'profit-loss',
+            'balance-sheet',
+            'cash-flow',
+            'product-summary',
+        ], true) ? 'portrait' : 'landscape';
 
         return match ($format) {
             'pdf' => Pdf::loadView("reports.exports.{$report}", [
@@ -51,10 +68,14 @@ class ReportExportController extends Controller
                 'rows' => $rows,
                 'summary' => $summary,
                 'organizationName' => $organization->name,
-                'organizationInfo' => $organizationInfo,
+                'organizationAddress' => $organizationAddress,
+                'organizationContact' => $organizationContact,
+                'organizationLogoPath' => $organizationLogoPath,
+                'organizationFooter' => $organization->report_footer,
                 'generatedAt' => now()->format('Y-m-d H:i'),
-                'filters' => $this->filterSummary($request),
-            ])->setPaper('a4', 'landscape')->download($filename . '.pdf'),
+                'filters' => $this->filterSummary($request, (int) $organization->id),
+                'pageNumberX' => $orientation === 'portrait' ? 540 : 760,
+            ])->setPaper('a4', $orientation)->download($filename . '.pdf'),
             'xlsx' => Excel::download(new ReportArrayExport($title, $organization->name, $organizationInfo, $headings, $rows), $filename . '.xlsx'),
             default => $this->csv($filename, $title, $organization->name, $organizationInfo, $headings, $rows),
         };
@@ -284,11 +305,40 @@ class ReportExportController extends Controller
         ]);
     }
 
-    private function filterSummary(Request $request): string
+    private function filterSummary(Request $request, int $organizationId): string
     {
-        return collect($request->only(['fiscal_period_id', 'account_id', 'period', 'date', 'from', 'to']))
+        $fiscalYearId = $request->integer('fiscal_year_id');
+        $fiscalPeriodId = $request->integer('fiscal_period_id');
+        $fiscalYear = $fiscalYearId
+            ? FiscalYear::query()->where('organization_id', $organizationId)->find($fiscalYearId)
+            : null;
+        $fiscalPeriod = $fiscalPeriodId
+            ? FiscalPeriod::query()
+                ->whereKey($fiscalPeriodId)
+                ->whereHas('fiscalYear', fn($query) => $query->where('organization_id', $organizationId))
+                ->first()
+            : null;
+        $labels = [
+            'fiscal_year_id' => 'Fiscal year',
+            'fiscal_period_id' => 'Fiscal period',
+            'account_id' => 'Account',
+            'period' => 'Period',
+            'date' => 'Date',
+            'from' => 'From',
+            'to' => 'To',
+        ];
+
+        return collect($request->only(['fiscal_year_id', 'fiscal_period_id', 'account_id', 'period', 'date', 'from', 'to']))
             ->filter(fn($value) => $value !== null && $value !== '')
-            ->map(fn($value, $key) => "$key=$value")
+            ->map(function ($value, $key) use ($fiscalYearId, $fiscalPeriodId, $fiscalYear, $fiscalPeriod, $labels) {
+                $displayValue = match ($key) {
+                    'fiscal_year_id' => $fiscalYear?->name ?? $value,
+                    'fiscal_period_id' => $fiscalPeriod?->name ?? $value,
+                    default => $value,
+                };
+
+                return ($labels[$key] ?? $key) . ': ' . $displayValue;
+            })
             ->implode(', ');
     }
 }

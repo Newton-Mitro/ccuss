@@ -7,6 +7,7 @@ import {
     UsersRound,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import DashboardMetricCharts from '../../components/dashboard-metric-charts';
 import { ResourcePageHeader } from '../../components/resource-page-shell';
 import {
     Card,
@@ -54,6 +55,14 @@ export default function Dashboard() {
                     title="Customer & KYC"
                     description="Monitor customer records and verification work."
                 />
+                <DashboardMetricCharts
+                    metrics={{
+                        Customers: stats.customers,
+                        'Active customers': stats.activeCustomers,
+                        'Pending customers': stats.pendingCustomers,
+                        'Pending documents': stats.pendingDocuments,
+                    }}
+                />
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {[
                         ['Customers', stats.customers],
@@ -100,7 +109,7 @@ export default function Dashboard() {
                             <Link
                                 key={label as string}
                                 href={route(href as string)}
-                                className="flex items-center justify-between rounded-md border p-4 transition-colors hover:bg-muted"
+                                className="flex items-center justify-between rounded-md border p-4 transition-colors hover:bg-muted hover:shadow-md"
                             >
                                 <span>{label}</span>
                                 <span className="font-semibold">{value}</span>
@@ -113,7 +122,7 @@ export default function Dashboard() {
                         <Link
                             key={label}
                             href={route(href)}
-                            className="flex items-center justify-between rounded-md border bg-card p-4 hover:bg-muted"
+                            className="flex items-center justify-between rounded-md border bg-card p-4 hover:bg-muted hover:shadow-md"
                         >
                             <span className="flex items-center gap-2">
                                 <Icon className="h-4 w-4 text-primary" />

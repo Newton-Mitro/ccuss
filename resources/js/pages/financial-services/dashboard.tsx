@@ -15,6 +15,7 @@ import {
     WalletCards,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import DashboardMetricCharts from '../../components/dashboard-metric-charts';
 
 interface Props extends SharedData {
     metrics: {
@@ -83,6 +84,14 @@ export default function FinancialServicesDashboard() {
                             </Link>
                         </Button>
                     }
+                />
+                <DashboardMetricCharts
+                    metrics={{
+                        'Active products': metrics.products,
+                        'Financial accounts': metrics.accounts,
+                        'Active accounts': metrics.activeAccounts,
+                        'Posted transactions': metrics.postedTransactions,
+                    }}
                 />
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                     {cards.map(({ label, value, icon: Icon, tone }) => (

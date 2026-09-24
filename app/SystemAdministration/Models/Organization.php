@@ -31,8 +31,6 @@ class Organization extends Model
         'postal_code',
         'country',
         'logo_path',
-        'report_header_line1',
-        'report_header_line2',
         'report_footer',
     ];
 

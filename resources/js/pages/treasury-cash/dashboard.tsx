@@ -7,6 +7,7 @@ import {
     Vault,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import DashboardMetricCharts from '../../components/dashboard-metric-charts';
 import { ResourcePageHeader } from '../../components/resource-page-shell';
 import {
     Card,
@@ -48,6 +49,14 @@ export default function Dashboard() {
                     title="Treasury & Cash"
                     description="Monitor branch days, cash locations, and teller activity."
                 />
+                <DashboardMetricCharts
+                    metrics={{
+                        Vaults: stats.vaults,
+                        Tellers: stats.tellers,
+                        'Open branch days': stats.openBranchDays,
+                        'Open teller sessions': stats.openTellerSessions,
+                    }}
+                />
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {[
                         ['Vaults', stats.vaults],
@@ -78,7 +87,7 @@ export default function Dashboard() {
                             <Link
                                 key={label}
                                 href={route(href)}
-                                className="flex items-center justify-between rounded-md border p-4 hover:bg-muted"
+                                className="flex items-center justify-between rounded-md border p-4 hover:bg-muted hover:shadow-md"
                             >
                                 <span className="flex items-center gap-2">
                                     <Icon className="h-4 w-4 text-primary" />

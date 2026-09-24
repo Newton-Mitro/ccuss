@@ -28,6 +28,7 @@ class StoreOrganizationRequest extends FormRequest
             'state' => ['nullable', 'string', 'max:100'],
             'postal_code' => ['nullable', 'string', 'max:20'],
             'country' => ['nullable', 'string', 'max:100'],
+            'report_footer' => ['nullable', 'string', 'max:255'],
             'logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg,webp,jpe', 'max:4048'],
         ];
     }

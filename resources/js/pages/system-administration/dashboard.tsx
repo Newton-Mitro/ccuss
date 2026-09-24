@@ -8,6 +8,7 @@ import {
     Users,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import DashboardMetricCharts from '../../components/dashboard-metric-charts';
 import { ResourcePageHeader } from '../../components/resource-page-shell';
 import {
     Card,
@@ -51,6 +52,15 @@ export default function Dashboard() {
                     title="Administrative Tasks"
                     description="Monitor organizations, access, and system history."
                 />
+                <DashboardMetricCharts
+                    metrics={{
+                        Organizations: stats.organizations,
+                        Branches: stats.branches,
+                        Users: stats.users,
+                        Roles: stats.roles,
+                        'Audit events': stats.auditLogs,
+                    }}
+                />
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {[
                         ['Organizations', stats.organizations],
@@ -84,7 +94,7 @@ export default function Dashboard() {
                                 <Link
                                     key={label}
                                     href={route(href)}
-                                    className="flex items-center justify-between rounded-md border p-4 hover:bg-muted"
+                                    className="flex items-center justify-between rounded-md border p-4 hover:bg-muted hover:shadow-md"
                                 >
                                     <span className="flex items-center gap-2">
                                         <LinkIcon className="h-4 w-4 text-primary" />

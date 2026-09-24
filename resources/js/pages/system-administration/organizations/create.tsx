@@ -30,8 +30,6 @@ function CreateOrganization() {
         postal_code: '',
         country: '',
         logo_url: '',
-        report_header_line1: '',
-        report_header_line2: '',
         report_footer: '',
         logo: null as File | null,
     });
@@ -315,42 +313,6 @@ function CreateOrganization() {
                                     Report Header/Footer
                                 </h3>
                                 <div className="grid grid-cols-1 gap-x-5 gap-y-2 md:grid-cols-4">
-                                    <div className="md:col-span-2">
-                                        <Label>Report Header Line 1</Label>
-                                        <Input
-                                            value={data.report_header_line1}
-                                            onChange={(e) =>
-                                                setData(
-                                                    'report_header_line1',
-                                                    e.target.value,
-                                                )
-                                            }
-                                            className="h-8 text-sm"
-                                            placeholder="Acme Corp - Financial Report"
-                                        />
-                                        <InputError
-                                            message={errors.report_header_line1}
-                                        />
-                                    </div>
-
-                                    <div className="md:col-span-2">
-                                        <Label>Report Header Line 2</Label>
-                                        <Input
-                                            value={data.report_header_line2}
-                                            onChange={(e) =>
-                                                setData(
-                                                    'report_header_line2',
-                                                    e.target.value,
-                                                )
-                                            }
-                                            className="h-8 text-sm"
-                                            placeholder="Confidential"
-                                        />
-                                        <InputError
-                                            message={errors.report_header_line2}
-                                        />
-                                    </div>
-
                                     <div className="md:col-span-2">
                                         <Label>Report Footer</Label>
                                         <Input
