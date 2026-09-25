@@ -78,6 +78,14 @@ export const treasuryAndCashMenu: SidebarItem[] = [
                         permission: ['cash_transactions.create'],
                     },
                     {
+                        name: 'Savings Cheque Withdrawal',
+                        icon: <i className="fa-solid fa-money-check-dollar" />,
+                        path: '/teller-transactions/savings-cheque-withdrawal',
+                        match_path:
+                            'teller-transactions/savings-cheque-withdrawal',
+                        permission: ['cash_transactions.create'],
+                    },
+                    {
                         name: 'Cash Withdrawal',
                         icon: <i className="fa-solid fa-arrow-up" />,
                         path: '/teller-transactions/withdrawal',

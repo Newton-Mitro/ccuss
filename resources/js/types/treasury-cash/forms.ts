@@ -109,6 +109,34 @@ export interface TellerCashTransactionFormPageProps extends SharedData {
     }[];
 }
 
+export interface SavingsChequeWithdrawalPageProps extends SharedData {
+    customer: {
+        id: number;
+        name?: string;
+        customer_no?: string;
+        status?: string;
+    } | null;
+    savings_accounts: {
+        id: number;
+        account_no: string;
+        name?: string | null;
+        account_type: string;
+        balance: string | number;
+        available_balance: string | number;
+    }[];
+    available_cheques: {
+        id: number;
+        financial_account_id: number;
+        cheque_book_id: number;
+        cheque_no: string;
+        status: string;
+        amount: string | number;
+        payee?: string | null;
+        issue_date?: string | null;
+    }[];
+    teller_sessions: TellerSessionOption[];
+}
+
 export interface TellerCreatePageProps extends SharedData {
     users: { id: number; name: string; email: string }[];
 }

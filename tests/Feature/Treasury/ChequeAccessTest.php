@@ -256,3 +256,58 @@ it('posts a savings-account cheque withdrawal through the teller cash ledger', f
         ->and($savingsAccount->fresh()->balance)->toBe('250.0000')
         ->and($transaction->financialTransaction->status)->toBe('POSTED');
 });
+
+it('loads a savings cheque withdrawal form for the selected customer and savings account', function () {
+    $organization = Organization::factory()->create();
+    $branch = Branch::factory()->create(['organization_id' => $organization->id]);
+    $customer = \App\CustomerModule\Models\Customer::factory()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+    ]);
+    $account = FinancialAccount::factory()->active(1200)->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+        'holder_type' => \App\CustomerModule\Models\Customer::class,
+        'holder_id' => $customer->id,
+        'account_type' => 'SAVINGS',
+        'account_no' => 'SAV-5001',
+    ]);
+    $book = ChequeBook::create([
+        'financial_account_id' => $account->id,
+        'book_no' => 'CHEQUE-BOOK-500',
+        'prefix' => 'CHQ',
+        'start_number' => 1,
+        'end_number' => 2,
+        'leaf_count' => 2,
+        'current_number' => 1,
+        'issued_date' => now()->toDateString(),
+        'status' => 'IN_USE',
+    ]);
+    $cheque = $book->cheques()->first();
+
+    $user = User::factory()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+    ]);
+    $role = Role::firstOrCreate(['slug' => 'cheque_issue_test'], ['name' => 'Cheque Issue Test']);
+    $chequePermission = Permission::firstOrCreate(
+        ['slug' => 'cheques.issue'],
+        ['module' => 'cheques', 'name' => 'Issue Cheques', 'action' => 'issue'],
+    );
+    $cashPermission = Permission::firstOrCreate(
+        ['slug' => 'cash_transactions.create'],
+        ['module' => 'cash_transactions', 'name' => 'Create Cash Transactions', 'action' => 'create'],
+    );
+    $role->permissions()->syncWithoutDetaching([$chequePermission->id, $cashPermission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+
+    $this->actingAs($user)
+        ->withSession(['active_organization_id' => $organization->id])
+        ->get(route('teller-transactions.savings-cheque-withdrawal', ['customer_id' => $customer->id]))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page
+            ->component('treasury-cash/teller-transactions/savings-cheque-withdrawal-page')
+            ->where('customer.id', $customer->id)
+            ->where('savings_accounts.0.id', $account->id)
+            ->where('available_cheques.0.id', $cheque->id));
+});

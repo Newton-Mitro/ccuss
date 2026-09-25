@@ -8,7 +8,9 @@ use App\Http\Controllers\Controller;
 use App\TreasuryAndCash\Application\CashAdjustmentService;
 use App\TreasuryAndCash\Application\CashMovementDataService;
 use App\TreasuryAndCash\Application\CashTransferService;
+use App\TreasuryAndCash\Application\ChequeService;
 use App\TreasuryAndCash\Application\TellerCashTransactionService;
+use App\TreasuryAndCash\Models\Cheque;
 use App\TreasuryAndCash\Models\TellerCashTransaction;
 use App\TreasuryAndCash\Models\TellerSession;
 use App\TreasuryAndCash\Models\CashTransfer;
@@ -424,6 +426,113 @@ class CashMovementController extends Controller
         return redirect()
             ->route('teller-transactions.customer-deposit', ['customer_id' => $customer->id])
             ->with('success', 'Customer deposit posted for ' . $customer->name . '.');
+    }
+
+    public function savingsChequeWithdrawal(Request $request): Response
+    {
+        $organization = $request->attributes->get('active_organization');
+        $user = $request->user();
+
+        abort_unless($user?->branch_id, 422, 'A branch assignment is required for teller transactions.');
+
+        $selectedCustomer = null;
+        $savingsAccounts = collect([]);
+        $availableCheques = collect([]);
+
+        $customerId = $request->query('customer_id');
+        if ($customerId) {
+            $selectedCustomer = Customer::query()
+                ->where('organization_id', $organization->id)
+                ->with('photo')
+                ->find($customerId);
+
+            if ($selectedCustomer) {
+                $savingsAccounts = FinancialAccount::query()
+                    ->where('organization_id', $organization->id)
+                    ->where('holder_type', Customer::class)
+                    ->where('holder_id', $selectedCustomer->id)
+                    ->where('account_type', 'SAVINGS')
+                    ->with(['product', 'chequeBooks.cheques' => fn($query) => $query->whereIn('status', ['UNUSED', 'ISSUED'])->orderBy('cheque_no')])
+                    ->orderBy('account_no')
+                    ->get();
+
+                $availableCheques = $savingsAccounts
+                    ->flatMap(fn(FinancialAccount $account) => $account->chequeBooks
+                        ->flatMap(fn($book) => $book->cheques->map(fn($cheque) => [
+                            'id' => $cheque->id,
+                            'financial_account_id' => $account->id,
+                            'cheque_book_id' => $book->id,
+                            'cheque_no' => $cheque->cheque_no,
+                            'status' => $cheque->status,
+                            'amount' => (float) ($cheque->amount ?? 0),
+                            'payee' => $cheque->payee,
+                            'issue_date' => $cheque->issue_date?->toDateString(),
+                        ])))
+                    ->values();
+            }
+        }
+
+        return Inertia::render('treasury-cash/teller-transactions/savings-cheque-withdrawal-page', [
+            'customer' => $selectedCustomer,
+            'savings_accounts' => $savingsAccounts->map(fn(FinancialAccount $account) => [
+                'id' => $account->id,
+                'account_type' => $account->account_type,
+                'account_no' => $account->account_no,
+                'name' => $account->name,
+                'balance' => (float) $account->balance,
+                'available_balance' => (float) $account->available_balance,
+            ])->all(),
+            'available_cheques' => $availableCheques->all(),
+            'teller_sessions' => TellerSession::query()
+                ->where('status', 'OPEN')
+                ->whereHas('branchDay', function ($branchDay) use ($organization, $user) {
+                    $branchDay
+                        ->where('organization_id', $organization->id)
+                        ->where('branch_id', $user->branch_id)
+                        ->where('status', 'OPEN');
+                })
+                ->with(['teller', 'branchDay'])
+                ->latest('opened_at')
+                ->get(['id', 'branch_day_id', 'teller_id', 'opening_cash', 'expected_cash']),
+        ]);
+    }
+
+    public function storeSavingsChequeWithdrawal(Request $request): RedirectResponse
+    {
+        $organization = $request->attributes->get('active_organization');
+        $user = $request->user();
+
+        abort_unless($user?->branch_id, 422, 'A branch assignment is required for teller transactions.');
+
+        $data = $request->validate([
+            'customer_id' => ['required', 'integer', 'exists:customers,id'],
+            'teller_session_id' => ['required', 'integer', 'exists:teller_sessions,id'],
+            'financial_account_id' => ['required', 'integer', 'exists:financial_accounts,id'],
+            'cheque_id' => ['required', 'integer', 'exists:cheques,id'],
+            'note' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $customer = Customer::query()->where('organization_id', $organization->id)->findOrFail($data['customer_id']);
+        $account = FinancialAccount::query()->where('organization_id', $organization->id)->where('id', $data['financial_account_id'])->firstOrFail();
+        $cheque = Cheque::query()->whereKey($data['cheque_id'])->where('financial_account_id', $account->id)->firstOrFail();
+
+        $session = TellerSession::query()
+            ->whereKey($data['teller_session_id'])
+            ->where('status', 'OPEN')
+            ->whereHas('branchDay', fn($query) => $query->where('organization_id', $organization->id)->where('branch_id', $user->branch_id)->where('status', 'OPEN'))
+            ->with(['teller.cashLocation.financialAccount'])
+            ->firstOrFail();
+
+        app(ChequeService::class)->withdrawFromTeller(
+            $cheque,
+            $session->id,
+            $organization->id,
+            $user->branch_id,
+            $user->id,
+        );
+
+        return redirect()->route('teller-transactions.savings-cheque-withdrawal', ['customer_id' => $customer->id])
+            ->with('success', 'Savings cheque withdrawal posted successfully.');
     }
 
     public function deposit(Request $request): Response
