@@ -322,6 +322,17 @@ class CashMovementController extends Controller
             ])->all(),
             'obligations' => $obligations,
             'totals' => $totals,
+            'teller_sessions' => TellerSession::query()
+                ->where('status', 'OPEN')
+                ->whereHas('branchDay', function ($branchDay) use ($organization, $user) {
+                    $branchDay
+                        ->where('organization_id', $organization->id)
+                        ->where('branch_id', $user->branch_id)
+                        ->where('status', 'OPEN');
+                })
+                ->with(['teller', 'branchDay'])
+                ->latest('opened_at')
+                ->get(['id', 'branch_day_id', 'teller_id', 'opening_cash', 'expected_cash']),
             'filters' => $request->only(['customer_id']),
         ]);
     }

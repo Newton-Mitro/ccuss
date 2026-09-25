@@ -38,6 +38,14 @@ interface ObligationsRow {
     amount: number;
 }
 
+interface TellerSessionOption {
+    id: number;
+    teller?: { name: string; code: string } | null;
+    branch_day?: { business_date: string } | null;
+    opening_cash?: string | number;
+    expected_cash?: string | number | null;
+}
+
 interface CustomerDepositPageProps {
     customer: Customer | null;
     customerAccounts: CustomerAccount[];
@@ -47,17 +55,19 @@ interface CustomerDepositPageProps {
         previous_due: number;
         total_due: number;
     };
+    teller_sessions: TellerSessionOption[];
     filters: { customer_id?: string };
 }
 
 export default function CustomerDepositPage() {
     useFlashToastHandler();
 
-    const { customer, customerAccounts, obligations, totals } =
+    const { customer, customerAccounts, obligations, totals, teller_sessions } =
         usePage<CustomerDepositPageProps>().props;
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
         customer ?? null,
     );
+    const [selectedTellerSessionId, setSelectedTellerSessionId] = useState('');
     const [depositAmount, setDepositAmount] = useState('');
     const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>(
         {},
@@ -101,13 +111,14 @@ export default function CustomerDepositPage() {
     };
 
     const submit = () => {
-        if (!selectedCustomer) {
+        if (!selectedCustomer || !selectedTellerSessionId) {
             return;
         }
 
         router.post(
             route('teller-transactions.customer-deposit.store'),
             {
+                teller_session_id: selectedTellerSessionId,
                 customer_id: selectedCustomer.id,
                 amount: depositAmount || totalSelected.toFixed(2),
                 selected: obligations
@@ -154,6 +165,42 @@ export default function CustomerDepositPage() {
                                     <StatusBadge tone="success">
                                         {selectedCustomer.status}
                                     </StatusBadge>
+                                </div>
+                                <div className="mb-4">
+                                    <label
+                                        htmlFor="customer-deposit-session"
+                                        className="mb-1 block text-sm font-medium"
+                                    >
+                                        Open teller session
+                                    </label>
+                                    <select
+                                        id="customer-deposit-session"
+                                        className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                                        value={selectedTellerSessionId}
+                                        onChange={(event) =>
+                                            setSelectedTellerSessionId(
+                                                event.target.value,
+                                            )
+                                        }
+                                        required
+                                    >
+                                        <option value="">
+                                            Select teller session
+                                        </option>
+                                        {teller_sessions.map((session) => (
+                                            <option
+                                                key={session.id}
+                                                value={session.id}
+                                            >
+                                                {session.teller?.name ??
+                                                    'Teller'}{' '}
+                                                ({session.teller?.code ?? '-'})
+                                                -{' '}
+                                                {session.branch_day
+                                                    ?.business_date ?? '-'}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                                     <div className="h-16 w-16 overflow-hidden rounded-full border bg-muted">

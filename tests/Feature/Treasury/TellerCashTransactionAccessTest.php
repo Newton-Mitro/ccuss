@@ -160,6 +160,20 @@ it('loads the customer deposit page without a selected customer', function () {
             ->where('customerAccounts', []));
 });
 
+it('loads the customer deposit page with open teller sessions available', function () {
+    $fixture = tellerCashTransactionFixture();
+    grantTellerCashTransactionPermission($fixture['user']);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('teller-transactions.customer-deposit'))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page
+            ->component('treasury-cash/teller-deposits/customer-deposit-page')
+            ->has('teller_sessions', 1)
+            ->where('teller_sessions.0.id', $fixture['session']->id));
+});
+
 it('creates a pending teller cash deposit for an open session', function () {
     $fixture = tellerCashTransactionFixture();
     grantTellerCashTransactionPermission($fixture['user']);
