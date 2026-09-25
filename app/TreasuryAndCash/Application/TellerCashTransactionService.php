@@ -3,6 +3,7 @@
 namespace App\TreasuryAndCash\Application;
 
 use App\FinancialServices\Application\FinancialTransactionService;
+use App\FinancialServices\Models\FinancialAccount;
 use App\TreasuryAndCash\Models\TellerCashTransaction;
 use App\TreasuryAndCash\Models\TellerSession;
 use Illuminate\Support\Facades\DB;
@@ -37,15 +38,40 @@ class TellerCashTransactionService
             $nextNumber = TellerCashTransaction::query()->lockForUpdate()->count() + 1;
             $financialTransactionId = null;
 
-            if ($type === 'DEPOSIT' && !empty($data['lines'])) {
+            if (!empty($data['lines'])) {
                 $cashAccount = $session->teller->cashLocation->financialAccount;
                 if (!$cashAccount) {
-                    throw new \RuntimeException('The teller cash location must be linked to a financial account before posting multi-line deposits.');
+                    throw new \RuntimeException('The teller cash location must be linked to a financial account before posting multi-line teller transactions.');
                 }
 
+                $accountIds = collect($data['lines'])->pluck('financial_account_id')->all();
+                $accounts = FinancialAccount::query()
+                    ->where('organization_id', $organizationId)
+                    ->whereIn('id', $accountIds)
+                    ->with('product')
+                    ->get()
+                    ->keyBy('id');
+
+                $entryLines = collect($data['lines'])->map(function (array $line) use ($accounts, $type): array {
+                    $account = $accounts->get($line['financial_account_id']);
+                    if (!$account) {
+                        throw new \RuntimeException('Every teller transaction line must reference a valid account in the active organization.');
+                    }
+
+                    $direction = $type === 'DEPOSIT' ? 'CREDIT' : 'DEBIT';
+
+                    return [
+                        'financial_account_id' => (int) $line['financial_account_id'],
+                        'direction' => $direction,
+                        'amount' => $line['amount'],
+                        'description' => $line['description'] ?? null,
+                    ];
+                })->all();
+
+                $cashDirection = $type === 'DEPOSIT' ? 'DEBIT' : 'CREDIT';
                 $financialTransaction = $this->financialTransactionService->createMultiLine(
                     [
-                        'transaction_type' => 'DEPOSIT',
+                        'transaction_type' => $type,
                         'transaction_date' => now(),
                         'reference' => $data['reference'] ?? null,
                         'description' => $data['note'] ?? null,
@@ -53,16 +79,11 @@ class TellerCashTransactionService
                     [
                         [
                             'financial_account_id' => $cashAccount->id,
-                            'direction' => 'DEBIT',
+                            'direction' => $cashDirection,
                             'amount' => $data['amount'],
-                            'description' => 'Teller cash received',
+                            'description' => $type === 'DEPOSIT' ? 'Teller cash received' : 'Teller cash disbursed',
                         ],
-                        ...collect($data['lines'])->map(fn(array $line): array => [
-                            'financial_account_id' => $line['financial_account_id'],
-                            'direction' => 'CREDIT',
-                            'amount' => $line['amount'],
-                            'description' => $line['description'] ?? null,
-                        ])->all(),
+                        ...$entryLines,
                     ],
                     $organizationId,
                     $userId,

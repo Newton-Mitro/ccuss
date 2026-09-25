@@ -12,7 +12,34 @@ class ChequeBook extends Model
 {
     use HasFactory;
 
+    protected static function booted(): void
+    {
+        static::created(function (self $book): void {
+            if ($book->cheques()->exists() || !isset($book->start_number, $book->end_number)) {
+                return;
+            }
+
+            $start = (int) $book->start_number;
+            $end = (int) $book->end_number;
+
+            for ($number = $start; $number <= $end; $number++) {
+                $book->cheques()->create([
+                    'financial_account_id' => $book->financial_account_id,
+                    'cheque_no' => ($book->prefix ?? '') . $number,
+                    'status' => 'UNUSED',
+                ]);
+            }
+
+            $book->refresh();
+            $book->update([
+                'current_number' => $start,
+                'leaf_count' => $end - $start + 1,
+            ]);
+        });
+    }
+
     protected $fillable = [
+        'financial_account_id',
         'bank_account_id',
         'book_no',
         'prefix',
@@ -37,6 +64,11 @@ class ChequeBook extends Model
         'leaf_count' => 'integer',
         'issued_date' => 'date',
     ];
+
+    public function financialAccount(): BelongsTo
+    {
+        return $this->belongsTo(\App\FinancialServices\Models\FinancialAccount::class);
+    }
 
     public function bankAccount(): BelongsTo
     {

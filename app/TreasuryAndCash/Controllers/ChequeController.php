@@ -3,6 +3,7 @@
 namespace App\TreasuryAndCash\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\FinancialServices\Models\FinancialAccount;
 use App\TreasuryAndCash\Application\ChequeDataService;
 use App\TreasuryAndCash\Application\ChequeService;
 use App\TreasuryAndCash\Models\BankAccount;
@@ -48,12 +49,13 @@ class ChequeController extends Controller
     public function createBook(Request $request): Response
     {
         return Inertia::render('treasury-cash/cheques/books/create', [
-            'bank_accounts' => BankAccount::query()
+            'financial_accounts' => FinancialAccount::query()
                 ->where('organization_id', $request->attributes->get('active_organization')->id)
-                ->with('bank')
+                ->where('account_type', 'SAVINGS')
                 ->where('status', 'ACTIVE')
-                ->orderBy('account_name')
-                ->get(['id', 'account_name', 'account_number', 'bank_id']),
+                ->with('holder')
+                ->orderBy('account_no')
+                ->get(['id', 'account_no', 'name', 'holder_type', 'holder_id']),
         ]);
     }
 

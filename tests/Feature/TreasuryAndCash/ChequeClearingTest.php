@@ -21,8 +21,8 @@ it('moves a presented cheque through clearing and settlement', function () {
     $financialAccount = FinancialAccount::factory()->active()->create(['organization_id' => $organization->id, 'branch_id' => $branch->id, 'financial_product_id' => $product->id, 'account_type' => 'BANK']);
     $bank = Bank::create(['organization_id' => $organization->id, 'code' => 'CB-1', 'name' => 'Clearing Bank', 'status' => true]);
     $bankAccount = BankAccount::create(['organization_id' => $organization->id, 'branch_id' => $branch->id, 'bank_id' => $bank->id, 'financial_account_id' => $financialAccount->id, 'account_name' => 'Clearing', 'account_number' => '900', 'status' => 'ACTIVE']);
-    $book = ChequeBook::create(['bank_account_id' => $bankAccount->id, 'book_no' => 'BOOK-1', 'start_number' => 1, 'end_number' => 1, 'current_number' => 1, 'leaf_count' => 1, 'status' => 'IN_USE']);
-    $cheque = Cheque::create(['cheque_book_id' => $book->id, 'cheque_no' => '1', 'status' => 'PRESENTED', 'amount' => 250, 'presented_date' => now()->toDateString()]);
+    $book = ChequeBook::create(['financial_account_id' => $financialAccount->id, 'bank_account_id' => $bankAccount->id, 'book_no' => 'BOOK-1', 'start_number' => 1, 'end_number' => 1, 'current_number' => 1, 'leaf_count' => 1, 'status' => 'IN_USE']);
+    $cheque = Cheque::create(['cheque_book_id' => $book->id, 'financial_account_id' => $financialAccount->id, 'cheque_no' => '2', 'status' => 'PRESENTED', 'amount' => 250, 'presented_date' => now()->toDateString()]);
     $service = app(ChequeClearingService::class);
 
     $clearing = $service->create(['cheque_id' => $cheque->id, 'branch_id' => $branch->id, 'clearing_no' => 'CLR-1'], $organization->id, $user->id);
@@ -42,8 +42,8 @@ it('records a returned clearing and prevents an invalid transition', function ()
     $financialAccount = FinancialAccount::factory()->active()->create(['organization_id' => $organization->id, 'branch_id' => $branch->id, 'financial_product_id' => $product->id, 'account_type' => 'BANK']);
     $bank = Bank::create(['organization_id' => $organization->id, 'code' => 'CB-2', 'name' => 'Return Bank', 'status' => true]);
     $bankAccount = BankAccount::create(['organization_id' => $organization->id, 'branch_id' => $branch->id, 'bank_id' => $bank->id, 'financial_account_id' => $financialAccount->id, 'account_name' => 'Returns', 'account_number' => '901', 'status' => 'ACTIVE']);
-    $book = ChequeBook::create(['bank_account_id' => $bankAccount->id, 'book_no' => 'BOOK-2', 'start_number' => 1, 'end_number' => 1, 'current_number' => 1, 'leaf_count' => 1, 'status' => 'IN_USE']);
-    $cheque = Cheque::create(['cheque_book_id' => $book->id, 'cheque_no' => '1', 'status' => 'PRESENTED', 'amount' => 100, 'presented_date' => now()->toDateString()]);
+    $book = ChequeBook::create(['financial_account_id' => $financialAccount->id, 'bank_account_id' => $bankAccount->id, 'book_no' => 'BOOK-2', 'start_number' => 1, 'end_number' => 1, 'current_number' => 1, 'leaf_count' => 1, 'status' => 'IN_USE']);
+    $cheque = Cheque::create(['cheque_book_id' => $book->id, 'financial_account_id' => $financialAccount->id, 'cheque_no' => '2', 'status' => 'PRESENTED', 'amount' => 100, 'presented_date' => now()->toDateString()]);
     $service = app(ChequeClearingService::class);
     $clearing = $service->create(['cheque_id' => $cheque->id, 'branch_id' => $branch->id, 'clearing_no' => 'CLR-2'], $organization->id, $user->id);
 

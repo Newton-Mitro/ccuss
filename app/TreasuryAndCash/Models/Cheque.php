@@ -15,6 +15,7 @@ class Cheque extends Model
 
     protected $fillable = [
         'cheque_book_id',
+        'financial_account_id',
         'cheque_no',
         'status',
         'issue_date',
@@ -38,6 +39,11 @@ class Cheque extends Model
     public function chequeBook(): BelongsTo
     {
         return $this->belongsTo(ChequeBook::class);
+    }
+
+    public function financialAccount(): BelongsTo
+    {
+        return $this->belongsTo(\App\FinancialServices\Models\FinancialAccount::class);
     }
 
     public function transactions(): HasMany

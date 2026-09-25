@@ -34,6 +34,50 @@ export default function ChequeClearings() {
         drawer_bank_branch: '',
         drawer_account_no: '',
     });
+
+    const confirmAction = (
+        title: string,
+        text: string,
+        action: 'send' | 'present' | 'settle' | 'bounce' | 'cancel',
+        clearingId: number,
+        requireReason = false,
+    ) => {
+        appSwal
+            .fire({
+                title,
+                text,
+                icon: 'warning',
+                input: requireReason ? 'textarea' : undefined,
+                inputPlaceholder: requireReason
+                    ? 'Reason for this action'
+                    : undefined,
+                inputValidator: requireReason
+                    ? (value) =>
+                          value?.trim()
+                              ? undefined
+                              : 'A reason is required before continuing.'
+                    : undefined,
+                showCancelButton: true,
+                confirmButtonText:
+                    action === 'bounce' ? 'Reject clearing' : 'Confirm',
+                cancelButtonText: 'Cancel',
+            })
+            .then((result) => {
+                if (!result.isConfirmed) {
+                    return;
+                }
+
+                const payload = requireReason
+                    ? { reason: result.value ?? '' }
+                    : {};
+
+                router.post(
+                    route('cheque-clearings.transition', [clearingId, action]),
+                    payload,
+                );
+            });
+    };
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Treasury & Cash', href: route('treasury-cash.dashboard') },
         { title: 'Cheque Clearings', href: route('cheque-clearings.index') },
@@ -146,144 +190,96 @@ export default function ChequeClearings() {
                                         {clearing.status}
                                     </StatusBadge>
                                     {clearing.status === 'RECEIVED' && (
-                                        <Button
-                                            size="sm"
-                                            onClick={() => {
-                                                appSwal
-                                                    .fire({
-                                                        title: 'Send this clearing?',
-                                                        text: `Send clearing ${clearing.clearing_no}?`,
-                                                        icon: 'warning',
-                                                        showCancelButton: true,
-                                                        confirmButtonText:
-                                                            'Send clearing',
-                                                        cancelButtonText:
-                                                            'Cancel',
-                                                    })
-                                                    .then((result) => {
-                                                        if (!result.isConfirmed)
-                                                            return;
-
-                                                        router.post(
-                                                            route(
-                                                                'cheque-clearings.transition',
-                                                                [
-                                                                    clearing.id,
-                                                                    'send',
-                                                                ],
-                                                            ),
-                                                        );
-                                                    });
-                                            }}
-                                        >
-                                            Send
-                                        </Button>
+                                        <>
+                                            <Button
+                                                size="sm"
+                                                onClick={() =>
+                                                    confirmAction(
+                                                        'Send this clearing?',
+                                                        `Send clearing ${clearing.clearing_no}?`,
+                                                        'send',
+                                                        clearing.id,
+                                                    )
+                                                }
+                                            >
+                                                Send
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() =>
+                                                    confirmAction(
+                                                        'Cancel this clearing?',
+                                                        `Cancel clearing ${clearing.clearing_no}?`,
+                                                        'cancel',
+                                                        clearing.id,
+                                                        true,
+                                                    )
+                                                }
+                                            >
+                                                Cancel
+                                            </Button>
+                                        </>
                                     )}
                                     {clearing.status === 'SENT' && (
-                                        <Button
-                                            size="sm"
-                                            onClick={() => {
-                                                appSwal
-                                                    .fire({
-                                                        title: 'Present this clearing?',
-                                                        text: `Present clearing ${clearing.clearing_no}?`,
-                                                        icon: 'warning',
-                                                        showCancelButton: true,
-                                                        confirmButtonText:
-                                                            'Present clearing',
-                                                        cancelButtonText:
-                                                            'Cancel',
-                                                    })
-                                                    .then((result) => {
-                                                        if (!result.isConfirmed)
-                                                            return;
-
-                                                        router.post(
-                                                            route(
-                                                                'cheque-clearings.transition',
-                                                                [
-                                                                    clearing.id,
-                                                                    'present',
-                                                                ],
-                                                            ),
-                                                        );
-                                                    });
-                                            }}
-                                        >
-                                            Present
-                                        </Button>
+                                        <>
+                                            <Button
+                                                size="sm"
+                                                onClick={() =>
+                                                    confirmAction(
+                                                        'Present this clearing?',
+                                                        `Present clearing ${clearing.clearing_no}?`,
+                                                        'present',
+                                                        clearing.id,
+                                                    )
+                                                }
+                                            >
+                                                Present
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() =>
+                                                    confirmAction(
+                                                        'Cancel this clearing?',
+                                                        `Cancel clearing ${clearing.clearing_no}?`,
+                                                        'cancel',
+                                                        clearing.id,
+                                                        true,
+                                                    )
+                                                }
+                                            >
+                                                Cancel
+                                            </Button>
+                                        </>
                                     )}
                                     {clearing.status === 'PRESENTED' && (
                                         <>
                                             <Button
                                                 size="sm"
-                                                onClick={() => {
-                                                    appSwal
-                                                        .fire({
-                                                            title: 'Settle this clearing?',
-                                                            text: `Settle clearing ${clearing.clearing_no}?`,
-                                                            icon: 'warning',
-                                                            showCancelButton: true,
-                                                            confirmButtonText:
-                                                                'Settle clearing',
-                                                            cancelButtonText:
-                                                                'Cancel',
-                                                        })
-                                                        .then((result) => {
-                                                            if (
-                                                                !result.isConfirmed
-                                                            )
-                                                                return;
-
-                                                            router.post(
-                                                                route(
-                                                                    'cheque-clearings.transition',
-                                                                    [
-                                                                        clearing.id,
-                                                                        'settle',
-                                                                    ],
-                                                                ),
-                                                            );
-                                                        });
-                                                }}
+                                                onClick={() =>
+                                                    confirmAction(
+                                                        'Settle this clearing?',
+                                                        `Settle clearing ${clearing.clearing_no}?`,
+                                                        'settle',
+                                                        clearing.id,
+                                                    )
+                                                }
                                             >
                                                 Settle
                                             </Button>
                                             <Button
                                                 size="sm"
                                                 variant="outline"
-                                                onClick={() => {
-                                                    appSwal
-                                                        .fire({
-                                                            title: 'Return this clearing?',
-                                                            text: `Return clearing ${clearing.clearing_no}?`,
-                                                            icon: 'warning',
-                                                            showCancelButton: true,
-                                                            confirmButtonText:
-                                                                'Return clearing',
-                                                            cancelButtonText:
-                                                                'Cancel',
-                                                        })
-                                                        .then((result) => {
-                                                            if (
-                                                                !result.isConfirmed
-                                                            )
-                                                                return;
-
-                                                            router.post(
-                                                                route(
-                                                                    'cheque-clearings.transition',
-                                                                    [
-                                                                        clearing.id,
-                                                                        'bounce',
-                                                                    ],
-                                                                ),
-                                                                {
-                                                                    reason: 'Returned by bank',
-                                                                },
-                                                            );
-                                                        });
-                                                }}
+                                                onClick={() =>
+                                                    confirmAction(
+                                                        'Return this clearing?',
+                                                        `Return clearing ${clearing.clearing_no}?`,
+                                                        'bounce',
+                                                        clearing.id,
+                                                        true,
+                                                    )
+                                                }
                                             >
                                                 Return
                                             </Button>

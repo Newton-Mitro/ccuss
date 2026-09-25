@@ -719,7 +719,7 @@ class FinancialTransactionService
 
     private function isAssetAccount(FinancialAccount $account): bool
     {
-        return in_array($account->account_type, ['CASH', 'BANK'], true)
+        return in_array($account->account_type, ['CASH', 'BANK', 'SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT'], true)
             || $account->product?->balance_type === 'ASSET';
     }
 }

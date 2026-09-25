@@ -69,7 +69,8 @@ return new class extends Migration {
 
         Schema::create('cheque_books', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('bank_account_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('financial_account_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('bank_account_id')->nullable()->constrained()->nullOnDelete();
             $table->string('book_no', 100);
             $table->string('prefix', 50)->nullable();
             $table->unsignedBigInteger('start_number');
@@ -79,12 +80,14 @@ return new class extends Migration {
             $table->date('issued_date')->nullable();
             $table->enum('status', ['AVAILABLE', 'IN_USE', 'EXHAUSTED', 'CANCELLED'])->default('AVAILABLE');
             $table->timestamps();
-            $table->unique(['bank_account_id', 'book_no']);
+            $table->unique(['financial_account_id', 'book_no']);
+            $table->index(['financial_account_id', 'status']);
         });
 
         Schema::create('cheques', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('cheque_book_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('financial_account_id')->nullable()->constrained()->nullOnDelete();
             $table->string('cheque_no', 100);
             $table->enum('status', ['UNUSED', 'ISSUED', 'PRESENTED', 'CLEARED', 'BOUNCED', 'STOPPED', 'CANCELLED', 'EXPIRED'])->default('UNUSED');
             $table->date('issue_date')->nullable();
@@ -97,6 +100,7 @@ return new class extends Migration {
             $table->text('note')->nullable();
             $table->timestamps();
             $table->unique(['cheque_book_id', 'cheque_no']);
+            $table->index(['financial_account_id', 'status']);
         });
 
         Schema::create('cheque_transactions', function (Blueprint $table): void {

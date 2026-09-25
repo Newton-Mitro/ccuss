@@ -11,8 +11,11 @@ class ChequeDataService
     public function listBooks(int $organizationId, ?string $search = null, int $perPage = 18): LengthAwarePaginator
     {
         $query = ChequeBook::query()
-            ->whereHas('bankAccount', fn($account) => $account->where('organization_id', $organizationId))
-            ->with('bankAccount.bank', 'bankAccount.branch')
+            ->where(function ($builder) use ($organizationId) {
+                $builder->whereHas('financialAccount', fn($account) => $account->where('organization_id', $organizationId))
+                    ->orWhereHas('bankAccount.financialAccount', fn($account) => $account->where('organization_id', $organizationId));
+            })
+            ->with('financialAccount.product', 'financialAccount.holder', 'bankAccount.bank', 'bankAccount.branch')
             ->latest();
 
         if (!empty($search)) {
@@ -20,6 +23,14 @@ class ChequeDataService
             $query->where(function ($builder) use ($searchTerm) {
                 $builder->where('book_no', 'like', "%{$searchTerm}%")
                     ->orWhere('prefix', 'like', "%{$searchTerm}%")
+                    ->orWhereHas('financialAccount', function ($accountQuery) use ($searchTerm) {
+                        $accountQuery->where('name', 'like', "%{$searchTerm}%")
+                            ->orWhere('account_no', 'like', "%{$searchTerm}%")
+                            ->orWhereHas('holder', function ($holderQuery) use ($searchTerm) {
+                                $holderQuery->where('name', 'like', "%{$searchTerm}%")
+                                    ->orWhere('customer_no', 'like', "%{$searchTerm}%");
+                            });
+                    })
                     ->orWhereHas('bankAccount', function ($accountQuery) use ($searchTerm) {
                         $accountQuery->where('account_name', 'like', "%{$searchTerm}%")
                             ->orWhere('account_number', 'like', "%{$searchTerm}%")
@@ -36,8 +47,11 @@ class ChequeDataService
     public function listCheques(int $organizationId, ?string $search = null, int $perPage = 18): LengthAwarePaginator
     {
         $query = Cheque::query()
-            ->whereHas('chequeBook.bankAccount', fn($account) => $account->where('organization_id', $organizationId))
-            ->with('chequeBook.bankAccount.bank')
+            ->where(function ($builder) use ($organizationId) {
+                $builder->whereHas('chequeBook.financialAccount', fn($account) => $account->where('organization_id', $organizationId))
+                    ->orWhereHas('chequeBook.bankAccount.financialAccount', fn($account) => $account->where('organization_id', $organizationId));
+            })
+            ->with('chequeBook.financialAccount', 'chequeBook.bankAccount.bank')
             ->latest();
 
         if (!empty($search)) {

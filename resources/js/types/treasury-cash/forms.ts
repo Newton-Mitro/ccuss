@@ -70,11 +70,12 @@ export interface TellerTransferPageProps extends SharedData {
 }
 
 export interface ChequeBookCreatePageProps extends SharedData {
-    bank_accounts: {
+    financial_accounts: {
         id: number;
-        account_name: string;
-        account_number: string;
-        bank?: { name: string } | null;
+        account_no: string;
+        name?: string | null;
+        holder_type?: string | null;
+        holder_id?: number | null;
     }[];
 }
 

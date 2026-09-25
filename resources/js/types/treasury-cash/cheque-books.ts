@@ -20,6 +20,11 @@ export interface ChequeBookListItem {
     leaf_count: number;
     issued_date?: string | null;
     status: ChequeBookStatus;
+    financial_account?: {
+        account_no: string;
+        name?: string | null;
+        holder?: { name?: string | null; customer_no?: string | null } | null;
+    } | null;
     bank_account?: {
         account_name: string;
         account_number: string;

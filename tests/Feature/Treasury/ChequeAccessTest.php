@@ -8,9 +8,13 @@ use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
 use App\TreasuryAndCash\Models\Bank;
 use App\TreasuryAndCash\Models\BankAccount;
+use App\TreasuryAndCash\Models\BranchDay;
+use App\TreasuryAndCash\Models\CashLocation;
 use App\TreasuryAndCash\Models\Cheque;
 use App\TreasuryAndCash\Models\ChequeBook;
 use App\TreasuryAndCash\Application\ChequeService;
+use App\TreasuryAndCash\Models\Teller;
+use App\TreasuryAndCash\Models\TellerSession;
 
 function grantChequeViewPermission(User $user): void
 {
@@ -73,6 +77,7 @@ function chequeFixture(): array
         'status' => 'ACTIVE',
     ]);
     $book = ChequeBook::create([
+        'financial_account_id' => $financialAccount->id,
         'bank_account_id' => $bankAccount->id,
         'book_no' => 'BOOK-001',
         'prefix' => 'CHQ',
@@ -83,12 +88,7 @@ function chequeFixture(): array
         'issued_date' => '2026-09-18',
         'status' => 'AVAILABLE',
     ]);
-    $cheque = Cheque::create([
-        'cheque_book_id' => $book->id,
-        'cheque_no' => 'CHQ-0001',
-        'status' => 'UNUSED',
-        'cheque_date' => '2026-09-18',
-    ]);
+    $cheque = $book->cheques()->firstOrFail();
 
     return compact('organization', 'branch', 'user', 'bankAccount', 'book', 'cheque');
 }
@@ -108,7 +108,7 @@ it('loads cheque books and cheques for authorized organization users', function 
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
-        ->get(route('cheques.index'))
+        ->get(route('cheques.index', ['per_page' => 1]))
         ->assertSuccessful()
         ->assertInertia(fn($page) => $page
             ->component('treasury-cash/cheques/index')
@@ -166,4 +166,93 @@ it('creates cheque leaves and enforces the cheque lifecycle', function () {
 
     expect(fn() => $service->transition($cheque->fresh(), 'bounce', $fixture['user']->id))
         ->toThrow(RuntimeException::class);
+});
+
+it('posts a savings-account cheque withdrawal through the teller cash ledger', function () {
+    $organization = Organization::factory()->create();
+    $branch = Branch::factory()->create(['organization_id' => $organization->id]);
+    $user = User::factory()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+    ]);
+    $branchDay = BranchDay::create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+        'business_date' => now()->toDateString(),
+        'status' => BranchDay::STATUS_OPEN,
+        'opened_at' => now(),
+        'opened_by' => $user->id,
+    ]);
+    $cashAccount = FinancialAccount::factory()->active(1000)->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+        'account_type' => 'CASH',
+        'account_no' => 'CASH-TELLER-100',
+    ]);
+    $cashLocation = CashLocation::create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+        'financial_account_id' => $cashAccount->id,
+        'code' => 'TELLER-100',
+        'name' => 'Teller Cash 100',
+        'type' => 'TELLER',
+        'is_active' => true,
+    ]);
+    $teller = Teller::create([
+        'cash_location_id' => $cashLocation->id,
+        'user_id' => $user->id,
+        'code' => 'TEL-100',
+        'name' => 'Teller 100',
+        'status' => 'ACTIVE',
+        'maximum_cash' => 20000,
+    ]);
+    $session = TellerSession::create([
+        'branch_day_id' => $branchDay->id,
+        'teller_id' => $teller->id,
+        'opened_by' => $user->id,
+        'status' => 'OPEN',
+        'opening_cash' => 1000,
+        'expected_cash' => 1000,
+        'opened_at' => now(),
+    ]);
+    $savingsAccount = FinancialAccount::factory()->active(500)->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+        'account_type' => 'SAVINGS',
+        'account_no' => 'SAV-300',
+    ]);
+    $book = ChequeBook::create([
+        'financial_account_id' => $savingsAccount->id,
+        'book_no' => 'CHEQUE-BOOK-100',
+        'prefix' => 'CHQ',
+        'start_number' => 1,
+        'end_number' => 1,
+        'current_number' => 1,
+        'leaf_count' => 1,
+        'issued_date' => now()->toDateString(),
+        'status' => 'IN_USE',
+    ]);
+    $cheque = Cheque::create([
+        'cheque_book_id' => $book->id,
+        'financial_account_id' => $savingsAccount->id,
+        'cheque_no' => 'CHQ-0001',
+        'status' => 'ISSUED',
+        'amount' => 250,
+        'payee' => 'Customer',
+        'issue_date' => now()->toDateString(),
+    ]);
+
+    $transaction = app(ChequeService::class)->withdrawFromTeller(
+        $cheque,
+        $session->id,
+        $organization->id,
+        $branch->id,
+        $user->id,
+    );
+
+    expect($transaction->status)->toBe('POSTED')
+        ->and($cheque->fresh()->status)->toBe('PRESENTED')
+        ->and($cashAccount->fresh()->balance)->toBe('1250.0000')
+        ->and($savingsAccount->fresh()->balance)->toBe('250.0000')
+        ->and($transaction->financialTransaction->status)->toBe('POSTED');
 });

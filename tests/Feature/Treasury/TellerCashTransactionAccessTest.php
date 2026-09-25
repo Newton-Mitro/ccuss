@@ -325,3 +325,56 @@ it('creates and posts a multi-line financial deposit with the teller cash leg', 
         ->and($transaction->fresh()->status)->toBe('POSTED')
         ->and($fixture['session']->fresh()->expected_cash)->toBe('5300.0000');
 });
+
+it('creates and posts a multi-line financial withdrawal with the teller cash leg', function () {
+    $fixture = tellerCashTransactionFixture();
+    grantTellerCashTransactionPermission($fixture['user']);
+    grantTellerCashTransactionPostPermission($fixture['user']);
+
+    $cashAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'financial_product_id' => null,
+        'account_type' => 'CASH',
+        'account_no' => 'CASH-TELLER-002',
+        'balance' => 1000,
+        'available_balance' => 1000,
+    ]);
+    $savingsAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'financial_product_id' => null,
+        'account_type' => 'SAVINGS',
+        'account_no' => 'SAVINGS-002',
+        'balance' => 500,
+        'available_balance' => 500,
+    ]);
+    $fixture['location']->update(['financial_account_id' => $cashAccount->id]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('teller-transactions.withdrawal.store'), [
+            'teller_session_id' => $fixture['session']->id,
+            'amount' => '300',
+            'lines' => [
+                ['financial_account_id' => $savingsAccount->id, 'amount' => '300'],
+            ],
+        ])
+        ->assertRedirect(route('teller-transactions.withdrawal'));
+
+    $transaction = TellerCashTransaction::query()->with('financialTransaction.entries')->latest()->firstOrFail();
+
+    expect($transaction->financial_transaction_id)->not->toBeNull()
+        ->and($transaction->financialTransaction->entries)->toHaveCount(2)
+        ->and($transaction->financialTransaction->status)->toBe('PENDING');
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('teller-transactions.post', $transaction))
+        ->assertRedirect(route('teller-transactions.index'));
+
+    expect($cashAccount->fresh()->balance)->toBe('700.0000')
+        ->and($savingsAccount->fresh()->balance)->toBe('200.0000')
+        ->and($transaction->fresh()->status)->toBe('POSTED')
+        ->and($fixture['session']->fresh()->expected_cash)->toBe('4700.0000');
+});

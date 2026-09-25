@@ -9,8 +9,9 @@ import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
 export default function CreateChequeBook() {
-    const { bank_accounts } = usePage<ChequeBookCreatePageProps>().props;
+    const { financial_accounts } = usePage<ChequeBookCreatePageProps>().props;
     const { data, setData, post, processing, errors } = useForm({
+        financial_account_id: '',
         bank_account_id: '',
         book_no: '',
         prefix: '',
@@ -47,25 +48,29 @@ export default function CreateChequeBook() {
                     className="space-y-4 rounded-md border bg-card p-4"
                 >
                     <div>
-                        <Label htmlFor="bank_account_id">Bank account</Label>
+                        <Label htmlFor="financial_account_id">
+                            Savings account
+                        </Label>
                         <select
-                            id="bank_account_id"
+                            id="financial_account_id"
                             className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm"
-                            value={data.bank_account_id}
+                            value={data.financial_account_id}
                             onChange={(event) =>
-                                setData('bank_account_id', event.target.value)
+                                setData(
+                                    'financial_account_id',
+                                    event.target.value,
+                                )
                             }
                         >
-                            <option value="">Select bank account</option>
-                            {bank_accounts.map((account) => (
+                            <option value="">Select savings account</option>
+                            {financial_accounts.map((account) => (
                                 <option key={account.id} value={account.id}>
-                                    {account.bank?.name ?? 'Bank'} ·{' '}
-                                    {account.account_name} ·{' '}
-                                    {account.account_number}
+                                    {account.account_no} ·{' '}
+                                    {account.name ?? 'Savings Account'}
                                 </option>
                             ))}
                         </select>
-                        <InputError message={errors.bank_account_id} />
+                        <InputError message={errors.financial_account_id} />
                     </div>
                     <div className="grid gap-4 sm:grid-cols-2">
                         <div>
@@ -138,7 +143,9 @@ export default function CreateChequeBook() {
                         </Button>
                         <Button
                             type="submit"
-                            disabled={processing || bank_accounts.length === 0}
+                            disabled={
+                                processing || financial_accounts.length === 0
+                            }
                         >
                             Create cheque book
                         </Button>
