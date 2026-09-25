@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem } from '@/types';
 import type { CashAdjustmentIndexProps } from '@/types/treasury-cash/cash-adjustments';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
@@ -172,18 +173,40 @@ export default function Index() {
                                                             type="button"
                                                             size="icon"
                                                             variant="ghost"
-                                                            onClick={() =>
-                                                                router.post(
-                                                                    route(
-                                                                        'cash-adjustments.list.approve',
-                                                                        adjustment.id,
-                                                                    ),
-                                                                    {},
-                                                                    {
-                                                                        preserveScroll: true,
-                                                                    },
-                                                                )
-                                                            }
+                                                            onClick={() => {
+                                                                appSwal
+                                                                    .fire({
+                                                                        title: 'Approve this cash adjustment?',
+                                                                        text: `Approve the ${adjustment.type.toLowerCase()} adjustment for ${adjustment.teller_session?.teller?.name ?? 'this teller'}?`,
+                                                                        icon: 'warning',
+                                                                        showCancelButton: true,
+                                                                        confirmButtonText:
+                                                                            'Approve adjustment',
+                                                                        cancelButtonText:
+                                                                            'Cancel',
+                                                                    })
+                                                                    .then(
+                                                                        (
+                                                                            result,
+                                                                        ) => {
+                                                                            if (
+                                                                                !result.isConfirmed
+                                                                            )
+                                                                                return;
+
+                                                                            router.post(
+                                                                                route(
+                                                                                    'cash-adjustments.list.approve',
+                                                                                    adjustment.id,
+                                                                                ),
+                                                                                {},
+                                                                                {
+                                                                                    preserveScroll: true,
+                                                                                },
+                                                                            );
+                                                                        },
+                                                                    );
+                                                            }}
                                                             aria-label={`Approve adjustment for ${adjustment.teller_session?.teller?.name ?? 'teller'}`}
                                                         >
                                                             <ClipboardCheck className="h-4 w-4 text-success" />
@@ -196,18 +219,40 @@ export default function Index() {
                                                             type="button"
                                                             size="icon"
                                                             variant="ghost"
-                                                            onClick={() =>
-                                                                router.post(
-                                                                    route(
-                                                                        'cash-adjustments.list.post',
-                                                                        adjustment.id,
-                                                                    ),
-                                                                    {},
-                                                                    {
-                                                                        preserveScroll: true,
-                                                                    },
-                                                                )
-                                                            }
+                                                            onClick={() => {
+                                                                appSwal
+                                                                    .fire({
+                                                                        title: 'Post this cash adjustment?',
+                                                                        text: 'This will post the approved adjustment to the ledger.',
+                                                                        icon: 'warning',
+                                                                        showCancelButton: true,
+                                                                        confirmButtonText:
+                                                                            'Post adjustment',
+                                                                        cancelButtonText:
+                                                                            'Cancel',
+                                                                    })
+                                                                    .then(
+                                                                        (
+                                                                            result,
+                                                                        ) => {
+                                                                            if (
+                                                                                !result.isConfirmed
+                                                                            )
+                                                                                return;
+
+                                                                            router.post(
+                                                                                route(
+                                                                                    'cash-adjustments.list.post',
+                                                                                    adjustment.id,
+                                                                                ),
+                                                                                {},
+                                                                                {
+                                                                                    preserveScroll: true,
+                                                                                },
+                                                                            );
+                                                                        },
+                                                                    );
+                                                            }}
                                                             aria-label={`Post adjustment for ${adjustment.teller_session?.teller?.name ?? 'teller'}`}
                                                         >
                                                             <CheckCircle2 className="h-4 w-4 text-success" />

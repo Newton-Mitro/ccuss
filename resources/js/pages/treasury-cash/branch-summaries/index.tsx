@@ -4,6 +4,7 @@ import {
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
@@ -50,14 +51,28 @@ export default function BranchCashSummariesIndex() {
                                 key={day.id}
                                 size="sm"
                                 variant="outline"
-                                onClick={() =>
-                                    router.post(
-                                        route(
-                                            'branch-cash-summaries.calculate',
-                                            day.id,
-                                        ),
-                                    )
-                                }
+                                onClick={() => {
+                                    appSwal
+                                        .fire({
+                                            title: 'Calculate summary?',
+                                            text: `Generate the cash summary for ${day.business_date}?`,
+                                            icon: 'warning',
+                                            showCancelButton: true,
+                                            confirmButtonText:
+                                                'Calculate summary',
+                                            cancelButtonText: 'Cancel',
+                                        })
+                                        .then((result) => {
+                                            if (!result.isConfirmed) return;
+
+                                            router.post(
+                                                route(
+                                                    'branch-cash-summaries.calculate',
+                                                    day.id,
+                                                ),
+                                            );
+                                        });
+                                }}
                             >
                                 {day.business_date} · {day.status}
                             </Button>

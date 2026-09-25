@@ -63,20 +63,33 @@ export default function Index() {
     const handleOpen = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
-        router.post(
-            route('branch-days.open'),
-            {
-                business_date: businessDate,
-                opening_note: openingNote || null,
-            },
-            {
-                preserveScroll: true,
-                onSuccess: () => {
-                    setOpenDialog(false);
-                    setOpeningNote('');
-                },
-            },
-        );
+        appSwal
+            .fire({
+                title: 'Open branch day?',
+                text: `Open a branch day for ${businessDate}?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Open branch day',
+                cancelButtonText: 'Cancel',
+            })
+            .then((result) => {
+                if (!result.isConfirmed) return;
+
+                router.post(
+                    route('branch-days.open'),
+                    {
+                        business_date: businessDate,
+                        opening_note: openingNote || null,
+                    },
+                    {
+                        preserveScroll: true,
+                        onSuccess: () => {
+                            setOpenDialog(false);
+                            setOpeningNote('');
+                        },
+                    },
+                );
+            });
     };
 
     const handleClose = (branchDay: BranchDayListItem) => {

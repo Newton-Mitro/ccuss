@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem } from '@/types';
 import type { CashTransferIndexProps } from '@/types/treasury-cash/cash-movements';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
@@ -166,18 +167,40 @@ export default function Index() {
                                                             type="button"
                                                             size="icon"
                                                             variant="ghost"
-                                                            onClick={() =>
-                                                                router.post(
-                                                                    route(
-                                                                        'cash-movements.transfers.approve',
-                                                                        transfer.id,
-                                                                    ),
-                                                                    {},
-                                                                    {
-                                                                        preserveScroll: true,
-                                                                    },
-                                                                )
-                                                            }
+                                                            onClick={() => {
+                                                                appSwal
+                                                                    .fire({
+                                                                        title: 'Approve this transfer?',
+                                                                        text: `Approve ${transfer.transfer_no} for ${transfer.amount}?`,
+                                                                        icon: 'warning',
+                                                                        showCancelButton: true,
+                                                                        confirmButtonText:
+                                                                            'Approve transfer',
+                                                                        cancelButtonText:
+                                                                            'Cancel',
+                                                                    })
+                                                                    .then(
+                                                                        (
+                                                                            result,
+                                                                        ) => {
+                                                                            if (
+                                                                                !result.isConfirmed
+                                                                            )
+                                                                                return;
+
+                                                                            router.post(
+                                                                                route(
+                                                                                    'cash-movements.transfers.approve',
+                                                                                    transfer.id,
+                                                                                ),
+                                                                                {},
+                                                                                {
+                                                                                    preserveScroll: true,
+                                                                                },
+                                                                            );
+                                                                        },
+                                                                    );
+                                                            }}
                                                             aria-label={`Approve ${transfer.transfer_no}`}
                                                         >
                                                             <ClipboardCheck className="h-4 w-4 text-success" />
@@ -190,18 +213,40 @@ export default function Index() {
                                                             type="button"
                                                             size="icon"
                                                             variant="ghost"
-                                                            onClick={() =>
-                                                                router.post(
-                                                                    route(
-                                                                        'cash-movements.transfers.complete',
-                                                                        transfer.id,
-                                                                    ),
-                                                                    {},
-                                                                    {
-                                                                        preserveScroll: true,
-                                                                    },
-                                                                )
-                                                            }
+                                                            onClick={() => {
+                                                                appSwal
+                                                                    .fire({
+                                                                        title: 'Complete this transfer?',
+                                                                        text: 'This will complete the approved cash transfer.',
+                                                                        icon: 'warning',
+                                                                        showCancelButton: true,
+                                                                        confirmButtonText:
+                                                                            'Complete transfer',
+                                                                        cancelButtonText:
+                                                                            'Cancel',
+                                                                    })
+                                                                    .then(
+                                                                        (
+                                                                            result,
+                                                                        ) => {
+                                                                            if (
+                                                                                !result.isConfirmed
+                                                                            )
+                                                                                return;
+
+                                                                            router.post(
+                                                                                route(
+                                                                                    'cash-movements.transfers.complete',
+                                                                                    transfer.id,
+                                                                                ),
+                                                                                {},
+                                                                                {
+                                                                                    preserveScroll: true,
+                                                                                },
+                                                                            );
+                                                                        },
+                                                                    );
+                                                            }}
                                                             aria-label={`Complete ${transfer.transfer_no}`}
                                                         >
                                                             <CheckCircle2 className="h-4 w-4 text-success" />

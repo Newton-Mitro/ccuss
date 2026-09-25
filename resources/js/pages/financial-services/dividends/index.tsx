@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
@@ -170,14 +171,35 @@ export default function DividendsIndex() {
                                                     <Button
                                                         size="sm"
                                                         variant="outline"
-                                                        onClick={() =>
-                                                            router.post(
-                                                                route(
-                                                                    'dividends.approve',
-                                                                    declaration.id,
-                                                                ),
-                                                            )
-                                                        }
+                                                        onClick={() => {
+                                                            appSwal
+                                                                .fire({
+                                                                    title: 'Approve this declaration?',
+                                                                    text: 'This will approve the dividend declaration.',
+                                                                    icon: 'warning',
+                                                                    showCancelButton: true,
+                                                                    confirmButtonText:
+                                                                        'Approve',
+                                                                    cancelButtonText:
+                                                                        'Cancel',
+                                                                })
+                                                                .then(
+                                                                    (
+                                                                        result,
+                                                                    ) => {
+                                                                        if (
+                                                                            result.isConfirmed
+                                                                        ) {
+                                                                            router.post(
+                                                                                route(
+                                                                                    'dividends.approve',
+                                                                                    declaration.id,
+                                                                                ),
+                                                                            );
+                                                                        }
+                                                                    },
+                                                                );
+                                                        }}
                                                     >
                                                         Approve
                                                     </Button>
@@ -209,14 +231,32 @@ export default function DividendsIndex() {
                                             <Button
                                                 key={allocation.id}
                                                 size="sm"
-                                                onClick={() =>
-                                                    router.post(
-                                                        route(
-                                                            'dividend-allocations.post',
-                                                            allocation.id,
-                                                        ),
-                                                    )
-                                                }
+                                                onClick={() => {
+                                                    appSwal
+                                                        .fire({
+                                                            title: 'Post this dividend allocation?',
+                                                            text: `Post dividend ${allocation.dividend_amount} for this allocation?`,
+                                                            icon: 'warning',
+                                                            showCancelButton: true,
+                                                            confirmButtonText:
+                                                                'Post allocation',
+                                                            cancelButtonText:
+                                                                'Cancel',
+                                                        })
+                                                        .then((result) => {
+                                                            if (
+                                                                !result.isConfirmed
+                                                            )
+                                                                return;
+
+                                                            router.post(
+                                                                route(
+                                                                    'dividend-allocations.post',
+                                                                    allocation.id,
+                                                                ),
+                                                            );
+                                                        });
+                                                }}
                                             >
                                                 Post{' '}
                                                 {allocation.dividend_amount}

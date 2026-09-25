@@ -15,6 +15,7 @@ import { BorderInfoBox } from '../../../components/border-info-box';
 import HeadingSmall from '../../../components/heading-small';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { CustomerAddress } from '../../../types/customer_kyc_module';
 
@@ -32,25 +33,58 @@ export default function ViewAddress({ address }: Props) {
     const [rejectionReason, setRejectionReason] = useState('');
 
     const handleApprove = () => {
-        router.post(
-            route('customers.addresses.approve', [
-                address.customer_id,
-                address.id,
-            ]),
-            {},
-        );
+        appSwal
+            .fire({
+                title: 'Approve this address?',
+                text: 'This will mark the customer address as approved.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Approve',
+                cancelButtonText: 'Cancel',
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    router.post(
+                        route('customers.addresses.approve', [
+                            address.customer_id,
+                            address.id,
+                        ]),
+                        {},
+                    );
+                }
+            });
     };
 
     const handleReject = () => {
-        router.post(
-            route('customers.addresses.reject', [
-                address.customer_id,
-                address.id,
-            ]),
-            {
-                rejection_reason: rejectionReason,
-            },
-        );
+        appSwal
+            .fire({
+                title: 'Reject this address?',
+                text: 'Provide the rejection reason before confirming.',
+                input: 'textarea',
+                inputPlaceholder: 'Rejection reason',
+                inputValue: rejectionReason,
+                inputValidator: (value) =>
+                    value?.trim()
+                        ? undefined
+                        : 'A rejection reason is required.',
+                showCancelButton: true,
+                confirmButtonText: 'Reject',
+                confirmButtonColor: '#dc2626',
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    setRejectionReason(result.value ?? '');
+                    router.post(
+                        route('customers.addresses.reject', [
+                            address.customer_id,
+                            address.id,
+                        ]),
+                        {
+                            rejection_reason: result.value,
+                        },
+                    );
+                }
+            });
     };
 
     const statusClass =

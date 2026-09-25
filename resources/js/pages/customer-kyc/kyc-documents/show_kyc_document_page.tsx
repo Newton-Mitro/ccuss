@@ -9,6 +9,7 @@ import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { appSwal } from '../../../lib/appSwal';
 import { formatDateTime } from '../../../lib/date_util';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { KycDocument } from '../../../types/customer_kyc_module';
@@ -51,23 +52,57 @@ const Show = () => {
 
     // 🚀 Actions (optional endpoints)
     const handleApprove = () => {
-        router.post(
-            route('customers.kyc-documents.approve', [
-                document.customer_id,
-                document.id,
-            ]),
-            {},
-        );
+        appSwal
+            .fire({
+                title: 'Approve this document?',
+                text: 'This will mark the KYC document as approved.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Approve',
+                cancelButtonText: 'Cancel',
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    router.post(
+                        route('customers.kyc-documents.approve', [
+                            document.customer_id,
+                            document.id,
+                        ]),
+                        {},
+                    );
+                }
+            });
     };
 
     const handleReject = () => {
-        router.post(
-            route('customers.kyc-documents.reject', [
-                document.customer_id,
-                document.id,
-            ]),
-            {},
-        );
+        appSwal
+            .fire({
+                title: 'Reject this document?',
+                text: 'Provide the rejection reason before confirming.',
+                input: 'textarea',
+                inputPlaceholder: 'Rejection reason',
+                inputValue: rejection_reason,
+                inputValidator: (value) =>
+                    value?.trim()
+                        ? undefined
+                        : 'A rejection reason is required.',
+                showCancelButton: true,
+                confirmButtonText: 'Reject',
+                confirmButtonColor: '#dc2626',
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    router.post(
+                        route('customers.kyc-documents.reject', [
+                            document.customer_id,
+                            document.id,
+                        ]),
+                        {
+                            rejection_reason: result.value,
+                        },
+                    );
+                }
+            });
     };
 
     return (

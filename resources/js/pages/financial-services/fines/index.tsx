@@ -4,6 +4,7 @@ import {
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
@@ -87,14 +88,32 @@ export default function FinesIndex() {
                                             <Button
                                                 size="sm"
                                                 variant="outline"
-                                                onClick={() =>
-                                                    router.post(
-                                                        route(
-                                                            'account-fines.waive',
-                                                            fine.id,
-                                                        ),
-                                                    )
-                                                }
+                                                onClick={() => {
+                                                    appSwal
+                                                        .fire({
+                                                            title: 'Waive this fine?',
+                                                            text: `Waive the outstanding fine for ${fine.financial_account?.account_no ?? 'this account'}?`,
+                                                            icon: 'warning',
+                                                            showCancelButton: true,
+                                                            confirmButtonText:
+                                                                'Waive fine',
+                                                            cancelButtonText:
+                                                                'Cancel',
+                                                        })
+                                                        .then((result) => {
+                                                            if (
+                                                                !result.isConfirmed
+                                                            )
+                                                                return;
+
+                                                            router.post(
+                                                                route(
+                                                                    'account-fines.waive',
+                                                                    fine.id,
+                                                                ),
+                                                            );
+                                                        });
+                                                }}
                                             >
                                                 Waive
                                             </Button>

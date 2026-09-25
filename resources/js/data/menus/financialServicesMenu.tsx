@@ -51,7 +51,7 @@ export const financialServicesMenu: SidebarItem[] = [
                 ],
             },
             {
-                name: 'Deposits & Shares',
+                name: 'Savings & Deposits',
                 icon: <i className="fa-solid fa-piggy-bank" />,
                 permission: ['financial.accounts.view'],
                 children_expanded: false,
@@ -95,7 +95,7 @@ export const financialServicesMenu: SidebarItem[] = [
                 ],
             },
             {
-                name: 'Loans',
+                name: 'Investment & Loans',
                 icon: <i className="fa-solid fa-hand-holding-dollar" />,
                 permission: ['financial.loan-applications.view'],
                 children_expanded: false,

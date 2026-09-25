@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem } from '@/types';
 import type { FinancialAccountShowPageProps } from '@/types/financial-services';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
@@ -236,14 +237,28 @@ export default function FinancialAccountShow() {
                             {account.status === 'PENDING' && (
                                 <Button
                                     size="sm"
-                                    onClick={() =>
-                                        router.post(
-                                            route(
-                                                'financial-accounts.activate',
-                                                account.id,
-                                            ),
-                                        )
-                                    }
+                                    onClick={() => {
+                                        appSwal
+                                            .fire({
+                                                title: 'Activate this account?',
+                                                text: `Activate ${account.account_no}? This will set the account to active.`,
+                                                icon: 'warning',
+                                                showCancelButton: true,
+                                                confirmButtonText:
+                                                    'Activate account',
+                                                cancelButtonText: 'Cancel',
+                                            })
+                                            .then((result) => {
+                                                if (!result.isConfirmed) return;
+
+                                                router.post(
+                                                    route(
+                                                        'financial-accounts.activate',
+                                                        account.id,
+                                                    ),
+                                                );
+                                            });
+                                    }}
                                 >
                                     <Check className="mr-1 h-4 w-4" /> Activate
                                 </Button>
@@ -254,14 +269,28 @@ export default function FinancialAccountShow() {
                                 <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() =>
-                                        router.post(
-                                            route(
-                                                'financial-accounts.close',
-                                                account.id,
-                                            ),
-                                        )
-                                    }
+                                    onClick={() => {
+                                        appSwal
+                                            .fire({
+                                                title: 'Close this account?',
+                                                text: `Close ${account.account_no}? This will change the account status.`,
+                                                icon: 'warning',
+                                                showCancelButton: true,
+                                                confirmButtonText:
+                                                    'Close account',
+                                                cancelButtonText: 'Cancel',
+                                            })
+                                            .then((result) => {
+                                                if (!result.isConfirmed) return;
+
+                                                router.post(
+                                                    route(
+                                                        'financial-accounts.close',
+                                                        account.id,
+                                                    ),
+                                                );
+                                            });
+                                    }}
                                 >
                                     <Lock className="mr-1 h-4 w-4" /> Close
                                 </Button>

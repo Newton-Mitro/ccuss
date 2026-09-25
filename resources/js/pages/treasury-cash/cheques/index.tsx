@@ -7,6 +7,7 @@ import {
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem } from '@/types';
 import type { ChequeIndexProps } from '@/types/treasury-cash/cheques';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
@@ -177,21 +178,43 @@ export default function Index() {
                                                     />
                                                     <button
                                                         className="rounded bg-primary px-2 text-xs text-primary-foreground"
-                                                        onClick={() =>
-                                                            router.post(
-                                                                route(
-                                                                    'cheques.issue',
-                                                                    cheque.id,
-                                                                ),
-                                                                {
-                                                                    amount: issueAmount,
-                                                                    payee: issuePayee,
-                                                                },
-                                                                {
-                                                                    preserveScroll: true,
-                                                                },
-                                                            )
-                                                        }
+                                                        onClick={() => {
+                                                            appSwal
+                                                                .fire({
+                                                                    title: 'Issue this cheque?',
+                                                                    text: `Issue cheque ${cheque.cheque_no} for ${issuePayee || 'the selected payee'}?`,
+                                                                    icon: 'warning',
+                                                                    showCancelButton: true,
+                                                                    confirmButtonText:
+                                                                        'Issue cheque',
+                                                                    cancelButtonText:
+                                                                        'Cancel',
+                                                                })
+                                                                .then(
+                                                                    (
+                                                                        result,
+                                                                    ) => {
+                                                                        if (
+                                                                            !result.isConfirmed
+                                                                        )
+                                                                            return;
+
+                                                                        router.post(
+                                                                            route(
+                                                                                'cheques.issue',
+                                                                                cheque.id,
+                                                                            ),
+                                                                            {
+                                                                                amount: issueAmount,
+                                                                                payee: issuePayee,
+                                                                            },
+                                                                            {
+                                                                                preserveScroll: true,
+                                                                            },
+                                                                        );
+                                                                    },
+                                                                );
+                                                        }}
                                                     >
                                                         Issue
                                                     </button>
@@ -215,18 +238,40 @@ export default function Index() {
                                                         'ISSUED' && (
                                                         <button
                                                             className="rounded border px-2 py-1 text-xs"
-                                                            onClick={() =>
-                                                                router.post(
-                                                                    route(
-                                                                        'cheques.present',
-                                                                        cheque.id,
-                                                                    ),
-                                                                    {},
-                                                                    {
-                                                                        preserveScroll: true,
-                                                                    },
-                                                                )
-                                                            }
+                                                            onClick={() => {
+                                                                appSwal
+                                                                    .fire({
+                                                                        title: 'Present this cheque?',
+                                                                        text: `Present cheque ${cheque.cheque_no} for payment?`,
+                                                                        icon: 'warning',
+                                                                        showCancelButton: true,
+                                                                        confirmButtonText:
+                                                                            'Present cheque',
+                                                                        cancelButtonText:
+                                                                            'Cancel',
+                                                                    })
+                                                                    .then(
+                                                                        (
+                                                                            result,
+                                                                        ) => {
+                                                                            if (
+                                                                                !result.isConfirmed
+                                                                            )
+                                                                                return;
+
+                                                                            router.post(
+                                                                                route(
+                                                                                    'cheques.present',
+                                                                                    cheque.id,
+                                                                                ),
+                                                                                {},
+                                                                                {
+                                                                                    preserveScroll: true,
+                                                                                },
+                                                                            );
+                                                                        },
+                                                                    );
+                                                            }}
                                                         >
                                                             Present
                                                         </button>
@@ -236,35 +281,79 @@ export default function Index() {
                                                         <>
                                                             <button
                                                                 className="rounded border px-2 py-1 text-xs"
-                                                                onClick={() =>
-                                                                    router.post(
-                                                                        route(
-                                                                            'cheques.clear',
-                                                                            cheque.id,
-                                                                        ),
-                                                                        {},
-                                                                        {
-                                                                            preserveScroll: true,
-                                                                        },
-                                                                    )
-                                                                }
+                                                                onClick={() => {
+                                                                    appSwal
+                                                                        .fire({
+                                                                            title: 'Clear this cheque?',
+                                                                            text: `Mark cheque ${cheque.cheque_no} as cleared?`,
+                                                                            icon: 'warning',
+                                                                            showCancelButton: true,
+                                                                            confirmButtonText:
+                                                                                'Clear cheque',
+                                                                            cancelButtonText:
+                                                                                'Cancel',
+                                                                        })
+                                                                        .then(
+                                                                            (
+                                                                                result,
+                                                                            ) => {
+                                                                                if (
+                                                                                    !result.isConfirmed
+                                                                                )
+                                                                                    return;
+
+                                                                                router.post(
+                                                                                    route(
+                                                                                        'cheques.clear',
+                                                                                        cheque.id,
+                                                                                    ),
+                                                                                    {},
+                                                                                    {
+                                                                                        preserveScroll: true,
+                                                                                    },
+                                                                                );
+                                                                            },
+                                                                        );
+                                                                }}
                                                             >
                                                                 Clear
                                                             </button>
                                                             <button
                                                                 className="rounded border px-2 py-1 text-xs"
-                                                                onClick={() =>
-                                                                    router.post(
-                                                                        route(
-                                                                            'cheques.bounce',
-                                                                            cheque.id,
-                                                                        ),
-                                                                        {},
-                                                                        {
-                                                                            preserveScroll: true,
-                                                                        },
-                                                                    )
-                                                                }
+                                                                onClick={() => {
+                                                                    appSwal
+                                                                        .fire({
+                                                                            title: 'Bounce this cheque?',
+                                                                            text: `Mark cheque ${cheque.cheque_no} as bounced?`,
+                                                                            icon: 'warning',
+                                                                            showCancelButton: true,
+                                                                            confirmButtonText:
+                                                                                'Bounce cheque',
+                                                                            cancelButtonText:
+                                                                                'Cancel',
+                                                                        })
+                                                                        .then(
+                                                                            (
+                                                                                result,
+                                                                            ) => {
+                                                                                if (
+                                                                                    !result.isConfirmed
+                                                                                )
+                                                                                    return;
+
+                                                                                router.post(
+                                                                                    route(
+                                                                                        'cheques.bounce',
+                                                                                        cheque.id,
+                                                                                    ),
+                                                                                    {},
+                                                                                    {
+                                                                                        preserveScroll: true,
+                                                                                    },
+                                                                                );
+                                                                            },
+                                                                        );
+                                                                }}
                                                             >
                                                                 Bounce
                                                             </button>
@@ -276,18 +365,40 @@ export default function Index() {
                                                             'PRESENTED') && (
                                                         <button
                                                             className="rounded border px-2 py-1 text-xs"
-                                                            onClick={() =>
-                                                                router.post(
-                                                                    route(
-                                                                        'cheques.stop',
-                                                                        cheque.id,
-                                                                    ),
-                                                                    {},
-                                                                    {
-                                                                        preserveScroll: true,
-                                                                    },
-                                                                )
-                                                            }
+                                                            onClick={() => {
+                                                                appSwal
+                                                                    .fire({
+                                                                        title: 'Stop this cheque?',
+                                                                        text: `Stop cheque ${cheque.cheque_no}?`,
+                                                                        icon: 'warning',
+                                                                        showCancelButton: true,
+                                                                        confirmButtonText:
+                                                                            'Stop cheque',
+                                                                        cancelButtonText:
+                                                                            'Cancel',
+                                                                    })
+                                                                    .then(
+                                                                        (
+                                                                            result,
+                                                                        ) => {
+                                                                            if (
+                                                                                !result.isConfirmed
+                                                                            )
+                                                                                return;
+
+                                                                            router.post(
+                                                                                route(
+                                                                                    'cheques.stop',
+                                                                                    cheque.id,
+                                                                                ),
+                                                                                {},
+                                                                                {
+                                                                                    preserveScroll: true,
+                                                                                },
+                                                                            );
+                                                                        },
+                                                                    );
+                                                            }}
                                                         >
                                                             Stop
                                                         </button>
@@ -298,18 +409,40 @@ export default function Index() {
                                                             'ISSUED') && (
                                                         <button
                                                             className="rounded border px-2 py-1 text-xs"
-                                                            onClick={() =>
-                                                                router.post(
-                                                                    route(
-                                                                        'cheques.cancel',
-                                                                        cheque.id,
-                                                                    ),
-                                                                    {},
-                                                                    {
-                                                                        preserveScroll: true,
-                                                                    },
-                                                                )
-                                                            }
+                                                            onClick={() => {
+                                                                appSwal
+                                                                    .fire({
+                                                                        title: 'Cancel this cheque?',
+                                                                        text: `Cancel cheque ${cheque.cheque_no}?`,
+                                                                        icon: 'warning',
+                                                                        showCancelButton: true,
+                                                                        confirmButtonText:
+                                                                            'Cancel cheque',
+                                                                        cancelButtonText:
+                                                                            'Cancel',
+                                                                    })
+                                                                    .then(
+                                                                        (
+                                                                            result,
+                                                                        ) => {
+                                                                            if (
+                                                                                !result.isConfirmed
+                                                                            )
+                                                                                return;
+
+                                                                            router.post(
+                                                                                route(
+                                                                                    'cheques.cancel',
+                                                                                    cheque.id,
+                                                                                ),
+                                                                                {},
+                                                                                {
+                                                                                    preserveScroll: true,
+                                                                                },
+                                                                            );
+                                                                        },
+                                                                    );
+                                                            }}
                                                         >
                                                             Cancel
                                                         </button>

@@ -1,3 +1,4 @@
+import { appSwal } from '@/lib/appSwal';
 import { CustomerSearchBox } from '@/pages/customer-kyc/customers/components/customer-search-box';
 import type { Customer } from '@/types/customer_kyc_module';
 import { Head, router, usePage } from '@inertiajs/react';
@@ -8,7 +9,7 @@ import {
     Search,
     ShieldCheck,
 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { route } from 'ziggy-js';
 import {
     ResourcePageHeader,
@@ -67,25 +68,14 @@ export default function CustomerDepositPage() {
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
         customer ?? null,
     );
-    const [selectedTellerSessionId, setSelectedTellerSessionId] = useState('');
+    const [selectedTellerSessionId, setSelectedTellerSessionId] = useState(
+        teller_sessions.length === 1 ? String(teller_sessions[0].id) : '',
+    );
     const [depositAmount, setDepositAmount] = useState('');
     const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>(
         {},
     );
     const [note, setNote] = useState('');
-
-    useEffect(() => {
-        setSelectedCustomer(customer ?? null);
-        setDepositAmount('');
-        setSelectedRows({});
-        setNote('');
-    }, [customer]);
-
-    useEffect(() => {
-        if (!selectedTellerSessionId && teller_sessions.length === 1) {
-            setSelectedTellerSessionId(String(teller_sessions[0].id));
-        }
-    }, [selectedTellerSessionId, teller_sessions]);
 
     const selectedTellerSession = useMemo(
         () =>
@@ -113,6 +103,13 @@ export default function CustomerDepositPage() {
 
     const handleSelectCustomer = (customer: Customer) => {
         setSelectedCustomer(customer);
+        setSelectedTellerSessionId(
+            teller_sessions.length === 1 ? String(teller_sessions[0].id) : '',
+        );
+        setDepositAmount('');
+        setSelectedRows({});
+        setNote('');
+
         router.get(
             route('teller-transactions.customer-deposit'),
             { customer_id: customer.id },
@@ -137,17 +134,30 @@ export default function CustomerDepositPage() {
             return;
         }
 
-        router.post(
-            route('teller-transactions.customer-deposit.store'),
-            {
-                teller_session_id: selectedTellerSessionId,
-                customer_id: selectedCustomer.id,
-                amount: depositAmount || totalSelected.toFixed(2),
-                selected: selectedObligationIds,
-                note,
-            },
-            { preserveScroll: true },
-        );
+        appSwal
+            .fire({
+                title: 'Post this customer deposit?',
+                text: `Post a teller deposit of ${depositAmount || totalSelected.toFixed(2)} for ${selectedCustomer.name}?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Post deposit',
+                cancelButtonText: 'Cancel',
+            })
+            .then((result) => {
+                if (!result.isConfirmed) return;
+
+                router.post(
+                    route('teller-transactions.customer-deposit.store'),
+                    {
+                        teller_session_id: selectedTellerSessionId,
+                        customer_id: selectedCustomer.id,
+                        amount: depositAmount || totalSelected.toFixed(2),
+                        selected: selectedObligationIds,
+                        note,
+                    },
+                    { preserveScroll: true },
+                );
+            });
     };
 
     const canSubmit =

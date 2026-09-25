@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem } from '@/types';
 import type { TellerCashTransactionIndexProps } from '@/types/treasury-cash/teller-transactions';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
@@ -163,18 +164,40 @@ export default function Index() {
                                                         type="button"
                                                         size="icon"
                                                         variant="ghost"
-                                                        onClick={() =>
-                                                            router.post(
-                                                                route(
-                                                                    'teller-transactions.post',
-                                                                    transaction.id,
-                                                                ),
-                                                                {},
-                                                                {
-                                                                    preserveScroll: true,
-                                                                },
-                                                            )
-                                                        }
+                                                        onClick={() => {
+                                                            appSwal
+                                                                .fire({
+                                                                    title: 'Post this teller transaction?',
+                                                                    text: `Post ${transaction.transaction_no} for ${transaction.amount}?`,
+                                                                    icon: 'warning',
+                                                                    showCancelButton: true,
+                                                                    confirmButtonText:
+                                                                        'Post transaction',
+                                                                    cancelButtonText:
+                                                                        'Cancel',
+                                                                })
+                                                                .then(
+                                                                    (
+                                                                        result,
+                                                                    ) => {
+                                                                        if (
+                                                                            !result.isConfirmed
+                                                                        )
+                                                                            return;
+
+                                                                        router.post(
+                                                                            route(
+                                                                                'teller-transactions.post',
+                                                                                transaction.id,
+                                                                            ),
+                                                                            {},
+                                                                            {
+                                                                                preserveScroll: true,
+                                                                            },
+                                                                        );
+                                                                    },
+                                                                );
+                                                        }}
                                                         aria-label={`Post ${transaction.transaction_no}`}
                                                     >
                                                         <CheckCircle2 className="h-4 w-4 text-success" />

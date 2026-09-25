@@ -19,7 +19,20 @@ export default function ApprovalActions({
     }
 
     const handleApprove = () => {
-        router.post(approveUrl, {}, { preserveScroll: true });
+        appSwal
+            .fire({
+                title: 'Approve record?',
+                text: 'This action will mark the record as approved.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Approve',
+                cancelButtonText: 'Cancel',
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    router.post(approveUrl, {}, { preserveScroll: true });
+                }
+            });
     };
 
     const handleReject = () => {

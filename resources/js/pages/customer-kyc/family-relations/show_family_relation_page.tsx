@@ -20,6 +20,7 @@ import { Card, CardContent } from '../../../components/ui/card';
 import { Input } from '../../../components/ui/input';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { appSwal } from '../../../lib/appSwal';
 import { formatDateTime } from '../../../lib/date_util';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { CustomerFamilyRelation } from '../../../types/customer_kyc_module';
@@ -75,26 +76,58 @@ export default function ShowFamilyRelation() {
 
     // ✅ Actions for pending verification
     const handleApprove = () => {
-        router.post(
-            route('customers.family-relations.approve', [
-                familyRelation.customer_id,
-                familyRelation.id,
-            ]),
-            {},
-        );
+        appSwal
+            .fire({
+                title: 'Approve this relation?',
+                text: 'This will mark the family relation as approved.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Approve',
+                cancelButtonText: 'Cancel',
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    router.post(
+                        route('customers.family-relations.approve', [
+                            familyRelation.customer_id,
+                            familyRelation.id,
+                        ]),
+                        {},
+                    );
+                }
+            });
     };
 
     const handleReject = () => {
-        router.post(
-            route('customers.family-relations.reject', [
-                familyRelation.customer_id,
-                familyRelation.id,
-            ]),
-            {
-                rejection_reason,
-            },
-            {},
-        );
+        appSwal
+            .fire({
+                title: 'Reject this relation?',
+                text: 'Provide the reason before confirming the rejection.',
+                input: 'textarea',
+                inputPlaceholder: 'Rejection reason',
+                inputValue: rejection_reason,
+                inputValidator: (value) =>
+                    value?.trim()
+                        ? undefined
+                        : 'A rejection reason is required.',
+                showCancelButton: true,
+                confirmButtonText: 'Reject',
+                confirmButtonColor: '#dc2626',
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    router.post(
+                        route('customers.family-relations.reject', [
+                            familyRelation.customer_id,
+                            familyRelation.id,
+                        ]),
+                        {
+                            rejection_reason: result.value,
+                        },
+                        {},
+                    );
+                }
+            });
     };
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>

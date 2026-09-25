@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
@@ -118,28 +119,62 @@ export default function InterestProvisionsIndex() {
                                         <>
                                             <Button
                                                 size="sm"
-                                                onClick={() =>
-                                                    router.post(
-                                                        route(
-                                                            'interest-provisions.approve',
-                                                            provision.id,
-                                                        ),
-                                                    )
-                                                }
+                                                onClick={() => {
+                                                    appSwal
+                                                        .fire({
+                                                            title: 'Approve this provision?',
+                                                            text: 'This will approve the calculated interest provision.',
+                                                            icon: 'warning',
+                                                            showCancelButton: true,
+                                                            confirmButtonText:
+                                                                'Approve',
+                                                            cancelButtonText:
+                                                                'Cancel',
+                                                        })
+                                                        .then((result) => {
+                                                            if (
+                                                                result.isConfirmed
+                                                            ) {
+                                                                router.post(
+                                                                    route(
+                                                                        'interest-provisions.approve',
+                                                                        provision.id,
+                                                                    ),
+                                                                );
+                                                            }
+                                                        });
+                                                }}
                                             >
                                                 Approve
                                             </Button>
                                             <Button
                                                 size="sm"
                                                 variant="outline"
-                                                onClick={() =>
-                                                    router.post(
-                                                        route(
-                                                            'interest-provisions.reject',
-                                                            provision.id,
-                                                        ),
-                                                    )
-                                                }
+                                                onClick={() => {
+                                                    appSwal
+                                                        .fire({
+                                                            title: 'Reject this provision?',
+                                                            text: 'This will reject the calculated interest provision.',
+                                                            icon: 'warning',
+                                                            showCancelButton: true,
+                                                            confirmButtonText:
+                                                                'Reject',
+                                                            cancelButtonText:
+                                                                'Cancel',
+                                                        })
+                                                        .then((result) => {
+                                                            if (
+                                                                result.isConfirmed
+                                                            ) {
+                                                                router.post(
+                                                                    route(
+                                                                        'interest-provisions.reject',
+                                                                        provision.id,
+                                                                    ),
+                                                                );
+                                                            }
+                                                        });
+                                                }}
                                             >
                                                 Reject
                                             </Button>
@@ -148,14 +183,30 @@ export default function InterestProvisionsIndex() {
                                     {provision.status === 'APPROVED' && (
                                         <Button
                                             size="sm"
-                                            onClick={() =>
-                                                router.post(
-                                                    route(
-                                                        'interest-provisions.post',
-                                                        provision.id,
-                                                    ),
-                                                )
-                                            }
+                                            onClick={() => {
+                                                appSwal
+                                                    .fire({
+                                                        title: 'Post this provision?',
+                                                        text: `Post the approved interest provision for ${provision.financial_account?.account_no ?? 'this account'}?`,
+                                                        icon: 'warning',
+                                                        showCancelButton: true,
+                                                        confirmButtonText:
+                                                            'Post provision',
+                                                        cancelButtonText:
+                                                            'Cancel',
+                                                    })
+                                                    .then((result) => {
+                                                        if (!result.isConfirmed)
+                                                            return;
+
+                                                        router.post(
+                                                            route(
+                                                                'interest-provisions.post',
+                                                                provision.id,
+                                                            ),
+                                                        );
+                                                    });
+                                            }}
                                         >
                                             Post
                                         </Button>

@@ -4,6 +4,7 @@ import {
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem } from '@/types';
 import type { FinancialTransactionPageProps } from '@/types/financial-services';
 import { Head, Link, router, usePage } from '@inertiajs/react';
@@ -36,14 +37,28 @@ export default function FinancialTransactionShow() {
                             {transaction.status === 'PENDING' && (
                                 <Button
                                     size="sm"
-                                    onClick={() =>
-                                        router.post(
-                                            route(
-                                                'financial-transactions.post',
-                                                transaction.id,
-                                            ),
-                                        )
-                                    }
+                                    onClick={() => {
+                                        appSwal
+                                            .fire({
+                                                title: 'Post this transaction?',
+                                                text: `Post ${transaction.transaction_no}? This will move it to the ledger.`,
+                                                icon: 'warning',
+                                                showCancelButton: true,
+                                                confirmButtonText:
+                                                    'Post transaction',
+                                                cancelButtonText: 'Cancel',
+                                            })
+                                            .then((result) => {
+                                                if (!result.isConfirmed) return;
+
+                                                router.post(
+                                                    route(
+                                                        'financial-transactions.post',
+                                                        transaction.id,
+                                                    ),
+                                                );
+                                            });
+                                    }}
                                 >
                                     <Check className="mr-1 h-4 w-4" /> Post
                                 </Button>
@@ -52,14 +67,28 @@ export default function FinancialTransactionShow() {
                                 <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() =>
-                                        router.post(
-                                            route(
-                                                'financial-transactions.reverse',
-                                                transaction.id,
-                                            ),
-                                        )
-                                    }
+                                    onClick={() => {
+                                        appSwal
+                                            .fire({
+                                                title: 'Reverse this transaction?',
+                                                text: `Reverse ${transaction.transaction_no}? This action affects the posted ledger.`,
+                                                icon: 'warning',
+                                                showCancelButton: true,
+                                                confirmButtonText:
+                                                    'Reverse transaction',
+                                                cancelButtonText: 'Cancel',
+                                            })
+                                            .then((result) => {
+                                                if (!result.isConfirmed) return;
+
+                                                router.post(
+                                                    route(
+                                                        'financial-transactions.reverse',
+                                                        transaction.id,
+                                                    ),
+                                                );
+                                            });
+                                    }}
                                 >
                                     <RotateCcw className="mr-1 h-4 w-4" />{' '}
                                     Reverse

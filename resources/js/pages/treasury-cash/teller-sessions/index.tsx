@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem } from '@/types';
 import type {
     TellerSessionIndexProps,
@@ -77,26 +78,57 @@ export default function Index() {
 
     const handleOpen = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        openForm.post(route('teller-sessions.open'), {
-            preserveScroll: true,
-            onSuccess: () => {
-                setOpenDialog(false);
-                openForm.reset();
-            },
-        });
+        if (!branch_day) return;
+
+        appSwal
+            .fire({
+                title: 'Open teller session?',
+                text: `Open a teller session for ${branch_day.business_date}?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Open session',
+                cancelButtonText: 'Cancel',
+            })
+            .then((result) => {
+                if (!result.isConfirmed) return;
+
+                openForm.post(route('teller-sessions.open'), {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        setOpenDialog(false);
+                        openForm.reset();
+                    },
+                });
+            });
     };
 
     const handleClose = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (!closingSession) return;
 
-        closeForm.post(route('teller-sessions.close', closingSession.id), {
-            preserveScroll: true,
-            onSuccess: () => {
-                setClosingSession(null);
-                closeForm.reset();
-            },
-        });
+        appSwal
+            .fire({
+                title: 'Close teller session?',
+                text: `Close the session for ${closingSession.teller?.name ?? 'this teller'}?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Close session',
+                cancelButtonText: 'Cancel',
+            })
+            .then((result) => {
+                if (!result.isConfirmed) return;
+
+                closeForm.post(
+                    route('teller-sessions.close', closingSession.id),
+                    {
+                        preserveScroll: true,
+                        onSuccess: () => {
+                            setClosingSession(null);
+                            closeForm.reset();
+                        },
+                    },
+                );
+            });
     };
 
     return (
@@ -110,7 +142,15 @@ export default function Index() {
                 {canOpen && (
                     <Dialog open={openDialog} onOpenChange={setOpenDialog}>
                         <DialogTrigger asChild>
-                            <Button type="button" disabled={!branch_day}>
+                            <Button
+                                type="button"
+                                disabled={!branch_day}
+                                title={
+                                    !branch_day
+                                        ? 'Open a branch day before creating a teller session.'
+                                        : undefined
+                                }
+                            >
                                 <Plus className="h-4 w-4" />
                                 Open teller session
                             </Button>

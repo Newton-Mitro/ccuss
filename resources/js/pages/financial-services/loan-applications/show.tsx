@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
 import type { BreadcrumbItem } from '@/types';
 import type { LoanApplicationShowPageProps } from '@/types/financial-services';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
@@ -58,11 +59,44 @@ export default function LoanApplicationShow() {
         { title: 'Loan Applications', href: route('loan-applications.index') },
         { title: application.application_no, href: '' },
     ];
-    const action = (name: 'submit' | 'review' | 'reject' | 'approve') =>
-        router.post(
-            route(`loan-applications.${name}`, application.id),
-            name === 'approve' || name === 'reject' ? data : undefined,
-        );
+    const action = (name: 'submit' | 'review' | 'reject' | 'approve') => {
+        const titleMap = {
+            submit: 'Submit for review?',
+            review: 'Start review?',
+            approve: 'Approve this loan application?',
+            reject: 'Reject this loan application?',
+        };
+        const textMap = {
+            submit: `Submit ${application.application_no} for review?`,
+            review: `Begin review of ${application.application_no}?`,
+            approve: `Approve ${application.application_no} with the entered amount and note?`,
+            reject: `Reject ${application.application_no}? This action cannot be undone.`,
+        };
+        const confirmMap = {
+            submit: 'Submit application',
+            review: 'Start review',
+            approve: 'Approve application',
+            reject: 'Reject application',
+        };
+
+        appSwal
+            .fire({
+                title: titleMap[name],
+                text: textMap[name],
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: confirmMap[name],
+                cancelButtonText: 'Cancel',
+            })
+            .then((result) => {
+                if (!result.isConfirmed) return;
+
+                router.post(
+                    route(`loan-applications.${name}`, application.id),
+                    name === 'approve' || name === 'reject' ? data : {},
+                );
+            });
+    };
     const submitCollateral = (event: React.FormEvent) => {
         event.preventDefault();
         postCollateral(
@@ -116,14 +150,27 @@ export default function LoanApplicationShow() {
                     {application.status === 'APPROVED' &&
                         !application.loan_account && (
                             <Button
-                                onClick={() =>
-                                    router.post(
-                                        route(
-                                            'loan-applications.create-account',
-                                            application.id,
-                                        ),
-                                    )
-                                }
+                                onClick={() => {
+                                    appSwal
+                                        .fire({
+                                            title: 'Create loan account?',
+                                            text: `Create the loan account for ${application.application_no}?`,
+                                            icon: 'warning',
+                                            showCancelButton: true,
+                                            confirmButtonText: 'Create account',
+                                            cancelButtonText: 'Cancel',
+                                        })
+                                        .then((result) => {
+                                            if (!result.isConfirmed) return;
+
+                                            router.post(
+                                                route(
+                                                    'loan-applications.create-account',
+                                                    application.id,
+                                                ),
+                                            );
+                                        });
+                                }}
                             >
                                 Create loan account
                             </Button>
@@ -200,34 +247,71 @@ export default function LoanApplicationShow() {
                                     <Button
                                         size="sm"
                                         variant="outline"
-                                        onClick={() =>
-                                            router.post(
-                                                route(
-                                                    'loan-applications.schedule.generate',
-                                                    application.id,
-                                                ),
-                                                { frequency: 'MONTHLY' },
-                                            )
-                                        }
+                                        onClick={() => {
+                                            appSwal
+                                                .fire({
+                                                    title: 'Generate monthly schedule?',
+                                                    text: `Generate the repayment schedule for ${application.application_no}?`,
+                                                    icon: 'warning',
+                                                    showCancelButton: true,
+                                                    confirmButtonText:
+                                                        'Generate schedule',
+                                                    cancelButtonText: 'Cancel',
+                                                })
+                                                .then((result) => {
+                                                    if (!result.isConfirmed)
+                                                        return;
+
+                                                    router.post(
+                                                        route(
+                                                            'loan-applications.schedule.generate',
+                                                            application.id,
+                                                        ),
+                                                        {
+                                                            frequency:
+                                                                'MONTHLY',
+                                                        },
+                                                    );
+                                                });
+                                        }}
                                     >
                                         Generate monthly schedule
                                     </Button>
                                     <Button
                                         size="sm"
                                         variant="outline"
-                                        onClick={() =>
-                                            router.post(
-                                                route(
-                                                    'loan-applications.arrears.assess',
-                                                    application.id,
-                                                ),
-                                                {
-                                                    as_of_date: new Date()
-                                                        .toISOString()
-                                                        .slice(0, 10),
-                                                },
-                                            )
-                                        }
+                                        onClick={() => {
+                                            appSwal
+                                                .fire({
+                                                    title: 'Assess arrears?',
+                                                    text: `Assess arrears for ${application.application_no}?`,
+                                                    icon: 'warning',
+                                                    showCancelButton: true,
+                                                    confirmButtonText:
+                                                        'Assess arrears',
+                                                    cancelButtonText: 'Cancel',
+                                                })
+                                                .then((result) => {
+                                                    if (!result.isConfirmed)
+                                                        return;
+
+                                                    router.post(
+                                                        route(
+                                                            'loan-applications.arrears.assess',
+                                                            application.id,
+                                                        ),
+                                                        {
+                                                            as_of_date:
+                                                                new Date()
+                                                                    .toISOString()
+                                                                    .slice(
+                                                                        0,
+                                                                        10,
+                                                                    ),
+                                                        },
+                                                    );
+                                                });
+                                        }}
                                     >
                                         Assess arrears
                                     </Button>
@@ -332,21 +416,43 @@ export default function LoanApplicationShow() {
                                                             key={resolution}
                                                             size="sm"
                                                             variant="outline"
-                                                            onClick={() =>
-                                                                router.post(
-                                                                    route(
-                                                                        'loan-applications.arrears.resolve',
-                                                                        [
-                                                                            application.id,
-                                                                            arrear.id,
-                                                                        ],
-                                                                    ),
-                                                                    {
-                                                                        resolution,
-                                                                        note: arrearNote,
-                                                                    },
-                                                                )
-                                                            }
+                                                            onClick={() => {
+                                                                appSwal
+                                                                    .fire({
+                                                                        title: 'Resolve arrear?',
+                                                                        text: `Apply the ${resolution.replace('_', ' ').toLowerCase()} resolution to this arrear?`,
+                                                                        icon: 'warning',
+                                                                        showCancelButton: true,
+                                                                        confirmButtonText:
+                                                                            'Resolve arrear',
+                                                                        cancelButtonText:
+                                                                            'Cancel',
+                                                                    })
+                                                                    .then(
+                                                                        (
+                                                                            result,
+                                                                        ) => {
+                                                                            if (
+                                                                                !result.isConfirmed
+                                                                            )
+                                                                                return;
+
+                                                                            router.post(
+                                                                                route(
+                                                                                    'loan-applications.arrears.resolve',
+                                                                                    [
+                                                                                        application.id,
+                                                                                        arrear.id,
+                                                                                    ],
+                                                                                ),
+                                                                                {
+                                                                                    resolution,
+                                                                                    note: arrearNote,
+                                                                                },
+                                                                            );
+                                                                        },
+                                                                    );
+                                                            }}
                                                         >
                                                             {resolution.replace(
                                                                 '_',
@@ -495,36 +601,68 @@ export default function LoanApplicationShow() {
                                     <div className="flex gap-2">
                                         <Button
                                             size="sm"
-                                            onClick={() =>
-                                                router.post(
-                                                    route(
-                                                        'loan-applications.collaterals.verify',
-                                                        [
-                                                            application.id,
-                                                            collateral.id,
-                                                        ],
-                                                    ),
-                                                    { approved: true },
-                                                )
-                                            }
+                                            onClick={() => {
+                                                appSwal
+                                                    .fire({
+                                                        title: 'Verify this collateral?',
+                                                        text: `Verify ${collateral.type} collateral for ${application.application_no}?`,
+                                                        icon: 'warning',
+                                                        showCancelButton: true,
+                                                        confirmButtonText:
+                                                            'Verify collateral',
+                                                        cancelButtonText:
+                                                            'Cancel',
+                                                    })
+                                                    .then((result) => {
+                                                        if (!result.isConfirmed)
+                                                            return;
+
+                                                        router.post(
+                                                            route(
+                                                                'loan-applications.collaterals.verify',
+                                                                [
+                                                                    application.id,
+                                                                    collateral.id,
+                                                                ],
+                                                            ),
+                                                            { approved: true },
+                                                        );
+                                                    });
+                                            }}
                                         >
                                             Verify
                                         </Button>
                                         <Button
                                             size="sm"
                                             variant="outline"
-                                            onClick={() =>
-                                                router.post(
-                                                    route(
-                                                        'loan-applications.collaterals.verify',
-                                                        [
-                                                            application.id,
-                                                            collateral.id,
-                                                        ],
-                                                    ),
-                                                    { approved: false },
-                                                )
-                                            }
+                                            onClick={() => {
+                                                appSwal
+                                                    .fire({
+                                                        title: 'Reject this collateral?',
+                                                        text: `Reject ${collateral.type} collateral for ${application.application_no}?`,
+                                                        icon: 'warning',
+                                                        showCancelButton: true,
+                                                        confirmButtonText:
+                                                            'Reject collateral',
+                                                        cancelButtonText:
+                                                            'Cancel',
+                                                    })
+                                                    .then((result) => {
+                                                        if (!result.isConfirmed)
+                                                            return;
+
+                                                        router.post(
+                                                            route(
+                                                                'loan-applications.collaterals.verify',
+                                                                [
+                                                                    application.id,
+                                                                    collateral.id,
+                                                                ],
+                                                            ),
+                                                            { approved: false },
+                                                        );
+                                                    });
+                                            }}
                                         >
                                             Reject
                                         </Button>
@@ -534,17 +672,32 @@ export default function LoanApplicationShow() {
                                     <Button
                                         size="sm"
                                         variant="outline"
-                                        onClick={() =>
-                                            router.post(
-                                                route(
-                                                    'loan-applications.collaterals.release',
-                                                    [
-                                                        application.id,
-                                                        collateral.id,
-                                                    ],
-                                                ),
-                                            )
-                                        }
+                                        onClick={() => {
+                                            appSwal
+                                                .fire({
+                                                    title: 'Release this collateral?',
+                                                    text: `Release ${collateral.type} collateral for ${application.application_no}?`,
+                                                    icon: 'warning',
+                                                    showCancelButton: true,
+                                                    confirmButtonText:
+                                                        'Release collateral',
+                                                    cancelButtonText: 'Cancel',
+                                                })
+                                                .then((result) => {
+                                                    if (!result.isConfirmed)
+                                                        return;
+
+                                                    router.post(
+                                                        route(
+                                                            'loan-applications.collaterals.release',
+                                                            [
+                                                                application.id,
+                                                                collateral.id,
+                                                            ],
+                                                        ),
+                                                    );
+                                                });
+                                        }}
                                     >
                                         Release
                                     </Button>
@@ -673,36 +826,68 @@ export default function LoanApplicationShow() {
                                     <div className="flex gap-2">
                                         <Button
                                             size="sm"
-                                            onClick={() =>
-                                                router.post(
-                                                    route(
-                                                        'loan-applications.guarantors.decide',
-                                                        [
-                                                            application.id,
-                                                            guarantor.id,
-                                                        ],
-                                                    ),
-                                                    { accepted: true },
-                                                )
-                                            }
+                                            onClick={() => {
+                                                appSwal
+                                                    .fire({
+                                                        title: 'Accept guarantor?',
+                                                        text: `Accept ${guarantor.customer?.name ?? 'this guarantor'} for ${application.application_no}?`,
+                                                        icon: 'warning',
+                                                        showCancelButton: true,
+                                                        confirmButtonText:
+                                                            'Accept guarantor',
+                                                        cancelButtonText:
+                                                            'Cancel',
+                                                    })
+                                                    .then((result) => {
+                                                        if (!result.isConfirmed)
+                                                            return;
+
+                                                        router.post(
+                                                            route(
+                                                                'loan-applications.guarantors.decide',
+                                                                [
+                                                                    application.id,
+                                                                    guarantor.id,
+                                                                ],
+                                                            ),
+                                                            { accepted: true },
+                                                        );
+                                                    });
+                                            }}
                                         >
                                             Accept
                                         </Button>
                                         <Button
                                             size="sm"
                                             variant="outline"
-                                            onClick={() =>
-                                                router.post(
-                                                    route(
-                                                        'loan-applications.guarantors.decide',
-                                                        [
-                                                            application.id,
-                                                            guarantor.id,
-                                                        ],
-                                                    ),
-                                                    { accepted: false },
-                                                )
-                                            }
+                                            onClick={() => {
+                                                appSwal
+                                                    .fire({
+                                                        title: 'Reject guarantor?',
+                                                        text: `Reject ${guarantor.customer?.name ?? 'this guarantor'} for ${application.application_no}?`,
+                                                        icon: 'warning',
+                                                        showCancelButton: true,
+                                                        confirmButtonText:
+                                                            'Reject guarantor',
+                                                        cancelButtonText:
+                                                            'Cancel',
+                                                    })
+                                                    .then((result) => {
+                                                        if (!result.isConfirmed)
+                                                            return;
+
+                                                        router.post(
+                                                            route(
+                                                                'loan-applications.guarantors.decide',
+                                                                [
+                                                                    application.id,
+                                                                    guarantor.id,
+                                                                ],
+                                                            ),
+                                                            { accepted: false },
+                                                        );
+                                                    });
+                                            }}
                                         >
                                             Reject
                                         </Button>
@@ -902,14 +1087,29 @@ export default function LoanApplicationShow() {
                                     <Button
                                         type="button"
                                         variant="outline"
-                                        onClick={() =>
-                                            router.post(
-                                                route(
-                                                    'loan-applications.protection.activate',
-                                                    application.id,
-                                                ),
-                                            )
-                                        }
+                                        onClick={() => {
+                                            appSwal
+                                                .fire({
+                                                    title: 'Activate protection?',
+                                                    text: `Activate the loan protection for ${application.application_no}?`,
+                                                    icon: 'warning',
+                                                    showCancelButton: true,
+                                                    confirmButtonText:
+                                                        'Activate protection',
+                                                    cancelButtonText: 'Cancel',
+                                                })
+                                                .then((result) => {
+                                                    if (!result.isConfirmed)
+                                                        return;
+
+                                                    router.post(
+                                                        route(
+                                                            'loan-applications.protection.activate',
+                                                            application.id,
+                                                        ),
+                                                    );
+                                                });
+                                        }}
                                     >
                                         Activate
                                     </Button>
@@ -919,14 +1119,29 @@ export default function LoanApplicationShow() {
                                     <Button
                                         type="button"
                                         variant="outline"
-                                        onClick={() =>
-                                            router.post(
-                                                route(
-                                                    'loan-applications.protection.cancel',
-                                                    application.id,
-                                                ),
-                                            )
-                                        }
+                                        onClick={() => {
+                                            appSwal
+                                                .fire({
+                                                    title: 'Cancel protection?',
+                                                    text: `Cancel the loan protection for ${application.application_no}?`,
+                                                    icon: 'warning',
+                                                    showCancelButton: true,
+                                                    confirmButtonText:
+                                                        'Cancel protection',
+                                                    cancelButtonText: 'Cancel',
+                                                })
+                                                .then((result) => {
+                                                    if (!result.isConfirmed)
+                                                        return;
+
+                                                    router.post(
+                                                        route(
+                                                            'loan-applications.protection.cancel',
+                                                            application.id,
+                                                        ),
+                                                    );
+                                                });
+                                        }}
                                     >
                                         Cancel
                                     </Button>

@@ -20,6 +20,7 @@ import { Card, CardContent } from '../../../components/ui/card';
 import { Input } from '../../../components/ui/input';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { appSwal } from '../../../lib/appSwal';
 import { formatDateTime } from '../../../lib/date_util';
 import { BreadcrumbItem, SharedData } from '../../../types';
 import { CustomerIntroducer } from '../../../types/customer_kyc_module';
@@ -79,23 +80,57 @@ export default function ShowIntroducer() {
 
     // ✅ Actions for pending verification
     const handleApprove = () => {
-        router.post(
-            route('customers.introducers.approve', [
-                introducer_request.introduced_customer_id,
-                introducer_request.id,
-            ]),
-            {},
-        );
+        appSwal
+            .fire({
+                title: 'Approve this introducer?',
+                text: 'This will mark the introducer record as approved.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Approve',
+                cancelButtonText: 'Cancel',
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    router.post(
+                        route('customers.introducers.approve', [
+                            introducer_request.introduced_customer_id,
+                            introducer_request.id,
+                        ]),
+                        {},
+                    );
+                }
+            });
     };
 
     const handleReject = () => {
-        router.post(
-            route('customers.introducers.reject', [
-                introducer_request.introduced_customer_id,
-                introducer_request.id,
-            ]),
-            {},
-        );
+        appSwal
+            .fire({
+                title: 'Reject this introducer?',
+                text: 'Provide the rejection reason before confirming.',
+                input: 'textarea',
+                inputPlaceholder: 'Rejection reason',
+                inputValue: rejection_reason,
+                inputValidator: (value) =>
+                    value?.trim()
+                        ? undefined
+                        : 'A rejection reason is required.',
+                showCancelButton: true,
+                confirmButtonText: 'Reject',
+                confirmButtonColor: '#dc2626',
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    router.post(
+                        route('customers.introducers.reject', [
+                            introducer_request.introduced_customer_id,
+                            introducer_request.id,
+                        ]),
+                        {
+                            rejection_reason: result.value,
+                        },
+                    );
+                }
+            });
     };
 
     return (
