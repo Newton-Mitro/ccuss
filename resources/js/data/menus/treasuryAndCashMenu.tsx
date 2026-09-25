@@ -71,6 +71,13 @@ export const treasuryAndCashMenu: SidebarItem[] = [
                         permission: ['cash_transactions.create'],
                     },
                     {
+                        name: 'Customer Deposit',
+                        icon: <i className="fa-solid fa-hand-holding-dollar" />,
+                        path: '/teller-transactions/customer-deposit',
+                        match_path: 'teller-transactions/customer-deposit',
+                        permission: ['cash_transactions.create'],
+                    },
+                    {
                         name: 'Cash Withdrawal',
                         icon: <i className="fa-solid fa-arrow-up" />,
                         path: '/teller-transactions/withdrawal',

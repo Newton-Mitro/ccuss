@@ -14,10 +14,17 @@ return new class extends Migration {
                 ->nullOnDelete();
         });
 
-        Schema::table('accounts', function (Blueprint $table): void {
-            $table->boolean('is_cash_account')->default(false)->after('is_reconcilable');
-            $table->index(['organization_id', 'is_cash_account']);
-        });
+        if (!Schema::hasColumn('accounts', 'is_cash_account')) {
+            Schema::table('accounts', function (Blueprint $table): void {
+                $table->boolean('is_cash_account')->default(false)->after('is_reconcilable');
+            });
+        }
+
+        if (!Schema::getConnection()->getSchemaBuilder()->hasIndex('accounts', ['organization_id', 'is_cash_account'])) {
+            Schema::table('accounts', function (Blueprint $table): void {
+                $table->index(['organization_id', 'is_cash_account']);
+            });
+        }
 
         Schema::table('customer_introducers', function (Blueprint $table): void {
             $table->foreign('introducer_account_id', 'customer_introducers_account_id_foreign')

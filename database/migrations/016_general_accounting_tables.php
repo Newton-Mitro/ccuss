@@ -111,7 +111,7 @@ return new class extends Migration {
             $table->foreignId('account_id')->constrained('accounts')->restrictOnDelete();
             $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->unsignedBigInteger('cost_center_id')->nullable();
-            $table->foreignId('financial_account_id')->nullable()->constrained('financial_accounts')->nullOnDelete();
+            $table->unsignedBigInteger('financial_account_id')->nullable();
             $table->string('description')->nullable();
             $table->decimal('debit', 20, 4)->default(0);
             $table->decimal('credit', 20, 4)->default(0);

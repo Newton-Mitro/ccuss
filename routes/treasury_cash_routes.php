@@ -154,6 +154,12 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::post('/deposit', [CashMovementController::class, 'storeDeposit'])
             ->middleware('permission:cash_transactions.create')
             ->name('deposit.store');
+        Route::get('/customer-deposit', [CashMovementController::class, 'customerDeposit'])
+            ->middleware('permission:cash_transactions.create')
+            ->name('customer-deposit');
+        Route::post('/customer-deposit', [CashMovementController::class, 'storeCustomerDeposit'])
+            ->middleware('permission:cash_transactions.create')
+            ->name('customer-deposit.store');
         Route::get('/withdrawal', [CashMovementController::class, 'withdrawal'])
             ->middleware('permission:cash_transactions.create')
             ->name('withdrawal');

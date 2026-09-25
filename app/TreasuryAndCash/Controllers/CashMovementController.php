@@ -2,12 +2,15 @@
 
 namespace App\TreasuryAndCash\Controllers;
 
+use App\CustomerModule\Models\Customer;
+use App\FinancialServices\Models\FinancialAccount;
 use App\Http\Controllers\Controller;
 use App\TreasuryAndCash\Application\CashAdjustmentService;
 use App\TreasuryAndCash\Application\CashMovementDataService;
 use App\TreasuryAndCash\Application\CashTransferService;
 use App\TreasuryAndCash\Application\TellerCashTransactionService;
 use App\TreasuryAndCash\Models\TellerCashTransaction;
+use App\TreasuryAndCash\Models\TellerSession;
 use App\TreasuryAndCash\Models\CashTransfer;
 use App\TreasuryAndCash\Models\CashAdjustment;
 use App\TreasuryAndCash\Requests\StoreCashAdjustmentRequest;
@@ -15,6 +18,7 @@ use App\TreasuryAndCash\Requests\StoreCashTransferRequest;
 use App\TreasuryAndCash\Requests\StoreTellerCashTransactionRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -261,6 +265,156 @@ class CashMovementController extends Controller
             ->with('success', 'Cash adjustment created successfully.');
     }
 
+    public function customerDeposit(Request $request): Response
+    {
+        $organization = $request->attributes->get('active_organization');
+        $user = $request->user();
+
+        abort_unless($user?->branch_id, 422, 'A branch assignment is required for teller transactions.');
+
+        $selectedCustomer = null;
+        $customerAccounts = collect([]);
+        $obligations = [];
+        $totals = [
+            'current_due' => 0,
+            'previous_due' => 0,
+            'total_due' => 0,
+        ];
+
+        $customerId = $request->query('customer_id');
+        if ($customerId) {
+            $selectedCustomer = Customer::query()
+                ->where('organization_id', $organization->id)
+                ->with('photo')
+                ->find($customerId);
+
+            if ($selectedCustomer) {
+                $customerAccounts = FinancialAccount::query()
+                    ->where('organization_id', $organization->id)
+                    ->where('holder_type', Customer::class)
+                    ->where('holder_id', $selectedCustomer->id)
+                    ->with(['product', 'loanAccount', 'shareAccount', 'recurringDeposit'])
+                    ->orderBy('account_no')
+                    ->get();
+
+                $customerAccounts = $customerAccounts
+                    ->filter(fn(FinancialAccount $account) => in_array($account->account_type, ['SAVINGS', 'SHARE', 'RECURRING_DEPOSIT', 'LOAN'], true))
+                    ->values();
+
+                $obligations = $this->buildCustomerDepositObligations($customerAccounts);
+                $totals = [
+                    'current_due' => collect($obligations)->where('month', 'Current month')->sum('amount'),
+                    'previous_due' => collect($obligations)->where('month', 'Previous month')->sum('amount'),
+                    'total_due' => collect($obligations)->sum('amount'),
+                ];
+            }
+        }
+
+        return Inertia::render('treasury-cash/teller-deposits/customer-deposit-page', [
+            'customer' => $selectedCustomer,
+            'customerAccounts' => $customerAccounts->map(fn(FinancialAccount $account) => [
+                'id' => $account->id,
+                'account_type' => $account->account_type,
+                'account_no' => $account->account_no,
+                'name' => $account->name,
+                'balance' => (float) $account->balance,
+                'available_balance' => (float) $account->available_balance,
+            ])->all(),
+            'obligations' => $obligations,
+            'totals' => $totals,
+            'filters' => $request->only(['customer_id']),
+        ]);
+    }
+
+    public function storeCustomerDeposit(Request $request): RedirectResponse
+    {
+        $organization = $request->attributes->get('active_organization');
+        $user = $request->user();
+
+        abort_unless($user?->branch_id, 422, 'A branch assignment is required for teller transactions.');
+
+        $data = $request->validate([
+            'teller_session_id' => ['required', 'integer', 'exists:teller_sessions,id'],
+            'customer_id' => ['required', 'integer', 'exists:customers,id'],
+            'amount' => ['required', 'numeric', 'gt:0'],
+            'selected' => ['required', 'array', 'min:1'],
+            'selected.*' => ['string'],
+            'note' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $customer = Customer::query()
+            ->where('organization_id', $organization->id)
+            ->findOrFail($data['customer_id']);
+
+        $session = TellerSession::query()
+            ->whereKey($data['teller_session_id'])
+            ->where('status', 'OPEN')
+            ->whereHas('branchDay', function ($branchDay) use ($organization, $user) {
+                $branchDay
+                    ->where('organization_id', $organization->id)
+                    ->where('branch_id', $user->branch_id)
+                    ->where('status', 'OPEN');
+            })
+            ->with(['teller.cashLocation.financialAccount'])
+            ->firstOrFail();
+
+        $customerAccounts = FinancialAccount::query()
+            ->where('organization_id', $organization->id)
+            ->where('holder_type', Customer::class)
+            ->where('holder_id', $customer->id)
+            ->with(['product', 'loanAccount', 'shareAccount', 'recurringDeposit'])
+            ->orderBy('account_no')
+            ->get();
+
+        $customerAccounts = $customerAccounts
+            ->filter(fn(FinancialAccount $account) => in_array($account->account_type, ['SAVINGS', 'SHARE', 'RECURRING_DEPOSIT', 'LOAN'], true))
+            ->values();
+
+        $selectedObligations = collect($this->buildCustomerDepositObligations($customerAccounts))
+            ->keyBy('id')
+            ->only($data['selected'])
+            ->values();
+
+        if ($selectedObligations->isEmpty()) {
+            throw ValidationException::withMessages([
+                'selected' => ['The selected obligations do not belong to this customer.'],
+            ]);
+        }
+
+        $selectedTotal = (float) $selectedObligations->sum('amount');
+        if ((float) $data['amount'] > $selectedTotal + 0.0001) {
+            throw ValidationException::withMessages([
+                'amount' => ['The payment amount cannot exceed the selected obligations total.'],
+            ]);
+        }
+
+        $lines = $selectedObligations
+            ->map(fn(array $obligation): array => [
+                'financial_account_id' => (int) $obligation['account_id'],
+                'amount' => (string) number_format((float) $obligation['amount'], 4, '.', ''),
+                'description' => $obligation['due_type'] . ' - ' . $obligation['month'],
+            ])
+            ->all();
+
+        $this->tellerCashTransactionService->create(
+            $organization->id,
+            $user->branch_id,
+            $user->id,
+            'DEPOSIT',
+            [
+                'teller_session_id' => $session->id,
+                'amount' => number_format((float) $data['amount'], 4, '.', ''),
+                'reference' => 'CUST-DEP-' . $customer->customer_no,
+                'note' => $data['note'] ?? 'Customer deposit',
+                'lines' => $lines,
+            ],
+        );
+
+        return redirect()
+            ->route('teller-transactions.customer-deposit', ['customer_id' => $customer->id])
+            ->with('success', 'Customer deposit posted for ' . $customer->name . '.');
+    }
+
     public function deposit(Request $request): Response
     {
         return $this->tellerCashTransactionForm($request, 'DEPOSIT');
@@ -292,6 +446,81 @@ class CashMovementController extends Controller
             ...$this->cashMovementDataService->forTellerCashTransaction($organization->id, $user->branch_id),
             'transaction_type' => $type,
         ]);
+    }
+
+    private function buildCustomerDepositObligations($customerAccounts): array
+    {
+        $rows = [];
+
+        foreach ($customerAccounts as $account) {
+            if ($account->account_type === 'LOAN' && $account->loanAccount) {
+                $principal = (float) ($account->loanAccount->principal_amount ?: $account->balance ?: 0);
+                $rate = (float) ($account->loanAccount->contractual_rate ?: 0.12);
+                $dailyInterest = $principal * $rate / 365;
+                $currentMonthDue = round($dailyInterest * 30, 2);
+                $previousDue = round($dailyInterest * 45, 2);
+
+                $rows[] = [
+                    'id' => 'loan-interest-' . $account->id,
+                    'account_id' => $account->id,
+                    'account_type' => 'LOAN',
+                    'due_type' => 'Loan interest',
+                    'month' => 'Current month',
+                    'amount' => $currentMonthDue,
+                ];
+                $rows[] = [
+                    'id' => 'loan-interest-prev-' . $account->id,
+                    'account_id' => $account->id,
+                    'account_type' => 'LOAN',
+                    'due_type' => 'Loan interest',
+                    'month' => 'Previous month',
+                    'amount' => $previousDue,
+                ];
+
+                $protectionFee = 125;
+                $renewalFee = 50;
+                $fineAmount = 0;
+
+                $rows[] = [
+                    'id' => 'protection-fee-' . $account->id,
+                    'account_id' => $account->id,
+                    'account_type' => 'LOAN',
+                    'due_type' => 'Loan protection fee',
+                    'month' => 'Current month',
+                    'amount' => $protectionFee,
+                ];
+                $rows[] = [
+                    'id' => 'renewal-fee-' . $account->id,
+                    'account_id' => $account->id,
+                    'account_type' => 'LOAN',
+                    'due_type' => 'Loan protection renew fee',
+                    'month' => 'Current month',
+                    'amount' => $renewalFee,
+                ];
+                $rows[] = [
+                    'id' => 'fine-' . $account->id,
+                    'account_id' => $account->id,
+                    'account_type' => 'LOAN',
+                    'due_type' => 'Loan fine',
+                    'month' => 'Previous month',
+                    'amount' => $fineAmount,
+                ];
+            }
+
+            if ($account->account_type === 'SAVINGS' || $account->account_type === 'SHARE' || $account->account_type === 'RECURRING_DEPOSIT') {
+                $depositDue = max(0, (float) $account->balance * 0.01);
+                $rows[] = [
+                    'id' => 'deposit-' . $account->id,
+                    'account_id' => $account->id,
+                    'account_type' => $account->account_type,
+                    'due_type' => 'Deposit contribution',
+                    'month' => 'Current month',
+                    'amount' => round($depositDue, 2),
+                ];
+            }
+        }
+
+        return $rows;
     }
 
     private function storeTellerCashTransaction(

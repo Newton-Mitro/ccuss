@@ -1,5 +1,6 @@
 <?php
 
+use App\CustomerModule\Models\Customer;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
@@ -145,6 +146,20 @@ it('loads the teller transaction queue for users with view permission', function
             ->has('transactions.data', 0));
 });
 
+it('loads the customer deposit page without a selected customer', function () {
+    $fixture = tellerCashTransactionFixture();
+    grantTellerCashTransactionPermission($fixture['user']);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('teller-transactions.customer-deposit'))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page
+            ->component('treasury-cash/teller-deposits/customer-deposit-page')
+            ->where('customer', null)
+            ->where('customerAccounts', []));
+});
+
 it('creates a pending teller cash deposit for an open session', function () {
     $fixture = tellerCashTransactionFixture();
     grantTellerCashTransactionPermission($fixture['user']);
@@ -167,6 +182,50 @@ it('creates a pending teller cash deposit for an open session', function () {
         ->and($transaction->status)->toBe('PENDING')
         ->and($transaction->amount)->toBe('300.0000')
         ->and($transaction->requested_by)->toBe($fixture['user']->id);
+});
+
+it('creates a pending customer deposit from selected obligations', function () {
+    $fixture = tellerCashTransactionFixture();
+    grantTellerCashTransactionPermission($fixture['user']);
+
+    $customer = Customer::factory()->individualMale()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+    ]);
+    $cashAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'financial_product_id' => null,
+        'account_type' => 'CASH',
+        'account_no' => 'CASH-TELLER-002',
+    ]);
+    $savingsAccount = FinancialAccount::factory()->active(1000)->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'financial_product_id' => null,
+        'holder_type' => Customer::class,
+        'holder_id' => $customer->id,
+        'account_type' => 'SAVINGS',
+        'account_no' => 'SAVINGS-CUST-002',
+    ]);
+    $fixture['location']->update(['financial_account_id' => $cashAccount->id]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('teller-transactions.customer-deposit.store'), [
+            'teller_session_id' => $fixture['session']->id,
+            'customer_id' => $customer->id,
+            'amount' => '10.00',
+            'selected' => ['deposit-' . $savingsAccount->id],
+            'note' => 'Customer cash deposit',
+        ])
+        ->assertRedirect(route('teller-transactions.customer-deposit', ['customer_id' => $customer->id]));
+
+    $transaction = TellerCashTransaction::query()->latest()->firstOrFail();
+
+    expect($transaction->type)->toBe('DEPOSIT')
+        ->and($transaction->amount)->toBe('10.0000')
+        ->and($transaction->financial_transaction_id)->not->toBeNull();
 });
 
 it('posts a pending deposit and updates the teller expected cash', function () {

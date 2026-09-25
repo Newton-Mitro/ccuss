@@ -96,6 +96,10 @@ return new class extends Migration {
             $table->index(['financial_transaction_id', 'line_no'], 'fin_tx_entry_line_index');
         });
 
+        Schema::table('voucher_entries', function (Blueprint $table): void {
+            $table->foreign('financial_account_id')->references('id')->on('financial_accounts')->nullOnDelete();
+        });
+
         Schema::create('financial_product_policies', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('financial_product_id')->unique()->constrained()->cascadeOnDelete();
