@@ -81,6 +81,20 @@ export default function CustomerDepositPage() {
         setNote('');
     }, [customer]);
 
+    useEffect(() => {
+        if (!selectedTellerSessionId && teller_sessions.length === 1) {
+            setSelectedTellerSessionId(String(teller_sessions[0].id));
+        }
+    }, [selectedTellerSessionId, teller_sessions]);
+
+    const selectedTellerSession = useMemo(
+        () =>
+            teller_sessions.find(
+                (session) => String(session.id) === selectedTellerSessionId,
+            ) ?? null,
+        [selectedTellerSessionId, teller_sessions],
+    );
+
     const totalSelected = useMemo(
         () =>
             obligations
@@ -110,8 +124,16 @@ export default function CustomerDepositPage() {
         setSelectedRows((current) => ({ ...current, [id]: !current[id] }));
     };
 
+    const selectedObligationIds = obligations
+        .filter((row) => selectedRows[row.id])
+        .map((row) => row.id);
+
     const submit = () => {
-        if (!selectedCustomer || !selectedTellerSessionId) {
+        if (
+            !selectedCustomer ||
+            !selectedTellerSessionId ||
+            selectedObligationIds.length === 0
+        ) {
             return;
         }
 
@@ -121,14 +143,18 @@ export default function CustomerDepositPage() {
                 teller_session_id: selectedTellerSessionId,
                 customer_id: selectedCustomer.id,
                 amount: depositAmount || totalSelected.toFixed(2),
-                selected: obligations
-                    .filter((row) => selectedRows[row.id])
-                    .map((row) => row.id),
+                selected: selectedObligationIds,
                 note,
             },
             { preserveScroll: true },
         );
     };
+
+    const canSubmit =
+        Boolean(selectedCustomer) &&
+        Boolean(selectedTellerSessionId) &&
+        selectedObligationIds.length > 0 &&
+        Number(depositAmount || totalSelected || 0) > 0;
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
@@ -201,7 +227,36 @@ export default function CustomerDepositPage() {
                                             </option>
                                         ))}
                                     </select>
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                        Required before posting the deposit.
+                                    </p>
                                 </div>
+                                {selectedTellerSession && (
+                                    <div className="mb-4 rounded-md border border-primary/20 bg-primary/5 p-3 text-sm">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <span className="text-muted-foreground">
+                                                Selected session
+                                            </span>
+                                            <span className="font-medium text-foreground">
+                                                {selectedTellerSession.teller
+                                                    ?.name ?? 'Teller'}
+                                            </span>
+                                        </div>
+                                        <div className="mt-1 flex items-center justify-between gap-3">
+                                            <span className="text-muted-foreground">
+                                                Expected cash
+                                            </span>
+                                            <span className="font-medium text-foreground">
+                                                BDT{' '}
+                                                {Number(
+                                                    selectedTellerSession.expected_cash ??
+                                                        selectedTellerSession.opening_cash ??
+                                                        0,
+                                                ).toFixed(2)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
                                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                                     <div className="h-16 w-16 overflow-hidden rounded-full border bg-muted">
                                         {selectedCustomer.photo?.url ? (
@@ -490,7 +545,11 @@ export default function CustomerDepositPage() {
                                 <Button variant="outline" type="button">
                                     Review
                                 </Button>
-                                <Button type="button" onClick={submit}>
+                                <Button
+                                    type="button"
+                                    onClick={submit}
+                                    disabled={!canSubmit}
+                                >
                                     <ArrowDownToLine className="mr-2 h-4 w-4" />
                                     Submit deposit
                                 </Button>

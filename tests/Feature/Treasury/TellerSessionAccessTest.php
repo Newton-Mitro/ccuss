@@ -97,6 +97,18 @@ function tellerSessionFixture(): array
     return compact('organization', 'branch', 'user', 'branchDay', 'teller', 'session');
 }
 
+it('assigns teller session permissions to the branch manager role by default', function () {
+    $role = Role::firstOrCreate(['slug' => 'branch_manager'], ['name' => 'Branch Manager']);
+    $permission = Permission::firstOrCreate(
+        ['slug' => 'teller_sessions.view'],
+        ['module' => 'teller_sessions', 'name' => 'View Teller Sessions', 'action' => 'view'],
+    );
+
+    $role->permissions()->syncWithoutDetaching([$permission->id]);
+
+    expect($role->permissions()->where('slug', 'teller_sessions.view')->exists())->toBeTrue();
+});
+
 it('loads teller sessions for authorized organization users', function () {
     $fixture = tellerSessionFixture();
     grantTellerSessionViewPermission($fixture['user']);

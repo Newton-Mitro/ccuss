@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             $this->call([
                 RoleSeeder::class,
                 SystemAdministratorRolePermissionSeeder::class,
+                DefaultRolePermissionSeeder::class,
                 OrganizationStructureSeeder::class,
                 GeneralAccountingSeeder::class,
                 CustomerSeeder::class,
