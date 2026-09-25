@@ -16,10 +16,19 @@ interface Account {
     name: string;
 }
 
+interface FinancialAccount {
+    id: number;
+    account_no: string;
+    name?: string | null;
+    account_type?: string;
+}
+
 interface VoucherEntry {
     id?: number;
     account_id: number;
+    financial_account_id?: number | string | null;
     account?: Account;
+    financial_account?: FinancialAccount;
     debit: number | string;
     credit: number | string;
     description?: string | null;
@@ -40,6 +49,7 @@ interface Voucher {
 interface Props extends SharedData {
     voucher: Voucher;
     accounts: Account[];
+    financialAccounts: FinancialAccount[];
     fiscalPeriods: { id: number; name?: string; period_name?: string }[];
 }
 
@@ -55,7 +65,10 @@ const voucherTypes = [
 ].map((value) => ({ value, label: value }));
 
 export default function VoucherEditPage() {
-    const { voucher, accounts, fiscalPeriods } = usePage<Props>().props;
+    const { voucher, accounts, fiscalPeriods, financialAccounts } =
+        usePage<Props>().props as Props & {
+            financialAccounts: FinancialAccount[];
+        };
     const [voucherDate, setVoucherDate] = useState(
         voucher.voucher_date?.split('T')[0] ?? '',
     );
@@ -127,6 +140,9 @@ export default function VoucherEditPage() {
                 description,
                 entries: entries.map((entry) => ({
                     account_id: Number(entry.account_id),
+                    financial_account_id: entry.financial_account_id
+                        ? Number(entry.financial_account_id)
+                        : null,
                     debit: Number(entry.debit || 0),
                     credit: Number(entry.credit || 0),
                     description: entry.description || null,
@@ -221,6 +237,9 @@ export default function VoucherEditPage() {
                                 <tr>
                                     <th className="border-b p-2">Account</th>
                                     <th className="border-b p-2">
+                                        Financial account
+                                    </th>
+                                    <th className="border-b p-2">
                                         Description
                                     </th>
                                     <th className="border-b p-2 text-right">
@@ -260,6 +279,34 @@ export default function VoucherEditPage() {
                                                                 account.id,
                                                             ),
                                                             label: `${account.code} - ${account.name}`,
+                                                        }),
+                                                    ),
+                                                ]}
+                                            />
+                                        </td>
+                                        <td className="p-2">
+                                            <Select
+                                                value={String(
+                                                    entry.financial_account_id ??
+                                                        '',
+                                                )}
+                                                onChange={(value) =>
+                                                    updateEntry(index, {
+                                                        financial_account_id:
+                                                            value || null,
+                                                    })
+                                                }
+                                                options={[
+                                                    {
+                                                        value: '',
+                                                        label: 'None',
+                                                    },
+                                                    ...financialAccounts.map(
+                                                        (account) => ({
+                                                            value: String(
+                                                                account.id,
+                                                            ),
+                                                            label: `${account.account_no} - ${account.name ?? 'Unnamed account'}`,
                                                         }),
                                                     ),
                                                 ]}

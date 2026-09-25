@@ -2,6 +2,7 @@
 
 namespace App\GeneralAccounting\Models;
 
+use App\FinancialServices\Models\FinancialAccount;
 use App\GeneralAccounting\Models\Voucher;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -21,8 +22,7 @@ class VoucherEntry extends Model
         'account_id',
         'branch_id',
         'cost_center_id',
-        'party_type',
-        'party_id',
+        'financial_account_id',
         'description',
         'debit',
         'credit',
@@ -44,5 +44,10 @@ class VoucherEntry extends Model
     public function account(): BelongsTo
     {
         return $this->belongsTo(LedgerAccount::class, 'account_id');
+    }
+
+    public function financialAccount(): BelongsTo
+    {
+        return $this->belongsTo(FinancialAccount::class, 'financial_account_id');
     }
 }

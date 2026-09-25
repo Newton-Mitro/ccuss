@@ -1,5 +1,6 @@
 <?php
 
+use App\FinancialServices\Models\FinancialAccount;
 use App\GeneralAccounting\Application\AccountGroupService;
 use App\GeneralAccounting\Application\FiscalPeriodService;
 use App\GeneralAccounting\Application\FiscalYearService;
@@ -83,6 +84,28 @@ it('creates a balanced draft voucher with an organization-scoped number', functi
         ->and($voucher->status)->toBe('DRAFT')
         ->and($voucher->voucher_no)->toBe('JOURNAL-2025-000001')
         ->and($voucher->entries)->toHaveCount(2);
+});
+
+it('stores a linked financial account on each voucher entry', function () {
+    $fixture = voucherFixture();
+    $financialAccount = FinancialAccount::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'status' => 'ACTIVE',
+    ]);
+
+    $voucher = app(VoucherService::class)->createDraft([
+        'fiscal_period_id' => $fixture['period']->id,
+        'voucher_type' => 'JOURNAL',
+        'voucher_date' => '2025-07-10',
+        'entries' => [
+            ['account_id' => $fixture['accounts'][0]->id, 'financial_account_id' => $financialAccount->id, 'debit' => 100, 'credit' => 0],
+            ['account_id' => $fixture['accounts'][1]->id, 'financial_account_id' => $financialAccount->id, 'debit' => 0, 'credit' => 100],
+        ],
+    ], $fixture['organization']->id, $fixture['user']->id);
+
+    expect($voucher->entries)->toHaveCount(2)
+        ->and($voucher->entries->first()->financial_account_id)->toBe($financialAccount->id)
+        ->and($voucher->entries->last()->financial_account_id)->toBe($financialAccount->id);
 });
 
 it('rejects unbalanced, one-sided, and out-of-period vouchers', function () {

@@ -64,6 +64,7 @@ class VoucherController extends Controller
             'fiscalPeriods' => $this->fiscalPeriods($request),
             'accounts' => $this->accounts($request),
             'costCenters' => $this->costCenters($request),
+            'financialAccounts' => $this->financialAccounts($request),
             'voucherType' => $voucherType,
         ]);
     }
@@ -97,9 +98,10 @@ class VoucherController extends Controller
         $this->authorizeOrganization($request, $voucher);
 
         return Inertia::render('general-accounting/vouchers/edit/voucher_edit_page', [
-            'voucher' => $voucher->load('entries.account'),
+            'voucher' => $voucher->load(['entries.account', 'entries.financialAccount']),
             'fiscalPeriods' => $this->fiscalPeriods($request),
             'accounts' => $this->accounts($request),
+            'financialAccounts' => $this->financialAccounts($request),
         ]);
     }
 
@@ -199,6 +201,15 @@ class VoucherController extends Controller
             ->where('status', true)
             ->orderBy('code')
             ->get(['id', 'code', 'name']);
+    }
+
+    private function financialAccounts(Request $request)
+    {
+        return \App\FinancialServices\Models\FinancialAccount::query()
+            ->where('organization_id', $request->attributes->get('active_organization')->id)
+            ->where('status', 'ACTIVE')
+            ->orderBy('account_no')
+            ->get(['id', 'account_no', 'name', 'account_type']);
     }
 
     private function organizationQuery(Request $request)

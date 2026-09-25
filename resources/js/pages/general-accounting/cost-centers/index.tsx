@@ -1,7 +1,5 @@
-import DataTablePagination from '@/components/data-table-pagination';
 import {
     ResourcePageHeader,
-    ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
@@ -11,12 +9,13 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { ChevronDown, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { route } from 'ziggy-js';
 
 interface CostCenter {
     id: number;
+    parent_id?: number | null;
     code: string;
     name: string;
     level: number;
@@ -36,7 +35,137 @@ interface Props extends SharedData {
 export default function CostCenterIndex() {
     const { costCenters, filters } = usePage<Props>().props;
     const [search, setSearch] = useState(filters.search ?? '');
+    const [expanded, setExpanded] = useState<number[]>([]);
     useFlashToastHandler();
+
+    const childrenByParent = useMemo(() => {
+        const map = new Map<number, CostCenter[]>();
+
+        costCenters.data.forEach((costCenter) => {
+            if (costCenter.parent_id) {
+                const parentId = Number(costCenter.parent_id);
+                const children = map.get(parentId) ?? [];
+                children.push(costCenter);
+                map.set(parentId, children);
+            }
+        });
+
+        return map;
+    }, [costCenters.data]);
+
+    const rootNodes = useMemo(() => {
+        const visibleIds = new Set(
+            costCenters.data.map((costCenter) => costCenter.id),
+        );
+
+        return costCenters.data.filter(
+            (costCenter) =>
+                !costCenter.parent_id ||
+                !visibleIds.has(Number(costCenter.parent_id)),
+        );
+    }, [costCenters.data]);
+
+    const toggleExpanded = (id: number) => {
+        setExpanded((current) =>
+            current.includes(id)
+                ? current.filter((item) => item !== id)
+                : [...current, id],
+        );
+    };
+
+    const renderCostCenterNode = (
+        costCenter: CostCenter,
+        depth = 0,
+    ): React.ReactNode => {
+        const children = childrenByParent.get(costCenter.id) ?? [];
+        const hasChildren = children.length > 0;
+        const isExpanded = expanded.includes(costCenter.id);
+
+        return (
+            <div
+                key={costCenter.id}
+                className="border-b border-border/80 last:border-b-0"
+            >
+                <div
+                    className="flex items-center gap-3 px-3 py-2 hover:bg-primary/5"
+                    style={{ paddingLeft: `${depth * 1.1 + 0.75}rem` }}
+                >
+                    <div className="flex w-5 items-center justify-center">
+                        {hasChildren ? (
+                            <button
+                                type="button"
+                                className="flex h-5 w-5 items-center justify-center rounded text-muted-foreground hover:bg-muted"
+                                onClick={() => toggleExpanded(costCenter.id)}
+                                aria-label={
+                                    isExpanded
+                                        ? `Collapse ${costCenter.name}`
+                                        : `Expand ${costCenter.name}`
+                                }
+                                title={
+                                    isExpanded
+                                        ? `Collapse ${costCenter.name}`
+                                        : `Expand ${costCenter.name}`
+                                }
+                            >
+                                {isExpanded ? (
+                                    <ChevronDown className="h-4 w-4" />
+                                ) : (
+                                    <ChevronRight className="h-4 w-4" />
+                                )}
+                            </button>
+                        ) : (
+                            <span className="h-4 w-4" />
+                        )}
+                    </div>
+
+                    <div className="grid min-w-0 flex-1 grid-cols-[1.15fr_1.7fr_1.2fr_0.5fr_0.9fr_0.7fr] items-center gap-3">
+                        <div className="min-w-0 font-mono text-xs text-muted-foreground">
+                            {costCenter.code}
+                        </div>
+                        <div className="min-w-0">
+                            <span className="font-medium">
+                                {costCenter.name}
+                            </span>
+                        </div>
+                        <div className="min-w-0 truncate text-muted-foreground">
+                            {costCenter.parent
+                                ? `${costCenter.parent.code} - ${costCenter.parent.name}`
+                                : '-'}
+                        </div>
+                        <div className="min-w-0">{costCenter.level}</div>
+                        <div className="min-w-0">
+                            <StatusBadge
+                                tone={costCenter.status ? 'success' : 'danger'}
+                            >
+                                {costCenter.status ? 'Active' : 'Inactive'}
+                            </StatusBadge>
+                        </div>
+                        <div className="flex items-center justify-end gap-1.5">
+                            <Link
+                                href={route('cost-centers.edit', costCenter.id)}
+                                title="Edit cost center"
+                            >
+                                <Pencil className="h-4 w-4" />
+                            </Link>
+                            <button
+                                type="button"
+                                onClick={() => destroy(costCenter)}
+                                title="Delete cost center"
+                            >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {hasChildren &&
+                    isExpanded &&
+                    children.map((child) =>
+                        renderCostCenterNode(child, depth + 1),
+                    )}
+            </div>
+        );
+    };
 
     useEffect(() => {
         const timeout = setTimeout(() => {
@@ -122,99 +251,12 @@ export default function CostCenterIndex() {
                     </div>
                 ) : (
                     <>
-                        <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
-                            <ResourceTableCard>
-                                <table className="w-full text-sm">
-                                    <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
-                                        <tr>
-                                            <th className="border-b border-border px-4 py-3">
-                                                Code
-                                            </th>
-                                            <th className="border-b border-border px-4 py-3">
-                                                Name
-                                            </th>
-                                            <th className="border-b border-border px-4 py-3">
-                                                Parent
-                                            </th>
-                                            <th className="border-b border-border px-4 py-3">
-                                                Level
-                                            </th>
-                                            <th className="border-b border-border px-4 py-3">
-                                                Status
-                                            </th>
-                                            <th className="border-b border-border px-4 py-3">
-                                                Actions
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {costCenters.data.map((costCenter) => (
-                                            <tr
-                                                key={costCenter.id}
-                                                className="border-b border-border/80 even:bg-muted/40 hover:bg-primary/5"
-                                            >
-                                                <td className="px-4 py-3 font-mono">
-                                                    {costCenter.code}
-                                                </td>
-                                                <td className="px-4 py-3 font-medium">
-                                                    <span
-                                                        style={{
-                                                            paddingLeft: `${costCenter.level * 16}px`,
-                                                        }}
-                                                    >
-                                                        {costCenter.name}
-                                                    </span>
-                                                </td>
-                                                <td className="px-4 py-3 text-muted-foreground">
-                                                    {costCenter.parent
-                                                        ? `${costCenter.parent.code} - ${costCenter.parent.name}`
-                                                        : '-'}
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    {costCenter.level}
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    <StatusBadge
-                                                        tone={
-                                                            costCenter.status
-                                                                ? 'success'
-                                                                : 'danger'
-                                                        }
-                                                    >
-                                                        {costCenter.status
-                                                            ? 'Active'
-                                                            : 'Inactive'}
-                                                    </StatusBadge>
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    <div className="flex items-center gap-1.5">
-                                                        <Link
-                                                            href={route(
-                                                                'cost-centers.edit',
-                                                                costCenter.id,
-                                                            )}
-                                                            title="Edit cost center"
-                                                        >
-                                                            <Pencil className="h-4 w-4" />
-                                                        </Link>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() =>
-                                                                destroy(
-                                                                    costCenter,
-                                                                )
-                                                            }
-                                                            title="Delete cost center"
-                                                        >
-                                                            <Trash2 className="h-4 w-4 text-destructive" />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </ResourceTableCard>
+                        <div className="overflow-auto rounded-md border bg-card">
+                            <div className="space-y-1 p-2">
+                                {rootNodes.map((costCenter) =>
+                                    renderCostCenterNode(costCenter),
+                                )}
+                            </div>
                         </div>
 
                         <div className="space-y-3 md:hidden">
@@ -282,18 +324,6 @@ export default function CostCenterIndex() {
                         </div>
                     </>
                 )}
-
-                <DataTablePagination
-                    links={costCenters.links}
-                    perPage={costCenters.per_page ?? 18}
-                    onPerPageChange={(perPage) =>
-                        router.get(
-                            route('cost-centers.index'),
-                            { search, per_page: perPage },
-                            { preserveScroll: true, preserveState: true },
-                        )
-                    }
-                />
             </div>
         </CustomAuthLayout>
     );

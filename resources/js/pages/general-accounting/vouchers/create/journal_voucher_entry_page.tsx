@@ -38,6 +38,7 @@ interface FiscalPeriod {
 
 interface Entry {
     account_id: string;
+    financial_account_id: string;
     debit: string;
     credit: string;
     description: string;
@@ -46,6 +47,7 @@ interface Entry {
 
 const emptyEntry = (): Entry => ({
     account_id: '',
+    financial_account_id: '',
     debit: '',
     credit: '',
     description: '',
@@ -126,11 +128,22 @@ const voucherModes: Record<
 };
 
 export default function JournalVoucherEntryPage() {
-    const { fiscalPeriods, accounts, costCenters, voucherType } = usePage()
-        .props as unknown as {
+    const {
+        fiscalPeriods,
+        accounts,
+        costCenters,
+        financialAccounts,
+        voucherType,
+    } = usePage().props as unknown as {
         fiscalPeriods: FiscalPeriod[];
         accounts: Account[];
         costCenters: CostCenter[];
+        financialAccounts: {
+            id: number;
+            account_no: string;
+            name: string | null;
+            account_type: string;
+        }[];
         voucherType: string;
     };
 
@@ -578,6 +591,34 @@ export default function JournalVoucherEntryPage() {
 
                                 <div>
                                     <Label className="text-xs">
+                                        Financial account
+                                    </Label>
+
+                                    <Select
+                                        value={draftEntry.financial_account_id}
+                                        onChange={(value) =>
+                                            updateDraftEntry(
+                                                'financial_account_id',
+                                                value,
+                                            )
+                                        }
+                                        options={[
+                                            {
+                                                value: '',
+                                                label: 'None',
+                                            },
+                                            ...financialAccounts.map(
+                                                (account) => ({
+                                                    value: String(account.id),
+                                                    label: `${account.account_no} - ${account.name ?? 'Unnamed account'}`,
+                                                }),
+                                            ),
+                                        ]}
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label className="text-xs">
                                         Cost center
                                     </Label>
 
@@ -737,6 +778,10 @@ export default function JournalVoucherEntryPage() {
                                             </th>
 
                                             <th className="border-b px-2 py-1 text-xs">
+                                                Financial account
+                                            </th>
+
+                                            <th className="border-b px-2 py-1 text-xs">
                                                 Cost center
                                             </th>
 
@@ -766,6 +811,13 @@ export default function JournalVoucherEntryPage() {
                                                     entry.account_id,
                                             );
 
+                                            const financialAccount =
+                                                financialAccounts.find(
+                                                    (account) =>
+                                                        String(account.id) ===
+                                                        entry.financial_account_id,
+                                                );
+
                                             const costCenter = costCenters.find(
                                                 (center) =>
                                                     String(center.id) ===
@@ -781,6 +833,12 @@ export default function JournalVoucherEntryPage() {
                                                         {account
                                                             ? `${account.code} - ${account.name}`
                                                             : '-'}
+                                                    </td>
+
+                                                    <td className="px-2 py-1 text-muted-foreground">
+                                                        {financialAccount
+                                                            ? `${financialAccount.account_no} - ${financialAccount.name ?? 'Unnamed account'}`
+                                                            : 'None'}
                                                     </td>
 
                                                     <td className="px-2 py-1 text-muted-foreground">

@@ -86,7 +86,7 @@ export default function GeneralLedgerPage() {
                                 : 'Select an account to view transactions'
                         }
                     />
-                    <div className="flex w-full flex-col gap-2 sm:w-120 sm:flex-row">
+                    <div className="flex w-full flex-col gap-2 sm:w-[26rem] sm:flex-row sm:items-center">
                         <Select
                             value={accountId}
                             onChange={changeAccount}
@@ -116,18 +116,36 @@ export default function GeneralLedgerPage() {
                         <thead className="bg-muted text-muted-foreground">
                             <tr>
                                 {[
-                                    'Date',
-                                    'Voucher',
-                                    'Description',
-                                    'Debit',
-                                    'Credit',
-                                    'Balance',
-                                ].map((heading) => (
+                                    {
+                                        label: 'Date',
+                                        align: 'text-left',
+                                    },
+                                    {
+                                        label: 'Voucher',
+                                        align: 'text-left',
+                                    },
+                                    {
+                                        label: 'Description',
+                                        align: 'text-left',
+                                    },
+                                    {
+                                        label: 'Debit',
+                                        align: 'text-right',
+                                    },
+                                    {
+                                        label: 'Credit',
+                                        align: 'text-right',
+                                    },
+                                    {
+                                        label: 'Balance',
+                                        align: 'text-right',
+                                    },
+                                ].map(({ label, align }) => (
                                     <th
-                                        key={heading}
-                                        className="border-b px-3 py-2 text-left font-medium"
+                                        key={label}
+                                        className={`border-b px-3 py-2 font-medium ${align}`}
                                     >
-                                        {heading}
+                                        {label}
                                     </th>
                                 ))}
                             </tr>
@@ -139,24 +157,24 @@ export default function GeneralLedgerPage() {
                                         key={entry.id}
                                         className="border-b even:bg-muted/50"
                                     >
-                                        <td className="px-3 py-2">
+                                        <td className="px-3 py-2 text-left">
                                             {new Date(
                                                 entry.voucher_date,
                                             ).toLocaleDateString()}
                                         </td>
-                                        <td className="px-3 py-2">
+                                        <td className="px-3 py-2 text-left">
                                             {entry.voucher_no}
                                         </td>
-                                        <td className="px-3 py-2">
+                                        <td className="px-3 py-2 text-left">
                                             {entry.entry_description || '-'}
                                         </td>
-                                        <td className="px-3 py-2 text-right">
+                                        <td className="px-3 py-2 text-right tabular-nums">
                                             {formatBDTCurrency(entry.debit)}
                                         </td>
-                                        <td className="px-3 py-2 text-right">
+                                        <td className="px-3 py-2 text-right tabular-nums">
                                             {formatBDTCurrency(entry.credit)}
                                         </td>
-                                        <td className="px-3 py-2 text-right">
+                                        <td className="px-3 py-2 text-right tabular-nums">
                                             {formatBDTCurrency(
                                                 entry.running_balance,
                                             )}
