@@ -33,8 +33,12 @@ class ChequeClearingController extends Controller
 
     public function store(StoreChequeClearingRequest $request)
     {
-        $this->service->create($request->validated(), (int) $request->attributes->get('active_organization')->id, $request->user()->id);
-        return back()->with('success', 'Cheque clearing created.');
+        try {
+            $this->service->create($request->validated(), (int) $request->attributes->get('active_organization')->id, $request->user()->id);
+            return back()->with('success', 'Cheque clearing created.');
+        } catch (\RuntimeException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
     }
 
     public function transition(Request $request, ChequeClearing $chequeClearing, string $action)

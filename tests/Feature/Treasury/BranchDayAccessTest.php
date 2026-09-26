@@ -67,6 +67,23 @@ it('loads the branch day index page for users with branch-day access', function 
         ->assertInertia(fn($page) => $page->component('treasury-cash/branch-days/index'));
 });
 
+it('loads the dedicated branch day creation page for users with open access', function () {
+    $organization = Organization::factory()->create();
+    $branch = Branch::factory()->create(['organization_id' => $organization->id]);
+    $user = User::factory()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+    ]);
+
+    grantBranchDayLifecyclePermissions($user);
+
+    $this->actingAs($user)
+        ->withSession(['active_organization_id' => $organization->id])
+        ->get(route('branch-days.create'))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page->component('treasury-cash/branch-days/create'));
+});
+
 it('forbids users without branch-day access from the branch day index', function () {
     $organization = Organization::factory()->create();
     $branch = Branch::factory()->create(['organization_id' => $organization->id]);
@@ -118,6 +135,26 @@ it('opens and closes a branch day for the authenticated users branch', function 
         ->and($branchDay->fresh()->closed_by)->toBe($user->id)
         ->and($branchDay->fresh()->closing_note)->toBe('Day closed')
         ->and($branchDay->fresh()->closed_at)->not->toBeNull();
+});
+
+it('redirects with an error when opening a branch day without a branch assignment', function () {
+    $organization = Organization::factory()->create();
+    $user = User::factory()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => null,
+    ]);
+
+    grantBranchDayLifecyclePermissions($user);
+
+    $this->actingAs($user)
+        ->withSession(['active_organization_id' => $organization->id])
+        ->from(route('branch-days.index'))
+        ->post(route('branch-days.open'), [
+            'business_date' => '2026-09-18',
+            'opening_note' => 'Morning opening',
+        ])
+        ->assertRedirect(route('branch-days.index'))
+        ->assertSessionHas('error', 'A branch assignment is required to open a branch day.');
 });
 
 it('rejects opening a second branch day for the same branch and date', function () {

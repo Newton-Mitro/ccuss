@@ -18,7 +18,7 @@ class BranchDayController extends Controller
         private readonly BranchDayService $branchDayService,
     ) {
         $this->middleware('permission:branch_days.view')->only(['index']);
-        $this->middleware('permission:branch_days.open')->only(['open']);
+        $this->middleware('permission:branch_days.open')->only(['create', 'open']);
         $this->middleware('permission:branch_days.close')->only(['close']);
     }
 
@@ -35,6 +35,21 @@ class BranchDayController extends Controller
         return Inertia::render('treasury-cash/branch-days/index', [
             'branch_days' => $branchDays,
             'filters' => $request->only(['search', 'per_page', 'page']),
+            'auth' => [
+                'user' => [
+                    'branch_id' => $request->user()?->branch_id,
+                ],
+            ],
+        ]);
+    }
+
+    public function create(Request $request): Response
+    {
+        $organization = $request->attributes->get('active_organization');
+
+        return Inertia::render('treasury-cash/branch-days/create', [
+            'organization' => $organization,
+            'user_branch_id' => $request->user()?->branch_id,
         ]);
     }
 
@@ -43,7 +58,10 @@ class BranchDayController extends Controller
         $organization = $request->attributes->get('active_organization');
         $user = $request->user();
 
-        abort_unless($user?->branch_id, 422, 'A branch assignment is required to open a branch day.');
+        if (!$user?->branch_id) {
+            return redirect()->route('branch-days.index')
+                ->with('error', 'A branch assignment is required to open a branch day.');
+        }
 
         try {
             $this->branchDayService->open(

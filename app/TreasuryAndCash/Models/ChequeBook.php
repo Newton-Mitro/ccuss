@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Schema;
 
 class ChequeBook extends Model
 {
@@ -21,13 +22,19 @@ class ChequeBook extends Model
 
             $start = (int) $book->start_number;
             $end = (int) $book->end_number;
+            $hasFinancialAccountColumn = Schema::hasColumn('cheques', 'financial_account_id');
 
             for ($number = $start; $number <= $end; $number++) {
-                $book->cheques()->create([
-                    'financial_account_id' => $book->financial_account_id,
+                $chequeData = [
                     'cheque_no' => ($book->prefix ?? '') . $number,
                     'status' => 'UNUSED',
-                ]);
+                ];
+
+                if ($hasFinancialAccountColumn) {
+                    $chequeData['financial_account_id'] = $book->financial_account_id;
+                }
+
+                $book->cheques()->create($chequeData);
             }
 
             $book->refresh();

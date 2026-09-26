@@ -18,8 +18,13 @@ use App\FinancialServices\Models\ShareAccount;
 use App\FinancialServices\Application\LoanScheduleService;
 use App\GeneralAccounting\Models\LedgerAccount;
 use App\SystemAdministration\Models\Organization;
+use App\TreasuryAndCash\Models\Bank;
+use App\TreasuryAndCash\Models\BankAccount;
+use App\TreasuryAndCash\Models\Cheque;
+use App\TreasuryAndCash\Models\ChequeBook;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class FinancialServicesSeeder extends Seeder
 {
@@ -34,6 +39,99 @@ class FinancialServicesSeeder extends Seeder
             $shareOpeningAmount = 5000;
             $legacySavingsBalance = 25000;
             $legacyFixedDepositPrincipal = 100000;
+
+            $seedCustomer = Customer::query()
+                ->where('organization_id', $organization->id)
+                ->orderBy('id')
+                ->first();
+
+            if (!$seedCustomer) {
+                $seedCustomer = Customer::factory()->create([
+                    'organization_id' => $organization->id,
+                    'branch_id' => $branchId,
+                    'type' => 'INDIVIDUAL',
+                    'status' => 'ACTIVE',
+                ]);
+            }
+
+            $createSavingsChequeBook = function (FinancialAccount $account) use ($organization, $branchId, $seedCustomer): void {
+                $hasBookFinancialAccount = Schema::hasColumn('cheque_books', 'financial_account_id');
+                $hasChequesFinancialAccount = Schema::hasColumn('cheques', 'financial_account_id');
+                $hasBankAccountColumn = Schema::hasColumn('cheque_books', 'bank_account_id');
+
+                $bank = Bank::query()->firstOrCreate(
+                    ['organization_id' => $organization->id, 'code' => 'BANK-CORE'],
+                    [
+                        'name' => 'Core Bank',
+                        'short_name' => 'CORE',
+                        'status' => true,
+                    ],
+                );
+
+                $bankAccount = BankAccount::query()->firstOrCreate(
+                    ['organization_id' => $organization->id, 'account_number' => 'BANK-CORE-001'],
+                    [
+                        'branch_id' => $branchId,
+                        'bank_id' => $bank->id,
+                        'financial_account_id' => $account->id,
+                        'account_name' => $account->name . ' Cheque Account',
+                        'routing_number' => '0001',
+                        'account_type' => 'SAVINGS',
+                        'opening_balance' => 0,
+                        'is_reconcilable' => true,
+                        'status' => 'ACTIVE',
+                    ],
+                );
+
+                $bookQuery = $hasBookFinancialAccount
+                    ? ['financial_account_id' => $account->id, 'book_no' => 'SAV-CHECKBOOK-' . $account->id]
+                    : ['book_no' => 'SAV-CHECKBOOK-' . $account->id];
+
+                $bookData = [
+                    'prefix' => 'SAV',
+                    'start_number' => 1001,
+                    'end_number' => 1015,
+                    'current_number' => 1001,
+                    'leaf_count' => 15,
+                    'issued_date' => now()->toDateString(),
+                    'status' => 'IN_USE',
+                ];
+
+                if ($hasBankAccountColumn) {
+                    $bookData['bank_account_id'] = $bankAccount->id;
+                }
+
+                if ($hasBookFinancialAccount) {
+                    $bookData['financial_account_id'] = $account->id;
+                }
+
+                $book = ChequeBook::query()->firstOrCreate($bookQuery, $bookData);
+
+                $existingCheques = $book->cheques()->count();
+                if ($existingCheques === 0) {
+                    foreach (range(1001, 1015) as $number) {
+                        $status = $number <= 1004 ? 'ISSUED' : 'UNUSED';
+                        $amount = $number <= 1003 ? [2500, 3750, 5000][$number - 1001] ?? 2000 : null;
+
+                        $chequeData = [
+                            'cheque_book_id' => $book->id,
+                            'cheque_no' => 'SAV-' . $number,
+                            'status' => $status,
+                            'issue_date' => now()->toDateString(),
+                            'cheque_date' => now()->toDateString(),
+                            'amount' => $amount,
+                            'payee' => $status === 'ISSUED' ? $seedCustomer->name : null,
+                            'memo' => 'Seeded savings cheque book',
+                        ];
+
+                        if ($hasChequesFinancialAccount) {
+                            $chequeData['financial_account_id'] = $account->id;
+                        }
+
+                        Cheque::query()->create($chequeData);
+                    }
+                }
+            };
 
             $products = [
                 ['SAV-REG', 'Regular Savings', 'SAVINGS', 'LIABILITY', '3.000000', 'SIMPLE', 'MONTHLY', 100],
@@ -130,6 +228,74 @@ class FinancialServicesSeeder extends Seeder
                     'organization_id' => $organization->id,
                     'type' => 'INDIVIDUAL',
                 ]);
+            }
+
+            $multiProductCustomer = $customers->first() ?? $seedCustomer;
+            foreach (FinancialProduct::query()->where('organization_id', $organization->id)->orderBy('id')->get() as $product) {
+                $accountNo = match ($product->category) {
+                    'SAVINGS' => 'SAV-ALL-' . $multiProductCustomer->id,
+                    'SHARE' => 'SHR-ALL-' . $multiProductCustomer->id,
+                    'FIXED_DEPOSIT' => 'FDR-ALL-' . $multiProductCustomer->id,
+                    'RECURRING_DEPOSIT' => 'RD-ALL-' . $multiProductCustomer->id,
+                    'LOAN' => 'LN-ALL-' . $multiProductCustomer->id,
+                    default => 'OTH-ALL-' . $multiProductCustomer->id,
+                };
+
+                $balance = match ($product->category) {
+                    'SAVINGS' => 15000,
+                    'SHARE' => 2500,
+                    'FIXED_DEPOSIT' => 35000,
+                    'RECURRING_DEPOSIT' => 18000,
+                    'LOAN' => 42000,
+                    default => 0,
+                };
+
+                $account = FinancialAccount::query()->updateOrCreate(
+                    ['organization_id' => $organization->id, 'account_no' => $accountNo],
+                    [
+                        'branch_id' => $branchId,
+                        'financial_product_id' => $product->id,
+                        'holder_type' => Customer::class,
+                        'holder_id' => $multiProductCustomer->id,
+                        'name' => $multiProductCustomer->name . ' - ' . $product->name,
+                        'account_type' => $product->category,
+                        'status' => 'ACTIVE',
+                        'balance' => $balance,
+                        'available_balance' => $balance,
+                        'interest_accrued' => 0,
+                        'opened_at' => now()->subMonths(3)->toDateString(),
+                        'metadata' => ['seeded' => true, 'multi_product_customer' => true],
+                    ],
+                );
+
+                if (!$account->holders()->where('customers.id', $multiProductCustomer->id)->exists()) {
+                    $account->addHolder($multiProductCustomer, 'PRIMARY');
+                }
+
+                if ($product->category === 'SAVINGS') {
+                    $createSavingsChequeBook($account);
+                }
+
+                if ($product->category === 'SHARE') {
+                    ShareAccount::query()->firstOrCreate(
+                        ['financial_account_id' => $account->id],
+                        ['customer_id' => $multiProductCustomer->id, 'member_since' => now()->subMonths(3)->toDateString(), 'membership_no' => 'SEED-MEM-' . $multiProductCustomer->id, 'membership_status' => 'ACTIVE'],
+                    );
+                }
+
+                if ($product->category === 'FIXED_DEPOSIT') {
+                    FixedDeposit::query()->firstOrCreate(
+                        ['financial_account_id' => $account->id],
+                        ['principal_amount' => $balance, 'contractual_rate' => $product->interest_rate, 'term_months' => 12, 'started_at' => now()->subMonths(3)->toDateString(), 'maturity_date' => now()->addMonths(9)->toDateString(), 'maturity_amount' => round($balance * (1 + ((float) $product->interest_rate / 100)), 2), 'maturity_instruction' => 'RENEW_PRINCIPAL', 'status' => 'ACTIVE'],
+                    );
+                }
+
+                if ($product->category === 'RECURRING_DEPOSIT') {
+                    RecurringDeposit::query()->firstOrCreate(
+                        ['financial_account_id' => $account->id],
+                        ['installment_amount' => 1500, 'installment_frequency' => 'MONTHLY', 'total_installments' => 12, 'paid_installments' => 3, 'started_at' => now()->subMonths(3)->toDateString(), 'maturity_date' => now()->addMonths(9)->toDateString(), 'maturity_extension_days' => 0, 'grace_days' => 7, 'status' => 'ACTIVE'],
+                    );
+                }
             }
 
             $loanCustomer = $customers->first();

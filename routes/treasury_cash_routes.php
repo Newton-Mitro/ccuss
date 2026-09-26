@@ -24,6 +24,9 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::get('/', [BranchDayController::class, 'index'])
             ->middleware('permission:branch_days.view')
             ->name('index');
+        Route::get('/create', [BranchDayController::class, 'create'])
+            ->middleware('permission:branch_days.open')
+            ->name('create');
         Route::post('/open', [BranchDayController::class, 'open'])
             ->middleware('permission:branch_days.open')
             ->name('open');
@@ -88,6 +91,9 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::get('/teller-sessions', [CashManagementController::class, 'tellerSessions'])
             ->middleware('permission:teller_sessions.view')
             ->name('teller-sessions.index');
+        Route::get('/teller-sessions/create', [CashManagementController::class, 'createSession'])
+            ->middleware('permission:teller_sessions.open')
+            ->name('teller-sessions.create');
         Route::post('/teller-sessions/open', [CashManagementController::class, 'openSession'])
             ->middleware('permission:teller_sessions.open')
             ->name('teller-sessions.open');

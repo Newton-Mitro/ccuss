@@ -126,6 +126,17 @@ it('loads teller sessions for authorized organization users', function () {
             ->where('teller_sessions.data.0.teller.code', $fixture['teller']->code));
 });
 
+it('loads the dedicated teller session creation page for users with open access', function () {
+    $fixture = tellerSessionFixture();
+    grantTellerSessionLifecyclePermissions($fixture['user']);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('teller-sessions.create'))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page->component('treasury-cash/teller-sessions/create'));
+});
+
 it('does not expose teller sessions without permission', function () {
     $fixture = tellerSessionFixture();
 

@@ -30,7 +30,7 @@ class CashManagementController extends Controller
         $this->middleware('permission:cash_management.create')->only(['createVault', 'storeVault', 'createTeller', 'storeTeller']);
         $this->middleware('permission:cash_management.update')->only(['editVault', 'updateVault', 'editTeller', 'updateTeller']);
         $this->middleware('permission:teller_sessions.view')->only(['tellerSessions']);
-        $this->middleware('permission:teller_sessions.open')->only(['openSession']);
+        $this->middleware('permission:teller_sessions.open')->only(['createSession', 'openSession']);
         $this->middleware('permission:teller_sessions.close')->only(['closeSession']);
     }
 
@@ -230,6 +230,37 @@ class CashManagementController extends Controller
                 ? $this->cashManagementDataService->tellerSessionOptions($organization->id, $user->branch_id)
                 : ['branch_day' => null, 'tellers' => []]),
             'filters' => $request->only(['search', 'per_page', 'page']),
+            'auth' => [
+                'user' => [
+                    'branch_id' => $user?->branch_id,
+                    'permissions' => $user?->permissions?->all() ?? [],
+                    'roles' => $user?->roles?->all() ?? [],
+                ],
+            ],
+        ]);
+    }
+
+    public function createSession(Request $request): Response
+    {
+        $organization = $request->attributes->get('active_organization');
+        $user = $request->user();
+
+        if (!$user?->branch_id) {
+            return Inertia::render('treasury-cash/teller-sessions/create', [
+                'branch_day' => null,
+                'tellers' => [],
+                'user_branch_id' => null,
+                'organization' => $organization,
+            ]);
+        }
+
+        $options = $this->cashManagementDataService->tellerSessionOptions($organization->id, $user->branch_id);
+
+        return Inertia::render('treasury-cash/teller-sessions/create', [
+            'branch_day' => $options['branch_day'],
+            'tellers' => $options['tellers'],
+            'user_branch_id' => $user->branch_id,
+            'organization' => $organization,
         ]);
     }
 

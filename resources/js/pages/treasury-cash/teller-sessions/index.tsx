@@ -8,14 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem } from '@/types';
 import type {
     TellerSessionIndexProps,
     TellerSessionListItem,
 } from '@/types/treasury-cash/teller-sessions';
-import { Head, useForm, usePage } from '@inertiajs/react';
-import { Banknote, Clock3, LockKeyhole, Plus } from 'lucide-react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Clock3, LockKeyhole, Plus } from 'lucide-react';
 import { FormEvent, useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 import {
@@ -25,13 +24,11 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from '../../../components/ui/dialog';
 
 export default function Index() {
     const { teller_sessions, branch_day, tellers, filters, auth } =
         usePage<TellerSessionIndexProps>().props;
-    const [openDialog, setOpenDialog] = useState(false);
     const [closingSession, setClosingSession] =
         useState<TellerSessionListItem | null>(null);
     useFlashToastHandler();
@@ -40,11 +37,6 @@ export default function Index() {
         search: filters.search || '',
         page: Number(filters.page) || 1,
         per_page: Number(filters.per_page) || 18,
-    });
-    const openForm = useForm({
-        teller_id: '',
-        opening_cash: '',
-        opening_note: '',
     });
     const closeForm = useForm({
         closing_cash: '',
@@ -75,32 +67,6 @@ export default function Index() {
         { title: 'Cash Management', href: '' },
         { title: 'Teller Sessions', href: route('teller-sessions.index') },
     ];
-
-    const handleOpen = (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        if (!branch_day) return;
-
-        appSwal
-            .fire({
-                title: 'Open teller session?',
-                text: `Open a teller session for ${branch_day.business_date}?`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Open session',
-                cancelButtonText: 'Cancel',
-            })
-            .then((result) => {
-                if (!result.isConfirmed) return;
-
-                openForm.post(route('teller-sessions.open'), {
-                    preserveScroll: true,
-                    onSuccess: () => {
-                        setOpenDialog(false);
-                        openForm.reset();
-                    },
-                });
-            });
-    };
 
     const handleClose = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -138,10 +104,8 @@ export default function Index() {
                 <ResourcePageHeader
                     title="Teller Sessions"
                     description="Review teller session status and cash position for each business day."
-                />
-                {canOpen && (
-                    <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-                        <DialogTrigger asChild>
+                    action={
+                        canOpen ? (
                             <Button
                                 type="button"
                                 disabled={!branch_day}
@@ -150,118 +114,22 @@ export default function Index() {
                                         ? 'Open a branch day before creating a teller session.'
                                         : undefined
                                 }
+                                onClick={() =>
+                                    router.visit(
+                                        route('teller-sessions.create'),
+                                    )
+                                }
                             >
                                 <Plus className="h-4 w-4" />
                                 Open teller session
                             </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Open teller session</DialogTitle>
-                                <DialogDescription>
-                                    {branch_day
-                                        ? `Open a session for ${branch_day.business_date}.`
-                                        : 'An open branch day is required first.'}
-                                </DialogDescription>
-                            </DialogHeader>
-                            <form onSubmit={handleOpen} className="space-y-4">
-                                <div className="space-y-2">
-                                    <label
-                                        htmlFor="teller_id"
-                                        className="text-sm font-medium"
-                                    >
-                                        Teller
-                                    </label>
-                                    <select
-                                        id="teller_id"
-                                        className="h-9 w-full rounded-md border bg-background px-3 text-sm"
-                                        value={openForm.data.teller_id}
-                                        onChange={(event) =>
-                                            openForm.setData(
-                                                'teller_id',
-                                                event.target.value,
-                                            )
-                                        }
-                                        required
-                                    >
-                                        <option value="">
-                                            Select active teller
-                                        </option>
-                                        {tellers.map((teller) => (
-                                            <option
-                                                key={teller.id}
-                                                value={teller.id}
-                                            >
-                                                {teller.name} ({teller.code})
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {openForm.errors.teller_id && (
-                                        <p className="text-sm text-destructive">
-                                            {openForm.errors.teller_id}
-                                        </p>
-                                    )}
-                                </div>
-                                <div className="space-y-2">
-                                    <label
-                                        htmlFor="opening_cash"
-                                        className="text-sm font-medium"
-                                    >
-                                        Opening cash
-                                    </label>
-                                    <Input
-                                        id="opening_cash"
-                                        type="number"
-                                        min="0"
-                                        step="0.0001"
-                                        value={openForm.data.opening_cash}
-                                        onChange={(event) =>
-                                            openForm.setData(
-                                                'opening_cash',
-                                                event.target.value,
-                                            )
-                                        }
-                                        required
-                                    />
-                                    {openForm.errors.opening_cash && (
-                                        <p className="text-sm text-destructive">
-                                            {openForm.errors.opening_cash}
-                                        </p>
-                                    )}
-                                </div>
-                                <div className="space-y-2">
-                                    <label
-                                        htmlFor="opening_note"
-                                        className="text-sm font-medium"
-                                    >
-                                        Opening note
-                                    </label>
-                                    <Input
-                                        id="opening_note"
-                                        value={openForm.data.opening_note}
-                                        onChange={(event) =>
-                                            openForm.setData(
-                                                'opening_note',
-                                                event.target.value,
-                                            )
-                                        }
-                                        maxLength={2000}
-                                    />
-                                </div>
-                                <DialogFooter>
-                                    <Button
-                                        type="submit"
-                                        disabled={
-                                            openForm.processing || !branch_day
-                                        }
-                                    >
-                                        <Banknote className="h-4 w-4" />
-                                        Open session
-                                    </Button>
-                                </DialogFooter>
-                            </form>
-                        </DialogContent>
-                    </Dialog>
+                        ) : null
+                    }
+                />
+                {!branch_day && canOpen && (
+                    <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-900 dark:text-amber-200">
+                        Open a branch day before creating a teller session.
+                    </div>
                 )}
                 <Input
                     className="w-full bg-card sm:w-80"

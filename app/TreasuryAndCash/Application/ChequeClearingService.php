@@ -12,7 +12,12 @@ class ChequeClearingService
 {
     public function create(array $data, int $organizationId, int $userId): ChequeClearing
     {
-        $branchDay = BranchDay::query()->where('organization_id', $organizationId)->where('branch_id', $data['branch_id'])->where('status', BranchDay::STATUS_OPEN)->latest('business_date')->firstOrFail();
+        $branchDay = BranchDay::query()->where('organization_id', $organizationId)->where('branch_id', $data['branch_id'])->where('status', BranchDay::STATUS_OPEN)->latest('business_date')->first();
+
+        if (!$branchDay) {
+            throw new RuntimeException('No open branch day exists for this branch. Open a branch day before creating a cheque clearing.');
+        }
+
         $cheque = Cheque::query()->whereKey($data['cheque_id'])->whereHas('chequeBook.bankAccount', fn($query) => $query->where('organization_id', $organizationId))->firstOrFail();
         if ($cheque->status !== 'PRESENTED') {
             throw new RuntimeException('Only presented cheques can enter clearing.');

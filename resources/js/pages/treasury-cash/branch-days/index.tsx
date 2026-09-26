@@ -8,33 +8,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem } from '@/types';
-import type {
-    BranchDayIndexProps,
-    BranchDayListItem,
-} from '@/types/treasury-cash/branch-days';
+import type { BranchDayListItem } from '@/types/treasury-cash/branch-days';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { CalendarDays, LockKeyhole, Plus } from 'lucide-react';
-import { FormEvent, useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from '../../../components/ui/dialog';
 
 export default function Index() {
-    const { branch_days, filters } = usePage<BranchDayIndexProps>().props;
-    const [openDialog, setOpenDialog] = useState(false);
-    const [businessDate, setBusinessDate] = useState(
-        new Date().toISOString().slice(0, 10),
-    );
-    const [openingNote, setOpeningNote] = useState('');
+    const { branch_days, filters, auth } = usePage<any>().props;
+    const userHasBranch = !!auth?.user?.branch_id;
 
     useFlashToastHandler();
 
@@ -60,57 +43,14 @@ export default function Index() {
         { title: 'Branch Days', href: route('branch-days.index') },
     ];
 
-    const handleOpen = (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-
-        appSwal
-            .fire({
-                title: 'Open branch day?',
-                text: `Open a branch day for ${businessDate}?`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Open branch day',
-                cancelButtonText: 'Cancel',
-            })
-            .then((result) => {
-                if (!result.isConfirmed) return;
-
-                router.post(
-                    route('branch-days.open'),
-                    {
-                        business_date: businessDate,
-                        opening_note: openingNote || null,
-                    },
-                    {
-                        preserveScroll: true,
-                        onSuccess: () => {
-                            setOpenDialog(false);
-                            setOpeningNote('');
-                        },
-                    },
-                );
-            });
-    };
-
     const handleClose = (branchDay: BranchDayListItem) => {
-        appSwal
-            .fire({
-                title: 'Close branch day?',
-                text: `Close ${branchDay.business_date} for ${branchDay.branch?.name ?? 'this branch'}?`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Close branch day',
-                cancelButtonText: 'Cancel',
-            })
-            .then((result) => {
-                if (result.isConfirmed) {
-                    router.post(
-                        route('branch-days.close', branchDay.id),
-                        {},
-                        { preserveScroll: true },
-                    );
-                }
-            });
+        router.post(
+            route('branch-days.close', branchDay.id),
+            {},
+            {
+                preserveScroll: true,
+            },
+        );
     };
 
     return (
@@ -122,73 +62,29 @@ export default function Index() {
                     title="Branch Days"
                     description="Track business-day activity across the active organization branches."
                     action={
-                        <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-                            <DialogTrigger asChild>
-                                <Button type="button">
-                                    <Plus className="h-4 w-4" />
-                                    Open branch day
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>Open branch day</DialogTitle>
-                                    <DialogDescription>
-                                        Open a business day for your assigned
-                                        branch.
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <form
-                                    onSubmit={handleOpen}
-                                    className="space-y-4"
-                                >
-                                    <div className="space-y-2">
-                                        <label
-                                            htmlFor="business_date"
-                                            className="text-sm font-medium"
-                                        >
-                                            Business date
-                                        </label>
-                                        <Input
-                                            id="business_date"
-                                            type="date"
-                                            value={businessDate}
-                                            onChange={(event) =>
-                                                setBusinessDate(
-                                                    event.target.value,
-                                                )
-                                            }
-                                            required
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label
-                                            htmlFor="opening_note"
-                                            className="text-sm font-medium"
-                                        >
-                                            Opening note
-                                        </label>
-                                        <Input
-                                            id="opening_note"
-                                            value={openingNote}
-                                            onChange={(event) =>
-                                                setOpeningNote(
-                                                    event.target.value,
-                                                )
-                                            }
-                                            placeholder="Optional note"
-                                            maxLength={2000}
-                                        />
-                                    </div>
-                                    <DialogFooter>
-                                        <Button type="submit">
-                                            Open branch day
-                                        </Button>
-                                    </DialogFooter>
-                                </form>
-                            </DialogContent>
-                        </Dialog>
+                        <Button
+                            type="button"
+                            disabled={!userHasBranch}
+                            title={
+                                !userHasBranch
+                                    ? 'Assign a branch to your user'
+                                    : undefined
+                            }
+                            onClick={() =>
+                                router.visit(route('branch-days.create'))
+                            }
+                        >
+                            <Plus className="h-4 w-4" />
+                            Open branch day
+                        </Button>
                     }
                 />
+
+                {!userHasBranch && (
+                    <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-900 dark:text-amber-200">
+                        Assign a branch to your user
+                    </div>
+                )}
 
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <Input

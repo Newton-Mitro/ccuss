@@ -257,6 +257,66 @@ it('posts a savings-account cheque withdrawal through the teller cash ledger', f
         ->and($transaction->financialTransaction->status)->toBe('POSTED');
 });
 
+it('returns a clear error when a cheque clearing is attempted without an open branch day', function () {
+    $organization = Organization::factory()->create();
+    $branch = Branch::factory()->create(['organization_id' => $organization->id]);
+    $user = User::factory()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+    ]);
+    $account = FinancialAccount::factory()->active(1200)->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+        'holder_type' => \App\CustomerModule\Models\Customer::class,
+        'holder_id' => 1,
+        'account_type' => 'SAVINGS',
+        'account_no' => 'SAV-7001',
+    ]);
+    $book = ChequeBook::create([
+        'financial_account_id' => $account->id,
+        'book_no' => 'CHEQUE-BOOK-700',
+        'prefix' => 'CHQ',
+        'start_number' => 1,
+        'end_number' => 1,
+        'leaf_count' => 1,
+        'current_number' => 1,
+        'issued_date' => now()->toDateString(),
+        'status' => 'IN_USE',
+    ]);
+    $cheque = Cheque::create([
+        'cheque_book_id' => $book->id,
+        'financial_account_id' => $account->id,
+        'cheque_no' => 'CHQ-7001',
+        'status' => 'PRESENTED',
+        'amount' => 250,
+        'payee' => 'Customer',
+        'presented_date' => now()->toDateString(),
+        'issue_date' => now()->toDateString(),
+    ]);
+
+    $role = Role::firstOrCreate(['slug' => 'cheque_present_test'], ['name' => 'Cheque Present Test']);
+    $permission = Permission::firstOrCreate(
+        ['slug' => 'cheques.present'],
+        ['module' => 'cheques', 'name' => 'Present Cheques', 'action' => 'present'],
+    );
+    $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+
+    $response = $this->actingAs($user)
+        ->withSession(['active_organization_id' => $organization->id])
+        ->from(route('cheque-clearings.index'))
+        ->post(route('cheque-clearings.store'), [
+            'cheque_id' => $cheque->id,
+            'branch_id' => $branch->id,
+            'clearing_no' => 'CL-7001',
+            'drawer_bank_name' => 'Bank',
+            'drawer_account_no' => 'ACC-7001',
+        ]);
+
+    $response->assertRedirect(route('cheque-clearings.index'));
+    expect(session('error'))->toContain('open branch day');
+});
+
 it('loads a savings cheque withdrawal form for the selected customer and savings account', function () {
     $organization = Organization::factory()->create();
     $branch = Branch::factory()->create(['organization_id' => $organization->id]);

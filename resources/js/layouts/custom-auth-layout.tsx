@@ -549,10 +549,10 @@ export default function CustomAuthLayout({
                                     <Avatar className="h-8 w-8 overflow-hidden rounded-full border border-border bg-card">
                                         <AvatarImage
                                             src={auth?.user?.avatar}
-                                            alt={auth?.user.name}
+                                            alt={auth?.user?.name ?? 'User'}
                                         />
                                         <AvatarFallback className="rounded-lg text-sm text-muted-foreground">
-                                            {getInitials(auth?.user.name)}
+                                            {getInitials(auth?.user?.name)}
                                         </AvatarFallback>
                                     </Avatar>
                                 </button>
