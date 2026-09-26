@@ -237,20 +237,39 @@ export default function SavingsChequeWithdrawalPage() {
                                     disabled={!selectedAccountId}
                                     required
                                 >
-                                    <option value="">Select cheque</option>
-                                    {relevantCheques.map((cheque) => (
-                                        <option
-                                            key={cheque.id}
-                                            value={cheque.id}
-                                        >
-                                            {cheque.cheque_no} - {cheque.status}{' '}
-                                            -{' '}
-                                            {Number(cheque.amount || 0).toFixed(
-                                                2,
-                                            )}
-                                        </option>
-                                    ))}
+                                    <option value="">
+                                        {selectedAccountId
+                                            ? 'Select cheque'
+                                            : 'Select a savings account first'}
+                                    </option>
+                                    {relevantCheques.length > 0
+                                        ? relevantCheques.map((cheque) => (
+                                              <option
+                                                  key={cheque.id}
+                                                  value={cheque.id}
+                                              >
+                                                  {cheque.cheque_no} -{' '}
+                                                  {cheque.status} -{' '}
+                                                  {Number(
+                                                      cheque.amount || 0,
+                                                  ).toFixed(2)}
+                                              </option>
+                                          ))
+                                        : selectedAccountId && (
+                                              <option value="" disabled>
+                                                  No issued cheques available
+                                                  for this account
+                                              </option>
+                                          )}
                                 </select>
+                                {selectedAccountId &&
+                                    relevantCheques.length === 0 && (
+                                        <p className="text-xs text-muted-foreground">
+                                            No issued cheques are available for
+                                            this savings account. Issue a cheque
+                                            first.
+                                        </p>
+                                    )}
                             </div>
 
                             <div className="space-y-2">

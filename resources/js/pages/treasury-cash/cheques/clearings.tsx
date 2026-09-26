@@ -5,6 +5,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import type { BreadcrumbItem } from '@/types';
@@ -25,6 +26,8 @@ type Props = {
 };
 
 export default function ChequeClearings() {
+    useFlashToastHandler();
+
     const { clearings, cheques } = usePage<Props>().props;
     const { data, setData, post, processing } = useForm({
         cheque_id: '',
@@ -108,12 +111,27 @@ export default function ChequeClearings() {
                                 }
                             >
                                 <option value="">Select cheque</option>
-                                {cheques.map((cheque) => (
-                                    <option key={cheque.id} value={cheque.id}>
-                                        {cheque.cheque_no} · {cheque.amount}
+                                {cheques.length > 0 ? (
+                                    cheques.map((cheque) => (
+                                        <option
+                                            key={cheque.id}
+                                            value={cheque.id}
+                                        >
+                                            {cheque.cheque_no} · {cheque.amount}
+                                        </option>
+                                    ))
+                                ) : (
+                                    <option value="" disabled>
+                                        No presented cheques available
                                     </option>
-                                ))}
+                                )}
                             </select>
+                            {cheques.length === 0 && (
+                                <p className="mt-2 text-xs text-muted-foreground">
+                                    No presented cheques are currently available
+                                    for clearing.
+                                </p>
+                            )}
                         </div>
                         <div>
                             <Label>Branch ID</Label>
