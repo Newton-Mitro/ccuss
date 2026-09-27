@@ -15,7 +15,7 @@ export const financialServicesMenu: SidebarItem[] = [
                 permission: ['financial.view'],
             },
             {
-                name: 'All Financial Accounts',
+                name: 'Subledger Accounts',
                 icon: <i className="fa-solid fa-list" />,
                 path: '/all-financial-accounts',
                 match_path: 'all-financial-accounts',

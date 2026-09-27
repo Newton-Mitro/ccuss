@@ -64,7 +64,7 @@ export default function FinancialAccountIndex() {
         {
             title: category
                 ? `${categoryLabel} Management`
-                : 'Financial Accounts',
+                : 'Subledger Accounts',
             href: indexRoute,
         },
     ];
@@ -77,7 +77,7 @@ export default function FinancialAccountIndex() {
                     title={
                         category
                             ? `${categoryLabel} Management`
-                            : 'Financial Accounts'
+                            : 'Subledger Accounts'
                     }
                     description={
                         category
