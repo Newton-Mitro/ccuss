@@ -11,3 +11,4 @@
     - For customer transactions, login, promotional
 8. Send email statement to customer (Monthly, Quarterly, Half Yearly and Yearly)
 9. Month end and year end task???
+10. Without teller no one can make deposit/withdrawal transaction
