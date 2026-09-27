@@ -8,4 +8,11 @@ export const homeMenu: SidebarItem[] = [
         path: route('dashboard'),
         match_path: 'dashboard',
     },
+    {
+        name: 'Organizations',
+        icon: <i className="fa-solid fa-building-wheat" />,
+        path: '/organizations',
+        match_path: 'organizations',
+        permission: ['organizations.view'],
+    },
 ];

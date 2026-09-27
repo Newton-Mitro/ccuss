@@ -5,7 +5,7 @@ export const systemAdministrationMenu: SidebarItem[] = [
         name: 'Administration',
         icon: <i className="fa-solid fa-building-flag" />,
         children_expanded: false,
-        permission: ['organizations.view', 'branches.view'],
+        permission: [],
         children: [
             {
                 name: 'Dashboard',
@@ -18,21 +18,6 @@ export const systemAdministrationMenu: SidebarItem[] = [
                     'role_permissions.view',
                     'activity_logs.view',
                     'database_backups.view',
-                ],
-            },
-            {
-                name: 'Organization & Access',
-                icon: <i className="fa-solid fa-building" />,
-                children_expanded: false,
-                permission: ['organizations.view', 'branches.view'],
-                children: [
-                    {
-                        name: 'Switch Organization',
-                        icon: <i className="fa-solid fa-building-wheat" />,
-                        path: '/organizations',
-                        match_path: 'organizations',
-                        permission: ['organizations.view'],
-                    },
                 ],
             },
             {

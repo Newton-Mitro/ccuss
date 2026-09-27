@@ -20,8 +20,6 @@ class SystemAdministrationDashboardController
 
         return Inertia::render('system-administration/dashboard', [
             'stats' => [
-                'organizations' => Organization::count(),
-                'branches' => Branch::where('organization_id', $organizationId)->count(),
                 'users' => User::where('organization_id', $organizationId)->count(),
                 'roles' => Role::count(),
                 'auditLogs' => AuditLog::where('organization_id', $organizationId)->count(),

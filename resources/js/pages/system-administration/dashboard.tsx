@@ -3,7 +3,6 @@ import {
     ArrowRight,
     Building2,
     ClipboardList,
-    GitBranch,
     ShieldCheck,
     Users,
 } from 'lucide-react';
@@ -21,8 +20,6 @@ import { BreadcrumbItem, SharedData } from '../../types';
 
 interface Props extends SharedData {
     stats: {
-        organizations: number;
-        branches: number;
         users: number;
         roles: number;
         auditLogs: number;
@@ -31,8 +28,6 @@ interface Props extends SharedData {
 }
 
 const links: { label: string; href: string; icon: typeof Building2 }[] = [
-    { label: 'Organizations', href: 'organizations.index', icon: Building2 },
-    { label: 'Branches', href: 'branches.index', icon: GitBranch },
     { label: 'Users', href: 'users.index', icon: Users },
     { label: 'Role permissions', href: 'roles.index', icon: ShieldCheck },
     { label: 'Activity logs', href: 'audits.index', icon: ClipboardList },
@@ -54,8 +49,6 @@ export default function Dashboard() {
                 />
                 <DashboardMetricCharts
                     metrics={{
-                        Organizations: stats.organizations,
-                        Branches: stats.branches,
                         Users: stats.users,
                         Roles: stats.roles,
                         'Audit events': stats.auditLogs,
@@ -63,8 +56,6 @@ export default function Dashboard() {
                 />
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {[
-                        ['Organizations', stats.organizations],
-                        ['Branches', stats.branches],
                         ['Users', stats.users],
                         ['Roles', stats.roles],
                         ['Audit events', stats.auditLogs],
