@@ -49,7 +49,7 @@ export default function FinancialAccountForm() {
     const isMinorPrimary = primaryCustomer ? isMinor(primaryCustomer) : false;
     const submit = (event: React.FormEvent) => {
         event.preventDefault();
-        post(route('financial-accounts.store'));
+        post(getStoreRoute(category));
     };
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
@@ -272,9 +272,7 @@ export default function FinancialAccountForm() {
                             <Link
                                 href={
                                     category
-                                        ? route('financial-accounts.category', {
-                                              category,
-                                          })
+                                        ? getIndexRoute(category)
                                         : route('financial-accounts.index')
                                 }
                             >
@@ -305,4 +303,36 @@ function isMinor(customer: Props['customers'][number]): boolean {
     if (birthdayNotReached) age -= 1;
 
     return age < 18;
+}
+
+function getStoreRoute(category?: string | null): string {
+    switch (category) {
+        case 'SAVINGS':
+            return route('financial-accounts.savings.store');
+        case 'SHARE':
+            return route('financial-accounts.share.store');
+        case 'FIXED_DEPOSIT':
+            return route('financial-accounts.fixed.store');
+        case 'RECURRING_DEPOSIT':
+            return route('financial-accounts.recurring.store');
+        default:
+            return route('financial-accounts.store');
+    }
+}
+
+function getIndexRoute(category: string): string {
+    switch (category) {
+        case 'SAVINGS':
+            return route('financial-accounts.savings.index');
+        case 'SHARE':
+            return route('financial-accounts.share.index');
+        case 'FIXED_DEPOSIT':
+            return route('financial-accounts.fixed.index');
+        case 'RECURRING_DEPOSIT':
+            return route('financial-accounts.recurring.index');
+        case 'LOAN':
+            return route('loan-accounts.index');
+        default:
+            return route('financial-accounts.index');
+    }
 }

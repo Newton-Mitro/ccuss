@@ -34,7 +34,9 @@ class FinancialAccountController extends Controller
     ) {
         $this->middleware('permission:financial.accounts.view')->only(['index', 'show', 'statement']);
         $this->middleware('permission:financial.accounts.create')->only(['create', 'store']);
-        $this->middleware('permission:financial.accounts.update')->only('activate');
+        $this->middleware('permission:financial.accounts.view')->only(['productIndex', 'productShow']);
+        $this->middleware('permission:financial.accounts.create')->only(['productCreate', 'productStore']);
+        $this->middleware('permission:financial.accounts.update')->only(['activate', 'productEdit', 'productUpdate']);
         $this->middleware('permission:financial.accounts.close')->only('close');
         $this->middleware('permission:financial.accounts.nominees.manage')->only(['storeNominee', 'updateNominee', 'destroyNominee']);
         $this->middleware('permission:financial.accounts.holders.manage')->only(['storeHolder', 'updateHolder', 'destroyHolder']);
@@ -57,7 +59,22 @@ class FinancialAccountController extends Controller
         return $this->accountIndex($request, $category);
     }
 
-    private function accountIndex(Request $request, ?string $category = null): Response
+    public function productIndex(Request $request): Response
+    {
+        $product = $request->route('product');
+
+        return $this->accountIndex($request, $this->productCategory($request), "financial-services/accounts/{$product}/index");
+    }
+
+    public function productCreate(Request $request): Response
+    {
+        $category = $this->productCategory($request);
+        abort_if($category === 'LOAN', 404);
+
+        return $this->createForCategory($request, $category, "financial-services/accounts/{$request->route('product')}/create");
+    }
+
+    private function accountIndex(Request $request, ?string $category = null, string $page = 'financial-services/accounts/index'): Response
     {
         $accounts = $this->accountService
             ->queryForOrganization($this->organizationId($request))
@@ -73,7 +90,7 @@ class FinancialAccountController extends Controller
             ->paginate($request->integer('per_page', 18))
             ->withQueryString();
 
-        return Inertia::render('financial-services/accounts/index', [
+        return Inertia::render($page, [
             'accounts' => $accounts,
             'filters' => $request->only(['search', 'per_page', 'page']),
             'category' => $category,
@@ -88,7 +105,16 @@ class FinancialAccountController extends Controller
             ? $category
             : null;
 
-        return Inertia::render('financial-services/accounts/form', [
+        abort_if($category === 'LOAN', 404);
+
+        return $this->createForCategory($request, $category);
+    }
+
+    private function createForCategory(Request $request, ?string $category, string $page = 'financial-services/accounts/form'): Response
+    {
+        $organizationId = $this->organizationId($request);
+
+        return Inertia::render($page, [
             'products' => FinancialProduct::query()->where('organization_id', $organizationId)->where('status', true)->when($category, fn($query) => $query->where('category', $category))->orderBy('code')->get(['id', 'code', 'name', 'category']),
             'customers' => Customer::query()->where('organization_id', $organizationId)->orderBy('name')->get(['id', 'customer_no', 'name', 'type', 'dob']),
             'category' => $category,
@@ -97,16 +123,66 @@ class FinancialAccountController extends Controller
 
     public function store(StoreFinancialAccountRequest $request)
     {
-        $this->accountService->create($request->validated(), $this->organizationId($request));
+        $data = $request->validated();
+        abort_if($data['account_type'] === 'LOAN', 422, 'Loan accounts must be created from an approved loan application.');
+        $this->accountService->create($data, $this->organizationId($request));
 
         return redirect()->route('financial-accounts.index')->with('success', 'Financial account opened successfully.');
     }
 
-    public function show(Request $request, FinancialAccount $financialAccount): Response
+    public function productStore(StoreFinancialAccountRequest $request)
+    {
+        $category = $this->productCategory($request);
+        abort_if($category === 'LOAN', 404);
+        $data = $request->validated();
+        abort_unless($data['account_type'] === $category, 422, 'The account type does not match this product route.');
+        abort_unless(FinancialProduct::query()
+            ->where('organization_id', $this->organizationId($request))
+            ->where('category', $category)
+            ->where('status', true)
+            ->whereKey($data['financial_product_id'] ?? null)
+            ->exists(), 422, 'Select an active product for this account type.');
+
+        $account = $this->accountService->create($data, $this->organizationId($request));
+
+        return redirect()->route("financial-accounts.{$request->route('product')}.show", $account)
+            ->with('success', 'Financial account opened successfully.');
+    }
+
+    public function productEdit(Request $request, FinancialAccount $financialAccount): Response
+    {
+        $this->authorizeProductAccount($request, $financialAccount);
+        abort_if($financialAccount->account_type === 'LOAN', 404);
+
+        return Inertia::render("financial-services/accounts/{$request->route('product')}/edit", [
+            'account' => $financialAccount->load(['product', 'holder']),
+            'product' => $request->route('product'),
+        ]);
+    }
+
+    public function productUpdate(Request $request, FinancialAccount $financialAccount)
+    {
+        $this->authorizeProductAccount($request, $financialAccount);
+        abort_if($financialAccount->account_type === 'LOAN', 404);
+        $data = $request->validate(['name' => ['nullable', 'string', 'max:200']]);
+        $financialAccount->update($data);
+
+        return redirect()->route("financial-accounts.{$request->route('product')}.show", $financialAccount)
+            ->with('success', 'Account details updated successfully.');
+    }
+
+    public function productShow(Request $request, FinancialAccount $financialAccount): Response
+    {
+        $this->authorizeProductAccount($request, $financialAccount);
+
+        return $this->show($request, $financialAccount, "financial-services/accounts/{$request->route('product')}/show");
+    }
+
+    public function show(Request $request, FinancialAccount $financialAccount, string $page = 'financial-services/accounts/show'): Response
     {
         $this->authorizeOrganization($request, $financialAccount);
 
-        return Inertia::render('financial-services/accounts/show', [
+        return Inertia::render($page, [
             'account' => $financialAccount->load([
                 'product',
                 'holder',
@@ -391,6 +467,28 @@ class FinancialAccountController extends Controller
     private function organizationId(Request $request): int
     {
         return (int) $request->attributes->get('active_organization')->id;
+    }
+
+    private function productCategory(Request $request): string
+    {
+        $categories = [
+            'savings' => 'SAVINGS',
+            'share' => 'SHARE',
+            'fixed' => 'FIXED_DEPOSIT',
+            'recurring' => 'RECURRING_DEPOSIT',
+            'loan' => 'LOAN',
+        ];
+        $product = $request->route('product');
+
+        abort_unless(isset($categories[$product]), 404);
+
+        return $categories[$product];
+    }
+
+    private function authorizeProductAccount(Request $request, FinancialAccount $account): void
+    {
+        $this->authorizeOrganization($request, $account);
+        abort_unless($account->account_type === $this->productCategory($request), 404);
     }
 
     private function authorizeOrganization(Request $request, FinancialAccount $account): void

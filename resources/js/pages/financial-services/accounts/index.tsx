@@ -38,9 +38,8 @@ export default function FinancialAccountIndex() {
     const { accounts, filters, category } = usePage<Props>().props;
     const [search, setSearch] = useState(filters.search ?? '');
     const categoryLabel = category?.replaceAll('_', ' ') ?? 'All';
-    const indexRoute = category
-        ? route('financial-accounts.category', category)
-        : route('financial-accounts.index');
+    const indexRoute = getIndexRoute(category);
+    const createRoute = getCreateRoute(category);
 
     useEffect(() => {
         const timeout = setTimeout(
@@ -86,15 +85,7 @@ export default function FinancialAccountIndex() {
                     }
                     action={
                         <Button asChild size="sm">
-                            <Link
-                                href={
-                                    category
-                                        ? route('financial-accounts.create', {
-                                              category,
-                                          })
-                                        : route('financial-accounts.create')
-                                }
-                            >
+                            <Link href={createRoute}>
                                 <Plus className="mr-1 h-4 w-4" /> Open account
                             </Link>
                         </Button>
@@ -183,10 +174,7 @@ export default function FinancialAccountIndex() {
                                             </td>
                                             <td className="px-2 py-1 text-right">
                                                 <Link
-                                                    href={route(
-                                                        'financial-accounts.show',
-                                                        account.id,
-                                                    )}
+                                                    href={getShowRoute(account)}
                                                     title="View account"
                                                 >
                                                     <Eye className="ml-auto h-4 w-4" />
@@ -213,4 +201,55 @@ export default function FinancialAccountIndex() {
             </div>
         </CustomAuthLayout>
     );
+}
+
+function getIndexRoute(category?: string | null): string {
+    switch (category) {
+        case 'SAVINGS':
+            return route('financial-accounts.savings.index');
+        case 'SHARE':
+            return route('financial-accounts.share.index');
+        case 'FIXED_DEPOSIT':
+            return route('financial-accounts.fixed.index');
+        case 'RECURRING_DEPOSIT':
+            return route('financial-accounts.recurring.index');
+        case 'LOAN':
+            return route('loan-accounts.index');
+        default:
+            return route('financial-accounts.index');
+    }
+}
+
+function getCreateRoute(category?: string | null): string {
+    switch (category) {
+        case 'SAVINGS':
+            return route('financial-accounts.savings.create');
+        case 'SHARE':
+            return route('financial-accounts.share.create');
+        case 'FIXED_DEPOSIT':
+            return route('financial-accounts.fixed.create');
+        case 'RECURRING_DEPOSIT':
+            return route('financial-accounts.recurring.create');
+        case 'LOAN':
+            return route('loan-applications.create');
+        default:
+            return route('financial-accounts.create');
+    }
+}
+
+function getShowRoute(account: Account): string {
+    switch (account.account_type) {
+        case 'SAVINGS':
+            return route('financial-accounts.savings.show', account.id);
+        case 'SHARE':
+            return route('financial-accounts.share.show', account.id);
+        case 'FIXED_DEPOSIT':
+            return route('financial-accounts.fixed.show', account.id);
+        case 'RECURRING_DEPOSIT':
+            return route('financial-accounts.recurring.show', account.id);
+        case 'LOAN':
+            return route('loan-accounts.show', account.id);
+        default:
+            return route('financial-accounts.show', account.id);
+    }
 }

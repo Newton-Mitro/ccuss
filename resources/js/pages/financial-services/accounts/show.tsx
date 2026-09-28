@@ -11,7 +11,7 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem } from '@/types';
 import type { FinancialAccountShowPageProps } from '@/types/financial-services';
-import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
     Check,
     CircleDollarSign,
@@ -109,7 +109,7 @@ export default function FinancialAccountShow() {
         { title: 'Financial Services', href: '' },
         {
             title: 'Financial Accounts',
-            href: route('financial-accounts.index'),
+            href: getIndexRoute(account.account_type),
         },
         { title: account.account_no, href: '' },
     ];
@@ -234,6 +234,18 @@ export default function FinancialAccountShow() {
                     description={`${account.holder?.name ?? account.name ?? 'Unassigned'} · ${account.product?.name ?? account.account_type}`}
                     action={
                         <div className="flex gap-2">
+                            {account.account_type !== 'LOAN' && (
+                                <Button asChild size="sm" variant="outline">
+                                    <Link
+                                        href={getEditRoute(
+                                            account.account_type,
+                                            account.id,
+                                        )}
+                                    >
+                                        Edit details
+                                    </Link>
+                                </Button>
+                            )}
                             {account.status === 'PENDING' && (
                                 <Button
                                     size="sm"
@@ -1499,4 +1511,34 @@ export default function FinancialAccountShow() {
             </div>
         </CustomAuthLayout>
     );
+}
+
+function getIndexRoute(category: string): string {
+    switch (category) {
+        case 'SAVINGS':
+            return route('financial-accounts.savings.index');
+        case 'SHARE':
+            return route('financial-accounts.share.index');
+        case 'FIXED_DEPOSIT':
+            return route('financial-accounts.fixed.index');
+        case 'RECURRING_DEPOSIT':
+            return route('financial-accounts.recurring.index');
+        case 'LOAN':
+            return route('loan-accounts.index');
+        default:
+            return route('financial-accounts.index');
+    }
+}
+
+function getEditRoute(category: string, accountId: number): string {
+    switch (category) {
+        case 'SAVINGS':
+            return route('financial-accounts.savings.edit', accountId);
+        case 'SHARE':
+            return route('financial-accounts.share.edit', accountId);
+        case 'FIXED_DEPOSIT':
+            return route('financial-accounts.fixed.edit', accountId);
+        default:
+            return route('financial-accounts.recurring.edit', accountId);
+    }
 }

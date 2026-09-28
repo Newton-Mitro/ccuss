@@ -88,6 +88,8 @@ export interface FinancialProductAccountMappingsPageProps extends SharedData {
 
 export interface LoanApplication {
     id: number;
+    customer_id?: number;
+    financial_product_id?: number;
     application_no: string;
     requested_amount: string | number;
     approved_amount?: string | number | null;
@@ -217,6 +219,7 @@ export interface LoanApplicationIndexPageProps extends SharedData {
 export interface LoanApplicationFormPageProps extends SharedData {
     customers: { id: number; customer_no: string; name: string }[];
     products: { id: number; code: string; name: string }[];
+    application?: LoanApplication | null;
 }
 
 export interface LoanApplicationShowPageProps extends SharedData {

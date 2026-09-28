@@ -59,30 +59,29 @@ export const financialServicesMenu: SidebarItem[] = [
                     {
                         name: 'Savings Accounts',
                         icon: <i className="fa-solid fa-piggy-bank" />,
-                        path: '/financial-accounts/category/SAVINGS',
-                        match_path: 'financial-accounts/category/SAVINGS',
+                        path: '/financial-accounts/savings',
+                        match_path: 'financial-accounts/savings',
                         permission: ['financial.accounts.view'],
                     },
                     {
                         name: 'Shares & Memberships',
                         icon: <i className="fa-solid fa-chart-pie" />,
-                        path: '/financial-accounts/category/SHARE',
-                        match_path: 'financial-accounts/category/SHARE',
+                        path: '/financial-accounts/share',
+                        match_path: 'financial-accounts/share',
                         permission: ['financial.accounts.view'],
                     },
                     {
                         name: 'Fixed Deposits',
                         icon: <i className="fa-solid fa-lock" />,
-                        path: '/financial-accounts/category/FIXED_DEPOSIT',
-                        match_path: 'financial-accounts/category/FIXED_DEPOSIT',
+                        path: '/financial-accounts/fixed',
+                        match_path: 'financial-accounts/fixed',
                         permission: ['financial.accounts.view'],
                     },
                     {
                         name: 'Recurring Deposits',
                         icon: <i className="fa-solid fa-rotate" />,
-                        path: '/financial-accounts/category/RECURRING_DEPOSIT',
-                        match_path:
-                            'financial-accounts/category/RECURRING_DEPOSIT',
+                        path: '/financial-accounts/recurring',
+                        match_path: 'financial-accounts/recurring',
                         permission: ['financial.accounts.view'],
                     },
                     {
@@ -110,8 +109,8 @@ export const financialServicesMenu: SidebarItem[] = [
                     {
                         name: 'Loan Accounts',
                         icon: <i className="fa-solid fa-money-check-dollar" />,
-                        path: '/financial-accounts/category/LOAN',
-                        match_path: 'financial-accounts/category/LOAN',
+                        path: '/loan-accounts',
+                        match_path: 'loan-accounts',
                         permission: ['financial.accounts.view'],
                     },
                     {

@@ -2,7 +2,7 @@
     - Show all deposit, fine, interest, charges, protection fee, protection fee renewal, waver, dividend, disbursement, schedules
     - Check if anything need to be settled
     - if anything need to settle then settle everything and close the account
-2. Separate Account index, create, edit, view (Saving, Share, Fixed, Recurring, Loan)
+2. Separate routes and pages for Account (Saving, Share, Fixed, Recurring, Loan ) index, create, edit, view
 3. Saving/Bank Cheque flow
 4. Vault Transaction need denomination
 5. Seeder for Default Rules

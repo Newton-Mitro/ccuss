@@ -52,6 +52,40 @@ it('creates and transitions a loan application through approval', function () {
         ->and($approved->approved_by)->toBe($fixture['user']->id);
 });
 
+it('updates draft loan application details and rejects updates after submission', function () {
+    $fixture = loanApplicationFixture();
+    $service = app(LoanApplicationService::class);
+    $application = $service->create([
+        'customer_id' => $fixture['customer']->id,
+        'financial_product_id' => $fixture['product']->id,
+        'requested_amount' => 500,
+        'requested_term_months' => 6,
+        'purpose' => 'Initial purpose',
+    ], $fixture['organization']->id);
+
+    $updated = $service->updateDraft($application, [
+        'branch_id' => $fixture['branch']->id,
+        'customer_id' => $fixture['customer']->id,
+        'financial_product_id' => $fixture['product']->id,
+        'requested_amount' => 750,
+        'requested_term_months' => 9,
+        'purpose' => 'Updated purpose',
+    ]);
+
+    expect((float) $updated->requested_amount)->toBe(750.0)
+        ->and($updated->requested_term_months)->toBe(9)
+        ->and($updated->purpose)->toBe('Updated purpose');
+
+    $service->submit($updated);
+
+    expect(fn() => $service->updateDraft($updated, [
+        'customer_id' => $fixture['customer']->id,
+        'financial_product_id' => $fixture['product']->id,
+        'requested_amount' => 900,
+        'requested_term_months' => 12,
+    ]))->toThrow(RuntimeException::class, 'Only draft loan applications can be updated.');
+});
+
 it('rejects excessive approval and enforces the product loan ceiling', function () {
     $fixture = loanApplicationFixture();
     FinancialProductPolicy::factory()->create([

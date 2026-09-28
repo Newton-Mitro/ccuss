@@ -111,6 +111,20 @@ export default function LoanApplicationShow() {
                 <ResourcePageHeader
                     title={application.application_no}
                     description={`${application.customer?.name ?? ''} · ${application.product?.name ?? ''}`}
+                    action={
+                        application.status === 'DRAFT' ? (
+                            <Button asChild size="sm" variant="outline">
+                                <Link
+                                    href={route(
+                                        'loan-applications.edit',
+                                        application.id,
+                                    )}
+                                >
+                                    Edit draft
+                                </Link>
+                            </Button>
+                        ) : undefined
+                    }
                 />
                 <div className="grid gap-3 sm:grid-cols-4">
                     <div className="rounded-lg border bg-card p-3">

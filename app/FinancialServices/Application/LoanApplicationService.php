@@ -37,6 +37,31 @@ class LoanApplicationService
         return LoanApplication::create($data);
     }
 
+    public function updateDraft(LoanApplication $application, array $data): LoanApplication
+    {
+        if ($application->status !== 'DRAFT') {
+            throw new RuntimeException('Only draft loan applications can be updated.');
+        }
+
+        $product = FinancialProduct::query()
+            ->where('organization_id', $application->organization_id)
+            ->where('category', 'LOAN')
+            ->where('status', true)
+            ->findOrFail($data['financial_product_id']);
+        $this->policyService->validateLoanAmount($product, (float) $data['requested_amount']);
+
+        $application->update([
+            'branch_id' => $data['branch_id'] ?? null,
+            'customer_id' => $data['customer_id'],
+            'financial_product_id' => $product->id,
+            'requested_amount' => $data['requested_amount'],
+            'requested_term_months' => $data['requested_term_months'],
+            'purpose' => $data['purpose'] ?? null,
+        ]);
+
+        return $application->refresh();
+    }
+
     public function submit(LoanApplication $application): LoanApplication
     {
         if ($application->status !== 'DRAFT') {

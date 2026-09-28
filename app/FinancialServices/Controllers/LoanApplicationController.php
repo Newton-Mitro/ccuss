@@ -26,6 +26,7 @@ class LoanApplicationController extends Controller
     {
         $this->middleware('permission:financial.loan-applications.view')->only(['index', 'show']);
         $this->middleware('permission:financial.loan-applications.create')->only(['create', 'store', 'submit']);
+        $this->middleware('permission:financial.loan-applications.update')->only(['edit', 'update']);
         $this->middleware('permission:financial.loan-applications.manage')->only(['review', 'approve', 'reject', 'createLoanAccount', 'generateSchedule', 'assessArrears', 'resolveArrear', 'storeCollateral', 'verifyCollateral', 'releaseCollateral', 'storeGuarantor', 'decideGuarantor', 'storeProtection', 'activateProtection', 'cancelProtection']);
     }
 
@@ -51,6 +52,20 @@ class LoanApplicationController extends Controller
         return Inertia::render('financial-services/loan-applications/form', [
             'customers' => Customer::query()->where('organization_id', $organizationId)->orderBy('name')->get(['id', 'customer_no', 'name']),
             'products' => FinancialProduct::query()->where('organization_id', $organizationId)->where('category', 'LOAN')->where('status', true)->orderBy('code')->get(['id', 'code', 'name']),
+            'application' => null,
+        ]);
+    }
+
+    public function edit(Request $request, LoanApplication $loanApplication): Response
+    {
+        $this->authorizeOrganization($request, $loanApplication);
+        abort_unless($loanApplication->status === 'DRAFT', 404);
+        $organizationId = $this->organizationId($request);
+
+        return Inertia::render('financial-services/loan-applications/form', [
+            'customers' => Customer::query()->where('organization_id', $organizationId)->orderBy('name')->get(['id', 'customer_no', 'name']),
+            'products' => FinancialProduct::query()->where('organization_id', $organizationId)->where('category', 'LOAN')->where('status', true)->orderBy('code')->get(['id', 'code', 'name']),
+            'application' => $loanApplication,
         ]);
     }
 
@@ -59,6 +74,14 @@ class LoanApplicationController extends Controller
         $application = $this->service->create($request->validated(), $this->organizationId($request));
 
         return redirect()->route('loan-applications.show', $application)->with('success', 'Loan application saved as draft.');
+    }
+
+    public function update(StoreLoanApplicationRequest $request, LoanApplication $loanApplication)
+    {
+        $this->authorizeOrganization($request, $loanApplication);
+        $this->service->updateDraft($loanApplication, $request->validated());
+
+        return redirect()->route('loan-applications.show', $loanApplication)->with('success', 'Draft loan application updated.');
     }
 
     public function show(Request $request, LoanApplication $loanApplication): Response

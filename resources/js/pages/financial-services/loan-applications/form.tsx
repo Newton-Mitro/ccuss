@@ -11,33 +11,62 @@ import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
 export default function LoanApplicationForm() {
-    const { customers, products } =
+    const { customers, products, application } =
         usePage<LoanApplicationFormPageProps>().props;
-    const { data, setData, post, processing, errors } = useForm({
-        customer_id: '',
-        financial_product_id: '',
-        requested_amount: '',
-        requested_term_months: '12',
-        purpose: '',
+    const { data, setData, post, put, processing, errors } = useForm({
+        customer_id: application ? String(application.customer_id) : '',
+        financial_product_id: application
+            ? String(application.financial_product_id)
+            : '',
+        requested_amount: application
+            ? String(application.requested_amount)
+            : '',
+        requested_term_months: application
+            ? String(application.requested_term_months ?? 12)
+            : '12',
+        purpose: application?.purpose ?? '',
     });
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
         { title: 'Loan Applications', href: route('loan-applications.index') },
-        { title: 'New Application', href: '' },
+        { title: application ? 'Edit Draft' : 'New Application', href: '' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="New Loan Application" />
+            <Head
+                title={
+                    application
+                        ? 'Edit Loan Application'
+                        : 'New Loan Application'
+                }
+            />
             <div className="max-w-3xl space-y-4">
                 <ResourcePageHeader
-                    title="New loan application"
-                    description="Create a draft loan request for review."
+                    title={
+                        application
+                            ? 'Edit loan application'
+                            : 'New loan application'
+                    }
+                    description={
+                        application
+                            ? `${application.application_no} · Draft`
+                            : 'Create a draft loan request for review.'
+                    }
                 />
                 <form
                     onSubmit={(event) => {
                         event.preventDefault();
-                        post(route('loan-applications.store'));
+                        if (application) {
+                            put(
+                                route(
+                                    'loan-applications.update',
+                                    application.id,
+                                ),
+                            );
+                        } else {
+                            post(route('loan-applications.store'));
+                        }
                     }}
                     className="grid gap-3 rounded-lg border bg-card p-4 sm:grid-cols-2"
                 >
@@ -119,7 +148,7 @@ export default function LoanApplicationForm() {
                             </Link>
                         </Button>
                         <Button type="submit" disabled={processing}>
-                            Save draft
+                            {application ? 'Save changes' : 'Save draft'}
                         </Button>
                     </div>
                 </form>

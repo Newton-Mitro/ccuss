@@ -64,6 +64,37 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
         ->name('financial-accounts.category');
     Route::get('/financial-accounts/create', [FinancialAccountController::class, 'create'])->name('financial-accounts.create');
     Route::post('/financial-accounts', [FinancialAccountController::class, 'store'])->name('financial-accounts.store');
+    foreach ([
+        'savings' => 'SAVINGS',
+        'share' => 'SHARE',
+        'fixed' => 'FIXED_DEPOSIT',
+        'recurring' => 'RECURRING_DEPOSIT',
+    ] as $product => $category) {
+        Route::get("/financial-accounts/{$product}", [FinancialAccountController::class, 'productIndex'])
+            ->defaults('product', $product)
+            ->name("financial-accounts.{$product}.index");
+        Route::get("/financial-accounts/{$product}/create", [FinancialAccountController::class, 'productCreate'])
+            ->defaults('product', $product)
+            ->name("financial-accounts.{$product}.create");
+        Route::post("/financial-accounts/{$product}", [FinancialAccountController::class, 'productStore'])
+            ->defaults('product', $product)
+            ->name("financial-accounts.{$product}.store");
+        Route::get("/financial-accounts/{$product}/{financial_account}/edit", [FinancialAccountController::class, 'productEdit'])
+            ->defaults('product', $product)
+            ->name("financial-accounts.{$product}.edit");
+        Route::put("/financial-accounts/{$product}/{financial_account}", [FinancialAccountController::class, 'productUpdate'])
+            ->defaults('product', $product)
+            ->name("financial-accounts.{$product}.update");
+        Route::get("/financial-accounts/{$product}/{financial_account}", [FinancialAccountController::class, 'productShow'])
+            ->defaults('product', $product)
+            ->name("financial-accounts.{$product}.show");
+    }
+    Route::get('/loan-accounts', [FinancialAccountController::class, 'productIndex'])
+        ->defaults('product', 'loan')
+        ->name('loan-accounts.index');
+    Route::get('/loan-accounts/{financial_account}', [FinancialAccountController::class, 'productShow'])
+        ->defaults('product', 'loan')
+        ->name('loan-accounts.show');
     Route::get('/financial-accounts/{financial_account}', [FinancialAccountController::class, 'show'])->name('financial-accounts.show');
     Route::post('/financial-accounts/{financial_account}/activate', [FinancialAccountController::class, 'activate'])->name('financial-accounts.activate');
     Route::post('/financial-accounts/{financial_account}/close', [FinancialAccountController::class, 'close'])->name('financial-accounts.close');
@@ -103,6 +134,8 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/loan-applications', [LoanApplicationController::class, 'index'])->name('loan-applications.index');
     Route::get('/loan-applications/create', [LoanApplicationController::class, 'create'])->name('loan-applications.create');
     Route::post('/loan-applications', [LoanApplicationController::class, 'store'])->name('loan-applications.store');
+    Route::get('/loan-applications/{loan_application}/edit', [LoanApplicationController::class, 'edit'])->name('loan-applications.edit');
+    Route::put('/loan-applications/{loan_application}', [LoanApplicationController::class, 'update'])->name('loan-applications.update');
     Route::get('/loan-applications/{loan_application}', [LoanApplicationController::class, 'show'])->name('loan-applications.show');
     Route::post('/loan-applications/{loan_application}/submit', [LoanApplicationController::class, 'submit'])->name('loan-applications.submit');
     Route::post('/loan-applications/{loan_application}/review', [LoanApplicationController::class, 'review'])->name('loan-applications.review');
