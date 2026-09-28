@@ -1,3 +1,4 @@
+import { formatDate } from '@/lib/date_util';
 import type { PettyCashTransactionFormPageProps } from '@/types/treasury-cash/forms';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { HandCoins } from 'lucide-react';
@@ -50,7 +51,7 @@ export default function Form() {
                 />
                 <div className="rounded-md border bg-card p-4 text-sm text-muted-foreground">
                     {branch_day
-                        ? `Business day: ${branch_day.business_date} (${branch_day.status})`
+                        ? `Business day: ${formatDate(branch_day.business_date)} (${branch_day.status})`
                         : 'No open branch day'}
                 </div>
                 <form

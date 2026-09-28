@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatDate } from '@/lib/date_util';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
@@ -193,8 +194,8 @@ export default function ChequeClearings() {
                                         {clearing.cheque?.cheque_no ?? '-'}
                                     </p>
                                     <p className="text-xs text-muted-foreground">
-                                        {clearing.clearing_date} · Amount{' '}
-                                        {clearing.amount}
+                                        {formatDate(clearing.clearing_date)} ·
+                                        Amount {clearing.amount}
                                     </p>
                                 </div>
                                 <div className="flex items-center gap-2">

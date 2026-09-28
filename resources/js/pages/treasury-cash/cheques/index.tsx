@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatDate } from '@/lib/date_util';
 import { BreadcrumbItem } from '@/types';
 import type { ChequeIndexProps } from '@/types/treasury-cash/cheques';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
@@ -120,7 +121,7 @@ export default function Index() {
                                                 ?.account_name ?? '-'}
                                         </td>
                                         <td className="px-2 py-2">
-                                            {cheque.cheque_date ?? '-'}
+                                            {formatDate(cheque.cheque_date)}
                                         </td>
                                         <td className="px-2 py-2">
                                             {cheque.payee ?? '-'}

@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatDate } from '@/lib/date_util';
 import { BreadcrumbItem } from '@/types';
 import type { BankTransactionIndexPageProps } from '@/types/treasury-cash/forms';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
@@ -154,7 +155,9 @@ export default function Index() {
                                             </div>
                                         </td>
                                         <td className="px-2 py-2">
-                                            {transaction.transaction_date}
+                                            {formatDate(
+                                                transaction.transaction_date,
+                                            )}
                                         </td>
                                         <td className="px-2 py-2">
                                             {transaction.type}

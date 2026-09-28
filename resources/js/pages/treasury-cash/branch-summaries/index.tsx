@@ -5,6 +5,7 @@ import {
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatDate } from '@/lib/date_util';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
@@ -55,7 +56,7 @@ export default function BranchCashSummariesIndex() {
                                     appSwal
                                         .fire({
                                             title: 'Calculate summary?',
-                                            text: `Generate the cash summary for ${day.business_date}?`,
+                                            text: `Generate the cash summary for ${formatDate(day.business_date)}?`,
                                             icon: 'warning',
                                             showCancelButton: true,
                                             confirmButtonText:
@@ -74,7 +75,7 @@ export default function BranchCashSummariesIndex() {
                                         });
                                 }}
                             >
-                                {day.business_date} · {day.status}
+                                {formatDate(day.business_date)} · {day.status}
                             </Button>
                         ))}
                     </div>
@@ -91,8 +92,9 @@ export default function BranchCashSummariesIndex() {
                                         Business day
                                     </p>
                                     <p className="font-medium">
-                                        {summary.branch_day?.business_date ??
-                                            '-'}
+                                        {formatDate(
+                                            summary.branch_day?.business_date,
+                                        )}
                                     </p>
                                 </div>
                                 <div>

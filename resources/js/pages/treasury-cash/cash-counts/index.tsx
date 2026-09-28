@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatDate, formatDateTime } from '@/lib/date_util';
 import type { BreadcrumbItem } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
@@ -84,7 +85,7 @@ export default function CashCountsIndex() {
                             >
                                 {branchDays.map((day) => (
                                     <option key={day.id} value={day.id}>
-                                        {day.business_date}
+                                        {formatDate(day.business_date)}
                                     </option>
                                 ))}
                             </select>
@@ -258,7 +259,7 @@ export default function CashCountsIndex() {
                                 <span>
                                     {count.type} ·{' '}
                                     {count.cash_location?.name ?? '-'} ·{' '}
-                                    {count.counted_at}
+                                    {formatDateTime(count.counted_at)}
                                 </span>
                                 <strong>{count.total_amount}</strong>
                             </div>

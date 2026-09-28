@@ -5,6 +5,7 @@ import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { formatDate } from '../../../lib/date_util';
 import { BreadcrumbItem } from '../../../types';
 
 export default function Show({ branch }: BranchShowPageProps) {
@@ -68,15 +69,11 @@ export default function Show({ branch }: BranchShowPageProps) {
                         <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                             <div className="flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
-                                {new Date(
-                                    branch.created_at,
-                                ).toLocaleDateString()}
+                                {formatDate(branch.created_at)}
                             </div>
                             <div className="flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
-                                {new Date(
-                                    branch.updated_at,
-                                ).toLocaleDateString()}
+                                {formatDate(branch.updated_at)}
                             </div>
                         </div>
                     </div>

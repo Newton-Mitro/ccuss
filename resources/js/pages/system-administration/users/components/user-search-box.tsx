@@ -1,3 +1,4 @@
+import { formatDateTime } from '@/lib/date_util';
 import { Link } from '@inertiajs/react';
 import axios from 'axios';
 import { Search } from 'lucide-react';
@@ -186,7 +187,8 @@ export const UserSearchBox: React.FC<UserSearchBoxProps> = ({
                                 {`${user.name} • ${user.id}`}
                             </Link>
                             <p className="text-xs text-muted-foreground">
-                                {user.status} • {user.email_verified_at}
+                                {user.status} •{' '}
+                                {formatDateTime(user.email_verified_at)}
                             </p>
                         </div>
 

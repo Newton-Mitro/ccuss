@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatDate } from '@/lib/date_util';
 import { BreadcrumbItem } from '@/types';
 import type { AccountStatementPageProps } from '@/types/financial-services';
 import { Head, router, usePage } from '@inertiajs/react';
@@ -171,9 +172,9 @@ export default function AccountStatement() {
                             </div>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <CalendarDays className="h-4 w-4" />
-                                <span>{periodStart}</span>
+                                <span>{formatDate(periodStart)}</span>
                                 <span aria-hidden="true">to</span>
-                                <span>{periodEnd}</span>
+                                <span>{formatDate(periodEnd)}</span>
                             </div>
                         </div>
                         <div className="grid gap-3 sm:grid-cols-3">
@@ -245,7 +246,7 @@ export default function AccountStatement() {
                                     <tbody>
                                         <tr className="border-b bg-muted/20">
                                             <td className="p-3 text-muted-foreground">
-                                                {periodStart}
+                                                {formatDate(periodStart)}
                                             </td>
                                             <td className="p-3 font-medium">
                                                 Opening balance
@@ -272,9 +273,9 @@ export default function AccountStatement() {
                                                     className="border-b even:bg-muted/30 hover:bg-accent/20"
                                                 >
                                                     <td className="p-3 whitespace-nowrap text-muted-foreground">
-                                                        {
-                                                            movement.transaction_date
-                                                        }
+                                                        {formatDate(
+                                                            movement.transaction_date,
+                                                        )}
                                                     </td>
                                                     <td className="p-3">
                                                         <p className="font-mono text-xs font-medium">

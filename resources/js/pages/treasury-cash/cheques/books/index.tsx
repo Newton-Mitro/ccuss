@@ -7,6 +7,7 @@ import {
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatDate } from '@/lib/date_util';
 import { BreadcrumbItem } from '@/types';
 import type { ChequeBookIndexProps } from '@/types/treasury-cash/cheque-books';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
@@ -134,7 +135,7 @@ export default function Index() {
                                             {book.end_number}
                                         </td>
                                         <td className="px-2 py-2">
-                                            {book.issued_date ?? '-'}
+                                            {formatDate(book.issued_date)}
                                         </td>
                                         <td className="px-2 py-2">
                                             {book.leaf_count}

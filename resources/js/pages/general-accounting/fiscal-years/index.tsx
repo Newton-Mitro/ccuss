@@ -11,6 +11,7 @@ import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatDate } from '@/lib/date_util';
 import { BreadcrumbItem } from '@/types';
 import type { FiscalYearsPageProps } from '@/types/general-accounting';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
@@ -161,15 +162,11 @@ export default function FiscalYearIndex() {
                                                 </td>
 
                                                 <td className="px-4 py-3 text-muted-foreground">
-                                                    {new Date(
-                                                        fy.start_date,
-                                                    ).toLocaleDateString()}
+                                                    {formatDate(fy.start_date)}
                                                 </td>
 
                                                 <td className="px-4 py-3 text-muted-foreground">
-                                                    {new Date(
-                                                        fy.end_date,
-                                                    ).toLocaleDateString()}
+                                                    {formatDate(fy.end_date)}
                                                 </td>
 
                                                 <td className="px-4 py-3">
@@ -308,13 +305,8 @@ export default function FiscalYearIndex() {
                                                 {fy.name}
                                             </p>
                                             <p className="text-xs text-muted-foreground">
-                                                {new Date(
-                                                    fy.start_date,
-                                                ).toLocaleDateString()}{' '}
-                                                -{' '}
-                                                {new Date(
-                                                    fy.end_date,
-                                                ).toLocaleDateString()}
+                                                {formatDate(fy.start_date)} -{' '}
+                                                {formatDate(fy.end_date)}
                                             </p>
                                         </div>
                                         <StatusBadge

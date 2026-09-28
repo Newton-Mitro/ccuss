@@ -4,6 +4,7 @@ import {
     ResourceTableCard,
 } from '@/components/resource-page-shell';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatDate } from '@/lib/date_util';
 import { BreadcrumbItem } from '@/types';
 import type { TransactionsReportPageProps } from '@/types/financial-services';
 import { Head, router, usePage } from '@inertiajs/react';
@@ -91,7 +92,9 @@ export default function TransactionReport() {
                                             .join(', ') || '-'}
                                     </td>
                                     <td className="px-3 py-2">
-                                        {transaction.transaction_date}
+                                        {formatDate(
+                                            transaction.transaction_date,
+                                        )}
                                     </td>
                                     <td className="px-3 py-2">
                                         {transaction.transaction_type}

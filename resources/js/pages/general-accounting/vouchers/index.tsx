@@ -23,6 +23,7 @@ import { Button } from '../../../components/ui/button';
 import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { formatDate } from '../../../lib/date_util';
 import { transactionStatus } from './data/transaction_statuses';
 
 export default function Index() {
@@ -153,9 +154,9 @@ export default function Index() {
                                             className="border-b transition-colors even:bg-muted hover:bg-accent/20"
                                         >
                                             <td className="px-2 py-1">
-                                                {new Date(
+                                                {formatDate(
                                                     voucher.voucher_date,
-                                                ).toLocaleDateString()}
+                                                )}
                                             </td>
                                             <td className="px-2 py-1">
                                                 {voucher.voucher_type || '-'}

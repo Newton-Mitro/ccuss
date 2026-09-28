@@ -4,6 +4,7 @@ import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { formatDate } from '../../../lib/date_util';
 import { BreadcrumbItem, SharedData } from '../../../types';
 
 interface FiscalPeriod {
@@ -118,14 +119,10 @@ export default function PeriodActionPage() {
                                                     '-'}
                                             </td>
                                             <td className="px-3 py-2">
-                                                {new Date(
-                                                    period.start_date,
-                                                ).toLocaleDateString()}
+                                                {formatDate(period.start_date)}
                                             </td>
                                             <td className="px-3 py-2">
-                                                {new Date(
-                                                    period.end_date,
-                                                ).toLocaleDateString()}
+                                                {formatDate(period.end_date)}
                                             </td>
                                             <td className="px-3 py-2">
                                                 {period.draft_vouchers_count}

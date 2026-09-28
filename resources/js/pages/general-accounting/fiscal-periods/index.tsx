@@ -15,6 +15,7 @@ import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { appSwal } from '../../../lib/appSwal';
+import { formatDate } from '../../../lib/date_util';
 import { BreadcrumbItem } from '../../../types';
 import { periodStatuses } from './data/period_statuses';
 
@@ -176,15 +177,11 @@ export default function FiscalPeriodIndex() {
                                                 </td>
 
                                                 <td className="px-4 py-3 text-muted-foreground">
-                                                    {new Date(
-                                                        fp.start_date,
-                                                    ).toLocaleDateString()}
+                                                    {formatDate(fp.start_date)}
                                                 </td>
 
                                                 <td className="px-4 py-3 text-muted-foreground">
-                                                    {new Date(
-                                                        fp.end_date,
-                                                    ).toLocaleDateString()}
+                                                    {formatDate(fp.end_date)}
                                                 </td>
 
                                                 {/* 🔥 Status */}
@@ -305,13 +302,8 @@ export default function FiscalPeriodIndex() {
                                                     'No fiscal year'}
                                             </p>
                                             <p className="text-xs text-muted-foreground">
-                                                {new Date(
-                                                    fp.start_date,
-                                                ).toLocaleDateString()}{' '}
-                                                -{' '}
-                                                {new Date(
-                                                    fp.end_date,
-                                                ).toLocaleDateString()}
+                                                {formatDate(fp.start_date)} -{' '}
+                                                {formatDate(fp.end_date)}
                                             </p>
                                         </div>
                                         <ThemeStatusBadge

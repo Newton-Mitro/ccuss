@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatDate } from '@/lib/date_util';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
@@ -119,7 +120,10 @@ export default function BankReconciliationsIndex() {
                                     <p className="font-medium">
                                         {reconciliation.bank_account
                                             ?.account_name ?? '-'}{' '}
-                                        · {reconciliation.statement_date}
+                                        ·{' '}
+                                        {formatDate(
+                                            reconciliation.statement_date,
+                                        )}
                                     </p>
                                     <p className="text-xs text-muted-foreground">
                                         Statement{' '}

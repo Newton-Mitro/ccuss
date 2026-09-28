@@ -5,6 +5,7 @@ import ReportExportActions from '../../../components/report-export-actions';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
+import { formatDate } from '../../../lib/date_util';
 import { BreadcrumbItem, SharedData } from '../../../types';
 
 interface LedgerEntry {
@@ -158,9 +159,7 @@ export default function GeneralLedgerPage() {
                                         className="border-b even:bg-muted/50"
                                     >
                                         <td className="px-3 py-2 text-left">
-                                            {new Date(
-                                                entry.voucher_date,
-                                            ).toLocaleDateString()}
+                                            {formatDate(entry.voucher_date)}
                                         </td>
                                         <td className="px-3 py-2 text-left">
                                             {entry.voucher_no}

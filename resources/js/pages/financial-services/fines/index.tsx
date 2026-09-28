@@ -5,6 +5,7 @@ import {
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatDateTime } from '@/lib/date_util';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
@@ -54,8 +55,9 @@ export default function FinesIndex() {
                                             'Default fine'}
                                     </p>
                                     <p className="text-xs text-muted-foreground">
-                                        Assessed {fine.assessed_at} · Total{' '}
-                                        {fine.assessed_amount} · Paid{' '}
+                                        Assessed{' '}
+                                        {formatDateTime(fine.assessed_at)} ·
+                                        Total {fine.assessed_amount} · Paid{' '}
                                         {fine.paid_amount} · Waived{' '}
                                         {fine.waived_amount}
                                     </p>

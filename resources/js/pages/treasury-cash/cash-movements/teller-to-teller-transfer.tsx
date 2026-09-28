@@ -1,3 +1,4 @@
+import { formatDate } from '@/lib/date_util';
 import type { TellerTransferPageProps } from '@/types/treasury-cash/forms';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { ArrowRightLeft } from 'lucide-react';
@@ -52,7 +53,7 @@ export default function TellerToTellerTransfer() {
                     </div>
                     <div className="mt-1 text-muted-foreground">
                         {branch_day
-                            ? `${branch_day.business_date} (${branch_day.status})`
+                            ? `${formatDate(branch_day.business_date)} (${branch_day.status})`
                             : 'No open branch day'}
                     </div>
                 </div>

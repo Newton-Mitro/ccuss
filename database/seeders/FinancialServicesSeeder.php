@@ -514,16 +514,16 @@ class FinancialServicesSeeder extends Seeder
             $legacyCustomer = Customer::query()->updateOrCreate(
                 [
                     'organization_id' => $organization->id,
-                    'customer_no' => 'LEGACY-MEMBER-0001',
+                    'customer_no' => 'MEMBER-0001',
                 ],
                 [
                     'branch_id' => $branchId,
                     'type' => 'INDIVIDUAL',
-                    'name' => 'Legacy Migrated Member',
+                    'name' => 'Jane Doe',
                     'primary_phone' => '+8801700000001',
-                    'primary_email' => 'legacy.member@example.test',
+                    'primary_email' => 'jane.doe@example.test',
                     'identification_type' => 'NATIONAL_IDENTIFICATION_NUMBER',
-                    'identification_number' => 'LEGACY-NID-0001',
+                    'identification_number' => 'NID-0001',
                     'dob' => '1985-05-20',
                     'gender' => 'OTHER',
                     'status' => 'ACTIVE',
@@ -537,7 +537,7 @@ class FinancialServicesSeeder extends Seeder
             $legacySavingsAccount = FinancialAccount::query()->updateOrCreate(
                 [
                     'organization_id' => $organization->id,
-                    'account_no' => 'LEGACY-SAV-0001',
+                    'account_no' => 'SAV-0001',
                 ],
                 [
                     'branch_id' => $branchId,
@@ -554,7 +554,7 @@ class FinancialServicesSeeder extends Seeder
                         'seeded' => true,
                         'migration' => [
                             'source_system' => 'legacy_core_banking',
-                            'source_account_no' => 'OLD-SAV-88421',
+                            'source_account_no' => 'SAV-88421',
                             'migrated_at' => '2025-07-01',
                             'opening_balance' => $legacySavingsBalance,
                         ],
@@ -575,7 +575,7 @@ class FinancialServicesSeeder extends Seeder
             $legacyFixedAccount = FinancialAccount::query()->updateOrCreate(
                 [
                     'organization_id' => $organization->id,
-                    'account_no' => 'LEGACY-FDR-0001',
+                    'account_no' => 'FDR-0001',
                 ],
                 [
                     'branch_id' => $branchId,
@@ -592,7 +592,7 @@ class FinancialServicesSeeder extends Seeder
                         'seeded' => true,
                         'migration' => [
                             'source_system' => 'legacy_core_banking',
-                            'source_account_no' => 'OLD-FDR-55109',
+                            'source_account_no' => 'FDR-55109',
                             'migrated_at' => '2025-07-01',
                             'opening_balance' => $legacyFixedDepositPrincipal,
                         ],
@@ -619,8 +619,8 @@ class FinancialServicesSeeder extends Seeder
             );
 
             foreach ([
-                [$legacySavingsAccount, $legacySavingsBalance, 'LEGACY-MIGRATION-SAV-0001', 'Migrated legacy savings closing balance'],
-                [$legacyFixedAccount, $legacyFixedDepositPrincipal, 'LEGACY-MIGRATION-FDR-0001', 'Migrated legacy fixed deposit principal'],
+                [$legacySavingsAccount, $legacySavingsBalance, 'SAV-0001', 'Migrated legacy savings closing balance'],
+                [$legacyFixedAccount, $legacyFixedDepositPrincipal, 'FDR-0001', 'Migrated legacy fixed deposit principal'],
             ] as [$legacyAccount, $amount, $transactionNo, $description]) {
                 $migrationTransaction = FinancialTransaction::query()->updateOrCreate(
                     [

@@ -1,3 +1,4 @@
+import { formatDate } from '@/lib/date_util';
 import type { TellerCashTransactionFormPageProps } from '@/types/treasury-cash/forms';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { ArrowDownToLine, ArrowUpFromLine } from 'lucide-react';
@@ -85,7 +86,9 @@ export default function Form() {
                                 <option key={session.id} value={session.id}>
                                     {session.teller?.name ?? 'Teller'} (
                                     {session.teller?.code ?? '-'}) -{' '}
-                                    {session.branch_day?.business_date ?? '-'}
+                                    {formatDate(
+                                        session.branch_day?.business_date,
+                                    )}
                                 </option>
                             ))}
                         </select>

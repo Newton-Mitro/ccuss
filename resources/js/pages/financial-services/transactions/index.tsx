@@ -5,6 +5,7 @@ import {
 } from '@/components/resource-page-shell';
 import { Input } from '@/components/ui/input';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatDate } from '@/lib/date_util';
 import { BreadcrumbItem } from '@/types';
 import type { FinancialTransactionsPageProps } from '@/types/financial-services';
 import { Head, Link, router, usePage } from '@inertiajs/react';
@@ -92,7 +93,9 @@ export default function FinancialTransactionIndex() {
                                             {transaction.transaction_type}
                                         </td>
                                         <td className="px-2 py-1">
-                                            {transaction.transaction_date}
+                                            {formatDate(
+                                                transaction.transaction_date,
+                                            )}
                                         </td>
                                         <td className="px-2 py-1 text-right tabular-nums">
                                             {Number(transaction.amount).toFixed(

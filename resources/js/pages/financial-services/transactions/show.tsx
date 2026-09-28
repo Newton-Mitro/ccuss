@@ -5,6 +5,7 @@ import {
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatDate } from '@/lib/date_util';
 import { BreadcrumbItem } from '@/types';
 import type { FinancialTransactionPageProps } from '@/types/financial-services';
 import { Head, Link, router, usePage } from '@inertiajs/react';
@@ -113,7 +114,7 @@ export default function FinancialTransactionShow() {
                     <div className="rounded-lg border bg-card p-3">
                         <p className="text-xs text-muted-foreground">Date</p>
                         <p className="mt-1 font-medium">
-                            {transaction.transaction_date}
+                            {formatDate(transaction.transaction_date)}
                         </p>
                     </div>
                     <div className="rounded-lg border bg-card p-3">

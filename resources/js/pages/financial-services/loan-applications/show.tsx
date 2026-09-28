@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatDate } from '@/lib/date_util';
 import type { BreadcrumbItem } from '@/types';
 import type { LoanApplicationShowPageProps } from '@/types/financial-services';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
@@ -372,7 +373,9 @@ export default function LoanApplicationShow() {
                                                             }
                                                         </td>
                                                         <td>
-                                                            {schedule.due_date}
+                                                            {formatDate(
+                                                                schedule.due_date,
+                                                            )}
                                                         </td>
                                                         <td>
                                                             {
@@ -510,7 +513,9 @@ export default function LoanApplicationShow() {
                                                 className="flex flex-wrap justify-between gap-2 border-b pb-2 last:border-0 last:pb-0"
                                             >
                                                 <span>
-                                                    {disbursement.disbursed_at}{' '}
+                                                    {formatDate(
+                                                        disbursement.disbursed_at,
+                                                    )}{' '}
                                                     · {disbursement.status}
                                                 </span>
                                                 <span>
@@ -549,9 +554,9 @@ export default function LoanApplicationShow() {
                                             >
                                                 <div className="flex flex-wrap justify-between gap-2">
                                                     <span>
-                                                        {
-                                                            repayment.repayment_date
-                                                        }{' '}
+                                                        {formatDate(
+                                                            repayment.repayment_date,
+                                                        )}{' '}
                                                         · {repayment.amount} ·{' '}
                                                         {repayment.status}
                                                     </span>

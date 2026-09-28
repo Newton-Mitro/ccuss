@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatDate } from '@/lib/date_util';
 import { BreadcrumbItem } from '@/types';
 import type { FinancialAccountShowPageProps } from '@/types/financial-services';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
@@ -777,8 +778,9 @@ export default function FinancialAccountShow() {
                                         Member since
                                     </p>
                                     <p className="font-medium">
-                                        {account.share_account.member_since ??
-                                            'Not set'}
+                                        {formatDate(
+                                            account.share_account.member_since,
+                                        ) ?? 'Not set'}
                                     </p>
                                 </div>
                             </div>
@@ -883,8 +885,9 @@ export default function FinancialAccountShow() {
                                     Maturity
                                 </p>
                                 <p className="font-medium">
-                                    {account.fixed_deposit.maturity_date ??
-                                        'Not set'}
+                                    {formatDate(
+                                        account.fixed_deposit.maturity_date,
+                                    ) ?? 'Not set'}
                                 </p>
                             </div>
                             <div>
@@ -1104,7 +1107,9 @@ export default function FinancialAccountShow() {
                                                 {installment.installment_no}
                                             </td>
                                             <td className="px-2 py-2">
-                                                {installment.due_date}
+                                                {formatDate(
+                                                    installment.due_date,
+                                                )}
                                             </td>
                                             <td className="px-2 py-2">
                                                 {installment.status}
@@ -1403,8 +1408,9 @@ export default function FinancialAccountShow() {
                                     Maturity
                                 </p>
                                 <p className="font-medium">
-                                    {account.loan_account.maturity_date ??
-                                        'Not set'}
+                                    {formatDate(
+                                        account.loan_account.maturity_date,
+                                    ) ?? 'Not set'}
                                 </p>
                             </div>
                             <div>
@@ -1446,7 +1452,9 @@ export default function FinancialAccountShow() {
                                                         }
                                                     </td>
                                                     <td className="p-2">
-                                                        {schedule.due_date}
+                                                        {formatDate(
+                                                            schedule.due_date,
+                                                        )}
                                                     </td>
                                                     <td className="p-2">
                                                         {schedule.scheduled_principal ??
@@ -1488,7 +1496,9 @@ export default function FinancialAccountShow() {
                                             >
                                                 <div className="flex justify-between gap-2">
                                                     <span>
-                                                        {arrear.as_of_date}
+                                                        {formatDate(
+                                                            arrear.as_of_date,
+                                                        )}
                                                     </span>
                                                     <span className="font-medium">
                                                         {arrear.status}

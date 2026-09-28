@@ -24,6 +24,7 @@ import {
     CardTitle,
 } from '../components/ui/card';
 import CustomAuthLayout from '../layouts/custom-auth-layout';
+import { formatDateTime } from '../lib/date_util';
 import { BreadcrumbItem } from '../types';
 
 // Register Chart.js modules
@@ -431,9 +432,7 @@ export default function DashboardPage() {
                                             {log.action}
                                         </span>
                                         <span className="ml-2 opacity-70">
-                                            {new Date(
-                                                log.created_at,
-                                            ).toLocaleTimeString()}
+                                            {formatDateTime(log.created_at)}
                                         </span>
                                     </li>
                                 ))}
