@@ -2,21 +2,20 @@
 
 namespace App\FinancialServices\Application;
 
-use App\FinancialServices\Application\FinancialProductPolicyService;
+use App\FinancialServices\Models\AccountFine;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialTransaction;
+use App\FinancialServices\Models\InterestPosting;
+use App\FinancialServices\Models\InterestProvision;
 use App\FinancialServices\Models\LoanAccount;
 use App\FinancialServices\Models\LoanDisbursement;
 use App\FinancialServices\Models\LoanRepayment;
-use App\FinancialServices\Models\AccountFine;
-use App\FinancialServices\Models\InterestProvision;
-use App\FinancialServices\Models\InterestPosting;
-use App\FinancialServices\Models\ShareDividendAllocation;
 use App\FinancialServices\Models\RecurringDepositInstallment;
+use App\FinancialServices\Models\ShareDividendAllocation;
+use App\GeneralAccounting\Application\FinancialTransactionAccountingService;
 use App\TreasuryAndCash\Models\BranchDay;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
-use App\GeneralAccounting\Application\FinancialTransactionAccountingService;
 use RuntimeException;
 
 class FinancialTransactionService
@@ -24,8 +23,7 @@ class FinancialTransactionService
     public function __construct(
         private readonly FinancialProductPolicyService $policyService,
         private readonly FinancialTransactionAccountingService $accountingService,
-    ) {
-    }
+    ) {}
 
     public function create(array $data, int $organizationId, int $userId): FinancialTransaction
     {
@@ -33,7 +31,7 @@ class FinancialTransactionService
             ->where('organization_id', $organizationId)
             ->findOrFail($data['financial_account_id']);
 
-        if (!empty($data['idempotency_key'])) {
+        if (! empty($data['idempotency_key'])) {
             $existing = FinancialTransaction::query()
                 ->where('organization_id', $organizationId)
                 ->where('idempotency_key', $data['idempotency_key'])
@@ -43,7 +41,7 @@ class FinancialTransactionService
             if ($existing) {
                 $entry = $existing->entries->first();
                 if (
-                    !$entry
+                    ! $entry
                     || $entry->financial_account_id !== $account->id
                     || $existing->transaction_type !== $data['transaction_type']
                     || (float) $existing->amount !== (float) $data['amount']
@@ -55,7 +53,7 @@ class FinancialTransactionService
             }
         }
 
-        if (!in_array($account->status, ['PENDING', 'ACTIVE'], true)) {
+        if (! in_array($account->status, ['PENDING', 'ACTIVE'], true)) {
             throw new RuntimeException('Transactions cannot be created for this account status.');
         }
 
@@ -107,7 +105,7 @@ class FinancialTransactionService
         ?int $branchId = null,
     ): FinancialTransaction {
         return DB::transaction(function () use ($data, $entries, $organizationId, $userId, $branchId) {
-            $total = collect($entries)->sum(fn(array $entry): float => (float) $entry['amount']);
+            $total = collect($entries)->sum(fn (array $entry): float => (float) $entry['amount']);
             $existing = $this->findIdempotentTransaction($data['idempotency_key'] ?? null, $organizationId);
             if ($existing) {
                 $existingEntries = $existing->entries->sortBy('line_no')->values();
@@ -121,7 +119,7 @@ class FinancialTransactionService
                             && (float) $existingEntry->amount === (float) $entry['amount'];
                     });
 
-                if ($existing->transaction_type !== $data['transaction_type'] || (float) $existing->amount !== $total || !$sameEntries) {
+                if ($existing->transaction_type !== $data['transaction_type'] || (float) $existing->amount !== $total || ! $sameEntries) {
                     throw new RuntimeException('The idempotency key is already used for a different transaction.');
                 }
 
@@ -140,17 +138,17 @@ class FinancialTransactionService
             }
 
             foreach ($accounts as $account) {
-                if (!in_array($account->status, ['PENDING', 'ACTIVE'], true)) {
+                if (! in_array($account->status, ['PENDING', 'ACTIVE'], true)) {
                     throw new RuntimeException('Transactions cannot be created for this account status.');
                 }
             }
 
             $debitTotal = collect($entries)
                 ->where('direction', 'DEBIT')
-                ->sum(fn(array $entry): float => (float) $entry['amount']);
+                ->sum(fn (array $entry): float => (float) $entry['amount']);
             $creditTotal = collect($entries)
                 ->where('direction', 'CREDIT')
-                ->sum(fn(array $entry): float => (float) $entry['amount']);
+                ->sum(fn (array $entry): float => (float) $entry['amount']);
 
             if ($total <= 0 || abs($debitTotal - $creditTotal) > 0.0001) {
                 throw new RuntimeException('Financial transaction entries must be balanced and greater than zero.');
@@ -172,7 +170,7 @@ class FinancialTransactionService
             ]);
 
             $transaction->entries()->createMany(
-                collect($entries)->values()->map(fn(array $entry, int $index): array => [
+                collect($entries)->values()->map(fn (array $entry, int $index): array => [
                     'financial_account_id' => $entry['financial_account_id'],
                     'direction' => $entry['direction'],
                     'amount' => $entry['amount'],
@@ -240,7 +238,7 @@ class FinancialTransactionService
             }
 
             $loan = LoanAccount::query()
-                ->whereHas('financialAccount', fn($query) => $query->where('organization_id', $organizationId))
+                ->whereHas('financialAccount', fn ($query) => $query->where('organization_id', $organizationId))
                 ->whereIn('status', ['APPROVED', 'PARTIALLY_DISBURSED'])
                 ->with(['financialAccount', 'application.collaterals', 'application.guarantors', 'application.loanAccount.protectionPolicy'])
                 ->lockForUpdate()
@@ -309,7 +307,7 @@ class FinancialTransactionService
     {
         $fine = AccountFine::query()
             ->with('financialAccount')
-            ->whereHas('financialAccount', fn($query) => $query->where('organization_id', $organizationId))
+            ->whereHas('financialAccount', fn ($query) => $query->where('organization_id', $organizationId))
             ->lockForUpdate()
             ->findOrFail($data['account_fine_id']);
         $outstanding = (float) $fine->assessed_amount - (float) $fine->waived_amount - (float) $fine->paid_amount;
@@ -350,7 +348,7 @@ class FinancialTransactionService
             }
 
             $loan = LoanAccount::query()
-                ->whereHas('financialAccount', fn($query) => $query->where('organization_id', $organizationId))
+                ->whereHas('financialAccount', fn ($query) => $query->where('organization_id', $organizationId))
                 ->whereIn('status', ['ACTIVE', 'PARTIALLY_DISBURSED'])
                 ->with(['financialAccount', 'schedules.components'])
                 ->lockForUpdate()
@@ -402,7 +400,7 @@ class FinancialTransactionService
 
     private function findIdempotentTransaction(?string $idempotencyKey, int $organizationId): ?FinancialTransaction
     {
-        if (!$idempotencyKey) {
+        if (! $idempotencyKey) {
             return null;
         }
 
@@ -493,7 +491,7 @@ class FinancialTransactionService
                 }
                 $allocation->update(['status' => 'POSTED', 'financial_transaction_id' => $transaction->id]);
                 $declaration = $allocation->declaration()->lockForUpdate()->firstOrFail();
-                if (!$declaration->allocations()->where('status', '!=', 'POSTED')->exists()) {
+                if (! $declaration->allocations()->where('status', '!=', 'POSTED')->exists()) {
                     $declaration->update(['status' => 'POSTED']);
                 }
             }
@@ -604,14 +602,14 @@ class FinancialTransactionService
         $remaining = $amount;
         $allocations = [];
         $schedules = $loan->schedules
-            ->filter(fn($schedule) => !in_array($schedule->status, ['PAID', 'WAIVED'], true))
-            ->filter(fn($schedule) => $allowAdvance || $schedule->due_date->toDateString() <= $repaymentDate)
+            ->filter(fn ($schedule) => ! in_array($schedule->status, ['PAID', 'WAIVED'], true))
+            ->filter(fn ($schedule) => $allowAdvance || $schedule->due_date->toDateString() <= $repaymentDate)
             ->sortBy('due_date');
 
         foreach ($schedules as $schedule) {
             foreach (['FEE', 'PROTECTION_FEE', 'INTEREST', 'PRINCIPAL'] as $type) {
                 $component = $schedule->components->firstWhere('type', $type);
-                if (!$component) {
+                if (! $component) {
                     continue;
                 }
                 $outstanding = max(0, (float) $component->amount_due - (float) $component->amount_paid);
@@ -641,7 +639,7 @@ class FinancialTransactionService
             $paid = min((float) $component->amount_due, (float) $component->amount_paid + (float) $allocation->amount);
             $component->update(['amount_paid' => $paid, 'status' => $paid >= (float) $component->amount_due ? 'PAID' : 'PARTIAL']);
             $schedule = $allocation->schedule->fresh('components');
-            $totalPaid = $schedule->components->sum(fn($item) => (float) $item->amount_paid);
+            $totalPaid = $schedule->components->sum(fn ($item) => (float) $item->amount_paid);
             $fullyPaid = $totalPaid >= (float) $schedule->total_due;
             $schedule->update(['total_paid' => $totalPaid, 'status' => $fullyPaid ? 'PAID' : 'PARTIAL', 'paid_at' => $fullyPaid ? now() : null]);
         }
@@ -656,7 +654,7 @@ class FinancialTransactionService
             $paid = max(0, (float) $component->amount_paid - (float) $allocation->amount);
             $component->update(['amount_paid' => $paid, 'status' => $paid <= 0 ? 'PENDING' : 'PARTIAL']);
             $schedule = $allocation->schedule->fresh('components');
-            $totalPaid = $schedule->components->sum(fn($item) => (float) $item->amount_paid);
+            $totalPaid = $schedule->components->sum(fn ($item) => (float) $item->amount_paid);
             $schedule->update(['total_paid' => $totalPaid, 'status' => $totalPaid <= 0 ? 'PENDING' : 'PARTIAL', 'paid_at' => null]);
         }
         $repayment->update(['status' => 'REVERSED']);
@@ -676,10 +674,10 @@ class FinancialTransactionService
             if ($application->status !== 'APPROVED') {
                 throw new RuntimeException('The loan application must be approved before disbursement.');
             }
-            if ($application->collaterals->contains(fn($collateral) => $collateral->status === 'PENDING')) {
+            if ($application->collaterals->contains(fn ($collateral) => $collateral->status === 'PENDING')) {
                 throw new RuntimeException('All collateral must be verified or rejected before disbursement.');
             }
-            if ($application->guarantors->contains(fn($guarantor) => $guarantor->status === 'PENDING')) {
+            if ($application->guarantors->contains(fn ($guarantor) => $guarantor->status === 'PENDING')) {
                 throw new RuntimeException('All guarantor invitations must be decided before disbursement.');
             }
             $protection = $loan->protectionPolicy;
@@ -689,7 +687,7 @@ class FinancialTransactionService
         }
 
         if (
-            $loan->financialAccount->branch_id && !BranchDay::query()
+            $loan->financialAccount->branch_id && ! BranchDay::query()
                 ->where('branch_id', $loan->financialAccount->branch_id)
                 ->whereDate('business_date', $disbursedAt)
                 ->where('status', BranchDay::STATUS_OPEN)
@@ -719,7 +717,15 @@ class FinancialTransactionService
 
     private function isAssetAccount(FinancialAccount $account): bool
     {
-        return in_array($account->account_type, ['CASH', 'BANK', 'SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT'], true)
-            || $account->product?->balance_type === 'ASSET';
+        if (in_array($account->account_type, ['CASH', 'BANK', 'LOAN'], true)) {
+            return true;
+        }
+
+        if (in_array($account->account_type, ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT'], true)) {
+            return $account->product?->category === $account->account_type
+                && $account->product?->balance_type === 'ASSET';
+        }
+
+        return $account->product?->balance_type === 'ASSET';
     }
 }

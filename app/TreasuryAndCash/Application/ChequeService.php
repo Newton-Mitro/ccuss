@@ -3,11 +3,8 @@
 namespace App\TreasuryAndCash\Application;
 
 use App\FinancialServices\Application\FinancialTransactionService;
-use App\FinancialServices\Models\FinancialAccount;
-use App\FinancialServices\Models\FinancialTransaction;
 use App\TreasuryAndCash\Models\BankAccount;
 use App\TreasuryAndCash\Models\BranchDay;
-use App\TreasuryAndCash\Models\CashLocation;
 use App\TreasuryAndCash\Models\Cheque;
 use App\TreasuryAndCash\Models\ChequeBook;
 use App\TreasuryAndCash\Models\TellerCashTransaction;
@@ -19,11 +16,11 @@ class ChequeService
 {
     public function createBook(array $data, int $userId): ChequeBook
     {
-        return DB::transaction(function () use ($data, $userId): ChequeBook {
+        return DB::transaction(function () use ($data): ChequeBook {
             $start = (int) $data['start_number'];
             $end = (int) $data['end_number'];
 
-            if (empty($data['financial_account_id']) && !empty($data['bank_account_id'])) {
+            if (empty($data['financial_account_id']) && ! empty($data['bank_account_id'])) {
                 $data['financial_account_id'] = BankAccount::query()
                     ->whereKey($data['bank_account_id'])
                     ->value('financial_account_id');
@@ -49,6 +46,7 @@ class ChequeService
         }
 
         $cheque->update($data);
+
         return $cheque->refresh();
     }
 
@@ -66,7 +64,7 @@ class ChequeService
 
         $current = $cheque->status;
         $target = $nextStatus[$current] ?? null;
-        if (!$target) {
+        if (! $target) {
             throw new RuntimeException("Cheque cannot be {$action} from {$current} status.");
         }
 
@@ -110,7 +108,7 @@ class ChequeService
             }
 
             $account = $cheque->financialAccount ?? $cheque->chequeBook?->financialAccount;
-            if (!$account || $account->organization_id !== $organizationId) {
+            if (! $account || $account->organization_id !== $organizationId) {
                 throw new RuntimeException('The cheque must belong to a valid organization account.');
             }
 
@@ -121,13 +119,13 @@ class ChequeService
             $session = TellerSession::query()
                 ->whereKey($tellerSessionId)
                 ->where('status', 'OPEN')
-                ->whereHas('branchDay', fn($builder) => $builder->where('organization_id', $organizationId)->where('branch_id', $branchId)->where('status', BranchDay::STATUS_OPEN))
+                ->whereHas('branchDay', fn ($builder) => $builder->where('organization_id', $organizationId)->where('branch_id', $branchId)->where('status', BranchDay::STATUS_OPEN))
                 ->with(['branchDay', 'teller.cashLocation.financialAccount'])
                 ->lockForUpdate()
                 ->firstOrFail();
 
             $tellerCashAccount = $session->teller?->cashLocation?->financialAccount;
-            if (!$tellerCashAccount) {
+            if (! $tellerCashAccount) {
                 throw new RuntimeException('The teller cash location must be linked to a financial account before posting a cheque withdrawal.');
             }
 
@@ -136,19 +134,19 @@ class ChequeService
                 [
                     'transaction_type' => 'WITHDRAWAL',
                     'transaction_date' => now(),
-                    'reference' => 'CHEQUE-' . $cheque->cheque_no,
+                    'reference' => 'CHEQUE-'.$cheque->cheque_no,
                     'description' => 'Cheque withdrawal',
                 ],
                 [
                     [
                         'financial_account_id' => $tellerCashAccount->id,
-                        'direction' => 'DEBIT',
+                        'direction' => 'CREDIT',
                         'amount' => (float) $cheque->amount,
                         'description' => 'Cheque cash out',
                     ],
                     [
                         'financial_account_id' => $account->id,
-                        'direction' => 'CREDIT',
+                        'direction' => 'DEBIT',
                         'amount' => (float) $cheque->amount,
                         'description' => 'Cheque withdrawal debited to savings account',
                     ],
@@ -169,7 +167,7 @@ class ChequeService
                 'type' => 'PRESENT',
                 'amount' => $cheque->amount,
                 'transaction_date' => now(),
-                'reference' => 'CHEQUE-' . $cheque->cheque_no,
+                'reference' => 'CHEQUE-'.$cheque->cheque_no,
                 'description' => 'Cheque presented at teller',
                 'created_by' => $userId,
             ]);
@@ -180,11 +178,11 @@ class ChequeService
                 'cash_location_id' => $cashLocation->id,
                 'teller_session_id' => $session->id,
                 'financial_transaction_id' => $financialTransaction->id,
-                'transaction_no' => 'TELLER-CHEQUE-' . now()->format('YmdHis'),
+                'transaction_no' => 'TELLER-CHEQUE-'.now()->format('YmdHis'),
                 'type' => 'WITHDRAWAL',
                 'amount' => $cheque->amount,
                 'status' => 'POSTED',
-                'reference' => 'CHEQUE-' . $cheque->cheque_no,
+                'reference' => 'CHEQUE-'.$cheque->cheque_no,
                 'note' => 'Cheque withdrawal processed',
                 'requested_by' => $userId,
                 'requested_at' => now(),
