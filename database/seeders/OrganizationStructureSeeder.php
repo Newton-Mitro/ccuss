@@ -22,8 +22,8 @@ class OrganizationStructureSeeder extends Seeder
         // 1. Organization
         $organization = Organization::factory()->create([
             'code' => 'ORG-001',
-            'name' => 'Credit Union Society Ltd.',
-            'short_name' => 'CUSL',
+            'name' => 'Unity Credit Union Society Ltd.',
+            'short_name' => 'UCUSL',
         ]);
 
         // 2. Branches
@@ -34,6 +34,12 @@ class OrganizationStructureSeeder extends Seeder
                 'code' => 'BR-' . str_pad($index + 1, 3, '0', STR_PAD_LEFT),
             ]);
         });
+
+        $organization = Organization::factory()->create([
+            'code' => 'ORG-002',
+            'name' => 'Gopalganj Credit Union Society Ltd.',
+            'short_name' => 'GCUSL',
+        ]);
 
         $this->command->info('✅ Organization with branches created.');
     }

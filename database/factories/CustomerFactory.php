@@ -29,8 +29,8 @@ class CustomerFactory extends Factory
 
         $organization = Organization::query()
             ->with('branches')
-            ->inRandomOrder()
-            ->first();
+            ->where('code', 'ORG-001')
+            ->firstOrFail();
 
         $branch = $organization?->branches->random();
 
