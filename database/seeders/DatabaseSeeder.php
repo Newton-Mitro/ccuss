@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
                 GeneralAccountingSeeder::class,
                 CustomerSeeder::class,
                 FinancialServicesSeeder::class,
+                \Database\Seeders\AccountDefaultRulesSeeder::class,
                 TreasuryAndCashSeeder::class,
             ]);
         });
