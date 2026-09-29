@@ -35,7 +35,8 @@ class RoleSeeder extends Seeder
                 ['slug' => $slug],
                 [
                     'name' => $name,
-                    'description' => "{$name} role"
+                    'description' => "{$name} role",
+                    'preset' => true,
                 ]
             );
         }

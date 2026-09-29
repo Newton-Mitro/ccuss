@@ -10,7 +10,7 @@ import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 
 export default function CreateBranchDayPage() {
-    const { auth, organization } = usePage<any>().props;
+    const { auth } = usePage<any>().props;
     const userHasBranch = !!auth?.user?.branch_id;
 
     const { data, setData, post, processing, errors } = useForm({
@@ -42,7 +42,7 @@ export default function CreateBranchDayPage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Open Branch Day" />
 
-            <div className="mx-auto max-w-2xl space-y-6 text-foreground">
+            <div className="max-w-5xl space-y-6">
                 <ResourcePageHeader
                     title="Open branch day"
                     description="Create a new opening record for the current branch and business date."

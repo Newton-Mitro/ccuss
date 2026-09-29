@@ -1,6 +1,6 @@
 import type { FiscalPeriodFormPageProps } from '@/types/general-accounting';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { ArrowLeft, CheckCheck, ListFilter, Loader2 } from 'lucide-react';
+import { Head, useForm, usePage } from '@inertiajs/react';
+import { CheckCheck, Loader2 } from 'lucide-react';
 import React from 'react';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
@@ -19,8 +19,6 @@ export default function FiscalPeriodForm() {
         usePage<FiscalPeriodFormPageProps>().props;
 
     useFlashToastHandler();
-
-    const handleBack = () => window.history.back();
 
     const { data, setData, post, put, processing, errors } = useForm({
         name: fiscalPeriod?.name || '',
@@ -65,117 +63,107 @@ export default function FiscalPeriodForm() {
                         : 'Create Fiscal Period'
                 }
             />
-
-            {/* Header */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <HeadingSmall
-                    title={
-                        fiscalPeriod?.id
-                            ? 'Edit Fiscal Period'
-                            : 'Create Fiscal Period'
-                    }
-                    description="Manage fiscal period details."
-                />
-
-                <div className="flex flex-wrap gap-2">
-                    <button
-                        onClick={handleBack}
-                        className="flex items-center gap-1 rounded border border-border bg-card px-3 py-1.5 text-sm text-card-foreground transition-all hover:bg-card/50"
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                        <span className="hidden sm:inline">Back</span>
-                    </button>
-
-                    <Link
-                        href="/fiscal-periods"
-                        className="flex items-center gap-1 rounded border border-border bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition-all hover:bg-secondary/50"
-                    >
-                        <ListFilter className="h-4 w-4" />
-                        <span className="hidden sm:inline">Fiscal Periods</span>
-                    </Link>
-                </div>
-            </div>
-
-            {/* Form */}
-            <form
-                onSubmit={handleSubmit}
-                className="mt-4 space-y-6 rounded-md border bg-card p-4 sm:p-6"
-            >
-                {/* Dates */}
-                <div className="grid grid-cols-2 gap-4">
-                    {/* Period Name */}
-                    <div>
-                        <Label className="text-xs">Period Name</Label>
-                        <Input
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
-                            className="h-8 text-sm"
-                        />
-                        <InputError message={errors.name} />
-                    </div>
-
-                    {/* Fiscal Year */}
-                    <div>
-                        <Label className="text-xs">Fiscal Year</Label>
-                        <Select
-                            value={data.fiscal_year_id?.toString()}
-                            onChange={(value) =>
-                                setData('fiscal_year_id', Number(value))
-                            }
-                            options={fiscalYears.map((fy) => ({
-                                value: fy.id.toString(),
-                                label: fy.code,
-                            }))}
-                        />
-                        <InputError message={errors.fiscal_year_id} />
-                    </div>
-
-                    <div>
-                        <Label className="text-xs">Start Date</Label>
-                        <AppDatePicker
-                            value={data.start_date}
-                            onChange={(value) => setData('start_date', value)}
-                        />
-                        <InputError message={errors.start_date} />
-                    </div>
-
-                    <div>
-                        <Label className="text-xs">End Date</Label>
-                        <AppDatePicker
-                            value={data.end_date}
-                            onChange={(value) => setData('end_date', value)}
-                        />
-                        <InputError message={errors.end_date} />
-                    </div>
-
-                    {/* 🔥 Status (NEW) */}
-                    <div>
-                        <Label className="text-xs">Status</Label>
-                        <Select
-                            value={data.status}
-                            onChange={(value) =>
-                                setData('status', value as 'OPEN' | 'CLOSED')
-                            }
-                            options={statusOptions}
-                        />
-                        <InputError message={errors.status} />
-                    </div>
+            <div className="max-w-5xl space-y-6">
+                {/* Header */}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <HeadingSmall
+                        title={
+                            fiscalPeriod?.id
+                                ? 'Edit Fiscal Period'
+                                : 'Create Fiscal Period'
+                        }
+                        description="Manage fiscal period details."
+                    />
                 </div>
 
-                {/* Submit */}
-                <Button
-                    type="submit"
-                    disabled={processing}
-                    className="flex items-center gap-2"
+                {/* Form */}
+                <form
+                    onSubmit={handleSubmit}
+                    className="mt-4 space-y-6 rounded-md border bg-card p-4 sm:p-6"
                 >
-                    {processing ? (
-                        <Loader2 className="animate-spin" />
-                    ) : (
-                        <CheckCheck />
-                    )}
-                    {fiscalPeriod?.id ? 'Update' : 'Create'}
-                </Button>
-            </form>
+                    {/* Dates */}
+                    <div className="grid grid-cols-2 gap-4">
+                        {/* Period Name */}
+                        <div>
+                            <Label className="text-xs">Period Name</Label>
+                            <Input
+                                value={data.name}
+                                onChange={(e) =>
+                                    setData('name', e.target.value)
+                                }
+                                className="h-8 text-sm"
+                            />
+                            <InputError message={errors.name} />
+                        </div>
+
+                        {/* Fiscal Year */}
+                        <div>
+                            <Label className="text-xs">Fiscal Year</Label>
+                            <Select
+                                value={data.fiscal_year_id?.toString()}
+                                onChange={(value) =>
+                                    setData('fiscal_year_id', Number(value))
+                                }
+                                options={fiscalYears.map((fy) => ({
+                                    value: fy.id.toString(),
+                                    label: fy.code,
+                                }))}
+                            />
+                            <InputError message={errors.fiscal_year_id} />
+                        </div>
+
+                        <div>
+                            <Label className="text-xs">Start Date</Label>
+                            <AppDatePicker
+                                value={data.start_date}
+                                onChange={(value) =>
+                                    setData('start_date', value)
+                                }
+                            />
+                            <InputError message={errors.start_date} />
+                        </div>
+
+                        <div>
+                            <Label className="text-xs">End Date</Label>
+                            <AppDatePicker
+                                value={data.end_date}
+                                onChange={(value) => setData('end_date', value)}
+                            />
+                            <InputError message={errors.end_date} />
+                        </div>
+
+                        {/* 🔥 Status (NEW) */}
+                        <div>
+                            <Label className="text-xs">Status</Label>
+                            <Select
+                                value={data.status}
+                                onChange={(value) =>
+                                    setData(
+                                        'status',
+                                        value as 'OPEN' | 'CLOSED',
+                                    )
+                                }
+                                options={statusOptions}
+                            />
+                            <InputError message={errors.status} />
+                        </div>
+                    </div>
+
+                    {/* Submit */}
+                    <Button
+                        type="submit"
+                        disabled={processing}
+                        className="flex items-center gap-2"
+                    >
+                        {processing ? (
+                            <Loader2 className="animate-spin" />
+                        ) : (
+                            <CheckCheck />
+                        )}
+                        {fiscalPeriod?.id ? 'Update' : 'Create'}
+                    </Button>
+                </form>
+            </div>
         </CustomAuthLayout>
     );
 }

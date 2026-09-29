@@ -1,8 +1,8 @@
 import { SidebarItem } from '../../types';
 
-export const financialServicesMenu: SidebarItem[] = [
+export const productAndSubledgers: SidebarItem[] = [
     {
-        name: 'Financial Products',
+        name: 'Products & Subledgers',
         icon: <i className="fa-solid fa-piggy-bank" />,
         children_expanded: false,
         permission: ['financial.view'],
@@ -50,78 +50,7 @@ export const financialServicesMenu: SidebarItem[] = [
                     },
                 ],
             },
-            {
-                name: 'Savings & Deposits',
-                icon: <i className="fa-solid fa-piggy-bank" />,
-                permission: ['financial.accounts.view'],
-                children_expanded: false,
-                children: [
-                    {
-                        name: 'Savings Accounts',
-                        icon: <i className="fa-solid fa-piggy-bank" />,
-                        path: '/financial-accounts/savings',
-                        match_path: 'financial-accounts/savings',
-                        permission: ['financial.accounts.view'],
-                    },
-                    {
-                        name: 'Shares & Memberships',
-                        icon: <i className="fa-solid fa-chart-pie" />,
-                        path: '/financial-accounts/share',
-                        match_path: 'financial-accounts/share',
-                        permission: ['financial.accounts.view'],
-                    },
-                    {
-                        name: 'Fixed Deposits',
-                        icon: <i className="fa-solid fa-lock" />,
-                        path: '/financial-accounts/fixed',
-                        match_path: 'financial-accounts/fixed',
-                        permission: ['financial.accounts.view'],
-                    },
-                    {
-                        name: 'Recurring Deposits',
-                        icon: <i className="fa-solid fa-rotate" />,
-                        path: '/financial-accounts/recurring',
-                        match_path: 'financial-accounts/recurring',
-                        permission: ['financial.accounts.view'],
-                    },
-                    {
-                        name: 'Account Statements',
-                        icon: <i className="fa-solid fa-file-lines" />,
-                        path: '/financial-account-statements',
-                        match_path: 'financial-account-statements',
-                        permission: ['financial.accounts.view'],
-                    },
-                ],
-            },
-            {
-                name: 'Investment & Loans',
-                icon: <i className="fa-solid fa-hand-holding-dollar" />,
-                permission: ['financial.loan-applications.view'],
-                children_expanded: false,
-                children: [
-                    {
-                        name: 'Loan Applications',
-                        icon: <i className="fa-solid fa-file-signature" />,
-                        path: '/loan-applications',
-                        match_path: 'loan-applications',
-                        permission: ['financial.loan-applications.view'],
-                    },
-                    {
-                        name: 'Loan Accounts',
-                        icon: <i className="fa-solid fa-money-check-dollar" />,
-                        path: '/loan-accounts',
-                        match_path: 'loan-accounts',
-                        permission: ['financial.accounts.view'],
-                    },
-                    {
-                        name: 'Disbursement Entry',
-                        icon: <i className="fa-solid fa-arrow-up-right-dots" />,
-                        path: '/financial-transactions/loan-disbursement/create',
-                        match_path: 'financial-transactions/loan-disbursement',
-                        permission: ['financial.transactions.create'],
-                    },
-                ],
-            },
+
             {
                 name: 'Transaction Desk',
                 icon: <i className="fa-solid fa-money-bill-transfer" />,

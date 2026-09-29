@@ -1,20 +1,26 @@
 import { SidebarItem } from '../../types';
+import { auditAndCompliance } from './audit-and-compliance';
+import { creditAndRecovery } from './credit-and-recovery';
 import { customerKycMenu } from './customerKycMenu';
-import { financialServicesMenu } from './financialServicesMenu';
+import { depositAccounts } from './deposit-accounts';
 import { generalAccountingMenu } from './generalAccountingMenu';
 import { homeMenu } from './homeMenu';
-import { systemAdministrationMenu } from './systemAdministrationMenu';
+import { productAndSubledgers } from './product-and-subledgers';
+import { systemAdministration } from './system-administration';
 import { treasuryAndCashMenu } from './treasuryAndCashMenu';
 
 export const sidebarMenu: SidebarItem[] = [
     ...homeMenu,
     ...customerKycMenu,
-    ...financialServicesMenu,
+    ...productAndSubledgers,
+    ...depositAccounts,
+    ...creditAndRecovery,
     // ...investmentMenu,
     // ...procurementMenu,
     // ...fixedAssetsMenu,
     // ...employeePayrollMenu,
     ...treasuryAndCashMenu,
     ...generalAccountingMenu,
-    ...systemAdministrationMenu,
+    ...auditAndCompliance,
+    ...systemAdministration,
 ];

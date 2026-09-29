@@ -53,11 +53,6 @@ export default function TrialBalancePage() {
         selectedFiscalPeriod || 0,
     );
 
-    const fiscalYearCode = fiscalYears.find((fy) => fy.id === fiscalYear)?.code;
-    const fiscalPeriodName = fiscalPeriods.find(
-        (fp) => fp.id === fiscalPeriod,
-    )?.period_name;
-
     /* ---------------- Filter Handlers ---------------- */
     const handleFiscalYearChange = (value) => {
         const year = Number(value);
@@ -119,7 +114,7 @@ export default function TrialBalancePage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Trial Balance" />
 
-            <div className="space-y-3 print:p-4 print:text-black">
+            <div className="space-y-3">
                 <ReportExportActions
                     report="trial-balance"
                     query={{
@@ -128,7 +123,7 @@ export default function TrialBalancePage() {
                     }}
                 />
                 {/* Header */}
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <HeadingSmall
                         title="Trial Balance"
                         description="Debit, Credit & Balance Summary"
@@ -158,31 +153,12 @@ export default function TrialBalancePage() {
                                 }))}
                             />
                         </div>
-
-                        <button
-                            onClick={() => window.print()}
-                            className="rounded-md bg-primary px-3 py-1 text-sm font-medium text-primary-foreground hover:bg-primary/80"
-                        >
-                            Print
-                        </button>
                     </div>
                 </div>
 
-                {/* Print Header */}
-                <div className="hidden text-center print:block">
-                    <h1 className="text-xl font-bold">Trial Balance</h1>
-                    {fiscalYearCode && (
-                        <p className="text-sm">Fiscal Year: {fiscalYearCode}</p>
-                    )}
-                    {fiscalPeriodName && (
-                        <p className="text-sm">Period: {fiscalPeriodName}</p>
-                    )}
-                    <hr className="my-2 border-t" />
-                </div>
-
                 {/* Table */}
-                <div className="rounded-md border p-2 print:border-none">
-                    <table className="w-full border-collapse text-sm print:text-base">
+                <div className="rounded-md border p-2">
+                    <table className="w-full border-collapse text-sm">
                         <thead>
                             <tr>
                                 <th className="border-b px-2 py-1 text-left">
@@ -206,7 +182,7 @@ export default function TrialBalancePage() {
                             return (
                                 <tbody key={group}>
                                     {/* Group Header */}
-                                    <tr className="bg-muted font-semibold print:bg-transparent">
+                                    <tr className="bg-muted font-semibold">
                                         <td colSpan={4} className="px-2 py-1">
                                             {group}
                                         </td>

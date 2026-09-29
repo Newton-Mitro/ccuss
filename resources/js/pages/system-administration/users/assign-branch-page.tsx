@@ -1,6 +1,5 @@
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import {
-    ArrowLeft,
     Building2,
     CheckCircle2,
     GitBranch,
@@ -46,18 +45,12 @@ export default function AssignBranchPage() {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Assign Branch - ${user.name}`} />
-            <div className="mx-auto max-w-5xl space-y-6">
+            <div className="max-w-5xl space-y-6">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <HeadingSmall
                         title="Assign Branch"
                         description="Select the branch for this user in the active organization."
                     />
-                    <Button asChild variant="outline">
-                        <Link href={route('users.index')}>
-                            <ArrowLeft className="h-4 w-4" />
-                            Back
-                        </Link>
-                    </Button>
                 </div>
 
                 <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">

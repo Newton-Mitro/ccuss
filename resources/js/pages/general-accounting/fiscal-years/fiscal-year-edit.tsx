@@ -1,6 +1,6 @@
 import type { FiscalYearFormPageProps } from '@/types/general-accounting';
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
+import { CheckCheck, Loader2 } from 'lucide-react';
 import React from 'react';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
@@ -21,8 +21,6 @@ export default function FiscalYearForm() {
     const { fiscalYear } = usePage<FiscalYearFormPageProps>().props;
 
     useFlashToastHandler();
-
-    const handleBack = () => window.history.back();
 
     const { data, setData, post, put, processing, errors } = useForm({
         name: fiscalYear?.name || '',
@@ -59,106 +57,104 @@ export default function FiscalYearForm() {
                 }
             />
 
-            {/* Header */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <HeadingSmall
-                    title={
-                        fiscalYear?.id
-                            ? 'Edit Fiscal Year'
-                            : 'Create Fiscal Year'
-                    }
-                    description="Manage fiscal year details."
-                />
-
-                <button
-                    onClick={handleBack}
-                    className="flex items-center gap-1 rounded border border-border bg-card px-3 py-1.5 text-sm text-card-foreground transition-all hover:bg-card/50"
-                >
-                    <ArrowLeft className="h-4 w-4" />
-                    <span className="hidden sm:inline">Back</span>
-                </button>
-            </div>
-
-            {/* Form */}
-            <form
-                onSubmit={handleSubmit}
-                className="mt-4 space-y-6 rounded-md border bg-card p-4 sm:p-6"
-            >
-                {/* Dates */}
-                <div className="grid grid-cols-2 gap-4">
-                    {/* Name */}
-                    <div>
-                        <Label className="text-xs">Fiscal Year Name</Label>
-                        <Input
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
-                            className="h-8 text-sm"
-                        />
-                        <InputError message={errors.name} />
-                    </div>
-
-                    <div>
-                        <Label className="text-xs">Start Date</Label>
-                        <AppDatePicker
-                            value={data.start_date}
-                            onChange={(value) => setData('start_date', value)}
-                        />
-                        <InputError message={errors.start_date} />
-                    </div>
-
-                    <div>
-                        <Label className="text-xs">End Date</Label>
-                        <AppDatePicker
-                            value={data.end_date}
-                            onChange={(value) => setData('end_date', value)}
-                        />
-                        <InputError message={errors.end_date} />
-                    </div>
-
-                    {/* 🔥 Status (ONLY ONE CONTROL NOW) */}
-                    <div>
-                        <Label className="text-xs">Closed Status</Label>
-
-                        <ToggleGroup
-                            type="single"
-                            value={data.status}
-                            onValueChange={(val) =>
-                                setData('status', val as 'OPEN' | 'CLOSED')
-                            }
-                            size="sm"
-                            variant="outline"
-                        >
-                            <ToggleGroupItem
-                                value="OPEN"
-                                className="border-2 border-border"
-                            >
-                                Open
-                            </ToggleGroupItem>
-
-                            <ToggleGroupItem
-                                value="CLOSED"
-                                className="border-2 border-border"
-                            >
-                                Closed
-                            </ToggleGroupItem>
-                        </ToggleGroup>
-                    </div>
+            <div className="max-w-5xl space-y-6">
+                {/* Header */}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <HeadingSmall
+                        title={
+                            fiscalYear?.id
+                                ? 'Edit Fiscal Year'
+                                : 'Create Fiscal Year'
+                        }
+                        description="Manage fiscal year details."
+                    />
                 </div>
 
-                {/* Submit */}
-                <Button
-                    type="submit"
-                    disabled={processing}
-                    className="flex items-center gap-2"
+                {/* Form */}
+                <form
+                    onSubmit={handleSubmit}
+                    className="mt-4 space-y-6 rounded-md border bg-card p-4 sm:p-6"
                 >
-                    {processing ? (
-                        <Loader2 className="animate-spin" />
-                    ) : (
-                        <CheckCheck />
-                    )}
-                    {fiscalYear?.id ? 'Update' : 'Create'}
-                </Button>
-            </form>
+                    {/* Dates */}
+                    <div className="grid grid-cols-2 gap-4">
+                        {/* Name */}
+                        <div>
+                            <Label className="text-xs">Fiscal Year Name</Label>
+                            <Input
+                                value={data.name}
+                                onChange={(e) =>
+                                    setData('name', e.target.value)
+                                }
+                                className="h-8 text-sm"
+                            />
+                            <InputError message={errors.name} />
+                        </div>
+
+                        <div>
+                            <Label className="text-xs">Start Date</Label>
+                            <AppDatePicker
+                                value={data.start_date}
+                                onChange={(value) =>
+                                    setData('start_date', value)
+                                }
+                            />
+                            <InputError message={errors.start_date} />
+                        </div>
+
+                        <div>
+                            <Label className="text-xs">End Date</Label>
+                            <AppDatePicker
+                                value={data.end_date}
+                                onChange={(value) => setData('end_date', value)}
+                            />
+                            <InputError message={errors.end_date} />
+                        </div>
+
+                        {/* 🔥 Status (ONLY ONE CONTROL NOW) */}
+                        <div>
+                            <Label className="text-xs">Closed Status</Label>
+
+                            <ToggleGroup
+                                type="single"
+                                value={data.status}
+                                onValueChange={(val) =>
+                                    setData('status', val as 'OPEN' | 'CLOSED')
+                                }
+                                size="sm"
+                                variant="outline"
+                            >
+                                <ToggleGroupItem
+                                    value="OPEN"
+                                    className="border-2 border-border"
+                                >
+                                    Open
+                                </ToggleGroupItem>
+
+                                <ToggleGroupItem
+                                    value="CLOSED"
+                                    className="border-2 border-border"
+                                >
+                                    Closed
+                                </ToggleGroupItem>
+                            </ToggleGroup>
+                        </div>
+                    </div>
+
+                    {/* Submit */}
+                    <Button
+                        type="submit"
+                        disabled={processing}
+                        className="flex items-center gap-2"
+                    >
+                        {processing ? (
+                            <Loader2 className="animate-spin" />
+                        ) : (
+                            <CheckCheck />
+                        )}
+                        {fiscalYear?.id ? 'Update' : 'Create'}
+                    </Button>
+                </form>
+            </div>
         </CustomAuthLayout>
     );
 }

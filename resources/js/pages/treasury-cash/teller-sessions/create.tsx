@@ -44,7 +44,7 @@ export default function CreateTellerSessionPage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Open Teller Session" />
 
-            <div className="mx-auto max-w-2xl space-y-6 text-foreground">
+            <div className="max-w-5xl space-y-6">
                 <ResourcePageHeader
                     title="Open teller session"
                     description="Create a session for the active branch day and assigned teller."

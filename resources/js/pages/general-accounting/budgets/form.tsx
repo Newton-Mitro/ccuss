@@ -63,9 +63,16 @@ export default function BudgetForm() {
 
     const submit = (event: React.FormEvent) => {
         event.preventDefault();
-        editing
-            ? put(route('budgets.update', budget.id), { preserveScroll: true })
-            : post(route('budgets.store'), { preserveScroll: true });
+
+        if (editing) {
+            put(route('budgets.update', budget.id), {
+                preserveScroll: true,
+            });
+        } else {
+            post(route('budgets.store'), {
+                preserveScroll: true,
+            });
+        }
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -77,7 +84,7 @@ export default function BudgetForm() {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={editing ? 'Edit Budget' : 'Create Budget'} />
-            <div className="space-y-4">
+            <div className="max-w-5xl space-y-6">
                 <HeadingSmall
                     title={editing ? 'Edit Budget' : 'Create Budget'}
                     description="Set planned amounts for accounts, cost centers, and fiscal periods."

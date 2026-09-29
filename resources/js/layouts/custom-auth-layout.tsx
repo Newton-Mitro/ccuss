@@ -199,7 +199,7 @@ export default function CustomAuthLayout({
             {/* Sidebar */}
             <aside
                 className={cn(
-                    'app-sidebar z-40 flex h-screen shrink-0 flex-col overflow-hidden border-r border-sidebar-border/80 bg-sidebar text-sidebar-foreground transition-all duration-300 print:hidden',
+                    'app-sidebar z-40 flex h-screen shrink-0 flex-col overflow-hidden border-r border-sidebar-border/80 bg-sidebar text-sidebar-foreground transition-all duration-300',
                     sidebarFloating ? 'absolute top-0 left-0' : 'relative',
                     sidebarOpen ? 'w-72' : 'w-16',
                 )}
@@ -397,7 +397,7 @@ export default function CustomAuthLayout({
                     sidebarFloating && 'md:pl-16',
                 )}
             >
-                <header className="flex h-16 items-center justify-between border-b border-border/80 bg-sidebar/80 px-4 text-sidebar-foreground backdrop-blur-xl md:px-6 print:hidden">
+                <header className="flex h-16 items-center justify-between border-b border-border/80 bg-sidebar/80 px-4 text-sidebar-foreground backdrop-blur-xl md:px-6">
                     <div className="flex items-center gap-3">
                         <button
                             type="button"

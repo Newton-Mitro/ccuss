@@ -35,10 +35,6 @@ export default function ShareholdersEquityPage() {
         selectedFiscalYear || 0,
     );
 
-    const fiscalYearCode = fiscalYears.find(
-        (fy) => fy.id === Number(fiscalYear),
-    )?.code;
-
     const handleFiscalYearChange = (value) => {
         const year = Number(value);
         setFiscalYear(year);
@@ -100,13 +96,13 @@ export default function ShareholdersEquityPage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Statement of Shareholders’ Equity" />
 
-            <div className="space-y-3 print:p-4 print:text-black">
+            <div className="space-y-3">
                 <ReportExportActions
                     report="shareholders-equity"
                     query={{ fiscal_year_id: fiscalYear }}
                 />
                 {/* Header */}
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <HeadingSmall
                         title="Statement of Shareholders’ Equity"
                         description="Opening Balance + Net Profit = Closing Balance"
@@ -124,33 +120,12 @@ export default function ShareholdersEquityPage() {
                                 }))}
                             />
                         </div>
-
-                        <button
-                            onClick={() => window.print()}
-                            className="rounded-md bg-primary px-3 py-1 text-sm font-medium text-primary-foreground hover:bg-primary/80"
-                        >
-                            Print
-                        </button>
                     </div>
                 </div>
 
-                {/* Print Header */}
-                <div className="hidden text-center print:block">
-                    <h1 className="text-xl font-bold">
-                        Statement of Shareholders’ Equity
-                    </h1>
-                    {fiscalYearCode && (
-                        <p className="text-sm">Fiscal Year: {fiscalYearCode}</p>
-                    )}
-                    <p className="text-sm">
-                        Opening Balance + Net Profit = Closing Balance
-                    </p>
-                    <hr className="my-2 border-t" />
-                </div>
-
                 {/* Table */}
-                <div className="rounded-md border p-2 print:border-none">
-                    <table className="w-full border-collapse text-sm print:text-base">
+                <div className="rounded-md border p-2">
+                    <table className="w-full border-collapse text-sm">
                         <thead>
                             <tr>
                                 <th className="border-b px-2 py-1 text-left">
@@ -177,7 +152,7 @@ export default function ShareholdersEquityPage() {
                             return (
                                 <tbody key={group}>
                                     {/* Group Header */}
-                                    <tr className="bg-muted font-semibold print:bg-transparent">
+                                    <tr className="bg-muted font-semibold">
                                         <td colSpan={5} className="px-2 py-1">
                                             {group}
                                         </td>

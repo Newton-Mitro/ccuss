@@ -19,7 +19,7 @@ function exportUrl(report: string, format: string, query: Props['query']) {
 
 export default function ReportExportActions({ report, query }: Props) {
     return (
-        <div className="flex flex-wrap items-center gap-2 print:hidden">
+        <div className="flex flex-wrap items-center gap-2">
             <a
                 href={exportUrl(report, 'pdf', query)}
                 target="_blank"

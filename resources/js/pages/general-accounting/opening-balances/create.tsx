@@ -45,7 +45,7 @@ export default function OpeningBalancesCreate() {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Apply Opening Balances" />
-            <div className="space-y-4">
+            <div className="max-w-5xl space-y-6">
                 <HeadingSmall
                     title="Apply Opening Balances"
                     description="Create and post one balanced opening voucher."

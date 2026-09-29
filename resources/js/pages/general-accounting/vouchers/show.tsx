@@ -40,7 +40,7 @@ export default function VoucherView() {
             <Head title={`Voucher ${voucher.voucher_no}`} />
 
             {/* Header */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <HeadingSmall
                     title={`Voucher ${voucher.voucher_no}`}
                     description="View voucher details"
@@ -84,7 +84,7 @@ export default function VoucherView() {
             </div>
 
             {/* Print-only Header */}
-            <div className="mb-6 hidden print:block">
+            <div className="mb-6 hidden">
                 <div className="mb-2 text-center">
                     <h1 className="text-2xl font-bold tracking-wide uppercase">
                         PAYMENT VOUCHER

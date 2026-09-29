@@ -1,6 +1,6 @@
 import { SidebarItem } from '../../types';
 
-export const employeePayrollMenu: SidebarItem[] = [
+export const hrAndAdministration: SidebarItem[] = [
     {
         name: 'Employee & Payroll',
         icon: <i className="fa-solid fa-users-gear" />,

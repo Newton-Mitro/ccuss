@@ -11,7 +11,7 @@ class Role extends Model
 {
     use HasFactory, Auditable, SoftDeletes;
 
-    protected $fillable = ['name', 'slug', 'description'];
+    protected $fillable = ['name', 'slug', 'description', 'preset'];
 
     public function permissions()
     {

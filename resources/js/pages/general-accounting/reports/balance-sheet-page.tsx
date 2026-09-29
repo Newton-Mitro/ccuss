@@ -31,11 +31,6 @@ export default function BalanceSheetPage() {
         selectedFiscalYear || 0,
     );
 
-    // Get fiscal year code for display in print header
-    const fiscalYearCode = fiscalYears.find(
-        (fy) => fy.id === Number(fiscalYear),
-    )?.code;
-
     // Update report when fiscal year changes
     const handleFiscalYearChange = (value) => {
         const year = Number(value);
@@ -69,13 +64,13 @@ export default function BalanceSheetPage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Balance Sheet Report" />
 
-            <div className="space-y-3 text-foreground print:p-4 print:text-black">
+            <div className="space-y-3 text-foreground">
                 <ReportExportActions
                     report="balance-sheet"
                     query={{ fiscal_year_id: fiscalYear }}
                 />
-                {/* Screen Header + Fiscal Year + Print Button */}
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
+                {/* Screen Header + Fiscal Year */}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <HeadingSmall
                         title="Balance Sheet Report"
                         description="Assets = Liabilities + Equity"
@@ -92,35 +87,19 @@ export default function BalanceSheetPage() {
                                 }))}
                             />
                         </div>
-                        <button
-                            onClick={() => window.print()}
-                            className="ml-2 rounded-md bg-primary px-3 py-1 text-sm font-medium text-primary-foreground hover:bg-primary/80"
-                        >
-                            Print
-                        </button>
                     </div>
                 </div>
 
-                {/* Print-only Header */}
-                <div className="mb-4 hidden text-center print:block">
-                    <h1 className="text-xl font-bold">Balance Sheet Report</h1>
-                    {fiscalYearCode && (
-                        <p className="text-sm">Fiscal Year: {fiscalYearCode}</p>
-                    )}
-                    <p className="text-sm">Assets = Liabilities + Equity</p>
-                    <hr className="my-2 border-t" />
-                </div>
-
                 {/* Table & Totals */}
-                <div className="print-area rounded-md border p-2 print:rounded-none print:border-none">
-                    <table className="w-full border-collapse text-sm print:text-base">
-                        <thead className="sticky top-0 bg-muted text-sm text-muted-foreground print:bg-transparent">
+                <div className="rounded-md border p-2">
+                    <table className="w-full border-collapse text-sm">
+                        <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
                                 {['Category', 'Account Name', 'Balance'].map(
                                     (h) => (
                                         <th
                                             key={h}
-                                            className="border-b px-2 py-1 text-left font-medium text-muted-foreground print:text-black"
+                                            className="border-b px-2 py-1 text-left font-medium text-muted-foreground"
                                         >
                                             {h}
                                         </th>
@@ -133,15 +112,15 @@ export default function BalanceSheetPage() {
                                 balanceSheet.map((row) => (
                                     <tr
                                         key={row.ledger_account_id}
-                                        className="even:bg-muted/20 hover:bg-muted/10 print:bg-white"
+                                        className="even:bg-muted/20 hover:bg-muted/10"
                                     >
-                                        <td className="border px-2 py-1 print:text-black">
+                                        <td className="border px-2 py-1">
                                             {row.category}
                                         </td>
-                                        <td className="border px-2 py-1 print:text-black">
+                                        <td className="border px-2 py-1">
                                             {row.account_name}
                                         </td>
-                                        <td className="border px-2 py-1 text-right print:text-black">
+                                        <td className="border px-2 py-1 text-right">
                                             {Number(row.balance).toFixed(2)}
                                         </td>
                                     </tr>
@@ -150,22 +129,19 @@ export default function BalanceSheetPage() {
                                 <tr>
                                     <td
                                         colSpan={3}
-                                        className="px-2 py-4 text-center text-muted-foreground print:text-black"
+                                        className="px-2 py-4 text-center text-muted-foreground"
                                     >
                                         No accounts found.
                                     </td>
                                 </tr>
                             )}
                         </tbody>
-                        <tfoot className="bg-muted font-bold print:bg-transparent">
+                        <tfoot className="bg-muted font-bold">
                             <tr>
-                                <td
-                                    colSpan={2}
-                                    className="border px-2 py-1 print:text-black"
-                                >
+                                <td colSpan={2} className="border px-2 py-1">
                                     Total
                                 </td>
-                                <td className="border px-2 py-1 text-right print:text-black">
+                                <td className="border px-2 py-1 text-right">
                                     {totalBalance.toFixed(2)}
                                 </td>
                             </tr>
@@ -173,12 +149,12 @@ export default function BalanceSheetPage() {
                     </table>
 
                     {/* Totals per category */}
-                    <div className="mt-2 text-sm print:text-base">
+                    <div className="mt-2 text-sm">
                         {Object.entries(totalsByCategory).map(
                             ([category, total]) => (
                                 <div
                                     key={category}
-                                    className="flex justify-between border-b px-2 py-1 print:text-black"
+                                    className="flex justify-between border-b px-2 py-1"
                                 >
                                     <span>{category} Total:</span>
                                     <span>{total.toFixed(2)}</span>

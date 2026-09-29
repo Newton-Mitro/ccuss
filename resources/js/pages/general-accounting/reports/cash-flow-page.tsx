@@ -107,7 +107,7 @@ export default function CashFlowStatementPage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Cash Flow Statement" />
 
-            <div className="space-y-3 print:p-4 print:text-black">
+            <div className="space-y-3">
                 <ReportExportActions
                     report="cash-flow"
                     query={{
@@ -116,7 +116,7 @@ export default function CashFlowStatementPage() {
                     }}
                 />
                 {/* Header */}
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <HeadingSmall
                         title="Cash Flow Statement"
                         description="Operating, Investing & Financing Activities"
@@ -149,18 +149,11 @@ export default function CashFlowStatementPage() {
                                 ]}
                             />
                         </div>
-
-                        <button
-                            onClick={() => window.print()}
-                            className="rounded-md bg-primary px-3 py-1 text-sm font-medium text-primary-foreground hover:bg-primary/80"
-                        >
-                            Print
-                        </button>
                     </div>
                 </div>
 
                 {/* Print Header */}
-                <div className="hidden text-center print:block">
+                <div className="hidden text-center">
                     <h1 className="text-xl font-bold">Cash Flow Statement</h1>
                     {fiscalYearCode && (
                         <p className="text-sm">Fiscal Year: {fiscalYearCode}</p>
@@ -175,8 +168,8 @@ export default function CashFlowStatementPage() {
                 </div>
 
                 {/* Table */}
-                <div className="rounded-md border p-2 print:border-none">
-                    <table className="w-full border-collapse text-sm print:text-base">
+                <div className="rounded-md border p-2">
+                    <table className="w-full border-collapse text-sm">
                         <thead>
                             <tr>
                                 <th className="border-b px-2 py-1 text-left">
@@ -194,7 +187,7 @@ export default function CashFlowStatementPage() {
                         {Object.entries(grouped).map(([category, rows]) => (
                             <tbody key={category}>
                                 {/* Category Header */}
-                                <tr className="bg-muted font-semibold print:bg-transparent">
+                                <tr className="bg-muted font-semibold">
                                     <td colSpan={3} className="px-2 py-1">
                                         {category} Activities
                                     </td>

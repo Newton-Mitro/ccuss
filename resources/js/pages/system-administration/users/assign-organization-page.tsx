@@ -1,6 +1,5 @@
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import {
-    ArrowLeft,
     Building2,
     CheckCircle2,
     Mail,
@@ -76,18 +75,12 @@ export default function AssignOrganizationPage() {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Assign Organization - ${user.name}`} />
-            <div className="mx-auto max-w-5xl space-y-6">
+            <div className="max-w-5xl space-y-6">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <HeadingSmall
                         title="Assign Organization"
                         description="Select the organizations this user belongs to and choose the primary organization."
                     />
-                    <Button asChild variant="outline">
-                        <Link href={route('users.index')}>
-                            <ArrowLeft className="h-4 w-4" />
-                            Back
-                        </Link>
-                    </Button>
                 </div>
 
                 <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
