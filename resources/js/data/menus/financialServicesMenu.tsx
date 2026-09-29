@@ -2,7 +2,7 @@ import { SidebarItem } from '../../types';
 
 export const financialServicesMenu: SidebarItem[] = [
     {
-        name: 'Financial Services',
+        name: 'Financial Products',
         icon: <i className="fa-solid fa-piggy-bank" />,
         children_expanded: false,
         permission: ['financial.view'],

@@ -8,20 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { appSwal } from '@/lib/appSwal';
 import { formatDate } from '@/lib/date_util';
 import { BreadcrumbItem } from '@/types';
 import type { FinancialAccountShowPageProps } from '@/types/financial-services';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import {
-    Check,
-    CircleDollarSign,
-    Lock,
-    Pencil,
-    Plus,
-    Trash2,
-    X,
-} from 'lucide-react';
+import { CircleDollarSign, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 import { route } from 'ziggy-js';
 
@@ -233,83 +224,6 @@ export default function FinancialAccountShow() {
                 <ResourcePageHeader
                     title={account.account_no}
                     description={`${account.holder?.name ?? account.name ?? 'Unassigned'} · ${account.product?.name ?? account.account_type}`}
-                    action={
-                        <div className="flex gap-2">
-                            {account.account_type !== 'LOAN' && (
-                                <Button asChild size="sm" variant="outline">
-                                    <Link
-                                        href={getEditRoute(
-                                            account.account_type,
-                                            account.id,
-                                        )}
-                                    >
-                                        Edit details
-                                    </Link>
-                                </Button>
-                            )}
-                            {account.status === 'PENDING' && (
-                                <Button
-                                    size="sm"
-                                    onClick={() => {
-                                        appSwal
-                                            .fire({
-                                                title: 'Activate this account?',
-                                                text: `Activate ${account.account_no}? This will set the account to active.`,
-                                                icon: 'warning',
-                                                showCancelButton: true,
-                                                confirmButtonText:
-                                                    'Activate account',
-                                                cancelButtonText: 'Cancel',
-                                            })
-                                            .then((result) => {
-                                                if (!result.isConfirmed) return;
-
-                                                router.post(
-                                                    route(
-                                                        'financial-accounts.activate',
-                                                        account.id,
-                                                    ),
-                                                );
-                                            });
-                                    }}
-                                >
-                                    <Check className="mr-1 h-4 w-4" /> Activate
-                                </Button>
-                            )}
-                            {['ACTIVE', 'DORMANT', 'FROZEN'].includes(
-                                account.status,
-                            ) && (
-                                <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => {
-                                        appSwal
-                                            .fire({
-                                                title: 'Close this account?',
-                                                text: `Close ${account.account_no}? This will change the account status.`,
-                                                icon: 'warning',
-                                                showCancelButton: true,
-                                                confirmButtonText:
-                                                    'Close account',
-                                                cancelButtonText: 'Cancel',
-                                            })
-                                            .then((result) => {
-                                                if (!result.isConfirmed) return;
-
-                                                router.post(
-                                                    route(
-                                                        'financial-accounts.close',
-                                                        account.id,
-                                                    ),
-                                                );
-                                            });
-                                    }}
-                                >
-                                    <Lock className="mr-1 h-4 w-4" /> Close
-                                </Button>
-                            )}
-                        </div>
-                    }
                 />
                 <div className="grid gap-3 sm:grid-cols-3">
                     <div className="rounded-lg border bg-card p-3">
@@ -1537,18 +1451,5 @@ function getIndexRoute(category: string): string {
             return route('loan-accounts.index');
         default:
             return route('financial-accounts.index');
-    }
-}
-
-function getEditRoute(category: string, accountId: number): string {
-    switch (category) {
-        case 'SAVINGS':
-            return route('financial-accounts.savings.edit', accountId);
-        case 'SHARE':
-            return route('financial-accounts.share.edit', accountId);
-        case 'FIXED_DEPOSIT':
-            return route('financial-accounts.fixed.edit', accountId);
-        default:
-            return route('financial-accounts.recurring.edit', accountId);
     }
 }

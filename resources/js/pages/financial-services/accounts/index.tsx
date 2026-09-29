@@ -3,12 +3,11 @@ import {
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Eye, Plus } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
@@ -39,7 +38,6 @@ export default function FinancialAccountIndex() {
     const [search, setSearch] = useState(filters.search ?? '');
     const categoryLabel = category?.replaceAll('_', ' ') ?? 'All';
     const indexRoute = getIndexRoute(category);
-    const createRoute = getCreateRoute(category);
 
     useEffect(() => {
         const timeout = setTimeout(
@@ -82,13 +80,6 @@ export default function FinancialAccountIndex() {
                         category
                             ? `Manage ${categoryLabel.toLowerCase()} accounts and member activity.`
                             : 'Manage member, deposit, loan, cash, and bank accounts.'
-                    }
-                    action={
-                        <Button asChild size="sm">
-                            <Link href={createRoute}>
-                                <Plus className="mr-1 h-4 w-4" /> Open account
-                            </Link>
-                        </Button>
                     }
                 />
                 <Input
@@ -217,23 +208,6 @@ function getIndexRoute(category?: string | null): string {
             return route('loan-accounts.index');
         default:
             return route('financial-accounts.index');
-    }
-}
-
-function getCreateRoute(category?: string | null): string {
-    switch (category) {
-        case 'SAVINGS':
-            return route('financial-accounts.savings.create');
-        case 'SHARE':
-            return route('financial-accounts.share.create');
-        case 'FIXED_DEPOSIT':
-            return route('financial-accounts.fixed.create');
-        case 'RECURRING_DEPOSIT':
-            return route('financial-accounts.recurring.create');
-        case 'LOAN':
-            return route('loan-applications.create');
-        default:
-            return route('financial-accounts.create');
     }
 }
 

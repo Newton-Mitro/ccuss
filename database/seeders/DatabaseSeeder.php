@@ -34,21 +34,26 @@ class DatabaseSeeder extends Seeder
                 GeneralAccountingSeeder::class,
                 CustomerSeeder::class,
                 FinancialServicesSeeder::class,
-                \Database\Seeders\AccountDefaultRulesSeeder::class,
+                AccountDefaultRulesSeeder::class,
                 TreasuryAndCashSeeder::class,
             ]);
         });
 
-        $organization = Organization::query()
+        $organization01 = Organization::query()
             ->where('code', 'ORG-001')
             ->firstOrFail();
 
+        $organization02 = Organization::query()
+            ->where('code', 'ORG-002')
+            ->firstOrFail();
+
         $user->forceFill([
-            'organization_id' => $organization->id,
-            'branch_id' => $organization->branches()->oldest('id')->value('id'),
+            'organization_id' => $organization01->id,
+            'branch_id' => $organization01->branches()->oldest('id')->value('id'),
         ])->save();
 
-        $user->organizations()->syncWithoutDetaching([$organization->id]);
+        $user->organizations()->syncWithoutDetaching([$organization01->id]);
+        $user->organizations()->syncWithoutDetaching([$organization02->id]);
         $user->branches()->syncWithoutDetaching([$user->branch_id]);
 
         // Assign role
