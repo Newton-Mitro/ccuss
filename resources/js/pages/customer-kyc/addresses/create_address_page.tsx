@@ -1,5 +1,5 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
+import { CheckCheck, Loader2 } from 'lucide-react';
 
 import React from 'react';
 import { route } from 'ziggy-js';
@@ -24,8 +24,6 @@ const Create = () => {
     const { customer } = usePage<Props>().props;
 
     useFlashToastHandler();
-
-    const handleBack = () => window.history.back();
 
     const { data, setData, post, processing, errors } = useForm({
         customer_id: customer.id,
@@ -66,16 +64,6 @@ const Create = () => {
                     title="Create Customer Address"
                     description="Add new address for customer."
                 />
-
-                <div className="">
-                    <button
-                        onClick={handleBack}
-                        className="flex items-center gap-1 rounded border border-border bg-card px-3 py-1.5 text-sm text-card-foreground transition-all hover:bg-card/50"
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                        <span className="hidden sm:inline">Back</span>
-                    </button>
-                </div>
             </div>
 
             <form

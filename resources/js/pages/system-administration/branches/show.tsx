@@ -1,6 +1,6 @@
 import type { BranchShowPageProps } from '@/types/system-administration';
 import { Head } from '@inertiajs/react';
-import { ArrowLeft, Clock, Hash, MapPin } from 'lucide-react';
+import { Clock, Hash, MapPin } from 'lucide-react';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
@@ -30,8 +30,6 @@ export default function Show({ branch }: BranchShowPageProps) {
 
     const hasCoordinates = branch.latitude && branch.longitude;
 
-    const handleBack = () => window.history.back();
-
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Branch: ${branch.name}`} />
@@ -43,15 +41,6 @@ export default function Show({ branch }: BranchShowPageProps) {
                         title="Branch Details"
                         description="View and manage branch details."
                     />
-                    <div className="">
-                        <button
-                            onClick={handleBack}
-                            className="flex items-center gap-1 rounded border border-border bg-card px-3 py-1.5 text-sm text-card-foreground transition-all hover:bg-card/50"
-                        >
-                            <ArrowLeft className="h-4 w-4" />
-                            <span className="hidden sm:inline">Back</span>
-                        </button>
-                    </div>
                 </div>
 
                 {/* Overview Card */}

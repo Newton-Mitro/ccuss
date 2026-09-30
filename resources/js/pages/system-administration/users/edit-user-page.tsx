@@ -1,7 +1,7 @@
 import type { UserFormPageProps } from '@/types/system-administration';
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { ArrowLeft, CheckCheck, Key, Loader2 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { CheckCheck, Key, Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
@@ -17,7 +17,7 @@ import {
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
-import type { Permission, Role } from '../../../types/user';
+import type { Permission } from '../../../types/user';
 
 const UserForm = ({
     user,
@@ -27,8 +27,6 @@ const UserForm = ({
     auth,
 }: UserFormPageProps) => {
     useFlashToastHandler();
-
-    const handleBack = () => window.history.back();
 
     const isEdit = !!user;
 
@@ -105,29 +103,11 @@ const UserForm = ({
 
     const allRoles = [...systemAdminRole, ...filteredRoles];
 
-    const [selectedRole, setSelectedRole] = useState<Role | null>(
-        allRoles[0] || null,
-    );
-
     const [selectAll, setSelectAll] = useState(false);
 
     useFlashToastHandler();
 
-    useEffect(() => {
-        if (!selectedRole) return;
-
-        const initialPermissions =
-            selectedRole.permissions?.map((p) => p.id) || [];
-        setData('permissions', initialPermissions);
-
-        // Wrap setSelectAll in a microtask to avoid sync state update in effect
-        Promise.resolve().then(() => {
-            setSelectAll(initialPermissions.length === permissions.length);
-        });
-    }, [selectedRole, permissions]);
-
     const toggleSelectAll = () => {
-        if (!selectedRole) return;
         if (selectAll) {
             setData('permissions', []);
             setSelectAll(false);
@@ -164,15 +144,6 @@ const UserForm = ({
                     description="Manage user details and roles."
                 />
                 <div className="flex flex-wrap gap-2">
-                    <div className="">
-                        <button
-                            onClick={handleBack}
-                            className="flex items-center gap-1 rounded border border-border bg-card px-3 py-1.5 text-sm text-card-foreground transition-all hover:bg-card/50"
-                        >
-                            <ArrowLeft className="h-4 w-4" />
-                            <span className="hidden sm:inline">Back</span>
-                        </button>
-                    </div>
                     <Link
                         href="/users"
                         className="flex items-center gap-1 rounded bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition hover:bg-secondary/90"

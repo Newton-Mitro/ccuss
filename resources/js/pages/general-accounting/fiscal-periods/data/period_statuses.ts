@@ -5,14 +5,14 @@ export const periodStatuses = [
     },
     {
         label: 'Open',
-        value: 'open',
+        value: 'OPEN',
     },
     {
         label: 'Closed',
-        value: 'closed',
+        value: 'CLOSED',
     },
     {
         label: 'Locked',
-        value: 'locked',
+        value: 'LOCKED',
     },
 ];

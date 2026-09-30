@@ -13,6 +13,7 @@ import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
+import { periodStatuses } from './data/period_statuses';
 
 export default function FiscalPeriodForm() {
     const { fiscalPeriod, fiscalYears } =
@@ -46,12 +47,6 @@ export default function FiscalPeriodForm() {
         { title: 'General Accounting', href: '' },
         { title: 'Fiscal Periods', href: route('fiscal-periods.index') },
         { title: fiscalPeriod?.id ? 'Edit' : 'Create', href: '' },
-    ];
-
-    const statusOptions = [
-        { value: 'open', label: 'Open' },
-        { value: 'closed', label: 'Closed' },
-        { value: 'locked', label: 'Locked' },
     ];
 
     return (
@@ -137,13 +132,8 @@ export default function FiscalPeriodForm() {
                             <Label className="text-xs">Status</Label>
                             <Select
                                 value={data.status}
-                                onChange={(value) =>
-                                    setData(
-                                        'status',
-                                        value as 'OPEN' | 'CLOSED',
-                                    )
-                                }
-                                options={statusOptions}
+                                onChange={(value) => setData('status', value)}
+                                options={periodStatuses}
                             />
                             <InputError message={errors.status} />
                         </div>

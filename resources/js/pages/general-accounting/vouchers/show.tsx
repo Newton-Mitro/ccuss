@@ -1,6 +1,6 @@
 import type { VoucherViewPageProps } from '@/types/general-accounting';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { ArrowLeft, Edit2, Printer } from 'lucide-react';
+import { Edit2, Printer } from 'lucide-react';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
@@ -23,8 +23,6 @@ export default function VoucherView() {
         return { totalDebit, totalCredit };
     };
 
-    const handleBack = () => window.history.back();
-
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Vouchers', href: route('vouchers.index') },
         { title: `Voucher ${voucher.voucher_no}`, href: '' },
@@ -46,16 +44,6 @@ export default function VoucherView() {
                     description="View voucher details"
                 />
                 <div className="flex gap-2">
-                    <div className="">
-                        <button
-                            onClick={handleBack}
-                            className="flex items-center gap-1 rounded border border-border bg-card px-3 py-1.5 text-sm text-card-foreground transition-all hover:bg-card/50"
-                        >
-                            <ArrowLeft className="h-4 w-4" />
-                            <span className="hidden sm:inline">Back</span>
-                        </button>
-                    </div>
-
                     <Link
                         href={
                             isDisabled

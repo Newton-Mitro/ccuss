@@ -1,6 +1,6 @@
 import type { CustomerPageProps } from '@/types/customer-kyc-pages';
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { ArrowLeft, CheckCheck, ListFilter, Loader2 } from 'lucide-react';
+import { CheckCheck, ListFilter, Loader2 } from 'lucide-react';
 import React, { useState } from 'react';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
@@ -36,8 +36,6 @@ import {
 
 const Edit = ({ customer }: CustomerPageProps) => {
     useFlashToastHandler();
-
-    const handleBack = () => window.history.back();
 
     const { data, setData, processing, errors, clearErrors } = useForm({
         customer_no: customer.customer_no,
@@ -95,7 +93,7 @@ const Edit = ({ customer }: CustomerPageProps) => {
             {
                 forceFormData: true,
                 preserveScroll: true,
-                onError: (errors) => {},
+                onError: () => {},
             },
         );
     };
@@ -147,16 +145,6 @@ const Edit = ({ customer }: CustomerPageProps) => {
                     description="Update customer information."
                 />
                 <div className="flex flex-wrap gap-2">
-                    <div className="">
-                        <button
-                            onClick={handleBack}
-                            className="flex items-center gap-1 rounded border border-border bg-card px-3 py-1.5 text-sm text-card-foreground transition-all hover:bg-card/50"
-                        >
-                            <ArrowLeft className="h-4 w-4" />
-                            <span className="hidden sm:inline">Back</span>
-                        </button>
-                    </div>
-
                     <Link
                         href={route('customers.index')}
                         className="flex items-center gap-1 rounded border border-border bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition-all hover:bg-secondary/50"

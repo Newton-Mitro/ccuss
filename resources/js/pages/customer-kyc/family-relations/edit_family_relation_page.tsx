@@ -1,5 +1,5 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { ArrowLeft, CheckCheck, ListFilter, Loader2 } from 'lucide-react';
+import { CheckCheck, ListFilter, Loader2 } from 'lucide-react';
 
 import React, { useState } from 'react';
 import { route } from 'ziggy-js';
@@ -25,8 +25,6 @@ const Edit = () => {
     );
 
     useFlashToastHandler();
-
-    const handleBack = () => window.history.back();
 
     const { data, setData, put, processing, errors } = useForm({
         customer_id: customer.id,
@@ -71,10 +69,6 @@ const Edit = () => {
                 />
 
                 <div className="flex gap-2">
-                    <button onClick={handleBack} className="btn-muted">
-                        <ArrowLeft className="h-4 w-4" />
-                    </button>
-
                     <Link
                         href={route('customers.show', customer.id)}
                         className="btn-secondary"

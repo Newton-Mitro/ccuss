@@ -1,8 +1,6 @@
 import { Head } from '@inertiajs/react';
 
 export default function Forbidden() {
-    const handleBack = () => window.history.back();
-
     return (
         <>
             <Head title="Permission Denied" />
@@ -19,13 +17,6 @@ export default function Forbidden() {
                         You do not have the required permission to access this
                         page.
                     </p>
-
-                    <button
-                        onClick={handleBack}
-                        className="mt-6 inline-block rounded bg-primary px-5 py-2 text-primary-foreground hover:bg-primary/90"
-                    >
-                        Go to Dashboard
-                    </button>
                 </div>
             </div>
         </>

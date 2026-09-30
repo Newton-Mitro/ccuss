@@ -27,7 +27,7 @@ return new class extends Migration {
             $table->string('name', 50);
             $table->date('start_date');
             $table->date('end_date');
-            $table->enum('status', ['OPEN', 'CLOSED'])->default('OPEN');
+            $table->enum('status', ['OPEN', 'LOCKED', 'CLOSED'])->default('OPEN');
             $table->timestamps();
             $table->unique(['fiscal_year_id', 'name']);
             $table->index(['fiscal_year_id', 'start_date', 'end_date',]);

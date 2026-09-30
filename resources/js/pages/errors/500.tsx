@@ -1,8 +1,6 @@
 import { Head } from '@inertiajs/react';
 
 export default function ServerError() {
-    const handleBack = () => window.history.back();
-
     return (
         <>
             <Head title="Internal Server Error" />
@@ -19,13 +17,6 @@ export default function ServerError() {
                         Something went wrong on our server. Please try again
                         later.
                     </p>
-
-                    <button
-                        onClick={handleBack}
-                        className="mt-6 inline-block rounded bg-primary px-5 py-2 text-primary-foreground hover:bg-primary/90"
-                    >
-                        Go to Dashboard
-                    </button>
                 </div>
             </div>
         </>

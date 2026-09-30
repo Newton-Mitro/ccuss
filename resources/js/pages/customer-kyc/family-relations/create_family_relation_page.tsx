@@ -1,5 +1,5 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { ArrowLeft, CheckCheck, ListFilter, Loader2 } from 'lucide-react';
+import { CheckCheck, ListFilter, Loader2 } from 'lucide-react';
 
 import React, { useState } from 'react';
 import { route } from 'ziggy-js';
@@ -21,7 +21,6 @@ const Create = () => {
 
     useFlashToastHandler();
 
-    const handleBack = () => window.history.back();
     const [selectedRelative, setSelectedRelative] = useState<Customer | null>(
         null,
     );
@@ -62,16 +61,6 @@ const Create = () => {
                 />
 
                 <div className="flex items-center gap-2">
-                    <div className="">
-                        <button
-                            onClick={handleBack}
-                            className="flex items-center gap-1 rounded border border-border bg-card px-3 py-1.5 text-sm text-card-foreground transition-all hover:bg-card/50"
-                        >
-                            <ArrowLeft className="h-4 w-4" />
-                            <span className="hidden sm:inline">Back</span>
-                        </button>
-                    </div>
-
                     <Link
                         href={route('customers.show', customer.id)}
                         className="btn-secondary"

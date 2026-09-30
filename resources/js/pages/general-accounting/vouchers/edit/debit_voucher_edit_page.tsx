@@ -1,5 +1,5 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { ArrowLeft, CheckCheck, Loader2, Plus, Trash2 } from 'lucide-react';
+import { CheckCheck, Loader2, Plus, Trash2 } from 'lucide-react';
 import { useMemo } from 'react';
 import toast from 'react-hot-toast';
 
@@ -62,23 +62,14 @@ interface VoucherFormData {
 /* -------------------------------------------------------
  | Component
  ------------------------------------------------------- */
-export default function EditDebitVoucherEntry({
-    backUrl,
-}: {
-    backUrl: string;
-}) {
+export default function EditDebitVoucherEntry() {
     const {
         voucher,
         fiscalYears,
         fiscalPeriods,
-        cashSubledgerId,
         cashSubledgers,
         branches,
-        cashLedgerId,
         cashLedgers,
-        activeFiscalYearId,
-        activeFiscalPeriodId,
-        userBranchId,
     } = usePage().props as any;
 
     const isPosted = voucher?.status === 'POSTED';
@@ -107,8 +98,6 @@ export default function EditDebitVoucherEntry({
     const errors = useMemo(() => normalizeErrors(rawErrors), [rawErrors]);
 
     useFlashToastHandler();
-
-    const handleBack = () => window.history.back();
 
     const addLine = () => {
         if (disabled) return;
@@ -230,15 +219,6 @@ export default function EditDebitVoucherEntry({
                     title="Edit Debit / Payment Voucher"
                     description="Update voucher details"
                 />
-                <div className="">
-                    <button
-                        onClick={handleBack}
-                        className="flex items-center gap-1 rounded border border-border bg-card px-3 py-1.5 text-sm text-card-foreground transition-all hover:bg-card/50"
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                        <span className="hidden sm:inline">Back</span>
-                    </button>
-                </div>
             </div>
 
             {/* Form */}
