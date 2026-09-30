@@ -1,4 +1,4 @@
-import { Head, usePage } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { Heart, Sparkles } from 'lucide-react';
 
@@ -6,35 +6,17 @@ import AppLogo from '../components/app-logo';
 import CustomAuthLayout from '../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../types';
 
-interface User {
-    name?: string;
-    email?: string;
-}
-
 interface Quote {
     message?: string;
 }
 
-interface PageProps {
-    auth: {
-        user: User;
-    };
-    quote: Quote;
-}
-
 export default function HomePage({ quote }: { quote: Quote }) {
-    const { auth } = usePage<PageProps>().props;
-
-    const user = auth?.user;
-
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Home',
             href: '#',
         },
     ];
-
-    const firstName = user?.name?.split(' ')[0] ?? 'User';
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
