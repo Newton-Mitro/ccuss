@@ -89,28 +89,34 @@ export default function FinancialAccountIndex() {
                     className="w-full bg-card sm:w-96"
                 />
                 <ResourceTableCard className="h-[calc(100vh-320px)] md:h-[calc(100vh-300px)]">
-                    <div className="overflow-auto">
-                        <table className="w-full min-w-190 text-sm">
-                            <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
-                                <tr>
-                                    {[
-                                        'Account',
-                                        'Holder',
-                                        'Product',
-                                        'Type',
-                                        'Balance',
-                                        'Status',
-                                        '',
-                                    ].map((heading) => (
-                                        <th
-                                            key={heading}
-                                            className="border-b p-2 text-left text-sm font-medium"
-                                        >
-                                            {heading}
-                                        </th>
-                                    ))}
+                    <div className="h-full overflow-auto">
+                        <table className="w-full min-w-[900px] table-fixed text-sm">
+                            <thead className="sticky top-0 z-10 bg-muted text-muted-foreground">
+                                <tr className="border-b">
+                                    <th className="w-[15%] px-3 py-2.5 text-left font-medium">
+                                        Account
+                                    </th>
+                                    <th className="w-[20%] px-3 py-2.5 text-left font-medium">
+                                        Holder
+                                    </th>
+                                    <th className="w-[17%] px-3 py-2.5 text-left font-medium">
+                                        Product
+                                    </th>
+                                    <th className="w-[15%] px-3 py-2.5 text-left font-medium">
+                                        Type
+                                    </th>
+                                    <th className="w-[13%] px-3 py-2.5 text-right font-medium">
+                                        Balance
+                                    </th>
+                                    <th className="w-[10%] px-3 py-2.5 text-center font-medium">
+                                        Status
+                                    </th>
+                                    <th className="w-[10%] px-3 py-2.5 text-center font-medium">
+                                        Actions
+                                    </th>
                                 </tr>
                             </thead>
+
                             <tbody>
                                 {accounts.data.length === 0 ? (
                                     <tr>
@@ -127,31 +133,35 @@ export default function FinancialAccountIndex() {
                                     accounts.data.map((account) => (
                                         <tr
                                             key={account.id}
-                                            className="border-b even:bg-muted hover:bg-accent/20"
+                                            className="border-b even:bg-muted/40 hover:bg-accent/20"
                                         >
-                                            <td className="px-2 py-1 font-mono text-xs">
+                                            <td className="px-3 py-2.5 align-middle font-mono text-xs">
                                                 {account.account_no}
                                             </td>
-                                            <td className="px-2 py-1">
+
+                                            <td className="truncate px-3 py-2.5 align-middle">
                                                 {account.holder?.name ??
                                                     account.name ??
                                                     '-'}
                                             </td>
-                                            <td className="px-2 py-1">
+
+                                            <td className="truncate px-3 py-2.5 align-middle">
                                                 {account.product?.name ?? '-'}
                                             </td>
-                                            <td className="px-2 py-1">
-                                                {account.account_type.replaceAll(
-                                                    '_',
-                                                    ' ',
-                                                )}
+
+                                            <td className="px-3 py-2.5 align-middle capitalize">
+                                                {account.account_type
+                                                    .replaceAll('_', ' ')
+                                                    .toLowerCase()}
                                             </td>
-                                            <td className="px-2 py-1 text-right tabular-nums">
+
+                                            <td className="px-3 py-2.5 text-right align-middle tabular-nums">
                                                 {Number(
                                                     account.balance,
                                                 ).toFixed(4)}
                                             </td>
-                                            <td className="px-2 py-1">
+
+                                            <td className="px-3 py-2.5 text-center align-middle">
                                                 <StatusBadge
                                                     tone={
                                                         account.status ===
@@ -163,13 +173,19 @@ export default function FinancialAccountIndex() {
                                                     {account.status}
                                                 </StatusBadge>
                                             </td>
-                                            <td className="px-2 py-1 text-right">
-                                                <Link
-                                                    href={getShowRoute(account)}
-                                                    title="View account"
-                                                >
-                                                    <Eye className="ml-auto h-4 w-4" />
-                                                </Link>
+
+                                            <td className="px-3 py-2.5 text-center align-middle">
+                                                <div className="flex items-center justify-center">
+                                                    <Link
+                                                        href={getShowRoute(
+                                                            account,
+                                                        )}
+                                                        title="View account"
+                                                        className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-accent"
+                                                    >
+                                                        <Eye className="h-4 w-4" />
+                                                    </Link>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))

@@ -40,66 +40,129 @@ export default function BudgetEntries() {
                     <>
                         <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
                             <ResourceTableCard>
-                                <table className="w-full text-sm">
-                                    <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
+                                <table className="w-full table-fixed border-collapse text-sm">
+                                    <colgroup>
+                                        <col className="w-[18%]" />
+                                        <col className="w-[25%]" />
+                                        <col className="w-[22%]" />
+                                        <col className="w-[15%]" />
+                                        <col className="w-[12%]" />
+                                        <col className="w-[8%]" />
+                                    </colgroup>
+
+                                    <thead className="sticky top-0 z-10 bg-muted text-sm text-muted-foreground">
                                         <tr>
-                                            <th className="border-b border-border px-4 py-3">
+                                            <th className="border-b border-border px-4 py-3 text-left font-medium">
                                                 Budget
                                             </th>
-                                            <th className="border-b border-border px-4 py-3">
+
+                                            <th className="border-b border-border px-4 py-3 text-left font-medium">
                                                 Account
                                             </th>
-                                            <th className="border-b border-border px-4 py-3">
-                                                Cost center
+
+                                            <th className="border-b border-border px-4 py-3 text-left font-medium">
+                                                Cost Center
                                             </th>
-                                            <th className="border-b border-border px-4 py-3">
+
+                                            <th className="border-b border-border px-4 py-3 text-left font-medium">
                                                 Period
                                             </th>
-                                            <th className="border-b border-border px-4 py-3">
+
+                                            <th className="border-b border-border px-4 py-3 text-right font-medium">
                                                 Amount
                                             </th>
-                                            <th className="border-b border-border px-4 py-3">
+
+                                            <th className="border-b border-border px-4 py-3 text-right font-medium">
                                                 Action
                                             </th>
                                         </tr>
                                     </thead>
+
                                     <tbody>
                                         {entries.data.map((entry: any) => (
                                             <tr
                                                 key={entry.id}
-                                                className="border-b even:bg-muted hover:bg-accent/20"
+                                                className="border-b border-border/80 transition-colors last:border-b-0 even:bg-muted/40 hover:bg-primary/5"
                                             >
-                                                <td className="px-4 py-3 font-medium">
-                                                    {entry.budget?.name}
+                                                {/* Budget */}
+                                                <td className="px-4 py-3 align-middle font-medium text-foreground">
+                                                    <span
+                                                        className="block truncate"
+                                                        title={
+                                                            entry.budget
+                                                                ?.name || ''
+                                                        }
+                                                    >
+                                                        {entry.budget?.name ||
+                                                            '-'}
+                                                    </span>
                                                 </td>
-                                                <td className="px-4 py-3">
-                                                    {entry.account?.code} -{' '}
-                                                    {entry.account?.name}
+
+                                                {/* Account */}
+                                                <td className="px-4 py-3 align-middle text-foreground">
+                                                    <span
+                                                        className="block truncate"
+                                                        title={
+                                                            entry.account
+                                                                ? `${entry.account.code} - ${entry.account.name}`
+                                                                : ''
+                                                        }
+                                                    >
+                                                        {entry.account
+                                                            ? `${entry.account.code} - ${entry.account.name}`
+                                                            : '-'}
+                                                    </span>
                                                 </td>
-                                                <td className="px-4 py-3 text-muted-foreground">
-                                                    {entry.cost_center
-                                                        ? `${entry.cost_center.code} - ${entry.cost_center.name}`
-                                                        : 'All'}
+
+                                                {/* Cost Center */}
+                                                <td className="px-4 py-3 align-middle text-muted-foreground">
+                                                    <span
+                                                        className="block truncate"
+                                                        title={
+                                                            entry.cost_center
+                                                                ? `${entry.cost_center.code} - ${entry.cost_center.name}`
+                                                                : 'All cost centers'
+                                                        }
+                                                    >
+                                                        {entry.cost_center
+                                                            ? `${entry.cost_center.code} - ${entry.cost_center.name}`
+                                                            : 'All'}
+                                                    </span>
                                                 </td>
-                                                <td className="px-4 py-3 text-muted-foreground">
+
+                                                {/* Period */}
+                                                <td className="px-4 py-3 align-middle whitespace-nowrap text-muted-foreground">
                                                     {entry.fiscal_period
                                                         ?.name ?? 'Annual'}
                                                 </td>
-                                                <td className="px-4 py-3 font-medium">
+
+                                                {/* Amount */}
+                                                <td className="px-4 py-3 text-right align-middle font-medium tabular-nums">
                                                     {Number(
                                                         entry.amount,
                                                     ).toFixed(2)}
                                                 </td>
-                                                <td className="px-4 py-3">
-                                                    <Link
-                                                        href={route(
-                                                            'budgets.show',
-                                                            entry.budget_id,
-                                                        )}
-                                                        title="View budget"
-                                                    >
-                                                        <Eye className="h-4 w-4" />
-                                                    </Link>
+
+                                                {/* Action */}
+                                                <td className="px-4 py-3 align-middle">
+                                                    <div className="flex justify-end">
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            asChild
+                                                            title="View budget"
+                                                        >
+                                                            <Link
+                                                                href={route(
+                                                                    'budgets.show',
+                                                                    entry.budget_id,
+                                                                )}
+                                                            >
+                                                                <Eye className="h-4 w-4 text-primary" />
+                                                            </Link>
+                                                        </Button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}

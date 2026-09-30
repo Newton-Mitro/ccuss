@@ -115,9 +115,6 @@ export default function FiscalPeriodIndex() {
                             options={periodStatuses}
                         />
                     </div>
-                    <span className="text-sm text-muted-foreground">
-                        {fiscalPeriods.data.length} records
-                    </span>
                 </div>
 
                 {fiscalPeriods.data.length === 0 ? (
@@ -140,24 +137,41 @@ export default function FiscalPeriodIndex() {
                     <>
                         <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
                             <ResourceTableCard>
-                                <table className="w-full border-collapse">
-                                    <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
+                                <table className="w-full table-fixed border-collapse text-sm">
+                                    <colgroup>
+                                        <col className="w-[20%]" />
+                                        <col className="w-[20%]" />
+                                        <col className="w-[15%]" />
+                                        <col className="w-[15%]" />
+                                        <col className="w-[12%]" />
+                                        <col className="w-[18%]" />
+                                    </colgroup>
+
+                                    <thead className="sticky top-0 z-10 bg-muted text-sm text-muted-foreground">
                                         <tr>
-                                            {[
-                                                'Period Name',
-                                                'Fiscal Year',
-                                                'Start Date',
-                                                'End Date',
-                                                'Status', // ✅ FIXED
-                                                'Actions',
-                                            ].map((h) => (
-                                                <th
-                                                    key={h}
-                                                    className="border-b border-border px-4 py-3 font-medium"
-                                                >
-                                                    {h}
-                                                </th>
-                                            ))}
+                                            <th className="border-b border-border px-4 py-3 text-left font-medium">
+                                                Period Name
+                                            </th>
+
+                                            <th className="border-b border-border px-4 py-3 text-left font-medium">
+                                                Fiscal Year
+                                            </th>
+
+                                            <th className="border-b border-border px-4 py-3 text-left font-medium">
+                                                Start Date
+                                            </th>
+
+                                            <th className="border-b border-border px-4 py-3 text-left font-medium">
+                                                End Date
+                                            </th>
+
+                                            <th className="border-b border-border px-4 py-3 text-left font-medium">
+                                                Status
+                                            </th>
+
+                                            <th className="border-b border-border px-4 py-3 text-right font-medium">
+                                                Actions
+                                            </th>
                                         </tr>
                                     </thead>
 
@@ -165,27 +179,44 @@ export default function FiscalPeriodIndex() {
                                         {fiscalPeriods.data.map((fp) => (
                                             <tr
                                                 key={fp.id}
-                                                className="border-b border-border/80 transition-colors even:bg-muted/40 hover:bg-primary/5"
+                                                className="border-b border-border/80 transition-colors last:border-b-0 even:bg-muted/40 hover:bg-primary/5"
                                             >
-                                                <td className="px-4 py-3 font-medium">
-                                                    {fp.name}
+                                                {/* Period Name */}
+                                                <td className="px-4 py-3 align-middle font-medium text-foreground">
+                                                    <span
+                                                        className="block truncate"
+                                                        title={fp.name}
+                                                    >
+                                                        {fp.name}
+                                                    </span>
                                                 </td>
 
-                                                <td className="px-4 py-3 text-muted-foreground">
-                                                    {fp.fiscal_year?.name ||
-                                                        '-'}
+                                                {/* Fiscal Year */}
+                                                <td className="px-4 py-3 align-middle text-muted-foreground">
+                                                    <span
+                                                        className="block truncate"
+                                                        title={
+                                                            fp.fiscal_year
+                                                                ?.name || ''
+                                                        }
+                                                    >
+                                                        {fp.fiscal_year?.name ||
+                                                            '-'}
+                                                    </span>
                                                 </td>
 
-                                                <td className="px-4 py-3 text-muted-foreground">
+                                                {/* Start Date */}
+                                                <td className="px-4 py-3 align-middle whitespace-nowrap text-muted-foreground">
                                                     {formatDate(fp.start_date)}
                                                 </td>
 
-                                                <td className="px-4 py-3 text-muted-foreground">
+                                                {/* End Date */}
+                                                <td className="px-4 py-3 align-middle whitespace-nowrap text-muted-foreground">
                                                     {formatDate(fp.end_date)}
                                                 </td>
 
-                                                {/* 🔥 Status */}
-                                                <td className="px-4 py-3">
+                                                {/* Status */}
+                                                <td className="px-4 py-3 align-middle whitespace-nowrap">
                                                     <ThemeStatusBadge
                                                         tone={
                                                             fp.status === 'OPEN'
@@ -197,27 +228,40 @@ export default function FiscalPeriodIndex() {
                                                     </ThemeStatusBadge>
                                                 </td>
 
-                                                <td className="px-4 py-3">
-                                                    <div className="flex items-center gap-1.5">
-                                                        <Link
-                                                            href={route(
-                                                                'fiscal-periods.edit',
-                                                                fp.id,
-                                                            )}
-                                                            className="text-success"
+                                                {/* Actions */}
+                                                <td className="px-4 py-3 align-middle">
+                                                    <div className="flex items-center justify-end gap-1.5">
+                                                        {/* Edit */}
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            asChild
                                                             title="Edit fiscal period"
+                                                            className="shrink-0"
                                                         >
-                                                            <Pencil className="h-5 w-5" />
-                                                        </Link>
+                                                            <Link
+                                                                href={route(
+                                                                    'fiscal-periods.edit',
+                                                                    fp.id,
+                                                                )}
+                                                            >
+                                                                <Pencil className="h-4 w-4 text-emerald-600" />
+                                                            </Link>
+                                                        </Button>
 
+                                                        {/* Close / Reopen */}
                                                         {fp.status ===
                                                         'OPEN' ? (
-                                                            <button
+                                                            <Button
                                                                 type="button"
+                                                                variant="ghost"
+                                                                size="icon"
                                                                 title="Close fiscal period"
                                                                 disabled={
                                                                     processing
                                                                 }
+                                                                className="shrink-0"
                                                                 onClick={() =>
                                                                     router.post(
                                                                         route(
@@ -231,17 +275,19 @@ export default function FiscalPeriodIndex() {
                                                                         },
                                                                     )
                                                                 }
-                                                                className="text-amber-600 hover:text-amber-700 disabled:opacity-40"
                                                             >
-                                                                <Lock className="h-5 w-5" />
-                                                            </button>
+                                                                <Lock className="h-4 w-4 text-amber-600" />
+                                                            </Button>
                                                         ) : (
-                                                            <button
+                                                            <Button
                                                                 type="button"
+                                                                variant="ghost"
+                                                                size="icon"
                                                                 title="Reopen fiscal period"
                                                                 disabled={
                                                                     processing
                                                                 }
+                                                                className="shrink-0"
                                                                 onClick={() =>
                                                                     router.post(
                                                                         route(
@@ -255,28 +301,30 @@ export default function FiscalPeriodIndex() {
                                                                         },
                                                                     )
                                                                 }
-                                                                className="text-blue-600 hover:text-blue-700 disabled:opacity-40"
                                                             >
-                                                                <RotateCcw className="h-5 w-5" />
-                                                            </button>
+                                                                <RotateCcw className="h-4 w-4 text-blue-600" />
+                                                            </Button>
                                                         )}
 
-                                                        <button
+                                                        {/* Delete */}
+                                                        <Button
                                                             type="button"
+                                                            variant="ghost"
+                                                            size="icon"
                                                             disabled={
                                                                 processing
                                                             }
+                                                            title="Delete fiscal period"
+                                                            className="shrink-0"
                                                             onClick={() =>
                                                                 handleDelete(
                                                                     fp.id,
                                                                     fp.name,
                                                                 )
                                                             }
-                                                            className="text-destructive hover:text-destructive/80 disabled:opacity-50"
-                                                            title="Delete fiscal period"
                                                         >
-                                                            <Trash2 className="h-5 w-5" />
-                                                        </button>
+                                                            <Trash2 className="h-4 w-4 text-destructive" />
+                                                        </Button>
                                                     </div>
                                                 </td>
                                             </tr>

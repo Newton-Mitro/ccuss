@@ -131,23 +131,36 @@ export default function FiscalYearIndex() {
                     <>
                         <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
                             <ResourceTableCard>
-                                <table className="w-full border-collapse text-sm">
-                                    <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
+                                <table className="w-full table-fixed border-collapse text-sm">
+                                    <colgroup>
+                                        <col className="w-[18%]" />
+                                        <col className="w-[16%]" />
+                                        <col className="w-[16%]" />
+                                        <col className="w-[12%]" />
+                                        <col className="w-[38%]" />
+                                    </colgroup>
+
+                                    <thead className="sticky top-0 z-10 bg-muted text-sm text-muted-foreground">
                                         <tr>
-                                            {[
-                                                'Code',
-                                                'Start Date',
-                                                'End Date',
-                                                'Status',
-                                                'Actions',
-                                            ].map((h) => (
-                                                <th
-                                                    key={h}
-                                                    className="border-b border-border px-4 py-3 font-medium"
-                                                >
-                                                    {h}
-                                                </th>
-                                            ))}
+                                            <th className="border-b border-border px-4 py-3 text-left font-medium">
+                                                Code
+                                            </th>
+
+                                            <th className="border-b border-border px-4 py-3 text-left font-medium">
+                                                Start Date
+                                            </th>
+
+                                            <th className="border-b border-border px-4 py-3 text-left font-medium">
+                                                End Date
+                                            </th>
+
+                                            <th className="border-b border-border px-4 py-3 text-left font-medium">
+                                                Status
+                                            </th>
+
+                                            <th className="border-b border-border px-4 py-3 text-right font-medium">
+                                                Actions
+                                            </th>
                                         </tr>
                                     </thead>
 
@@ -155,21 +168,30 @@ export default function FiscalYearIndex() {
                                         {fiscalYears.data.map((fy) => (
                                             <tr
                                                 key={fy.id}
-                                                className="border-b border-border/80 transition-colors even:bg-muted/40 hover:bg-primary/5"
+                                                className="border-b border-border/80 transition-colors last:border-b-0 even:bg-muted/40 hover:bg-primary/5"
                                             >
-                                                <td className="px-4 py-3 font-medium text-foreground">
-                                                    {fy.name}
+                                                {/* Code */}
+                                                <td className="px-4 py-3 align-middle font-medium text-foreground">
+                                                    <span
+                                                        className="block truncate"
+                                                        title={fy.name}
+                                                    >
+                                                        {fy.name}
+                                                    </span>
                                                 </td>
 
-                                                <td className="px-4 py-3 text-muted-foreground">
+                                                {/* Start Date */}
+                                                <td className="px-4 py-3 align-middle whitespace-nowrap text-muted-foreground">
                                                     {formatDate(fy.start_date)}
                                                 </td>
 
-                                                <td className="px-4 py-3 text-muted-foreground">
+                                                {/* End Date */}
+                                                <td className="px-4 py-3 align-middle whitespace-nowrap text-muted-foreground">
                                                     {formatDate(fy.end_date)}
                                                 </td>
 
-                                                <td className="px-4 py-3">
+                                                {/* Status */}
+                                                <td className="px-4 py-3 align-middle whitespace-nowrap">
                                                     {fy.status === 'CLOSED' ? (
                                                         <StatusBadge tone="danger">
                                                             Closed
@@ -181,14 +203,17 @@ export default function FiscalYearIndex() {
                                                     )}
                                                 </td>
 
-                                                <td className="px-4 py-3">
-                                                    <div className="flex items-center gap-1.5">
+                                                {/* Actions */}
+                                                <td className="px-4 py-3 align-middle">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        {/* Edit */}
                                                         <Button
                                                             type="button"
                                                             variant="ghost"
                                                             size="icon"
                                                             asChild
                                                             title="Edit fiscal year"
+                                                            className="shrink-0"
                                                         >
                                                             <Link
                                                                 href={route(
@@ -200,6 +225,7 @@ export default function FiscalYearIndex() {
                                                             </Link>
                                                         </Button>
 
+                                                        {/* Retained Earnings */}
                                                         {!fy.is_closed && (
                                                             <>
                                                                 <Select
@@ -230,8 +256,10 @@ export default function FiscalYearIndex() {
                                                                             }),
                                                                         ),
                                                                     ]}
-                                                                    className="w-60"
+                                                                    className="w-[260px] shrink-0"
                                                                 />
+
+                                                                {/* Close */}
                                                                 <Button
                                                                     type="button"
                                                                     variant="ghost"
@@ -261,12 +289,14 @@ export default function FiscalYearIndex() {
                                                                             },
                                                                         )
                                                                     }
+                                                                    className="shrink-0"
                                                                 >
                                                                     <Lock className="h-4 w-4 text-amber-600" />
                                                                 </Button>
                                                             </>
                                                         )}
 
+                                                        {/* Delete */}
                                                         <Button
                                                             type="button"
                                                             variant="ghost"
@@ -281,6 +311,7 @@ export default function FiscalYearIndex() {
                                                                 )
                                                             }
                                                             title="Delete fiscal year"
+                                                            className="shrink-0"
                                                         >
                                                             <Trash2 className="h-4 w-4 text-red-600" />
                                                         </Button>

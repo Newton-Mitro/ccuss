@@ -3,7 +3,7 @@ import { SidebarItem } from '../../types';
 export const productAndSubledgers: SidebarItem[] = [
     {
         name: 'Products & Subledgers',
-        icon: <i className="fa-solid fa-piggy-bank" />,
+        icon: <i className="fa-solid fa-layer-group" />,
         children_expanded: false,
         permission: ['financial.view'],
         children: [

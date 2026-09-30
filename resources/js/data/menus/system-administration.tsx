@@ -2,8 +2,8 @@ import { SidebarItem } from '../../types';
 
 export const systemAdministration: SidebarItem[] = [
     {
-        name: 'System Administration',
-        icon: <i className="fa-solid fa-building-flag" />,
+        name: 'Administration',
+        icon: <i className="fa-solid fa-shield-halved" />,
         children_expanded: false,
         permission: [],
         children: [

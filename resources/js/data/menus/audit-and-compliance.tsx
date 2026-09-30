@@ -3,7 +3,7 @@ import { SidebarItem } from '../../types';
 export const auditAndCompliance: SidebarItem[] = [
     {
         name: 'Audit & Compliance',
-        icon: <i className="fa-solid fa-building-flag" />,
+        icon: <i className="fa-solid fa-scale-balanced" />,
         children_expanded: false,
         permission: [],
         children: [
