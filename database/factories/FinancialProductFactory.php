@@ -22,7 +22,6 @@ class FinancialProductFactory extends Factory
             'name' => fake()->unique()->words(2, true),
             'category' => $category,
             'balance_type' => $isLoan ? 'ASSET' : fake()->randomElement(['LIABILITY', 'EQUITY']),
-            'interest_rate' => $hasInterest ? fake()->randomFloat(6, 1, 18) : 0,
             'interest_calculation' => $hasInterest ? fake()->randomElement(['SIMPLE', 'COMPOUND', 'FLAT', 'REDUCING_BALANCE']) : 'NONE',
             'interest_frequency' => $hasInterest ? fake()->randomElement(['DAILY', 'MONTHLY', 'QUARTERLY', 'YEARLY', 'MATURITY']) : 'NONE',
             'settings' => [
@@ -32,6 +31,26 @@ class FinancialProductFactory extends Factory
             'is_system' => false,
             'status' => true,
         ];
+    }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (FinancialProduct $product): void {
+            $product->terms()->firstOrCreate(
+                ['code' => 'BASE'],
+                [
+                    'name' => 'Base term',
+                    'tenure_value' => 1,
+                    'tenure_unit' => 'MONTH',
+                    'interest_rate' => $product->interest_frequency === 'NONE'
+                        ? 0
+                        : fake()->randomFloat(6, 1, 18),
+                    'interest_calculation' => $product->interest_calculation,
+                    'interest_frequency' => $product->interest_frequency,
+                    'status' => true,
+                ],
+            );
+        });
     }
 
     public function loan(): static

@@ -14,7 +14,7 @@ interface Props extends SharedData {
         id: number;
         code: string;
         name: string;
-        interest_rate?: string | number;
+        base_interest_rate?: string | number | null;
     }>;
     customers: Array<{ id: number; customer_no: string; name: string }>;
 }
@@ -70,10 +70,10 @@ export default function FixedDepositAccountCreate() {
                                     const selected = products.find(
                                         (item) => String(item.id) === value,
                                     );
-                                    if (selected?.interest_rate)
+                                    if (selected?.base_interest_rate)
                                         setData(
                                             'contractual_rate',
-                                            String(selected.interest_rate),
+                                            String(selected.base_interest_rate),
                                         );
                                 }}
                                 options={[
@@ -154,7 +154,7 @@ export default function FixedDepositAccountCreate() {
                             />
                             <p className="mt-1 text-xs text-muted-foreground">
                                 Product rate:{' '}
-                                {product?.interest_rate ?? 'Not specified'}
+                                {product?.base_interest_rate ?? 'Not specified'}
                             </p>
                             <InputError message={errors.contractual_rate} />
                         </div>

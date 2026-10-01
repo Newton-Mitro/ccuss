@@ -27,12 +27,12 @@ class InterestProvisionService
         FinancialAccount::query()
             ->where('organization_id', $organizationId)
             ->whereIn('status', ['PENDING', 'ACTIVE'])
-            ->whereHas('product', fn($query) => $query->where('interest_rate', '>', 0)->where('interest_frequency', '!=', 'NONE'))
-            ->with('product')
+            ->whereHas('product.baseTerm', fn($query) => $query->where('interest_rate', '>', 0)->where('interest_frequency', '!=', 'NONE')->where('status', true))
+            ->with('product.baseTerm')
             ->chunkById(100, function ($accounts) use ($start, $end, $days, $userId, &$provisions): void {
                 foreach ($accounts as $account) {
                     $basis = max(0, (float) ($account->available_balance ?? $account->balance));
-                    $rate = (float) $account->product->interest_rate;
+                    $rate = (float) $account->product->baseTerm->interest_rate;
                     $amount = round($basis * $rate / 100 * $days / 365, 4);
                     if ($amount <= 0) {
                         continue;

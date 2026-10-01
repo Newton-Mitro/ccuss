@@ -65,6 +65,7 @@ class VoucherController extends Controller
             'accounts' => $this->accounts($request),
             'costCenters' => $this->costCenters($request),
             'financialAccounts' => $this->financialAccounts($request),
+            'cheques' => $this->cheques($request),
             'voucherType' => $voucherType,
         ]);
     }
@@ -89,7 +90,7 @@ class VoucherController extends Controller
         $this->authorizeOrganization($request, $voucher);
 
         return Inertia::render('general-accounting/vouchers/show', [
-            'voucher' => $voucher->load(['entries.account', 'fiscalYear', 'fiscalPeriod', 'creator', 'poster', 'financialTransaction']),
+            'voucher' => $voucher->load(['entries.account', 'entries.financialAccount', 'entries.cheque', 'fiscalYear', 'fiscalPeriod', 'creator', 'poster', 'financialTransaction']),
         ]);
     }
 
@@ -102,6 +103,7 @@ class VoucherController extends Controller
             'fiscalPeriods' => $this->fiscalPeriods($request),
             'accounts' => $this->accounts($request),
             'financialAccounts' => $this->financialAccounts($request),
+            'cheques' => $this->cheques($request),
         ]);
     }
 
@@ -191,7 +193,7 @@ class VoucherController extends Controller
             ->where('organization_id', $request->attributes->get('active_organization')->id)
             ->where('status', true)
             ->orderBy('code')
-            ->get(['id', 'code', 'name', 'type', 'normal_balance']);
+            ->get(['id', 'code', 'name', 'type', 'normal_balance', 'is_control_account']);
     }
 
     private function costCenters(Request $request)
@@ -210,6 +212,14 @@ class VoucherController extends Controller
             ->where('status', 'ACTIVE')
             ->orderBy('account_no')
             ->get(['id', 'account_no', 'name', 'account_type']);
+    }
+
+    private function cheques(Request $request)
+    {
+        return \App\TreasuryAndCash\Models\Cheque::query()
+            ->whereHas('financialAccount', fn($query) => $query->where('organization_id', $request->attributes->get('active_organization')->id))
+            ->orderBy('cheque_no')
+            ->get(['id', 'financial_account_id', 'cheque_no', 'amount', 'status']);
     }
 
     private function organizationQuery(Request $request)

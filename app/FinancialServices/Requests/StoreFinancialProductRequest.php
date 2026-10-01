@@ -19,7 +19,7 @@ class StoreFinancialProductRequest extends FormRequest
             'name' => ['required', 'string', 'max:150'],
             'category' => ['required', Rule::in(['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT', 'LOAN', 'OTHER'])],
             'balance_type' => ['required', Rule::in(['ASSET', 'LIABILITY', 'EQUITY'])],
-            'interest_rate' => ['nullable', 'numeric', 'min:0'],
+            'base_interest_rate' => ['nullable', 'numeric', 'min:0'],
             'interest_calculation' => ['required', Rule::in(['NONE', 'SIMPLE', 'COMPOUND', 'FLAT', 'REDUCING_BALANCE'])],
             'interest_frequency' => ['required', Rule::in(['NONE', 'DAILY', 'MONTHLY', 'QUARTERLY', 'HALF_YEARLY', 'YEARLY', 'MATURITY'])],
             'settings' => ['nullable', 'array'],

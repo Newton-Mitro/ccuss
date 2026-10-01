@@ -29,6 +29,7 @@ class FinancialProductController extends Controller
     {
         $products = $this->productService
             ->queryForOrganization($this->organizationId($request))
+            ->with('baseTerm')
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search')->trim();
                 $query->where(fn($query) => $query
@@ -101,7 +102,7 @@ class FinancialProductController extends Controller
         $this->authorizeOrganization($request, $financialProduct);
 
         return Inertia::render('financial-services/products/show', [
-            'product' => $financialProduct->load(['policy', 'accountMappings.debitAccount', 'accountMappings.creditAccount']),
+            'product' => $financialProduct->load(['baseTerm', 'policy', 'accountMappings.debitAccount', 'accountMappings.creditAccount']),
             'ledgerAccounts' => LedgerAccount::query()
                 ->where('organization_id', $this->organizationId($request))
                 ->where('status', true)
@@ -141,7 +142,7 @@ class FinancialProductController extends Controller
         $this->authorizeOrganization($request, $financialProduct);
 
         return Inertia::render('financial-services/products/form', [
-            'product' => $financialProduct,
+            'product' => $financialProduct->load('baseTerm'),
         ]);
     }
 

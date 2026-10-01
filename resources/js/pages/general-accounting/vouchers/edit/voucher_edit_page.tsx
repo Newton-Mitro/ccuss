@@ -14,6 +14,7 @@ interface Account {
     id: number;
     code: string;
     name: string;
+    is_control_account?: boolean;
 }
 
 interface FinancialAccount {
@@ -27,6 +28,8 @@ interface VoucherEntry {
     id?: number;
     account_id: number;
     financial_account_id?: number | string | null;
+    instrument_type?: string | null;
+    instrument_id?: number | string | null;
     account?: Account;
     financial_account?: FinancialAccount;
     debit: number | string;
@@ -50,6 +53,13 @@ interface Props extends SharedData {
     voucher: Voucher;
     accounts: Account[];
     financialAccounts: FinancialAccount[];
+    cheques: {
+        id: number;
+        financial_account_id: number | string | null;
+        cheque_no: string;
+        amount: number | string | null;
+        status?: string;
+    }[];
     fiscalPeriods: { id: number; name?: string; period_name?: string }[];
 }
 
@@ -65,10 +75,16 @@ const voucherTypes = [
 ].map((value) => ({ value, label: value }));
 
 export default function VoucherEditPage() {
-    const { voucher, accounts, fiscalPeriods, financialAccounts } =
-        usePage<Props>().props as Props & {
-            financialAccounts: FinancialAccount[];
-        };
+    const {
+        voucher,
+        accounts,
+        fiscalPeriods,
+        financialAccounts,
+        cheques = [],
+    } = usePage<Props>().props as Props & {
+        financialAccounts: FinancialAccount[];
+        cheques?: Props['cheques'];
+    };
     const [voucherDate, setVoucherDate] = useState(
         voucher.voucher_date?.split('T')[0] ?? '',
     );
@@ -84,6 +100,52 @@ export default function VoucherEditPage() {
     const [error, setError] = useState('');
 
     useFlashToastHandler();
+
+    const getEntryAccount = (entry: VoucherEntry) =>
+        accounts.find(
+            (account) => String(account.id) === String(entry.account_id),
+        );
+
+    const validateEntry = (entry: VoucherEntry) => {
+        const account = getEntryAccount(entry);
+
+        if (!account) {
+            return 'Select a valid account for each voucher entry.';
+        }
+
+        if (account.is_control_account && !entry.financial_account_id) {
+            return 'Control ledger accounts require a financial account selection.';
+        }
+
+        if (entry.instrument_type && entry.instrument_type !== 'CHEQUE') {
+            return 'Unsupported voucher instrument type selected.';
+        }
+
+        if (entry.instrument_type === 'CHEQUE') {
+            if (!entry.financial_account_id) {
+                return 'Cheque instruments require a linked financial account.';
+            }
+
+            if (!entry.instrument_id) {
+                return 'Select a cheque instrument for this voucher line.';
+            }
+
+            const selectedInstrument = cheques.find(
+                (instrument) =>
+                    String(instrument.id) === String(entry.instrument_id),
+            );
+
+            if (
+                !selectedInstrument ||
+                String(selectedInstrument.financial_account_id) !==
+                    String(entry.financial_account_id)
+            ) {
+                return 'The selected cheque does not belong to the chosen financial account.';
+            }
+        }
+
+        return '';
+    };
 
     const debitTotal = entries.reduce(
         (sum, entry) => sum + Number(entry.debit || 0),
@@ -130,6 +192,14 @@ export default function VoucherEditPage() {
             return;
         }
 
+        for (const entry of entries) {
+            const validationMessage = validateEntry(entry);
+            if (validationMessage) {
+                setError(validationMessage);
+                return;
+            }
+        }
+
         setProcessing(true);
         router.put(
             route('vouchers.update', voucher.id),
@@ -143,6 +213,12 @@ export default function VoucherEditPage() {
                     financial_account_id: entry.financial_account_id
                         ? Number(entry.financial_account_id)
                         : null,
+                    instrument_type: entry.instrument_type || null,
+                    instrument_id:
+                        entry.instrument_type === 'CHEQUE' &&
+                        entry.instrument_id
+                            ? Number(entry.instrument_id)
+                            : null,
                     debit: Number(entry.debit || 0),
                     credit: Number(entry.credit || 0),
                     description: entry.description || null,
@@ -240,6 +316,10 @@ export default function VoucherEditPage() {
                                         Financial account
                                     </th>
                                     <th className="border-b p-2">
+                                        Instrument type
+                                    </th>
+                                    <th className="border-b p-2">Cheque</th>
+                                    <th className="border-b p-2">
                                         Description
                                     </th>
                                     <th className="border-b p-2 text-right">
@@ -262,12 +342,38 @@ export default function VoucherEditPage() {
                                                 value={String(
                                                     entry.account_id || '',
                                                 )}
-                                                onChange={(value) =>
+                                                onChange={(value) => {
+                                                    const selectedAccount =
+                                                        accounts.find(
+                                                            (account) =>
+                                                                String(
+                                                                    account.id,
+                                                                ) ===
+                                                                String(value),
+                                                        );
+
+                                                    if (
+                                                        !selectedAccount?.is_control_account
+                                                    ) {
+                                                        updateEntry(index, {
+                                                            account_id: Number(
+                                                                value || 0,
+                                                            ),
+                                                            financial_account_id:
+                                                                null,
+                                                            instrument_type:
+                                                                null,
+                                                            instrument_id: null,
+                                                        });
+                                                        return;
+                                                    }
+
                                                     updateEntry(index, {
-                                                        account_id:
-                                                            Number(value),
-                                                    })
-                                                }
+                                                        account_id: Number(
+                                                            value || 0,
+                                                        ),
+                                                    });
+                                                }}
                                                 options={[
                                                     {
                                                         value: '',
@@ -290,6 +396,10 @@ export default function VoucherEditPage() {
                                                     entry.financial_account_id ??
                                                         '',
                                                 )}
+                                                disabled={
+                                                    !getEntryAccount(entry)
+                                                        ?.is_control_account
+                                                }
                                                 onChange={(value) =>
                                                     updateEntry(index, {
                                                         financial_account_id:
@@ -299,7 +409,11 @@ export default function VoucherEditPage() {
                                                 options={[
                                                     {
                                                         value: '',
-                                                        label: 'None',
+                                                        label: getEntryAccount(
+                                                            entry,
+                                                        )?.is_control_account
+                                                            ? 'Select financial account'
+                                                            : 'Disabled',
                                                     },
                                                     ...financialAccounts.map(
                                                         (account) => ({
@@ -309,6 +423,86 @@ export default function VoucherEditPage() {
                                                             label: `${account.account_no} - ${account.name ?? 'Unnamed account'}`,
                                                         }),
                                                     ),
+                                                ]}
+                                            />
+                                        </td>
+                                        <td className="p-2">
+                                            <Select
+                                                value={
+                                                    entry.instrument_type ?? ''
+                                                }
+                                                disabled={
+                                                    !getEntryAccount(entry)
+                                                        ?.is_control_account ||
+                                                    !entry.financial_account_id
+                                                }
+                                                onChange={(value) =>
+                                                    updateEntry(index, {
+                                                        instrument_type:
+                                                            value || null,
+                                                        instrument_id:
+                                                            value === 'CHEQUE'
+                                                                ? entry.instrument_id
+                                                                : null,
+                                                    })
+                                                }
+                                                options={[
+                                                    {
+                                                        value: '',
+                                                        label: 'None',
+                                                    },
+                                                    {
+                                                        value: 'CHEQUE',
+                                                        label: 'Cheque',
+                                                    },
+                                                ]}
+                                            />
+                                        </td>
+                                        <td className="p-2">
+                                            <Select
+                                                value={String(
+                                                    entry.instrument_id ?? '',
+                                                )}
+                                                disabled={
+                                                    !getEntryAccount(entry)
+                                                        ?.is_control_account ||
+                                                    !entry.financial_account_id ||
+                                                    entry.instrument_type !==
+                                                        'CHEQUE'
+                                                }
+                                                onChange={(value) =>
+                                                    updateEntry(index, {
+                                                        instrument_id: value
+                                                            ? Number(value)
+                                                            : null,
+                                                    })
+                                                }
+                                                options={[
+                                                    {
+                                                        value: '',
+                                                        label:
+                                                            entry.instrument_type ===
+                                                            'CHEQUE'
+                                                                ? 'Select cheque'
+                                                                : 'Disabled',
+                                                    },
+                                                    ...(entry.financial_account_id
+                                                        ? cheques.filter(
+                                                              (cheque) =>
+                                                                  String(
+                                                                      cheque.financial_account_id,
+                                                                  ) ===
+                                                                  String(
+                                                                      entry.financial_account_id,
+                                                                  ),
+                                                          )
+                                                        : []
+                                                    ).map((instrument) => ({
+                                                        value: String(
+                                                            instrument.id,
+                                                        ),
+                                                        label: `${instrument.cheque_no} (${instrument.amount ?? '0'})`,
+                                                    })),
                                                 ]}
                                             />
                                         </td>
@@ -373,7 +567,7 @@ export default function VoucherEditPage() {
                             </tbody>
                             <tfoot>
                                 <tr className="font-medium">
-                                    <td colSpan={2} className="p-2 text-right">
+                                    <td colSpan={5} className="p-2 text-right">
                                         Totals
                                     </td>
                                     <td className="p-2 text-right">

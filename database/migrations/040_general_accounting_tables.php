@@ -423,6 +423,9 @@ return new class extends Migration {
                 ->constrained('financial_accounts')
                 ->nullOnDelete();
 
+            $table->string('instrument_type', 30)->nullable();
+            $table->unsignedBigInteger('instrument_id')->nullable();
+
             $table->string('description')
                 ->nullable();
 
@@ -463,6 +466,11 @@ return new class extends Migration {
             $table->index([
                 'financial_account_id',
             ]);
+
+            $table->index(
+                ['instrument_type', 'instrument_id'],
+                'voucher_entries_instrument_idx',
+            );
         });
 
 

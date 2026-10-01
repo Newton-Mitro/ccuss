@@ -18,7 +18,7 @@ export default function FinancialProductForm() {
         name: product?.name ?? '',
         category: product?.category ?? 'SAVINGS',
         balance_type: product?.balance_type ?? 'LIABILITY',
-        interest_rate: String(product?.interest_rate ?? '0'),
+        base_interest_rate: String(product?.base_term?.interest_rate ?? '0'),
         interest_calculation: product?.interest_calculation ?? 'NONE',
         interest_frequency: product?.interest_frequency ?? 'NONE',
         status: product?.status ?? true,
@@ -114,16 +114,20 @@ export default function FinancialProductForm() {
                             />
                         </div>
                         <div>
-                            <Label>Interest rate (%)</Label>
+                            <Label>Base term annual rate (%)</Label>
                             <Input
                                 type="number"
                                 min="0"
                                 step="0.000001"
-                                value={data.interest_rate}
+                                value={data.base_interest_rate}
                                 onChange={(event) =>
-                                    setData('interest_rate', event.target.value)
+                                    setData(
+                                        'base_interest_rate',
+                                        event.target.value,
+                                    )
                                 }
                             />
+                            <InputError message={errors.base_interest_rate} />
                         </div>
                         <div>
                             <Label>Interest calculation</Label>

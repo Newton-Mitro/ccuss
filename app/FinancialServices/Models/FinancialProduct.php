@@ -8,9 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use App\FinancialServices\Models\FinancialAccount;
-use App\FinancialServices\Models\FinancialProductAccountMapping;
-use App\FinancialServices\Models\FinancialProductPolicy;
 
 class FinancialProduct extends Model
 {
@@ -27,7 +24,6 @@ class FinancialProduct extends Model
         'name',
         'category',
         'balance_type',
-        'interest_rate',
         'interest_calculation',
         'interest_frequency',
         'settings',
@@ -36,7 +32,6 @@ class FinancialProduct extends Model
     ];
 
     protected $casts = [
-        'interest_rate' => 'decimal:6',
         'settings' => 'array',
         'is_system' => 'boolean',
         'status' => 'boolean',
@@ -60,5 +55,15 @@ class FinancialProduct extends Model
     public function financialAccounts(): HasMany
     {
         return $this->hasMany(FinancialAccount::class);
+    }
+
+    public function terms(): HasMany
+    {
+        return $this->hasMany(FinancialProductTerm::class);
+    }
+
+    public function baseTerm(): HasOne
+    {
+        return $this->hasOne(FinancialProductTerm::class)->where('code', 'BASE');
     }
 }

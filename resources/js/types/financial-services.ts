@@ -14,7 +14,11 @@ export interface FinancialProduct {
         | 'LOAN'
         | 'OTHER';
     balance_type: 'ASSET' | 'LIABILITY' | 'EQUITY';
-    interest_rate: string | number;
+    base_term?: {
+        interest_rate: string | number;
+        interest_calculation?: string;
+        interest_frequency?: string;
+    } | null;
     interest_calculation?:
         | 'NONE'
         | 'SIMPLE'

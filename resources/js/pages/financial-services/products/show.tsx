@@ -109,9 +109,20 @@ export default function FinancialProductShow() {
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     {[
                         ['Balance type', product.balance_type],
-                        ['Interest rate', `${product.interest_rate}%`],
-                        ['Calculation', product.interest_calculation],
-                        ['Frequency', product.interest_frequency],
+                        [
+                            'Base term rate',
+                            `${product.base_term?.interest_rate ?? '0'}%`,
+                        ],
+                        [
+                            'Calculation',
+                            product.base_term?.interest_calculation ??
+                                product.interest_calculation,
+                        ],
+                        [
+                            'Frequency',
+                            product.base_term?.interest_frequency ??
+                                product.interest_frequency,
+                        ],
                     ].map(([label, value]) => (
                         <div
                             key={label}

@@ -130,7 +130,14 @@ class FinancialAccountController extends Controller
         $organizationId = $this->organizationId($request);
 
         return Inertia::render($page, [
-            'products' => FinancialProduct::query()->with('policy')->where('organization_id', $organizationId)->where('status', true)->when($category, fn($query) => $query->where('category', $category))->orderBy('code')->get(['id', 'code', 'name', 'category']),
+            'products' => FinancialProduct::query()->with(['policy', 'baseTerm'])->where('organization_id', $organizationId)->where('status', true)->when($category, fn($query) => $query->where('category', $category))->orderBy('code')->get(['id', 'code', 'name', 'category'])->map(fn(FinancialProduct $product) => [
+                'id' => $product->id,
+                'code' => $product->code,
+                'name' => $product->name,
+                'category' => $product->category,
+                'base_interest_rate' => $product->baseTerm?->interest_rate,
+                'policy' => $product->policy,
+            ]),
             'customers' => Customer::query()->where('organization_id', $organizationId)->orderBy('name')->get(['id', 'customer_no', 'name', 'type', 'dob']),
             'category' => $category,
         ]);

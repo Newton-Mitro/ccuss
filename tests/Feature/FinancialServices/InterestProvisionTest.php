@@ -1,12 +1,29 @@
 <?php
 
 use App\FinancialServices\Application\InterestProvisionService;
+use App\FinancialServices\Application\FinancialProductService;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\InterestProvision;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\User;
 use App\FinancialServices\Application\FinancialTransactionService;
+
+it('stores product rates on the base term instead of financial_products', function () {
+    $organization = Organization::factory()->create();
+    $product = app(FinancialProductService::class)->create([
+        'code' => 'SAV-BASE',
+        'name' => 'Savings Base Rate',
+        'category' => 'SAVINGS',
+        'balance_type' => 'LIABILITY',
+        'base_interest_rate' => 7.25,
+        'interest_calculation' => 'SIMPLE',
+        'interest_frequency' => 'MONTHLY',
+    ], $organization->id);
+
+    expect(Schema::hasColumn('financial_products', 'interest_rate'))->toBeFalse()
+        ->and((float) $product->baseTerm->interest_rate)->toBe(7.25);
+});
 
 it('calculates idempotent interest provisions and supports approval', function () {
     $organization = Organization::factory()->create();
@@ -15,9 +32,10 @@ it('calculates idempotent interest provisions and supports approval', function (
         'organization_id' => $organization->id,
         'category' => 'SAVINGS',
         'balance_type' => 'LIABILITY',
-        'interest_rate' => 12,
         'interest_frequency' => 'MONTHLY',
     ]);
+    $product->baseTerm()->update(['interest_rate' => 12]);
+    expect(Schema::hasColumn('financial_products', 'interest_rate'))->toBeFalse();
     $account = FinancialAccount::factory()->active()->create([
         'organization_id' => $organization->id,
         'financial_product_id' => $product->id,
@@ -52,9 +70,9 @@ it('does not calculate interest for another organization', function () {
     $product = FinancialProduct::factory()->create([
         'organization_id' => $otherOrganization->id,
         'category' => 'SAVINGS',
-        'interest_rate' => 10,
         'interest_frequency' => 'MONTHLY',
     ]);
+    $product->baseTerm()->update(['interest_rate' => 10]);
     FinancialAccount::factory()->active()->create([
         'organization_id' => $otherOrganization->id,
         'financial_product_id' => $product->id,

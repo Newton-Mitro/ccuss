@@ -122,7 +122,9 @@ export default function FinancialProductIndex() {
                                                 {product.balance_type}
                                             </td>
                                             <td className="px-2 py-1 tabular-nums">
-                                                {product.interest_rate}%
+                                                {product.base_term
+                                                    ?.interest_rate ?? '0'}
+                                                %
                                             </td>
                                             <td className="px-2 py-1">
                                                 <StatusBadge

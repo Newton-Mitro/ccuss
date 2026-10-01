@@ -4,6 +4,7 @@ namespace App\GeneralAccounting\Models;
 
 use App\FinancialServices\Models\FinancialAccount;
 use App\GeneralAccounting\Models\Voucher;
+use App\TreasuryAndCash\Models\Cheque;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,6 +24,8 @@ class VoucherEntry extends Model
         'branch_id',
         'cost_center_id',
         'financial_account_id',
+        'instrument_type',
+        'instrument_id',
         'description',
         'debit',
         'credit',
@@ -34,6 +37,7 @@ class VoucherEntry extends Model
         'debit' => 'decimal:4',
         'credit' => 'decimal:4',
         'line_no' => 'integer',
+        'instrument_id' => 'integer',
     ];
 
     public function voucher(): BelongsTo
@@ -49,5 +53,10 @@ class VoucherEntry extends Model
     public function financialAccount(): BelongsTo
     {
         return $this->belongsTo(FinancialAccount::class, 'financial_account_id');
+    }
+
+    public function cheque(): BelongsTo
+    {
+        return $this->belongsTo(Cheque::class, 'instrument_id');
     }
 }

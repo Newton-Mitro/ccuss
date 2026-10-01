@@ -11,6 +11,8 @@ use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
+use App\TreasuryAndCash\Models\ChequeBook;
+use Inertia\Testing\AssertableInertia as Assert;
 
 function voucherFixture(): array
 {
@@ -28,6 +30,10 @@ function voucherFixture(): array
         Permission::updateOrCreate(
             ['slug' => 'accounting.voucher.create'],
             ['module' => 'accounting_voucher', 'name' => 'Create Vouchers', 'action' => 'create'],
+        )->id,
+        Permission::updateOrCreate(
+            ['slug' => 'accounting.voucher.update'],
+            ['module' => 'accounting_voucher', 'name' => 'Update Vouchers', 'action' => 'update'],
         )->id,
     ]);
     $user->roles()->sync([$role->id]);
@@ -106,6 +112,37 @@ it('stores a linked financial account on each voucher entry', function () {
     expect($voucher->entries)->toHaveCount(2)
         ->and($voucher->entries->first()->financial_account_id)->toBe($financialAccount->id)
         ->and($voucher->entries->last()->financial_account_id)->toBe($financialAccount->id);
+});
+
+it('requires a financial account when a control ledger is selected', function () {
+    $fixture = voucherFixture();
+    $controlGroup = app(AccountGroupService::class)->create([
+        'organization_id' => $fixture['organization']->id,
+        'code' => '1300',
+        'name' => 'Control Accounts',
+        'type' => 'ASSET',
+        'normal_balance' => 'DEBIT',
+    ]);
+    $controlAccount = app(LedgerAccountService::class)->create([
+        'organization_id' => $fixture['organization']->id,
+        'account_group_id' => $controlGroup->id,
+        'code' => '1301',
+        'name' => 'Control Cash',
+        'type' => 'ASSET',
+        'normal_balance' => 'DEBIT',
+        'is_control_account' => true,
+        'status' => true,
+    ]);
+
+    expect(fn() => app(VoucherService::class)->createDraft([
+        'fiscal_period_id' => $fixture['period']->id,
+        'voucher_type' => 'JOURNAL',
+        'voucher_date' => '2025-07-10',
+        'entries' => [
+            ['account_id' => $controlAccount->id, 'debit' => 100, 'credit' => 0, 'instrument_type' => 'CHEQUE'],
+            ['account_id' => $fixture['accounts'][1]->id, 'debit' => 0, 'credit' => 100],
+        ],
+    ], $fixture['organization']->id, $fixture['user']->id))->toThrow(InvalidArgumentException::class, 'financial account');
 });
 
 it('rejects unbalanced, one-sided, and out-of-period vouchers', function () {
@@ -225,6 +262,52 @@ it('creates a voucher through the organization-scoped HTTP endpoint', function (
         ->where('voucher_type', 'RECEIPT')
         ->where('description', 'HTTP voucher')
         ->exists())->toBeTrue();
+});
+
+it('loads financial-account and cheque metadata when editing a voucher draft', function () {
+    $fixture = voucherFixture();
+    $financialAccount = FinancialAccount::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'status' => 'ACTIVE',
+    ]);
+    $chequeBook = ChequeBook::query()->create([
+        'financial_account_id' => $financialAccount->id,
+        'book_no' => 'TEST-BOOK-' . $financialAccount->id,
+        'prefix' => 'T-',
+        'start_number' => 101,
+        'end_number' => 101,
+        'leaf_count' => 1,
+    ]);
+    $cheque = $chequeBook->cheques()->firstOrFail();
+    $voucher = app(VoucherService::class)->createDraft([
+        'fiscal_period_id' => $fixture['period']->id,
+        'voucher_type' => 'JOURNAL',
+        'voucher_date' => '2025-07-10',
+        'description' => 'Edit metadata check',
+        'entries' => [
+            ['account_id' => $fixture['accounts'][0]->id, 'financial_account_id' => $financialAccount->id, 'instrument_type' => 'CHEQUE', 'instrument_id' => $cheque->id, 'debit' => 100, 'credit' => 0],
+            ['account_id' => $fixture['accounts'][1]->id, 'financial_account_id' => $financialAccount->id, 'debit' => 0, 'credit' => 100],
+        ],
+    ], $fixture['organization']->id, $fixture['user']->id);
+
+    $response = $this
+        ->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('vouchers.edit', $voucher));
+
+    $response->assertOk()->assertInertia(fn(Assert $page) => $page
+        ->component('general-accounting/vouchers/edit/voucher_edit_page')
+        ->where('voucher.id', $voucher->id)
+        ->where('accounts.0.is_control_account', false)
+        ->has('financialAccounts')
+        ->has('cheques'));
+
+    $this->get(route('vouchers.show', $voucher))
+        ->assertOk()
+        ->assertInertia(fn(Assert $page) => $page
+            ->component('general-accounting/vouchers/show')
+            ->where('voucher.entries.0.financial_account.account_no', $financialAccount->account_no)
+            ->where('voucher.entries.0.cheque.cheque_no', $cheque->cheque_no));
 });
 
 it('edits draft vouchers and rejects edits to posted vouchers', function () {

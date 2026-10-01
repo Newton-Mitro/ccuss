@@ -127,12 +127,15 @@ class LoanApplicationService
             throw new RuntimeException('This loan application already has a loan account.');
         }
 
-        $application->loadMissing(['product', 'customer']);
-        $interestCalculation = in_array($application->product->interest_calculation, ['SIMPLE', 'FLAT', 'REDUCING_BALANCE'], true)
-            ? $application->product->interest_calculation
+        $application->loadMissing(['product.baseTerm', 'customer']);
+        $baseTerm = $application->product->baseTerm;
+        $interestCalculation = in_array($baseTerm?->interest_calculation, ['SIMPLE', 'FLAT', 'REDUCING_BALANCE'], true)
+            ? $baseTerm->interest_calculation
             : 'SIMPLE';
+        $contractualRate = (float) ($baseTerm?->interest_rate ?? 0);
+        $interestFrequency = $baseTerm?->interest_frequency ?: 'MONTHLY';
 
-        return DB::transaction(function () use ($application, $interestCalculation): LoanAccount {
+        return DB::transaction(function () use ($application, $interestCalculation, $contractualRate, $interestFrequency): LoanAccount {
             $financialAccount = FinancialAccount::create([
                 'organization_id' => $application->organization_id,
                 'branch_id' => $application->branch_id,
@@ -150,11 +153,11 @@ class LoanApplicationService
                 'loan_no' => 'LN-' . str_pad((string) $application->id, 8, '0', STR_PAD_LEFT),
                 'principal_amount' => $application->approved_amount,
                 'disbursed_amount' => 0,
-                'contractual_rate' => $application->product->interest_rate,
+                'contractual_rate' => $contractualRate,
                 'interest_calculation' => $interestCalculation,
                 'term_value' => $application->requested_term_months,
                 'term_unit' => 'MONTH',
-                'interest_frequency' => $application->product->interest_frequency ?: 'MONTHLY',
+                'interest_frequency' => $interestFrequency,
                 'repayment_frequency' => 'MONTHLY',
                 'approved_at' => $application->approved_at?->toDateString(),
                 'maturity_date' => CarbonImmutable::parse($application->approved_at ?? now())->addMonthsNoOverflow((int) $application->requested_term_months)->toDateString(),
