@@ -1,6 +1,6 @@
 import { SidebarItem } from '../../types';
 
-export const customerKycMenu: SidebarItem[] = [
+export const customerAndKYC: SidebarItem[] = [
     {
         name: 'Customers & KYC',
         icon: <i className="fa-solid fa-user-group" />,

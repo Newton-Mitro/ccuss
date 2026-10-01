@@ -2,7 +2,7 @@ import { SidebarItem } from '../../types';
 
 export const depositAccounts: SidebarItem[] = [
     {
-        name: 'Savings & Deposits',
+        name: 'Member Share & Deposits',
         icon: <i className="fa-solid fa-piggy-bank" />,
         permission: ['financial.accounts.view'],
         children_expanded: false,

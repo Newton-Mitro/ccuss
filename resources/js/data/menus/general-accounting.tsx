@@ -1,6 +1,6 @@
 import { SidebarItem } from '../../types';
 
-export const generalAccountingMenu: SidebarItem[] = [
+export const generalAccounting: SidebarItem[] = [
     {
         name: 'General Accounting',
         icon: <i className="fa-solid fa-book-open" />,
@@ -169,6 +169,35 @@ export const generalAccountingMenu: SidebarItem[] = [
                         path: '/financial-reports/cash-flow',
                         match_path: 'financial-reports/cash-flow',
                         permission: ['accounting.cash_flow.view'],
+                    },
+                ],
+            },
+            {
+                name: 'Period End',
+                icon: <i className="fa-solid fa-lock" />,
+                children_expanded: false,
+                permission: ['accounting.period_end.view'],
+                children: [
+                    {
+                        name: 'Close Period',
+                        icon: <i className="fa-solid fa-lock" />,
+                        path: '/period-end/close',
+                        match_path: 'period-end/close',
+                        permission: ['accounting.period_end.close'],
+                    },
+                    {
+                        name: 'Reopen Period',
+                        icon: <i className="fa-solid fa-lock-open" />,
+                        path: '/period-end/reopen',
+                        match_path: 'period-end/reopen',
+                        permission: ['accounting.period_end.reopen'],
+                    },
+                    {
+                        name: 'Year-End Closing',
+                        icon: <i className="fa-solid fa-calendar-check" />,
+                        path: '/period-end/year-end-closing',
+                        match_path: 'period-end/year-end-closing',
+                        permission: ['accounting.year_end.close'],
                     },
                 ],
             },

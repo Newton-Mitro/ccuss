@@ -1,8 +1,8 @@
 import { SidebarItem } from '../../types';
 
-export const systemAdministration: SidebarItem[] = [
+export const administrationAndSecurity: SidebarItem[] = [
     {
-        name: 'Administration',
+        name: 'Administration & Security',
         icon: <i className="fa-solid fa-shield-halved" />,
         children_expanded: false,
         permission: [],
