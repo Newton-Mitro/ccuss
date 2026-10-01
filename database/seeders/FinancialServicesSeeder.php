@@ -150,9 +150,6 @@ class FinancialServicesSeeder extends Seeder
                         'name' => $name,
                         'category' => $category,
                         'balance_type' => $balanceType,
-                        'interest_rate' => $rate,
-                        'interest_calculation' => $calculation,
-                        'interest_frequency' => $frequency,
                         'settings' => [
                             'credit_union' => true,
                             'requires_kyc' => true,
@@ -161,6 +158,32 @@ class FinancialServicesSeeder extends Seeder
                         ],
                         'is_system' => true,
                         'status' => true,
+                    ],
+                );
+
+                $termValue = match ($category) {
+                    'FIXED_DEPOSIT' => 12,
+                    'RECURRING_DEPOSIT' => 24,
+                    'LOAN' => 12,
+                    default => 1,
+                };
+
+                DB::table('financial_product_terms')->updateOrInsert(
+                    ['financial_product_id' => $product->id, 'code' => 'BASE'],
+                    [
+                        'name' => 'Base term',
+                        'tenure_value' => $termValue,
+                        'tenure_unit' => 'MONTH',
+                        'interest_rate' => $rate,
+                        'interest_calculation' => $calculation,
+                        'interest_frequency' => $frequency,
+                        'minimum_amount' => $minimumOpening ?: null,
+                        'maximum_amount' => null,
+                        'rules' => json_encode([]),
+                        'status' => true,
+                        'effective_from' => now()->toDateString(),
+                        'updated_at' => now(),
+                        'created_at' => now(),
                     ],
                 );
 
@@ -279,21 +302,25 @@ class FinancialServicesSeeder extends Seeder
                 if ($product->category === 'SHARE') {
                     ShareAccount::query()->firstOrCreate(
                         ['financial_account_id' => $account->id],
-                        ['customer_id' => $multiProductCustomer->id, 'member_since' => now()->subMonths(3)->toDateString(), 'membership_no' => 'SEED-MEM-' . $multiProductCustomer->id, 'membership_status' => 'ACTIVE'],
+                        ['member_since' => now()->subMonths(3)->toDateString(), 'membership_no' => 'SEED-MEM-' . $multiProductCustomer->id, 'membership_status' => 'ACTIVE'],
                     );
                 }
 
                 if ($product->category === 'FIXED_DEPOSIT') {
+                    $productRate = (float) DB::table('financial_product_terms')
+                        ->where('financial_product_id', $product->id)
+                        ->where('code', 'BASE')
+                        ->value('interest_rate');
                     FixedDeposit::query()->firstOrCreate(
                         ['financial_account_id' => $account->id],
-                        ['principal_amount' => $balance, 'contractual_rate' => $product->interest_rate, 'term_months' => 12, 'started_at' => now()->subMonths(3)->toDateString(), 'maturity_date' => now()->addMonths(9)->toDateString(), 'maturity_amount' => round($balance * (1 + ((float) $product->interest_rate / 100)), 2), 'maturity_instruction' => 'RENEW_PRINCIPAL', 'status' => 'ACTIVE'],
+                        ['principal_amount' => $balance, 'contractual_rate' => $productRate, 'term_value' => 12, 'term_unit' => 'MONTH', 'started_at' => now()->subMonths(3)->toDateString(), 'maturity_date' => now()->addMonths(9)->toDateString(), 'maturity_amount' => round($balance * (1 + ($productRate / 100)), 2), 'maturity_instruction' => 'RENEW_PRINCIPAL'],
                     );
                 }
 
                 if ($product->category === 'RECURRING_DEPOSIT') {
                     RecurringDeposit::query()->firstOrCreate(
                         ['financial_account_id' => $account->id],
-                        ['installment_amount' => 1500, 'installment_frequency' => 'MONTHLY', 'total_installments' => 12, 'paid_installments' => 3, 'started_at' => now()->subMonths(3)->toDateString(), 'maturity_date' => now()->addMonths(9)->toDateString(), 'maturity_extension_days' => 0, 'grace_days' => 7, 'status' => 'ACTIVE'],
+                        ['installment_amount' => 1500, 'installment_frequency' => 'MONTHLY', 'total_installments' => 12, 'paid_installments' => 3, 'started_at' => now()->subMonths(3)->toDateString(), 'maturity_date' => now()->addMonths(9)->toDateString(), 'maturity_extension_days' => 0, 'grace_days' => 7],
                     );
                 }
             }
@@ -345,15 +372,18 @@ class FinancialServicesSeeder extends Seeder
             $loanAccount = LoanAccount::query()->updateOrCreate(
                 ['loan_no' => 'LN-SEED-0001'],
                 [
-                    'customer_id' => $loanCustomer->id,
                     'financial_account_id' => $loanFinancialAccount->id,
-                    'financial_product_id' => $loanProduct->id,
                     'loan_application_id' => $loanApplication->id,
                     'principal_amount' => 50000,
                     'disbursed_amount' => 50000,
-                    'contractual_rate' => $loanProduct->interest_rate,
+                    'contractual_rate' => DB::table('financial_product_terms')->where('financial_product_id', $loanProduct->id)->where('code', 'BASE')->value('interest_rate'),
                     'interest_calculation' => 'REDUCING_BALANCE',
-                    'term_months' => 24,
+                    'interest_frequency' => 'MONTHLY',
+                    'term_value' => 24,
+                    'term_unit' => 'MONTH',
+                    'repayment_frequency' => 'MONTHLY',
+                    'grace_days' => 0,
+                    'late_payment_fine_rate' => 0,
                     'approved_at' => now()->subMonths(6)->toDateString(),
                     'disbursed_at' => now()->subMonths(6)->toDateString(),
                     'maturity_date' => now()->addMonths(18)->toDateString(),
@@ -401,7 +431,6 @@ class FinancialServicesSeeder extends Seeder
                     'maturity_date' => now()->addMonths(18)->toDateString(),
                     'maturity_extension_days' => 0,
                     'grace_days' => 7,
-                    'status' => 'ACTIVE',
                 ],
             );
 
@@ -609,12 +638,12 @@ class FinancialServicesSeeder extends Seeder
                 [
                     'principal_amount' => $legacyFixedDepositPrincipal,
                     'contractual_rate' => 8.5,
-                    'term_months' => 12,
+                    'term_value' => 12,
+                    'term_unit' => 'MONTH',
                     'started_at' => '2024-01-01',
                     'maturity_date' => '2025-01-01',
                     'maturity_amount' => 108500,
                     'maturity_instruction' => 'RENEW_PRINCIPAL',
-                    'status' => 'RENEWED',
                 ],
             );
 
@@ -660,7 +689,7 @@ class FinancialServicesSeeder extends Seeder
                 ]);
                 $shareAccount->update(['opened_at' => now()->subMonths(6)->toDateString()]);
                 $shareAccount->addHolder($shareCustomer, 'PRIMARY');
-                ShareAccount::query()->firstOrCreate(['financial_account_id' => $shareAccount->id], ['customer_id' => $shareCustomer->id, 'member_since' => now()->subMonths(6)->toDateString(), 'membership_no' => sprintf('MEM-%05d', $shareCustomer->id), 'membership_status' => 'ACTIVE']);
+                ShareAccount::query()->firstOrCreate(['financial_account_id' => $shareAccount->id], ['member_since' => now()->subMonths(6)->toDateString(), 'membership_no' => sprintf('MEM-%05d', $shareCustomer->id), 'membership_status' => 'ACTIVE']);
 
                 $shareTransaction = FinancialTransaction::query()->updateOrCreate(
                     [

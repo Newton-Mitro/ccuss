@@ -92,6 +92,15 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/loan-accounts', [FinancialAccountController::class, 'productIndex'])
         ->defaults('product', 'loan')
         ->name('loan-accounts.index');
+    Route::get('/loan-accounts/create', [FinancialAccountController::class, 'productCreate'])
+        ->defaults('product', 'loan')
+        ->name('loan-accounts.create');
+    Route::get('/loan-accounts/{financial_account}/edit', [FinancialAccountController::class, 'productEdit'])
+        ->defaults('product', 'loan')
+        ->name('loan-accounts.edit');
+    Route::put('/loan-accounts/{financial_account}', [FinancialAccountController::class, 'productUpdate'])
+        ->defaults('product', 'loan')
+        ->name('loan-accounts.update');
     Route::get('/loan-accounts/{financial_account}', [FinancialAccountController::class, 'productShow'])
         ->defaults('product', 'loan')
         ->name('loan-accounts.show');

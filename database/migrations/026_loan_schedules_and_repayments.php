@@ -191,64 +191,6 @@ return new class extends Migration {
 
         /*
         |--------------------------------------------------------------------------
-        | Loan Repayments
-        |--------------------------------------------------------------------------
-        |
-        | Represents an actual repayment made against a loan account.
-        |
-        */
-
-        Schema::create('loan_repayments', function (Blueprint $table): void {
-            $table->id();
-
-            $table->foreignId('loan_account_id')
-                ->constrained()
-                ->cascadeOnDelete();
-
-            $table->foreignId('financial_transaction_id')
-                ->nullable()
-                ->constrained('financial_transactions')
-                ->nullOnDelete();
-
-            $table->decimal('amount', 20, 4);
-
-            $table->date('repayment_date');
-
-            $table->enum('status', [
-                'PENDING',
-                'POSTED',
-                'REVERSED',
-                'CANCELLED',
-            ])->default('PENDING');
-
-            $table->string('reference', 100)
-                ->nullable();
-
-            $table->foreignId('created_by')
-                ->nullable()
-                ->constrained('users')
-                ->nullOnDelete();
-
-            $table->timestamps();
-
-            $table->unique(
-                [
-                    'loan_account_id',
-                    'financial_transaction_id',
-                ],
-                'loan_repayment_transaction_unique'
-            );
-
-            $table->index([
-                'loan_account_id',
-                'repayment_date',
-                'status',
-            ]);
-        });
-
-
-        /*
-        |--------------------------------------------------------------------------
         | Loan Repayment Allocations
         |--------------------------------------------------------------------------
         |
@@ -412,7 +354,6 @@ return new class extends Migration {
     {
         Schema::dropIfExists('loan_arrears');
         Schema::dropIfExists('loan_repayment_allocations');
-        Schema::dropIfExists('loan_repayments');
         Schema::dropIfExists('loan_schedule_components');
         Schema::dropIfExists('loan_schedules');
     }

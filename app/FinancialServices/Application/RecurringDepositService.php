@@ -46,7 +46,6 @@ class RecurringDepositService
                 'maturity_date' => $maturityDate->toDateString(),
                 'maturity_extension_days' => $data['maturity_extension_days'] ?? 0,
                 'grace_days' => $data['grace_days'] ?? 0,
-                'status' => 'ACTIVE',
             ]);
 
             $recurringDeposit->installments()->createMany(collect(range(1, $totalInstallments))->map(fn(int $number): array => [

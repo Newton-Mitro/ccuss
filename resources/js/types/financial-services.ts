@@ -362,7 +362,8 @@ export interface FixedDeposit {
     id: number;
     principal_amount?: string | number;
     contractual_rate?: string | number;
-    term_months?: number;
+    term_value?: number;
+    term_unit?: string;
     started_at?: string | null;
     maturity_date?: string | null;
     maturity_amount?: string | number | null;
@@ -396,7 +397,8 @@ export interface LoanAccount {
     principal_amount?: string | number;
     disbursed_amount?: string | number;
     contractual_rate?: string | number;
-    term_months?: number;
+    term_value?: number;
+    term_unit?: string;
     maturity_date?: string | null;
     status?: string;
     schedules?: LoanSchedule[];

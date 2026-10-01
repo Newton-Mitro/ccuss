@@ -3,6 +3,7 @@
 namespace App\FinancialServices\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreDepositNomineeRequest extends FormRequest
 {
@@ -14,6 +15,11 @@ class StoreDepositNomineeRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'customer_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('customers', 'id')->where(fn($query) => $query->where('organization_id', (int) $this->attributes->get('active_organization')?->id)),
+            ],
             'name' => ['required', 'string', 'max:150'],
             'relationship' => ['required', 'string', 'max:100'],
             'phone' => ['nullable', 'string', 'max:50'],

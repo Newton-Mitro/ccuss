@@ -9,7 +9,7 @@ import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
 interface Props extends SharedData {
-    product: 'savings' | 'share' | 'fixed' | 'recurring';
+    product: 'savings' | 'share' | 'fixed' | 'recurring' | 'loan';
     account: {
         id: number;
         account_no: string;
@@ -108,6 +108,8 @@ function getIndexRoute(product: Props['product']): string {
             return route('financial-accounts.fixed.index');
         case 'recurring':
             return route('financial-accounts.recurring.index');
+        case 'loan':
+            return route('loan-accounts.index');
     }
 }
 
@@ -121,6 +123,8 @@ function getShowRoute(product: Props['product'], id: number): string {
             return route('financial-accounts.fixed.show', id);
         case 'recurring':
             return route('financial-accounts.recurring.show', id);
+        case 'loan':
+            return route('loan-accounts.show', id);
     }
 }
 
@@ -134,5 +138,7 @@ function getUpdateRoute(product: Props['product'], id: number): string {
             return route('financial-accounts.fixed.update', id);
         case 'recurring':
             return route('financial-accounts.recurring.update', id);
+        case 'loan':
+            return route('loan-accounts.update', id);
     }
 }

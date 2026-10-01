@@ -7,6 +7,7 @@ use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Schema;
 use RuntimeException;
 
 class FinancialAccountService
@@ -66,6 +67,13 @@ class FinancialAccountService
                         ->where('organization_id', $organizationId)
                         ->findOrFail($jointHolderId);
                     $account->addHolder($jointHolder);
+                }
+
+                if ($product->category === 'SAVINGS' && Schema::hasTable('saving_accounts')) {
+                    $account->savingAccount()->create([
+                        'minimum_balance' => data_get($data, 'minimum_balance', 0),
+                        'settings' => data_get($data, 'settings'),
+                    ]);
                 }
             }
 

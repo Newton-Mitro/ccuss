@@ -23,7 +23,7 @@ class LoanScheduleService
             throw new RuntimeException('Loan repayment frequency must be weekly, monthly, or quarterly.');
         }
 
-        $termMonths = max(1, (int) ($data['term_months'] ?? $loan->term_months));
+        $termMonths = max(1, (int) ($data['term_months'] ?? $loan->term_value));
         $periods = $frequency === 'WEEKLY'
             ? (int) ceil($termMonths * 52 / 12)
             : ($frequency === 'QUARTERLY' ? (int) ceil($termMonths / 3) : $termMonths);
@@ -36,7 +36,8 @@ class LoanScheduleService
         $protectionFee = (float) ($data['scheduled_protection_fee'] ?? $settings['protection_fee_per_installment'] ?? 0);
         $inputs = [
             'frequency' => $frequency,
-            'term_months' => $termMonths,
+            'term_value' => $termMonths,
+            'term_unit' => 'MONTH',
             'start_date' => $startDate->toDateString(),
             'principal' => round($principal, 4),
             'annual_rate' => round($annualRate, 6),

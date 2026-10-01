@@ -23,7 +23,7 @@ class StoreFinancialAccountHolderRequest extends FormRequest
                 'integer',
                 Rule::exists('customers', 'id')->where(fn($query) => $query->where('organization_id', $organizationId)),
             ],
-            'role' => ['required', Rule::in(['PRIMARY', 'JOINT'])],
+            'role' => ['required', Rule::in(['PRIMARY', 'JOINT', 'SIGNATORY'])],
             'ownership_percent' => ['required', 'numeric', 'gt:0', 'lte:100'],
             'guardian_customer_id' => [
                 'nullable',

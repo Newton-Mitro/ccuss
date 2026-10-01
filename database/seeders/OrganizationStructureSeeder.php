@@ -20,26 +20,32 @@ class OrganizationStructureSeeder extends Seeder
     public function run(): void
     {
         // 1. Organization
-        $organization = Organization::factory()->create([
-            'code' => 'ORG-001',
-            'name' => 'Unity Credit Union Society Ltd.',
-            'short_name' => 'UCUSL',
-        ]);
+        $organization = Organization::query()->firstOrCreate(
+            ['code' => 'ORG-001'],
+            [
+                'name' => 'Unity Credit Union Society Ltd.',
+                'short_name' => 'UCUSL',
+            ],
+        );
 
         // 2. Branches
         $branches = collect($this->dhakaBranches)->map(function ($branchName, $index) use ($organization) {
-            return Branch::factory()->create([
-                'organization_id' => $organization->id,
-                'name' => $branchName,
-                'code' => 'BR-' . str_pad($index + 1, 3, '0', STR_PAD_LEFT),
-            ]);
+            return Branch::query()->firstOrCreate(
+                ['code' => 'BR-' . str_pad($index + 1, 3, '0', STR_PAD_LEFT)],
+                [
+                    'organization_id' => $organization->id,
+                    'name' => $branchName,
+                ],
+            );
         });
 
-        $organization = Organization::factory()->create([
-            'code' => 'ORG-002',
-            'name' => 'Gopalganj Credit Union Society Ltd.',
-            'short_name' => 'GCUSL',
-        ]);
+        Organization::query()->firstOrCreate(
+            ['code' => 'ORG-002'],
+            [
+                'name' => 'Gopalganj Credit Union Society Ltd.',
+                'short_name' => 'GCUSL',
+            ],
+        );
 
         $this->command->info('✅ Organization with branches created.');
     }

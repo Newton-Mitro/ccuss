@@ -118,6 +118,11 @@ class FinancialAccount extends Model
         return $this->hasOne(ShareAccount::class);
     }
 
+    public function savingAccount(): HasOne
+    {
+        return $this->hasOne(SavingAccount::class);
+    }
+
     public function fixedDeposit(): HasOne
     {
         return $this->hasOne(FixedDeposit::class);

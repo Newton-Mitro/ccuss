@@ -22,7 +22,6 @@ class RecurringDeposit extends Model
         'maturity_date',
         'maturity_extension_days',
         'grace_days',
-        'status',
         'closed_at',
         'closure_reason',
     ];

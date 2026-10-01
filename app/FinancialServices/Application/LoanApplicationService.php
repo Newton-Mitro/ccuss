@@ -146,15 +146,16 @@ class LoanApplicationService
             ]);
 
             return $application->loanAccount()->create([
-                'customer_id' => $application->customer_id,
                 'financial_account_id' => $financialAccount->id,
-                'financial_product_id' => $application->financial_product_id,
                 'loan_no' => 'LN-' . str_pad((string) $application->id, 8, '0', STR_PAD_LEFT),
                 'principal_amount' => $application->approved_amount,
                 'disbursed_amount' => 0,
                 'contractual_rate' => $application->product->interest_rate,
                 'interest_calculation' => $interestCalculation,
-                'term_months' => $application->requested_term_months,
+                'term_value' => $application->requested_term_months,
+                'term_unit' => 'MONTH',
+                'interest_frequency' => $application->product->interest_frequency ?: 'MONTHLY',
+                'repayment_frequency' => 'MONTHLY',
                 'approved_at' => $application->approved_at?->toDateString(),
                 'maturity_date' => CarbonImmutable::parse($application->approved_at ?? now())->addMonthsNoOverflow((int) $application->requested_term_months)->toDateString(),
                 'status' => 'APPROVED',

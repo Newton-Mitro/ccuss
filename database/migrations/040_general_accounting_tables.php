@@ -197,6 +197,24 @@ return new class extends Migration {
             ]);
         });
 
+        Schema::table('financial_product_account_mappings', function (Blueprint $table): void {
+            $table->foreign('debit_account_id')
+                ->references('id')
+                ->on('accounts')
+                ->nullOnDelete();
+            $table->foreign('credit_account_id')
+                ->references('id')
+                ->on('accounts')
+                ->nullOnDelete();
+        });
+
+        Schema::table('petty_cash_transactions', function (Blueprint $table): void {
+            $table->foreign('expense_account_id')
+                ->references('id')
+                ->on('accounts')
+                ->nullOnDelete();
+        });
+
 
         /*
         |--------------------------------------------------------------------------

@@ -12,44 +12,41 @@ interface Props extends SharedData {
         id: number;
         account_no: string;
         name?: string;
-        fixed_deposit?: {
-            principal_amount?: string | number;
-            maturity_date?: string;
-            maturity_instruction?: string;
-        } | null;
         holder?: { name?: string } | null;
+        loan_account?: {
+            loan_no?: string;
+            contractual_rate?: string | number;
+            maturity_date?: string;
+        } | null;
     };
 }
-export default function FixedDepositAccountEdit() {
+export default function LoanAccountEdit() {
     const { account } = usePage<Props>().props;
     const { data, setData, put, processing, errors } = useForm({
         name: account.name ?? '',
     });
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
+        { title: 'Loan Accounts', href: route('loan-accounts.index') },
         {
-            title: 'Fixed Deposits',
-            href: route('financial-accounts.fixed.index'),
+            title: account.loan_account?.loan_no ?? account.account_no,
+            href: '',
         },
-        { title: account.account_no, href: '' },
     ];
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title={`Edit ${account.account_no}`} />
+            <Head
+                title={`Edit ${account.loan_account?.loan_no ?? account.account_no}`}
+            />
             <div className="max-w-2xl space-y-4">
                 <ResourcePageHeader
-                    title="Edit fixed deposit account"
-                    description={`${account.holder?.name ?? 'Depositor'} · maturity ${account.fixed_deposit?.maturity_date ?? '-'}`}
+                    title="Edit loan account"
+                    description={`${account.holder?.name ?? 'Borrower'} · approved loan contract`}
                 />
                 <form
                     onSubmit={(event) => {
                         event.preventDefault();
-                        put(
-                            route(
-                                'financial-accounts.fixed.update',
-                                account.id,
-                            ),
-                        );
+                        put(route('loan-accounts.update', account.id));
                     }}
                     className="space-y-4 rounded-lg border bg-card p-5"
                 >
@@ -64,27 +61,19 @@ export default function FixedDepositAccountEdit() {
                     </Label>
                     <InputError message={errors.name} />
                     <p className="text-sm text-muted-foreground">
-                        Principal:{' '}
-                        {account.fixed_deposit?.principal_amount ?? '0'} ·
-                        Instruction:{' '}
-                        {account.fixed_deposit?.maturity_instruction?.replaceAll(
-                            '_',
-                            ' ',
-                        ) ?? '-'}
+                        Rate: {account.loan_account?.contractual_rate ?? '0'}% ·
+                        Maturity: {account.loan_account?.maturity_date ?? '-'}
                     </p>
                     <div className="flex justify-end gap-2 border-t pt-4">
                         <Button asChild type="button" variant="outline">
                             <Link
-                                href={route(
-                                    'financial-accounts.fixed.show',
-                                    account.id,
-                                )}
+                                href={route('loan-accounts.show', account.id)}
                             >
                                 Cancel
                             </Link>
                         </Button>
                         <Button type="submit" disabled={processing}>
-                            Save deposit details
+                            Save loan details
                         </Button>
                     </div>
                 </form>

@@ -22,6 +22,7 @@ use App\FinancialServices\Requests\StoreRecurringDepositPaymentRequest;
 use Carbon\CarbonImmutable;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -69,22 +70,33 @@ class FinancialAccountController extends Controller
     public function productCreate(Request $request): Response
     {
         $category = $this->productCategory($request);
-        abort_if($category === 'LOAN', 404);
+
+        if ($category === 'LOAN') {
+            return Inertia::render('financial-services/accounts/loan/create');
+        }
 
         return $this->createForCategory($request, $category, "financial-services/accounts/{$request->route('product')}/create");
     }
 
     private function accountIndex(Request $request, ?string $category = null, string $page = 'financial-services/accounts/index'): Response
     {
+        $relations = ['product.policy', 'holder', 'shareAccount', 'fixedDeposit', 'recurringDeposit', 'loanAccount'];
+        if (Schema::hasTable('saving_accounts')) {
+            $relations[] = 'savingAccount';
+        }
+
         $accounts = $this->accountService
             ->queryForOrganization($this->organizationId($request))
-            ->with(['product', 'holder'])
+            ->with($relations)
             ->when($category, fn($query) => $query->where('account_type', $category))
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search')->trim();
                 $query->where(fn($query) => $query
                     ->where('account_no', 'like', "%{$search}%")
-                    ->orWhere('name', 'like', "%{$search}%"));
+                    ->orWhere('name', 'like', "%{$search}%")
+                    ->orWhereHasMorph('holder', [Customer::class], fn($holder) => $holder
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhere('customer_no', 'like', "%{$search}%")));
             })
             ->latest('id')
             ->paginate($request->integer('per_page', 18))
@@ -115,7 +127,7 @@ class FinancialAccountController extends Controller
         $organizationId = $this->organizationId($request);
 
         return Inertia::render($page, [
-            'products' => FinancialProduct::query()->where('organization_id', $organizationId)->where('status', true)->when($category, fn($query) => $query->where('category', $category))->orderBy('code')->get(['id', 'code', 'name', 'category']),
+            'products' => FinancialProduct::query()->with('policy')->where('organization_id', $organizationId)->where('status', true)->when($category, fn($query) => $query->where('category', $category))->orderBy('code')->get(['id', 'code', 'name', 'category']),
             'customers' => Customer::query()->where('organization_id', $organizationId)->orderBy('name')->get(['id', 'customer_no', 'name', 'type', 'dob']),
             'category' => $category,
         ]);
@@ -145,6 +157,19 @@ class FinancialAccountController extends Controller
 
         $account = $this->accountService->create($data, $this->organizationId($request));
 
+        if ($category === 'SHARE') {
+            $account->shareAccount()->create([
+                'customer_id' => $account->holder_id,
+                'membership_no' => $data['membership_no'] ?? null ?: 'MEM-' . str_pad((string) $account->id, 8, '0', STR_PAD_LEFT),
+                'member_since' => $data['member_since'] ?? null,
+                'membership_status' => $data['membership_status'] ?? 'PENDING',
+            ]);
+        } elseif ($category === 'FIXED_DEPOSIT') {
+            $this->fixedDepositService->open($account, $data);
+        } elseif ($category === 'RECURRING_DEPOSIT') {
+            $this->recurringDepositService->open($account, $data);
+        }
+
         return redirect()->route("financial-accounts.{$request->route('product')}.show", $account)
             ->with('success', 'Financial account opened successfully.');
     }
@@ -152,10 +177,13 @@ class FinancialAccountController extends Controller
     public function productEdit(Request $request, FinancialAccount $financialAccount): Response
     {
         $this->authorizeProductAccount($request, $financialAccount);
-        abort_if($financialAccount->account_type === 'LOAN', 404);
+        $relations = ['product', 'holder', 'shareAccount', 'fixedDeposit', 'recurringDeposit', 'loanAccount'];
+        if (Schema::hasTable('saving_accounts')) {
+            $relations[] = 'savingAccount';
+        }
 
         return Inertia::render("financial-services/accounts/{$request->route('product')}/edit", [
-            'account' => $financialAccount->load(['product', 'holder']),
+            'account' => $financialAccount->load($relations),
             'product' => $request->route('product'),
         ]);
     }
@@ -163,7 +191,6 @@ class FinancialAccountController extends Controller
     public function productUpdate(Request $request, FinancialAccount $financialAccount)
     {
         $this->authorizeProductAccount($request, $financialAccount);
-        abort_if($financialAccount->account_type === 'LOAN', 404);
         $data = $request->validate(['name' => ['nullable', 'string', 'max:200']]);
         $financialAccount->update($data);
 
@@ -181,24 +208,30 @@ class FinancialAccountController extends Controller
     public function show(Request $request, FinancialAccount $financialAccount, string $page = 'financial-services/accounts/show'): Response
     {
         $this->authorizeOrganization($request, $financialAccount);
+        $relations = [
+            'product',
+            'holder',
+            'nominees',
+            'shareAccount',
+            'fixedDeposit',
+            'recurringDeposit.installments',
+            'loanAccount.schedules.components',
+            'loanAccount.arrears',
+            'transactions',
+        ];
+        if (Schema::hasTable('financial_account_holders')) {
+            $relations[] = 'holders';
+        }
+        if (Schema::hasTable('saving_accounts')) {
+            $relations[] = 'savingAccount';
+        }
 
         return Inertia::render($page, [
-            'account' => $financialAccount->load([
-                'product',
-                'holder',
-                'holders',
-                'nominees',
-                'shareAccount',
-                'fixedDeposit',
-                'recurringDeposit.installments',
-                'loanAccount.schedules.components',
-                'loanAccount.arrears',
-                'transactions',
-            ]),
+            'account' => $financialAccount->load($relations),
             'customers' => Customer::query()
                 ->where('organization_id', $this->organizationId($request))
                 ->orderBy('name')
-                ->get(['id', 'customer_no', 'name', 'type', 'dob']),
+                ->get(['id', 'customer_no', 'name', 'type', 'dob', 'primary_phone']),
         ]);
     }
 
@@ -393,13 +426,11 @@ class FinancialAccountController extends Controller
     {
         $this->authorizeShareAccount($request, $financialAccount);
         abort_if($financialAccount->shareAccount()->exists(), 422, 'This share account already has membership details.');
-        $customerId = (int) $financialAccount->holder_id;
         $membershipNo = $request->input('membership_no') ?: 'MEM-' . str_pad((string) $financialAccount->id, 8, '0', STR_PAD_LEFT);
         abort_if(ShareAccount::query()->where('membership_no', $membershipNo)->exists(), 422, 'The membership number is already in use.');
 
         $financialAccount->shareAccount()->create([
             ...$request->validated(),
-            'customer_id' => $customerId,
             'membership_no' => $membershipNo,
         ]);
 

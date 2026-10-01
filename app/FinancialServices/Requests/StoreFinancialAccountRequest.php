@@ -48,6 +48,20 @@ class StoreFinancialAccountRequest extends FormRequest
                 'integer',
                 Rule::exists('customers', 'id')->where(fn($query) => $query->where('organization_id', $organizationId)),
             ],
+            'minimum_balance' => ['nullable', 'numeric', 'gte:0'],
+            'membership_no' => ['nullable', 'string', 'max:100'],
+            'member_since' => ['nullable', 'date'],
+            'membership_status' => ['nullable', Rule::in(['PENDING', 'ACTIVE', 'SUSPENDED', 'CLOSED'])],
+            'principal_amount' => ['nullable', 'numeric', 'gt:0'],
+            'contractual_rate' => ['nullable', 'numeric', 'gte:0'],
+            'term_months' => ['nullable', 'integer', 'min:1', 'max:600'],
+            'started_at' => ['nullable', 'date'],
+            'maturity_instruction' => ['nullable', Rule::in(['PAYOUT', 'RENEW_PRINCIPAL', 'RENEW_PRINCIPAL_AND_INTEREST'])],
+            'installment_amount' => ['nullable', 'numeric', 'gt:0'],
+            'installment_frequency' => ['nullable', Rule::in(['WEEKLY', 'MONTHLY', 'QUARTERLY'])],
+            'total_installments' => ['nullable', 'integer', 'min:1', 'max:600'],
+            'maturity_extension_days' => ['nullable', 'integer', 'min:0'],
+            'grace_days' => ['nullable', 'integer', 'min:0'],
         ];
     }
 }

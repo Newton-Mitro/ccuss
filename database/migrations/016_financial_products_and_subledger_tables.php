@@ -65,11 +65,13 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('financial_product_id')->constrained()->cascadeOnDelete();
             $table->string('transaction_type', 50);
-            $table->foreignId('debit_account_id')->nullable()->constrained('accounts')->nullOnDelete();
-            $table->foreignId('credit_account_id')->nullable()->constrained('accounts')->nullOnDelete();
+            $table->unsignedBigInteger('debit_account_id')->nullable();
+            $table->unsignedBigInteger('credit_account_id')->nullable();
             $table->boolean('status')->default(true);
             $table->timestamps();
             $table->unique(['financial_product_id', 'transaction_type'], 'fp_account_map_product_type_unique');
+            $table->index('debit_account_id');
+            $table->index('credit_account_id');
         });
 
         Schema::create('financial_accounts', function (Blueprint $table): void {
@@ -240,17 +242,17 @@ return new class extends Migration {
                 'organization_id',
                 'branch_id',
                 'transaction_date',
-            ]);
+            ], 'fin_tx_org_branch_date_index');
 
             $table->index([
                 'organization_id',
                 'status',
-            ]);
+            ], 'fin_tx_org_status_index');
 
             $table->index([
                 'transaction_type',
                 'status',
-            ]);
+            ], 'fin_tx_type_status_index');
         });
 
         Schema::create('financial_transaction_entries', function (Blueprint $table): void {
@@ -299,7 +301,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('financial_account_id')->constrained('financial_accounts')->cascadeOnDelete();
             $table->foreignId('customer_id')->constrained('customers')->restrictOnDelete();
-            $table->enum('role', ['PRIMARY', 'JOINT'])->default('JOINT');
+            $table->enum('role', ['PRIMARY', 'JOINT', 'SIGNATORY'])->default('JOINT');
             $table->decimal('ownership_percent', 8, 4)->default(100);
             $table->foreignId('guardian_customer_id')->nullable()->constrained('customers')->restrictOnDelete();
             $table->timestamps();
@@ -310,6 +312,7 @@ return new class extends Migration {
         Schema::create('financial_account_nominees', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('financial_account_id')->constrained('financial_accounts')->cascadeOnDelete();
+            $table->foreignId('customer_id')->nullable()->constrained('customers')->nullOnDelete();
             $table->string('name', 150);
             $table->string('relationship', 100);
             $table->string('phone', 50)->nullable();
