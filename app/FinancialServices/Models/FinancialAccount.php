@@ -108,6 +108,11 @@ class FinancialAccount extends Model
         return $this->hasMany(DepositNominee::class);
     }
 
+    public function authorizedPersons(): HasMany
+    {
+        return $this->hasMany(FinancialAccountAuthorizedPerson::class);
+    }
+
     public function chequeBooks(): HasMany
     {
         return $this->hasMany(\App\TreasuryAndCash\Models\ChequeBook::class, 'financial_account_id');

@@ -301,7 +301,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('financial_account_id')->constrained('financial_accounts')->cascadeOnDelete();
             $table->foreignId('customer_id')->constrained('customers')->restrictOnDelete();
-            $table->enum('role', ['PRIMARY', 'JOINT', 'SIGNATORY'])->default('JOINT');
+            $table->enum('role', ['PRIMARY', 'JOINT', 'GUARDIAN'])->default('JOINT');
             $table->decimal('ownership_percent', 8, 4)->default(100);
             $table->foreignId('guardian_customer_id')->nullable()->constrained('customers')->restrictOnDelete();
             $table->timestamps();
@@ -309,10 +309,37 @@ return new class extends Migration {
             $table->index(['customer_id', 'role']);
         });
 
+        Schema::create('financial_account_authorized_persons', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('financial_account_id');
+            $table->unsignedBigInteger('customer_id');
+            $table->enum('authorization_type', ['SIGNATORY', 'OPERATOR', 'VIEWER'])->default('SIGNATORY');
+            $table->string('designation', 100)->nullable();
+            $table->decimal('transaction_limit', 20, 4)->nullable();
+            $table->date('effective_from')->nullable();
+            $table->date('effective_to')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->text('note')->nullable();
+            $table->timestamps();
+            $table->foreign('financial_account_id', 'faa_auth_account_fk')->references('id')->on('financial_accounts')->cascadeOnDelete();
+            $table->foreign('customer_id', 'faa_auth_customer_fk')->references('id')->on('customers')->restrictOnDelete();
+            $table->unique(
+                [
+                    'financial_account_id',
+                    'customer_id',
+                    'authorization_type',
+                ],
+                'financial_account_authorized_person_unique'
+            );
+            $table->index(['financial_account_id', 'is_active'], 'faa_auth_account_active_idx');
+            $table->index(['customer_id', 'is_active'], 'faa_auth_customer_active_idx');
+            $table->index(['effective_from', 'effective_to'], 'faa_auth_effective_idx');
+        });
+
         Schema::create('financial_account_nominees', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('financial_account_id')->constrained('financial_accounts')->cascadeOnDelete();
-            $table->foreignId('customer_id')->nullable()->constrained('customers')->nullOnDelete();
+            $table->unsignedBigInteger('financial_account_id');
+            $table->unsignedBigInteger('customer_id')->nullable();
             $table->string('name', 150);
             $table->string('relationship', 100);
             $table->string('phone', 50)->nullable();
@@ -321,13 +348,16 @@ return new class extends Migration {
             $table->decimal('share_percent', 8, 4)->default(100);
             $table->boolean('is_primary')->default(true);
             $table->timestamps();
-            $table->index(['financial_account_id', 'is_primary']);
+            $table->foreign('financial_account_id', 'faa_nominee_account_fk')->references('id')->on('financial_accounts')->cascadeOnDelete();
+            $table->foreign('customer_id', 'faa_nominee_customer_fk')->references('id')->on('customers')->nullOnDelete();
+            $table->index(['financial_account_id', 'is_primary'], 'faa_nominee_primary_idx');
         });
     }
 
     public function down(): void
     {
         Schema::dropIfExists('financial_account_nominees');
+        Schema::dropIfExists('financial_account_authorized_persons');
         Schema::dropIfExists('financial_account_holders');
         Schema::dropIfExists('financial_product_terms');
         Schema::dropIfExists('financial_product_policies');

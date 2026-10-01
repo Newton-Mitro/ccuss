@@ -29,18 +29,37 @@ interface Nominee {
     share_percent?: string | number;
     is_primary?: boolean;
 }
+interface AuthorizedPerson {
+    id: number;
+    customer?: { id?: number; name?: string; customer_no?: string } | null;
+    authorization_type: string;
+    designation?: string | null;
+    transaction_limit?: string | number | null;
+    effective_from?: string | null;
+    effective_to?: string | null;
+    is_active?: boolean;
+    note?: string | null;
+}
 
 export default function FinancialAccountPeopleManagement({
     account,
     customers,
     nomineesEnabled,
 }: {
-    account: { id: number; holders?: Holder[]; nominees?: Nominee[] };
+    account: {
+        id: number;
+        holders?: Holder[];
+        nominees?: Nominee[];
+        authorized_persons?: AuthorizedPerson[];
+    };
     customers: Customer[];
     nomineesEnabled: boolean;
 }) {
     const [editingHolder, setEditingHolder] = useState<number | null>(null);
     const [editingNominee, setEditingNominee] = useState<number | null>(null);
+    const [editingAuthorizedPerson, setEditingAuthorizedPerson] = useState<
+        number | null
+    >(null);
     const holderForm = useForm({
         customer_id: '',
         role: 'JOINT',
@@ -54,6 +73,16 @@ export default function FinancialAccountPeopleManagement({
         phone: '',
         share_percent: '100',
         is_primary: false,
+    });
+    const authorizedPersonForm = useForm({
+        customer_id: '',
+        authorization_type: 'SIGNATORY',
+        designation: '',
+        transaction_limit: '',
+        effective_from: '',
+        effective_to: '',
+        is_active: true,
+        note: '',
     });
     const saveHolder = (event: React.FormEvent) => {
         event.preventDefault();
@@ -96,6 +125,31 @@ export default function FinancialAccountPeopleManagement({
         else
             nomineeForm.post(
                 route('financial-accounts.nominees.store', account.id),
+                options,
+            );
+    };
+    const saveAuthorizedPerson = (event: React.FormEvent) => {
+        event.preventDefault();
+        const options = {
+            onSuccess: () => {
+                authorizedPersonForm.reset();
+                setEditingAuthorizedPerson(null);
+            },
+        };
+        if (editingAuthorizedPerson)
+            authorizedPersonForm.put(
+                route('financial-accounts.authorized-persons.update', [
+                    account.id,
+                    editingAuthorizedPerson,
+                ]),
+                options,
+            );
+        else
+            authorizedPersonForm.post(
+                route(
+                    'financial-accounts.authorized-persons.store',
+                    account.id,
+                ),
                 options,
             );
     };
@@ -212,7 +266,7 @@ export default function FinancialAccountPeopleManagement({
                                 options={[
                                     { value: 'PRIMARY', label: 'Primary' },
                                     { value: 'JOINT', label: 'Joint' },
-                                    { value: 'SIGNATORY', label: 'Signatory' },
+                                    { value: 'GUARDIAN', label: 'Guardian' },
                                 ]}
                             />
                             <InputError message={holderForm.errors.role} />
@@ -241,6 +295,234 @@ export default function FinancialAccountPeopleManagement({
                         <Button type="submit" disabled={holderForm.processing}>
                             <Plus className="mr-1 h-4 w-4" />
                             {editingHolder ? 'Update holder' : 'Add holder'}
+                        </Button>
+                    </div>
+                </form>
+            </section>
+            <section className="rounded-lg border bg-card p-4">
+                <div className="flex items-center justify-between">
+                    <h2 className="font-semibold">Authorized persons</h2>
+                    <span className="text-xs text-muted-foreground">
+                        Signatory, operator, or viewer access
+                    </span>
+                </div>
+                <div className="mt-3 divide-y">
+                    {(account.authorized_persons ?? []).map((person) => (
+                        <div
+                            key={person.id}
+                            className="flex items-center justify-between gap-3 py-2 text-sm"
+                        >
+                            <div>
+                                <p className="font-medium">
+                                    {person.customer?.name ??
+                                        person.customer?.customer_no ??
+                                        'Customer'}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                    {person.authorization_type}
+                                    {person.designation
+                                        ? ` · ${person.designation}`
+                                        : ''}
+                                    {person.is_active === false
+                                        ? ' · Inactive'
+                                        : ''}
+                                </p>
+                            </div>
+                            <div className="flex gap-1">
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                        setEditingAuthorizedPerson(person.id);
+                                        authorizedPersonForm.setData({
+                                            customer_id: person.customer
+                                                ? String(
+                                                      (
+                                                          person.customer as {
+                                                              id?: number;
+                                                          }
+                                                      ).id ?? '',
+                                                  )
+                                                : '',
+                                            authorization_type:
+                                                person.authorization_type,
+                                            designation:
+                                                person.designation ?? '',
+                                            transaction_limit: String(
+                                                person.transaction_limit ?? '',
+                                            ),
+                                            effective_from:
+                                                person.effective_from ?? '',
+                                            effective_to:
+                                                person.effective_to ?? '',
+                                            is_active:
+                                                person.is_active !== false,
+                                            note: person.note ?? '',
+                                        });
+                                    }}
+                                >
+                                    <Pencil className="mr-1 h-4 w-4" />
+                                    Edit
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() =>
+                                        router.delete(
+                                            route(
+                                                'financial-accounts.authorized-persons.destroy',
+                                                [account.id, person.id],
+                                            ),
+                                        )
+                                    }
+                                >
+                                    <Trash2 className="mr-1 h-4 w-4" />
+                                    Remove
+                                </Button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                <form
+                    onSubmit={saveAuthorizedPerson}
+                    className="mt-3 space-y-3 border-t pt-3"
+                >
+                    <div className="grid gap-3 sm:grid-cols-2">
+                        <div>
+                            <Label>Customer</Label>
+                            <Select
+                                value={authorizedPersonForm.data.customer_id}
+                                disabled={Boolean(editingAuthorizedPerson)}
+                                onChange={(value) =>
+                                    authorizedPersonForm.setData(
+                                        'customer_id',
+                                        value,
+                                    )
+                                }
+                                options={[
+                                    { value: '', label: 'Select customer' },
+                                    ...customers.map((customer) => ({
+                                        value: String(customer.id),
+                                        label: `${customer.customer_no} - ${customer.name}`,
+                                    })),
+                                ]}
+                            />
+                            <InputError
+                                message={
+                                    authorizedPersonForm.errors.customer_id
+                                }
+                            />
+                        </div>
+                        <div>
+                            <Label>Access type</Label>
+                            <Select
+                                value={
+                                    authorizedPersonForm.data.authorization_type
+                                }
+                                onChange={(value) =>
+                                    authorizedPersonForm.setData(
+                                        'authorization_type',
+                                        value,
+                                    )
+                                }
+                                options={[
+                                    { value: 'SIGNATORY', label: 'Signatory' },
+                                    { value: 'OPERATOR', label: 'Operator' },
+                                    { value: 'VIEWER', label: 'Viewer' },
+                                ]}
+                            />
+                        </div>
+                        <div>
+                            <Label>Designation</Label>
+                            <Input
+                                value={authorizedPersonForm.data.designation}
+                                onChange={(event) =>
+                                    authorizedPersonForm.setData(
+                                        'designation',
+                                        event.target.value,
+                                    )
+                                }
+                            />
+                        </div>
+                        <div>
+                            <Label>Transaction limit</Label>
+                            <Input
+                                type="number"
+                                min="0"
+                                step="0.0001"
+                                value={
+                                    authorizedPersonForm.data.transaction_limit
+                                }
+                                onChange={(event) =>
+                                    authorizedPersonForm.setData(
+                                        'transaction_limit',
+                                        event.target.value,
+                                    )
+                                }
+                            />
+                            <InputError
+                                message={
+                                    authorizedPersonForm.errors
+                                        .transaction_limit
+                                }
+                            />
+                        </div>
+                        <div>
+                            <Label>Effective from</Label>
+                            <Input
+                                type="date"
+                                value={authorizedPersonForm.data.effective_from}
+                                onChange={(event) =>
+                                    authorizedPersonForm.setData(
+                                        'effective_from',
+                                        event.target.value,
+                                    )
+                                }
+                            />
+                        </div>
+                        <div>
+                            <Label>Effective to</Label>
+                            <Input
+                                type="date"
+                                value={authorizedPersonForm.data.effective_to}
+                                onChange={(event) =>
+                                    authorizedPersonForm.setData(
+                                        'effective_to',
+                                        event.target.value,
+                                    )
+                                }
+                            />
+                            <InputError
+                                message={
+                                    authorizedPersonForm.errors.effective_to
+                                }
+                            />
+                        </div>
+                    </div>
+                    <label className="flex items-center gap-2 text-sm">
+                        <input
+                            type="checkbox"
+                            checked={authorizedPersonForm.data.is_active}
+                            onChange={(event) =>
+                                authorizedPersonForm.setData(
+                                    'is_active',
+                                    event.target.checked,
+                                )
+                            }
+                        />
+                        Active authorization
+                    </label>
+                    <div className="flex justify-end">
+                        <Button
+                            type="submit"
+                            disabled={authorizedPersonForm.processing}
+                        >
+                            <Plus className="mr-1 h-4 w-4" />
+                            {editingAuthorizedPerson
+                                ? 'Update authorization'
+                                : 'Add authorized person'}
                         </Button>
                     </div>
                 </form>

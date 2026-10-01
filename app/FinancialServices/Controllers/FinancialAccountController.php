@@ -12,6 +12,7 @@ use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\DepositNominee;
 use App\FinancialServices\Models\ShareAccount;
+use App\FinancialServices\Models\FinancialAccountAuthorizedPerson;
 use App\FinancialServices\Requests\StoreFinancialAccountRequest;
 use App\FinancialServices\Requests\StoreDepositNomineeRequest;
 use App\FinancialServices\Requests\StoreFinancialAccountHolderRequest;
@@ -19,6 +20,7 @@ use App\FinancialServices\Requests\StoreShareAccountRequest;
 use App\FinancialServices\Requests\StoreFixedDepositRequest;
 use App\FinancialServices\Requests\StoreRecurringDepositRequest;
 use App\FinancialServices\Requests\StoreRecurringDepositPaymentRequest;
+use App\FinancialServices\Requests\StoreFinancialAccountAuthorizedPersonRequest;
 use Carbon\CarbonImmutable;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -41,6 +43,7 @@ class FinancialAccountController extends Controller
         $this->middleware('permission:financial.accounts.close')->only('close');
         $this->middleware('permission:financial.accounts.nominees.manage')->only(['storeNominee', 'updateNominee', 'destroyNominee']);
         $this->middleware('permission:financial.accounts.holders.manage')->only(['storeHolder', 'updateHolder', 'destroyHolder']);
+        $this->middleware('permission:financial.accounts.holders.manage')->only(['storeAuthorizedPerson', 'updateAuthorizedPerson', 'destroyAuthorizedPerson']);
         $this->middleware('permission:financial.accounts.membership.manage')->only(['storeShareAccount', 'updateShareAccount']);
         $this->middleware('permission:financial.accounts.fixed-deposits.manage')->only('storeFixedDeposit');
         $this->middleware('permission:financial.accounts.recurring-deposits.manage')->only('storeRecurringDeposit');
@@ -212,6 +215,7 @@ class FinancialAccountController extends Controller
             'product',
             'holder',
             'nominees',
+            'authorizedPersons.customer',
             'shareAccount',
             'fixedDeposit',
             'recurringDeposit.installments',
@@ -422,6 +426,32 @@ class FinancialAccountController extends Controller
         return back()->with('success', 'Account holder removed successfully.');
     }
 
+    public function storeAuthorizedPerson(StoreFinancialAccountAuthorizedPersonRequest $request, FinancialAccount $financialAccount)
+    {
+        $this->authorizeAuthorizedPersonAccount($request, $financialAccount);
+        $financialAccount->authorizedPersons()->create($request->validated());
+
+        return back()->with('success', 'Authorized person added successfully.');
+    }
+
+    public function updateAuthorizedPerson(StoreFinancialAccountAuthorizedPersonRequest $request, FinancialAccount $financialAccount, FinancialAccountAuthorizedPerson $authorizedPerson)
+    {
+        $this->authorizeAuthorizedPersonAccount($request, $financialAccount);
+        abort_unless($authorizedPerson->financial_account_id === $financialAccount->id, 404);
+        $authorizedPerson->update($request->validated());
+
+        return back()->with('success', 'Authorized person updated successfully.');
+    }
+
+    public function destroyAuthorizedPerson(Request $request, FinancialAccount $financialAccount, FinancialAccountAuthorizedPerson $authorizedPerson)
+    {
+        $this->authorizeAuthorizedPersonAccount($request, $financialAccount);
+        abort_unless($authorizedPerson->financial_account_id === $financialAccount->id, 404);
+        $authorizedPerson->delete();
+
+        return back()->with('success', 'Authorized person removed successfully.');
+    }
+
     public function storeShareAccount(StoreShareAccountRequest $request, FinancialAccount $financialAccount)
     {
         $this->authorizeShareAccount($request, $financialAccount);
@@ -548,6 +578,12 @@ class FinancialAccountController extends Controller
         $this->authorizeOrganization($request, $account);
         abort_unless(in_array($account->account_type, ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT'], true), 422, 'This account does not support holder maintenance.');
         abort_if($account->status === 'CLOSED', 422, 'Closed accounts cannot change holders.');
+    }
+
+    private function authorizeAuthorizedPersonAccount(Request $request, FinancialAccount $account): void
+    {
+        $this->authorizeOrganization($request, $account);
+        abort_if($account->status === 'CLOSED', 422, 'Closed accounts cannot change authorized persons.');
     }
 
     private function validateHolderAllocation(StoreFinancialAccountHolderRequest $request, FinancialAccount $account, ?Customer $current = null): void
