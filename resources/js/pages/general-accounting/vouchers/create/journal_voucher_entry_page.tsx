@@ -20,6 +20,7 @@ interface Account {
     code: string;
     name: string;
     type?: string;
+    is_control_account?: boolean;
 }
 
 interface CostCenter {
@@ -39,6 +40,8 @@ interface FiscalPeriod {
 interface Entry {
     account_id: string;
     financial_account_id: string;
+    instrument_type: string;
+    instrument_id: string;
     debit: string;
     credit: string;
     description: string;
@@ -48,6 +51,8 @@ interface Entry {
 const emptyEntry = (): Entry => ({
     account_id: '',
     financial_account_id: '',
+    instrument_type: '',
+    instrument_id: '',
     debit: '',
     credit: '',
     description: '',
@@ -133,6 +138,7 @@ export default function JournalVoucherEntryPage() {
         accounts,
         costCenters,
         financialAccounts,
+        cheques,
         voucherType,
     } = usePage().props as unknown as {
         fiscalPeriods: FiscalPeriod[];
@@ -143,6 +149,12 @@ export default function JournalVoucherEntryPage() {
             account_no: string;
             name: string | null;
             account_type: string;
+        }[];
+        cheques: {
+            id: number;
+            financial_account_id: number | string | null;
+            cheque_no: string;
+            amount: number | string | null;
         }[];
         voucherType: string;
     };
@@ -157,18 +169,44 @@ export default function JournalVoucherEntryPage() {
         entries: [] as Entry[],
     });
 
-    const [draftEntry, setDraftEntry] = useState<Entry>(emptyEntry());
+    const [draftDebitEntry, setDraftDebitEntry] = useState<Entry>(emptyEntry());
+    const [draftCreditEntry, setDraftCreditEntry] =
+        useState<Entry>(emptyEntry());
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
+    const [editingSide, setEditingSide] = useState<'debit' | 'credit' | null>(
+        null,
+    );
+    const [draftDescription, setDraftDescription] = useState('');
     const [draftError, setDraftError] = useState('');
 
     useFlashToastHandler();
 
-    const updateDraftEntry = (field: keyof Entry, value: string) => {
+    const updateDraftEntry = (
+        side: 'debit' | 'credit',
+        field: keyof Entry,
+        value: string,
+    ) => {
         setDraftError('');
-        setDraftEntry((current) => ({
-            ...current,
-            [field]: value,
-        }));
+        const setEntry =
+            side === 'debit' ? setDraftDebitEntry : setDraftCreditEntry;
+        setEntry((current) => {
+            const updated = { ...current, [field]: value };
+            if (field === 'account_id') {
+                const account = accounts.find(
+                    (item) => String(item.id) === value,
+                );
+                if (!account?.is_control_account) {
+                    updated.financial_account_id = '';
+                    updated.instrument_type = '';
+                    updated.instrument_id = '';
+                }
+            }
+            if (field === 'financial_account_id') updated.instrument_id = '';
+            if (field === 'instrument_type' && value !== 'CHEQUE') {
+                updated.instrument_id = '';
+            }
+            return updated;
+        });
     };
 
     const isSettlementAccount = (account?: Account) =>
@@ -237,47 +275,76 @@ export default function JournalVoucherEntryPage() {
         return true;
     };
 
-    const addOrUpdateEntry = () => {
-        const debit = Number(draftEntry.debit || 0);
-        const credit = Number(draftEntry.credit || 0);
+    const resetDraft = () => {
+        setDraftDebitEntry(emptyEntry());
+        setDraftCreditEntry(emptyEntry());
+        setDraftDescription('');
+        setEditingIndex(null);
+        setEditingSide(null);
+        setDraftError('');
+    };
+
+    const validateDraftSide = (entry: Entry, side: 'debit' | 'credit') => {
         const account = accounts.find(
-            (item) => String(item.id) === draftEntry.account_id,
+            (item) => String(item.id) === entry.account_id,
         );
-
-        // An entry must have an account and exactly one side.
-        if (!draftEntry.account_id) {
-            setDraftError('Select a ledger account for this line.');
-            return;
+        const amount = Number(entry[side] || 0);
+        if (!account) {
+            setDraftError(`Select a valid ${side} account.`);
+            return false;
         }
-
-        if ((debit <= 0 && credit <= 0) || (debit > 0 && credit > 0)) {
-            setDraftError('Enter a positive amount on exactly one side.');
-            return;
+        if (amount <= 0) {
+            setDraftError(`Enter a positive ${side} amount.`);
+            return false;
         }
-
-        if (!accountingLineIsValid(account, debit > 0)) {
-            return;
+        if (account.is_control_account && !entry.financial_account_id) {
+            setDraftError(
+                `${side === 'debit' ? 'Debit' : 'Credit'} control accounts require a financial account.`,
+            );
+            return false;
         }
+        if (entry.instrument_type === 'CHEQUE' && !entry.instrument_id) {
+            setDraftError(`Select the ${side} cheque instrument.`);
+            return false;
+        }
+        return accountingLineIsValid(account, side === 'debit');
+    };
 
-        if (editingIndex === null) {
-            setData('entries', [
-                ...data.entries,
-                {
-                    ...draftEntry,
-                },
-            ]);
-        } else {
+    const addOrUpdateEntry = () => {
+        if (editingIndex !== null && editingSide) {
+            const entry =
+                editingSide === 'debit' ? draftDebitEntry : draftCreditEntry;
+            if (!validateDraftSide(entry, editingSide)) return;
+            const updatedEntry = { ...entry, description: draftDescription };
             setData(
                 'entries',
-                data.entries.map((entry, index) =>
-                    index === editingIndex ? { ...draftEntry } : entry,
+                data.entries.map((current, index) =>
+                    index === editingIndex ? updatedEntry : current,
                 ),
             );
+            resetDraft();
+            return;
         }
 
-        setDraftEntry(emptyEntry());
-        setEditingIndex(null);
-        setDraftError('');
+        const newEntries: Entry[] = [];
+        for (const side of ['debit', 'credit'] as const) {
+            const entry = side === 'debit' ? draftDebitEntry : draftCreditEntry;
+            if (!entry.account_id && !entry[side]) continue;
+            if (!validateDraftSide(entry, side)) return;
+            newEntries.push({
+                ...entry,
+                debit: side === 'debit' ? entry.debit : '',
+                credit: side === 'credit' ? entry.credit : '',
+                description: draftDescription,
+            });
+        }
+
+        if (newEntries.length === 0) {
+            setDraftError('Add a debit account, a credit account, or both.');
+            return;
+        }
+        setData('entries', [...data.entries, ...newEntries]);
+        resetDraft();
     };
 
     const editEntry = (index: number) => {
@@ -287,11 +354,12 @@ export default function JournalVoucherEntryPage() {
             return;
         }
 
-        setDraftEntry({
-            ...entry,
-        });
-
+        const side = Number(entry.debit) > 0 ? 'debit' : 'credit';
+        setDraftDebitEntry(side === 'debit' ? { ...entry } : emptyEntry());
+        setDraftCreditEntry(side === 'credit' ? { ...entry } : emptyEntry());
+        setDraftDescription(entry.description);
         setEditingIndex(index);
+        setEditingSide(side);
     };
 
     const deleteEntry = (index: number) => {
@@ -301,8 +369,7 @@ export default function JournalVoucherEntryPage() {
         );
 
         if (editingIndex === index) {
-            setDraftEntry(emptyEntry());
-            setEditingIndex(null);
+            resetDraft();
         } else if (editingIndex !== null && editingIndex > index) {
             setEditingIndex(editingIndex - 1);
         }
@@ -394,39 +461,210 @@ export default function JournalVoucherEntryPage() {
         },
     ];
 
-    const draftDebit = Number(draftEntry.debit || 0);
-    const draftCredit = Number(draftEntry.credit || 0);
+    const draftDebit = Number(draftDebitEntry.debit || 0);
+    const draftCredit = Number(draftCreditEntry.credit || 0);
+    const canAddEntry = Boolean(
+        draftDebitEntry.account_id ||
+        draftDebitEntry.debit ||
+        draftCreditEntry.account_id ||
+        draftCreditEntry.credit,
+    );
 
-    const canAddEntry =
-        Boolean(draftEntry.account_id) &&
-        ((draftDebit > 0 && draftCredit === 0) ||
-            (draftCredit > 0 && draftDebit === 0));
+    const accountOptionsFor = (side: 'debit' | 'credit', entry: Entry) =>
+        accounts.filter((account) => {
+            const selected = String(account.id) === entry.account_id;
+            const settlement = isSettlementAccount(account);
+            if (voucherType === 'CONTRA') return selected || settlement;
+            if (voucherType === 'PAYMENT') {
+                return (
+                    selected || (side === 'credit' ? settlement : !settlement)
+                );
+            }
+            if (voucherType === 'RECEIPT') {
+                return (
+                    selected || (side === 'debit' ? settlement : !settlement)
+                );
+            }
+            return true;
+        });
 
-    const draftAccountOptions = accounts.filter((account) => {
-        const selected = String(account.id) === draftEntry.account_id;
+    const renderDraftSide = (side: 'debit' | 'credit') => {
+        const entry = side === 'debit' ? draftDebitEntry : draftCreditEntry;
+        const selectedAccount = accounts.find(
+            (account) => String(account.id) === entry.account_id,
+        );
+        const requiresFinancialAccount = Boolean(
+            selectedAccount?.is_control_account,
+        );
+        const availableCheques = cheques.filter(
+            (cheque) =>
+                String(cheque.financial_account_id) ===
+                String(entry.financial_account_id),
+        );
+        const isDebit = side === 'debit';
 
-        if (voucherType === 'CONTRA') {
-            return selected || isSettlementAccount(account);
-        }
+        return (
+            <section
+                key={side}
+                className={`space-y-2 rounded-md border p-2 ${isDebit ? 'border-emerald-500/25 bg-emerald-500/[0.035]' : 'border-rose-500/25 bg-rose-500/[0.035]'}`}
+            >
+                <div className="flex items-center justify-between border-b border-border/60 pb-1">
+                    <span
+                        className={`text-xs font-semibold uppercase ${isDebit ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}`}
+                    >
+                        {side} entry
+                    </span>
+                    <span className="font-mono text-xs text-muted-foreground tabular-nums">
+                        {Number(entry[side] || 0).toFixed(2)}
+                    </span>
+                </div>
 
-        if (voucherType === 'PAYMENT' && draftCredit > 0) {
-            return selected || isSettlementAccount(account);
-        }
+                <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_140px]">
+                    <div>
+                        <Label className="text-xs">
+                            {isDebit ? 'Debit account' : 'Credit account'}
+                        </Label>
+                        <Select
+                            value={entry.account_id}
+                            disabled={
+                                editingIndex !== null && editingSide !== side
+                            }
+                            onChange={(value) =>
+                                updateDraftEntry(side, 'account_id', value)
+                            }
+                            options={[
+                                { value: '', label: 'Select ledger account' },
+                                ...accountOptionsFor(side, entry).map(
+                                    (account) => ({
+                                        value: String(account.id),
+                                        label: `${account.code} - ${account.name}${account.is_control_account ? ' · Control' : ''}`,
+                                    }),
+                                ),
+                            ]}
+                        />
+                    </div>
+                    <div>
+                        <Label className="text-xs">
+                            {isDebit ? 'Debit amount' : 'Credit amount'}
+                        </Label>
+                        <Input
+                            type="number"
+                            min="0"
+                            step="0.0001"
+                            value={entry[side]}
+                            disabled={
+                                editingIndex !== null && editingSide !== side
+                            }
+                            placeholder="0.00"
+                            onChange={(event) =>
+                                updateDraftEntry(side, side, event.target.value)
+                            }
+                        />
+                    </div>
+                </div>
 
-        if (voucherType === 'PAYMENT' && draftDebit > 0) {
-            return selected || !isSettlementAccount(account);
-        }
+                <div className="grid gap-2 sm:grid-cols-3">
+                    <div>
+                        <Label className="text-xs">Financial account</Label>
+                        <Select
+                            value={entry.financial_account_id}
+                            disabled={
+                                !requiresFinancialAccount ||
+                                (editingIndex !== null && editingSide !== side)
+                            }
+                            onChange={(value) =>
+                                updateDraftEntry(
+                                    side,
+                                    'financial_account_id',
+                                    value,
+                                )
+                            }
+                            options={[
+                                {
+                                    value: '',
+                                    label: requiresFinancialAccount
+                                        ? 'Select account'
+                                        : 'Disabled',
+                                },
+                                ...financialAccounts.map((account) => ({
+                                    value: String(account.id),
+                                    label: `${account.account_no} - ${account.name ?? 'Unnamed account'}`,
+                                })),
+                            ]}
+                        />
+                    </div>
+                    <div>
+                        <Label className="text-xs">Instrument type</Label>
+                        <Select
+                            value={entry.instrument_type}
+                            disabled={
+                                !entry.financial_account_id ||
+                                (editingIndex !== null && editingSide !== side)
+                            }
+                            onChange={(value) =>
+                                updateDraftEntry(side, 'instrument_type', value)
+                            }
+                            options={[
+                                { value: '', label: 'None' },
+                                { value: 'CHEQUE', label: 'Cheque' },
+                            ]}
+                        />
+                    </div>
+                    <div>
+                        <Label className="text-xs">Instrument</Label>
+                        <Select
+                            value={entry.instrument_id}
+                            disabled={
+                                !entry.financial_account_id ||
+                                entry.instrument_type !== 'CHEQUE' ||
+                                (editingIndex !== null && editingSide !== side)
+                            }
+                            onChange={(value) =>
+                                updateDraftEntry(side, 'instrument_id', value)
+                            }
+                            options={[
+                                {
+                                    value: '',
+                                    label:
+                                        entry.instrument_type === 'CHEQUE'
+                                            ? 'Select cheque'
+                                            : 'Disabled',
+                                },
+                                ...availableCheques.map((cheque) => ({
+                                    value: String(cheque.id),
+                                    label: `${cheque.cheque_no} (${cheque.amount ?? '0'})`,
+                                })),
+                            ]}
+                        />
+                    </div>
+                </div>
 
-        if (voucherType === 'RECEIPT' && draftDebit > 0) {
-            return selected || isSettlementAccount(account);
-        }
-
-        if (voucherType === 'RECEIPT' && draftCredit > 0) {
-            return selected || !isSettlementAccount(account);
-        }
-
-        return true;
-    });
+                <details
+                    open={Boolean(entry.cost_center_id)}
+                    className="border-t border-border/60 pt-1"
+                >
+                    <summary className="w-fit cursor-pointer text-xs text-muted-foreground hover:text-foreground">
+                        Cost center
+                    </summary>
+                    <div className="mt-1 max-w-sm">
+                        <Select
+                            value={entry.cost_center_id}
+                            onChange={(value) =>
+                                updateDraftEntry(side, 'cost_center_id', value)
+                            }
+                            options={[
+                                { value: '', label: 'None' },
+                                ...costCenters.map((center) => ({
+                                    value: String(center.id),
+                                    label: `${center.code} - ${center.name}`,
+                                })),
+                            ]}
+                        />
+                    </div>
+                </details>
+            </section>
+        );
+    };
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
@@ -457,9 +695,9 @@ export default function JournalVoucherEntryPage() {
                     onSubmit={submit}
                     className="space-y-2 rounded-xl border border-border/80 bg-card p-2 sm:p-3"
                 >
-                    <div className="grid items-stretch gap-2 lg:grid-cols-[minmax(240px,0.7fr)_minmax(0,1.8fr)]">
+                    <div className="space-y-2">
                         {/* Voucher Details */}
-                        <section className="h-full space-y-3 rounded-lg border border-border/70 bg-muted/20 p-3 lg:sticky lg:top-4">
+                        <section className="rounded-lg border border-border/70 bg-muted/20 p-2">
                             <div className="flex items-center justify-between gap-2 border-b border-border/60 pb-2">
                                 <div>
                                     <h2 className="text-sm font-semibold text-foreground">
@@ -476,7 +714,7 @@ export default function JournalVoucherEntryPage() {
                                 </p>
                             </div>
 
-                            <div className="space-y-3">
+                            <div className="grid gap-2 md:grid-cols-[minmax(200px,0.9fr)_160px_minmax(240px,1.5fr)] md:items-end">
                                 <div>
                                     <Label className="text-xs">
                                         Fiscal period
@@ -544,194 +782,59 @@ export default function JournalVoucherEntryPage() {
                             </div>
                         </section>
 
-                        {/* Add Voucher Entry */}
-                        <section className="h-full space-y-3 rounded-lg border border-primary/20 bg-primary/3 p-3">
-                            <div className="flex items-center justify-between gap-2 border-b border-primary/15 pb-2">
+                        <section className="space-y-2 rounded-lg border border-border/70 bg-card p-2 sm:p-3">
+                            <div className="flex items-center justify-between gap-2 border-b border-border/60 pb-1">
                                 <div>
                                     <h2 className="text-sm font-semibold text-foreground">
-                                        Voucher entries
+                                        Debit and credit entries
                                     </h2>
-
                                     <p className="text-[11px] text-muted-foreground">
                                         {mode.rule}
                                     </p>
                                 </div>
-
                                 <StatusBadge tone="info">
-                                    {data.entries.length} added
+                                    {data.entries.length} lines
                                 </StatusBadge>
                             </div>
 
-                            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-6">
-                                <div className="xl:col-span-2">
-                                    <Label className="text-xs">Account</Label>
-
-                                    <Select
-                                        value={draftEntry.account_id}
-                                        onChange={(value) =>
-                                            updateDraftEntry(
-                                                'account_id',
-                                                value,
-                                            )
-                                        }
-                                        options={[
-                                            {
-                                                value: '',
-                                                label: 'Select account',
-                                            },
-                                            ...draftAccountOptions.map(
-                                                (account) => ({
-                                                    value: String(account.id),
-                                                    label: `${account.code} - ${account.name} (${account.type ?? 'ledger'})`,
-                                                }),
-                                            ),
-                                        ]}
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label className="text-xs">
-                                        Financial account
-                                    </Label>
-
-                                    <Select
-                                        value={draftEntry.financial_account_id}
-                                        onChange={(value) =>
-                                            updateDraftEntry(
-                                                'financial_account_id',
-                                                value,
-                                            )
-                                        }
-                                        options={[
-                                            {
-                                                value: '',
-                                                label: 'None',
-                                            },
-                                            ...financialAccounts.map(
-                                                (account) => ({
-                                                    value: String(account.id),
-                                                    label: `${account.account_no} - ${account.name ?? 'Unnamed account'}`,
-                                                }),
-                                            ),
-                                        ]}
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label className="text-xs">
-                                        Cost center
-                                    </Label>
-
-                                    <Select
-                                        value={draftEntry.cost_center_id}
-                                        onChange={(value) =>
-                                            updateDraftEntry(
-                                                'cost_center_id',
-                                                value,
-                                            )
-                                        }
-                                        options={[
-                                            {
-                                                value: '',
-                                                label: 'None',
-                                            },
-                                            ...costCenters.map(
-                                                (costCenter) => ({
-                                                    value: String(
-                                                        costCenter.id,
-                                                    ),
-                                                    label: `${costCenter.code} - ${costCenter.name}`,
-                                                }),
-                                            ),
-                                        ]}
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label className="text-xs">
-                                        {mode.debitLabel}
-                                    </Label>
-
-                                    <Input
-                                        type="number"
-                                        min="0"
-                                        step="0.0001"
-                                        value={draftEntry.debit}
-                                        onChange={(event) => {
-                                            const value = event.target.value;
-
-                                            updateDraftEntry('debit', value);
-
-                                            if (Number(value) > 0) {
-                                                setDraftEntry((current) => ({
-                                                    ...current,
-                                                    debit: value,
-                                                    credit: '',
-                                                }));
-                                            }
-                                        }}
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label className="text-xs">
-                                        {mode.creditLabel}
-                                    </Label>
-
-                                    <Input
-                                        type="number"
-                                        min="0"
-                                        step="0.0001"
-                                        value={draftEntry.credit}
-                                        onChange={(event) => {
-                                            const value = event.target.value;
-
-                                            updateDraftEntry('credit', value);
-
-                                            if (Number(value) > 0) {
-                                                setDraftEntry((current) => ({
-                                                    ...current,
-                                                    credit: value,
-                                                    debit: '',
-                                                }));
-                                            }
-                                        }}
-                                    />
-                                </div>
-
-                                <div className="sm:col-span-2 xl:col-span-6">
-                                    <Label className="text-xs">
-                                        Line description
-                                    </Label>
-
-                                    <Input
-                                        value={draftEntry.description}
-                                        placeholder="Optional"
-                                        onChange={(event) =>
-                                            updateDraftEntry(
-                                                'description',
-                                                event.target.value,
-                                            )
-                                        }
-                                    />
-                                </div>
+                            <div className="grid gap-2 xl:grid-cols-2">
+                                {renderDraftSide('debit')}
+                                {renderDraftSide('credit')}
                             </div>
 
-                            <div className="flex justify-end border-t border-primary/10 pt-2">
-                                <Button
-                                    type="button"
-                                    size="sm"
-                                    onClick={addOrUpdateEntry}
-                                    disabled={!canAddEntry}
-                                >
-                                    {editingIndex === null ? (
-                                        <Plus className="mr-1.5 h-4 w-4" />
-                                    ) : null}
-
-                                    {editingIndex === null
-                                        ? 'Add line'
-                                        : 'Update line'}
-                                </Button>
+                            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-2">
+                                <Input
+                                    aria-label="Line description"
+                                    className="min-w-48 flex-1 sm:max-w-md"
+                                    value={draftDescription}
+                                    placeholder="Line description (optional)"
+                                    onChange={(event) =>
+                                        setDraftDescription(event.target.value)
+                                    }
+                                />
+                                <div className="flex gap-2">
+                                    {editingIndex !== null && (
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={resetDraft}
+                                        >
+                                            Cancel
+                                        </Button>
+                                    )}
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        onClick={addOrUpdateEntry}
+                                        disabled={!canAddEntry}
+                                    >
+                                        <Plus className="mr-1 h-4 w-4" />
+                                        {editingIndex === null
+                                            ? 'Add entries'
+                                            : 'Update entry'}
+                                    </Button>
+                                </div>
                             </div>
 
                             {draftError && (
@@ -739,13 +842,12 @@ export default function JournalVoucherEntryPage() {
                                     {draftError}
                                 </p>
                             )}
-
                             <InputError message={errors.entries} />
                         </section>
                     </div>
 
                     {/* Added Voucher Lines */}
-                    <section className="space-y-2 rounded-lg border border-border/70 bg-card p-3">
+                    <section className="space-y-2 rounded-lg border border-border/70 bg-card p-2">
                         <div className="flex items-center justify-between border-b border-border/70 pb-2">
                             <div>
                                 <h2 className="text-sm font-semibold text-foreground">
@@ -765,24 +867,16 @@ export default function JournalVoucherEntryPage() {
                         </div>
 
                         {data.entries.length === 0 ? (
-                            <div className="rounded-lg border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
-                                Add a debit or credit line above to begin.
+                            <div className="rounded-md border border-dashed border-border px-3 py-2 text-center text-xs text-muted-foreground">
+                                Select debit and credit accounts above to begin.
                             </div>
                         ) : (
-                            <div className="h-[min(380px,calc(100vh/3))] overflow-auto rounded-md border bg-background">
-                                <table className="w-full min-w-212.5 border-collapse text-sm">
+                            <div className="max-h-40 overflow-auto rounded-md border bg-background">
+                                <table className="w-full min-w-180 border-collapse text-sm">
                                     <thead className="bg-muted text-left text-muted-foreground">
                                         <tr>
                                             <th className="border-b px-2 py-1 text-xs">
-                                                Account
-                                            </th>
-
-                                            <th className="border-b px-2 py-1 text-xs">
-                                                Financial account
-                                            </th>
-
-                                            <th className="border-b px-2 py-1 text-xs">
-                                                Cost center
+                                                Account details
                                             </th>
 
                                             <th className="border-b px-2 py-1 text-right text-xs">
@@ -823,27 +917,52 @@ export default function JournalVoucherEntryPage() {
                                                     String(center.id) ===
                                                     entry.cost_center_id,
                                             );
+                                            const instrument = cheques.find(
+                                                (cheque) =>
+                                                    String(cheque.id) ===
+                                                    entry.instrument_id,
+                                            );
 
                                             return (
                                                 <tr
                                                     key={`${entry.account_id}-${index}`}
                                                     className="border-b last:border-b-0 even:bg-muted/40 hover:bg-accent/20"
                                                 >
-                                                    <td className="px-2 py-1 font-medium">
-                                                        {account
-                                                            ? `${account.code} - ${account.name}`
-                                                            : '-'}
-                                                    </td>
-
-                                                    <td className="px-2 py-1 text-muted-foreground">
-                                                        {financialAccount
-                                                            ? `${financialAccount.account_no} - ${financialAccount.name ?? 'Unnamed account'}`
-                                                            : 'None'}
-                                                    </td>
-
-                                                    <td className="px-2 py-1 text-muted-foreground">
-                                                        {costCenter?.name ??
-                                                            'None'}
+                                                    <td className="px-2 py-1">
+                                                        <div className="leading-tight font-medium">
+                                                            {account
+                                                                ? `${account.code} - ${account.name}`
+                                                                : '-'}
+                                                        </div>
+                                                        <div className="flex flex-wrap gap-x-2 text-[11px] leading-tight text-muted-foreground">
+                                                            {financialAccount && (
+                                                                <span>
+                                                                    {
+                                                                        financialAccount.account_no
+                                                                    }{' '}
+                                                                    -{' '}
+                                                                    {financialAccount.name ??
+                                                                        'Unnamed account'}
+                                                                </span>
+                                                            )}
+                                                            {entry.instrument_type && (
+                                                                <span>
+                                                                    {
+                                                                        entry.instrument_type
+                                                                    }
+                                                                    {instrument
+                                                                        ? ` · ${instrument.cheque_no}`
+                                                                        : ''}
+                                                                </span>
+                                                            )}
+                                                            {costCenter && (
+                                                                <span>
+                                                                    {
+                                                                        costCenter.name
+                                                                    }
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                     </td>
 
                                                     <td className="px-2 py-1 text-right tabular-nums">
