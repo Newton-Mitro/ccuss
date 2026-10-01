@@ -14,7 +14,6 @@ return new class extends Migration {
             $table->string('name', 150);
             $table->enum('category', ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT', 'LOAN', 'OTHER']);
             $table->enum('balance_type', ['ASSET', 'LIABILITY', 'EQUITY']);
-            // $table->decimal('interest_rate', 12, 6)->default(0);
             $table->enum('interest_calculation', ['NONE', 'SIMPLE', 'COMPOUND', 'FLAT', 'REDUCING_BALANCE'])->default('NONE');
             $table->enum('interest_frequency', ['NONE', 'DAILY', 'MONTHLY', 'QUARTERLY', 'HALF_YEARLY', 'YEARLY', 'MATURITY'])->default('NONE');
             $table->json('settings')->nullable();
@@ -101,22 +100,157 @@ return new class extends Migration {
 
         Schema::create('financial_transactions', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Organization / Branch
+            |--------------------------------------------------------------------------
+            */
+
+            $table->foreignId('organization_id')
+                ->constrained('organizations')
+                ->cascadeOnDelete();
+
+            $table->foreignId('branch_id')
+                ->nullable()
+                ->constrained('branches')
+                ->nullOnDelete();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Transaction Identification
+            |--------------------------------------------------------------------------
+            */
+
             $table->string('transaction_no', 100);
+
+            /*
+            | Prevents duplicate processing when the same transaction request
+            | is submitted more than once.
+            */
+            $table->uuid('idempotency_key')
+                ->nullable();
+
             $table->string('transaction_type', 50);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Transaction Details
+            |--------------------------------------------------------------------------
+            */
+
             $table->dateTime('transaction_date');
+
             $table->decimal('amount', 20, 4);
-            $table->string('currency', 10)->default('BDT');
-            $table->enum('status', ['PENDING', 'POSTED', 'REVERSED', 'CANCELLED'])->default('PENDING');
-            $table->string('reference')->nullable();
-            $table->text('description')->nullable();
+
+            $table->string('currency', 10)
+                ->default('BDT');
+
+            $table->string('reference')
+                ->nullable();
+
+            $table->text('description')
+                ->nullable();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Transaction Status
+            |--------------------------------------------------------------------------
+            */
+
+            $table->enum('status', [
+                'PENDING',
+                'POSTED',
+                'REVERSED',
+                'CANCELLED',
+            ])->default('PENDING');
+
+            /*
+            |--------------------------------------------------------------------------
+            | Source
+            |--------------------------------------------------------------------------
+            |
+            | Examples:
+            | Loan repayment
+            | Loan disbursement
+            | Savings deposit
+            | Savings withdrawal
+            | Fixed deposit
+            | Share purchase
+            | etc.
+            |
+            */
+
             $table->nullableMorphs('source');
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('posted_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamp('posted_at')->nullable();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Users
+            |--------------------------------------------------------------------------
+            */
+
+            $table->foreignId('created_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+            $table->foreignId('posted_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+            $table->timestamp('posted_at')
+                ->nullable();
+
             $table->timestamps();
-            $table->unique(['organization_id', 'transaction_no']);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Constraints
+            |--------------------------------------------------------------------------
+            */
+
+            $table->unique([
+                'organization_id',
+                'transaction_no',
+            ], 'financial_transaction_number_unique');
+
+            /*
+            |--------------------------------------------------------------------------
+            | Idempotency
+            |--------------------------------------------------------------------------
+            |
+            | Same idempotency key cannot create another transaction within
+            | the same organization.
+            |
+            */
+
+            $table->unique([
+                'organization_id',
+                'idempotency_key',
+            ], 'financial_transaction_idempotency_unique');
+
+            /*
+            |--------------------------------------------------------------------------
+            | Indexes
+            |--------------------------------------------------------------------------
+            */
+
+            $table->index([
+                'organization_id',
+                'branch_id',
+                'transaction_date',
+            ]);
+
+            $table->index([
+                'organization_id',
+                'status',
+            ]);
+
+            $table->index([
+                'transaction_type',
+                'status',
+            ]);
         });
 
         Schema::create('financial_transaction_entries', function (Blueprint $table): void {
@@ -131,10 +265,6 @@ return new class extends Migration {
             $table->timestamps();
             $table->index(['financial_account_id', 'id']);
             $table->index(['financial_transaction_id', 'line_no'], 'fin_tx_entry_line_index');
-        });
-
-        Schema::table('voucher_entries', function (Blueprint $table): void {
-            $table->foreign('financial_account_id')->references('id')->on('financial_accounts')->nullOnDelete();
         });
 
         Schema::create('financial_product_policies', function (Blueprint $table): void {
@@ -165,7 +295,7 @@ return new class extends Migration {
             $table->index(['status', 'effective_from']);
         });
 
-        Schema::create('deposit_account_holders', function (Blueprint $table): void {
+        Schema::create('financial_account_holders', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('financial_account_id')->constrained('financial_accounts')->cascadeOnDelete();
             $table->foreignId('customer_id')->constrained('customers')->restrictOnDelete();
@@ -177,7 +307,7 @@ return new class extends Migration {
             $table->index(['customer_id', 'role']);
         });
 
-        Schema::create('deposit_nominees', function (Blueprint $table): void {
+        Schema::create('financial_account_nominees', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('financial_account_id')->constrained('financial_accounts')->cascadeOnDelete();
             $table->string('name', 150);
@@ -194,8 +324,8 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('deposit_nominees');
-        Schema::dropIfExists('deposit_account_holders');
+        Schema::dropIfExists('financial_account_nominees');
+        Schema::dropIfExists('financial_account_holders');
         Schema::dropIfExists('financial_product_terms');
         Schema::dropIfExists('financial_product_policies');
         Schema::dropIfExists('financial_transaction_entries');

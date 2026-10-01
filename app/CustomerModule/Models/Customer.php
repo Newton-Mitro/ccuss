@@ -189,7 +189,7 @@ class Customer extends Model
     {
         return $this->belongsToMany(
             FinancialAccount::class,
-            'deposit_account_holders',
+            'financial_account_holders',
             'customer_id',
             'financial_account_id',
         )

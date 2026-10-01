@@ -98,7 +98,7 @@ class FinancialAccount extends Model
 
     public function holders(): BelongsToMany
     {
-        return $this->belongsToMany(Customer::class, 'deposit_account_holders', 'financial_account_id')
+        return $this->belongsToMany(Customer::class, 'financial_account_holders', 'financial_account_id')
             ->withPivot(['role', 'ownership_percent', 'guardian_customer_id'])
             ->withTimestamps();
     }

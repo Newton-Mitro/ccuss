@@ -42,10 +42,37 @@ return new class extends Migration {
 
             $table->foreignId('organization_id')->constrained();
         });
+
+        Schema::create('fiscal_years', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
+            $table->string('name', 50);
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->enum('status', ['OPEN', 'CLOSED'])->default('OPEN');
+            $table->boolean('is_current')->default(false);
+            $table->timestamps();
+            $table->unique(['organization_id', 'name']);
+            $table->index(['organization_id', 'start_date', 'end_date']);
+        });
+
+        Schema::create('fiscal_periods', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('fiscal_year_id')->constrained()->cascadeOnDelete();
+            $table->string('name', 50);
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->enum('status', ['OPEN', 'LOCKED', 'CLOSED'])->default('OPEN');
+            $table->timestamps();
+            $table->unique(['fiscal_year_id', 'name']);
+            $table->index(['fiscal_year_id', 'start_date', 'end_date',]);
+        });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('fiscal_periods');
+        Schema::dropIfExists('fiscal_years');
         Schema::dropIfExists('branches');
         Schema::dropIfExists('organizations');
     }
