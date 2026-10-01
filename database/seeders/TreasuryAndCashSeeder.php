@@ -7,6 +7,7 @@ use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\User;
 use App\TreasuryAndCash\Models\Bank;
 use App\TreasuryAndCash\Models\BankAccount;
+use App\TreasuryAndCash\Models\CashDenomination;
 use App\TreasuryAndCash\Models\CashLocation;
 use App\TreasuryAndCash\Models\PettyCashFund;
 use App\TreasuryAndCash\Models\Teller;
@@ -23,6 +24,8 @@ class TreasuryAndCashSeeder extends Seeder
         $user = User::query()->where('email', 'super.admin@email.com')->firstOrFail();
 
         DB::transaction(function () use ($organization, $branchId, $user): void {
+            CashDenomination::seedBangladeshPreset($organization->id);
+
             $vaultAccount = FinancialAccount::query()->updateOrCreate(
                 [
                     'organization_id' => $organization->id,

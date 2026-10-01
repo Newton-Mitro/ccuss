@@ -30,6 +30,39 @@ it('records denomination quantities and calculates the cash count total', functi
     expect($count->total_amount)->toBe('310.0000')->and($count->denominations)->toHaveCount(2);
 });
 
+it('has a bangladesh denomination preset', function () {
+    $preset = CashDenomination::bangladeshPreset();
+
+    expect($preset)->toBeArray()
+        ->and($preset)->toContainEqual(['currency' => 'BDT', 'type' => 'NOTE', 'value' => 1000, 'name' => '1000 Taka', 'is_active' => true, 'sort_order' => 9])
+        ->and($preset)->toContainEqual(['currency' => 'BDT', 'type' => 'COIN', 'value' => 1, 'name' => '1 Taka Coin', 'is_active' => true, 'sort_order' => 12]);
+});
+
+it('can seed the bangladesh denomination preset through the denomination store flow', function () {
+    $organization = Organization::factory()->create();
+    $branch = Branch::factory()->create(['organization_id' => $organization->id]);
+    $user = User::factory()->create(['organization_id' => $organization->id, 'branch_id' => $branch->id]);
+
+    $role = \App\SystemAdministration\Models\Role::firstOrCreate(
+        ['slug' => 'cash_count_preset_test'],
+        ['name' => 'Cash Count Preset Test']
+    );
+    $permission = \App\SystemAdministration\Models\Permission::firstOrCreate(
+        ['slug' => 'cash_transactions.create'],
+        ['module' => 'cash_transactions', 'name' => 'Create Cash Transactions', 'action' => 'create']
+    );
+    $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+
+    $this->actingAs($user)
+        ->withSession(['active_organization_id' => $organization->id])
+        ->post(route('cash-denominations.store'), ['preset' => 'BANGLADESH'])
+        ->assertRedirect();
+
+    expect(CashDenomination::query()->where('organization_id', $organization->id)->count())->toBeGreaterThanOrEqual(12)
+        ->and(CashDenomination::query()->where('organization_id', $organization->id)->where('currency', 'BDT')->count())->toBeGreaterThan(0);
+});
+
 it('rejects counts for a closed branch day', function () {
     $organization = Organization::factory()->create();
     $branch = Branch::factory()->create(['organization_id' => $organization->id]);

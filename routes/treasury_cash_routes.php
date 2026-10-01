@@ -46,6 +46,12 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::post('/cash-denominations', [CashCountController::class, 'storeDenomination'])
             ->middleware('permission:cash_transactions.create')
             ->name('cash-denominations.store');
+        Route::get('/vault-counts', [CashCountController::class, 'index'])
+            ->middleware('permission:cash_transactions.view')
+            ->name('vault-counts.index');
+        Route::post('/vault-counts', [CashCountController::class, 'store'])
+            ->middleware('permission:cash_transactions.create')
+            ->name('vault-counts.store');
         Route::get('/branch-cash-summaries', [BranchCashSummaryController::class, 'index'])
             ->middleware('permission:cash_transactions.view')
             ->name('branch-cash-summaries.index');
@@ -100,6 +106,23 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::post('/teller-sessions/{tellerSession}/close', [CashManagementController::class, 'closeSession'])
             ->middleware('permission:teller_sessions.close')
             ->name('teller-sessions.close');
+
+        Route::get('/vault-sessions', [CashManagementController::class, 'vaultSessions'])
+            ->middleware('permission:vault_sessions.view')
+            ->name('vault-sessions.index');
+        Route::get('/vault-sessions/create', [CashManagementController::class, 'createVaultSession'])
+            ->middleware('permission:vault_sessions.open')
+            ->name('vault-sessions.create');
+        Route::post('/vault-sessions/open', [CashManagementController::class, 'openVaultSession'])
+            ->middleware('permission:vault_sessions.open')
+            ->name('vault-sessions.open');
+        Route::post('/vault-sessions/{vaultSession}/close', [CashManagementController::class, 'closeVaultSession'])
+            ->middleware('permission:vault_sessions.close')
+            ->name('vault-sessions.close');
+
+        Route::get('/vault-cash-position', [BranchCashSummaryController::class, 'index'])
+            ->middleware('permission:cash_transactions.view')
+            ->name('vault-cash-position.index');
     });
 
 Route::middleware(['auth', 'verified', 'organization'])
@@ -121,6 +144,28 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::post('/teller-to-teller-transfer', [CashMovementController::class, 'storeTellerToTellerTransfer'])
             ->middleware('permission:cash_transfers.create')
             ->name('teller-to-teller-transfer.store');
+
+        Route::get('/vault-transfers', [CashMovementController::class, 'cashTransfers'])
+            ->middleware('permission:cash_transfers.view')
+            ->name('vault-transfers.index');
+        Route::post('/vault-transfers/{transfer}/approve', [CashMovementController::class, 'approveCashTransfer'])
+            ->middleware('permission:cash_transfers.approve')
+            ->name('vault-transfers.approve');
+        Route::post('/vault-transfers/{transfer}/complete', [CashMovementController::class, 'completeCashTransfer'])
+            ->middleware('permission:cash_transfers.complete')
+            ->name('vault-transfers.complete');
+        Route::get('/vault-transfers/vault-to-teller', [CashMovementController::class, 'tellerToTellerTransfer'])
+            ->middleware('permission:cash_transfers.create')
+            ->name('vault-transfers.vault-to-teller');
+        Route::post('/vault-transfers/vault-to-teller', [CashMovementController::class, 'storeTellerToTellerTransfer'])
+            ->middleware('permission:cash_transfers.create')
+            ->name('vault-transfers.vault-to-teller.store');
+        Route::get('/vault-transfers/teller-to-vault', [CashMovementController::class, 'tellerToTellerTransfer'])
+            ->middleware('permission:cash_transfers.create')
+            ->name('vault-transfers.teller-to-vault');
+        Route::post('/vault-transfers/teller-to-vault', [CashMovementController::class, 'storeTellerToTellerTransfer'])
+            ->middleware('permission:cash_transfers.create')
+            ->name('vault-transfers.teller-to-vault.store');
     });
 
 Route::middleware(['auth', 'verified', 'organization'])
@@ -142,7 +187,35 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::post('/teller-cash-adjustment', [CashMovementController::class, 'storeTellerCashAdjustment'])
             ->middleware('permission:cash_transactions.create')
             ->name('teller-cash-adjustment.store');
+
+        Route::get('/vault-adjustments', [CashMovementController::class, 'cashAdjustments'])
+            ->middleware('permission:cash_transactions.view')
+            ->name('vault-adjustments.index');
+        Route::get('/vault-adjustments/create', [CashMovementController::class, 'tellerCashAdjustment'])
+            ->middleware('permission:cash_transactions.create')
+            ->name('vault-adjustments.create');
+        Route::post('/vault-adjustments/create', [CashMovementController::class, 'storeTellerCashAdjustment'])
+            ->middleware('permission:cash_transactions.create')
+            ->name('vault-adjustments.store');
     });
+
+Route::middleware(['auth', 'verified', 'organization'])->group(function () {
+    Route::get('/vault-transfers', [CashMovementController::class, 'cashTransfers'])
+        ->middleware('permission:cash_transfers.view')
+        ->name('vault-transfers.root.index');
+    Route::get('/vault-transfers/vault-to-teller', [CashMovementController::class, 'tellerToTellerTransfer'])
+        ->middleware('permission:cash_transfers.create')
+        ->name('vault-transfers.root.vault-to-teller');
+    Route::get('/vault-transfers/teller-to-vault', [CashMovementController::class, 'tellerToTellerTransfer'])
+        ->middleware('permission:cash_transfers.create')
+        ->name('vault-transfers.root.teller-to-vault');
+    Route::get('/vault-adjustments', [CashMovementController::class, 'cashAdjustments'])
+        ->middleware('permission:cash_transactions.view')
+        ->name('vault-adjustments.root.index');
+    Route::get('/vault-adjustments/create', [CashMovementController::class, 'tellerCashAdjustment'])
+        ->middleware('permission:cash_transactions.create')
+        ->name('vault-adjustments.root.create');
+});
 
 Route::middleware(['auth', 'verified', 'organization'])
     ->prefix('teller-transactions')

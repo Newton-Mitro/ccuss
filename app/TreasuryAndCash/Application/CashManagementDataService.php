@@ -5,6 +5,7 @@ namespace App\TreasuryAndCash\Application;
 use App\TreasuryAndCash\Models\Teller;
 use App\TreasuryAndCash\Models\TellerSession;
 use App\TreasuryAndCash\Models\Vault;
+use App\TreasuryAndCash\Models\VaultSession;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class CashManagementDataService
@@ -72,6 +73,54 @@ class CashManagementDataService
                 ->first(['id', 'business_date']),
             'tellers' => Teller::query()
                 ->where('status', 'ACTIVE')
+                ->whereHas('cashLocation', function ($query) use ($organizationId, $branchId) {
+                    $query->where('organization_id', $organizationId)
+                        ->where('branch_id', $branchId)
+                        ->where('is_active', true);
+                })
+                ->orderBy('name')
+                ->get(['id', 'code', 'name']),
+        ];
+    }
+
+    public function listVaultSessions(int $organizationId, ?string $search = null, int $perPage = 18): LengthAwarePaginator
+    {
+        $query = VaultSession::query()
+            ->whereHas('branchDay', fn($branchDay) => $branchDay->where('organization_id', $organizationId))
+            ->with(['branchDay.branch', 'vault', 'openedBy', 'closedBy'])
+            ->latest();
+
+        if (!empty($search)) {
+            $searchTerm = trim($search);
+            $query->where(function ($builder) use ($searchTerm) {
+                $builder->where('status', 'like', "%{$searchTerm}%")
+                    ->orWhereHas('vault', function ($vaultQuery) use ($searchTerm) {
+                        $vaultQuery->where('code', 'like', "%{$searchTerm}%")
+                            ->orWhere('name', 'like', "%{$searchTerm}%");
+                    })
+                    ->orWhereHas('branchDay', function ($branchDayQuery) use ($searchTerm) {
+                        $branchDayQuery->where('business_date', 'like', "%{$searchTerm}%")
+                            ->orWhereHas('branch', function ($branchQuery) use ($searchTerm) {
+                                $branchQuery->where('name', 'like', "%{$searchTerm}%")
+                                    ->orWhere('code', 'like', "%{$searchTerm}%");
+                            });
+                    });
+            });
+        }
+
+        return $query->paginate($perPage)->withQueryString();
+    }
+
+    public function vaultSessionOptions(int $organizationId, int $branchId): array
+    {
+        return [
+            'branch_day' => \App\TreasuryAndCash\Models\BranchDay::query()
+                ->where('organization_id', $organizationId)
+                ->where('branch_id', $branchId)
+                ->where('status', \App\TreasuryAndCash\Models\BranchDay::STATUS_OPEN)
+                ->latest('business_date')
+                ->first(['id', 'business_date']),
+            'vaults' => Vault::query()
                 ->whereHas('cashLocation', function ($query) use ($organizationId, $branchId) {
                     $query->where('organization_id', $organizationId)
                         ->where('branch_id', $branchId)

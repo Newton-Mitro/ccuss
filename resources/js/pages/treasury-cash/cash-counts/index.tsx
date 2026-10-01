@@ -49,6 +49,7 @@ export default function CashCountsIndex() {
         })),
     });
     const denominationForm = useForm({
+        preset: 'CUSTOM',
         currency: 'BDT',
         type: 'NOTE',
         value: '',
@@ -204,6 +205,24 @@ export default function CashCountsIndex() {
                         }}
                     >
                         <div>
+                            <Label>Preset</Label>
+                            <select
+                                className="h-9 rounded-md border bg-background px-3 text-sm"
+                                value={denominationForm.data.preset}
+                                onChange={(event) =>
+                                    denominationForm.setData(
+                                        'preset',
+                                        event.target.value,
+                                    )
+                                }
+                            >
+                                <option value="CUSTOM">Custom</option>
+                                <option value="BANGLADESH">
+                                    Bangladesh (BDT)
+                                </option>
+                            </select>
+                        </div>
+                        <div>
                             <Label>Type</Label>
                             <select
                                 className="h-9 rounded-md border bg-background px-3 text-sm"
@@ -213,6 +232,10 @@ export default function CashCountsIndex() {
                                         'type',
                                         event.target.value,
                                     )
+                                }
+                                disabled={
+                                    denominationForm.data.preset ===
+                                    'BANGLADESH'
                                 }
                             >
                                 <option>NOTE</option>
@@ -232,6 +255,10 @@ export default function CashCountsIndex() {
                                         event.target.value,
                                     )
                                 }
+                                disabled={
+                                    denominationForm.data.preset ===
+                                    'BANGLADESH'
+                                }
                             />
                         </div>
                         <div>
@@ -244,9 +271,17 @@ export default function CashCountsIndex() {
                                         event.target.value,
                                     )
                                 }
+                                disabled={
+                                    denominationForm.data.preset ===
+                                    'BANGLADESH'
+                                }
                             />
                         </div>
-                        <Button type="submit">Add denomination</Button>
+                        <Button type="submit">
+                            {denominationForm.data.preset === 'BANGLADESH'
+                                ? 'Load Bangladesh denominations'
+                                : 'Add denomination'}
+                        </Button>
                     </form>
                 </section>
                 <section className="rounded-lg border bg-card">

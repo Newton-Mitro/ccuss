@@ -46,8 +46,30 @@ class CashCountController extends Controller
 
     public function storeDenomination(Request $request)
     {
-        $data = $request->validate(['currency' => ['required', 'string', 'max:10'], 'type' => ['required', 'in:NOTE,COIN'], 'value' => ['required', 'numeric', 'gt:0'], 'name' => ['nullable', 'string', 'max:50']]);
-        $this->service->createDenomination($data, (int) $request->attributes->get('active_organization')->id);
+        $data = $request->validate([
+            'preset' => ['nullable', 'in:BANGLADESH'],
+            'currency' => ['nullable', 'string', 'max:10'],
+            'type' => ['nullable', 'in:NOTE,COIN'],
+            'value' => ['nullable', 'numeric', 'gt:0'],
+            'name' => ['nullable', 'string', 'max:50'],
+        ]);
+
+        $organizationId = (int) $request->attributes->get('active_organization')->id;
+
+        if (($data['preset'] ?? null) === 'BANGLADESH') {
+            CashDenomination::seedBangladeshPreset($organizationId);
+
+            return back()->with('success', 'Bangladesh denomination preset loaded successfully.');
+        }
+
+        $data = $request->validate([
+            'currency' => ['required', 'string', 'max:10'],
+            'type' => ['required', 'in:NOTE,COIN'],
+            'value' => ['required', 'numeric', 'gt:0'],
+            'name' => ['nullable', 'string', 'max:50'],
+        ]);
+
+        $this->service->createDenomination($data, $organizationId);
 
         return back()->with('success', 'Cash denomination created successfully.');
     }

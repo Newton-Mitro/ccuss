@@ -5,14 +5,18 @@ namespace App\TreasuryAndCash\Controllers;
 use App\Http\Controllers\Controller;
 use App\TreasuryAndCash\Application\CashManagementDataService;
 use App\TreasuryAndCash\Application\TellerSessionService;
+use App\TreasuryAndCash\Application\VaultSessionService;
 use App\TreasuryAndCash\Models\TellerSession;
 use App\TreasuryAndCash\Models\CashLocation;
 use App\TreasuryAndCash\Models\Teller;
 use App\TreasuryAndCash\Models\Vault;
+use App\TreasuryAndCash\Models\VaultSession;
 use App\TreasuryAndCash\Requests\CloseTellerSessionRequest;
+use App\TreasuryAndCash\Requests\CloseVaultSessionRequest;
 use App\TreasuryAndCash\Requests\StoreTellerSessionRequest;
 use App\TreasuryAndCash\Requests\StoreTellerRequest;
 use App\TreasuryAndCash\Requests\StoreVaultRequest;
+use App\TreasuryAndCash\Requests\StoreVaultSessionRequest;
 use App\SystemAdministration\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -25,6 +29,7 @@ class CashManagementController extends Controller
     public function __construct(
         private readonly CashManagementDataService $cashManagementDataService,
         private readonly TellerSessionService $tellerSessionService,
+        private readonly VaultSessionService $vaultSessionService,
     ) {
         $this->middleware('permission:cash_management.view')->only(['vaults', 'tellers']);
         $this->middleware('permission:cash_management.create')->only(['createVault', 'storeVault', 'createTeller', 'storeTeller']);
@@ -32,6 +37,9 @@ class CashManagementController extends Controller
         $this->middleware('permission:teller_sessions.view')->only(['tellerSessions']);
         $this->middleware('permission:teller_sessions.open')->only(['createSession', 'openSession']);
         $this->middleware('permission:teller_sessions.close')->only(['closeSession']);
+        $this->middleware('permission:vault_sessions.view')->only(['vaultSessions']);
+        $this->middleware('permission:vault_sessions.open')->only(['createVaultSession', 'openVaultSession']);
+        $this->middleware('permission:vault_sessions.close')->only(['closeVaultSession']);
     }
 
     public function vaults(Request $request): Response
@@ -307,12 +315,115 @@ class CashManagementController extends Controller
             ->with('success', 'Teller session closed successfully.');
     }
 
+    public function vaultSessions(Request $request): Response
+    {
+        $organization = $request->attributes->get('active_organization');
+        $user = $request->user();
+        $vaultSessions = $this->cashManagementDataService->listVaultSessions(
+            $organization->id,
+            $request->input('search'),
+            $request->input('per_page', 18),
+        );
+
+        return Inertia::render('treasury-cash/vault-sessions/index', [
+            'vault_sessions' => $vaultSessions,
+            ...($user?->branch_id
+                ? $this->cashManagementDataService->vaultSessionOptions($organization->id, $user->branch_id)
+                : ['branch_day' => null, 'vaults' => []]),
+            'filters' => $request->only(['search', 'per_page', 'page']),
+            'auth' => [
+                'user' => [
+                    'branch_id' => $user?->branch_id,
+                    'permissions' => $user?->permissions?->all() ?? [],
+                    'roles' => $user?->roles?->all() ?? [],
+                ],
+            ],
+        ]);
+    }
+
+    public function createVaultSession(Request $request): Response
+    {
+        $organization = $request->attributes->get('active_organization');
+        $user = $request->user();
+
+        if (!$user?->branch_id) {
+            return Inertia::render('treasury-cash/vault-sessions/create', [
+                'branch_day' => null,
+                'vaults' => [],
+                'user_branch_id' => null,
+                'organization' => $organization,
+            ]);
+        }
+
+        $options = $this->cashManagementDataService->vaultSessionOptions($organization->id, $user->branch_id);
+
+        return Inertia::render('treasury-cash/vault-sessions/create', [
+            'branch_day' => $options['branch_day'],
+            'vaults' => $options['vaults'],
+            'user_branch_id' => $user->branch_id,
+            'organization' => $organization,
+        ]);
+    }
+
+    public function openVaultSession(StoreVaultSessionRequest $request): RedirectResponse
+    {
+        $organization = $request->attributes->get('active_organization');
+        $user = $request->user();
+
+        abort_unless($user?->branch_id, 422, 'A branch assignment is required to open a vault session.');
+
+        try {
+            $this->vaultSessionService->open(
+                $organization->id,
+                $user->branch_id,
+                $user->id,
+                $request->validated('vault_id'),
+                $request->validated('opening_cash'),
+                $request->validated('opening_note'),
+            );
+        } catch (\RuntimeException $exception) {
+            return back()->withInput()->with('error', $exception->getMessage());
+        }
+
+        return redirect()->route('vault-sessions.index')
+            ->with('success', 'Vault session opened successfully.');
+    }
+
+    public function closeVaultSession(CloseVaultSessionRequest $request, VaultSession $vaultSession): RedirectResponse
+    {
+        $this->authorizeVaultSession($vaultSession, $request);
+
+        try {
+            $this->vaultSessionService->close(
+                $vaultSession,
+                $request->user()->id,
+                $request->validated('closing_cash'),
+                $request->validated('closing_note'),
+            );
+        } catch (\RuntimeException $exception) {
+            return back()->withInput()->with('error', $exception->getMessage());
+        }
+
+        return redirect()->route('vault-sessions.index')
+            ->with('success', 'Vault session closed successfully.');
+    }
+
     private function authorizeTellerSession(TellerSession $tellerSession, Request $request): void
     {
         abort_unless(
             $tellerSession->branchDay
             && $tellerSession->branchDay->organization_id === $request->attributes->get('active_organization')->id
             && $tellerSession->branchDay->branch_id === $request->user()->branch_id,
+            404,
+        );
+    }
+
+    private function authorizeVaultSession(VaultSession $vaultSession, Request $request): void
+    {
+        abort_unless(
+            $vaultSession->branchDay
+            && $vaultSession->branchDay->organization_id === $request->attributes->get('active_organization')->id
+            && $vaultSession->branchDay->branch_id === $request->user()->branch_id,
             404,
         );
     }
