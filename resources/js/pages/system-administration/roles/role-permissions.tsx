@@ -335,7 +335,7 @@ const RolePermissionForm = ({
                                     )}
                                 </div>
 
-                                <div className="scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent h-[63vh] space-y-4 overflow-y-auto rounded-md border">
+                                <div className="scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent mb-4 h-[63vh] space-y-4 overflow-y-auto rounded-md border">
                                     {Object.entries(groupedPermissions).map(
                                         ([module, perms]) => {
                                             const ids = perms.map((p) => p.id);

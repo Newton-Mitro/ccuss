@@ -1,6 +1,8 @@
 <?php
 
 use App\FinancialServices\Models\FinancialAccount;
+use App\FinancialServices\Models\FinancialProduct;
+use App\FinancialServices\Models\FinancialProductAccountMapping;
 use App\GeneralAccounting\Application\AccountGroupService;
 use App\GeneralAccounting\Application\FiscalPeriodService;
 use App\GeneralAccounting\Application\FiscalYearService;
@@ -262,6 +264,38 @@ it('creates a voucher through the organization-scoped HTTP endpoint', function (
         ->where('voucher_type', 'RECEIPT')
         ->where('description', 'HTTP voucher')
         ->exists())->toBeTrue();
+});
+
+it('provides organization-scoped product account mappings to voucher creation', function () {
+    $fixture = voucherFixture();
+    $product = FinancialProduct::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+    ]);
+    FinancialProductAccountMapping::factory()->create([
+        'financial_product_id' => $product->id,
+        'debit_account_id' => $fixture['accounts'][0]->id,
+        'credit_account_id' => $fixture['accounts'][1]->id,
+    ]);
+
+    $otherOrganization = Organization::factory()->create();
+    $otherProduct = FinancialProduct::factory()->create([
+        'organization_id' => $otherOrganization->id,
+    ]);
+    FinancialProductAccountMapping::factory()->create([
+        'financial_product_id' => $otherProduct->id,
+        'debit_account_id' => $fixture['accounts'][0]->id,
+        'credit_account_id' => $fixture['accounts'][1]->id,
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('vouchers.create', ['type' => 'JOURNAL']))
+        ->assertOk()
+        ->assertInertia(fn(Assert $page) => $page
+            ->component('general-accounting/vouchers/create/journal_voucher_entry_page')
+            ->has('financialProductAccountMappings', 1)
+            ->where('financialProductAccountMappings.0.financial_product_id', $product->id)
+            ->where('financialProductAccountMappings.0.debit_account_id', $fixture['accounts'][0]->id));
 });
 
 it('loads financial-account and cheque metadata when editing a voucher draft', function () {

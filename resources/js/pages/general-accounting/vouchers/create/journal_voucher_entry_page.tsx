@@ -138,6 +138,7 @@ export default function JournalVoucherEntryPage() {
         accounts,
         costCenters,
         financialAccounts,
+        financialProductAccountMappings,
         cheques,
         voucherType,
     } = usePage().props as unknown as {
@@ -149,6 +150,12 @@ export default function JournalVoucherEntryPage() {
             account_no: string;
             name: string | null;
             account_type: string;
+            financial_product_id: number | string | null;
+        }[];
+        financialProductAccountMappings: {
+            financial_product_id: number | string;
+            debit_account_id: number | string | null;
+            credit_account_id: number | string | null;
         }[];
         cheques: {
             id: number;
@@ -169,37 +176,21 @@ export default function JournalVoucherEntryPage() {
         entries: [] as Entry[],
     });
 
-    const [draftDebitEntry, setDraftDebitEntry] = useState<Entry>(emptyEntry());
-    const [draftCreditEntry, setDraftCreditEntry] =
-        useState<Entry>(emptyEntry());
+    const [draftEntry, setDraftEntry] = useState<Entry>(emptyEntry());
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
-    const [editingSide, setEditingSide] = useState<'debit' | 'credit' | null>(
-        null,
-    );
     const [draftDescription, setDraftDescription] = useState('');
     const [draftError, setDraftError] = useState('');
 
     useFlashToastHandler();
 
-    const updateDraftEntry = (
-        side: 'debit' | 'credit',
-        field: keyof Entry,
-        value: string,
-    ) => {
+    const updateDraftEntry = (field: keyof Entry, value: string) => {
         setDraftError('');
-        const setEntry =
-            side === 'debit' ? setDraftDebitEntry : setDraftCreditEntry;
-        setEntry((current) => {
+        setDraftEntry((current) => {
             const updated = { ...current, [field]: value };
             if (field === 'account_id') {
-                const account = accounts.find(
-                    (item) => String(item.id) === value,
-                );
-                if (!account?.is_control_account) {
-                    updated.financial_account_id = '';
-                    updated.instrument_type = '';
-                    updated.instrument_id = '';
-                }
+                updated.financial_account_id = '';
+                updated.instrument_type = '';
+                updated.instrument_id = '';
             }
             if (field === 'financial_account_id') updated.instrument_id = '';
             if (field === 'instrument_type' && value !== 'CHEQUE') {
@@ -276,27 +267,34 @@ export default function JournalVoucherEntryPage() {
     };
 
     const resetDraft = () => {
-        setDraftDebitEntry(emptyEntry());
-        setDraftCreditEntry(emptyEntry());
+        setDraftEntry(emptyEntry());
         setDraftDescription('');
         setEditingIndex(null);
-        setEditingSide(null);
         setDraftError('');
     };
 
-    const validateDraftSide = (entry: Entry, side: 'debit' | 'credit') => {
+    const validateDraftEntry = (entry: Entry) => {
+        const debit = Number(entry.debit || 0);
+        const credit = Number(entry.credit || 0);
+        const hasDebit = debit > 0;
+        const hasCredit = credit > 0;
+        if (debit < 0 || credit < 0 || hasDebit === hasCredit) {
+            setDraftError(
+                'Enter a positive amount in either Debit or Credit, not both.',
+            );
+            return false;
+        }
+
+        const side = hasDebit ? 'debit' : 'credit';
         const account = accounts.find(
             (item) => String(item.id) === entry.account_id,
         );
         const amount = Number(entry[side] || 0);
         if (!account) {
-            setDraftError(`Select a valid ${side} account.`);
+            setDraftError('Select a valid ledger account.');
             return false;
         }
-        if (amount <= 0) {
-            setDraftError(`Enter a positive ${side} amount.`);
-            return false;
-        }
+        if (amount <= 0) return false;
         if (account.is_control_account && !entry.financial_account_id) {
             setDraftError(
                 `${side === 'debit' ? 'Debit' : 'Credit'} control accounts require a financial account.`,
@@ -311,11 +309,13 @@ export default function JournalVoucherEntryPage() {
     };
 
     const addOrUpdateEntry = () => {
-        if (editingIndex !== null && editingSide) {
-            const entry =
-                editingSide === 'debit' ? draftDebitEntry : draftCreditEntry;
-            if (!validateDraftSide(entry, editingSide)) return;
-            const updatedEntry = { ...entry, description: draftDescription };
+        if (!validateDraftEntry(draftEntry)) return;
+
+        const updatedEntry = {
+            ...draftEntry,
+            description: draftDescription,
+        };
+        if (editingIndex !== null) {
             setData(
                 'entries',
                 data.entries.map((current, index) =>
@@ -326,24 +326,7 @@ export default function JournalVoucherEntryPage() {
             return;
         }
 
-        const newEntries: Entry[] = [];
-        for (const side of ['debit', 'credit'] as const) {
-            const entry = side === 'debit' ? draftDebitEntry : draftCreditEntry;
-            if (!entry.account_id && !entry[side]) continue;
-            if (!validateDraftSide(entry, side)) return;
-            newEntries.push({
-                ...entry,
-                debit: side === 'debit' ? entry.debit : '',
-                credit: side === 'credit' ? entry.credit : '',
-                description: draftDescription,
-            });
-        }
-
-        if (newEntries.length === 0) {
-            setDraftError('Add a debit account, a credit account, or both.');
-            return;
-        }
-        setData('entries', [...data.entries, ...newEntries]);
+        setData('entries', [...data.entries, updatedEntry]);
         resetDraft();
     };
 
@@ -354,12 +337,9 @@ export default function JournalVoucherEntryPage() {
             return;
         }
 
-        const side = Number(entry.debit) > 0 ? 'debit' : 'credit';
-        setDraftDebitEntry(side === 'debit' ? { ...entry } : emptyEntry());
-        setDraftCreditEntry(side === 'credit' ? { ...entry } : emptyEntry());
+        setDraftEntry({ ...entry });
         setDraftDescription(entry.description);
         setEditingIndex(index);
-        setEditingSide(side);
     };
 
     const deleteEntry = (index: number) => {
@@ -461,135 +441,150 @@ export default function JournalVoucherEntryPage() {
         },
     ];
 
-    const draftDebit = Number(draftDebitEntry.debit || 0);
-    const draftCredit = Number(draftCreditEntry.credit || 0);
     const canAddEntry = Boolean(
-        draftDebitEntry.account_id ||
-        draftDebitEntry.debit ||
-        draftCreditEntry.account_id ||
-        draftCreditEntry.credit,
+        draftEntry.account_id || draftEntry.debit || draftEntry.credit,
     );
 
-    const accountOptionsFor = (side: 'debit' | 'credit', entry: Entry) =>
+    const accountOptionsFor = (entry: Entry) =>
         accounts.filter((account) => {
             const selected = String(account.id) === entry.account_id;
-            const settlement = isSettlementAccount(account);
-            if (voucherType === 'CONTRA') return selected || settlement;
-            if (voucherType === 'PAYMENT') {
-                return (
-                    selected || (side === 'credit' ? settlement : !settlement)
-                );
-            }
-            if (voucherType === 'RECEIPT') {
-                return (
-                    selected || (side === 'debit' ? settlement : !settlement)
-                );
-            }
-            return true;
+            return (
+                selected ||
+                voucherType !== 'CONTRA' ||
+                isSettlementAccount(account)
+            );
         });
 
-    const renderDraftSide = (side: 'debit' | 'credit') => {
-        const entry = side === 'debit' ? draftDebitEntry : draftCreditEntry;
+    const renderDraftEntry = () => {
+        const entry = draftEntry;
         const selectedAccount = accounts.find(
             (account) => String(account.id) === entry.account_id,
         );
         const requiresFinancialAccount = Boolean(
             selectedAccount?.is_control_account,
         );
+        const relatedProductIds = new Set(
+            financialProductAccountMappings
+                .filter(
+                    (mapping) =>
+                        String(mapping.debit_account_id) === entry.account_id ||
+                        String(mapping.credit_account_id) === entry.account_id,
+                )
+                .map((mapping) => String(mapping.financial_product_id)),
+        );
+        const availableFinancialAccounts = financialAccounts.filter(
+            (account) =>
+                account.financial_product_id !== null &&
+                relatedProductIds.has(String(account.financial_product_id)),
+        );
         const availableCheques = cheques.filter(
             (cheque) =>
                 String(cheque.financial_account_id) ===
                 String(entry.financial_account_id),
         );
-        const isDebit = side === 'debit';
 
         return (
-            <section
-                key={side}
-                className={`space-y-2 rounded-md border p-2 ${isDebit ? 'border-emerald-500/25 bg-emerald-500/[0.035]' : 'border-rose-500/25 bg-rose-500/[0.035]'}`}
-            >
-                <div className="flex items-center justify-between border-b border-border/60 pb-1">
-                    <span
-                        className={`text-xs font-semibold uppercase ${isDebit ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}`}
-                    >
-                        {side} entry
-                    </span>
-                    <span className="font-mono text-xs text-muted-foreground tabular-nums">
-                        {Number(entry[side] || 0).toFixed(2)}
-                    </span>
-                </div>
-
-                <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_140px]">
-                    <div>
-                        <Label className="text-xs">
-                            {isDebit ? 'Debit account' : 'Credit account'}
-                        </Label>
+            <div className="space-y-1.5">
+                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(220px,1fr)_120px_120px_minmax(180px,0.8fr)_auto] lg:items-end">
+                    <div className="sm:col-span-2 lg:col-span-1">
+                        <Label className="text-xs">Ledger account</Label>
                         <Select
                             value={entry.account_id}
-                            disabled={
-                                editingIndex !== null && editingSide !== side
-                            }
                             onChange={(value) =>
-                                updateDraftEntry(side, 'account_id', value)
+                                updateDraftEntry('account_id', value)
                             }
                             options={[
                                 { value: '', label: 'Select ledger account' },
-                                ...accountOptionsFor(side, entry).map(
-                                    (account) => ({
-                                        value: String(account.id),
-                                        label: `${account.code} - ${account.name}${account.is_control_account ? ' · Control' : ''}`,
-                                    }),
-                                ),
+                                ...accountOptionsFor(entry).map((account) => ({
+                                    value: String(account.id),
+                                    label: `${account.code} - ${account.name}${account.is_control_account ? ' · Control' : ''}`,
+                                })),
                             ]}
                         />
                     </div>
-                    <div>
-                        <Label className="text-xs">
-                            {isDebit ? 'Debit amount' : 'Credit amount'}
-                        </Label>
+                    {(['debit', 'credit'] as const).map((side) => (
+                        <div key={side}>
+                            <Label
+                                className={`text-xs font-medium ${side === 'debit' ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}`}
+                            >
+                                {side === 'debit'
+                                    ? 'Debit amount'
+                                    : 'Credit amount'}
+                            </Label>
+                            <Input
+                                type="number"
+                                min="0"
+                                step="0.0001"
+                                value={entry[side]}
+                                placeholder="0.00"
+                                onChange={(event) =>
+                                    updateDraftEntry(side, event.target.value)
+                                }
+                            />
+                        </div>
+                    ))}
+                    <div className="sm:col-span-2 lg:col-span-1">
+                        <Label className="text-xs">Line description</Label>
                         <Input
-                            type="number"
-                            min="0"
-                            step="0.0001"
-                            value={entry[side]}
-                            disabled={
-                                editingIndex !== null && editingSide !== side
-                            }
-                            placeholder="0.00"
+                            value={draftDescription}
+                            placeholder="Optional"
                             onChange={(event) =>
-                                updateDraftEntry(side, side, event.target.value)
+                                setDraftDescription(event.target.value)
                             }
                         />
                     </div>
+                    <div className="flex items-end gap-2 sm:col-span-2 lg:col-span-1">
+                        {editingIndex !== null && (
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={resetDraft}
+                            >
+                                Cancel
+                            </Button>
+                        )}
+                        <Button
+                            type="button"
+                            size="sm"
+                            onClick={addOrUpdateEntry}
+                            disabled={!canAddEntry}
+                        >
+                            <Plus className="mr-1 h-4 w-4" />
+                            {editingIndex === null
+                                ? 'Add entry'
+                                : 'Update entry'}
+                        </Button>
+                    </div>
                 </div>
 
-                <div className="grid gap-2 sm:grid-cols-3">
+                <div className="grid gap-2 border-t border-border/60 pt-2 sm:grid-cols-3">
                     <div>
-                        <Label className="text-xs">Financial account</Label>
+                        <Label className="text-xs">Subledger account</Label>
                         <Select
                             value={entry.financial_account_id}
                             disabled={
                                 !requiresFinancialAccount ||
-                                (editingIndex !== null && editingSide !== side)
+                                availableFinancialAccounts.length === 0
                             }
                             onChange={(value) =>
-                                updateDraftEntry(
-                                    side,
-                                    'financial_account_id',
-                                    value,
-                                )
+                                updateDraftEntry('financial_account_id', value)
                             }
                             options={[
                                 {
                                     value: '',
-                                    label: requiresFinancialAccount
-                                        ? 'Select account'
-                                        : 'Disabled',
+                                    label: !requiresFinancialAccount
+                                        ? 'Select control ledger first'
+                                        : availableFinancialAccounts.length
+                                          ? 'Select subledger account'
+                                          : 'No related subledger accounts',
                                 },
-                                ...financialAccounts.map((account) => ({
-                                    value: String(account.id),
-                                    label: `${account.account_no} - ${account.name ?? 'Unnamed account'}`,
-                                })),
+                                ...availableFinancialAccounts.map(
+                                    (account) => ({
+                                        value: String(account.id),
+                                        label: `${account.account_no} - ${account.name ?? 'Unnamed account'}`,
+                                    }),
+                                ),
                             ]}
                         />
                     </div>
@@ -597,12 +592,9 @@ export default function JournalVoucherEntryPage() {
                         <Label className="text-xs">Instrument type</Label>
                         <Select
                             value={entry.instrument_type}
-                            disabled={
-                                !entry.financial_account_id ||
-                                (editingIndex !== null && editingSide !== side)
-                            }
+                            disabled={!entry.financial_account_id}
                             onChange={(value) =>
-                                updateDraftEntry(side, 'instrument_type', value)
+                                updateDraftEntry('instrument_type', value)
                             }
                             options={[
                                 { value: '', label: 'None' },
@@ -616,11 +608,10 @@ export default function JournalVoucherEntryPage() {
                             value={entry.instrument_id}
                             disabled={
                                 !entry.financial_account_id ||
-                                entry.instrument_type !== 'CHEQUE' ||
-                                (editingIndex !== null && editingSide !== side)
+                                entry.instrument_type !== 'CHEQUE'
                             }
                             onChange={(value) =>
-                                updateDraftEntry(side, 'instrument_id', value)
+                                updateDraftEntry('instrument_id', value)
                             }
                             options={[
                                 {
@@ -650,7 +641,7 @@ export default function JournalVoucherEntryPage() {
                         <Select
                             value={entry.cost_center_id}
                             onChange={(value) =>
-                                updateDraftEntry(side, 'cost_center_id', value)
+                                updateDraftEntry('cost_center_id', value)
                             }
                             options={[
                                 { value: '', label: 'None' },
@@ -662,7 +653,7 @@ export default function JournalVoucherEntryPage() {
                         />
                     </div>
                 </details>
-            </section>
+            </div>
         );
     };
 
@@ -786,7 +777,7 @@ export default function JournalVoucherEntryPage() {
                             <div className="flex items-center justify-between gap-2 border-b border-border/60 pb-1">
                                 <div>
                                     <h2 className="text-sm font-semibold text-foreground">
-                                        Debit and credit entries
+                                        Voucher entries
                                     </h2>
                                     <p className="text-[11px] text-muted-foreground">
                                         {mode.rule}
@@ -797,44 +788,8 @@ export default function JournalVoucherEntryPage() {
                                 </StatusBadge>
                             </div>
 
-                            <div className="grid gap-2 xl:grid-cols-2">
-                                {renderDraftSide('debit')}
-                                {renderDraftSide('credit')}
-                            </div>
-
-                            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-2">
-                                <Input
-                                    aria-label="Line description"
-                                    className="min-w-48 flex-1 sm:max-w-md"
-                                    value={draftDescription}
-                                    placeholder="Line description (optional)"
-                                    onChange={(event) =>
-                                        setDraftDescription(event.target.value)
-                                    }
-                                />
-                                <div className="flex gap-2">
-                                    {editingIndex !== null && (
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={resetDraft}
-                                        >
-                                            Cancel
-                                        </Button>
-                                    )}
-                                    <Button
-                                        type="button"
-                                        size="sm"
-                                        onClick={addOrUpdateEntry}
-                                        disabled={!canAddEntry}
-                                    >
-                                        <Plus className="mr-1 h-4 w-4" />
-                                        {editingIndex === null
-                                            ? 'Add entries'
-                                            : 'Update entry'}
-                                    </Button>
-                                </div>
+                            <div className="grid gap-2">
+                                {renderDraftEntry()}
                             </div>
 
                             {draftError && (
@@ -857,7 +812,7 @@ export default function JournalVoucherEntryPage() {
                                 <p className="text-[11px] text-muted-foreground">
                                     {data.entries.length
                                         ? 'Review or edit before saving.'
-                                        : 'Add a debit or credit line above.'}
+                                        : 'Add an account entry above.'}
                                 </p>
                             </div>
 
@@ -868,7 +823,8 @@ export default function JournalVoucherEntryPage() {
 
                         {data.entries.length === 0 ? (
                             <div className="rounded-md border border-dashed border-border px-3 py-2 text-center text-xs text-muted-foreground">
-                                Select debit and credit accounts above to begin.
+                                Select a ledger account and enter a debit or
+                                credit amount above to begin.
                             </div>
                         ) : (
                             <div className="max-h-40 overflow-auto rounded-md border bg-background">

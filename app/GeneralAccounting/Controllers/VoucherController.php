@@ -65,6 +65,7 @@ class VoucherController extends Controller
             'accounts' => $this->accounts($request),
             'costCenters' => $this->costCenters($request),
             'financialAccounts' => $this->financialAccounts($request),
+            'financialProductAccountMappings' => $this->financialProductAccountMappings($request),
             'cheques' => $this->cheques($request),
             'voucherType' => $voucherType,
         ]);
@@ -211,7 +212,17 @@ class VoucherController extends Controller
             ->where('organization_id', $request->attributes->get('active_organization')->id)
             ->where('status', 'ACTIVE')
             ->orderBy('account_no')
-            ->get(['id', 'account_no', 'name', 'account_type']);
+            ->get(['id', 'account_no', 'name', 'account_type', 'financial_product_id']);
+    }
+
+    private function financialProductAccountMappings(Request $request)
+    {
+        return \App\FinancialServices\Models\FinancialProductAccountMapping::query()
+            ->where('status', true)
+            ->whereHas('product', fn($query) => $query
+                ->where('organization_id', $request->attributes->get('active_organization')->id)
+                ->where('status', true))
+            ->get(['financial_product_id', 'debit_account_id', 'credit_account_id']);
     }
 
     private function cheques(Request $request)
