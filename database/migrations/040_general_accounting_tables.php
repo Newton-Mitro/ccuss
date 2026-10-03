@@ -197,6 +197,24 @@ return new class extends Migration {
             ]);
         });
 
+        Schema::create('treasury_gl_mappings', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
+            $table->string('source_type', 40);
+            $table->string('source_code', 100);
+            $table->string('transaction_type', 50);
+            $table->foreignId('debit_account_id')->constrained('accounts')->restrictOnDelete();
+            $table->foreignId('credit_account_id')->constrained('accounts')->restrictOnDelete();
+            $table->boolean('status')->default(true);
+            $table->timestamps();
+
+            $table->unique(
+                ['organization_id', 'source_type', 'source_code', 'transaction_type'],
+                'treasury_gl_mapping_source_unique',
+            );
+            $table->index(['organization_id', 'status']);
+        });
+
         Schema::table('financial_product_account_mappings', function (Blueprint $table): void {
             $table->foreign('debit_account_id')
                 ->references('id')
@@ -607,6 +625,8 @@ return new class extends Migration {
         Schema::dropIfExists('budgets');
 
         Schema::dropIfExists('voucher_entries');
+
+        Schema::dropIfExists('treasury_gl_mappings');
 
         Schema::dropIfExists('parties');
 

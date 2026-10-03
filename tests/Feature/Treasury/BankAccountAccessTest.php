@@ -1,6 +1,11 @@
 <?php
 
 use App\FinancialServices\Models\FinancialAccount;
+use App\GeneralAccounting\Models\AccountGroup;
+use App\GeneralAccounting\Models\LedgerAccount;
+use App\GeneralAccounting\Models\FiscalPeriod;
+use App\GeneralAccounting\Models\FiscalYear;
+use App\GeneralAccounting\Models\TreasuryGlMapping;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
@@ -60,6 +65,18 @@ function bankAccountFixture(): array
     $user = User::factory()->create([
         'organization_id' => $organization->id,
         'branch_id' => $branch->id,
+    ]);
+    $fiscalYear = FiscalYear::factory()->create([
+        'organization_id' => $organization->id,
+        'start_date' => '2026-01-01',
+        'end_date' => '2026-12-31',
+        'status' => 'OPEN',
+    ]);
+    FiscalPeriod::factory()->create([
+        'fiscal_year_id' => $fiscalYear->id,
+        'start_date' => '2026-01-01',
+        'end_date' => '2026-12-31',
+        'status' => 'OPEN',
     ]);
     $bank = Bank::create([
         'organization_id' => $organization->id,
@@ -140,6 +157,25 @@ it('creates and posts a bank transaction for an open branch day', function () {
 
     expect($transaction->status)->toBe('PENDING')
         ->and($transaction->branch_day_id)->toBe($branchDay->id);
+
+    $group = AccountGroup::factory()->create(['organization_id' => $fixture['organization']->id]);
+    $debitAccount = LedgerAccount::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'account_group_id' => $group->id,
+    ]);
+    $creditAccount = LedgerAccount::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'account_group_id' => $group->id,
+    ]);
+    TreasuryGlMapping::query()->create([
+        'organization_id' => $fixture['organization']->id,
+        'source_type' => 'BANK_TRANSACTION',
+        'source_code' => 'DEFAULT',
+        'transaction_type' => 'DEPOSIT',
+        'debit_account_id' => $debitAccount->id,
+        'credit_account_id' => $creditAccount->id,
+        'status' => true,
+    ]);
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])

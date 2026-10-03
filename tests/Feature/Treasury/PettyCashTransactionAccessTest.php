@@ -5,6 +5,11 @@ use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
+use App\GeneralAccounting\Models\AccountGroup;
+use App\GeneralAccounting\Models\FiscalPeriod;
+use App\GeneralAccounting\Models\FiscalYear;
+use App\GeneralAccounting\Models\LedgerAccount;
+use App\GeneralAccounting\Models\TreasuryGlMapping;
 use App\TreasuryAndCash\Models\BranchDay;
 use App\TreasuryAndCash\Models\CashLocation;
 use App\TreasuryAndCash\Models\PettyCashFund;
@@ -86,6 +91,18 @@ function pettyCashTransactionFixture(): array
     $user = User::factory()->create([
         'organization_id' => $organization->id,
         'branch_id' => $branch->id,
+    ]);
+    $fiscalYear = FiscalYear::factory()->create([
+        'organization_id' => $organization->id,
+        'start_date' => '2026-01-01',
+        'end_date' => '2026-12-31',
+        'status' => 'OPEN',
+    ]);
+    FiscalPeriod::factory()->create([
+        'fiscal_year_id' => $fiscalYear->id,
+        'start_date' => '2026-01-01',
+        'end_date' => '2026-12-31',
+        'status' => 'OPEN',
     ]);
     $branchDay = BranchDay::create([
         'organization_id' => $organization->id,
@@ -184,6 +201,25 @@ it('posts a petty cash expense and reduces the fund balance', function () {
         'created_by' => $fixture['user']->id,
     ]);
 
+    $group = AccountGroup::factory()->create(['organization_id' => $fixture['organization']->id]);
+    $expenseAccount = LedgerAccount::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'account_group_id' => $group->id,
+    ]);
+    $cashAccount = LedgerAccount::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'account_group_id' => $group->id,
+    ]);
+    TreasuryGlMapping::query()->create([
+        'organization_id' => $fixture['organization']->id,
+        'source_type' => 'PETTY_CASH_TRANSACTION',
+        'source_code' => 'DEFAULT',
+        'transaction_type' => 'EXPENSE',
+        'debit_account_id' => $expenseAccount->id,
+        'credit_account_id' => $cashAccount->id,
+        'status' => true,
+    ]);
+
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->post(route('petty-cash-transactions.post', $transaction))
@@ -191,4 +227,30 @@ it('posts a petty cash expense and reduces the fund balance', function () {
 
     expect($transaction->fresh()->status)->toBe('POSTED')
         ->and($fixture['fund']->fresh()->current_balance)->toBe('3375.0000');
+});
+
+it('keeps a petty cash transaction pending when its GL mapping is missing', function () {
+    $fixture = pettyCashTransactionFixture();
+    grantPettyCashPostPermission($fixture['user']);
+    $transaction = PettyCashTransaction::create([
+        'branch_day_id' => $fixture['branchDay']->id,
+        'petty_cash_fund_id' => $fixture['fund']->id,
+        'transaction_no' => 'PETTY-UNMAPPED-001',
+        'type' => 'EXPENSE',
+        'amount' => 125,
+        'description' => 'Unmapped expense',
+        'status' => 'PENDING',
+        'created_by' => $fixture['user']->id,
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->from(route('petty-cash-transactions.index'))
+        ->post(route('petty-cash-transactions.post', $transaction))
+        ->assertRedirect(route('petty-cash-transactions.index'))
+        ->assertSessionHas('error', fn(string $message) => str_contains($message, 'No active General Ledger mapping'));
+
+    expect($transaction->fresh()->status)->toBe('PENDING')
+        ->and($fixture['fund']->fresh()->current_balance)->toBe('3500.0000')
+        ->and(\App\GeneralAccounting\Models\Voucher::query()->count())->toBe(0);
 });

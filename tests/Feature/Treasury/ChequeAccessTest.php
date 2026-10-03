@@ -1,6 +1,11 @@
 <?php
 
 use App\FinancialServices\Models\FinancialAccount;
+use App\GeneralAccounting\Models\AccountGroup;
+use App\GeneralAccounting\Models\FiscalPeriod;
+use App\GeneralAccounting\Models\FiscalYear;
+use App\GeneralAccounting\Models\LedgerAccount;
+use App\GeneralAccounting\Models\TreasuryGlMapping;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
@@ -53,6 +58,18 @@ function chequeFixture(): array
         'organization_id' => $organization->id,
         'branch_id' => $branch->id,
     ]);
+    $fiscalYear = FiscalYear::factory()->create([
+        'organization_id' => $organization->id,
+        'start_date' => '2026-01-01',
+        'end_date' => '2026-12-31',
+        'status' => 'OPEN',
+    ]);
+    FiscalPeriod::factory()->create([
+        'fiscal_year_id' => $fiscalYear->id,
+        'start_date' => '2026-01-01',
+        'end_date' => '2026-12-31',
+        'status' => 'OPEN',
+    ]);
     $bank = Bank::create([
         'organization_id' => $organization->id,
         'code' => 'CHEQUE-BANK',
@@ -101,7 +118,7 @@ it('loads cheque books and cheques for authorized organization users', function 
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('cheque-books.index'))
         ->assertSuccessful()
-        ->assertInertia(fn ($page) => $page
+        ->assertInertia(fn($page) => $page
             ->component('treasury-cash/cheques/books/index')
             ->has('books.data', 1)
             ->where('books.data.0.book_no', $fixture['book']->book_no));
@@ -110,7 +127,7 @@ it('loads cheque books and cheques for authorized organization users', function 
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('cheques.index', ['per_page' => 1]))
         ->assertSuccessful()
-        ->assertInertia(fn ($page) => $page
+        ->assertInertia(fn($page) => $page
             ->component('treasury-cash/cheques/index')
             ->has('cheques.data', 1)
             ->where('cheques.data.0.cheque_no', $fixture['cheque']->cheque_no));
@@ -164,7 +181,7 @@ it('creates cheque leaves and enforces the cheque lifecycle', function () {
     expect($cheque->fresh()->status)->toBe('CLEARED')
         ->and($cheque->transactions()->count())->toBe(3);
 
-    expect(fn () => $service->transition($cheque->fresh(), 'bounce', $fixture['user']->id))
+    expect(fn() => $service->transition($cheque->fresh(), 'bounce', $fixture['user']->id))
         ->toThrow(RuntimeException::class);
 });
 
@@ -174,6 +191,18 @@ it('posts a savings-account cheque withdrawal through the teller cash ledger', f
     $user = User::factory()->create([
         'organization_id' => $organization->id,
         'branch_id' => $branch->id,
+    ]);
+    $fiscalYear = FiscalYear::factory()->create([
+        'organization_id' => $organization->id,
+        'start_date' => '2026-01-01',
+        'end_date' => '2026-12-31',
+        'status' => 'OPEN',
+    ]);
+    FiscalPeriod::factory()->create([
+        'fiscal_year_id' => $fiscalYear->id,
+        'start_date' => '2026-01-01',
+        'end_date' => '2026-12-31',
+        'status' => 'OPEN',
     ]);
     $branchDay = BranchDay::create([
         'organization_id' => $organization->id,
@@ -197,6 +226,24 @@ it('posts a savings-account cheque withdrawal through the teller cash ledger', f
         'name' => 'Teller Cash 100',
         'type' => 'TELLER',
         'is_active' => true,
+    ]);
+    $group = AccountGroup::factory()->create(['organization_id' => $organization->id]);
+    $debitLedger = LedgerAccount::factory()->create([
+        'organization_id' => $organization->id,
+        'account_group_id' => $group->id,
+    ]);
+    $creditLedger = LedgerAccount::factory()->create([
+        'organization_id' => $organization->id,
+        'account_group_id' => $group->id,
+    ]);
+    TreasuryGlMapping::query()->create([
+        'organization_id' => $organization->id,
+        'source_type' => 'CASH_LOCATION',
+        'source_code' => 'TELLER',
+        'transaction_type' => 'WITHDRAWAL',
+        'debit_account_id' => $debitLedger->id,
+        'credit_account_id' => $creditLedger->id,
+        'status' => true,
     ]);
     $teller = Teller::create([
         'cash_location_id' => $cashLocation->id,
@@ -365,7 +412,7 @@ it('loads a savings cheque withdrawal form for the selected customer and savings
         ->withSession(['active_organization_id' => $organization->id])
         ->get(route('teller-transactions.savings-cheque-withdrawal', ['customer_id' => $customer->id]))
         ->assertSuccessful()
-        ->assertInertia(fn ($page) => $page
+        ->assertInertia(fn($page) => $page
             ->component('treasury-cash/teller-transactions/savings-cheque-withdrawal-page')
             ->where('customer.id', $customer->id)
             ->where('savings_accounts.0.id', $account->id)

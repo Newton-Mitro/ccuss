@@ -62,10 +62,10 @@ class GeneralAccountingSeeder extends Seeder
             $accounts = [];
             foreach ([
                 ['1100', 'Cash on Hand', '1100', 'ASSET', 'DEBIT', true, true, false],
-                ['1110', 'Vault Cash', '1100', 'ASSET', 'DEBIT', true, true, false],
-                ['1120', 'Teller Cash', '1100', 'ASSET', 'DEBIT', true, true, false],
-                ['1130', 'Petty Cash', '1100', 'ASSET', 'DEBIT', true, true, false],
-                ['1200', 'Bank Accounts', '1100', 'ASSET', 'DEBIT', true, true, false],
+                ['1110', 'Vault Cash', '1100', 'ASSET', 'DEBIT', true, true, true],
+                ['1120', 'Teller Cash', '1100', 'ASSET', 'DEBIT', true, true, true],
+                ['1130', 'Petty Cash', '1100', 'ASSET', 'DEBIT', true, true, true],
+                ['1200', 'Bank Accounts', '1100', 'ASSET', 'DEBIT', true, true, true],
                 ['1210', 'Bank Clearing', '1100', 'ASSET', 'DEBIT', false, true, false],
                 ['1300', 'Loan Receivables', '1200', 'ASSET', 'DEBIT', false, false, true],
                 ['1310', 'Accrued Loan Interest Receivable', '1200', 'ASSET', 'DEBIT', false, false, false],

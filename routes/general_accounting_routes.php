@@ -10,6 +10,7 @@ use App\GeneralAccounting\Controllers\GeneralAccountingDashboardController;
 use App\GeneralAccounting\Controllers\LedgerAccountController;
 use App\GeneralAccounting\Controllers\PartyController;
 use App\GeneralAccounting\Controllers\PeriodEndController;
+use App\GeneralAccounting\Controllers\TreasuryGlMappingController;
 use App\GeneralAccounting\Controllers\VoucherController;
 use Illuminate\Support\Facades\Route;
 
@@ -101,6 +102,13 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
             'update' => 'parties.update',
             'destroy' => 'parties.destroy',
         ]);
+
+    Route::get('/treasury-gl-mappings', [TreasuryGlMappingController::class, 'index'])
+        ->name('treasury-gl-mappings.index');
+    Route::post('/treasury-gl-mappings', [TreasuryGlMappingController::class, 'store'])
+        ->name('treasury-gl-mappings.store');
+    Route::delete('/treasury-gl-mappings/{mapping}', [TreasuryGlMappingController::class, 'destroy'])
+        ->name('treasury-gl-mappings.destroy');
 
     Route::get('/budgets/entries', [BudgetController::class, 'entries'])->name('budgets.entries');
     Route::resource('budgets', BudgetController::class);

@@ -9,10 +9,13 @@ use App\GeneralAccounting\Models\AccountGroup;
 use App\GeneralAccounting\Models\FiscalPeriod;
 use App\GeneralAccounting\Models\FiscalYear;
 use App\GeneralAccounting\Models\LedgerAccount;
+use App\GeneralAccounting\Models\TreasuryGlMapping;
 use App\GeneralAccounting\Models\Voucher;
 use App\SystemAdministration\Models\AuditLog;
+use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\User;
+use App\TreasuryAndCash\Models\CashLocation;
 
 it('links a mapped posted transaction to one voucher and reverses the link', function () {
     $organization = Organization::factory()->create();
@@ -41,4 +44,90 @@ it('links a mapped posted transaction to one voucher and reverses the link', fun
 
     $service->reverse($transaction->fresh(), $organization->id);
     expect($voucher->fresh()->status)->toBe('REVERSED');
+});
+
+it('summarizes a teller cash transaction using its balanced line total', function () {
+    $organization = Organization::factory()->create();
+    $branch = Branch::factory()->create(['organization_id' => $organization->id]);
+    $user = User::factory()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+    ]);
+    $group = AccountGroup::factory()->create(['organization_id' => $organization->id]);
+    $debitLedger = LedgerAccount::factory()->create([
+        'organization_id' => $organization->id,
+        'account_group_id' => $group->id,
+    ]);
+    $creditLedger = LedgerAccount::factory()->create([
+        'organization_id' => $organization->id,
+        'account_group_id' => $group->id,
+    ]);
+    $year = FiscalYear::factory()->create([
+        'organization_id' => $organization->id,
+        'start_date' => '2026-01-01',
+        'end_date' => '2026-12-31',
+    ]);
+    FiscalPeriod::factory()->create([
+        'fiscal_year_id' => $year->id,
+        'start_date' => '2026-01-01',
+        'end_date' => '2026-12-31',
+    ]);
+    $cashAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+        'financial_product_id' => null,
+        'account_type' => 'CASH',
+        'balance' => 0,
+        'available_balance' => 0,
+    ]);
+    $savingsAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+        'financial_product_id' => null,
+        'account_type' => 'SAVINGS',
+        'balance' => 0,
+        'available_balance' => 0,
+    ]);
+    CashLocation::query()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+        'financial_account_id' => $cashAccount->id,
+        'code' => 'TELLER-GL-001',
+        'name' => 'Teller GL Summary Source',
+        'type' => 'TELLER',
+        'is_active' => true,
+    ]);
+    TreasuryGlMapping::query()->create([
+        'organization_id' => $organization->id,
+        'source_type' => 'CASH_LOCATION',
+        'source_code' => 'TELLER',
+        'transaction_type' => 'DEPOSIT',
+        'debit_account_id' => $debitLedger->id,
+        'credit_account_id' => $creditLedger->id,
+        'status' => true,
+    ]);
+
+    $service = app(FinancialTransactionService::class);
+    $transaction = $service->createMultiLine(
+        [
+            'transaction_type' => 'DEPOSIT',
+            'transaction_date' => '2026-09-23',
+            'description' => 'Teller deposit summary',
+        ],
+        [
+            ['financial_account_id' => $cashAccount->id, 'direction' => 'DEBIT', 'amount' => 250],
+            ['financial_account_id' => $savingsAccount->id, 'direction' => 'CREDIT', 'amount' => 250],
+        ],
+        $organization->id,
+        $user->id,
+        $branch->id,
+    );
+
+    $service->post($transaction, $organization->id, $user->id);
+    $voucher = $transaction->fresh()->voucher;
+
+    expect($transaction->amount)->toBe('500.0000')
+        ->and($voucher)->not->toBeNull()
+        ->and((float) $voucher->entries->sum('debit'))->toBe(250.0)
+        ->and((float) $voucher->entries->sum('credit'))->toBe(250.0);
 });

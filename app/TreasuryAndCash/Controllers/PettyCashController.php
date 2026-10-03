@@ -64,7 +64,7 @@ class PettyCashController extends Controller
         abort_unless($user?->branch_id, 422, 'A branch assignment is required for petty cash transactions.');
 
         try {
-            $this->pettyCashTransactionService->post($organization->id, $user->branch_id, $transaction->id);
+            $this->pettyCashTransactionService->post($organization->id, $user->branch_id, $transaction->id, $user->id);
         } catch (\RuntimeException $exception) {
             return back()->with('error', $exception->getMessage());
         }

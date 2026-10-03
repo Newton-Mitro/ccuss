@@ -7,6 +7,11 @@ use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
 use App\FinancialServices\Models\FinancialAccount;
+use App\GeneralAccounting\Models\AccountGroup;
+use App\GeneralAccounting\Models\FiscalPeriod;
+use App\GeneralAccounting\Models\FiscalYear;
+use App\GeneralAccounting\Models\LedgerAccount;
+use App\GeneralAccounting\Models\TreasuryGlMapping;
 use App\TreasuryAndCash\Models\BranchDay;
 use App\TreasuryAndCash\Models\CashLocation;
 use App\TreasuryAndCash\Models\Teller;
@@ -81,6 +86,18 @@ function tellerCashTransactionFixture(): array
         'organization_id' => $organization->id,
         'branch_id' => $branch->id,
     ]);
+    $fiscalYear = FiscalYear::factory()->create([
+        'organization_id' => $organization->id,
+        'start_date' => '2026-01-01',
+        'end_date' => '2026-12-31',
+        'status' => 'OPEN',
+    ]);
+    FiscalPeriod::factory()->create([
+        'fiscal_year_id' => $fiscalYear->id,
+        'start_date' => '2026-01-01',
+        'end_date' => '2026-12-31',
+        'status' => 'OPEN',
+    ]);
     $branchDay = BranchDay::create([
         'organization_id' => $organization->id,
         'branch_id' => $branch->id,
@@ -115,6 +132,29 @@ function tellerCashTransactionFixture(): array
     ]);
 
     return compact('organization', 'branch', 'user', 'branchDay', 'location', 'teller', 'session');
+}
+
+function configureTellerSummaryMapping(array $fixture, string $transactionType): void
+{
+    $group = AccountGroup::factory()->create(['organization_id' => $fixture['organization']->id]);
+    $debitAccount = LedgerAccount::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'account_group_id' => $group->id,
+    ]);
+    $creditAccount = LedgerAccount::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'account_group_id' => $group->id,
+    ]);
+
+    TreasuryGlMapping::query()->create([
+        'organization_id' => $fixture['organization']->id,
+        'source_type' => 'CASH_LOCATION',
+        'source_code' => 'TELLER',
+        'transaction_type' => $transactionType,
+        'debit_account_id' => $debitAccount->id,
+        'credit_account_id' => $creditAccount->id,
+        'status' => true,
+    ]);
 }
 
 it('loads deposit and withdrawal forms with scoped teller sessions', function () {
@@ -295,6 +335,7 @@ it('creates and posts a multi-line financial deposit with the teller cash leg', 
         'account_no' => 'SHARE-001',
     ]);
     $fixture['location']->update(['financial_account_id' => $cashAccount->id]);
+    configureTellerSummaryMapping($fixture, 'DEPOSIT');
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
@@ -350,6 +391,7 @@ it('creates and posts a multi-line financial withdrawal with the teller cash leg
         'available_balance' => 500,
     ]);
     $fixture['location']->update(['financial_account_id' => $cashAccount->id]);
+    configureTellerSummaryMapping($fixture, 'WITHDRAWAL');
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])

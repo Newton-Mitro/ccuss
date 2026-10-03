@@ -2,6 +2,7 @@
 
 namespace App\TreasuryAndCash\Application;
 
+use App\GeneralAccounting\Application\TreasurySummaryPostingService;
 use App\TreasuryAndCash\Models\BranchDay;
 use App\TreasuryAndCash\Models\PettyCashFund;
 use App\TreasuryAndCash\Models\PettyCashTransaction;
@@ -9,6 +10,11 @@ use Illuminate\Support\Facades\DB;
 
 class PettyCashTransactionService
 {
+    public function __construct(
+        private readonly TreasurySummaryPostingService $summaryPostingService,
+    ) {
+    }
+
     public function create(int $organizationId, int $branchId, int $userId, string $type, array $data): PettyCashTransaction
     {
         return DB::transaction(function () use ($organizationId, $branchId, $userId, $type, $data) {
@@ -57,9 +63,9 @@ class PettyCashTransactionService
         });
     }
 
-    public function post(int $organizationId, int $branchId, int $transactionId): PettyCashTransaction
+    public function post(int $organizationId, int $branchId, int $transactionId, int $userId): PettyCashTransaction
     {
-        return DB::transaction(function () use ($organizationId, $branchId, $transactionId) {
+        return DB::transaction(function () use ($organizationId, $branchId, $transactionId, $userId) {
             $transaction = PettyCashTransaction::query()
                 ->whereKey($transactionId)
                 ->where('status', 'PENDING')
@@ -105,6 +111,25 @@ class PettyCashTransactionService
                     ? $balance + $amount
                     : $balance - $amount,
             ]);
+
+            $branchDay = BranchDay::query()->findOrFail($transaction->branch_day_id);
+            $this->summaryPostingService->post(
+                organizationId: $organizationId,
+                sourceType: 'PETTY_CASH_TRANSACTION',
+                sourceCode: 'DEFAULT',
+                transactionType: $transaction->type,
+                voucherNo: 'PETTY-GL-' . $transaction->id,
+                voucherDate: (string) $branchDay->business_date,
+                branchId: $branchId,
+                userId: $userId,
+                amount: $amount,
+                description: $transaction->description ?? 'Petty cash ' . strtolower($transaction->type),
+                reference: $transaction->transaction_no,
+                debitAccountOverride: $transaction->type === 'EXPENSE' && $transaction->expense_account_id
+                ? (int) $transaction->expense_account_id
+                : null,
+            );
+
             $transaction->update(['status' => 'POSTED']);
 
             return $transaction->fresh();

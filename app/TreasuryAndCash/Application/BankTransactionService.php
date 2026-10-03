@@ -2,6 +2,7 @@
 
 namespace App\TreasuryAndCash\Application;
 
+use App\GeneralAccounting\Application\TreasurySummaryPostingService;
 use App\TreasuryAndCash\Models\BankAccount;
 use App\TreasuryAndCash\Models\BankTransaction;
 use App\TreasuryAndCash\Models\BranchDay;
@@ -9,6 +10,11 @@ use Illuminate\Support\Facades\DB;
 
 class BankTransactionService
 {
+    public function __construct(
+        private readonly TreasurySummaryPostingService $summaryPostingService,
+    ) {
+    }
+
     public function create(int $organizationId, int $branchId, array $data): BankTransaction
     {
         return DB::transaction(function () use ($organizationId, $branchId, $data) {
@@ -45,9 +51,9 @@ class BankTransactionService
         });
     }
 
-    public function post(int $organizationId, int $branchId, int $transactionId): BankTransaction
+    public function post(int $organizationId, int $branchId, int $transactionId, int $userId): BankTransaction
     {
-        return DB::transaction(function () use ($organizationId, $branchId, $transactionId) {
+        return DB::transaction(function () use ($organizationId, $branchId, $transactionId, $userId) {
             $transaction = BankTransaction::query()
                 ->whereKey($transactionId)
                 ->where('status', 'PENDING')
@@ -74,6 +80,20 @@ class BankTransactionService
             if ($newBalance < 0) {
                 throw new \RuntimeException('The transaction would make the bank balance negative.');
             }
+
+            $this->summaryPostingService->post(
+                organizationId: $organizationId,
+                sourceType: 'BANK_TRANSACTION',
+                sourceCode: 'DEFAULT',
+                transactionType: $transaction->type,
+                voucherNo: 'BANK-GL-' . $transaction->id,
+                voucherDate: $transaction->transaction_date->toDateString(),
+                branchId: $branchId,
+                userId: $userId,
+                amount: (float) $transaction->amount,
+                description: $transaction->description ?? 'Bank ' . strtolower($transaction->type),
+                reference: $transaction->reference ?: $transaction->transaction_no,
+            );
 
             $transaction->update(['status' => 'POSTED', 'balance_after' => $newBalance]);
 

@@ -41,6 +41,15 @@ export const generalAccounting: SidebarItem[] = [
                         match_path: 'parties',
                         permission: ['accounting.parties.view'],
                     },
+                    {
+                        name: 'Treasury GL Mappings',
+                        icon: (
+                            <i className="fa-solid fa-arrow-right-arrow-left" />
+                        ),
+                        path: '/treasury-gl-mappings',
+                        match_path: 'treasury-gl-mappings',
+                        permission: ['accounting.treasury_mappings.manage'],
+                    },
                 ],
             },
             {

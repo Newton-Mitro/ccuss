@@ -164,6 +164,7 @@ class BankingController extends Controller
                 $request->attributes->get('active_organization')->id,
                 $user->branch_id,
                 $transaction->id,
+                $user->id,
             );
         } catch (\RuntimeException $exception) {
             return back()->with('error', $exception->getMessage());

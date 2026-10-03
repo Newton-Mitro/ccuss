@@ -22,6 +22,7 @@ final class GeneralAccountingPermissions
             new PermissionDefinition('Accounting Parties', 'Create Parties', 'accounting.parties.create', 'create', 'Create accounting parties'),
             new PermissionDefinition('Accounting Parties', 'Update Parties', 'accounting.parties.update', 'update', 'Update accounting parties'),
             new PermissionDefinition('Accounting Parties', 'Delete Parties', 'accounting.parties.delete', 'delete', 'Delete accounting parties'),
+            new PermissionDefinition('Accounting Treasury GL Mappings', 'Manage Treasury GL Mappings', 'accounting.treasury_mappings.manage', 'manage', 'Configure Treasury-to-General-Ledger summary mappings'),
             new PermissionDefinition('Accounting Fiscal Year', 'View Fiscal Years', 'settings.fiscal_year.view', 'view', 'View fiscal years'),
             new PermissionDefinition('Accounting Fiscal Year', 'Create Fiscal Year', 'settings.fiscal_year.create', 'create', 'Create fiscal years'),
             new PermissionDefinition('Accounting Fiscal Year', 'Update Fiscal Year', 'settings.fiscal_year.update', 'update', 'Update fiscal years'),
