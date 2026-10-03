@@ -1,19 +1,16 @@
 <?php
 
-use App\FinancialServices\Models\FinancialAccount;
-use App\FinancialServices\Models\FinancialProduct;
-use App\FinancialServices\Models\FinancialProductAccountMapping;
 use App\GeneralAccounting\Application\AccountGroupService;
 use App\GeneralAccounting\Application\FiscalPeriodService;
 use App\GeneralAccounting\Application\FiscalYearService;
 use App\GeneralAccounting\Application\LedgerAccountService;
 use App\GeneralAccounting\Application\VoucherService;
+use App\GeneralAccounting\Models\Party;
 use App\GeneralAccounting\Models\Voucher;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
-use App\TreasuryAndCash\Models\ChequeBook;
 use Inertia\Testing\AssertableInertia as Assert;
 
 function voucherFixture(): array
@@ -94,11 +91,14 @@ it('creates a balanced draft voucher with an organization-scoped number', functi
         ->and($voucher->entries)->toHaveCount(2);
 });
 
-it('stores a linked financial account on each voucher entry', function () {
+it('stores an accounting party on a voucher entry', function () {
     $fixture = voucherFixture();
-    $financialAccount = FinancialAccount::factory()->create([
+    $party = Party::query()->create([
         'organization_id' => $fixture['organization']->id,
-        'status' => 'ACTIVE',
+        'code' => 'SUP-001',
+        'name' => 'Office Supplier',
+        'party_type' => 'SUPPLIER',
+        'status' => true,
     ]);
 
     $voucher = app(VoucherService::class)->createDraft([
@@ -106,17 +106,17 @@ it('stores a linked financial account on each voucher entry', function () {
         'voucher_type' => 'JOURNAL',
         'voucher_date' => '2025-07-10',
         'entries' => [
-            ['account_id' => $fixture['accounts'][0]->id, 'financial_account_id' => $financialAccount->id, 'debit' => 100, 'credit' => 0],
-            ['account_id' => $fixture['accounts'][1]->id, 'financial_account_id' => $financialAccount->id, 'debit' => 0, 'credit' => 100],
+            ['account_id' => $fixture['accounts'][0]->id, 'party_id' => $party->id, 'debit' => 100, 'credit' => 0],
+            ['account_id' => $fixture['accounts'][1]->id, 'debit' => 0, 'credit' => 100],
         ],
     ], $fixture['organization']->id, $fixture['user']->id);
 
     expect($voucher->entries)->toHaveCount(2)
-        ->and($voucher->entries->first()->financial_account_id)->toBe($financialAccount->id)
-        ->and($voucher->entries->last()->financial_account_id)->toBe($financialAccount->id);
+        ->and($voucher->entries->first()->party_id)->toBe($party->id)
+        ->and($voucher->entries->last()->party_id)->toBeNull();
 });
 
-it('requires a financial account when a control ledger is selected', function () {
+it('allows control ledger entries without a subledger account', function () {
     $fixture = voucherFixture();
     $controlGroup = app(AccountGroupService::class)->create([
         'organization_id' => $fixture['organization']->id,
@@ -136,15 +136,18 @@ it('requires a financial account when a control ledger is selected', function ()
         'status' => true,
     ]);
 
-    expect(fn() => app(VoucherService::class)->createDraft([
+    $voucher = app(VoucherService::class)->createDraft([
         'fiscal_period_id' => $fixture['period']->id,
         'voucher_type' => 'JOURNAL',
         'voucher_date' => '2025-07-10',
         'entries' => [
-            ['account_id' => $controlAccount->id, 'debit' => 100, 'credit' => 0, 'instrument_type' => 'CHEQUE'],
+            ['account_id' => $controlAccount->id, 'debit' => 100, 'credit' => 0],
             ['account_id' => $fixture['accounts'][1]->id, 'debit' => 0, 'credit' => 100],
         ],
-    ], $fixture['organization']->id, $fixture['user']->id))->toThrow(InvalidArgumentException::class, 'financial account');
+    ], $fixture['organization']->id, $fixture['user']->id);
+
+    expect($voucher->entries)->toHaveCount(2)
+        ->and($voucher->entries->first()->account_id)->toBe($controlAccount->id);
 });
 
 it('rejects unbalanced, one-sided, and out-of-period vouchers', function () {
@@ -266,61 +269,36 @@ it('creates a voucher through the organization-scoped HTTP endpoint', function (
         ->exists())->toBeTrue();
 });
 
-it('provides organization-scoped product account mappings to voucher creation', function () {
+it('provides parties without subledger data to voucher creation', function () {
     $fixture = voucherFixture();
-    $product = FinancialProduct::factory()->create([
-        'organization_id' => $fixture['organization']->id,
-    ]);
-    FinancialProductAccountMapping::factory()->create([
-        'financial_product_id' => $product->id,
-        'debit_account_id' => $fixture['accounts'][0]->id,
-        'credit_account_id' => $fixture['accounts'][1]->id,
-    ]);
-
-    $otherOrganization = Organization::factory()->create();
-    $otherProduct = FinancialProduct::factory()->create([
-        'organization_id' => $otherOrganization->id,
-    ]);
-    FinancialProductAccountMapping::factory()->create([
-        'financial_product_id' => $otherProduct->id,
-        'debit_account_id' => $fixture['accounts'][0]->id,
-        'credit_account_id' => $fixture['accounts'][1]->id,
-    ]);
-
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('vouchers.create', ['type' => 'JOURNAL']))
         ->assertOk()
         ->assertInertia(fn(Assert $page) => $page
             ->component('general-accounting/vouchers/create/journal_voucher_entry_page')
-            ->has('financialProductAccountMappings', 1)
-            ->where('financialProductAccountMappings.0.financial_product_id', $product->id)
-            ->where('financialProductAccountMappings.0.debit_account_id', $fixture['accounts'][0]->id));
+            ->has('parties')
+            ->missing('financialAccounts')
+            ->missing('cheques'));
 });
 
-it('loads financial-account and cheque metadata when editing a voucher draft', function () {
+it('loads accounting parties when editing and viewing a voucher draft', function () {
     $fixture = voucherFixture();
-    $financialAccount = FinancialAccount::factory()->create([
+    $party = Party::query()->create([
         'organization_id' => $fixture['organization']->id,
-        'status' => 'ACTIVE',
+        'code' => 'MEM-001',
+        'name' => 'Accounting Member',
+        'party_type' => 'CUSTOMER',
+        'status' => true,
     ]);
-    $chequeBook = ChequeBook::query()->create([
-        'financial_account_id' => $financialAccount->id,
-        'book_no' => 'TEST-BOOK-' . $financialAccount->id,
-        'prefix' => 'T-',
-        'start_number' => 101,
-        'end_number' => 101,
-        'leaf_count' => 1,
-    ]);
-    $cheque = $chequeBook->cheques()->firstOrFail();
     $voucher = app(VoucherService::class)->createDraft([
         'fiscal_period_id' => $fixture['period']->id,
         'voucher_type' => 'JOURNAL',
         'voucher_date' => '2025-07-10',
         'description' => 'Edit metadata check',
         'entries' => [
-            ['account_id' => $fixture['accounts'][0]->id, 'financial_account_id' => $financialAccount->id, 'instrument_type' => 'CHEQUE', 'instrument_id' => $cheque->id, 'debit' => 100, 'credit' => 0],
-            ['account_id' => $fixture['accounts'][1]->id, 'financial_account_id' => $financialAccount->id, 'debit' => 0, 'credit' => 100],
+            ['account_id' => $fixture['accounts'][0]->id, 'party_id' => $party->id, 'debit' => 100, 'credit' => 0],
+            ['account_id' => $fixture['accounts'][1]->id, 'debit' => 0, 'credit' => 100],
         ],
     ], $fixture['organization']->id, $fixture['user']->id);
 
@@ -333,15 +311,13 @@ it('loads financial-account and cheque metadata when editing a voucher draft', f
         ->component('general-accounting/vouchers/edit/voucher_edit_page')
         ->where('voucher.id', $voucher->id)
         ->where('accounts.0.is_control_account', false)
-        ->has('financialAccounts')
-        ->has('cheques'));
+        ->has('parties', 1));
 
     $this->get(route('vouchers.show', $voucher))
         ->assertOk()
         ->assertInertia(fn(Assert $page) => $page
             ->component('general-accounting/vouchers/show')
-            ->where('voucher.entries.0.financial_account.account_no', $financialAccount->account_no)
-            ->where('voucher.entries.0.cheque.cheque_no', $cheque->cheque_no));
+            ->where('voucher.entries.0.party.name', $party->name));
 });
 
 it('edits draft vouchers and rejects edits to posted vouchers', function () {

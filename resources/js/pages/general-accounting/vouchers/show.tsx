@@ -209,10 +209,9 @@ export default function VoucherView() {
                         <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
                                 {[
-                                    'Ledger, Subledger, Reference Account',
-                                    'Financial Account',
-                                    'Instrument Type',
-                                    'Instrument No.',
+                                    'Ledger Account',
+                                    'Party',
+                                    'Reference',
                                     'Debit',
                                     'Credit',
                                 ].map((h) => (
@@ -249,17 +248,12 @@ export default function VoucherView() {
                                             </div>
                                         </td>
                                         <td className="px-2 py-1">
-                                            {line.financial_account
-                                                ? `${line.financial_account.account_no} - ${line.financial_account.name || 'Unnamed account'}`
+                                            {line.party
+                                                ? `${line.party.code} - ${line.party.name}`
                                                 : '-'}
                                         </td>
                                         <td className="px-2 py-1">
-                                            {line.instrument_type || '-'}
-                                        </td>
-                                        <td className="px-2 py-1">
-                                            {(line.instrument_type === 'CHEQUE'
-                                                ? line.cheque?.cheque_no
-                                                : line.instrument_no) || '-'}
+                                            {line.reference || '-'}
                                         </td>
                                         <td className="px-2 py-1 text-right">
                                             {formatBDTCurrency(line.debit)}
@@ -272,7 +266,7 @@ export default function VoucherView() {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={6}
+                                        colSpan={5}
                                         className="px-4 py-6 text-center text-muted-foreground"
                                     >
                                         No entries found.
@@ -282,7 +276,7 @@ export default function VoucherView() {
                         </tbody>
                         <tfoot>
                             <tr className="border-t font-medium">
-                                <td colSpan={3}></td>
+                                <td colSpan={2}></td>
 
                                 <td className="px-2 py-1 text-right">
                                     Totals:
@@ -295,7 +289,7 @@ export default function VoucherView() {
                                 </td>
                             </tr>
                             <tr className="border-t text-right font-medium">
-                                <td colSpan={6} className="p-3">
+                                <td colSpan={5} className="p-3">
                                     {`in word: ${takaToText(totals.totalCredit)} only.`}
                                 </td>
                             </tr>

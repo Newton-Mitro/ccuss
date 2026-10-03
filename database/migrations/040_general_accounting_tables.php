@@ -274,6 +274,37 @@ return new class extends Migration {
 
         /*
         |--------------------------------------------------------------------------
+        | Accounting Parties
+        |--------------------------------------------------------------------------
+        |
+        | Organization-scoped counterparties referenced by voucher entries.
+        |
+        */
+
+        Schema::create('parties', function (Blueprint $table) {
+            $table->id();
+
+            $table->foreignId('organization_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->string('code', 50);
+            $table->string('name', 150);
+            $table->string('party_type', 30)->default('OTHER');
+            $table->string('phone', 50)->nullable();
+            $table->string('email', 254)->nullable();
+            $table->string('address', 500)->nullable();
+            $table->boolean('status')->default(true);
+
+            $table->timestamps();
+
+            $table->unique(['organization_id', 'code']);
+            $table->index(['organization_id', 'party_type', 'status']);
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
         | Vouchers
         |--------------------------------------------------------------------------
         |
@@ -409,22 +440,10 @@ return new class extends Migration {
                 ->constrained('cost_centers')
                 ->nullOnDelete();
 
-            /*
-             * Links the entry to a financial/sub-ledger account.
-             *
-             * Examples:
-             * - Bank Account
-             * - Savings Account
-             * - Loan Account
-             * - Fixed Deposit Account
-             */
-            $table->foreignId('financial_account_id')
+            $table->foreignId('party_id')
                 ->nullable()
-                ->constrained('financial_accounts')
+                ->constrained('parties')
                 ->nullOnDelete();
-
-            $table->string('instrument_type', 30)->nullable();
-            $table->unsignedBigInteger('instrument_id')->nullable();
 
             $table->string('description')
                 ->nullable();
@@ -463,14 +482,6 @@ return new class extends Migration {
                 'account_id',
             ]);
 
-            $table->index([
-                'financial_account_id',
-            ]);
-
-            $table->index(
-                ['instrument_type', 'instrument_id'],
-                'voucher_entries_instrument_idx',
-            );
         });
 
 
@@ -587,6 +598,8 @@ return new class extends Migration {
         Schema::dropIfExists('budgets');
 
         Schema::dropIfExists('voucher_entries');
+
+        Schema::dropIfExists('parties');
 
         Schema::dropIfExists('vouchers');
 

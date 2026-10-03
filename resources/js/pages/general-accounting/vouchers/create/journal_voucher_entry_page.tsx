@@ -46,10 +46,7 @@ interface FiscalPeriod {
 
 interface Entry {
     account_id: string;
-    financial_account_id: string;
     party_id: string;
-    instrument_type: string;
-    instrument_id: string;
     debit: string;
     credit: string;
     description: string;
@@ -58,10 +55,7 @@ interface Entry {
 
 const emptyEntry = (): Entry => ({
     account_id: '',
-    financial_account_id: '',
     party_id: '',
-    instrument_type: '',
-    instrument_id: '',
     debit: '',
     credit: '',
     description: '',
@@ -142,33 +136,14 @@ const voucherModes: Record<
 };
 
 export default function JournalVoucherEntryPage() {
-    const {
-        fiscalPeriods,
-        accounts,
-        costCenters,
-        financialAccounts,
-        parties,
-        cheques,
-        voucherType,
-    } = usePage().props as unknown as {
-        fiscalPeriods: FiscalPeriod[];
-        accounts: Account[];
-        costCenters: CostCenter[];
-        financialAccounts: {
-            id: number;
-            account_no: string;
-            name: string | null;
-            account_type: string;
-        }[];
-        parties: Party[];
-        cheques: {
-            id: number;
-            financial_account_id: number | string | null;
-            cheque_no: string;
-            amount: number | string | null;
-        }[];
-        voucherType: string;
-    };
+    const { fiscalPeriods, accounts, costCenters, parties, voucherType } =
+        usePage().props as unknown as {
+            fiscalPeriods: FiscalPeriod[];
+            accounts: Account[];
+            costCenters: CostCenter[];
+            parties: Party[];
+            voucherType: string;
+        };
 
     const mode = voucherModes[voucherType] ?? voucherModes.JOURNAL;
 
@@ -190,17 +165,7 @@ export default function JournalVoucherEntryPage() {
     const updateDraftEntry = (field: keyof Entry, value: string) => {
         setDraftError('');
         setDraftEntry((current) => {
-            const updated = { ...current, [field]: value };
-            if (field === 'account_id') {
-                updated.financial_account_id = '';
-                updated.instrument_type = '';
-                updated.instrument_id = '';
-            }
-            if (field === 'financial_account_id') updated.instrument_id = '';
-            if (field === 'instrument_type' && value !== 'CHEQUE') {
-                updated.instrument_id = '';
-            }
-            return updated;
+            return { ...current, [field]: value };
         });
     };
 
@@ -299,16 +264,6 @@ export default function JournalVoucherEntryPage() {
             return false;
         }
         if (amount <= 0) return false;
-        if (account.is_control_account && !entry.financial_account_id) {
-            setDraftError(
-                `${side === 'debit' ? 'Debit' : 'Credit'} control accounts require a financial account.`,
-            );
-            return false;
-        }
-        if (entry.instrument_type === 'CHEQUE' && !entry.instrument_id) {
-            setDraftError(`Select the ${side} cheque instrument.`);
-            return false;
-        }
         return accountingLineIsValid(account, side === 'debit');
     };
 
@@ -461,17 +416,6 @@ export default function JournalVoucherEntryPage() {
 
     const renderDraftEntry = () => {
         const entry = draftEntry;
-        const selectedAccount = accounts.find(
-            (account) => String(account.id) === entry.account_id,
-        );
-        const requiresFinancialAccount = Boolean(
-            selectedAccount?.is_control_account,
-        );
-        const availableCheques = cheques.filter(
-            (cheque) =>
-                String(cheque.financial_account_id) ===
-                String(entry.financial_account_id),
-        );
 
         return (
             <div className="space-y-1.5">
@@ -561,76 +505,6 @@ export default function JournalVoucherEntryPage() {
                                 ? 'Add entry'
                                 : 'Update entry'}
                         </Button>
-                    </div>
-                </div>
-
-                <div className="grid gap-2 border-t border-border/60 pt-2 sm:grid-cols-3">
-                    <div>
-                        <Label className="text-xs">Subledger account</Label>
-                        <Select
-                            value={entry.financial_account_id}
-                            disabled={
-                                !requiresFinancialAccount ||
-                                financialAccounts.length === 0
-                            }
-                            onChange={(value) =>
-                                updateDraftEntry('financial_account_id', value)
-                            }
-                            options={[
-                                {
-                                    value: '',
-                                    label: !requiresFinancialAccount
-                                        ? 'Select control ledger first'
-                                        : financialAccounts.length
-                                          ? 'Select subledger account'
-                                          : 'No related subledger accounts',
-                                },
-                                ...financialAccounts.map((account) => ({
-                                    value: String(account.id),
-                                    label: `${account.account_no} - ${account.name ?? 'Unnamed account'}`,
-                                })),
-                            ]}
-                        />
-                    </div>
-                    <div>
-                        <Label className="text-xs">Instrument type</Label>
-                        <Select
-                            value={entry.instrument_type}
-                            disabled={!entry.financial_account_id}
-                            onChange={(value) =>
-                                updateDraftEntry('instrument_type', value)
-                            }
-                            options={[
-                                { value: '', label: 'None' },
-                                { value: 'CHEQUE', label: 'Cheque' },
-                            ]}
-                        />
-                    </div>
-                    <div>
-                        <Label className="text-xs">Instrument</Label>
-                        <Select
-                            value={entry.instrument_id}
-                            disabled={
-                                !entry.financial_account_id ||
-                                entry.instrument_type !== 'CHEQUE'
-                            }
-                            onChange={(value) =>
-                                updateDraftEntry('instrument_id', value)
-                            }
-                            options={[
-                                {
-                                    value: '',
-                                    label:
-                                        entry.instrument_type === 'CHEQUE'
-                                            ? 'Select cheque'
-                                            : 'Disabled',
-                                },
-                                ...availableCheques.map((cheque) => ({
-                                    value: String(cheque.id),
-                                    label: `${cheque.cheque_no} (${cheque.amount ?? '0'})`,
-                                })),
-                            ]}
-                        />
                     </div>
                 </div>
 
@@ -865,12 +739,6 @@ export default function JournalVoucherEntryPage() {
                                                     entry.account_id,
                                             );
 
-                                            const financialAccount =
-                                                financialAccounts.find(
-                                                    (account) =>
-                                                        String(account.id) ===
-                                                        entry.financial_account_id,
-                                                );
                                             const party = parties.find(
                                                 (item) =>
                                                     String(item.id) ===
@@ -882,12 +750,6 @@ export default function JournalVoucherEntryPage() {
                                                     String(center.id) ===
                                                     entry.cost_center_id,
                                             );
-                                            const instrument = cheques.find(
-                                                (cheque) =>
-                                                    String(cheque.id) ===
-                                                    entry.instrument_id,
-                                            );
-
                                             return (
                                                 <tr
                                                     key={`${entry.account_id}-${index}`}
@@ -900,30 +762,10 @@ export default function JournalVoucherEntryPage() {
                                                                 : '-'}
                                                         </div>
                                                         <div className="flex flex-wrap gap-x-2 text-[11px] leading-tight text-muted-foreground">
-                                                            {financialAccount && (
-                                                                <span>
-                                                                    {
-                                                                        financialAccount.account_no
-                                                                    }{' '}
-                                                                    -{' '}
-                                                                    {financialAccount.name ??
-                                                                        'Unnamed account'}
-                                                                </span>
-                                                            )}
                                                             {party && (
                                                                 <span>
                                                                     Party:{' '}
                                                                     {party.name}
-                                                                </span>
-                                                            )}
-                                                            {entry.instrument_type && (
-                                                                <span>
-                                                                    {
-                                                                        entry.instrument_type
-                                                                    }
-                                                                    {instrument
-                                                                        ? ` · ${instrument.cheque_no}`
-                                                                        : ''}
                                                                 </span>
                                                             )}
                                                             {costCenter && (

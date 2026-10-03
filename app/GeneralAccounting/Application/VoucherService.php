@@ -134,7 +134,6 @@ class VoucherService
                     'account_id' => $entry->account_id,
                     'branch_id' => $entry->branch_id,
                     'cost_center_id' => $entry->cost_center_id,
-                    'financial_account_id' => $entry->financial_account_id,
                     'party_id' => $entry->party_id,
                     'description' => $entry->description,
                     'debit' => $entry->credit,
@@ -192,11 +191,6 @@ class VoucherService
                 throw new InvalidArgumentException('Every voucher entry must reference an active account in the active organization.');
             }
 
-            $financialAccountId = $entry['financial_account_id'] ?? null;
-            if ($account->is_control_account && empty($financialAccountId)) {
-                throw new InvalidArgumentException('Control ledger accounts require a financial account selection.');
-            }
-
             $partyId = $entry['party_id'] ?? null;
             if (
                 $partyId !== null && !Party::query()
@@ -208,44 +202,13 @@ class VoucherService
                 throw new InvalidArgumentException('Every voucher party must be active in the active organization.');
             }
 
-            $instrumentType = isset($entry['instrument_type']) && $entry['instrument_type'] !== ''
-                ? strtoupper((string) $entry['instrument_type'])
-                : null;
-            $instrumentId = $entry['instrument_id'] ?? null;
-
-            if ($instrumentType !== null && $instrumentType !== 'CHEQUE') {
-                throw new InvalidArgumentException('Unsupported voucher instrument type selected.');
-            }
-
-            if ($instrumentType === 'CHEQUE') {
-                if (empty($financialAccountId)) {
-                    throw new InvalidArgumentException('Cheque instruments require a linked financial account.');
-                }
-
-                if (empty($instrumentId)) {
-                    throw new InvalidArgumentException('Select a cheque instrument for this voucher line.');
-                }
-
-                $instrumentExists = \App\TreasuryAndCash\Models\Cheque::query()
-                    ->whereKey($instrumentId)
-                    ->where('financial_account_id', (int) $financialAccountId)
-                    ->exists();
-
-                if (!$instrumentExists) {
-                    throw new InvalidArgumentException('The selected cheque does not belong to the chosen financial account.');
-                }
-            }
-
             $debitTotal += $debit;
             $creditTotal += $credit;
             $normalized[] = [
                 'account_id' => $account->id,
                 'branch_id' => $entry['branch_id'] ?? null,
                 'cost_center_id' => $entry['cost_center_id'] ?? null,
-                'financial_account_id' => $financialAccountId ?: null,
                 'party_id' => $partyId ?: null,
-                'instrument_type' => $instrumentType,
-                'instrument_id' => $instrumentId ?: null,
                 'description' => $entry['description'] ?? null,
                 'debit' => $debit,
                 'credit' => $credit,

@@ -62,13 +62,6 @@ class StoreVoucherRequest extends FormRequest
                     fn($query) => $query->where('organization_id', $organizationId),
                 ),
             ],
-            'entries.*.financial_account_id' => [
-                'nullable',
-                'integer',
-                Rule::exists('financial_accounts', 'id')->where(
-                    fn($query) => $query->where('organization_id', $organizationId),
-                ),
-            ],
             'entries.*.party_id' => [
                 'nullable',
                 'integer',
@@ -78,8 +71,6 @@ class StoreVoucherRequest extends FormRequest
                         ->where('status', true),
                 ),
             ],
-            'entries.*.instrument_type' => ['nullable', 'string', 'max:30', 'in:CHEQUE'],
-            'entries.*.instrument_id' => ['nullable', 'integer'],
             'entries.*.description' => ['nullable', 'string', 'max:500'],
             'entries.*.debit' => ['nullable', 'numeric', 'min:0'],
             'entries.*.credit' => ['nullable', 'numeric', 'min:0'],

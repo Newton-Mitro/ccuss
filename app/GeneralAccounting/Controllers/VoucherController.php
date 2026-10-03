@@ -3,36 +3,31 @@
 namespace App\GeneralAccounting\Controllers;
 
 use App\GeneralAccounting\Application\VoucherService;
-use App\GeneralAccounting\Models\FiscalPeriod;
 use App\GeneralAccounting\Models\CostCenter;
+use App\GeneralAccounting\Models\FiscalPeriod;
 use App\GeneralAccounting\Models\LedgerAccount;
 use App\GeneralAccounting\Models\Party;
 use App\GeneralAccounting\Models\Voucher;
-            'parties' => $this->parties($request),
+use App\GeneralAccounting\Requests\StoreVoucherRequest;
 use App\GeneralAccounting\Requests\UpdateVoucherRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-            'voucher' => $voucher->load(['entries.account', 'entries.financialAccount', 'entries.party', 'entries.cheque', 'fiscalYear', 'fiscalPeriod', 'creator', 'poster', 'financialTransaction']),
-use App\GeneralAccounting\Requests\StoreVoucherRequest;
 use Inertia\Inertia;
 use Inertia\Response;
-            'voucher' => $voucher->load(['entries.account', 'entries.financialAccount', 'entries.party']),
 
 class VoucherController extends Controller
 {
-            'parties' => $this->parties($request),
     public function __construct(
         private readonly VoucherService $voucherService,
-            ->get(['id', 'account_no', 'name', 'account_type']);
+    ) {
         $this->middleware('permission:accounting.voucher_entries.view')->only(['index', 'show']);
         $this->middleware('permission:accounting.voucher.create')->only(['create', 'store']);
-    private function parties(Request $request)
+        $this->middleware('permission:accounting.voucher.update')->only(['edit', 'update']);
         $this->middleware('permission:accounting.voucher.post')->only(['post']);
-        return Party::query()
-            ->where('organization_id', $request->attributes->get('active_organization')->id)
-            ->where('status', true)
-            ->orderBy('name')
-            ->get(['id', 'code', 'name', 'party_type']);
+    }
+
+    public function index(Request $request): Response
+    {
         $vouchers = $this->organizationQuery($request)
             ->with(['fiscalYear', 'fiscalPeriod', 'branch', 'creator', 'entries'])
             ->when($request->filled('search'), function ($query) use ($request) {
@@ -68,9 +63,7 @@ class VoucherController extends Controller
             'fiscalPeriods' => $this->fiscalPeriods($request),
             'accounts' => $this->accounts($request),
             'costCenters' => $this->costCenters($request),
-            'financialAccounts' => $this->financialAccounts($request),
             'parties' => $this->parties($request),
-            'cheques' => $this->cheques($request),
             'voucherType' => $voucherType,
         ]);
     }
@@ -95,7 +88,7 @@ class VoucherController extends Controller
         $this->authorizeOrganization($request, $voucher);
 
         return Inertia::render('general-accounting/vouchers/show', [
-            'voucher' => $voucher->load(['entries.account', 'entries.financialAccount', 'entries.party', 'entries.cheque', 'fiscalYear', 'fiscalPeriod', 'creator', 'poster', 'financialTransaction']),
+            'voucher' => $voucher->load(['entries.account', 'entries.party', 'fiscalYear', 'fiscalPeriod', 'creator', 'poster', 'financialTransaction']),
         ]);
     }
 
@@ -104,12 +97,10 @@ class VoucherController extends Controller
         $this->authorizeOrganization($request, $voucher);
 
         return Inertia::render('general-accounting/vouchers/edit/voucher_edit_page', [
-            'voucher' => $voucher->load(['entries.account', 'entries.financialAccount', 'entries.party']),
+            'voucher' => $voucher->load(['entries.account', 'entries.party']),
             'fiscalPeriods' => $this->fiscalPeriods($request),
             'accounts' => $this->accounts($request),
-            'financialAccounts' => $this->financialAccounts($request),
             'parties' => $this->parties($request),
-            'cheques' => $this->cheques($request),
         ]);
     }
 
@@ -211,15 +202,6 @@ class VoucherController extends Controller
             ->get(['id', 'code', 'name']);
     }
 
-    private function financialAccounts(Request $request)
-    {
-        return \App\FinancialServices\Models\FinancialAccount::query()
-            ->where('organization_id', $request->attributes->get('active_organization')->id)
-            ->where('status', 'ACTIVE')
-            ->orderBy('account_no')
-            ->get(['id', 'account_no', 'name', 'account_type', 'financial_product_id']);
-    }
-
     private function parties(Request $request)
     {
         return Party::query()
@@ -227,14 +209,6 @@ class VoucherController extends Controller
             ->where('status', true)
             ->orderBy('name')
             ->get(['id', 'code', 'name', 'party_type']);
-    }
-
-    private function cheques(Request $request)
-    {
-        return \App\TreasuryAndCash\Models\Cheque::query()
-            ->whereHas('financialAccount', fn($query) => $query->where('organization_id', $request->attributes->get('active_organization')->id))
-            ->orderBy('cheque_no')
-            ->get(['id', 'financial_account_id', 'cheque_no', 'amount', 'status']);
     }
 
     private function organizationQuery(Request $request)
