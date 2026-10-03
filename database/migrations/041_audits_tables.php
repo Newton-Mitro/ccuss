@@ -59,7 +59,5 @@ return new class extends Migration {
     {
         Schema::dropIfExists('database_backup_logs');
         Schema::dropIfExists('audit_logs');
-        Schema::dropIfExists('activity_logs');
-        Schema::dropIfExists('report_templates');
     }
 };

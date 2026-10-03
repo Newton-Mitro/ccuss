@@ -593,6 +593,15 @@ return new class extends Migration {
         |--------------------------------------------------------------------------
         */
 
+        Schema::table('financial_product_account_mappings', function (Blueprint $table): void {
+            $table->dropForeign(['debit_account_id']);
+            $table->dropForeign(['credit_account_id']);
+        });
+
+        Schema::table('petty_cash_transactions', function (Blueprint $table): void {
+            $table->dropForeign(['expense_account_id']);
+        });
+
         Schema::dropIfExists('budget_entries');
 
         Schema::dropIfExists('budgets');

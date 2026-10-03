@@ -7,6 +7,7 @@ use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\User;
 use Database\Seeders\FinancialServicesSeeder;
 use Database\Seeders\OpeningBalanceVoucherSeeder;
+use Database\Seeders\PartySeeder;
 use Database\Seeders\SystemAdministratorRolePermissionSeeder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
@@ -33,6 +34,7 @@ class DatabaseSeeder extends Seeder
                 DefaultRolePermissionSeeder::class,
                 OrganizationStructureSeeder::class,
                 GeneralAccountingSeeder::class,
+                PartySeeder::class,
                 CustomerSeeder::class,
                 FinancialServicesSeeder::class,
                 OpeningBalanceVoucherSeeder::class,
