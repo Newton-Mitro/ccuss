@@ -24,6 +24,7 @@ class VoucherEntry extends Model
         'branch_id',
         'cost_center_id',
         'financial_account_id',
+        'party_id',
         'instrument_type',
         'instrument_id',
         'description',
@@ -53,6 +54,11 @@ class VoucherEntry extends Model
     public function financialAccount(): BelongsTo
     {
         return $this->belongsTo(FinancialAccount::class, 'financial_account_id');
+    }
+
+    public function party(): BelongsTo
+    {
+        return $this->belongsTo(Party::class);
     }
 
     public function cheque(): BelongsTo

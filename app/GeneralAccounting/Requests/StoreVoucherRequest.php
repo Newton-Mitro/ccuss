@@ -69,6 +69,15 @@ class StoreVoucherRequest extends FormRequest
                     fn($query) => $query->where('organization_id', $organizationId),
                 ),
             ],
+            'entries.*.party_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('parties', 'id')->where(
+                    fn($query) => $query
+                        ->where('organization_id', $organizationId)
+                        ->where('status', true),
+                ),
+            ],
             'entries.*.instrument_type' => ['nullable', 'string', 'max:30', 'in:CHEQUE'],
             'entries.*.instrument_id' => ['nullable', 'integer'],
             'entries.*.description' => ['nullable', 'string', 'max:500'],

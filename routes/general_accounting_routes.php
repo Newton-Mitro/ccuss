@@ -8,6 +8,7 @@ use App\GeneralAccounting\Controllers\FiscalPeriodController;
 use App\GeneralAccounting\Controllers\FiscalYearController;
 use App\GeneralAccounting\Controllers\GeneralAccountingDashboardController;
 use App\GeneralAccounting\Controllers\LedgerAccountController;
+use App\GeneralAccounting\Controllers\PartyController;
 use App\GeneralAccounting\Controllers\PeriodEndController;
 use App\GeneralAccounting\Controllers\VoucherController;
 use Illuminate\Support\Facades\Route;
@@ -90,6 +91,17 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
             'destroy' => 'cost-centers.destroy',
         ]);
 
+    Route::resource('parties', PartyController::class)
+        ->except(['show'])
+        ->names([
+            'index' => 'parties.index',
+            'create' => 'parties.create',
+            'store' => 'parties.store',
+            'edit' => 'parties.edit',
+            'update' => 'parties.update',
+            'destroy' => 'parties.destroy',
+        ]);
+
     Route::get('/budgets/entries', [BudgetController::class, 'entries'])->name('budgets.entries');
     Route::resource('budgets', BudgetController::class);
     Route::post('/budgets/{budget}/activate', [BudgetController::class, 'activate'])->name('budgets.activate');
@@ -97,7 +109,7 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/financial-reports/budget-vs-actual', [BudgetController::class, 'budgetVsActual'])
         ->name('financial-reports.budget-vs-actual');
 
-    Route::get('/vouchers', [VoucherController::class, 'index'])->name('vouchers.index');
+    Route::get('/list-vouchers', [VoucherController::class, 'index'])->name('vouchers.index');
     Route::get('/vouchers/create', [VoucherController::class, 'create'])->name('vouchers.create');
     Route::post('/vouchers', [VoucherController::class, 'store'])->name('vouchers.store');
     Route::get('/vouchers/{voucher}', [VoucherController::class, 'show'])->name('vouchers.show');

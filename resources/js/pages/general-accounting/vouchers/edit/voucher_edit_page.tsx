@@ -24,14 +24,23 @@ interface FinancialAccount {
     account_type?: string;
 }
 
+interface Party {
+    id: number;
+    code: string;
+    name: string;
+    party_type: string;
+}
+
 interface VoucherEntry {
     id?: number;
     account_id: number;
     financial_account_id?: number | string | null;
+    party_id?: number | string | null;
     instrument_type?: string | null;
     instrument_id?: number | string | null;
     account?: Account;
     financial_account?: FinancialAccount;
+    party?: Party | null;
     debit: number | string;
     credit: number | string;
     description?: string | null;
@@ -53,6 +62,7 @@ interface Props extends SharedData {
     voucher: Voucher;
     accounts: Account[];
     financialAccounts: FinancialAccount[];
+    parties: Party[];
     cheques: {
         id: number;
         financial_account_id: number | string | null;
@@ -80,6 +90,7 @@ export default function VoucherEditPage() {
         accounts,
         fiscalPeriods,
         financialAccounts,
+        parties,
         cheques = [],
     } = usePage<Props>().props as Props & {
         financialAccounts: FinancialAccount[];
@@ -213,6 +224,7 @@ export default function VoucherEditPage() {
                     financial_account_id: entry.financial_account_id
                         ? Number(entry.financial_account_id)
                         : null,
+                    party_id: entry.party_id ? Number(entry.party_id) : null,
                     instrument_type: entry.instrument_type || null,
                     instrument_id:
                         entry.instrument_type === 'CHEQUE' &&
@@ -315,6 +327,7 @@ export default function VoucherEditPage() {
                                     <th className="border-b p-2">
                                         Financial account
                                     </th>
+                                    <th className="border-b p-2">Party</th>
                                     <th className="border-b p-2">
                                         Instrument type
                                     </th>
@@ -387,6 +400,23 @@ export default function VoucherEditPage() {
                                                             label: `${account.code} - ${account.name}`,
                                                         }),
                                                     ),
+                                                ]}
+                                            />
+                                        </td>
+                                        <td className="p-2">
+                                            <Select
+                                                value={String(entry.party_id ?? '')}
+                                                onChange={(value) =>
+                                                    updateEntry(index, {
+                                                        party_id: value || null,
+                                                    })
+                                                }
+                                                options={[
+                                                    { value: '', label: 'No party' },
+                                                    ...parties.map((party) => ({
+                                                        value: String(party.id),
+                                                        label: `${party.code} - ${party.name}`,
+                                                    })),
                                                 ]}
                                             />
                                         </td>

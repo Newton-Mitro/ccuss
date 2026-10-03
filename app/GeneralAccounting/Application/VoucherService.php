@@ -5,6 +5,7 @@ namespace App\GeneralAccounting\Application;
 use App\GeneralAccounting\Application\Contracts\VoucherRepositoryInterface;
 use App\GeneralAccounting\Models\FiscalPeriod;
 use App\GeneralAccounting\Models\LedgerAccount;
+use App\GeneralAccounting\Models\Party;
 use App\GeneralAccounting\Models\Voucher;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -134,6 +135,7 @@ class VoucherService
                     'branch_id' => $entry->branch_id,
                     'cost_center_id' => $entry->cost_center_id,
                     'financial_account_id' => $entry->financial_account_id,
+                    'party_id' => $entry->party_id,
                     'description' => $entry->description,
                     'debit' => $entry->credit,
                     'credit' => $entry->debit,
@@ -195,6 +197,17 @@ class VoucherService
                 throw new InvalidArgumentException('Control ledger accounts require a financial account selection.');
             }
 
+            $partyId = $entry['party_id'] ?? null;
+            if (
+                $partyId !== null && !Party::query()
+                    ->where('organization_id', $organizationId)
+                    ->where('status', true)
+                    ->whereKey($partyId)
+                    ->exists()
+            ) {
+                throw new InvalidArgumentException('Every voucher party must be active in the active organization.');
+            }
+
             $instrumentType = isset($entry['instrument_type']) && $entry['instrument_type'] !== ''
                 ? strtoupper((string) $entry['instrument_type'])
                 : null;
@@ -230,6 +243,7 @@ class VoucherService
                 'branch_id' => $entry['branch_id'] ?? null,
                 'cost_center_id' => $entry['cost_center_id'] ?? null,
                 'financial_account_id' => $financialAccountId ?: null,
+                'party_id' => $partyId ?: null,
                 'instrument_type' => $instrumentType,
                 'instrument_id' => $instrumentId ?: null,
                 'description' => $entry['description'] ?? null,

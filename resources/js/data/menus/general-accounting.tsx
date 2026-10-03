@@ -34,6 +34,13 @@ export const generalAccounting: SidebarItem[] = [
                         match_path: 'cost-centers',
                         permission: ['accounting.cost_centers.view'],
                     },
+                    {
+                        name: 'Parties',
+                        icon: <i className="fa-solid fa-users" />,
+                        path: '/parties',
+                        match_path: 'parties',
+                        permission: ['accounting.parties.view'],
+                    },
                 ],
             },
             {

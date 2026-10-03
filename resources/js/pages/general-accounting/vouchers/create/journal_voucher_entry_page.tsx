@@ -29,6 +29,13 @@ interface CostCenter {
     name: string;
 }
 
+interface Party {
+    id: number;
+    code: string;
+    name: string;
+    party_type: string;
+}
+
 interface FiscalPeriod {
     id: number;
     name: string;
@@ -40,6 +47,7 @@ interface FiscalPeriod {
 interface Entry {
     account_id: string;
     financial_account_id: string;
+    party_id: string;
     instrument_type: string;
     instrument_id: string;
     debit: string;
@@ -51,6 +59,7 @@ interface Entry {
 const emptyEntry = (): Entry => ({
     account_id: '',
     financial_account_id: '',
+    party_id: '',
     instrument_type: '',
     instrument_id: '',
     debit: '',
@@ -138,7 +147,7 @@ export default function JournalVoucherEntryPage() {
         accounts,
         costCenters,
         financialAccounts,
-        financialProductAccountMappings,
+        parties,
         cheques,
         voucherType,
     } = usePage().props as unknown as {
@@ -150,13 +159,8 @@ export default function JournalVoucherEntryPage() {
             account_no: string;
             name: string | null;
             account_type: string;
-            financial_product_id: number | string | null;
         }[];
-        financialProductAccountMappings: {
-            financial_product_id: number | string;
-            debit_account_id: number | string | null;
-            credit_account_id: number | string | null;
-        }[];
+        parties: Party[];
         cheques: {
             id: number;
             financial_account_id: number | string | null;
@@ -463,20 +467,6 @@ export default function JournalVoucherEntryPage() {
         const requiresFinancialAccount = Boolean(
             selectedAccount?.is_control_account,
         );
-        const relatedProductIds = new Set(
-            financialProductAccountMappings
-                .filter(
-                    (mapping) =>
-                        String(mapping.debit_account_id) === entry.account_id ||
-                        String(mapping.credit_account_id) === entry.account_id,
-                )
-                .map((mapping) => String(mapping.financial_product_id)),
-        );
-        const availableFinancialAccounts = financialAccounts.filter(
-            (account) =>
-                account.financial_product_id !== null &&
-                relatedProductIds.has(String(account.financial_product_id)),
-        );
         const availableCheques = cheques.filter(
             (cheque) =>
                 String(cheque.financial_account_id) ===
@@ -485,7 +475,7 @@ export default function JournalVoucherEntryPage() {
 
         return (
             <div className="space-y-1.5">
-                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(220px,1fr)_120px_120px_minmax(180px,0.8fr)_auto] lg:items-end">
+                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(220px,1fr)_120px_120px_minmax(180px,0.8fr)_minmax(180px,0.8fr)_auto] lg:items-end">
                     <div className="sm:col-span-2 lg:col-span-1">
                         <Label className="text-xs">Ledger account</Label>
                         <Select
@@ -523,6 +513,22 @@ export default function JournalVoucherEntryPage() {
                             />
                         </div>
                     ))}
+                    <div className="sm:col-span-2 lg:col-span-1">
+                        <Label className="text-xs">Party</Label>
+                        <Select
+                            value={entry.party_id}
+                            onChange={(value) =>
+                                updateDraftEntry('party_id', value)
+                            }
+                            options={[
+                                { value: '', label: 'No party' },
+                                ...parties.map((party) => ({
+                                    value: String(party.id),
+                                    label: `${party.code} - ${party.name}`,
+                                })),
+                            ]}
+                        />
+                    </div>
                     <div className="sm:col-span-2 lg:col-span-1">
                         <Label className="text-xs">Line description</Label>
                         <Input
@@ -565,7 +571,7 @@ export default function JournalVoucherEntryPage() {
                             value={entry.financial_account_id}
                             disabled={
                                 !requiresFinancialAccount ||
-                                availableFinancialAccounts.length === 0
+                                financialAccounts.length === 0
                             }
                             onChange={(value) =>
                                 updateDraftEntry('financial_account_id', value)
@@ -575,16 +581,14 @@ export default function JournalVoucherEntryPage() {
                                     value: '',
                                     label: !requiresFinancialAccount
                                         ? 'Select control ledger first'
-                                        : availableFinancialAccounts.length
+                                        : financialAccounts.length
                                           ? 'Select subledger account'
                                           : 'No related subledger accounts',
                                 },
-                                ...availableFinancialAccounts.map(
-                                    (account) => ({
-                                        value: String(account.id),
-                                        label: `${account.account_no} - ${account.name ?? 'Unnamed account'}`,
-                                    }),
-                                ),
+                                ...financialAccounts.map((account) => ({
+                                    value: String(account.id),
+                                    label: `${account.account_no} - ${account.name ?? 'Unnamed account'}`,
+                                })),
                             ]}
                         />
                     </div>
@@ -867,6 +871,11 @@ export default function JournalVoucherEntryPage() {
                                                         String(account.id) ===
                                                         entry.financial_account_id,
                                                 );
+                                            const party = parties.find(
+                                                (item) =>
+                                                    String(item.id) ===
+                                                    entry.party_id,
+                                            );
 
                                             const costCenter = costCenters.find(
                                                 (center) =>
@@ -899,6 +908,12 @@ export default function JournalVoucherEntryPage() {
                                                                     -{' '}
                                                                     {financialAccount.name ??
                                                                         'Unnamed account'}
+                                                                </span>
+                                                            )}
+                                                            {party && (
+                                                                <span>
+                                                                    Party:{' '}
+                                                                    {party.name}
                                                                 </span>
                                                             )}
                                                             {entry.instrument_type && (
