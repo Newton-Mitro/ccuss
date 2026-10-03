@@ -13,6 +13,9 @@ use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
+use Database\Seeders\DefaultRolePermissionSeeder;
+use Database\Seeders\RoleSeeder;
+use Database\Seeders\SystemAdministratorRolePermissionSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -224,6 +227,137 @@ test('role permission service syncs the selected permissions to a role', functio
 
     expect($updatedRole->permissions()->pluck('permissions.id')->sort()->values()->all())
         ->toBe([$permissionOne->id, $permissionTwo->id]);
+});
+
+test('role seeder creates all requested built-in roles as presets', function () {
+    $expectedRoles = [
+        'system_administrator' => 'System Administrator',
+        'ceo_general_manager' => 'CEO / General Manager',
+        'finance_manager' => 'Finance Manager',
+        'branch_manager' => 'Branch Manager',
+        'assistant_branch_manager' => 'Assistant Branch Manager',
+        'accounts_officer' => 'Accounts Officer',
+        'internal_auditor' => 'Internal Auditor',
+        'member_service_officer' => 'Member Service Officer',
+        'teller' => 'Teller',
+        'senior_teller' => 'Senior Teller',
+        'vault_officer' => 'Vault Officer',
+        'loan_officer' => 'Loan Officer',
+        'credit_loan_manager' => 'Credit / Loan Manager',
+        'recovery_officer' => 'Recovery Officer',
+        'deposit_officer' => 'Deposit Officer',
+        'hr_payroll_officer' => 'HR & Payroll Officer',
+        'compliance_officer' => 'Compliance Officer',
+        'report_officer' => 'Report Officer',
+        'it_support_officer' => 'IT Support Officer',
+    ];
+
+    $this->seed(RoleSeeder::class);
+
+    foreach ($expectedRoles as $slug => $name) {
+        $role = Role::where('slug', $slug)->firstOrFail();
+        expect($role->name)->toBe($name)->and($role->preset)->toBeTrue();
+    }
+});
+
+test('role seeder migrates the redundant super administrator role', function () {
+    $systemAdministrator = Role::create([
+        'name' => 'System Administrator',
+        'slug' => 'system_administrator',
+        'preset' => true,
+    ]);
+    $superAdministrator = Role::create([
+        'name' => 'Super Administrator',
+        'slug' => 'super_administrator',
+        'preset' => true,
+    ]);
+    $user = User::factory()->create();
+    $user->roles()->attach($superAdministrator->id);
+
+    $this->seed(RoleSeeder::class);
+
+    expect($user->fresh()->roles()->pluck('roles.id')->all())
+        ->toBe([$systemAdministrator->id])
+        ->and(Role::withTrashed()->find($superAdministrator->id)->trashed())
+        ->toBeTrue();
+});
+
+test('default role permissions respect role responsibilities', function () {
+    $this->seed(RoleSeeder::class);
+    $this->seed(SystemAdministratorRolePermissionSeeder::class);
+    $this->seed(DefaultRolePermissionSeeder::class);
+
+    $permissionExists = fn(Role $role, string $slug) => $role->permissions()
+        ->where('slug', $slug)
+        ->exists();
+
+    $systemAdministrator = Role::where('slug', 'system_administrator')->firstOrFail();
+    $teller = Role::where('slug', 'teller')->firstOrFail();
+    $branchManager = Role::where('slug', 'branch_manager')->firstOrFail();
+    $loanOfficer = Role::where('slug', 'loan_officer')->firstOrFail();
+    $creditManager = Role::where('slug', 'credit_loan_manager')->firstOrFail();
+    $financeManager = Role::where('slug', 'finance_manager')->firstOrFail();
+    $reportOfficer = Role::where('slug', 'report_officer')->firstOrFail();
+
+    expect($systemAdministrator->permissions()->count())->toBe(Permission::count())
+        ->and($permissionExists($teller, 'cash_transactions.create'))->toBeTrue()
+        ->and($permissionExists($teller, 'cash_transfers.approve'))->toBeFalse()
+        ->and($permissionExists($branchManager, 'cash_transfers.approve'))->toBeTrue()
+        ->and($permissionExists($loanOfficer, 'financial.loan-applications.create'))->toBeTrue()
+        ->and($permissionExists($loanOfficer, 'financial.loan-applications.manage'))->toBeFalse()
+        ->and($permissionExists($creditManager, 'financial.loan-applications.manage'))->toBeTrue()
+        ->and($permissionExists($financeManager, 'accounting.voucher.post'))->toBeTrue()
+        ->and($permissionExists($financeManager, 'accounting.voucher.reverse'))->toBeFalse()
+        ->and($permissionExists($reportOfficer, 'accounting.reports.view'))->toBeTrue()
+        ->and($permissionExists($reportOfficer, 'accounting.voucher.create'))->toBeFalse();
+});
+
+test('custom roles can be created updated and deleted while preset roles are protected', function () {
+    $this->withoutMiddleware();
+    $this->actingAs(User::factory()->create());
+
+    $response = $this->from(route('roles.index'))->post(route('roles.store'), [
+        'name' => 'Cash Manager',
+        'slug' => 'cash-manager',
+        'description' => 'Manages cash operations',
+    ]);
+
+    $role = Role::where('slug', 'cash-manager')->firstOrFail();
+    expect($role->preset)->toBeFalse();
+    $response->assertRedirect(route('roles.index'));
+
+    $this->put(route('roles.update', $role->id), [
+        'name' => 'Senior Cash Manager',
+        'slug' => 'senior-cash-manager',
+        'description' => 'Manages all cash operations',
+    ])->assertRedirect(route('roles.index'));
+    expect($role->fresh()->name)->toBe('Senior Cash Manager');
+
+    $assignedUser = User::factory()->create();
+    $assignedUser->roles()->attach($role->id);
+    $this->delete(route('roles.destroy', $role->id))->assertUnprocessable();
+    $assignedUser->roles()->detach($role->id);
+
+    $this->delete(route('roles.destroy', $role->id))
+        ->assertRedirect(route('roles.index'));
+    expect(Role::withTrashed()->find($role->id)->trashed())->toBeTrue();
+
+    $presetRole = Role::create([
+        'name' => 'Preset Role',
+        'slug' => 'preset-role',
+        'preset' => true,
+    ]);
+
+    $this->put(route('roles.update', $presetRole->id), [
+        'name' => 'Changed Preset Role',
+        'slug' => 'changed-preset-role',
+    ])->assertForbidden();
+    $this->delete(route('roles.destroy', $presetRole->id))->assertForbidden();
+    $this->put(route('roles.update-permissions', $presetRole->id), [
+        'permissions' => [],
+    ])->assertForbidden();
+
+    expect($presetRole->fresh()->name)->toBe('Preset Role');
 });
 
 test('audit log service groups latest events by batch', function () {

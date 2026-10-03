@@ -13,6 +13,8 @@ class Role extends Model
 
     protected $fillable = ['name', 'slug', 'description', 'preset'];
 
+    protected $casts = ['preset' => 'boolean'];
+
     public function permissions()
     {
         return $this->belongsToMany(

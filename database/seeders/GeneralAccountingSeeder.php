@@ -2,14 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\GeneralAccounting\Application\VoucherService;
 use App\GeneralAccounting\Models\AccountGroup;
 use App\GeneralAccounting\Models\Budget;
 use App\GeneralAccounting\Models\BudgetEntry;
 use App\GeneralAccounting\Models\CostCenter;
 use App\GeneralAccounting\Models\FiscalYear;
 use App\GeneralAccounting\Models\LedgerAccount;
-use App\GeneralAccounting\Models\Voucher;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\User;
 use Carbon\CarbonImmutable;
@@ -189,35 +187,6 @@ class GeneralAccountingSeeder extends Seeder
                 );
             }
 
-            if (
-                !Voucher::query()
-                    ->where('organization_id', $organization->id)
-                    ->where('description', 'Opening balances')
-                    ->where('status', 'POSTED')
-                    ->exists()
-            ) {
-                $voucher = app(VoucherService::class)->createDraft([
-                    'branch_id' => $branchId,
-                    'fiscal_period_id' => $period->id,
-                    'voucher_type' => 'OPENING',
-                    'voucher_date' => '2025-07-01',
-                    'description' => 'Opening balances',
-                    'entries' => [
-                        [
-                            'account_id' => $accounts['1100']->id,
-                            'debit' => 100000,
-                            'credit' => 0,
-                        ],
-                        [
-                            'account_id' => $accounts['3100']->id,
-                            'debit' => 0,
-                            'credit' => 100000,
-                        ],
-                    ],
-                ], $organization->id, $user->id);
-
-                app(VoucherService::class)->post($voucher, $organization->id, $user->id);
-            }
         });
 
         $this->command?->info('General Accounting data seeded.');

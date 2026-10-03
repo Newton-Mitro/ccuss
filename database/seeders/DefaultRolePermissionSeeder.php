@@ -11,6 +11,7 @@ class DefaultRolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
+        $definitions = PermissionRegistry::definitions();
         $rolePermissions = [
             'branch_manager' => [
                 'treasury.view',
@@ -30,6 +31,31 @@ class DefaultRolePermissionSeeder extends Seeder
                 'cash_transfers.create',
                 'cash_transfers.approve',
                 'cash_transfers.complete',
+                'customer.view',
+                'customer.search',
+                'financial.view',
+                'financial.accounts.view',
+                'financial.transactions.view',
+            ],
+            'assistant_branch_manager' => [
+                'treasury.view',
+                'cash_management.view',
+                'branch_days.view',
+                'branch_days.open',
+                'branch_days.close',
+                'teller_sessions.view',
+                'teller_sessions.open',
+                'teller_sessions.close',
+                'cash_transactions.view',
+                'cash_transactions.create',
+                'cash_transactions.post',
+                'cash_transfers.view',
+                'cash_transfers.create',
+                'customer.view',
+                'customer.search',
+                'financial.view',
+                'financial.accounts.view',
+                'financial.transactions.view',
             ],
             'teller' => [
                 'treasury.view',
@@ -38,40 +64,337 @@ class DefaultRolePermissionSeeder extends Seeder
                 'cash_transactions.view',
                 'cash_transactions.create',
                 'cash_transactions.post',
+                'financial.accounts.view',
             ],
-            'finance_officer' => [
+            'senior_teller' => [
                 'treasury.view',
                 'cash_management.view',
                 'teller_sessions.view',
+                'teller_sessions.open',
+                'teller_sessions.close',
                 'cash_transactions.view',
                 'cash_transactions.create',
                 'cash_transactions.post',
                 'cash_transfers.view',
                 'cash_transfers.create',
-                'cash_transfers.approve',
+                'cash_counts.view',
+                'cash_counts.create',
+                'cash_counts.verify',
+                'financial.accounts.view',
+            ],
+            'vault_officer' => [
+                'treasury.view',
+                'cash_management.view',
+                'teller_sessions.view',
+                'vault_sessions.view',
+                'vault_sessions.open',
+                'vault_sessions.close',
+                'cash_counts.view',
+                'cash_counts.create',
+                'cash_counts.verify',
+                'cash_transactions.view',
+                'cash_transfers.view',
+                'cash_transfers.create',
+                'cash_transfers.complete',
+            ],
+            'accounts_officer' => [
+                'accounting.view',
+                'accounting.coa.view',
+                'accounting.cost_centers.view',
+                'settings.fiscal_year.view',
+                'settings.fiscal.view',
+                'accounting.voucher_entries.view',
+                'accounting.voucher.view',
+                'accounting.voucher.journal.view',
+                'accounting.voucher.payment.view',
+                'accounting.voucher.receipt.view',
+                'accounting.voucher.contra.view',
+                'accounting.voucher.adjustment.view',
+                'accounting.voucher.opening.view',
+                'accounting.voucher.create',
+                'accounting.voucher.update',
+                'accounting.opening_balances.view',
+                'accounting.reports.view',
+                'accounting.trial.view',
+                'accounting.general_ledger.view',
+                'accounting.account_statement.view',
+                'accounting.day_book.view',
+                'accounting.profit_loss.view',
+                'accounting.balance_sheet.view',
+                'accounting.cash_flow.view',
+                'financial.transactions.view',
+                'banking.view',
+                'bank_accounts.view',
+                'bank_transactions.view',
+                'bank_reconciliation.view',
+            ],
+            'loan_officer' => [
+                'customer.view',
+                'customer.search',
+                'customer.create',
+                'customer.update',
+                'customer_address.view',
+                'customer_address.create',
+                'customer_address.update',
+                'customer_family_relation.view',
+                'customer_family_relation.create',
+                'customer_family_relation.update',
+                'customer_introducer.view',
+                'customer_introducer.create',
+                'customer_introducer.update',
+                'customer_kyc_document.view',
+                'customer_kyc_document.create',
+                'customer_kyc_document.update',
+                'financial.view',
+                'financial.products.view',
+                'financial.accounts.view',
+                'financial.loan-applications.view',
+                'financial.loan-applications.create',
+                'financial.loan-applications.update',
+            ],
+            'credit_loan_manager' => [
+                'customer.view',
+                'customer.search',
+                'customer_kyc_document.view',
+                'financial.view',
+                'financial.accounts.view',
+                'financial.loan-applications.view',
+                'financial.loan-applications.manage',
+                'financial.transactions.view',
+                'financial.reports.view',
+            ],
+            'recovery_officer' => [
+                'customer.view',
+                'customer.search',
+                'financial.view',
+                'financial.accounts.view',
+                'financial.loan-applications.view',
+                'financial.transactions.view',
+                'financial.transactions.create',
+                'financial.reports.view',
+            ],
+            'deposit_officer' => [
+                'customer.view',
+                'customer.search',
+                'customer.create',
+                'customer.update',
+                'customer_address.view',
+                'customer_address.create',
+                'customer_address.update',
+                'customer_kyc_document.view',
+                'customer_kyc_document.create',
+                'customer_kyc_document.update',
+                'financial.view',
+                'financial.products.view',
+                'financial.accounts.view',
+                'financial.accounts.create',
+                'financial.accounts.update',
+                'financial.accounts.nominees.manage',
+                'financial.accounts.holders.manage',
+                'financial.accounts.fixed-deposits.manage',
+                'financial.accounts.recurring-deposits.manage',
+                'financial.transactions.view',
+                'financial.transactions.create',
+            ],
+            'hr_payroll_officer' => [
+                'operations.view',
+                'hr.view',
+                'hr.attendance.view',
+                'hr.leave.view',
+                'hr.reports.view',
+                'payroll.view',
+            ],
+            'compliance_officer' => [
+                'customer.view',
+                'customer.search',
+                'customer_address.view',
+                'customer_address.approve',
+                'customer_address.reject',
+                'customer_family_relation.view',
+                'customer_family_relation.approve',
+                'customer_family_relation.reject',
+                'customer_introducer.view',
+                'customer_introducer.approve',
+                'customer_introducer.reject',
+                'customer_kyc_document.view',
+                'customer_kyc_document.approve',
+                'customer_kyc_document.reject',
+                'financial.view',
+                'financial.accounts.view',
+                'financial.loan-applications.view',
+                'financial.transactions.view',
+                'financial.reports.view',
+                'accounting.reports.view',
+                'accounting.trial.view',
+                'accounting.general_ledger.view',
+                'accounting.account_statement.view',
+                'accounting.day_book.view',
+                'accounting.profit_loss.view',
+                'accounting.balance_sheet.view',
+                'accounting.cash_flow.view',
+                'activity_logs.view',
+            ],
+            'it_support_officer' => [
+                'users.view',
+                'users.search',
+                'activity_logs.view',
+                'database_backups.view',
+                'organizations.view',
+                'branches.view',
             ],
         ];
 
-        $permissionIds = collect(PermissionRegistry::definitions())
+        $customerReadPermissions = [
+            'customer.view',
+            'customer.search',
+            'customer_address.view',
+            'customer_family_relation.view',
+            'customer_introducer.view',
+            'customer_kyc_document.view',
+        ];
+
+        $customerServicePermissions = [
+            ...$customerReadPermissions,
+            'customer.create',
+            'customer.update',
+            'customer_address.create',
+            'customer_address.update',
+            'customer_family_relation.create',
+            'customer_family_relation.update',
+            'customer_introducer.create',
+            'customer_introducer.update',
+            'customer_kyc_document.create',
+            'customer_kyc_document.update',
+        ];
+
+        $accountingReadPermissions = [
+            'accounting.view',
+            'accounting.coa.view',
+            'accounting.cost_centers.view',
+            'settings.fiscal_year.view',
+            'settings.fiscal.view',
+            'accounting.voucher_entries.view',
+            'accounting.voucher.view',
+            'accounting.voucher.journal.view',
+            'accounting.voucher.payment.view',
+            'accounting.voucher.receipt.view',
+            'accounting.voucher.contra.view',
+            'accounting.voucher.adjustment.view',
+            'accounting.voucher.opening.view',
+            'accounting.opening_balances.view',
+            'accounting.reports.view',
+            'accounting.trial.view',
+            'accounting.general_ledger.view',
+            'accounting.account_statement.view',
+            'accounting.day_book.view',
+            'accounting.profit_loss.view',
+            'accounting.balance_sheet.view',
+            'accounting.shareholders-equity.view',
+            'accounting.cash_flow.view',
+            'accounting.budgets.view',
+            'accounting.budget_entries.view',
+            'accounting.budgets.report',
+            'accounting.period_end.view',
+        ];
+
+        $executiveReadPermissions = collect($definitions)
+            ->filter(fn($definition) => in_array($definition->action, ['view', 'search', 'report'], true)
+                && !$definition->forAdmin)
+            ->pluck('slug')
+            ->all();
+
+        $financeManagerPermissions = array_merge($accountingReadPermissions, [
+            'accounting.coa.create',
+            'accounting.coa.update',
+            'accounting.cost_centers.create',
+            'accounting.cost_centers.update',
+            'settings.fiscal_year.create',
+            'settings.fiscal_year.update',
+            'settings.fiscal.create',
+            'settings.fiscal.update',
+            'accounting.period_end.close',
+            'accounting.voucher.create',
+            'accounting.voucher.update',
+            'accounting.voucher.post',
+            'accounting.voucher.cancel',
+            'accounting.opening_balances.create',
+            'accounting.budgets.create',
+            'accounting.budgets.update',
+            'accounting.budgets.activate',
+            'accounting.budgets.close',
+            'financial.view',
+            'financial.dashboard.view',
+            'financial.accounts.view',
+            'financial.accounts.update',
+            'financial.transactions.view',
+            'financial.transactions.create',
+            'financial.transactions.post',
+            'financial.reports.view',
+            'treasury.view',
+            'branch_days.view',
+            'cash_management.view',
+            'cash_transactions.view',
+            'cash_transfers.view',
+            'cash_transfers.create',
+            'cash_transfers.approve',
+            'cash_transfers.complete',
+            'petty_cash.view',
+            'petty_cash.create',
+            'petty_cash.expense',
+            'petty_cash.replenish',
+            'banking.view',
+            'banks.view',
+            'banks.create',
+            'banks.update',
+            'bank_accounts.view',
+            'bank_accounts.create',
+            'bank_accounts.update',
+            'bank_transactions.view',
+            'bank_transactions.create',
+            'bank_reconciliation.view',
+            'bank_reconciliation.complete',
+            'cheques.view',
+            'cheques.issue',
+            'cheque_books.view',
+            'cheque_books.create',
+            'cheque_books.update',
+            'investments.view',
+            'investments.manage',
+        ]);
+
+        $permissionIds = collect($definitions)
             ->mapWithKeys(fn($definition) => [
                 $definition->slug => Permission::firstOrCreate(
                     ['slug' => $definition->slug],
                     $definition->toArray(),
-                )->id
+                )->id,
             ])
             ->all();
 
-        foreach ($rolePermissions as $slug => $permissions) {
-            $role = Role::firstOrCreate(['slug' => $slug], ['name' => ucfirst(str_replace('_', ' ', $slug))]);
-            $ids = collect($permissions)
-                ->map(fn(string $slugName) => $permissionIds[$slugName] ?? null)
-                ->filter()
-                ->values()
-                ->all();
+        $rolePermissions['ceo_general_manager'] = $executiveReadPermissions;
+        $rolePermissions['finance_manager'] = $financeManagerPermissions;
+        $rolePermissions['member_service_officer'] = $customerServicePermissions;
+        $rolePermissions['internal_auditor'] = array_values(array_unique([
+            ...$executiveReadPermissions,
+            'activity_logs.view',
+            'database_backups.view',
+        ]));
+        $rolePermissions['report_officer'] = $executiveReadPermissions;
+
+        foreach ($rolePermissions as $roleSlug => $permissions) {
+            $role = Role::query()->where('slug', $roleSlug)->firstOrFail();
+            $ids = $permissions === '*'
+                ? array_values($permissionIds)
+                : collect($permissions)
+                    ->map(fn(string $slug) => $permissionIds[$slug]
+                        ?? throw new \LogicException("Unknown permission slug [{$slug}] in the default role matrix."))
+                    ->unique()
+                    ->values()
+                    ->all();
 
             $role->permissions()->sync($ids);
         }
 
-        $this->command?->info('Default treasury permissions assigned to standard roles.');
+        $this->command?->info('Default role permissions assigned.');
     }
 }

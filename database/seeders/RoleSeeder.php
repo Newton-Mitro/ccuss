@@ -15,23 +15,28 @@ class RoleSeeder extends Seeder
         // ----------------------------
         $roles = [
             'system_administrator' => 'System Administrator',
+            'ceo_general_manager' => 'CEO / General Manager',
+            'finance_manager' => 'Finance Manager',
             'branch_manager' => 'Branch Manager',
+            'assistant_branch_manager' => 'Assistant Branch Manager',
+            'accounts_officer' => 'Accounts Officer',
+            'internal_auditor' => 'Internal Auditor',
+            'member_service_officer' => 'Member Service Officer',
             'teller' => 'Teller',
-            'finance_officer' => 'Finance Officer',
-            'accountant' => 'Accountant',
+            'senior_teller' => 'Senior Teller',
+            'vault_officer' => 'Vault Officer',
             'loan_officer' => 'Loan Officer',
-            'customer_service' => 'Customer Service',
-            'audit_officer' => 'Audit Officer',
-            'hr_officer' => 'HR Officer',
-            'marketing_officer' => 'Marketing Officer',
-            'sales_officer' => 'Sales Officer',
-            'employee' => 'Employee',
-            'basic_user' => 'Basic User',
-            'online_banking_user' => 'Online Banking User',
+            'credit_loan_manager' => 'Credit / Loan Manager',
+            'recovery_officer' => 'Recovery Officer',
+            'deposit_officer' => 'Deposit Officer',
+            'hr_payroll_officer' => 'HR & Payroll Officer',
+            'compliance_officer' => 'Compliance Officer',
+            'report_officer' => 'Report Officer',
+            'it_support_officer' => 'IT Support Officer',
         ];
 
         foreach ($roles as $slug => $name) {
-            Role::firstOrCreate(
+            $role = Role::firstOrCreate(
                 ['slug' => $slug],
                 [
                     'name' => $name,
@@ -39,6 +44,27 @@ class RoleSeeder extends Seeder
                     'preset' => true,
                 ]
             );
+
+            if (!$role->preset) {
+                $role->forceFill(['preset' => true])->save();
+            }
+        }
+
+        $systemAdministrator = Role::query()
+            ->where('slug', 'system_administrator')
+            ->firstOrFail();
+        $redundantRole = Role::withTrashed()
+            ->where('slug', 'super_administrator')
+            ->first();
+
+        if ($redundantRole && !$redundantRole->trashed()) {
+            foreach ($redundantRole->users()->get() as $user) {
+                $user->roles()->syncWithoutDetaching([$systemAdministrator->id]);
+            }
+
+            $redundantRole->users()->detach();
+            $redundantRole->permissions()->detach();
+            $redundantRole->delete();
         }
 
         $this->command->info("✅ Roles created");

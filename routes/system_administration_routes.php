@@ -56,6 +56,15 @@ Route::middleware(['auth', 'verified'])->prefix('roles')->name('roles.')->group(
     Route::get('permissions', [RolePermissionController::class, 'index'])
         ->middleware('permission:role_permissions.view')
         ->name('index');
+    Route::post('/', [RolePermissionController::class, 'store'])
+        ->middleware('permission:role_permissions.update')
+        ->name('store');
+    Route::put('{roleId}', [RolePermissionController::class, 'updateRole'])
+        ->middleware('permission:role_permissions.update')
+        ->name('update');
+    Route::delete('{roleId}', [RolePermissionController::class, 'destroy'])
+        ->middleware('permission:role_permissions.update')
+        ->name('destroy');
     Route::put('{roleId}/permissions', [RolePermissionController::class, 'update'])
         ->middleware('permission:role_permissions.update')
         ->name('update-permissions');

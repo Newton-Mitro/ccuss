@@ -7,6 +7,8 @@ export interface Role {
     name: string;
     slug: string;
     description?: string | null;
+    preset?: boolean;
+    users_count?: number;
     created_at?: string;
     updated_at?: string;
     permissions?: Permission[];
