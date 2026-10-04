@@ -185,14 +185,14 @@ export default function CustomerDepositPage() {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Customer Deposit" />
-            <div className="space-y-4 text-foreground">
+            <div className="space-y-3 text-foreground">
                 <ResourcePageHeader
                     title="Customer Deposit"
                     description="Review accounts and post a teller deposit."
                     action={<StatusBadge tone="info">Teller ready</StatusBadge>}
                 />
 
-                <div className="w-full lg:w-1/2">
+                <div className="w-full pr-1 lg:w-1/2">
                     <FinancialAccountSearchInput
                         onSelect={handleSelectAccount}
                         initialAccount={selectedAccount}

@@ -92,29 +92,36 @@ export default function Index() {
                     }
                 />
                 <ResourceToolbar>
-                    <input
-                        type="text"
-                        placeholder="Search vouchers..."
-                        value={data.search}
-                        onChange={(event) => {
-                            setData('search', event.target.value);
-                            setData('page', 1);
-                        }}
-                        className="h-9 w-full max-w-sm rounded-md border bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-                    />
-                    <Select
-                        value={data.status}
-                        onChange={(value) => {
-                            setData('status', value);
-                            setData('page', 1);
-                        }}
-                        options={transactionStatus}
-                    />
-                    <span className="text-sm text-muted-foreground">
-                        {vouchers.data.length} records
-                    </span>
+                    <div className="flex w-full flex-col justify-between gap-2 sm:flex-row sm:items-center">
+                        {/* Search */}
+                        <div className="relative min-w-0 flex-1 sm:max-w-sm">
+                            <i className="fa-solid fa-magnifying-glass pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-xs text-muted-foreground" />
+                            <input
+                                type="text"
+                                placeholder="Search vouchers..."
+                                value={data.search}
+                                onChange={(event) => {
+                                    setData('search', event.target.value);
+                                    setData('page', 1);
+                                }}
+                                className="h-9 w-full rounded-md border bg-card pr-3 pl-9 text-sm text-foreground shadow-sm transition outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/15"
+                            />
+                        </div>
+
+                        {/* Status */}
+                        <div className="w-full sm:w-44">
+                            <Select
+                                value={data.status}
+                                onChange={(value) => {
+                                    setData('status', value);
+                                    setData('page', 1);
+                                }}
+                                options={transactionStatus}
+                            />
+                        </div>
+                    </div>
                 </ResourceToolbar>
-                <ResourceTableCard className="h-[calc(100vh-320px)] md:h-[calc(100vh-300px)]">
+                <ResourceTableCard className="h-[calc(100vh-320px)] md:h-[calc(100vh-350px)]">
                     <table className="w-full border-collapse">
                         <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                             <tr>
