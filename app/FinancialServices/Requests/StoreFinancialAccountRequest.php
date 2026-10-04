@@ -2,6 +2,7 @@
 
 namespace App\FinancialServices\Requests;
 
+use App\CustomerModule\Models\Customer;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -63,5 +64,45 @@ class StoreFinancialAccountRequest extends FormRequest
             'maturity_extension_days' => ['nullable', 'integer', 'min:0'],
             'grace_days' => ['nullable', 'integer', 'min:0'],
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator): void {
+            if ($validator->errors()->has('holder_id') || !$this->filled('holder_id')) {
+                return;
+            }
+
+            $organizationId = (int) $this->attributes->get('active_organization')?->id;
+            $holder = Customer::query()
+                ->where('organization_id', $organizationId)
+                ->find($this->input('holder_id'));
+
+            if (
+                !$holder
+                || $holder->type !== Customer::TYPE_INDIVIDUAL
+                || !$holder->dob
+                || $holder->dob->age >= 18
+            ) {
+                return;
+            }
+
+            $guardian = Customer::query()
+                ->where('organization_id', $organizationId)
+                ->find($this->input('guardian_customer_id'));
+
+            if (
+                !$guardian
+                || $guardian->id === $holder->id
+                || $guardian->type !== Customer::TYPE_INDIVIDUAL
+                || !$guardian->dob
+                || $guardian->dob->age < 18
+            ) {
+                $validator->errors()->add(
+                    'guardian_customer_id',
+                    'Select an adult individual guardian for a minor account holder.',
+                );
+            }
+        });
     }
 }

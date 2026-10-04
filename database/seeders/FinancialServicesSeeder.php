@@ -42,6 +42,7 @@ class FinancialServicesSeeder extends Seeder
             $shareOpeningAmount = 5000;
             $legacySavingsBalance = 25000;
             $legacyFixedDepositPrincipal = 100000;
+            $tellerOpeningBalance = 25000;
 
             $seedCustomer = Customer::query()
                 ->where('organization_id', $organization->id)
@@ -217,20 +218,20 @@ class FinancialServicesSeeder extends Seeder
                 };
                 $mappingPairs = $category === 'LOAN'
                     ? [
-                        ['DISBURSEMENT', '1300', '1110'],
-                        ['REPAYMENT', '1110', '1300'],
-                        ['INTEREST', '1110', '4100'],
-                        ['FEE', '1110', '4200'],
+                        ['DISBURSEMENT', '1300', '1120'],
+                        ['REPAYMENT', '1120', '1300'],
+                        ['INTEREST', '1120', '4100'],
+                        ['FEE', '1120', '4200'],
                     ]
                     : [
-                        ['DEPOSIT', '1110', $liabilityAccount],
-                        ['WITHDRAWAL', $liabilityAccount, '1110'],
+                        ['DEPOSIT', '1120', $liabilityAccount],
+                        ['WITHDRAWAL', $liabilityAccount, '1120'],
                         ['INTEREST', '5200', $liabilityAccount],
                         ['FEE', $liabilityAccount, '4200'],
                     ];
 
                 if ($category !== 'LOAN') {
-                    $mappingPairs[] = ['MIGRATION_OPENING_BALANCE', '1110', $liabilityAccount];
+                    $mappingPairs[] = ['MIGRATION_OPENING_BALANCE', '1120', $liabilityAccount];
                 }
 
                 foreach ($mappingPairs as [$transactionType, $debitCode, $creditCode]) {
@@ -623,20 +624,21 @@ class FinancialServicesSeeder extends Seeder
                 ->where('category', 'SAVINGS')
                 ->first();
 
-            $cashAccount = FinancialAccount::query()->firstOrCreate(
+            $tellerAccount = FinancialAccount::query()->updateOrCreate(
                 [
                     'organization_id' => $organization->id,
-                    'account_no' => 'CASH-VAULT-001',
+                    'account_no' => 'CASH-TELLER-001',
                 ],
                 [
                     'branch_id' => $branchId,
                     'financial_product_id' => null,
+                    'name' => 'Main Teller Cash Account',
                     'account_type' => 'CASH',
                     'status' => 'ACTIVE',
-                    'balance' => 0,
-                    'available_balance' => 0,
+                    'balance' => $tellerOpeningBalance,
+                    'available_balance' => $tellerOpeningBalance,
                     'opened_at' => '2025-07-01',
-                    'metadata' => ['seeded' => true, 'cash_location' => 'Main Vault'],
+                    'metadata' => ['seeded' => true, 'cash_location' => 'Main Teller'],
                 ],
             );
 
@@ -680,8 +682,8 @@ class FinancialServicesSeeder extends Seeder
                 );
 
                 FinancialTransactionEntry::query()->updateOrCreate(
-                    ['financial_transaction_id' => $transaction->id, 'financial_account_id' => $cashAccount->id, 'direction' => 'DEBIT'],
-                    ['amount' => $savingsOpeningAmount, 'balance_after' => ($index + 1) * $savingsOpeningAmount, 'description' => 'Seeded vault cash received'],
+                    ['financial_transaction_id' => $transaction->id, 'financial_account_id' => $tellerAccount->id, 'direction' => 'DEBIT'],
+                    ['amount' => $savingsOpeningAmount, 'balance_after' => ($index + 1) * $savingsOpeningAmount, 'description' => 'Seeded teller cash received'],
                 );
                 FinancialTransactionEntry::query()->updateOrCreate(
                     ['financial_transaction_id' => $transaction->id, 'financial_account_id' => $account->id, 'direction' => 'CREDIT'],
@@ -774,10 +776,6 @@ class FinancialServicesSeeder extends Seeder
             }
 
             $seededSavingsCount = $customers->count();
-            $cashAccount->update([
-                'balance' => $seededSavingsCount * $savingsOpeningAmount,
-                'available_balance' => $seededSavingsCount * $savingsOpeningAmount,
-            ]);
 
             $legacyCustomer = $janeDoe;
 
@@ -890,7 +888,7 @@ class FinancialServicesSeeder extends Seeder
                     ],
                 );
                 FinancialTransactionEntry::query()->updateOrCreate(
-                    ['financial_transaction_id' => $migrationTransaction->id, 'financial_account_id' => $cashAccount->id, 'direction' => 'DEBIT'],
+                    ['financial_transaction_id' => $migrationTransaction->id, 'financial_account_id' => $tellerAccount->id, 'direction' => 'DEBIT'],
                     ['amount' => $amount, 'balance_after' => $seededSavingsCount * $savingsOpeningAmount + $amount, 'description' => 'Migrated legacy balance offset'],
                 );
                 FinancialTransactionEntry::query()->updateOrCreate(
@@ -930,8 +928,8 @@ class FinancialServicesSeeder extends Seeder
                     ],
                 );
                 FinancialTransactionEntry::query()->updateOrCreate(
-                    ['financial_transaction_id' => $shareTransaction->id, 'financial_account_id' => $cashAccount->id, 'direction' => 'DEBIT'],
-                    ['amount' => $shareOpeningAmount, 'balance_after' => $seededSavingsCount * $savingsOpeningAmount + $shareOpeningAmount, 'description' => 'Seeded vault cash received for share contribution'],
+                    ['financial_transaction_id' => $shareTransaction->id, 'financial_account_id' => $tellerAccount->id, 'direction' => 'DEBIT'],
+                    ['amount' => $shareOpeningAmount, 'balance_after' => $seededSavingsCount * $savingsOpeningAmount + $shareOpeningAmount, 'description' => 'Seeded teller cash received for share contribution'],
                 );
                 FinancialTransactionEntry::query()->updateOrCreate(
                     ['financial_transaction_id' => $shareTransaction->id, 'financial_account_id' => $shareAccount->id, 'direction' => 'CREDIT'],
@@ -960,8 +958,8 @@ class FinancialServicesSeeder extends Seeder
                 ['amount' => 50000, 'description' => 'Loan principal disbursed'],
             );
             FinancialTransactionEntry::query()->updateOrCreate(
-                ['financial_transaction_id' => $loanDisbursement->id, 'financial_account_id' => $cashAccount->id, 'direction' => 'CREDIT'],
-                ['amount' => 50000, 'description' => 'Vault cash paid for loan disbursement'],
+                ['financial_transaction_id' => $loanDisbursement->id, 'financial_account_id' => $tellerAccount->id, 'direction' => 'CREDIT'],
+                ['amount' => 50000, 'description' => 'Teller cash paid for loan disbursement'],
             );
 
             foreach (range(1, 6) as $installmentNo) {
@@ -983,7 +981,7 @@ class FinancialServicesSeeder extends Seeder
                     ],
                 );
                 FinancialTransactionEntry::query()->updateOrCreate(
-                    ['financial_transaction_id' => $installmentTransaction->id, 'financial_account_id' => $cashAccount->id, 'direction' => 'DEBIT'],
+                    ['financial_transaction_id' => $installmentTransaction->id, 'financial_account_id' => $tellerAccount->id, 'direction' => 'DEBIT'],
                     ['amount' => 5000, 'description' => 'Recurring deposit installment received'],
                 );
                 FinancialTransactionEntry::query()->updateOrCreate(
@@ -992,14 +990,34 @@ class FinancialServicesSeeder extends Seeder
                 );
             }
 
-            $cashBalance = (float) DB::table('financial_transaction_entries as entries')
+            $vaultAccountId = FinancialAccount::query()
+                ->where('organization_id', $organization->id)
+                ->where('account_no', 'CASH-VAULT-001')
+                ->value('id');
+            $seededTransactionIds = FinancialTransaction::query()
+                ->where('organization_id', $organization->id)
+                ->where(function ($query): void {
+                    $query->where('transaction_no', 'like', 'FT-SEED-%')
+                        ->orWhereIn('transaction_no', ['SAV-0001', 'FDR-0001']);
+                })
+                ->pluck('id');
+
+            if ($vaultAccountId && $seededTransactionIds->isNotEmpty()) {
+                FinancialTransactionEntry::query()
+                    ->whereIn('financial_transaction_id', $seededTransactionIds)
+                    ->where('financial_account_id', $vaultAccountId)
+                    ->delete();
+            }
+
+            $tellerMovement = (float) DB::table('financial_transaction_entries as entries')
                 ->join('financial_transactions as transactions', 'transactions.id', '=', 'entries.financial_transaction_id')
                 ->where('transactions.organization_id', $organization->id)
                 ->where('transactions.status', 'POSTED')
-                ->where('entries.financial_account_id', $cashAccount->id)
+                ->where('entries.financial_account_id', $tellerAccount->id)
                 ->selectRaw("COALESCE(SUM(CASE WHEN entries.direction = 'DEBIT' THEN entries.amount ELSE -entries.amount END), 0) as balance")
                 ->value('balance');
-            $cashAccount->update(['balance' => $cashBalance, 'available_balance' => $cashBalance]);
+            $tellerBalance = $tellerOpeningBalance + $tellerMovement;
+            $tellerAccount->update(['balance' => $tellerBalance, 'available_balance' => $tellerBalance]);
 
             foreach (FinancialAccount::query()
                 ->where('organization_id', $organization->id)
@@ -1049,9 +1067,15 @@ class FinancialServicesSeeder extends Seeder
                     $query->where('transaction_no', 'like', 'FT-SEED-%')
                         ->orWhereIn('transaction_no', ['SAV-0001', 'FDR-0001']);
                 })
-                ->with('entries.financialAccount.product')
+                ->with(['entries.financialAccount.product', 'voucher'])
                 ->get()
-                ->each(fn(FinancialTransaction $transaction) => $accountingService->post($transaction, (int) $seederUserId));
+                ->each(function (FinancialTransaction $transaction) use ($accountingService, $seederUserId): void {
+                    $transaction->voucher?->delete();
+                    $accountingService->post(
+                        $transaction->fresh('entries.financialAccount.product'),
+                        (int) $seederUserId,
+                    );
+                });
         });
     }
 }

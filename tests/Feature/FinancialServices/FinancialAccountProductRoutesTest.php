@@ -33,7 +33,7 @@ function grantFinancialAccountProductPermissions(User $user, array $slugs): void
 
 function createFinancialAccountProductFixture(string $category = 'SAVINGS'): array
 {
-    $organization = Organization::factory()->create();
+    $organization = Organization::factory()->create(['code' => 'ORG-001']);
     $branch = Branch::factory()->create(['organization_id' => $organization->id]);
     $user = User::factory()->create([
         'organization_id' => $organization->id,
@@ -167,4 +167,89 @@ it('does not allow direct loan account creation through the generic account endp
         ->assertUnprocessable();
 
     expect(FinancialAccount::query()->where('account_no', 'LOAN-DIRECT-001')->exists())->toBeFalse();
+});
+
+it('requires an adult guardian when opening an account for a minor', function () {
+    $fixture = createFinancialAccountProductFixture('SAVINGS');
+    grantFinancialAccountProductPermissions($fixture['user'], ['financial.accounts.create']);
+    $minor = Customer::factory()->individualMale()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'dob' => now()->subYears(12)->toDateString(),
+    ]);
+    $guardian = Customer::factory()->individualFemale()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'dob' => now()->subYears(30)->toDateString(),
+    ]);
+    $payload = [
+        'branch_id' => $fixture['branch']->id,
+        'financial_product_id' => $fixture['product']->id,
+        'holder_type' => 'customer',
+        'holder_id' => $minor->id,
+        'account_no' => 'SAVINGS-MINOR-001',
+        'name' => 'Minor savings account',
+        'account_type' => 'SAVINGS',
+    ];
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('financial-accounts.savings.store'), $payload)
+        ->assertSessionHasErrors('guardian_customer_id');
+
+    expect(FinancialAccount::query()->where('account_no', 'SAVINGS-MINOR-001')->exists())->toBeFalse();
+
+    $this->post(route('financial-accounts.savings.store'), [
+        ...$payload,
+        'guardian_customer_id' => $guardian->id,
+    ])->assertRedirect(route('financial-accounts.savings.show', FinancialAccount::query()
+                    ->where('account_no', 'SAVINGS-MINOR-001')
+                    ->firstOrFail()));
+});
+
+it('shows guardian validation and opens a fixed deposit for a minor with an adult guardian', function () {
+    $fixture = createFinancialAccountProductFixture('FIXED_DEPOSIT');
+    grantFinancialAccountProductPermissions($fixture['user'], ['financial.accounts.create']);
+    $minor = Customer::factory()->individualMale()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'dob' => now()->subYears(12)->toDateString(),
+    ]);
+    $guardian = Customer::factory()->individualFemale()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'dob' => now()->subYears(30)->toDateString(),
+    ]);
+    $payload = [
+        'branch_id' => $fixture['branch']->id,
+        'financial_product_id' => $fixture['product']->id,
+        'holder_type' => 'customer',
+        'holder_id' => $minor->id,
+        'account_no' => 'FDR-MINOR-001',
+        'name' => 'Minor fixed deposit',
+        'account_type' => 'FIXED_DEPOSIT',
+        'principal_amount' => 1000,
+        'contractual_rate' => 8,
+        'term_months' => 12,
+        'started_at' => now()->toDateString(),
+        'maturity_instruction' => 'PAYOUT',
+    ];
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('financial-accounts.fixed.store'), $payload)
+        ->assertSessionHasErrors('guardian_customer_id');
+
+    $this->post(route('financial-accounts.fixed.store'), [
+        ...$payload,
+        'guardian_customer_id' => $guardian->id,
+    ])->assertRedirect(route('financial-accounts.fixed.show', FinancialAccount::query()
+                    ->where('account_no', 'FDR-MINOR-001')
+                    ->firstOrFail()));
+
+    expect(FinancialAccount::query()
+        ->where('account_no', 'FDR-MINOR-001')
+        ->firstOrFail()
+        ->fixedDeposit()
+        ->exists())->toBeTrue();
 });

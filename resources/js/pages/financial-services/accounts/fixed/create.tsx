@@ -16,7 +16,13 @@ interface Props extends SharedData {
         name: string;
         base_interest_rate?: string | number | null;
     }>;
-    customers: Array<{ id: number; customer_no: string; name: string }>;
+    customers: Array<{
+        id: number;
+        customer_no: string;
+        name: string;
+        type: 'INDIVIDUAL' | 'ORGANIZATION';
+        dob?: string | null;
+    }>;
 }
 
 export default function FixedDepositAccountCreate() {
@@ -24,6 +30,7 @@ export default function FixedDepositAccountCreate() {
     const { data, setData, post, processing, errors } = useForm({
         financial_product_id: '',
         holder_id: '',
+        guardian_customer_id: '',
         account_no: '',
         name: '',
         account_type: 'FIXED_DEPOSIT',
@@ -33,6 +40,10 @@ export default function FixedDepositAccountCreate() {
         started_at: new Date().toISOString().slice(0, 10),
         maturity_instruction: 'PAYOUT',
     });
+    const depositor = customers.find(
+        (customer) => String(customer.id) === data.holder_id,
+    );
+    const isMinorDepositor = depositor ? isMinor(depositor) : false;
     const product = products.find(
         (item) => String(item.id) === data.financial_product_id,
     );
@@ -103,6 +114,39 @@ export default function FixedDepositAccountCreate() {
                             />
                             <InputError message={errors.holder_id} />
                         </div>
+                        {isMinorDepositor && (
+                            <div>
+                                <Label>Guardian</Label>
+                                <Select
+                                    value={data.guardian_customer_id}
+                                    onChange={(value) =>
+                                        setData('guardian_customer_id', value)
+                                    }
+                                    options={[
+                                        {
+                                            value: '',
+                                            label: 'Select adult guardian',
+                                        },
+                                        ...customers
+                                            .filter(
+                                                (customer) =>
+                                                    customer.type ===
+                                                        'INDIVIDUAL' &&
+                                                    !isMinor(customer) &&
+                                                    String(customer.id) !==
+                                                        data.holder_id,
+                                            )
+                                            .map((customer) => ({
+                                                value: String(customer.id),
+                                                label: `${customer.customer_no} - ${customer.name}`,
+                                            })),
+                                    ]}
+                                />
+                                <InputError
+                                    message={errors.guardian_customer_id}
+                                />
+                            </div>
+                        )}
                         <div>
                             <Label>Account number</Label>
                             <Input
@@ -215,4 +259,20 @@ export default function FixedDepositAccountCreate() {
             </div>
         </CustomAuthLayout>
     );
+}
+
+function isMinor(customer: Props['customers'][number]): boolean {
+    if (customer.type !== 'INDIVIDUAL' || !customer.dob) return false;
+
+    const birthDate = new Date(customer.dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const birthdayNotReached =
+        today.getMonth() < birthDate.getMonth() ||
+        (today.getMonth() === birthDate.getMonth() &&
+            today.getDate() < birthDate.getDate());
+
+    if (birthdayNotReached) age -= 1;
+
+    return age < 18;
 }
