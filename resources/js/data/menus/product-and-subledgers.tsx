@@ -71,20 +71,6 @@ export const productAndSubledgers: SidebarItem[] = [
                         match_path: 'financial-transactions/transfer',
                         permission: ['financial.transactions.create'],
                     },
-                    {
-                        name: 'Loan Repayments',
-                        icon: <i className="fa-solid fa-hand-holding-dollar" />,
-                        path: '/financial-transactions/loan-repayment/create',
-                        match_path: 'financial-transactions/loan-repayment',
-                        permission: ['financial.transactions.create'],
-                    },
-                    {
-                        name: 'Fine Payments',
-                        icon: <i className="fa-solid fa-receipt" />,
-                        path: '/financial-transactions/fine-payment/create',
-                        match_path: 'financial-transactions/fine-payment',
-                        permission: ['financial.transactions.create'],
-                    },
                 ],
             },
             {

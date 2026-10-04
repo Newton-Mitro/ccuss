@@ -570,7 +570,7 @@ export interface FinancialWorkflowLoanAccount {
     loan_no: string;
     principal_amount: string | number;
     disbursed_amount: string | number;
-    customer?: { name?: string } | null;
+    financial_account?: { customer?: { name?: string } | null } | null;
 }
 
 export interface FinancialTransactionWorkflowPageProps extends SharedData {
@@ -578,14 +578,4 @@ export interface FinancialTransactionWorkflowPageProps extends SharedData {
     accounts?: FinancialWorkflowAccount[];
     loan_accounts?: FinancialWorkflowLoanAccount[];
     payout_accounts?: FinancialWorkflowAccount[];
-    fines?: FinancialWorkflowFine[];
-}
-
-export interface FinancialWorkflowFine {
-    id: number;
-    assessed_amount: string | number;
-    paid_amount: string | number;
-    waived_amount: string | number;
-    status: string;
-    financial_account?: { account_no?: string; name?: string | null } | null;
 }

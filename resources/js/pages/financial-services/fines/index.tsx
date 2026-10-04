@@ -7,7 +7,7 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatDateTime } from '@/lib/date_util';
 import type { BreadcrumbItem } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
 type Fine = {
@@ -37,7 +37,7 @@ export default function FinesIndex() {
             <div className="space-y-4">
                 <ResourcePageHeader
                     title="Account Fines"
-                    description="Review assessed fines, collect payment, or waive authorized balances."
+                    description="Review assessed fines or waive authorized balances."
                 />
                 <section className="rounded-lg border bg-card">
                     <div className="divide-y">
@@ -77,16 +77,6 @@ export default function FinesIndex() {
                                         fine.status,
                                     ) && (
                                         <>
-                                            <Button size="sm" asChild>
-                                                <Link
-                                                    href={route(
-                                                        'financial-transactions.workflow',
-                                                        'fine-payment',
-                                                    )}
-                                                >
-                                                    Pay
-                                                </Link>
-                                            </Button>
                                             <Button
                                                 size="sm"
                                                 variant="outline"

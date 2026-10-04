@@ -18,6 +18,7 @@ use App\TreasuryAndCash\Models\CashAdjustment;
 use App\TreasuryAndCash\Requests\StoreCashAdjustmentRequest;
 use App\TreasuryAndCash\Requests\StoreCashTransferRequest;
 use App\TreasuryAndCash\Requests\StoreTellerCashTransactionRequest;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -267,6 +268,48 @@ class CashMovementController extends Controller
             ->with('success', 'Cash adjustment created successfully.');
     }
 
+    public function searchCustomerDepositAccounts(Request $request): JsonResponse
+    {
+        $organization = $request->attributes->get('active_organization');
+        $search = trim((string) $request->query('search', ''));
+
+        if (mb_strlen($search) < 2) {
+            return response()->json([]);
+        }
+
+        $pattern = '%' . $search . '%';
+        $scope = $request->query('scope') === 'customer' ? 'customer' : 'all';
+        $accountsQuery = FinancialAccount::query()
+            ->where('organization_id', $organization->id)
+            ->whereIn('status', ['PENDING', 'ACTIVE'])
+            ->where(function ($query) use ($pattern): void {
+                $query->where('account_no', 'like', $pattern)
+                    ->orWhere('name', 'like', $pattern)
+                    ->orWhereHasMorph('holder', [Customer::class], fn($customer) => $customer
+                        ->where('name', 'like', $pattern)
+                        ->orWhere('customer_no', 'like', $pattern))
+                    ->orWhereHas('holders', fn($holder) => $holder
+                        ->where('name', 'like', $pattern)
+                        ->orWhere('customer_no', 'like', $pattern));
+            })
+            ->with(['holder', 'holders'])
+            ->orderBy('account_no')
+            ->limit(12);
+
+        if ($scope === 'customer') {
+            $accountsQuery
+                ->where('holder_type', Customer::class)
+                ->whereIn('account_type', ['SAVINGS', 'SHARE', 'RECURRING_DEPOSIT', 'LOAN'])
+                ->whereHas('customer');
+        }
+
+        $accounts = $accountsQuery->get();
+
+        return response()->json(
+            $accounts->map(fn(FinancialAccount $account) => $this->customerDepositAccountPayload($account))->all(),
+        );
+    }
+
     public function customerDeposit(Request $request): Response
     {
         $organization = $request->attributes->get('active_organization');
@@ -274,7 +317,18 @@ class CashMovementController extends Controller
 
         abort_unless($user?->branch_id, 422, 'A branch assignment is required for teller transactions.');
 
-        $selectedCustomer = null;
+        $selectedAccount = null;
+        $accountId = $request->query('account_id');
+        if ($accountId) {
+            $selectedAccount = FinancialAccount::query()
+                ->where('organization_id', $organization->id)
+                ->where('holder_type', Customer::class)
+                ->whereIn('account_type', ['SAVINGS', 'SHARE', 'RECURRING_DEPOSIT', 'LOAN'])
+                ->with(['customer.photo', 'holders'])
+                ->find($accountId);
+        }
+
+        $selectedCustomer = $selectedAccount?->customer;
         $customerAccounts = collect([]);
         $obligations = [];
         $totals = [
@@ -283,7 +337,7 @@ class CashMovementController extends Controller
             'total_due' => 0,
         ];
 
-        $customerId = $request->query('customer_id');
+        $customerId = $selectedCustomer?->id ?? $request->query('customer_id');
         if ($customerId) {
             $selectedCustomer = Customer::query()
                 ->where('organization_id', $organization->id)
@@ -303,6 +357,9 @@ class CashMovementController extends Controller
                     ->filter(fn(FinancialAccount $account) => in_array($account->account_type, ['SAVINGS', 'SHARE', 'RECURRING_DEPOSIT', 'LOAN'], true))
                     ->values();
 
+                $selectedAccount ??= $customerAccounts->first();
+                $selectedAccount?->loadMissing(['customer.photo', 'holders']);
+
                 $obligations = $this->buildCustomerDepositObligations($customerAccounts);
                 $totals = [
                     'current_due' => collect($obligations)->where('month', 'Current month')->sum('amount'),
@@ -314,6 +371,9 @@ class CashMovementController extends Controller
 
         return Inertia::render('treasury-cash/teller-deposits/customer-deposit-page', [
             'customer' => $selectedCustomer,
+            'selectedAccount' => $selectedAccount
+                ? $this->customerDepositAccountPayload($selectedAccount)
+                : null,
             'customerAccounts' => $customerAccounts->map(fn(FinancialAccount $account) => [
                 'id' => $account->id,
                 'account_type' => $account->account_type,
@@ -349,6 +409,7 @@ class CashMovementController extends Controller
         $data = $request->validate([
             'teller_session_id' => ['required', 'integer', 'exists:teller_sessions,id'],
             'customer_id' => ['required', 'integer', 'exists:customers,id'],
+            'account_id' => ['nullable', 'integer'],
             'amount' => ['required', 'numeric', 'gt:0'],
             'selected' => ['required', 'array', 'min:1'],
             'selected.*' => ['string'],
@@ -358,6 +419,16 @@ class CashMovementController extends Controller
         $customer = Customer::query()
             ->where('organization_id', $organization->id)
             ->findOrFail($data['customer_id']);
+
+        $selectedAccount = null;
+        if (!empty($data['account_id'])) {
+            $selectedAccount = FinancialAccount::query()
+                ->where('organization_id', $organization->id)
+                ->where('holder_type', Customer::class)
+                ->where('holder_id', $customer->id)
+                ->whereIn('account_type', ['SAVINGS', 'SHARE', 'RECURRING_DEPOSIT', 'LOAN'])
+                ->findOrFail($data['account_id']);
+        }
 
         $session = TellerSession::query()
             ->whereKey($data['teller_session_id'])
@@ -423,8 +494,13 @@ class CashMovementController extends Controller
             ],
         );
 
+        $redirectParameters = ['customer_id' => $customer->id];
+        if ($selectedAccount) {
+            $redirectParameters['account_id'] = $selectedAccount->id;
+        }
+
         return redirect()
-            ->route('teller-transactions.customer-deposit', ['customer_id' => $customer->id])
+            ->route('teller-transactions.customer-deposit', $redirectParameters)
             ->with('success', 'Customer deposit posted for ' . $customer->name . '.');
     }
 
@@ -566,6 +642,30 @@ class CashMovementController extends Controller
             ...$this->cashMovementDataService->forTellerCashTransaction($organization->id, $user->branch_id),
             'transaction_type' => $type,
         ]);
+    }
+
+    private function customerDepositAccountPayload(FinancialAccount $account): array
+    {
+        $account->loadMissing(['holder', 'holders']);
+        if ($account->holder_type === Customer::class) {
+            $account->loadMissing('customer.photo');
+        }
+
+        return [
+            'id' => $account->id,
+            'account_no' => $account->account_no,
+            'name' => $account->name,
+            'account_type' => $account->account_type,
+            'balance' => (float) $account->balance,
+            'available_balance' => (float) $account->available_balance,
+            'holder' => $account->holder_type === Customer::class ? $account->customer : null,
+            'holders' => $account->holders->map(fn(Customer $holder) => [
+                'id' => $holder->id,
+                'name' => $holder->name,
+                'customer_no' => $holder->customer_no,
+                'type' => $holder->type,
+            ])->all(),
+        ];
     }
 
     private function buildCustomerDepositObligations($customerAccounts): array

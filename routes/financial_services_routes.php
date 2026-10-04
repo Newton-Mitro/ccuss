@@ -127,7 +127,7 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
 
     Route::get('/financial-transactions', [FinancialTransactionController::class, 'index'])->name('financial-transactions.index');
     Route::get('/financial-transactions/{workflow}/create', [FinancialTransactionController::class, 'workflow'])
-        ->where('workflow', 'transfer|loan-disbursement|loan-repayment|fine-payment')
+        ->where('workflow', 'transfer|loan-disbursement|loan-repayment')
         ->name('financial-transactions.workflow');
     Route::post('/financial-transactions/transfer', [FinancialTransactionController::class, 'storeTransfer'])
         ->name('financial-transactions.transfer.store');
@@ -135,8 +135,6 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
         ->name('financial-transactions.loan-disbursement.store');
     Route::post('/financial-transactions/loan-repayment', [FinancialTransactionController::class, 'storeLoanRepayment'])
         ->name('financial-transactions.loan-repayment.store');
-    Route::post('/financial-transactions/fine-payment', [FinancialTransactionController::class, 'storeFinePayment'])
-        ->name('financial-transactions.fine-payment.store');
     Route::post('/financial-transactions', [FinancialTransactionController::class, 'store'])->name('financial-transactions.store');
     Route::get('/financial-transactions/{financial_transaction}', [FinancialTransactionController::class, 'show'])->name('financial-transactions.show');
     Route::post('/financial-transactions/{financial_transaction}/post', [FinancialTransactionController::class, 'post'])->name('financial-transactions.post');

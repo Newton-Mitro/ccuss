@@ -80,7 +80,7 @@ function grantTellerCashTransactionViewPermission(User $user): void
 
 function tellerCashTransactionFixture(): array
 {
-    $organization = Organization::factory()->create();
+    $organization = Organization::factory()->create(['code' => 'ORG-001']);
     $branch = Branch::factory()->create(['organization_id' => $organization->id]);
     $user = User::factory()->create([
         'organization_id' => $organization->id,
@@ -212,6 +212,70 @@ it('loads the customer deposit page with open teller sessions available', functi
             ->component('treasury-cash/teller-deposits/customer-deposit-page')
             ->has('teller_sessions', 1)
             ->where('teller_sessions.0.id', $fixture['session']->id));
+});
+
+it('searches customer deposit accounts by account and holder details', function () {
+    $fixture = tellerCashTransactionFixture();
+    grantTellerCashTransactionPermission($fixture['user']);
+    $customer = Customer::factory()->individualFemale()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'customer_no' => 'IND-ACCOUNT-SEARCH-001',
+        'name' => 'Amina Account Holder',
+    ]);
+    $account = FinancialAccount::factory()->active(500)->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'holder_type' => Customer::class,
+        'holder_id' => $customer->id,
+        'account_type' => 'SAVINGS',
+        'account_no' => 'SAV-ACCOUNT-SEARCH-001',
+        'name' => 'Holiday Savings Reserve',
+    ]);
+
+    foreach ([
+        $account->account_no,
+        $account->name,
+        $customer->customer_no,
+        $customer->name,
+    ] as $term) {
+        $this->actingAs($fixture['user'])
+            ->withSession(['active_organization_id' => $fixture['organization']->id])
+            ->getJson(route('teller-transactions.deposit.accounts.search', ['search' => $term]))
+            ->assertSuccessful()
+            ->assertJsonFragment([
+                'id' => $account->id,
+                'account_no' => $account->account_no,
+            ]);
+    }
+});
+
+it('restores the selected customer account on the customer deposit page', function () {
+    $fixture = tellerCashTransactionFixture();
+    grantTellerCashTransactionPermission($fixture['user']);
+    $customer = Customer::factory()->individualMale()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+    ]);
+    $account = FinancialAccount::factory()->active(500)->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'holder_type' => Customer::class,
+        'holder_id' => $customer->id,
+        'account_type' => 'SAVINGS',
+        'account_no' => 'SAV-RESTORE-001',
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('teller-transactions.customer-deposit', [
+            'customer_id' => $customer->id,
+            'account_id' => $account->id,
+        ]))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page
+            ->where('customer.id', $customer->id)
+            ->where('selectedAccount.id', $account->id));
 });
 
 it('creates a pending teller cash deposit for an open session', function () {

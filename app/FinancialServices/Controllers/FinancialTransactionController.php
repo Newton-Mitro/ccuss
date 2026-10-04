@@ -6,12 +6,10 @@ use App\FinancialServices\Application\FinancialTransactionService;
 use App\FinancialServices\Models\FinancialTransaction;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\LoanAccount;
-use App\FinancialServices\Models\AccountFine;
 use App\FinancialServices\Requests\StoreFinancialTransactionRequest;
 use App\FinancialServices\Requests\StoreFinancialTransferRequest;
 use App\FinancialServices\Requests\StoreLoanDisbursementRequest;
 use App\FinancialServices\Requests\StoreLoanRepaymentRequest;
-use App\FinancialServices\Requests\StoreFinePaymentRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -22,7 +20,7 @@ class FinancialTransactionController extends Controller
     public function __construct(private readonly FinancialTransactionService $transactionService)
     {
         $this->middleware('permission:financial.transactions.view')->only(['index', 'show']);
-        $this->middleware('permission:financial.transactions.create')->only(['store', 'storeTransfer', 'storeLoanDisbursement', 'storeLoanRepayment', 'storeFinePayment']);
+        $this->middleware('permission:financial.transactions.create')->only(['store', 'storeTransfer', 'storeLoanDisbursement', 'storeLoanRepayment']);
         $this->middleware('permission:financial.transactions.post')->only('post');
         $this->middleware('permission:financial.transactions.reverse')->only('reverse');
     }
@@ -50,7 +48,7 @@ class FinancialTransactionController extends Controller
 
     public function workflow(Request $request, string $workflow): Response
     {
-        abort_unless(in_array($workflow, ['transfer', 'loan-disbursement', 'loan-repayment', 'fine-payment'], true), 404);
+        abort_unless(in_array($workflow, ['transfer', 'loan-disbursement', 'loan-repayment'], true), 404);
 
         return Inertia::render('financial-services/transactions/workflow', [
             'workflow' => $workflow,
@@ -66,9 +64,9 @@ class FinancialTransactionController extends Controller
                     ->whereHas('financialAccount', fn($query) => $query
                         ->where('organization_id', $this->organizationId($request)))
                     ->whereIn('status', $workflow === 'loan-disbursement' ? ['APPROVED', 'PARTIALLY_DISBURSED'] : ['ACTIVE', 'PARTIALLY_DISBURSED'])
-                    ->with('customer:id,name')
+                    ->with('financialAccount.customer:id,name')
                     ->orderBy('loan_no')
-                    ->get(['id', 'loan_no', 'customer_id', 'principal_amount', 'disbursed_amount'])
+                    ->get(['id', 'loan_no', 'financial_account_id', 'principal_amount', 'disbursed_amount'])
                 : [],
             'payout_accounts' => in_array($workflow, ['loan-disbursement', 'loan-repayment'], true)
                 ? FinancialAccount::query()
@@ -77,14 +75,6 @@ class FinancialTransactionController extends Controller
                     ->whereIn('status', ['PENDING', 'ACTIVE'])
                     ->orderBy('account_no')
                     ->get(['id', 'account_no', 'name', 'account_type', 'balance'])
-                : [],
-            'fines' => $workflow === 'fine-payment'
-                ? AccountFine::query()
-                    ->whereHas('financialAccount', fn($query) => $query->where('organization_id', $this->organizationId($request)))
-                    ->whereIn('status', ['ASSESSED', 'PARTIALLY_PAID'])
-                    ->with('financialAccount:id,account_no,name')
-                    ->latest('assessed_at')
-                    ->get(['id', 'financial_account_id', 'assessed_amount', 'paid_amount', 'waived_amount', 'status'])
                 : [],
         ]);
     }
@@ -123,18 +113,6 @@ class FinancialTransactionController extends Controller
 
         return redirect()->route('financial-transactions.show', $transaction)
             ->with('success', 'Loan repayment created successfully.');
-    }
-
-    public function storeFinePayment(StoreFinePaymentRequest $request)
-    {
-        $transaction = $this->transactionService->createFinePayment(
-            $request->validated(),
-            $this->organizationId($request),
-            $request->user()->id,
-        );
-
-        return redirect()->route('financial-transactions.show', $transaction)
-            ->with('success', 'Fine payment created successfully.');
     }
 
     public function store(StoreFinancialTransactionRequest $request)

@@ -132,6 +132,13 @@ class GeneralAccountingSeeder extends Seeder
                 );
             }
 
+            $openingFiscalYearStart = CarbonImmutable::parse('2025-07-01');
+            $currentFiscalYearStart = CarbonImmutable::now()->month >= 7
+                ? CarbonImmutable::now()->startOfYear()->addMonths(6)
+                : CarbonImmutable::now()->subYear()->startOfYear()->addMonths(6);
+            $currentFiscalYearEnd = $currentFiscalYearStart->addYear()->subDay();
+            $openingFiscalYearIsCurrent = $currentFiscalYearStart->equalTo($openingFiscalYearStart);
+
             $fiscalYear = FiscalYear::query()->updateOrCreate(
                 [
                     'organization_id' => $organization->id,
@@ -141,15 +148,40 @@ class GeneralAccountingSeeder extends Seeder
                     'start_date' => '2025-07-01',
                     'end_date' => '2026-06-30',
                     'status' => 'OPEN',
+                    'is_current' => $openingFiscalYearIsCurrent,
+                ],
+            );
+
+            for ($month = 0; $month < 12; $month++) {
+                $start = $openingFiscalYearStart->addMonths($month);
+                $end = $start->endOfMonth();
+                $fiscalYear->periods()->firstOrCreate(
+                    ['name' => $start->format('F Y')],
+                    [
+                        'start_date' => $start->toDateString(),
+                        'end_date' => $end->toDateString(),
+                        'status' => 'OPEN',
+                    ],
+                );
+            }
+
+            $currentFiscalYear = FiscalYear::query()->updateOrCreate(
+                [
+                    'organization_id' => $organization->id,
+                    'name' => $currentFiscalYearStart->year . '-' . $currentFiscalYearEnd->year,
+                ],
+                [
+                    'start_date' => $currentFiscalYearStart->toDateString(),
+                    'end_date' => $currentFiscalYearEnd->toDateString(),
+                    'status' => 'OPEN',
                     'is_current' => true,
                 ],
             );
 
-            $periodStart = CarbonImmutable::parse('2025-07-01');
             for ($month = 0; $month < 12; $month++) {
-                $start = $periodStart->addMonths($month);
+                $start = $currentFiscalYearStart->addMonths($month);
                 $end = $start->endOfMonth();
-                $fiscalYear->periods()->firstOrCreate(
+                $currentFiscalYear->periods()->firstOrCreate(
                     ['name' => $start->format('F Y')],
                     [
                         'start_date' => $start->toDateString(),

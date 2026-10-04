@@ -1,4 +1,5 @@
 import { formatDate } from '@/lib/date_util';
+import { FinancialAccountSearchInput } from '@/pages/treasury-cash/teller-deposits/components/financial-account-search-input';
 import type { TellerCashTransactionFormPageProps } from '@/types/treasury-cash/forms';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { ArrowDownToLine, ArrowUpFromLine } from 'lucide-react';
@@ -12,11 +13,8 @@ import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 
 export default function Form() {
-    const {
-        transaction_type,
-        teller_sessions,
-        financial_accounts = [],
-    } = usePage<TellerCashTransactionFormPageProps>().props;
+    const { transaction_type, teller_sessions } =
+        usePage<TellerCashTransactionFormPageProps>().props;
     const isDeposit = transaction_type === 'DEPOSIT';
     const routeType = isDeposit ? 'deposit' : 'withdrawal';
     const { data, setData, post, processing, errors } = useForm({
@@ -127,32 +125,19 @@ export default function Form() {
                                     key={index}
                                     className="grid gap-2 rounded-md border p-3 sm:grid-cols-[1fr_9rem_auto]"
                                 >
-                                    <select
-                                        className="h-9 rounded-md border bg-background px-3 text-sm"
-                                        value={line.financial_account_id}
-                                        onChange={(event) => {
+                                    <FinancialAccountSearchInput
+                                        onSelect={(account) => {
                                             const lines = [...depositLines];
                                             lines[index] = {
                                                 ...line,
-                                                financial_account_id:
-                                                    event.target.value,
+                                                financial_account_id: String(
+                                                    account.id,
+                                                ),
                                             };
                                             updateDepositLines(lines);
                                         }}
-                                        required
-                                    >
-                                        <option value="">Select account</option>
-                                        {financial_accounts.map((account) => (
-                                            <option
-                                                key={account.id}
-                                                value={account.id}
-                                            >
-                                                {account.account_no} -{' '}
-                                                {account.name ||
-                                                    account.account_type}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        placeholder="Search customer or account"
+                                    />
                                     <Input
                                         type="number"
                                         min="0.0001"
