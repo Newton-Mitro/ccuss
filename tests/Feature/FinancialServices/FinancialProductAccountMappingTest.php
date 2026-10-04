@@ -56,6 +56,7 @@ it('creates and rejects duplicate product account mappings', function () {
         'branch_id' => $branch->id,
     ]);
     grantProductMappingPermission($user);
+    grantProductViewPermission($user);
     $product = FinancialProduct::factory()->create(['organization_id' => $organization->id]);
     $debit = LedgerAccount::factory()->create(['organization_id' => $organization->id]);
     $credit = LedgerAccount::factory()->create(['organization_id' => $organization->id]);
@@ -80,10 +81,21 @@ it('creates and rejects duplicate product account mappings', function () {
         ])
         ->assertSessionHasErrors('transaction_type');
 
-    $this->assertDatabaseHas('financial_product_account_mappings', [
+    $this->assertDatabaseHas('gl_account_mappings', [
+        'source_type' => 'FINANCIAL_PRODUCT',
+        'source_code' => (string) $product->id,
         'financial_product_id' => $product->id,
         'transaction_type' => 'DEPOSIT',
     ]);
+
+    $this->actingAs($user)
+        ->withSession(['active_organization_id' => $organization->id])
+        ->get(route('financial-products.show', $product))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page
+            ->component('financial-services/products/show')
+            ->where('product.account_mappings.0.transaction_type', 'DEPOSIT')
+            ->has('ledgerAccounts', 2));
 });
 
 it('rejects ledger accounts from another organization', function () {

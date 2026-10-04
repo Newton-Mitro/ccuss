@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TreasuryGlMapping extends Model
 {
+    protected $table = 'gl_account_mappings';
+
     protected $fillable = [
         'organization_id',
         'source_type',

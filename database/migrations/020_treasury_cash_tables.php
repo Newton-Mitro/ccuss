@@ -140,8 +140,7 @@ return new class extends Migration {
             $table->decimal('amount', 20, 4);
             $table->string('payee')->nullable();
             $table->text('description')->nullable();
-            $table->unsignedBigInteger('expense_account_id')->nullable();
-            $table->index('expense_account_id');
+            $table->foreignId('expense_account_id')->nullable()->constrained('accounts')->nullOnDelete();
             $table->enum('status', ['PENDING', 'POSTED', 'CANCELLED'])->default('PENDING');
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();

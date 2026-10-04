@@ -52,7 +52,7 @@ class FinancialTransactionAccountingService
         return $this->postingService->post(
             organizationId: $transaction->organization_id,
             sourceType: $mapping ? 'FINANCIAL_PRODUCT' : $source['type'],
-            sourceCode: $mapping ? $mapping->product?->code ?? 'MAPPED' : $source['code'],
+            sourceCode: $mapping ? (string) $mapping->financial_product_id : $source['code'],
             transactionType: $transaction->transaction_type,
             voucherNo: 'FT-' . $transaction->transaction_no,
             voucherDate: $transaction->transaction_date->toDateString(),

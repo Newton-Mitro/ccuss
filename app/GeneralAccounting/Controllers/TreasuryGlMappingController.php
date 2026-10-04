@@ -32,6 +32,7 @@ class TreasuryGlMappingController extends Controller
         return Inertia::render('general-accounting/treasury-gl-mappings/index', [
             'mappings' => TreasuryGlMapping::query()
                 ->where('organization_id', $organizationId)
+                ->whereIn('source_type', self::SOURCE_TYPES)
                 ->with([
                     'debitAccount:id,code,name',
                     'creditAccount:id,code,name',
@@ -96,7 +97,8 @@ class TreasuryGlMappingController extends Controller
     public function destroy(Request $request, TreasuryGlMapping $mapping): RedirectResponse
     {
         abort_unless(
-            $mapping->organization_id === $request->attributes->get('active_organization')->id,
+            $mapping->organization_id === $request->attributes->get('active_organization')->id
+            && in_array($mapping->source_type, self::SOURCE_TYPES, true),
             404,
         );
 

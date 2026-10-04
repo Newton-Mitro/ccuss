@@ -65,7 +65,7 @@ class FinancialProductController extends Controller
             })
             ->when($request->integer('product_id') > 0, fn($query) => $query->where('financial_product_id', $request->integer('product_id')))
             ->when(in_array($status, ['active', 'inactive'], true), fn($query) => $query->where('status', $status === 'active'))
-            ->orderBy(FinancialProduct::query()->select('code')->whereColumn('financial_products.id', 'financial_product_account_mappings.financial_product_id'))
+            ->orderBy(FinancialProduct::query()->select('code')->whereColumn('financial_products.id', 'gl_account_mappings.financial_product_id'))
             ->orderBy('transaction_type')
             ->paginate($request->integer('per_page') ?: 18)
             ->withQueryString();

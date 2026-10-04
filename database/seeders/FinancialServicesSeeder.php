@@ -232,7 +232,13 @@ class FinancialServicesSeeder extends Seeder
                     $creditAccount = LedgerAccount::query()->where('organization_id', $organization->id)->where('code', $creditCode)->first();
                     if ($debitAccount && $creditAccount) {
                         FinancialProductAccountMapping::query()->updateOrCreate(
-                            ['financial_product_id' => $product->id, 'transaction_type' => $transactionType],
+                            [
+                                'organization_id' => $organization->id,
+                                'financial_product_id' => $product->id,
+                                'source_type' => 'FINANCIAL_PRODUCT',
+                                'source_code' => (string) $product->id,
+                                'transaction_type' => $transactionType,
+                            ],
                             ['debit_account_id' => $debitAccount->id, 'credit_account_id' => $creditAccount->id, 'status' => true],
                         );
                     }

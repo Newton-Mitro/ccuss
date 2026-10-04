@@ -61,17 +61,22 @@ return new class extends Migration {
             ]);
         });
 
-        Schema::create('financial_product_account_mappings', function (Blueprint $table): void {
+        Schema::create('gl_account_mappings', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('financial_product_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('financial_product_id')->nullable()->constrained('financial_products')->cascadeOnDelete();
+            $table->string('source_type', 40);
+            $table->string('source_code', 100);
             $table->string('transaction_type', 50);
-            $table->unsignedBigInteger('debit_account_id')->nullable();
-            $table->unsignedBigInteger('credit_account_id')->nullable();
+            $table->foreignId('debit_account_id')->nullable()->constrained('accounts')->nullOnDelete();
+            $table->foreignId('credit_account_id')->nullable()->constrained('accounts')->nullOnDelete();
             $table->boolean('status')->default(true);
             $table->timestamps();
-            $table->unique(['financial_product_id', 'transaction_type'], 'fp_account_map_product_type_unique');
-            $table->index('debit_account_id');
-            $table->index('credit_account_id');
+            $table->unique(
+                ['organization_id', 'source_type', 'source_code', 'transaction_type'],
+                'gl_account_mapping_source_unique',
+            );
+            $table->index(['organization_id', 'status']);
         });
 
         Schema::create('financial_accounts', function (Blueprint $table): void {
@@ -364,7 +369,7 @@ return new class extends Migration {
         Schema::dropIfExists('financial_transaction_entries');
         Schema::dropIfExists('financial_transactions');
         Schema::dropIfExists('financial_accounts');
-        Schema::dropIfExists('financial_product_account_mappings');
+        Schema::dropIfExists('gl_account_mappings');
         Schema::dropIfExists('financial_products');
     }
 };

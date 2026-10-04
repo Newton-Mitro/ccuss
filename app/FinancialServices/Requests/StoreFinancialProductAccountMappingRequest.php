@@ -22,8 +22,10 @@ class StoreFinancialProductAccountMappingRequest extends FormRequest
                 'required',
                 'string',
                 'max:50',
-                Rule::unique('financial_product_account_mappings', 'transaction_type')
-                    ->where(fn($query) => $query->where('financial_product_id', $this->route('financial_product')?->id))
+                Rule::unique('gl_account_mappings', 'transaction_type')
+                    ->where(fn($query) => $query
+                        ->where('source_type', 'FINANCIAL_PRODUCT')
+                        ->where('financial_product_id', $this->route('financial_product')?->id))
                     ->ignore($mappingId),
             ],
             'debit_account_id' => [
