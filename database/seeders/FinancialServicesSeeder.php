@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Models\FinancialAccount;
+use App\FinancialServices\Models\FinancialAccountAuthorizedPerson;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\FinancialProductAccountMapping;
 use App\FinancialServices\Models\FinancialProductPolicy;
@@ -16,8 +17,10 @@ use App\FinancialServices\Models\RecurringDeposit;
 use App\FinancialServices\Models\RecurringDepositInstallment;
 use App\FinancialServices\Models\ShareAccount;
 use App\FinancialServices\Application\LoanScheduleService;
+use App\GeneralAccounting\Application\FinancialTransactionAccountingService;
 use App\GeneralAccounting\Models\LedgerAccount;
 use App\SystemAdministration\Models\Organization;
+use App\SystemAdministration\Models\User;
 use App\TreasuryAndCash\Models\Bank;
 use App\TreasuryAndCash\Models\BankAccount;
 use App\TreasuryAndCash\Models\Cheque;
@@ -140,7 +143,6 @@ class FinancialServicesSeeder extends Seeder
                 ['FDR-12M', 'Twelve Month Fixed Deposit', 'FIXED_DEPOSIT', 'LIABILITY', '8.500000', 'COMPOUND', 'MATURITY', 10000],
                 ['RD-24M', 'Twenty Four Month Recurring Deposit', 'RECURRING_DEPOSIT', 'LIABILITY', '7.000000', 'COMPOUND', 'MONTHLY', 500],
                 ['LN-GEN', 'General Loan', 'LOAN', 'ASSET', '12.000000', 'REDUCING_BALANCE', 'MONTHLY', 0],
-                ['OTH-GEN', 'Other Financial Product', 'OTHER', 'LIABILITY', '0.000000', 'NONE', 'NONE', 0],
             ];
 
             foreach ($products as [$code, $name, $category, $balanceType, $rate, $calculation, $frequency, $minimumOpening]) {
@@ -181,7 +183,7 @@ class FinancialServicesSeeder extends Seeder
                         'maximum_amount' => null,
                         'rules' => json_encode([]),
                         'status' => true,
-                        'effective_from' => now()->toDateString(),
+                        'effective_from' => '2025-07-01',
                         'updated_at' => now(),
                         'created_at' => now(),
                     ],
@@ -202,7 +204,7 @@ class FinancialServicesSeeder extends Seeder
                         'repayment_rules' => $category === 'LOAN' ? ['frequency' => 'MONTHLY', 'allocation' => ['FEE', 'INTEREST', 'PRINCIPAL']] : null,
                         'status' => 'ACTIVE',
                         'version' => '1.0',
-                        'effective_from' => now()->toDateString(),
+                        'effective_from' => '2025-07-01',
                     ],
                 );
 
@@ -215,17 +217,21 @@ class FinancialServicesSeeder extends Seeder
                 };
                 $mappingPairs = $category === 'LOAN'
                     ? [
-                        ['DISBURSEMENT', '1300', '1100'],
-                        ['REPAYMENT', '1100', '1300'],
-                        ['INTEREST', '1100', '4100'],
-                        ['FEE', '1100', '4200'],
+                        ['DISBURSEMENT', '1300', '1110'],
+                        ['REPAYMENT', '1110', '1300'],
+                        ['INTEREST', '1110', '4100'],
+                        ['FEE', '1110', '4200'],
                     ]
                     : [
-                        ['DEPOSIT', '1100', $liabilityAccount],
-                        ['WITHDRAWAL', $liabilityAccount, '1100'],
+                        ['DEPOSIT', '1110', $liabilityAccount],
+                        ['WITHDRAWAL', $liabilityAccount, '1110'],
                         ['INTEREST', '5200', $liabilityAccount],
                         ['FEE', $liabilityAccount, '4200'],
                     ];
+
+                if ($category !== 'LOAN') {
+                    $mappingPairs[] = ['MIGRATION_OPENING_BALANCE', '1110', $liabilityAccount];
+                }
 
                 foreach ($mappingPairs as [$transactionType, $debitCode, $creditCode]) {
                     $debitAccount = LedgerAccount::query()->where('organization_id', $organization->id)->where('code', $debitCode)->first();
@@ -259,8 +265,77 @@ class FinancialServicesSeeder extends Seeder
                 ]);
             }
 
-            $multiProductCustomer = $customers->first() ?? $seedCustomer;
+            $janeDoe = Customer::query()
+                ->where('organization_id', $organization->id)
+                ->where('name', 'Jane Doe')
+                ->first();
+
+            if (!$janeDoe) {
+                $janeDoe = Customer::factory()->individualFemale()->create([
+                    'organization_id' => $organization->id,
+                    'branch_id' => $branchId,
+                    'name' => 'Jane Doe',
+                    'status' => 'ACTIVE',
+                ]);
+            }
+
+            $johnDoe = Customer::query()
+                ->where('organization_id', $organization->id)
+                ->where('name', 'John Doe')
+                ->first();
+
+            if (!$johnDoe) {
+                $johnDoe = Customer::factory()->individualMale()->create([
+                    'organization_id' => $organization->id,
+                    'branch_id' => $branchId,
+                    'name' => 'John Doe',
+                    'status' => 'ACTIVE',
+                ]);
+            }
+
+            $minorCustomer = Customer::query()
+                ->where('organization_id', $organization->id)
+                ->where('name', 'Alex Doe')
+                ->first();
+
+            if (!$minorCustomer) {
+                $minorCustomer = Customer::factory()->individualMale()->create([
+                    'organization_id' => $organization->id,
+                    'branch_id' => $branchId,
+                    'name' => 'Alex Doe',
+                    'dob' => now()->subYears(12)->toDateString(),
+                    'status' => 'ACTIVE',
+                ]);
+            }
+
+            $organizationCustomer = Customer::query()
+                ->where('organization_id', $organization->id)
+                ->where('name', 'ABC Corp.')
+                ->first();
+
+            if (!$organizationCustomer) {
+                $organizationCustomer = Customer::factory()->organization()->create([
+                    'organization_id' => $organization->id,
+                    'branch_id' => $branchId,
+                    'name' => 'ABC Corp.',
+                    'status' => 'ACTIVE',
+                ]);
+            }
+
+            if (!$customers->contains('id', $janeDoe->id)) {
+                $customers->push($janeDoe);
+            }
+
+            if (!$customers->contains('id', $johnDoe->id)) {
+                $customers->push($johnDoe);
+            }
+
+            $multiProductCustomer = $janeDoe;
             foreach (FinancialProduct::query()->where('organization_id', $organization->id)->orderBy('id')->get() as $product) {
+                if (in_array($product->category, ['FIXED_DEPOSIT', 'LOAN', 'RECURRING_DEPOSIT'], true)) {
+                    continue;
+                }
+
                 $accountNo = match ($product->category) {
                     'SAVINGS' => 'SAV-ALL-' . $multiProductCustomer->id,
                     'SHARE' => 'SHR-ALL-' . $multiProductCustomer->id,
@@ -292,7 +367,7 @@ class FinancialServicesSeeder extends Seeder
                         'balance' => $balance,
                         'available_balance' => $balance,
                         'interest_accrued' => 0,
-                        'opened_at' => now()->subMonths(3)->toDateString(),
+                        'opened_at' => '2025-07-01',
                         'metadata' => ['seeded' => true, 'multi_product_customer' => true],
                     ],
                 );
@@ -331,7 +406,91 @@ class FinancialServicesSeeder extends Seeder
                 }
             }
 
-            $loanCustomer = $customers->first();
+            foreach (['SAVINGS', 'FIXED_DEPOSIT'] as $category) {
+                $product = FinancialProduct::query()
+                    ->where('organization_id', $organization->id)
+                    ->where('category', $category)
+                    ->orderBy('code')
+                    ->firstOrFail();
+                $accountNo = $category === 'SAVINGS'
+                    ? 'SAV-CORP-' . $organizationCustomer->id
+                    : 'FDR-CORP-' . $organizationCustomer->id;
+                $balance = $category === 'SAVINGS' ? 10000 : 50000;
+
+                $account = FinancialAccount::query()->updateOrCreate(
+                    [
+                        'organization_id' => $organization->id,
+                        'account_no' => $accountNo,
+                    ],
+                    [
+                        'branch_id' => $branchId,
+                        'financial_product_id' => $product->id,
+                        'holder_type' => Customer::class,
+                        'holder_id' => $organizationCustomer->id,
+                        'name' => $organizationCustomer->name . ' - ' . $product->name,
+                        'account_type' => $category,
+                        'status' => 'ACTIVE',
+                        'balance' => $balance,
+                        'available_balance' => $category === 'SAVINGS' ? $balance : 0,
+                        'opened_at' => '2025-07-01',
+                        'metadata' => ['seeded' => true, 'organization_customer' => true],
+                    ],
+                );
+
+                if (!$account->holders()->where('customers.id', $organizationCustomer->id)->exists()) {
+                    $account->addHolder($organizationCustomer, 'PRIMARY');
+                }
+
+                foreach ([$johnDoe, $janeDoe] as $signatory) {
+                    FinancialAccountAuthorizedPerson::query()->updateOrCreate(
+                        [
+                            'financial_account_id' => $account->id,
+                            'customer_id' => $signatory->id,
+                            'authorization_type' => 'SIGNATORY',
+                        ],
+                        [
+                            'designation' => 'Company Signatory',
+                            'is_active' => true,
+                            'note' => 'Authorized signatory for the organization account.',
+                        ],
+                    );
+                }
+
+                if ($category === 'FIXED_DEPOSIT') {
+                    $productRate = (float) DB::table('financial_product_terms')
+                        ->where('financial_product_id', $product->id)
+                        ->where('code', 'BASE')
+                        ->value('interest_rate');
+
+                    FixedDeposit::query()->updateOrCreate(
+                        ['financial_account_id' => $account->id],
+                        [
+                            'principal_amount' => $balance,
+                            'contractual_rate' => $productRate,
+                            'term_value' => 12,
+                            'term_unit' => 'MONTH',
+                            'started_at' => '2025-07-01',
+                            'maturity_date' => '2026-07-01',
+                            'maturity_amount' => round($balance * (1 + ($productRate / 100)), 2),
+                            'maturity_instruction' => 'RENEW_PRINCIPAL',
+                        ],
+                    );
+                }
+            }
+
+            $loanCustomer = $janeDoe;
+            FinancialAccount::query()
+                ->where('organization_id', $organization->id)
+                ->whereIn('account_no', [
+                    'FDR-ALL-' . $loanCustomer->id,
+                    'LN-ALL-' . $loanCustomer->id,
+                    'RD-ALL-' . $loanCustomer->id,
+                ])
+                ->whereJsonContains('metadata->seeded', true)
+                ->whereJsonContains('metadata->multi_product_customer', true)
+                ->whereDoesntHave('transactions')
+                ->delete();
+
             $loanProduct = FinancialProduct::query()
                 ->where('organization_id', $organization->id)
                 ->where('code', 'LN-GEN')
@@ -350,8 +509,8 @@ class FinancialServicesSeeder extends Seeder
                     'requested_term_months' => 24,
                     'purpose' => 'Seeded general loan for financial services workflows',
                     'status' => 'APPROVED',
-                    'applied_at' => now()->subMonths(7)->toDateString(),
-                    'approved_at' => now()->subMonths(6),
+                    'applied_at' => '2025-06-01',
+                    'approved_at' => '2025-07-01',
                     'decision_note' => 'Seeded approved loan application',
                 ],
             );
@@ -370,7 +529,7 @@ class FinancialServicesSeeder extends Seeder
                     'status' => 'ACTIVE',
                     'balance' => 50000,
                     'available_balance' => 50000,
-                    'opened_at' => now()->subMonths(6)->toDateString(),
+                    'opened_at' => '2025-07-01',
                     'metadata' => ['seeded' => true],
                 ],
             );
@@ -390,16 +549,16 @@ class FinancialServicesSeeder extends Seeder
                     'repayment_frequency' => 'MONTHLY',
                     'grace_days' => 0,
                     'late_payment_fine_rate' => 0,
-                    'approved_at' => now()->subMonths(6)->toDateString(),
-                    'disbursed_at' => now()->subMonths(6)->toDateString(),
-                    'maturity_date' => now()->addMonths(18)->toDateString(),
+                    'approved_at' => '2025-07-01',
+                    'disbursed_at' => '2025-07-01',
+                    'maturity_date' => '2027-07-01',
                     'status' => 'ACTIVE',
                 ],
             );
             app(LoanScheduleService::class)->generate($loanAccount, [
                 'frequency' => 'MONTHLY',
                 'term_months' => 24,
-                'start_date' => now()->subMonths(6)->toDateString(),
+                'start_date' => '2025-07-01',
             ]);
 
             $recurringDepositProduct = FinancialProduct::query()
@@ -421,7 +580,7 @@ class FinancialServicesSeeder extends Seeder
                     'status' => 'ACTIVE',
                     'balance' => 30000,
                     'available_balance' => 30000,
-                    'opened_at' => now()->subMonths(6)->toDateString(),
+                    'opened_at' => '2025-07-01',
                     'metadata' => ['seeded' => true],
                 ],
             );
@@ -433,8 +592,8 @@ class FinancialServicesSeeder extends Seeder
                     'installment_frequency' => 'MONTHLY',
                     'total_installments' => 24,
                     'paid_installments' => 6,
-                    'started_at' => now()->subMonths(6)->toDateString(),
-                    'maturity_date' => now()->addMonths(18)->toDateString(),
+                    'started_at' => '2025-07-01',
+                    'maturity_date' => '2027-07-01',
                     'maturity_extension_days' => 0,
                     'grace_days' => 7,
                 ],
@@ -442,18 +601,19 @@ class FinancialServicesSeeder extends Seeder
 
             foreach (range(1, 24) as $installmentNo) {
                 $isPaid = $installmentNo <= 6;
+                $installmentDate = now()->setDate(2025, 7, 1)->addMonths($installmentNo - 1);
                 RecurringDepositInstallment::query()->updateOrCreate(
                     [
                         'recurring_deposit_id' => $recurringDeposit->id,
                         'installment_no' => $installmentNo,
                     ],
                     [
-                        'due_date' => now()->subMonths(6)->addMonths($installmentNo - 1)->toDateString(),
+                        'due_date' => $installmentDate->toDateString(),
                         'amount_due' => 5000,
                         'amount_paid' => $isPaid ? 5000 : 0,
                         'fine_amount' => 0,
                         'status' => $isPaid ? 'PAID' : 'PENDING',
-                        'paid_at' => $isPaid ? now()->subMonths(6)->addMonths($installmentNo - 1) : null,
+                        'paid_at' => $isPaid ? $installmentDate : null,
                     ],
                 );
             }
@@ -475,7 +635,7 @@ class FinancialServicesSeeder extends Seeder
                     'status' => 'ACTIVE',
                     'balance' => 0,
                     'available_balance' => 0,
-                    'opened_at' => now()->subYear()->toDateString(),
+                    'opened_at' => '2025-07-01',
                     'metadata' => ['seeded' => true, 'cash_location' => 'Main Vault'],
                 ],
             );
@@ -497,7 +657,7 @@ class FinancialServicesSeeder extends Seeder
                         'balance' => $savingsOpeningAmount,
                         'available_balance' => $savingsOpeningAmount,
                         'interest_accrued' => 0,
-                        'opened_at' => now()->subMonths($index + 1)->toDateString(),
+                        'opened_at' => '2025-07-01',
                         'metadata' => ['seeded' => true],
                     ],
                 );
@@ -510,7 +670,7 @@ class FinancialServicesSeeder extends Seeder
                     [
                         'branch_id' => $branchId,
                         'transaction_type' => 'DEPOSIT',
-                        'transaction_date' => now()->subDays($index + 1),
+                        'transaction_date' => now()->setDate(2025, 7, 2)->addDays($index)->startOfDay(),
                         'amount' => $savingsOpeningAmount,
                         'currency' => 'BDT',
                         'status' => 'POSTED',
@@ -534,10 +694,83 @@ class FinancialServicesSeeder extends Seeder
 
                 $savingsProduct = FinancialProduct::query()->where('code', 'SAV-REG')->where('organization_id', $organization->id)->firstOrFail();
                 $account->update([
-                    'opened_at' => now()->subMonths(7)->toDateString(),
-                    'last_operated_at' => now()->subDays($index + 1)->toDateString(),
+                    'opened_at' => '2025-07-01',
+                    'last_operated_at' => now()->setDate(2025, 7, 2)->addDays($index)->toDateString(),
                 ]);
-                $account->addHolder($customer, 'PRIMARY');
+                $guardian = $customer->type === Customer::TYPE_INDIVIDUAL
+                    && $customer->dob !== null
+                    && $customer->dob->age < 18
+                    ? $johnDoe
+                    : null;
+                $account->addHolder($customer, 'PRIMARY', $guardian);
+            }
+
+            $savingsProduct = FinancialProduct::query()
+                ->where('organization_id', $organization->id)
+                ->where('code', 'SAV-REG')
+                ->firstOrFail();
+            $jointSavingsAccount = FinancialAccount::query()->updateOrCreate(
+                [
+                    'organization_id' => $organization->id,
+                    'account_no' => sprintf('SAV-JOINT-%06d-%06d', $johnDoe->id, $janeDoe->id),
+                ],
+                [
+                    'branch_id' => $branchId,
+                    'financial_product_id' => $savingsProduct->id,
+                    'holder_type' => Customer::class,
+                    'holder_id' => $johnDoe->id,
+                    'name' => 'John Doe and Jane Doe - Joint Savings',
+                    'account_type' => 'SAVINGS',
+                    'status' => 'ACTIVE',
+                    'balance' => 0,
+                    'available_balance' => 0,
+                    'interest_accrued' => 0,
+                    'opened_at' => now()->toDateString(),
+                    'metadata' => ['seeded' => true, 'joint_account' => true],
+                ],
+            );
+            $jointSavingsAccount->addHolder($johnDoe, 'PRIMARY', null, 50);
+            $jointSavingsAccount->addHolder($janeDoe, 'JOINT', null, 50);
+
+            $minorSavingsProduct = FinancialProduct::query()
+                ->where('organization_id', $organization->id)
+                ->where('code', 'SAV-MINOR')
+                ->firstOrFail();
+            $minorSavingsAccount = FinancialAccount::query()->updateOrCreate(
+                [
+                    'organization_id' => $organization->id,
+                    'account_no' => 'SAV-MINOR-' . $minorCustomer->id,
+                ],
+                [
+                    'branch_id' => $branchId,
+                    'financial_product_id' => $minorSavingsProduct->id,
+                    'holder_type' => Customer::class,
+                    'holder_id' => $minorCustomer->id,
+                    'name' => $minorCustomer->name . ' - ' . $minorSavingsProduct->name,
+                    'account_type' => 'SAVINGS',
+                    'status' => 'ACTIVE',
+                    'balance' => 0,
+                    'available_balance' => 0,
+                    'interest_accrued' => 0,
+                    'opened_at' => now()->toDateString(),
+                    'metadata' => ['seeded' => true, 'minor_account' => true],
+                ],
+            );
+            $minorSavingsAccount->addHolder($minorCustomer, 'PRIMARY', $johnDoe);
+
+            foreach ([$johnDoe, $janeDoe] as $parent) {
+                FinancialAccountAuthorizedPerson::query()->updateOrCreate(
+                    [
+                        'financial_account_id' => $minorSavingsAccount->id,
+                        'customer_id' => $parent->id,
+                        'authorization_type' => 'OPERATOR',
+                    ],
+                    [
+                        'designation' => 'Parent',
+                        'is_active' => true,
+                        'note' => 'Authorized to operate the minor savings account.',
+                    ],
+                );
             }
 
             $seededSavingsCount = $customers->count();
@@ -546,24 +779,7 @@ class FinancialServicesSeeder extends Seeder
                 'available_balance' => $seededSavingsCount * $savingsOpeningAmount,
             ]);
 
-            $legacyCustomer = Customer::query()->updateOrCreate(
-                [
-                    'organization_id' => $organization->id,
-                    'customer_no' => 'MEMBER-0001',
-                ],
-                [
-                    'branch_id' => $branchId,
-                    'type' => 'INDIVIDUAL',
-                    'name' => 'Jane Doe',
-                    'primary_phone' => '+8801700000001',
-                    'primary_email' => 'jane.doe@example.test',
-                    'identification_type' => 'NATIONAL_IDENTIFICATION_NUMBER',
-                    'identification_number' => 'NID-0001',
-                    'dob' => '1985-05-20',
-                    'gender' => 'OTHER',
-                    'status' => 'ACTIVE',
-                ],
-            );
+            $legacyCustomer = $janeDoe;
 
             $legacySavingsProduct = FinancialProduct::query()
                 ->where('organization_id', $organization->id)
@@ -682,7 +898,7 @@ class FinancialServicesSeeder extends Seeder
                     ['amount' => $amount, 'balance_after' => $amount, 'description' => $description],
                 );
             }
-            $shareCustomer = $customers->get(1);
+            $shareCustomer = $janeDoe;
             if ($shareCustomer) {
                 $shareProduct = FinancialProduct::query()->where('organization_id', $organization->id)->where('category', 'SHARE')->firstOrFail();
                 $shareAccount = FinancialAccount::query()->updateOrCreate(
@@ -693,9 +909,9 @@ class FinancialServicesSeeder extends Seeder
                     'balance' => $shareOpeningAmount,
                     'available_balance' => $shareOpeningAmount,
                 ]);
-                $shareAccount->update(['opened_at' => now()->subMonths(6)->toDateString()]);
+                $shareAccount->update(['opened_at' => '2025-07-05']);
                 $shareAccount->addHolder($shareCustomer, 'PRIMARY');
-                ShareAccount::query()->firstOrCreate(['financial_account_id' => $shareAccount->id], ['member_since' => now()->subMonths(6)->toDateString(), 'membership_no' => sprintf('MEM-%05d', $shareCustomer->id), 'membership_status' => 'ACTIVE']);
+                ShareAccount::query()->updateOrCreate(['financial_account_id' => $shareAccount->id], ['member_since' => '2025-07-05', 'membership_no' => sprintf('MEM-%05d', $shareCustomer->id), 'membership_status' => 'ACTIVE']);
 
                 $shareTransaction = FinancialTransaction::query()->updateOrCreate(
                     [
@@ -705,7 +921,7 @@ class FinancialServicesSeeder extends Seeder
                     [
                         'branch_id' => $branchId,
                         'transaction_type' => 'DEPOSIT',
-                        'transaction_date' => now()->subMonths(6),
+                        'transaction_date' => '2025-07-05',
                         'amount' => $shareOpeningAmount,
                         'currency' => 'BDT',
                         'status' => 'POSTED',
@@ -721,17 +937,121 @@ class FinancialServicesSeeder extends Seeder
                     ['financial_transaction_id' => $shareTransaction->id, 'financial_account_id' => $shareAccount->id, 'direction' => 'CREDIT'],
                     ['amount' => $shareOpeningAmount, 'balance_after' => $shareOpeningAmount, 'description' => 'Member share capital opening contribution'],
                 );
-                $cashAccount->update([
-                    'balance' => $seededSavingsCount * $savingsOpeningAmount
-                        + $shareOpeningAmount
-                        + $legacySavingsBalance
-                        + $legacyFixedDepositPrincipal,
-                    'available_balance' => $seededSavingsCount * $savingsOpeningAmount
-                        + $shareOpeningAmount
-                        + $legacySavingsBalance
-                        + $legacyFixedDepositPrincipal,
-                ]);
             }
+
+            $loanDisbursement = FinancialTransaction::query()->updateOrCreate(
+                [
+                    'organization_id' => $organization->id,
+                    'transaction_no' => 'FT-SEED-LOAN-001',
+                ],
+                [
+                    'branch_id' => $branchId,
+                    'transaction_type' => 'DISBURSEMENT',
+                    'transaction_date' => '2025-07-01',
+                    'amount' => 50000,
+                    'currency' => 'BDT',
+                    'status' => 'POSTED',
+                    'reference' => 'LN-SEED-0001',
+                    'description' => 'Seeded general loan disbursement',
+                ],
+            );
+            FinancialTransactionEntry::query()->updateOrCreate(
+                ['financial_transaction_id' => $loanDisbursement->id, 'financial_account_id' => $loanFinancialAccount->id, 'direction' => 'DEBIT'],
+                ['amount' => 50000, 'description' => 'Loan principal disbursed'],
+            );
+            FinancialTransactionEntry::query()->updateOrCreate(
+                ['financial_transaction_id' => $loanDisbursement->id, 'financial_account_id' => $cashAccount->id, 'direction' => 'CREDIT'],
+                ['amount' => 50000, 'description' => 'Vault cash paid for loan disbursement'],
+            );
+
+            foreach (range(1, 6) as $installmentNo) {
+                $installmentDate = now()->setDate(2025, 7, 1)->addMonths($installmentNo - 1);
+                $installmentTransaction = FinancialTransaction::query()->updateOrCreate(
+                    [
+                        'organization_id' => $organization->id,
+                        'transaction_no' => sprintf('FT-SEED-RD-%03d', $installmentNo),
+                    ],
+                    [
+                        'branch_id' => $branchId,
+                        'transaction_type' => 'DEPOSIT',
+                        'transaction_date' => $installmentDate,
+                        'amount' => 5000,
+                        'currency' => 'BDT',
+                        'status' => 'POSTED',
+                        'reference' => 'RD-SEED-0001-' . $installmentNo,
+                        'description' => 'Seeded recurring deposit installment ' . $installmentNo,
+                    ],
+                );
+                FinancialTransactionEntry::query()->updateOrCreate(
+                    ['financial_transaction_id' => $installmentTransaction->id, 'financial_account_id' => $cashAccount->id, 'direction' => 'DEBIT'],
+                    ['amount' => 5000, 'description' => 'Recurring deposit installment received'],
+                );
+                FinancialTransactionEntry::query()->updateOrCreate(
+                    ['financial_transaction_id' => $installmentTransaction->id, 'financial_account_id' => $recurringDepositAccount->id, 'direction' => 'CREDIT'],
+                    ['amount' => 5000, 'description' => 'Recurring deposit balance'],
+                );
+            }
+
+            $cashBalance = (float) DB::table('financial_transaction_entries as entries')
+                ->join('financial_transactions as transactions', 'transactions.id', '=', 'entries.financial_transaction_id')
+                ->where('transactions.organization_id', $organization->id)
+                ->where('transactions.status', 'POSTED')
+                ->where('entries.financial_account_id', $cashAccount->id)
+                ->selectRaw("COALESCE(SUM(CASE WHEN entries.direction = 'DEBIT' THEN entries.amount ELSE -entries.amount END), 0) as balance")
+                ->value('balance');
+            $cashAccount->update(['balance' => $cashBalance, 'available_balance' => $cashBalance]);
+
+            foreach (FinancialAccount::query()
+                ->where('organization_id', $organization->id)
+                ->whereJsonContains('metadata->seeded', true)
+                ->get() as $financialAccount) {
+                $debitTotal = (float) DB::table('financial_transaction_entries as entries')
+                    ->join('financial_transactions as transactions', 'transactions.id', '=', 'entries.financial_transaction_id')
+                    ->where('transactions.organization_id', $organization->id)
+                    ->where('transactions.status', 'POSTED')
+                    ->where('entries.financial_account_id', $financialAccount->id)
+                    ->where('entries.direction', 'DEBIT')
+                    ->sum('entries.amount');
+                $creditTotal = (float) DB::table('financial_transaction_entries as entries')
+                    ->join('financial_transactions as transactions', 'transactions.id', '=', 'entries.financial_transaction_id')
+                    ->where('transactions.organization_id', $organization->id)
+                    ->where('transactions.status', 'POSTED')
+                    ->where('entries.financial_account_id', $financialAccount->id)
+                    ->where('entries.direction', 'CREDIT')
+                    ->sum('entries.amount');
+                $debitNormal = in_array($financialAccount->account_type, ['CASH', 'BANK', 'LOAN'], true);
+                $netMovement = $debitNormal ? $debitTotal - $creditTotal : $creditTotal - $debitTotal;
+                $runningBalance = (float) $financialAccount->balance - $netMovement;
+
+                $entries = DB::table('financial_transaction_entries as entries')
+                    ->join('financial_transactions as transactions', 'transactions.id', '=', 'entries.financial_transaction_id')
+                    ->where('transactions.organization_id', $organization->id)
+                    ->where('transactions.status', 'POSTED')
+                    ->where('entries.financial_account_id', $financialAccount->id)
+                    ->orderBy('transactions.transaction_date')
+                    ->orderBy('transactions.id')
+                    ->orderBy('entries.id')
+                    ->get(['entries.id', 'entries.direction', 'entries.amount']);
+
+                foreach ($entries as $entry) {
+                    $increasesBalance = $entry->direction === ($debitNormal ? 'DEBIT' : 'CREDIT');
+                    $runningBalance += $increasesBalance ? (float) $entry->amount : -(float) $entry->amount;
+                    FinancialTransactionEntry::query()->whereKey($entry->id)->update(['balance_after' => $runningBalance]);
+                }
+            }
+
+            $seederUserId = User::query()->where('email', 'super.admin@email.com')->firstOrFail()->id;
+            $accountingService = app(FinancialTransactionAccountingService::class);
+            FinancialTransaction::query()
+                ->where('organization_id', $organization->id)
+                ->where('status', 'POSTED')
+                ->where(function ($query): void {
+                    $query->where('transaction_no', 'like', 'FT-SEED-%')
+                        ->orWhereIn('transaction_no', ['SAV-0001', 'FDR-0001']);
+                })
+                ->with('entries.financialAccount.product')
+                ->get()
+                ->each(fn(FinancialTransaction $transaction) => $accountingService->post($transaction, (int) $seederUserId));
         });
     }
 }

@@ -28,6 +28,20 @@ class TreasuryAndCashSeeder extends Seeder
         DB::transaction(function () use ($organization, $branchId, $user): void {
             CashDenomination::seedBangladeshPreset($organization->id);
 
+            $vaultBalance = (float) DB::table('financial_transaction_entries as entries')
+                ->join('financial_transactions as transactions', 'transactions.id', '=', 'entries.financial_transaction_id')
+                ->where('transactions.organization_id', $organization->id)
+                ->where('transactions.status', 'POSTED')
+                ->where('entries.financial_account_id', function ($query) use ($organization): void {
+                    $query->select('id')
+                        ->from('financial_accounts')
+                        ->where('organization_id', $organization->id)
+                        ->where('account_no', 'CASH-VAULT-001')
+                        ->limit(1);
+                })
+                ->selectRaw("COALESCE(SUM(CASE WHEN entries.direction = 'DEBIT' THEN entries.amount ELSE -entries.amount END), 0) as balance")
+                ->value('balance');
+
             $vaultAccount = FinancialAccount::query()->updateOrCreate(
                 [
                     'organization_id' => $organization->id,
@@ -39,9 +53,9 @@ class TreasuryAndCashSeeder extends Seeder
                     'name' => 'Main Vault Cash Account',
                     'account_type' => 'CASH',
                     'status' => 'ACTIVE',
-                    'balance' => 100000,
-                    'available_balance' => 100000,
-                    'opened_at' => now()->subYear()->toDateString(),
+                    'balance' => $vaultBalance,
+                    'available_balance' => $vaultBalance,
+                    'opened_at' => '2025-07-01',
                     'metadata' => ['seeded' => true, 'cash_location' => 'Main Vault'],
                 ],
             );
@@ -59,7 +73,7 @@ class TreasuryAndCashSeeder extends Seeder
                     'status' => 'ACTIVE',
                     'balance' => 25000,
                     'available_balance' => 25000,
-                    'opened_at' => now()->subYear()->toDateString(),
+                    'opened_at' => '2025-07-01',
                     'metadata' => ['seeded' => true, 'cash_location' => 'Main Teller'],
                 ],
             );
@@ -77,7 +91,7 @@ class TreasuryAndCashSeeder extends Seeder
                     'status' => 'ACTIVE',
                     'balance' => 5000,
                     'available_balance' => 5000,
-                    'opened_at' => now()->subYear()->toDateString(),
+                    'opened_at' => '2025-07-01',
                     'metadata' => ['seeded' => true, 'cash_location' => 'Operations Petty Cash'],
                 ],
             );
@@ -107,7 +121,7 @@ class TreasuryAndCashSeeder extends Seeder
                     'status' => 'ACTIVE',
                     'balance' => 250000,
                     'available_balance' => 250000,
-                    'opened_at' => now()->subYear()->toDateString(),
+                    'opened_at' => '2025-07-01',
                     'metadata' => ['seeded' => true, 'bank_code' => $bank->code],
                 ],
             );

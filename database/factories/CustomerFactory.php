@@ -124,12 +124,7 @@ class CustomerFactory extends Factory
                 ])
                 : null,
 
-            'status' => fake()->randomElement([
-                'PENDING',
-                'ACTIVE',
-                'INACTIVE',
-                'SUSPENDED',
-            ]),
+            'status' => 'ACTIVE',
         ];
     }
 

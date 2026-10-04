@@ -37,9 +37,9 @@ class DatabaseSeeder extends Seeder
                 PartySeeder::class,
                 CustomerSeeder::class,
                 FinancialServicesSeeder::class,
-                OpeningBalanceVoucherSeeder::class,
                 AccountDefaultRulesSeeder::class,
                 TreasuryAndCashSeeder::class,
+                OpeningBalanceVoucherSeeder::class,
             ]);
         });
 

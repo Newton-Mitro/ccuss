@@ -8,6 +8,7 @@ use App\CustomerModule\Models\CustomerFamilyRelation;
 use App\CustomerModule\Models\CustomerIntroducer;
 use App\CustomerModule\Models\KycDocument;
 use App\CustomerModule\Models\KycProfile;
+use App\SystemAdministration\Models\Organization;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -29,189 +30,304 @@ class CustomerSeeder extends Seeder
             return $count ? array_slice($files, 0, $count) : $files;
         };
 
-        $malePhotos = $getMediaFiles($mediaPath . '/male', 7);
-        $femalePhotos = $getMediaFiles($mediaPath . '/female', 10);
-        $organizationPhotos = $getMediaFiles($mediaPath . '/organization', 3);
-        $signatureFiles = $getMediaFiles($mediaPath . '/signatures', 20);
+        $malePhotos = $getMediaFiles($mediaPath . '/male', 2);
+        $femalePhotos = $getMediaFiles($mediaPath . '/female', 1);
+        $organizationPhotos = $getMediaFiles($mediaPath . '/organization', 1);
+        $signatureFiles = $getMediaFiles($mediaPath . '/signatures', 3);
         $nidFiles = $getMediaFiles($mediaPath . '/nid');
 
+        $organization = Organization::query()->where('code', 'ORG-001')->firstOrFail();
+        $branchId = $organization->branches()->oldest('id')->value('id');
+
         if (
-            count($malePhotos) < 7 ||
-            count($femalePhotos) < 10 ||
-            count($organizationPhotos) < 3 ||
-            count($signatureFiles) < 17 ||
+            count($malePhotos) < 2 ||
+            count($femalePhotos) < 1 ||
+            count($organizationPhotos) < 1 ||
+            count($signatureFiles) < 3 ||
             count($nidFiles) === 0
         ) {
             throw new \Exception("Not enough media files in one of the folders.");
         }
 
-        $customersData = array_merge(
-            array_fill(0, 7, 'male'),
-            array_fill(0, 10, 'female'),
-            array_fill(0, 3, 'organization')
-        );
+        $customersData = [
+            'john' => [
+                'photo_group' => 'male',
+                'signature_index' => 0,
+                'attributes' => [
+                    'customer_no' => 'IND-000001',
+                    'type' => Customer::TYPE_INDIVIDUAL,
+                    'name' => 'John Doe',
+                    'primary_phone' => '+8801000000001',
+                    'alternate_phone' => null,
+                    'primary_email' => 'john.doe@example.test',
+                    'alternate_email' => null,
+                    'identification_type' => 'NATIONAL_IDENTIFICATION_NUMBER',
+                    'identification_number' => 'DEMO-NID-JOHN-0001',
+                    'dob' => '1985-02-14',
+                    'gender' => 'MALE',
+                    'marital_status' => 'MARRIED',
+                    'blood_group' => 'O+',
+                    'nationality' => 'Bangladeshi',
+                    'occupation' => 'Accountant',
+                    'education' => 'Bachelor',
+                    'religion' => 'CHRISTIANITY',
+                    'status' => 'ACTIVE',
+                ],
+            ],
+            'jane' => [
+                'photo_group' => 'female',
+                'signature_index' => 1,
+                'attributes' => [
+                    'customer_no' => 'IND-000002',
+                    'type' => Customer::TYPE_INDIVIDUAL,
+                    'name' => 'Jane Doe',
+                    'primary_phone' => '+8801000000002',
+                    'alternate_phone' => null,
+                    'primary_email' => 'jane.doe@example.test',
+                    'alternate_email' => null,
+                    'identification_type' => 'NATIONAL_IDENTIFICATION_NUMBER',
+                    'identification_number' => 'DEMO-NID-JANE-0002',
+                    'dob' => '1987-07-21',
+                    'gender' => 'FEMALE',
+                    'marital_status' => 'MARRIED',
+                    'blood_group' => 'A+',
+                    'nationality' => 'Bangladeshi',
+                    'occupation' => 'Teacher',
+                    'education' => 'Bachelor',
+                    'religion' => 'CHRISTIANITY',
+                    'status' => 'ACTIVE',
+                ],
+            ],
+            'alex' => [
+                'photo_group' => 'minor',
+                'signature_index' => 2,
+                'attributes' => [
+                    'customer_no' => 'IND-000003',
+                    'type' => Customer::TYPE_INDIVIDUAL,
+                    'name' => 'Alex Doe',
+                    'primary_phone' => null,
+                    'alternate_phone' => null,
+                    'primary_email' => null,
+                    'alternate_email' => null,
+                    'identification_type' => 'BIRTH_REGISTRATION_NUMBER',
+                    'identification_number' => 'DEMO-BIRTH-ALEX-0003',
+                    'dob' => '2014-10-04',
+                    'gender' => 'MALE',
+                    'marital_status' => 'SINGLE',
+                    'blood_group' => 'B+',
+                    'nationality' => 'Bangladeshi',
+                    'occupation' => 'Student',
+                    'education' => 'Primary',
+                    'religion' => 'CHRISTIANITY',
+                    'status' => 'ACTIVE',
+                ],
+            ],
+            'organization' => [
+                'photo_group' => 'organization',
+                'signature_index' => null,
+                'attributes' => [
+                    'customer_no' => 'ORG-000001',
+                    'type' => Customer::TYPE_ORGANIZATION,
+                    'name' => 'ABC Corp.',
+                    'primary_phone' => '+8801000000004',
+                    'alternate_phone' => null,
+                    'primary_email' => 'contact@abc-corp.example.test',
+                    'alternate_email' => null,
+                    'identification_type' => 'REGISTRATION_NO',
+                    'identification_number' => 'DEMO-REG-ABC-0001',
+                    'dob' => null,
+                    'gender' => null,
+                    'marital_status' => null,
+                    'blood_group' => null,
+                    'nationality' => null,
+                    'occupation' => null,
+                    'education' => null,
+                    'religion' => null,
+                    'status' => 'ACTIVE',
+                ],
+            ],
+        ];
 
         $customers = collect();
 
-        foreach ($customersData as $index => $type) {
+        foreach ($customersData as $key => $customerData) {
+            $attributes = array_merge($customerData['attributes'], [
+                'organization_id' => $organization->id,
+                'branch_id' => $branchId,
+            ]);
+            $customer = Customer::query()
+                ->where('customer_no', $attributes['customer_no'])
+                ->first()
+                ?? Customer::query()
+                    ->where('organization_id', $organization->id)
+                    ->where('name', $attributes['name'])
+                    ->oldest('id')
+                    ->first()
+                ?? new Customer();
+            $customer->fill($attributes)->save();
+            $customers->put($key, $customer);
 
-            $customerFactory = match ($type) {
-                'male' => Customer::factory()->individualMale(),
-                'female' => Customer::factory()->individualFemale(),
-                'organization' => Customer::factory()->organization(),
-            };
-
-            $customer = $customerFactory->create();
-            $customers->push($customer);
-
-            // ✅ Base path per customer
             $basePath = "uploads/customers/{$customer->id}";
 
-            // ======================
-            // 📸 PHOTO
-            // ======================
-            $photoFile = match ($type) {
-                'male' => $malePhotos[$index],
-                'female' => $femalePhotos[$index - 7],
-                'organization' => $organizationPhotos[$index - 17],
+            $photoFile = match ($customerData['photo_group']) {
+                'male' => $malePhotos[0],
+                'female' => $femalePhotos[0],
+                'minor' => $malePhotos[1],
+                'organization' => $organizationPhotos[0],
             };
-
             $photoExt = pathinfo($photoFile, PATHINFO_EXTENSION);
             $photoFileName = 'photo_' . Str::slug($customer->customer_no) . '.' . $photoExt;
-
             $disk->putFileAs("{$basePath}/", $photoFile, $photoFileName);
 
-            // ======================
-            // 🪪 NID
-            // ======================
-            $nidFile = $nidFiles[array_rand($nidFiles)];
-            $nidExt = pathinfo($nidFile, PATHINFO_EXTENSION);
-            $nidFileName = 'nid_front_' . Str::slug($customer->customer_no) . '.' . $nidExt;
+            $createDocument = function (string $type, string $fileName, string $mime, string $status) use ($customer, $basePath): void {
+                KycDocument::query()->updateOrCreate(
+                    ['customer_id' => $customer->id, 'document_type' => $type],
+                    [
+                        'file_name' => $fileName,
+                        'file_path' => "{$basePath}/{$fileName}",
+                        'mime' => $mime,
+                        'alt_text' => ucwords(str_replace('_', ' ', $type)),
+                        'verification_status' => $status,
+                        'verified_at' => $status === KycDocument::STATUS_VERIFIED ? now() : null,
+                        'remarks' => null,
+                    ],
+                );
+            };
 
-            $disk->putFileAs("{$basePath}/", $nidFile, $nidFileName);
-
-            if ($type === 'organization') {
-
-                KycDocument::factory()->for($customer)->type('PHOTO')->verified()->create([
-                    'file_name' => $photoFileName,
-                    'file_path' => "{$basePath}/{$photoFileName}",
-                    'mime' => 'image/' . $photoExt,
-                ]);
-
-                KycDocument::factory()->for($customer)->type('TRADE_LICENSE')->verified()->create([
-                    'file_name' => $photoFileName,
-                    'file_path' => "{$basePath}/{$photoFileName}",
-                    'mime' => 'image/' . $photoExt,
-                ]);
-
+            if ($key === 'organization') {
+                $createDocument(
+                    KycDocument::PHOTO,
+                    $photoFileName,
+                    'image/' . $photoExt,
+                    KycDocument::STATUS_VERIFIED,
+                );
+                $createDocument(
+                    KycDocument::TRADE_LICENSE,
+                    $photoFileName,
+                    'image/' . $photoExt,
+                    KycDocument::STATUS_VERIFIED,
+                );
             } else {
-
-                // ======================
-                // ✍️ SIGNATURE
-                // ======================
-                $signatureFile = $signatureFiles[$index];
+                $signatureFile = $signatureFiles[$customerData['signature_index']];
                 $signatureExt = pathinfo($signatureFile, PATHINFO_EXTENSION);
                 $signatureFileName = 'signature_' . Str::slug($customer->customer_no) . '.' . $signatureExt;
-
                 $disk->putFileAs("{$basePath}/", $signatureFile, $signatureFileName);
 
-                // ======================
-                // 📄 KYC DOCUMENTS
-                // ======================
-                KycDocument::factory()->for($customer)->type('PHOTO')->pending()->create([
-                    'file_name' => $photoFileName,
-                    'file_path' => "{$basePath}/{$photoFileName}",
-                    'mime' => 'image/' . $photoExt,
-                ]);
+                $nidFile = $nidFiles[0];
+                $nidExt = pathinfo($nidFile, PATHINFO_EXTENSION);
+                $nidFileName = 'nid_front_' . Str::slug($customer->customer_no) . '.' . $nidExt;
+                $disk->putFileAs("{$basePath}/", $nidFile, $nidFileName);
 
-                KycDocument::factory()->for($customer)->type('SIGNATURE')->pending()->create([
-                    'file_name' => $signatureFileName,
-                    'file_path' => "{$basePath}/{$signatureFileName}",
-                    'mime' => 'image/' . $signatureExt,
-                ]);
-
-                KycDocument::factory()->for($customer)->type('NATIONAL_IDENTIFICATION_NUMBER')->pending()->create([
-                    'file_name' => $nidFileName,
-                    'file_path' => "{$basePath}/{$nidFileName}",
-                    'mime' => 'image/' . $nidExt,
-                ]);
-            }
-
-            // ======================
-            // 🏠 ADDRESSES
-            // ======================
-            foreach (['CURRENT', 'PERMANENT', 'MAILING'] as $addrType) {
-                CustomerAddress::factory()->for($customer)
-                    ->{$addrType === 'CURRENT' || $addrType === 'PERMANENT' ? 'pending' : 'pending'}()
-                        ->create(['type' => $addrType]);
-            }
-
-            // ======================
-            // 🧾 KYC PROFILE
-            // ======================
-            KycProfile::factory()->for($customer)->create()->recalculateVerificationCounts();
-        }
-
-        // ======================
-        // 👥 INTRODUCERS
-        // ======================
-        foreach ($customers as $customer) {
-            $introducer = $customers->where('id', '!=', $customer->id)->random();
-
-            CustomerIntroducer::create([
-                'introduced_customer_id' => $customer->id,
-                'introducer_customer_id' => $introducer->id,
-                'introducer_account_id' => null,
-                'relationship_type' => collect([
-                    'FAMILY',
-                    'FRIEND',
-                    'BUSINESS',
-                    'COLLEAGUE',
-                    'OTHER'
-                ])->random(),
-                'verification_status' => CustomerIntroducer::STATUS_PENDING,
-                'verified_at' => now(),
-            ]);
-        }
-
-        // ======================
-        // 👨‍👩‍👧 FAMILY RELATIONS
-        // ======================
-        foreach ($customers as $customer) {
-
-            if ($customer->type === 'ORGANIZATION')
-                continue;
-
-            $relatives = $customers
-                ->where('id', '!=', $customer->id)
-                ->filter(fn($relative) => $relative->type === 'INDIVIDUAL')
-                ->shuffle()
-                ->take(rand(2, 4));
-
-            foreach ($relatives as $relative) {
-
-                if ($customer->gender === 'MALE') {
-                    $relationshipOptions = $relative->gender === 'MALE'
-                        ? ['FATHER', 'BROTHER', 'SON', 'GRANDFATHER', 'UNCLE', 'NEPHEW', 'FATHER_IN_LAW', 'SON_IN_LAW', 'BROTHER_IN_LAW']
-                        : ['MOTHER', 'SISTER', 'DAUGHTER', 'WIFE', 'GRANDMOTHER', 'AUNT', 'NIECE', 'MOTHER_IN_LAW', 'DAUGHTER_IN_LAW', 'SISTER_IN_LAW'];
-                } else {
-                    $relationshipOptions = $relative->gender === 'MALE'
-                        ? ['FATHER', 'BROTHER', 'SON', 'HUSBAND', 'GRANDFATHER', 'UNCLE', 'NEPHEW', 'FATHER_IN_LAW', 'SON_IN_LAW', 'BROTHER_IN_LAW']
-                        : ['MOTHER', 'SISTER', 'DAUGHTER', 'WIFE', 'GRANDMOTHER', 'AUNT', 'NIECE', 'MOTHER_IN_LAW', 'DAUGHTER_IN_LAW', 'SISTER_IN_LAW'];
-                }
-
-                CustomerFamilyRelation::firstOrCreate(
-                    [
-                        'customer_id' => $customer->id,
-                        'relative_id' => $relative->id,
-                    ],
-                    [
-                        'relation_type' => collect($relationshipOptions)->random(),
-                    ]
+                $createDocument(
+                    KycDocument::PHOTO,
+                    $photoFileName,
+                    'image/' . $photoExt,
+                    KycDocument::STATUS_PENDING,
+                );
+                $createDocument(
+                    KycDocument::SIGNATURE,
+                    $signatureFileName,
+                    'image/' . $signatureExt,
+                    KycDocument::STATUS_PENDING,
+                );
+                $createDocument(
+                    KycDocument::NATIONAL_ID,
+                    $nidFileName,
+                    'image/' . $nidExt,
+                    KycDocument::STATUS_PENDING,
                 );
             }
+
+            $address = $key === 'organization'
+                ? [
+                    'line1' => '24 Road 11',
+                    'line2' => 'Banani',
+                    'division' => 'Dhaka',
+                    'district' => 'Dhaka',
+                    'upazila' => 'Gulshan',
+                    'union_ward' => 'Ward 19',
+                    'postal_code' => '1213',
+                ]
+                : [
+                    'line1' => '12 Road 5',
+                    'line2' => 'Dhanmondi',
+                    'division' => 'Dhaka',
+                    'district' => 'Dhaka',
+                    'upazila' => 'Dhanmondi',
+                    'union_ward' => 'Ward 15',
+                    'postal_code' => '1209',
+                ];
+
+            foreach (['CURRENT', 'PERMANENT', 'MAILING'] as $addressType) {
+                CustomerAddress::query()->updateOrCreate(
+                    ['customer_id' => $customer->id, 'type' => $addressType],
+                    array_merge($address, [
+                        'country' => 'Bangladesh',
+                        'verification_status' => CustomerAddress::STATUS_PENDING,
+                        'verified_at' => null,
+                        'remarks' => null,
+                    ]),
+                );
+            }
+
+            KycProfile::query()->updateOrCreate(
+                ['customer_id' => $customer->id],
+                [
+                    'primary_verified' => 0,
+                    'other_verified' => 0,
+                    'kyc_level' => KycProfile::LEVEL_MINIMAL,
+                ],
+            )->recalculateVerificationCounts();
         }
 
-        $this->command->info('✅ Customers seeded with per-customer file structure successfully.');
+        $johnDoe = $customers->get('john');
+        $janeDoe = $customers->get('jane');
+        $minorCustomer = $customers->get('alex');
+        $organizationCustomer = $customers->get('organization');
+
+        foreach ([
+            [$johnDoe, $janeDoe, CustomerIntroducer::FAMILY],
+            [$janeDoe, $johnDoe, CustomerIntroducer::FAMILY],
+            [$minorCustomer, $johnDoe, CustomerIntroducer::FAMILY],
+            [$organizationCustomer, $janeDoe, CustomerIntroducer::BUSINESS],
+        ] as [$introducedCustomer, $introducer, $relationshipType]) {
+            CustomerIntroducer::query()->updateOrCreate(
+                [
+                    'introduced_customer_id' => $introducedCustomer->id,
+                    'introducer_customer_id' => $introducer->id,
+                ],
+                [
+                    'introducer_account_id' => null,
+                    'relationship_type' => $relationshipType,
+                    'verification_status' => CustomerIntroducer::STATUS_PENDING,
+                    'verified_at' => null,
+                    'remarks' => null,
+                ],
+            );
+        }
+
+        foreach ([
+            [$minorCustomer, $johnDoe, CustomerFamilyRelation::FATHER],
+            [$minorCustomer, $janeDoe, CustomerFamilyRelation::MOTHER],
+            [$johnDoe, $janeDoe, CustomerFamilyRelation::WIFE],
+            [$janeDoe, $johnDoe, CustomerFamilyRelation::HUSBAND],
+        ] as [$customer, $relative, $relationType]) {
+            CustomerFamilyRelation::query()->updateOrCreate(
+                ['customer_id' => $customer->id, 'relative_id' => $relative->id],
+                [
+                    'relation_type' => $relationType,
+                    'verification_status' => CustomerFamilyRelation::STATUS_VERIFIED,
+                    'verified_at' => now(),
+                    'remarks' => null,
+                ],
+            );
+        }
+
+        KycProfile::query()
+            ->where('customer_id', $minorCustomer->id)
+            ->first()
+                ?->recalculateVerificationCounts();
+
+        $this->command->info('Customers seeded with deterministic related data.');
     }
 }
