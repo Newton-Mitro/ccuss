@@ -64,6 +64,12 @@ export interface CashLocationOption {
     type?: string;
 }
 
+export interface CashBranchOption {
+    id: number;
+    code: string;
+    name: string;
+}
+
 export interface TellerTransferPageProps extends SharedData {
     branch_day: { id: number; business_date: string; status: string } | null;
     cash_locations: CashLocationOption[];
@@ -80,7 +86,13 @@ export interface ChequeBookCreatePageProps extends SharedData {
 }
 
 export interface PettyCashAccountCreatePageProps extends SharedData {
-    cash_locations: CashLocationOption[];
+    branches?: CashBranchOption[];
+    default_branch_id?: number | null;
+}
+
+export interface VaultCreatePageProps extends SharedData {
+    branches?: CashBranchOption[];
+    default_branch_id?: number | null;
 }
 
 export interface PettyCashFundOption {
@@ -138,5 +150,7 @@ export interface SavingsChequeWithdrawalPageProps extends SharedData {
 }
 
 export interface TellerCreatePageProps extends SharedData {
-    users: { id: number; name: string; email: string }[];
+    branches?: CashBranchOption[];
+    default_branch_id?: number | null;
+    users: { id: number; branch_id?: number; name: string; email: string }[];
 }

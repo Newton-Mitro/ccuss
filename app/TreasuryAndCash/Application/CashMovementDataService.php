@@ -21,7 +21,13 @@ class CashMovementDataService
                     ->where('organization_id', $organizationId)
                     ->where('branch_id', $branchId);
             })
-            ->with(['tellerSession.teller', 'branchDay'])
+            ->with([
+                'tellerSession.teller',
+                'branchDay',
+                'financialTransaction:id,transaction_no,status',
+                'financialTransaction.entries:id,financial_transaction_id,financial_account_id,direction,amount,description,line_no',
+                'financialTransaction.entries.financialAccount:id,account_no,name',
+            ])
             ->latest('requested_at');
 
         if (!empty($search)) {

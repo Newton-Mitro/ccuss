@@ -9,9 +9,10 @@ import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
 export default function CreatePettyCashAccount() {
-    const { cash_locations } = usePage<PettyCashAccountCreatePageProps>().props;
+    const { branches = [], default_branch_id } =
+        usePage<PettyCashAccountCreatePageProps>().props;
     const { data, setData, post, processing, errors } = useForm({
-        cash_location_id: '',
+        branch_id: String(default_branch_id ?? branches[0]?.id ?? ''),
         code: '',
         name: '',
         fund_limit: '',
@@ -39,8 +40,8 @@ export default function CreatePettyCashAccount() {
                         Create petty cash fund
                     </h1>
                     <p className="text-sm text-muted-foreground">
-                        Configure a new petty cash fund with its cash location
-                        and operating limit.
+                        Configure a petty cash fund and its branch cash
+                        location.
                     </p>
                 </div>
 
@@ -55,23 +56,24 @@ export default function CreatePettyCashAccount() {
                     className="space-y-4 rounded-md border bg-card p-4"
                 >
                     <div>
-                        <Label htmlFor="cash_location_id">Cash location</Label>
+                        <Label htmlFor="branch_id">Branch</Label>
                         <select
-                            id="cash_location_id"
+                            id="branch_id"
                             className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm"
-                            value={data.cash_location_id}
+                            value={data.branch_id}
                             onChange={(event) =>
-                                setData('cash_location_id', event.target.value)
+                                setData('branch_id', event.target.value)
                             }
+                            required
                         >
-                            <option value="">Select cash location</option>
-                            {cash_locations.map((location) => (
-                                <option key={location.id} value={location.id}>
-                                    {location.code} · {location.name}
+                            <option value="">Select branch</option>
+                            {branches.map((branch) => (
+                                <option key={branch.id} value={branch.id}>
+                                    {branch.name} ({branch.code})
                                 </option>
                             ))}
                         </select>
-                        <InputError message={errors.cash_location_id} />
+                        <InputError message={errors.branch_id} />
                     </div>
 
                     <div className="grid gap-4 sm:grid-cols-2">
@@ -176,7 +178,7 @@ export default function CreatePettyCashAccount() {
                         </Button>
                         <Button
                             type="submit"
-                            disabled={processing || cash_locations.length === 0}
+                            disabled={processing || branches.length === 0}
                         >
                             {processing ? 'Saving...' : 'Create fund'}
                         </Button>

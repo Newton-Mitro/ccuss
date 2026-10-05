@@ -3,6 +3,7 @@
 namespace App\TreasuryAndCash\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreVaultRequest extends FormRequest
 {
@@ -14,6 +15,16 @@ class StoreVaultRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'branch_id' => [
+                $this->isMethod('post') ? 'required' : 'sometimes',
+                'integer',
+                Rule::exists('branches', 'id')->where(
+                    fn($query) => $query->where(
+                        'organization_id',
+                        $this->attributes->get('active_organization')?->id,
+                    ),
+                ),
+            ],
             'code' => ['required', 'string', 'max:50'],
             'name' => ['required', 'string', 'max:150'],
             'maximum_balance' => ['nullable', 'numeric', 'gte:0'],

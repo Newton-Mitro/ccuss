@@ -47,7 +47,10 @@ class CashMovementController extends Controller
         $this->middleware('permission:cash_transfers.approve')->only(['approveCashTransfer']);
         $this->middleware('permission:cash_transfers.complete')->only(['completeCashTransfer']);
         $this->middleware('permission:cash_transactions.view')->only(['tellerCashTransactions']);
+        $this->middleware('permission:cash_transactions.update')->only(['updateTellerCashTransaction']);
+        $this->middleware('permission:cash_transactions.cancel')->only(['cancelTellerCashTransaction']);
         $this->middleware('permission:cash_transactions.post')->only(['postTellerCashTransaction']);
+        $this->middleware('permission:cash_transactions.reverse')->only(['reverseTellerCashTransaction']);
         $this->middleware('permission:cash_transactions.view')->only(['cashAdjustments']);
         $this->middleware('permission:cash_transactions.post')->only(['approveCashAdjustment', 'postCashAdjustment']);
     }
@@ -142,6 +145,79 @@ class CashMovementController extends Controller
 
         return redirect()->route('teller-transactions.index')
             ->with('success', 'Teller transaction posted successfully.');
+    }
+
+    public function updateTellerCashTransaction(Request $request, TellerCashTransaction $transaction): RedirectResponse
+    {
+        $organization = $request->attributes->get('active_organization');
+        $user = $request->user();
+
+        abort_unless($user?->branch_id, 422, 'A branch assignment is required for teller transactions.');
+
+        $data = $request->validate([
+            'reference' => ['nullable', 'string', 'max:255'],
+            'note' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        try {
+            $this->tellerCashTransactionService->updatePendingDetails(
+                $organization->id,
+                $user->branch_id,
+                $transaction->id,
+                $data['reference'] ?? null,
+                $data['note'] ?? null,
+            );
+        } catch (\RuntimeException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
+
+        return back()->with('success', 'Teller transaction details updated successfully.');
+    }
+
+    public function cancelTellerCashTransaction(Request $request, TellerCashTransaction $transaction): RedirectResponse
+    {
+        $organization = $request->attributes->get('active_organization');
+        $user = $request->user();
+
+        abort_unless($user?->branch_id, 422, 'A branch assignment is required for teller transactions.');
+        $data = $request->validate(['reason' => ['required', 'string', 'max:2000']]);
+
+        try {
+            $this->tellerCashTransactionService->cancelPending(
+                $organization->id,
+                $user->branch_id,
+                $user->id,
+                $transaction->id,
+                $data['reason'],
+            );
+        } catch (\RuntimeException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
+
+        return back()->with('success', 'Pending teller transaction cancelled.');
+    }
+
+    public function reverseTellerCashTransaction(Request $request, TellerCashTransaction $transaction): RedirectResponse
+    {
+        $organization = $request->attributes->get('active_organization');
+        $user = $request->user();
+
+        abort_unless($user?->branch_id, 422, 'A branch assignment is required for teller transactions.');
+        $data = $request->validate(['reason' => ['required', 'string', 'max:2000']]);
+
+        try {
+            $this->tellerCashTransactionService->reversePosted(
+                $organization->id,
+                $user->branch_id,
+                $user->id,
+                $transaction->id,
+                $data['reason'],
+            );
+        } catch (\RuntimeException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
+
+        return back()->with('success', 'Posted teller transaction reversed.');
     }
 
     public function tellerToTellerTransfer(Request $request): Response

@@ -224,6 +224,15 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::get('/', [CashMovementController::class, 'tellerCashTransactions'])
             ->middleware('permission:cash_transactions.view')
             ->name('index');
+        Route::patch('/{transaction}', [CashMovementController::class, 'updateTellerCashTransaction'])
+            ->middleware('permission:cash_transactions.update')
+            ->name('update');
+        Route::post('/{transaction}/cancel', [CashMovementController::class, 'cancelTellerCashTransaction'])
+            ->middleware('permission:cash_transactions.cancel')
+            ->name('cancel');
+        Route::post('/{transaction}/reverse', [CashMovementController::class, 'reverseTellerCashTransaction'])
+            ->middleware('permission:cash_transactions.reverse')
+            ->name('reverse');
         Route::post('/{transaction}/post', [CashMovementController::class, 'postTellerCashTransaction'])
             ->middleware('permission:cash_transactions.post')
             ->name('post');

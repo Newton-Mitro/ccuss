@@ -162,4 +162,170 @@ class TellerCashTransactionService
             return $transaction->fresh();
         });
     }
+
+    public function updatePendingDetails(
+        int $organizationId,
+        int $branchId,
+        int $transactionId,
+        ?string $reference,
+        ?string $note,
+    ): TellerCashTransaction {
+        return DB::transaction(function () use ($organizationId, $branchId, $transactionId, $reference, $note) {
+            $transaction = TellerCashTransaction::query()
+                ->whereKey($transactionId)
+                ->where('status', 'PENDING')
+                ->whereHas('branchDay', function ($branchDay) use ($organizationId, $branchId) {
+                    $branchDay
+                        ->where('organization_id', $organizationId)
+                        ->where('branch_id', $branchId)
+                        ->where('status', 'OPEN');
+                })
+                ->with('tellerSession')
+                ->lockForUpdate()
+                ->first();
+
+            if (!$transaction || !$transaction->tellerSession || $transaction->tellerSession->status !== 'OPEN') {
+                throw new \RuntimeException('A pending transaction for an open teller session is required.');
+            }
+
+            $transaction->update([
+                'reference' => $reference,
+                'note' => $note,
+            ]);
+
+            if ($transaction->financial_transaction_id) {
+                $financialTransaction = $transaction->financialTransaction()
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$financialTransaction || $financialTransaction->status !== 'PENDING') {
+                    throw new \RuntimeException('Only a pending financial transaction can be edited.');
+                }
+
+                $financialTransaction->update([
+                    'reference' => $reference,
+                    'description' => $note,
+                ]);
+            }
+
+            return $transaction->fresh();
+        });
+    }
+
+    public function cancelPending(
+        int $organizationId,
+        int $branchId,
+        int $userId,
+        int $transactionId,
+        string $reason,
+    ): TellerCashTransaction {
+        return DB::transaction(function () use ($organizationId, $branchId, $userId, $transactionId, $reason) {
+            $transaction = TellerCashTransaction::query()
+                ->whereKey($transactionId)
+                ->where('status', 'PENDING')
+                ->whereHas('branchDay', function ($branchDay) use ($organizationId, $branchId) {
+                    $branchDay
+                        ->where('organization_id', $organizationId)
+                        ->where('branch_id', $branchId);
+                })
+                ->lockForUpdate()
+                ->first();
+
+            if (!$transaction) {
+                throw new \RuntimeException('Only a pending transaction in the active branch can be cancelled.');
+            }
+
+            if ($transaction->financial_transaction_id) {
+                $financialTransaction = $transaction->financialTransaction()
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$financialTransaction || $financialTransaction->status !== 'PENDING') {
+                    throw new \RuntimeException('The linked financial transaction is no longer pending.');
+                }
+
+                $financialTransaction->update(['status' => 'CANCELLED']);
+            }
+
+            $transaction->update([
+                'status' => 'CANCELLED',
+                'cancelled_by' => $userId,
+                'cancelled_at' => now(),
+                'cancellation_reason' => $reason,
+            ]);
+
+            return $transaction->fresh();
+        });
+    }
+
+    public function reversePosted(
+        int $organizationId,
+        int $branchId,
+        int $userId,
+        int $transactionId,
+        string $reason,
+    ): TellerCashTransaction {
+        return DB::transaction(function () use ($organizationId, $branchId, $userId, $transactionId, $reason) {
+            $transaction = TellerCashTransaction::query()
+                ->whereKey($transactionId)
+                ->where('status', 'POSTED')
+                ->whereHas('branchDay', function ($branchDay) use ($organizationId, $branchId) {
+                    $branchDay
+                        ->where('organization_id', $organizationId)
+                        ->where('branch_id', $branchId);
+                })
+                ->lockForUpdate()
+                ->first();
+
+            if (!$transaction) {
+                throw new \RuntimeException('Only a posted transaction in the active branch can be reversed.');
+            }
+
+            $session = TellerSession::query()
+                ->whereKey($transaction->teller_session_id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$session) {
+                throw new \RuntimeException('The teller session for this transaction no longer exists.');
+            }
+
+            if ($transaction->financial_transaction_id) {
+                $financialTransaction = $transaction->financialTransaction()
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$financialTransaction || $financialTransaction->status !== 'POSTED') {
+                    throw new \RuntimeException('The linked financial transaction is not posted and cannot be reversed.');
+                }
+
+                $this->financialTransactionService->reverse($financialTransaction, $organizationId);
+            }
+
+            $expectedCash = (float) ($session->expected_cash ?? $session->opening_cash);
+            $amount = (float) $transaction->amount;
+            $newExpectedCash = $transaction->type === 'DEPOSIT'
+                ? $expectedCash - $amount
+                : $expectedCash + $amount;
+
+            if ($newExpectedCash < 0) {
+                throw new \RuntimeException('The reversal would make teller expected cash negative.');
+            }
+
+            $sessionUpdates = ['expected_cash' => $newExpectedCash];
+            if ($session->status === 'CLOSED' && $session->closing_cash !== null) {
+                $sessionUpdates['cash_difference'] = (float) $session->closing_cash - $newExpectedCash;
+            }
+            $session->update($sessionUpdates);
+
+            $transaction->update([
+                'status' => 'REVERSED',
+                'reversed_by' => $userId,
+                'reversed_at' => now(),
+                'reversal_reason' => $reason,
+            ]);
+
+            return $transaction->fresh();
+        });
+    }
 }

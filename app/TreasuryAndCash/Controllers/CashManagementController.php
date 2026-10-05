@@ -3,6 +3,7 @@
 namespace App\TreasuryAndCash\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\TreasuryAndCash\Application\CashBranchAccessService;
 use App\TreasuryAndCash\Application\CashManagementDataService;
 use App\TreasuryAndCash\Application\TellerSessionService;
 use App\TreasuryAndCash\Application\VaultSessionService;
@@ -21,6 +22,7 @@ use App\SystemAdministration\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -28,6 +30,7 @@ class CashManagementController extends Controller
 {
     public function __construct(
         private readonly CashManagementDataService $cashManagementDataService,
+        private readonly CashBranchAccessService $cashBranchAccessService,
         private readonly TellerSessionService $tellerSessionService,
         private readonly VaultSessionService $vaultSessionService,
     ) {
@@ -70,23 +73,35 @@ class CashManagementController extends Controller
         ]);
     }
 
-    public function createVault(): Response
+    public function createVault(Request $request): Response
     {
-        return Inertia::render('treasury-cash/vaults/create');
+        $organization = $request->attributes->get('active_organization');
+
+        return Inertia::render('treasury-cash/vaults/create', [
+            'branches' => $this->cashBranchAccessService->branchesFor(
+                $request->user(),
+                $organization->id,
+            ),
+            'default_branch_id' => $request->user()->branch_id,
+        ]);
     }
 
     public function storeVault(StoreVaultRequest $request): RedirectResponse
     {
         $organization = $request->attributes->get('active_organization');
         $user = $request->user();
+        $data = $request->validated();
 
-        abort_unless($user?->branch_id, 422, 'A branch assignment is required to create a vault.');
+        if (!$this->cashBranchAccessService->canManage($user, $organization->id, (int) $data['branch_id'])) {
+            throw ValidationException::withMessages([
+                'branch_id' => 'You are not assigned to the selected branch.',
+            ]);
+        }
 
-        DB::transaction(function () use ($request, $organization, $user): void {
-            $data = $request->validated();
+        DB::transaction(function () use ($data, $organization): void {
             $location = CashLocation::create([
                 'organization_id' => $organization->id,
-                'branch_id' => $user->branch_id,
+                'branch_id' => $data['branch_id'],
                 'code' => $data['code'],
                 'name' => $data['name'],
                 'type' => 'VAULT',
@@ -131,15 +146,17 @@ class CashManagementController extends Controller
     public function createTeller(Request $request): Response
     {
         $user = $request->user();
-
-        abort_unless($user?->branch_id, 422, 'A branch assignment is required to create a teller.');
+        $organization = $request->attributes->get('active_organization');
+        $branches = $this->cashBranchAccessService->branchesFor($user, $organization->id);
 
         return Inertia::render('treasury-cash/tellers/create', [
+            'branches' => $branches,
+            'default_branch_id' => $user->branch_id,
             'users' => User::query()
-                ->where('organization_id', $request->attributes->get('active_organization')->id)
-                ->where('branch_id', $user->branch_id)
+                ->where('organization_id', $organization->id)
+                ->whereIn('branch_id', $branches->pluck('id'))
                 ->orderBy('name')
-                ->get(['id', 'name', 'email']),
+                ->get(['id', 'branch_id', 'name', 'email']),
         ]);
     }
 
@@ -149,20 +166,25 @@ class CashManagementController extends Controller
         $user = $request->user();
         $data = $request->validated();
 
-        abort_unless($user?->branch_id, 422, 'A branch assignment is required to create a teller.');
+        if (!$this->cashBranchAccessService->canManage($user, $organization->id, (int) $data['branch_id'])) {
+            throw ValidationException::withMessages([
+                'branch_id' => 'You are not assigned to the selected branch.',
+            ]);
+        }
+
         abort_unless(
             User::query()
                 ->whereKey($data['user_id'])
                 ->where('organization_id', $organization->id)
-                ->where('branch_id', $user->branch_id)
+                ->where('branch_id', $data['branch_id'])
                 ->exists(),
             404,
         );
 
-        DB::transaction(function () use ($data, $organization, $user): void {
+        DB::transaction(function () use ($data, $organization): void {
             $location = CashLocation::create([
                 'organization_id' => $organization->id,
-                'branch_id' => $user->branch_id,
+                'branch_id' => $data['branch_id'],
                 'code' => $data['code'],
                 'name' => $data['name'],
                 'type' => 'TELLER',
@@ -184,15 +206,15 @@ class CashManagementController extends Controller
     public function editTeller(Request $request, Teller $teller): Response
     {
         $this->authorizeCashLocation($request, $teller->cashLocation);
-        $user = $request->user();
+        $organization = $request->attributes->get('active_organization');
 
         return Inertia::render('treasury-cash/tellers/create', [
             'teller' => $teller->load('cashLocation'),
             'users' => User::query()
-                ->where('organization_id', $request->attributes->get('active_organization')->id)
-                ->where('branch_id', $user->branch_id)
+                ->where('organization_id', $organization->id)
+                ->where('branch_id', $teller->cashLocation->branch_id)
                 ->orderBy('name')
-                ->get(['id', 'name', 'email']),
+                ->get(['id', 'branch_id', 'name', 'email']),
         ]);
     }
 
@@ -200,6 +222,15 @@ class CashManagementController extends Controller
     {
         $this->authorizeCashLocation($request, $teller->cashLocation);
         $data = $request->validated();
+
+        abort_unless(
+            User::query()
+                ->whereKey($data['user_id'])
+                ->where('organization_id', $request->attributes->get('active_organization')->id)
+                ->where('branch_id', $teller->cashLocation->branch_id)
+                ->exists(),
+            404,
+        );
 
         DB::transaction(function () use ($teller, $data): void {
             $teller->update($data);

@@ -25,6 +25,12 @@ class TellerCashTransaction extends Model
         'note',
         'requested_by',
         'posted_by',
+        'cancelled_by',
+        'cancelled_at',
+        'cancellation_reason',
+        'reversed_by',
+        'reversed_at',
+        'reversal_reason',
         'requested_at',
         'posted_at',
     ];
@@ -33,6 +39,8 @@ class TellerCashTransaction extends Model
         'amount' => 'decimal:4',
         'requested_at' => 'datetime',
         'posted_at' => 'datetime',
+        'cancelled_at' => 'datetime',
+        'reversed_at' => 'datetime',
     ];
 
     public function branchDay(): BelongsTo
@@ -63,5 +71,15 @@ class TellerCashTransaction extends Model
     public function postedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'posted_by');
+    }
+
+    public function cancelledBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'cancelled_by');
+    }
+
+    public function reversedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reversed_by');
     }
 }

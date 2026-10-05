@@ -124,19 +124,31 @@ it('does not expose cash management pages without permission', function () {
         ->assertForbidden();
 });
 
-it('creates a vault and teller for the users active branch', function () {
+it('creates a vault and teller for a selected authorized branch', function () {
     $fixture = cashManagementFixture();
     grantCashManagementCreatePermission($fixture['user']);
+    $selectedBranch = Branch::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+    ]);
+    $fixture['user']->branches()->syncWithoutDetaching([$selectedBranch->id]);
+    $assignedTellerUser = User::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $selectedBranch->id,
+    ]);
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('vaults.create'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page->component('treasury-cash/vaults/create'));
+        ->assertInertia(fn($page) => $page
+            ->component('treasury-cash/vaults/create')
+            ->has('branches', 2)
+            ->where('default_branch_id', $fixture['branch']->id));
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->post(route('vaults.store'), [
+            'branch_id' => $selectedBranch->id,
             'code' => 'VAULT-002',
             'name' => 'Secondary Vault',
             'maximum_balance' => 50000,
@@ -150,12 +162,14 @@ it('creates a vault and teller for the users active branch', function () {
         ->assertSuccessful()
         ->assertInertia(fn($page) => $page
             ->component('treasury-cash/tellers/create')
-            ->has('users'));
+            ->has('branches', 2)
+            ->has('users', 2));
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->post(route('tellers.store'), [
-            'user_id' => $fixture['user']->id,
+            'branch_id' => $selectedBranch->id,
+            'user_id' => $assignedTellerUser->id,
             'code' => 'T-002',
             'name' => 'Second Teller',
             'maximum_cash' => 15000,
@@ -164,5 +178,27 @@ it('creates a vault and teller for the users active branch', function () {
         ->assertRedirect(route('tellers.index'));
 
     expect(Vault::query()->where('code', 'VAULT-002')->exists())->toBeTrue()
-        ->and(Teller::query()->where('code', 'T-002')->exists())->toBeTrue();
+        ->and(Teller::query()->where('code', 'T-002')->exists())->toBeTrue()
+        ->and(CashLocation::query()->where('code', 'VAULT-002')->value('branch_id'))->toBe($selectedBranch->id)
+        ->and(CashLocation::query()->where('code', 'T-002')->value('branch_id'))->toBe($selectedBranch->id);
+});
+
+it('rejects cash locations for branches not assigned to the user', function () {
+    $fixture = cashManagementFixture();
+    grantCashManagementCreatePermission($fixture['user']);
+    $otherBranch = Branch::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('vaults.store'), [
+            'branch_id' => $otherBranch->id,
+            'code' => 'VAULT-UNAUTHORIZED',
+            'name' => 'Unauthorized Vault',
+            'status' => 'ACTIVE',
+        ])
+        ->assertSessionHasErrors('branch_id');
+
+    expect(CashLocation::query()->where('code', 'VAULT-UNAUTHORIZED')->exists())->toBeFalse();
 });

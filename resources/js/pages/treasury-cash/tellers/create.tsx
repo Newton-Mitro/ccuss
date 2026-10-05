@@ -12,14 +12,27 @@ import { BreadcrumbItem } from '../../../types';
 
 export default function Create({ teller }: any) {
     const editing = Boolean(teller);
-    const { users } = usePage<TellerCreatePageProps>().props;
+    const {
+        users,
+        branches = [],
+        default_branch_id,
+    } = usePage<TellerCreatePageProps>().props;
     const { data, setData, post, put, processing, errors } = useForm({
+        branch_id: String(
+            teller?.cash_location?.branch_id ??
+                default_branch_id ??
+                branches[0]?.id ??
+                '',
+        ),
         user_id: teller?.user_id ?? '',
         code: teller?.code ?? '',
         name: teller?.name ?? '',
         maximum_cash: teller?.maximum_cash ?? '',
         status: teller?.status ?? 'ACTIVE',
     });
+    const branchUsers = editing
+        ? users
+        : users.filter((user) => String(user.branch_id) === data.branch_id);
     useFlashToastHandler();
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -57,6 +70,44 @@ export default function Create({ teller }: any) {
                             recognizable code.
                         </p>
                         <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                            {!editing && (
+                                <div className="space-y-2">
+                                    <label
+                                        htmlFor="branch_id"
+                                        className="text-sm font-medium"
+                                    >
+                                        Branch
+                                    </label>
+                                    <select
+                                        id="branch_id"
+                                        className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                                        value={data.branch_id}
+                                        onChange={(event) => {
+                                            setData(
+                                                'branch_id',
+                                                event.target.value,
+                                            );
+                                            setData('user_id', '');
+                                        }}
+                                        required
+                                    >
+                                        <option value="">Select branch</option>
+                                        {branches.map((branch) => (
+                                            <option
+                                                key={branch.id}
+                                                value={branch.id}
+                                            >
+                                                {branch.name} ({branch.code})
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {errors.branch_id && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.branch_id}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
                             <div className="space-y-2">
                                 <label
                                     htmlFor="user_id"
@@ -74,7 +125,7 @@ export default function Create({ teller }: any) {
                                     required
                                 >
                                     <option value="">Select user</option>
-                                    {users.map((user) => (
+                                    {branchUsers.map((user) => (
                                         <option key={user.id} value={user.id}>
                                             {user.name} ({user.email})
                                         </option>
@@ -194,7 +245,10 @@ export default function Create({ teller }: any) {
                         </a>
                         <Button
                             type="submit"
-                            disabled={processing}
+                            disabled={
+                                processing ||
+                                (!editing && branches.length === 0)
+                            }
                             className="min-w-40"
                         >
                             <Check className="h-4 w-4" />

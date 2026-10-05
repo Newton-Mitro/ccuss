@@ -3,17 +3,23 @@
 namespace App\TreasuryAndCash\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\TreasuryAndCash\Application\CashBranchAccessService;
 use App\TreasuryAndCash\Application\PettyCashDataService;
 use App\TreasuryAndCash\Application\PettyCashTransactionService;
+use App\TreasuryAndCash\Models\CashLocation;
+use App\TreasuryAndCash\Models\PettyCashFund;
 use App\TreasuryAndCash\Requests\StorePettyCashTransactionRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class PettyCashController extends Controller
 {
     public function __construct(
+        private readonly CashBranchAccessService $cashBranchAccessService,
         private readonly PettyCashDataService $pettyCashDataService,
         private readonly PettyCashTransactionService $pettyCashTransactionService,
     ) {
@@ -75,28 +81,50 @@ class PettyCashController extends Controller
 
     public function create(Request $request): Response
     {
+        $organization = $request->attributes->get('active_organization');
+
         return Inertia::render('treasury-cash/petty-cash/accounts/create', [
-            'cash_locations' => \App\TreasuryAndCash\Models\CashLocation::query()
-                ->where('organization_id', $request->attributes->get('active_organization')->id)
-                ->where('type', 'PETTY_CASH')
-                ->where('is_active', true)
-                ->orderBy('name')
-                ->get(['id', 'code', 'name']),
+            'branches' => $this->cashBranchAccessService->branchesFor(
+                $request->user(),
+                $organization->id,
+            ),
+            'default_branch_id' => $request->user()->branch_id,
         ]);
     }
 
     public function store(\App\TreasuryAndCash\Requests\StorePettyCashFundRequest $request): RedirectResponse
     {
-        \App\TreasuryAndCash\Models\PettyCashFund::create([
-            'cash_location_id' => $request->validated('cash_location_id'),
-            'custodian_id' => $request->user()->id,
-            'code' => $request->validated('code'),
-            'name' => $request->validated('name'),
-            'fund_limit' => $request->validated('fund_limit'),
-            'current_balance' => $request->validated('current_balance', 0),
-            'method' => $request->validated('method', 'IMPREST'),
-            'status' => $request->validated('status', 'ACTIVE'),
-        ]);
+        $organization = $request->attributes->get('active_organization');
+        $user = $request->user();
+        $data = $request->validated();
+
+        if (!$this->cashBranchAccessService->canManage($user, $organization->id, (int) $data['branch_id'])) {
+            throw ValidationException::withMessages([
+                'branch_id' => 'You are not assigned to the selected branch.',
+            ]);
+        }
+
+        DB::transaction(function () use ($organization, $user, $data): void {
+            $location = CashLocation::create([
+                'organization_id' => $organization->id,
+                'branch_id' => $data['branch_id'],
+                'code' => $data['code'],
+                'name' => $data['name'],
+                'type' => 'PETTY_CASH',
+                'is_active' => ($data['status'] ?? 'ACTIVE') === 'ACTIVE',
+            ]);
+
+            PettyCashFund::create([
+                'cash_location_id' => $location->id,
+                'custodian_id' => $user->id,
+                'code' => $data['code'],
+                'name' => $data['name'],
+                'fund_limit' => $data['fund_limit'],
+                'current_balance' => $data['current_balance'] ?? 0,
+                'method' => $data['method'] ?? 'IMPREST',
+                'status' => $data['status'] ?? 'ACTIVE',
+            ]);
+        });
 
         return redirect()->route('petty-cash-accounts.index')->with('success', 'Petty cash fund created successfully.');
     }

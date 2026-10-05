@@ -78,6 +78,66 @@ function grantTellerCashTransactionViewPermission(User $user): void
     $user->roles()->syncWithoutDetaching([$role->id]);
 }
 
+function grantTellerCashTransactionUpdatePermission(User $user): void
+{
+    $role = Role::firstOrCreate(
+        ['slug' => 'teller_cash_transaction_update_test'],
+        ['name' => 'Teller Cash Transaction Update Test'],
+    );
+
+    $permission = Permission::firstOrCreate(
+        ['slug' => 'cash_transactions.update'],
+        [
+            'module' => 'cash_transactions',
+            'name' => 'Update Cash Transactions',
+            'action' => 'update',
+        ],
+    );
+
+    $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+}
+
+function grantTellerCashTransactionCancelPermission(User $user): void
+{
+    $role = Role::firstOrCreate(
+        ['slug' => 'teller_cash_transaction_cancel_test'],
+        ['name' => 'Teller Cash Transaction Cancel Test'],
+    );
+
+    $permission = Permission::firstOrCreate(
+        ['slug' => 'cash_transactions.cancel'],
+        [
+            'module' => 'cash_transactions',
+            'name' => 'Cancel Cash Transactions',
+            'action' => 'cancel',
+        ],
+    );
+
+    $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+}
+
+function grantTellerCashTransactionReversePermission(User $user): void
+{
+    $role = Role::firstOrCreate(
+        ['slug' => 'teller_cash_transaction_reverse_test'],
+        ['name' => 'Teller Cash Transaction Reverse Test'],
+    );
+
+    $permission = Permission::firstOrCreate(
+        ['slug' => 'cash_transactions.reverse'],
+        [
+            'module' => 'cash_transactions',
+            'name' => 'Reverse Cash Transactions',
+            'action' => 'reverse',
+        ],
+    );
+
+    $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+}
+
 function tellerCashTransactionFixture(): array
 {
     $organization = Organization::factory()->create(['code' => 'ORG-001']);
@@ -372,10 +432,113 @@ it('posts a pending deposit and updates the teller expected cash', function () {
         ->and($fixture['session']->fresh()->expected_cash)->toBe('5300.0000');
 });
 
+it('updates reference and note on a pending teller transaction', function () {
+    $fixture = tellerCashTransactionFixture();
+    grantTellerCashTransactionUpdatePermission($fixture['user']);
+    $transaction = TellerCashTransaction::create([
+        'branch_day_id' => $fixture['branchDay']->id,
+        'cash_location_id' => $fixture['location']->id,
+        'teller_session_id' => $fixture['session']->id,
+        'transaction_no' => 'TELLER-UPDATE-001',
+        'type' => 'DEPOSIT',
+        'amount' => 300,
+        'status' => 'PENDING',
+        'requested_by' => $fixture['user']->id,
+        'requested_at' => now(),
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->patch(route('teller-transactions.update', $transaction), [
+            'reference' => 'REF-UPDATED',
+            'note' => 'Updated teller note',
+        ])
+        ->assertSessionHas('success');
+
+    expect($transaction->fresh()->reference)->toBe('REF-UPDATED')
+        ->and($transaction->fresh()->note)->toBe('Updated teller note')
+        ->and($transaction->fresh()->amount)->toBe('300.0000');
+});
+
+it('rejects edits to posted teller transactions', function () {
+    $fixture = tellerCashTransactionFixture();
+    grantTellerCashTransactionUpdatePermission($fixture['user']);
+    $transaction = TellerCashTransaction::create([
+        'branch_day_id' => $fixture['branchDay']->id,
+        'cash_location_id' => $fixture['location']->id,
+        'teller_session_id' => $fixture['session']->id,
+        'transaction_no' => 'TELLER-UPDATE-POSTED-001',
+        'type' => 'DEPOSIT',
+        'amount' => 300,
+        'status' => 'POSTED',
+        'requested_by' => $fixture['user']->id,
+        'requested_at' => now(),
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->patch(route('teller-transactions.update', $transaction), [
+            'reference' => 'SHOULD-NOT-SAVE',
+        ])
+        ->assertSessionHas('error');
+
+    expect($transaction->fresh()->reference)->toBeNull();
+});
+
+it('cancels a pending teller transaction and its financial draft with a reason', function () {
+    $fixture = tellerCashTransactionFixture();
+    grantTellerCashTransactionPermission($fixture['user']);
+    grantTellerCashTransactionCancelPermission($fixture['user']);
+
+    $cashAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'financial_product_id' => null,
+        'account_type' => 'CASH',
+        'account_no' => 'CASH-TELLER-CANCEL-001',
+    ]);
+    $savingsAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'financial_product_id' => null,
+        'account_type' => 'SAVINGS',
+        'account_no' => 'SAVINGS-CANCEL-001',
+    ]);
+    $fixture['location']->update(['financial_account_id' => $cashAccount->id]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('teller-transactions.deposit.store'), [
+            'teller_session_id' => $fixture['session']->id,
+            'amount' => '100',
+            'lines' => [
+                ['financial_account_id' => $savingsAccount->id, 'amount' => '100'],
+            ],
+        ])
+        ->assertRedirect(route('teller-transactions.deposit'));
+
+    $transaction = TellerCashTransaction::query()->latest()->firstOrFail();
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('teller-transactions.cancel', $transaction), [
+            'reason' => 'Duplicate entry',
+        ])
+        ->assertSessionHas('success');
+
+    expect($transaction->fresh()->status)->toBe('CANCELLED')
+        ->and($transaction->fresh()->cancellation_reason)->toBe('Duplicate entry')
+        ->and($transaction->fresh()->cancelled_by)->toBe($fixture['user']->id)
+        ->and($transaction->fresh()->cancelled_at)->not->toBeNull()
+        ->and($transaction->fresh()->financialTransaction->status)->toBe('CANCELLED')
+        ->and($fixture['session']->fresh()->expected_cash)->toBeNull();
+});
+
 it('creates and posts a multi-line financial deposit with the teller cash leg', function () {
     $fixture = tellerCashTransactionFixture();
     grantTellerCashTransactionPermission($fixture['user']);
     grantTellerCashTransactionPostPermission($fixture['user']);
+    grantTellerCashTransactionReversePermission($fixture['user']);
 
     $cashAccount = FinancialAccount::factory()->active()->create([
         'organization_id' => $fixture['organization']->id,
@@ -429,6 +592,30 @@ it('creates and posts a multi-line financial deposit with the teller cash leg', 
         ->and($shareAccount->fresh()->balance)->toBe('100.0000')
         ->and($transaction->fresh()->status)->toBe('POSTED')
         ->and($fixture['session']->fresh()->expected_cash)->toBe('5300.0000');
+
+    $fixture['session']->update([
+        'status' => 'CLOSED',
+        'closing_cash' => 5200,
+        'cash_difference' => -100,
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('teller-transactions.reverse', $transaction), [
+            'reason' => 'Entered against the wrong customer accounts',
+        ])
+        ->assertSessionHas('success');
+
+    expect($transaction->fresh()->status)->toBe('REVERSED')
+        ->and($transaction->fresh()->reversal_reason)->toBe('Entered against the wrong customer accounts')
+        ->and($transaction->fresh()->reversed_by)->toBe($fixture['user']->id)
+        ->and($transaction->fresh()->reversed_at)->not->toBeNull()
+        ->and($transaction->fresh()->financialTransaction->status)->toBe('REVERSED')
+        ->and($cashAccount->fresh()->balance)->toBe('0.0000')
+        ->and($savingsAccount->fresh()->balance)->toBe('0.0000')
+        ->and($shareAccount->fresh()->balance)->toBe('0.0000')
+        ->and($fixture['session']->fresh()->expected_cash)->toBe('5000.0000')
+        ->and($fixture['session']->fresh()->cash_difference)->toBe('200.0000');
 });
 
 it('creates and posts a multi-line financial withdrawal with the teller cash leg', function () {

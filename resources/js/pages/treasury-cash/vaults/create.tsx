@@ -1,4 +1,5 @@
-import { Head, useForm } from '@inertiajs/react';
+import type { VaultCreatePageProps } from '@/types/treasury-cash/forms';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, Check } from 'lucide-react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
@@ -11,7 +12,15 @@ import { BreadcrumbItem } from '../../../types';
 
 export default function Create({ vault }: any) {
     const editing = Boolean(vault);
+    const { branches = [], default_branch_id } =
+        usePage<VaultCreatePageProps>().props;
     const { data, setData, post, put, processing, errors } = useForm({
+        branch_id: String(
+            vault?.cash_location?.branch_id ??
+                default_branch_id ??
+                branches[0]?.id ??
+                '',
+        ),
         code: vault?.code ?? '',
         name: vault?.name ?? '',
         maximum_balance: vault?.maximum_balance ?? '',
@@ -54,6 +63,43 @@ export default function Create({ vault }: any) {
                             quickly.
                         </p>
                         <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                            {!editing && (
+                                <div className="space-y-2">
+                                    <label
+                                        htmlFor="branch_id"
+                                        className="text-sm font-medium"
+                                    >
+                                        Branch
+                                    </label>
+                                    <select
+                                        id="branch_id"
+                                        className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                                        value={data.branch_id}
+                                        onChange={(event) =>
+                                            setData(
+                                                'branch_id',
+                                                event.target.value,
+                                            )
+                                        }
+                                        required
+                                    >
+                                        <option value="">Select branch</option>
+                                        {branches.map((branch) => (
+                                            <option
+                                                key={branch.id}
+                                                value={branch.id}
+                                            >
+                                                {branch.name} ({branch.code})
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {errors.branch_id && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.branch_id}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
                             <div className="space-y-2">
                                 <label
                                     htmlFor="code"
@@ -162,7 +208,10 @@ export default function Create({ vault }: any) {
                         </a>
                         <Button
                             type="submit"
-                            disabled={processing}
+                            disabled={
+                                processing ||
+                                (!editing && branches.length === 0)
+                            }
                             className="min-w-40"
                         >
                             <Check className="h-4 w-4" />

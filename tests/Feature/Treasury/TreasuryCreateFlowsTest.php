@@ -184,23 +184,16 @@ it('loads the petty cash create form for authorized users', function () {
         'organization_id' => $organization->id,
         'branch_id' => $branch->id,
     ]);
-    $cashLocation = CashLocation::create([
-        'organization_id' => $organization->id,
-        'branch_id' => $branch->id,
-        'code' => 'PETTY-CREATE-001',
-        'name' => 'Creation Cash Location',
-        'type' => 'PETTY_CASH',
-        'is_active' => true,
-    ]);
     grantPettyCashCreatePermission($user);
 
     $this->actingAs($user)
         ->withSession(['active_organization_id' => $organization->id])
         ->get(route('petty-cash-accounts.create'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page->component('treasury-cash/petty-cash/accounts/create'));
-
-    expect($cashLocation->fresh()->id)->toBe($cashLocation->id);
+        ->assertInertia(fn($page) => $page
+            ->component('treasury-cash/petty-cash/accounts/create')
+            ->has('branches', 1)
+            ->where('default_branch_id', $branch->id));
 });
 
 it('creates a petty cash fund from the UI flow', function () {
@@ -210,20 +203,14 @@ it('creates a petty cash fund from the UI flow', function () {
         'organization_id' => $organization->id,
         'branch_id' => $branch->id,
     ]);
-    $cashLocation = CashLocation::create([
-        'organization_id' => $organization->id,
-        'branch_id' => $branch->id,
-        'code' => 'PETTY-CREATE-002',
-        'name' => 'Creation Cash Location 2',
-        'type' => 'PETTY_CASH',
-        'is_active' => true,
-    ]);
+    $selectedBranch = Branch::factory()->create(['organization_id' => $organization->id]);
+    $user->branches()->syncWithoutDetaching([$selectedBranch->id]);
     grantPettyCashCreatePermission($user);
 
     $this->actingAs($user)
         ->withSession(['active_organization_id' => $organization->id])
         ->post(route('petty-cash-accounts.store'), [
-            'cash_location_id' => $cashLocation->id,
+            'branch_id' => $selectedBranch->id,
             'code' => 'PC-NEW-100',
             'name' => 'New Petty Cash Fund',
             'fund_limit' => 25000,
@@ -232,5 +219,34 @@ it('creates a petty cash fund from the UI flow', function () {
         ])
         ->assertRedirect(route('petty-cash-accounts.index'));
 
-    expect(PettyCashFund::query()->where('code', 'PC-NEW-100')->exists())->toBeTrue();
+    $cashLocation = CashLocation::query()->where('code', 'PC-NEW-100')->firstOrFail();
+    $fund = PettyCashFund::query()->where('code', 'PC-NEW-100')->firstOrFail();
+
+    expect($fund->cash_location_id)->toBe($cashLocation->id)
+        ->and($cashLocation->branch_id)->toBe($selectedBranch->id)
+        ->and($cashLocation->type)->toBe('PETTY_CASH');
+});
+
+it('rejects petty cash creation for an unassigned branch', function () {
+    $organization = Organization::factory()->create();
+    $branch = Branch::factory()->create(['organization_id' => $organization->id]);
+    $otherBranch = Branch::factory()->create(['organization_id' => $organization->id]);
+    $user = User::factory()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+    ]);
+    grantPettyCashCreatePermission($user);
+
+    $this->actingAs($user)
+        ->withSession(['active_organization_id' => $organization->id])
+        ->post(route('petty-cash-accounts.store'), [
+            'branch_id' => $otherBranch->id,
+            'code' => 'PC-UNAUTHORIZED-100',
+            'name' => 'Unauthorized Petty Cash Fund',
+            'fund_limit' => 25000,
+        ])
+        ->assertSessionHasErrors('branch_id');
+
+    expect(CashLocation::query()->where('code', 'PC-UNAUTHORIZED-100')->exists())->toBeFalse()
+        ->and(PettyCashFund::query()->where('code', 'PC-UNAUTHORIZED-100')->exists())->toBeFalse();
 });
