@@ -141,6 +141,30 @@ it('loads the cash adjustment queue for users with view permission', function ()
             ->has('adjustments.data', 0));
 });
 
+it('loads cash adjustments without requiring a financial transaction relation', function () {
+    $fixture = cashAdjustmentFixture();
+    grantCashAdjustmentViewPermission($fixture['user']);
+    $adjustment = CashAdjustment::create([
+        'branch_day_id' => $fixture['branchDay']->id,
+        'cash_location_id' => $fixture['location']->id,
+        'teller_session_id' => $fixture['session']->id,
+        'amount' => 75,
+        'type' => 'SHORTAGE',
+        'reason' => 'Cash count difference',
+        'status' => 'PENDING',
+        'requested_by' => $fixture['user']->id,
+        'requested_at' => now(),
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('cash-adjustments.index'))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page
+            ->where('adjustments.data.0.id', $adjustment->id)
+            ->where('adjustments.data.0.reason', $adjustment->reason));
+});
+
 it('creates a pending shortage adjustment for an open teller session', function () {
     $fixture = cashAdjustmentFixture();
     grantCashAdjustmentCreatePermission($fixture['user']);

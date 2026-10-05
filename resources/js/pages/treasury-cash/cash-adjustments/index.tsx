@@ -36,7 +36,7 @@ export default function Index() {
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            get(route('cash-adjustments.list'), {
+            get(route('cash-adjustments.index'), {
                 preserveState: true,
                 replace: true,
             });
@@ -49,7 +49,7 @@ export default function Index() {
         { title: 'Cash Management', href: '' },
         {
             title: 'Cash Adjustment Queue',
-            href: route('cash-adjustments.list'),
+            href: route('cash-adjustments.index'),
         },
     ];
 
@@ -196,7 +196,7 @@ export default function Index() {
 
                                                                             router.post(
                                                                                 route(
-                                                                                    'cash-adjustments.list.approve',
+                                                                                    'cash-adjustments.index.approve',
                                                                                     adjustment.id,
                                                                                 ),
                                                                                 {},
@@ -242,7 +242,7 @@ export default function Index() {
 
                                                                             router.post(
                                                                                 route(
-                                                                                    'cash-adjustments.list.post',
+                                                                                    'cash-adjustments.index.post',
                                                                                     adjustment.id,
                                                                                 ),
                                                                                 {},

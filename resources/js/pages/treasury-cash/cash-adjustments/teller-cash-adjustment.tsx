@@ -39,7 +39,7 @@ export default function TellerCashAdjustment() {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Cash Adjustment" />
-            <div className="max-w-2xl space-y-6 text-foreground">
+            <div className="max-w-3xl space-y-6 text-foreground">
                 <HeadingSmall
                     title="Cash Adjustment"
                     description="Record a pending shortage or excess for an open teller session."
