@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { ArrowLeft, Vault } from 'lucide-react';
+import { Vault } from 'lucide-react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
 
@@ -31,7 +31,7 @@ export default function CreateVaultSessionPage() {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Open Vault Session" />
-            <div className="mx-auto max-w-2xl space-y-6">
+            <div className="max-w-3xl space-y-6">
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-semibold">
@@ -42,14 +42,6 @@ export default function CreateVaultSessionPage() {
                             the active branch day.
                         </p>
                     </div>
-                    <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={() => window.history.back()}
-                    >
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back
-                    </Button>
                 </div>
 
                 <form

@@ -25,9 +25,10 @@ import {
     DialogHeader,
     DialogTitle,
 } from '../../../components/ui/dialog';
+import { appSwal } from '../../../lib/appSwal';
 
 export default function Index() {
-    const { teller_sessions, branch_day, tellers, filters, auth } =
+    const { teller_sessions, branch_day, filters, auth } =
         usePage<TellerSessionIndexProps>().props;
     const [closingSession, setClosingSession] =
         useState<TellerSessionListItem | null>(null);

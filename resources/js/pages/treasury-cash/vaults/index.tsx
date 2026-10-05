@@ -10,7 +10,7 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
 import type { VaultIndexProps } from '@/types/treasury-cash/vaults';
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Pencil, Plus, Vault as VaultIcon } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
@@ -53,16 +53,14 @@ export default function Index() {
                     description="Review vault locations and their operating limits across the active organization."
                     action={
                         canCreate ? (
-                            <Button
+                            <Link
                                 type="button"
-                                onClick={() =>
-                                    (window.location.href =
-                                        route('vaults.create'))
-                                }
+                                href={route('vaults.create')}
+                                className="flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                             >
                                 <Plus className="h-4 w-4" />
                                 Create vault
-                            </Button>
+                            </Link>
                         ) : undefined
                     }
                 />

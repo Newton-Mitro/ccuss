@@ -1,6 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
-    ArrowLeft,
     CheckCheck,
     Edit2,
     HomeIcon,
@@ -126,15 +125,6 @@ export default function ViewAddress({ address }: Props) {
                     />
 
                     <div className="flex flex-wrap gap-1.5">
-                        <button
-                            type="button"
-                            onClick={() => window.history.back()}
-                            className="flex items-center gap-1 rounded border border-border bg-card px-2.5 py-1.5 text-sm text-card-foreground transition hover:bg-muted"
-                        >
-                            <ArrowLeft size={15} />
-                            <span className="hidden sm:inline">Back</span>
-                        </button>
-
                         <Link
                             href={route('customers.addresses.edit', [
                                 address.customer_id,

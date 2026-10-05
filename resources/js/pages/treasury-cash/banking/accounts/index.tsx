@@ -4,13 +4,12 @@ import {
     ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
 import type { BankAccountIndexProps } from '@/types/treasury-cash/bank-accounts';
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Building2, Plus } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
@@ -56,17 +55,14 @@ export default function Index() {
                     description="Review bank accounts, branch assignments, and reconciliation settings."
                     action={
                         permissions.has('bank_accounts.create') ? (
-                            <Button
+                            <Link
                                 type="button"
-                                onClick={() =>
-                                    (window.location.href = route(
-                                        'bank-accounts.create',
-                                    ))
-                                }
+                                href={route('bank-accounts.create')}
+                                className="flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                             >
                                 <Plus className="h-4 w-4" />
                                 Create bank account
-                            </Button>
+                            </Link>
                         ) : undefined
                     }
                 />
