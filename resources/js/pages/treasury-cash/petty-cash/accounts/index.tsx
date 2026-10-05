@@ -11,12 +11,12 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
 import type { PettyCashIndexProps } from '@/types/treasury-cash/petty-cash-accounts';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { WalletCards } from 'lucide-react';
+import { Pencil, WalletCards } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Index() {
-    const { funds, filters } = usePage<PettyCashIndexProps>().props;
+    const { funds, filters, auth } = usePage<PettyCashIndexProps>().props;
     useFlashToastHandler();
 
     const { data, setData, get } = useForm({
@@ -24,6 +24,13 @@ export default function Index() {
         page: Number(filters.page) || 1,
         per_page: Number(filters.per_page) || 18,
     });
+    const permissions = new Set([
+        ...(auth.user.permissions ?? []).map((permission) => permission.slug),
+        ...auth.user.roles.flatMap((role) =>
+            (role.permissions ?? []).map((permission) => permission.slug),
+        ),
+    ]);
+    const canUpdate = permissions.has('petty_cash.update');
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -87,6 +94,7 @@ export default function Index() {
                                         'Balance',
                                         'Limit',
                                         'Status',
+                                        'Actions',
                                     ].map((header) => (
                                         <th
                                             key={header}
@@ -151,6 +159,27 @@ export default function Index() {
                                             >
                                                 {fund.status}
                                             </StatusBadge>
+                                        </td>
+                                        <td className="px-2 py-2">
+                                            {canUpdate && (
+                                                <Button
+                                                    asChild
+                                                    type="button"
+                                                    size="icon"
+                                                    variant="ghost"
+                                                >
+                                                    <Link
+                                                        href={route(
+                                                            'petty-cash-accounts.edit',
+                                                            fund.id,
+                                                        )}
+                                                        aria-label={`Edit ${fund.name}`}
+                                                        title="Edit petty cash fund"
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </Link>
+                                                </Button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}

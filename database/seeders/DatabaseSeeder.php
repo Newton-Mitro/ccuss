@@ -17,11 +17,28 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-
         $user = User::firstOrCreate(
             ['email' => 'super.admin@email.com'],
             [
                 'name' => 'Super Admin',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ]
+        );
+
+        $user2 = User::firstOrCreate(
+            ['email' => 'manager@email.com'],
+            [
+                'name' => 'Panna Manager',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ]
+        );
+
+        $user3 = User::firstOrCreate(
+            ['email' => 'employee@email.com'],
+            [
+                'name' => 'CCCUL Employee',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ]
@@ -51,21 +68,70 @@ class DatabaseSeeder extends Seeder
             ->where('code', 'ORG-002')
             ->firstOrFail();
 
+        $branch01 = $organization01->branches()
+            ->oldest('id')
+            ->firstOrFail();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Super Admin
+        |--------------------------------------------------------------------------
+        */
         $user->forceFill([
             'organization_id' => $organization01->id,
-            'branch_id' => $organization01->branches()->oldest('id')->value('id'),
+            'branch_id' => $branch01->id,
         ])->save();
 
-        $user->organizations()->syncWithoutDetaching([$organization01->id]);
-        $user->organizations()->syncWithoutDetaching([$organization02->id]);
-        $user->branches()->syncWithoutDetaching([$user->branch_id]);
+        $user->organizations()->syncWithoutDetaching([
+            $organization01->id,
+            $organization02->id,
+        ]);
 
-        // Assign role
-        $roleModels = Role::where('slug', 'system_administrator')->first();
+        $user->branches()->syncWithoutDetaching([
+            $branch01->id,
+        ]);
 
-        if ($roleModels) {
-            $user->roles()->sync([$roleModels->id]);
+        $role = Role::where('slug', 'system_administrator')->first();
+
+        if ($role) {
+            $user->roles()->sync([$role->id]);
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Manager
+        |--------------------------------------------------------------------------
+        */
+        $user2->forceFill([
+            'organization_id' => $organization01->id,
+            'branch_id' => $branch01->id,
+        ])->save();
+
+        $user2->organizations()->syncWithoutDetaching([
+            $organization01->id,
+        ]);
+
+        $user2->branches()->syncWithoutDetaching([
+            $branch01->id,
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Employee
+        |--------------------------------------------------------------------------
+        */
+        $user3->forceFill([
+            'organization_id' => $organization01->id,
+            'branch_id' => $branch01->id,
+        ])->save();
+
+        $user3->organizations()->syncWithoutDetaching([
+            $organization01->id,
+        ]);
+
+        $user3->branches()->syncWithoutDetaching([
+            $branch01->id,
+        ]);
 
     }
 }

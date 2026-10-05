@@ -220,7 +220,7 @@ class CashMovementController extends Controller
         return back()->with('success', 'Posted teller transaction reversed.');
     }
 
-    public function tellerToTellerTransfer(Request $request): Response
+    public function tellerToTellerTransfer(Request $request, string $transferType = 'TELLER_TO_TELLER'): Response
     {
         $organization = $request->attributes->get('active_organization');
         $user = $request->user();
@@ -229,7 +229,11 @@ class CashMovementController extends Controller
 
         return Inertia::render(
             'treasury-cash/cash-movements/teller-to-teller-transfer',
-            $this->cashMovementDataService->forTellerTransfer($organization->id, $user->branch_id),
+            $this->cashMovementDataService->forCashTransfer(
+                $organization->id,
+                $user->branch_id,
+                $transferType,
+            ),
         );
     }
 
@@ -276,7 +280,7 @@ class CashMovementController extends Controller
         abort_unless($user?->branch_id, 422, 'A branch assignment is required for cash transfers.');
 
         try {
-            $this->cashTransferService->complete($organization->id, $user->branch_id, $transfer->id);
+            $this->cashTransferService->complete($organization->id, $user->branch_id, $transfer->id, $user->id);
         } catch (\RuntimeException $exception) {
             return back()->with('error', $exception->getMessage());
         }
@@ -285,8 +289,10 @@ class CashMovementController extends Controller
             ->with('success', 'Cash transfer completed successfully.');
     }
 
-    public function storeTellerToTellerTransfer(StoreCashTransferRequest $request): RedirectResponse
-    {
+    public function storeTellerToTellerTransfer(
+        StoreCashTransferRequest $request,
+        string $transferType = 'TELLER_TO_TELLER',
+    ): RedirectResponse {
         $organization = $request->attributes->get('active_organization');
         $user = $request->user();
 
@@ -298,13 +304,23 @@ class CashMovementController extends Controller
                 $user->branch_id,
                 $user->id,
                 $request->validated(),
+                $transferType,
             );
         } catch (\RuntimeException $exception) {
             return back()->withInput()->with('error', $exception->getMessage());
         }
 
+        $routeName = match ($transferType) {
+            'VAULT_TO_TELLER' => 'vault-transfers.root.vault-to-teller',
+            'TELLER_TO_VAULT' => 'vault-transfers.root.teller-to-vault',
+            'VAULT_TO_VAULT' => 'vault-transfers.root.vault-to-vault',
+            'BANK_TO_VAULT' => 'vault-transfers.root.bank-to-vault',
+            'VAULT_TO_BANK' => 'vault-transfers.root.vault-to-bank',
+            default => 'cash-movements.teller-to-teller-transfer',
+        };
+
         return redirect()
-            ->route('cash-movements.teller-to-teller-transfer')
+            ->route($routeName)
             ->with('success', "Cash transfer {$transfer->transfer_no} created successfully.");
     }
 

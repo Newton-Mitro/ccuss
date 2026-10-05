@@ -103,8 +103,18 @@ return new class extends Migration {
         Schema::create('cash_transfers', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('branch_day_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('from_cash_location_id')->constrained('cash_locations')->restrictOnDelete();
-            $table->foreignId('to_cash_location_id')->constrained('cash_locations')->restrictOnDelete();
+            $table->foreignId('from_cash_location_id')->nullable()->constrained('cash_locations')->restrictOnDelete();
+            $table->foreignId('to_cash_location_id')->nullable()->constrained('cash_locations')->restrictOnDelete();
+            $table->unsignedBigInteger('bank_account_id')->nullable();
+            $table->unsignedBigInteger('bank_transaction_id')->nullable();
+            $table->enum('transfer_type', [
+                'TELLER_TO_TELLER',
+                'VAULT_TO_TELLER',
+                'TELLER_TO_VAULT',
+                'VAULT_TO_VAULT',
+                'BANK_TO_VAULT',
+                'VAULT_TO_BANK',
+            ])->default('TELLER_TO_TELLER');
             $table->decimal('amount', 20, 4);
             $table->string('transfer_no', 100);
             $table->enum('status', ['PENDING', 'APPROVED', 'COMPLETED', 'CANCELLED'])->default('PENDING');
@@ -186,11 +196,17 @@ return new class extends Migration {
             $table->string('transaction_no', 100);
             $table->enum('type', ['DEPOSIT', 'WITHDRAWAL']);
             $table->decimal('amount', 20, 4);
-            $table->enum('status', ['PENDING', 'POSTED', 'CANCELLED'])->default('PENDING');
+            $table->enum('status', ['PENDING', 'POSTED', 'CANCELLED', 'REVERSED'])->default('PENDING');
             $table->string('reference')->nullable();
             $table->text('note')->nullable();
             $table->foreignId('requested_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('posted_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('cancelled_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('cancelled_at')->nullable();
+            $table->text('cancellation_reason')->nullable();
+            $table->foreignId('reversed_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('reversed_at')->nullable();
+            $table->text('reversal_reason')->nullable();
             $table->timestamp('requested_at')->nullable();
             $table->timestamp('posted_at')->nullable();
             $table->timestamps();

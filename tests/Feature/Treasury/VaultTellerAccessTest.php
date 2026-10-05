@@ -6,8 +6,11 @@ use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
 use App\TreasuryAndCash\Models\CashLocation;
+use App\TreasuryAndCash\Models\BranchDay;
 use App\TreasuryAndCash\Models\Teller;
+use App\TreasuryAndCash\Models\TellerSession;
 use App\TreasuryAndCash\Models\Vault;
+use App\TreasuryAndCash\Models\VaultSession;
 
 function grantCashManagementViewPermission(User $user): void
 {
@@ -42,6 +45,26 @@ function grantCashManagementCreatePermission(User $user): void
             'module' => 'cash_management',
             'name' => 'Create Cash Management',
             'action' => 'create',
+        ],
+    );
+
+    $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+}
+
+function grantCashManagementUpdatePermission(User $user): void
+{
+    $role = Role::firstOrCreate(
+        ['slug' => 'cash_management_update_test'],
+        ['name' => 'Cash Management Update Test'],
+    );
+
+    $permission = Permission::firstOrCreate(
+        ['slug' => 'cash_management.update'],
+        [
+            'module' => 'cash_management',
+            'name' => 'Update Cash Management',
+            'action' => 'update',
         ],
     );
 
@@ -127,14 +150,16 @@ it('does not expose cash management pages without permission', function () {
 it('creates a vault and teller for a selected authorized branch', function () {
     $fixture = cashManagementFixture();
     grantCashManagementCreatePermission($fixture['user']);
+    grantCashManagementUpdatePermission($fixture['user']);
     $selectedBranch = Branch::factory()->create([
         'organization_id' => $fixture['organization']->id,
     ]);
-    $fixture['user']->branches()->syncWithoutDetaching([$selectedBranch->id]);
+    $otherOrganization = Organization::factory()->create();
     $assignedTellerUser = User::factory()->create([
-        'organization_id' => $fixture['organization']->id,
-        'branch_id' => $selectedBranch->id,
+        'organization_id' => $otherOrganization->id,
+        'branch_id' => null,
     ]);
+    $assignedTellerUser->organizations()->syncWithoutDetaching([$fixture['organization']->id]);
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
@@ -181,14 +206,55 @@ it('creates a vault and teller for a selected authorized branch', function () {
         ->and(Teller::query()->where('code', 'T-002')->exists())->toBeTrue()
         ->and(CashLocation::query()->where('code', 'VAULT-002')->value('branch_id'))->toBe($selectedBranch->id)
         ->and(CashLocation::query()->where('code', 'T-002')->value('branch_id'))->toBe($selectedBranch->id);
+
+    $vault = Vault::query()->where('code', 'VAULT-002')->firstOrFail();
+    $teller = Teller::query()->where('code', 'T-002')->firstOrFail();
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('vaults.edit', $vault))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page
+            ->component('treasury-cash/vaults/create')
+            ->has('branches', 2)
+            ->where('branch_locked', false));
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->put(route('vaults.update', $vault), [
+            'branch_id' => $selectedBranch->id,
+            'code' => 'VAULT-002',
+            'name' => 'Updated Secondary Vault',
+            'status' => 'ACTIVE',
+        ])
+        ->assertRedirect(route('vaults.index'));
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('tellers.edit', $teller))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page
+            ->component('treasury-cash/tellers/create')
+            ->has('branches', 2)
+            ->where('branch_locked', false));
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->put(route('tellers.update', $teller), [
+            'branch_id' => $selectedBranch->id,
+            'user_id' => $assignedTellerUser->id,
+            'code' => 'T-002',
+            'name' => 'Updated Second Teller',
+            'status' => 'ACTIVE',
+        ])
+        ->assertRedirect(route('tellers.index'));
 });
 
-it('rejects cash locations for branches not assigned to the user', function () {
+it('rejects cash locations for branches outside the active organization', function () {
     $fixture = cashManagementFixture();
     grantCashManagementCreatePermission($fixture['user']);
-    $otherBranch = Branch::factory()->create([
-        'organization_id' => $fixture['organization']->id,
-    ]);
+    $otherOrganization = Organization::factory()->create();
+    $otherBranch = Branch::factory()->create(['organization_id' => $otherOrganization->id]);
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
@@ -201,4 +267,72 @@ it('rejects cash locations for branches not assigned to the user', function () {
         ->assertSessionHasErrors('branch_id');
 
     expect(CashLocation::query()->where('code', 'VAULT-UNAUTHORIZED')->exists())->toBeFalse();
+});
+
+it('prevents moving teller and vault locations after sessions exist', function () {
+    $fixture = cashManagementFixture();
+    grantCashManagementUpdatePermission($fixture['user']);
+    $targetBranch = Branch::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+    ]);
+    $targetTellerUser = User::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $targetBranch->id,
+    ]);
+    $branchDay = BranchDay::create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'business_date' => '2026-09-18',
+        'status' => 'OPEN',
+        'opened_at' => now(),
+        'opened_by' => $fixture['user']->id,
+    ]);
+    TellerSession::create([
+        'branch_day_id' => $branchDay->id,
+        'teller_id' => $fixture['teller']->id,
+        'opened_by' => $fixture['user']->id,
+        'status' => 'OPEN',
+        'opening_cash' => 100,
+    ]);
+    VaultSession::create([
+        'branch_day_id' => $branchDay->id,
+        'vault_id' => $fixture['vault']->id,
+        'opened_by' => $fixture['user']->id,
+        'status' => 'OPEN',
+        'opening_cash' => 100,
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('tellers.edit', $fixture['teller']))
+        ->assertInertia(fn($page) => $page->where('branch_locked', true));
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->put(route('tellers.update', $fixture['teller']), [
+            'branch_id' => $targetBranch->id,
+            'user_id' => $targetTellerUser->id,
+            'code' => $fixture['teller']->code,
+            'name' => $fixture['teller']->name,
+            'status' => 'ACTIVE',
+        ])
+        ->assertSessionHasErrors('branch_id');
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('vaults.edit', $fixture['vault']))
+        ->assertInertia(fn($page) => $page->where('branch_locked', true));
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->put(route('vaults.update', $fixture['vault']), [
+            'branch_id' => $targetBranch->id,
+            'code' => $fixture['vault']->code,
+            'name' => $fixture['vault']->name,
+            'status' => 'ACTIVE',
+        ])
+        ->assertSessionHasErrors('branch_id');
+
+    expect($fixture['teller']->cashLocation->fresh()->branch_id)->toBe($fixture['branch']->id)
+        ->and($fixture['vault']->cashLocation->fresh()->branch_id)->toBe($fixture['branch']->id);
 });

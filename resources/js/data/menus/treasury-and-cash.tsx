@@ -72,6 +72,31 @@ export const treasuryAndCash: SidebarItem[] = [
                                 match_path: 'vault-transfers/teller-to-vault',
                                 permission: ['cash_transfers.create'],
                             },
+                            {
+                                name: 'Vault to Vault',
+                                icon: <i className="fa-solid fa-right-left" />,
+                                path: '/vault-transfers/vault-to-vault',
+                                match_path: 'vault-transfers/vault-to-vault',
+                                permission: ['cash_transfers.create'],
+                            },
+                            {
+                                name: 'Bank to Vault',
+                                icon: (
+                                    <i className="fa-solid fa-building-columns" />
+                                ),
+                                path: '/vault-transfers/bank-to-vault',
+                                match_path: 'vault-transfers/bank-to-vault',
+                                permission: ['cash_transfers.create'],
+                            },
+                            {
+                                name: 'Vault to Bank',
+                                icon: (
+                                    <i className="fa-solid fa-building-columns" />
+                                ),
+                                path: '/vault-transfers/vault-to-bank',
+                                match_path: 'vault-transfers/vault-to-bank',
+                                permission: ['cash_transfers.create'],
+                            },
                         ],
                     },
                     {

@@ -37,6 +37,7 @@ final class TreasuryPermissions
             new PermissionDefinition('vault_sessions', 'Close Vault Sessions', 'vault_sessions.close', 'close', 'Close vault sessions'),
             new PermissionDefinition('petty_cash', 'View Petty Cash', 'petty_cash.view', 'view', 'View petty cash accounts'),
             new PermissionDefinition('petty_cash', 'Create Petty Cash Funds', 'petty_cash.create', 'create', 'Create petty cash funds'),
+            new PermissionDefinition('petty_cash', 'Update Petty Cash Funds', 'petty_cash.update', 'update', 'Update petty cash funds'),
             new PermissionDefinition('petty_cash', 'Record Petty Cash Expense', 'petty_cash.expense', 'expense', 'Record petty cash expenses'),
             new PermissionDefinition('petty_cash', 'Replenish Petty Cash', 'petty_cash.replenish', 'replenish', 'Replenish petty cash funds'),
             new PermissionDefinition('petty_cash', 'Close Petty Cash Fund', 'petty_cash.close', 'close', 'Close petty cash funds'),

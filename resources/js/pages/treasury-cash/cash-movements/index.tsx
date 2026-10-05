@@ -120,14 +120,23 @@ export default function Index() {
                                                         {transfer.transfer_no}
                                                     </div>
                                                     <div className="text-xs text-muted-foreground">
-                                                        {transfer.note ?? '-'}
+                                                        {transfer.transfer_type.replaceAll(
+                                                            '_',
+                                                            ' ',
+                                                        )}
+                                                        {transfer.note
+                                                            ? ` · ${transfer.note}`
+                                                            : ''}
                                                     </div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-2 py-2">
                                             {transfer.from_cash_location
-                                                ?.name ?? '-'}
+                                                ?.name ??
+                                                (transfer.bank_account
+                                                    ? `${transfer.bank_account.account_name} (${transfer.bank_account.account_number})`
+                                                    : '-')}
                                         </td>
                                         <td className="px-2 py-2">
                                             {transfer.to_cash_location?.name ??

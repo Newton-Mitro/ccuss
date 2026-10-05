@@ -72,7 +72,20 @@ export interface CashBranchOption {
 
 export interface TellerTransferPageProps extends SharedData {
     branch_day: { id: number; business_date: string; status: string } | null;
-    cash_locations: CashLocationOption[];
+    transfer_type:
+        | 'TELLER_TO_TELLER'
+        | 'VAULT_TO_TELLER'
+        | 'TELLER_TO_VAULT'
+        | 'VAULT_TO_VAULT'
+        | 'BANK_TO_VAULT'
+        | 'VAULT_TO_BANK';
+    from_cash_locations: CashLocationOption[];
+    to_cash_locations: CashLocationOption[];
+    bank_accounts?: {
+        id: number;
+        account_name: string;
+        account_number: string;
+    }[];
 }
 
 export interface ChequeBookCreatePageProps extends SharedData {
@@ -88,6 +101,25 @@ export interface ChequeBookCreatePageProps extends SharedData {
 export interface PettyCashAccountCreatePageProps extends SharedData {
     branches?: CashBranchOption[];
     default_branch_id?: number | null;
+    default_custodian_id?: number | null;
+    branch_locked?: boolean;
+    users?: {
+        id: number;
+        branch_id: number | null;
+        name: string;
+        email: string;
+    }[];
+    fund?: {
+        id: number;
+        code: string;
+        name: string;
+        custodian_id: number | null;
+        fund_limit: string | number;
+        current_balance: string | number;
+        method: 'IMPREST' | 'VARIABLE';
+        status: 'ACTIVE' | 'INACTIVE' | 'CLOSED';
+        cash_location?: { branch_id: number };
+    };
 }
 
 export interface VaultCreatePageProps extends SharedData {

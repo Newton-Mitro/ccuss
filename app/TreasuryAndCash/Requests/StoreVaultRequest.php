@@ -16,7 +16,7 @@ class StoreVaultRequest extends FormRequest
     {
         return [
             'branch_id' => [
-                $this->isMethod('post') ? 'required' : 'sometimes',
+                'required',
                 'integer',
                 Rule::exists('branches', 'id')->where(
                     fn($query) => $query->where(

@@ -6,6 +6,7 @@ use App\SystemAdministration\Traits\Auditable;
 use App\Support\Traits\UppercaseEnumAttributes;
 use App\SystemAdministration\Models\Organization;
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -83,6 +84,16 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->belongsToMany(Organization::class, 'organization_user')
             ->withTimestamps();
+    }
+
+    public function scopeForOrganization(Builder $query, int $organizationId): Builder
+    {
+        return $query->where(function (Builder $userQuery) use ($organizationId): void {
+            $userQuery
+                ->where('organization_id', $organizationId)
+                ->orWhereHas('organizations', fn(Builder $organizationQuery) =>
+                    $organizationQuery->whereKey($organizationId));
+        });
     }
 
     public function roles(): BelongsToMany

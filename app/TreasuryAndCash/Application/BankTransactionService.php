@@ -27,6 +27,7 @@ class BankTransactionService
             $account = BankAccount::query()
                 ->whereKey($data['bank_account_id'])
                 ->where('organization_id', $organizationId)
+                ->where(fn($query) => $query->whereNull('branch_id')->orWhere('branch_id', $branchId))
                 ->where('status', 'ACTIVE')
                 ->lockForUpdate()
                 ->first();

@@ -359,6 +359,7 @@ class DefaultRolePermissionSeeder extends Seeder
             'cash_transfers.complete',
             'petty_cash.view',
             'petty_cash.create',
+            'petty_cash.update',
             'petty_cash.expense',
             'petty_cash.replenish',
             'banking.view',

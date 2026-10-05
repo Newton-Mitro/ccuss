@@ -3,7 +3,9 @@
 namespace App\TreasuryAndCash\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\SystemAdministration\Models\User;
 use App\TreasuryAndCash\Application\CashBranchAccessService;
+use App\TreasuryAndCash\Application\CashLocationHistoryService;
 use App\TreasuryAndCash\Application\PettyCashDataService;
 use App\TreasuryAndCash\Application\PettyCashTransactionService;
 use App\TreasuryAndCash\Models\CashLocation;
@@ -20,11 +22,13 @@ class PettyCashController extends Controller
 {
     public function __construct(
         private readonly CashBranchAccessService $cashBranchAccessService,
+        private readonly CashLocationHistoryService $cashLocationHistoryService,
         private readonly PettyCashDataService $pettyCashDataService,
         private readonly PettyCashTransactionService $pettyCashTransactionService,
     ) {
         $this->middleware('permission:petty_cash.view')->only(['accounts']);
         $this->middleware('permission:petty_cash.create')->only(['create', 'store', 'funding', 'storeFunding']);
+        $this->middleware('permission:petty_cash.update')->only(['edit', 'update']);
         $this->middleware('permission:petty_cash.expense')->only(['expense', 'storeExpense']);
         $this->middleware('permission:petty_cash.view')->only(['transactions']);
         $this->middleware('permission:petty_cash.expense')->only(['postTransaction']);
@@ -82,13 +86,18 @@ class PettyCashController extends Controller
     public function create(Request $request): Response
     {
         $organization = $request->attributes->get('active_organization');
+        $user = $request->user();
 
         return Inertia::render('treasury-cash/petty-cash/accounts/create', [
             'branches' => $this->cashBranchAccessService->branchesFor(
-                $request->user(),
                 $organization->id,
             ),
-            'default_branch_id' => $request->user()->branch_id,
+            'default_branch_id' => $user->branch_id,
+            'default_custodian_id' => $user->branch_id ? $user->id : null,
+            'users' => User::query()
+                ->forOrganization($organization->id)
+                ->orderBy('name')
+                ->get(['id', 'branch_id', 'name', 'email']),
         ]);
     }
 
@@ -98,9 +107,15 @@ class PettyCashController extends Controller
         $user = $request->user();
         $data = $request->validated();
 
-        if (!$this->cashBranchAccessService->canManage($user, $organization->id, (int) $data['branch_id'])) {
+        if (!$this->cashBranchAccessService->canManage($organization->id, (int) $data['branch_id'])) {
             throw ValidationException::withMessages([
-                'branch_id' => 'You are not assigned to the selected branch.',
+                'branch_id' => 'Select a branch in the active organization.',
+            ]);
+        }
+
+        if (!User::query()->forOrganization($organization->id)->whereKey($data['custodian_id'])->exists()) {
+            throw ValidationException::withMessages([
+                'custodian_id' => 'Select a custodian belonging to the active organization.',
             ]);
         }
 
@@ -116,7 +131,7 @@ class PettyCashController extends Controller
 
             PettyCashFund::create([
                 'cash_location_id' => $location->id,
-                'custodian_id' => $user->id,
+                'custodian_id' => $data['custodian_id'],
                 'code' => $data['code'],
                 'name' => $data['name'],
                 'fund_limit' => $data['fund_limit'],
@@ -127,6 +142,66 @@ class PettyCashController extends Controller
         });
 
         return redirect()->route('petty-cash-accounts.index')->with('success', 'Petty cash fund created successfully.');
+    }
+
+    public function edit(Request $request, PettyCashFund $fund): Response
+    {
+        $organization = $request->attributes->get('active_organization');
+        $cashLocation = $fund->cashLocation;
+        abort_unless($cashLocation?->organization_id === $organization->id, 404);
+
+        return Inertia::render('treasury-cash/petty-cash/accounts/create', [
+            'fund' => $fund->load('cashLocation.branch'),
+            'branches' => $this->cashBranchAccessService->branchesFor($organization->id),
+            'default_branch_id' => $cashLocation->branch_id,
+            'branch_locked' => $this->cashLocationHistoryService->hasHistory($cashLocation),
+            'users' => User::query()
+                ->forOrganization($organization->id)
+                ->orderBy('name')
+                ->get(['id', 'branch_id', 'name', 'email']),
+        ]);
+    }
+
+    public function update(\App\TreasuryAndCash\Requests\StorePettyCashFundRequest $request, PettyCashFund $fund): RedirectResponse
+    {
+        $organization = $request->attributes->get('active_organization');
+        $cashLocation = $fund->cashLocation;
+        abort_unless($cashLocation?->organization_id === $organization->id, 404);
+
+        $data = $request->validated();
+        if (!User::query()->forOrganization($organization->id)->whereKey($data['custodian_id'])->exists()) {
+            throw ValidationException::withMessages([
+                'custodian_id' => 'Select a custodian belonging to the active organization.',
+            ]);
+        }
+
+        if (
+            (int) $data['branch_id'] !== (int) $cashLocation->branch_id
+            && $this->cashLocationHistoryService->hasHistory($cashLocation)
+        ) {
+            throw ValidationException::withMessages([
+                'branch_id' => 'This petty cash fund has transaction history and cannot be moved to another branch.',
+            ]);
+        }
+
+        DB::transaction(function () use ($fund, $cashLocation, $data): void {
+            $fund->update([
+                'code' => $data['code'],
+                'name' => $data['name'],
+                'custodian_id' => $data['custodian_id'],
+                'fund_limit' => $data['fund_limit'],
+                'method' => $data['method'] ?? 'IMPREST',
+                'status' => $data['status'] ?? 'ACTIVE',
+            ]);
+            $cashLocation->update([
+                'branch_id' => $data['branch_id'],
+                'code' => $data['code'],
+                'name' => $data['name'],
+                'is_active' => ($data['status'] ?? 'ACTIVE') === 'ACTIVE',
+            ]);
+        });
+
+        return redirect()->route('petty-cash-accounts.index')->with('success', 'Petty cash fund updated successfully.');
     }
 
     public function funding(Request $request): Response

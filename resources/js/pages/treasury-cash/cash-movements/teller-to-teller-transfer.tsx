@@ -12,16 +12,71 @@ import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
 
 export default function TellerToTellerTransfer() {
-    const { branch_day, cash_locations } =
-        usePage<TellerTransferPageProps>().props;
+    const {
+        branch_day,
+        transfer_type,
+        from_cash_locations,
+        to_cash_locations,
+        bank_accounts = [],
+    } = usePage<TellerTransferPageProps>().props;
     const { data, setData, post, processing, errors } = useForm({
         from_cash_location_id: '',
         to_cash_location_id: '',
+        bank_account_id: '',
         amount: '',
         note: '',
     });
 
     useFlashToastHandler();
+
+    const transferConfig = {
+        TELLER_TO_TELLER: {
+            title: 'Teller to Teller Transfer',
+            description: 'Transfer cash between active tellers in your branch.',
+            fromLabel: 'From teller',
+            toLabel: 'To teller',
+            routeName: 'cash-movements.teller-to-teller-transfer.store',
+        },
+        VAULT_TO_TELLER: {
+            title: 'Vault to Teller Transfer',
+            description:
+                'Transfer cash from a vault to an active teller in your branch.',
+            fromLabel: 'From vault',
+            toLabel: 'To teller',
+            routeName: 'vault-transfers.root.vault-to-teller.store',
+        },
+        TELLER_TO_VAULT: {
+            title: 'Teller to Vault Transfer',
+            description:
+                'Transfer cash from an active teller to a vault in your branch.',
+            fromLabel: 'From teller',
+            toLabel: 'To vault',
+            routeName: 'vault-transfers.root.teller-to-vault.store',
+        },
+        VAULT_TO_VAULT: {
+            title: 'Vault to Vault Transfer',
+            description: 'Transfer cash between active vaults in your branch.',
+            fromLabel: 'From vault',
+            toLabel: 'To vault',
+            routeName: 'vault-transfers.root.vault-to-vault.store',
+        },
+        BANK_TO_VAULT: {
+            title: 'Bank to Vault Funding',
+            description:
+                'Withdraw funds from a bank account and add them to an open vault session.',
+            fromLabel: 'From bank account',
+            toLabel: 'To vault',
+            routeName: 'vault-transfers.root.bank-to-vault.store',
+        },
+        VAULT_TO_BANK: {
+            title: 'Vault to Bank Deposit',
+            description:
+                'Deposit cash from an open vault session into a bank account.',
+            fromLabel: 'From vault',
+            toLabel: 'To bank account',
+            routeName: 'vault-transfers.root.vault-to-bank.store',
+        },
+    }[transfer_type];
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Treasury & Cash', href: '' },
@@ -34,16 +89,24 @@ export default function TellerToTellerTransfer() {
 
     const submit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        post(route('cash-movements.teller-to-teller-transfer.store'));
+        post(route(transferConfig.routeName));
     };
+    const hasSource =
+        transfer_type === 'BANK_TO_VAULT'
+            ? Boolean(data.bank_account_id)
+            : Boolean(data.from_cash_location_id);
+    const hasDestination =
+        transfer_type === 'VAULT_TO_BANK'
+            ? Boolean(data.bank_account_id)
+            : Boolean(data.to_cash_location_id);
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Cash Transfer" />
+            <Head title={transferConfig.title} />
             <div className="max-w-2xl space-y-6 text-foreground">
                 <HeadingSmall
-                    title="Cash Transfer"
-                    description="Create a pending transfer between active cash locations in your branch."
+                    title={transferConfig.title}
+                    description={transferConfig.description}
                 />
 
                 <div className="rounded-md border bg-card p-4 text-sm">
@@ -65,68 +128,157 @@ export default function TellerToTellerTransfer() {
                     <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
                             <label
-                                htmlFor="from_cash_location_id"
+                                htmlFor={
+                                    transfer_type === 'BANK_TO_VAULT'
+                                        ? 'bank_account_id'
+                                        : 'from_cash_location_id'
+                                }
                                 className="text-sm font-medium"
                             >
-                                From location
+                                {transferConfig.fromLabel}
                             </label>
-                            <select
-                                id="from_cash_location_id"
-                                className="h-9 w-full rounded-md border bg-background px-3 text-sm"
-                                value={data.from_cash_location_id}
-                                onChange={(event) =>
-                                    setData(
-                                        'from_cash_location_id',
-                                        event.target.value,
-                                    )
-                                }
-                                required
-                            >
-                                <option value="">Select source</option>
-                                {cash_locations.map((location) => (
-                                    <option
-                                        key={location.id}
-                                        value={location.id}
-                                    >
-                                        {location.name} ({location.code})
+                            {transfer_type === 'BANK_TO_VAULT' ? (
+                                <select
+                                    id="bank_account_id"
+                                    className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                                    value={data.bank_account_id}
+                                    onChange={(event) =>
+                                        setData(
+                                            'bank_account_id',
+                                            event.target.value,
+                                        )
+                                    }
+                                    required
+                                >
+                                    <option value="">
+                                        Select bank account
                                     </option>
-                                ))}
-                            </select>
+                                    {bank_accounts.map((account) => (
+                                        <option
+                                            key={account.id}
+                                            value={account.id}
+                                        >
+                                            {account.account_name} (
+                                            {account.account_number})
+                                        </option>
+                                    ))}
+                                </select>
+                            ) : (
+                                <select
+                                    id="from_cash_location_id"
+                                    className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                                    value={data.from_cash_location_id}
+                                    onChange={(event) =>
+                                        setData(
+                                            'from_cash_location_id',
+                                            event.target.value,
+                                        )
+                                    }
+                                    required
+                                >
+                                    <option value="">Select source</option>
+                                    {from_cash_locations
+                                        .filter(
+                                            (location) =>
+                                                String(location.id) !==
+                                                data.to_cash_location_id,
+                                        )
+                                        .map((location) => (
+                                            <option
+                                                key={location.id}
+                                                value={location.id}
+                                            >
+                                                {location.name} ({location.code}
+                                                )
+                                            </option>
+                                        ))}
+                                </select>
+                            )}
                             {errors.from_cash_location_id && (
                                 <p className="text-sm text-destructive">
                                     {errors.from_cash_location_id}
                                 </p>
                             )}
+                            {errors.bank_account_id && (
+                                <p className="text-sm text-destructive">
+                                    {errors.bank_account_id}
+                                </p>
+                            )}
                         </div>
                         <div className="space-y-2">
                             <label
-                                htmlFor="to_cash_location_id"
+                                htmlFor={
+                                    transfer_type === 'VAULT_TO_BANK'
+                                        ? 'bank_account_id'
+                                        : 'to_cash_location_id'
+                                }
                                 className="text-sm font-medium"
                             >
-                                To location
+                                {transferConfig.toLabel}
                             </label>
-                            <select
-                                id="to_cash_location_id"
-                                className="h-9 w-full rounded-md border bg-background px-3 text-sm"
-                                value={data.to_cash_location_id}
-                                onChange={(event) =>
-                                    setData(
-                                        'to_cash_location_id',
-                                        event.target.value,
-                                    )
-                                }
-                                required
-                            >
-                                <option value="">Select destination</option>
-                                {cash_locations.map((location) => (
-                                    <option
-                                        key={location.id}
-                                        value={location.id}
-                                    >
-                                        {location.name} ({location.code})
+                            {transfer_type === 'VAULT_TO_BANK' ? (
+                                <select
+                                    id="bank_account_id"
+                                    className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                                    value={data.bank_account_id}
+                                    onChange={(event) =>
+                                        setData(
+                                            'bank_account_id',
+                                            event.target.value,
+                                        )
+                                    }
+                                    required
+                                >
+                                    <option value="">
+                                        Select bank account
                                     </option>
-                                ))}
-                            </select>
+                                    {bank_accounts.map((account) => (
+                                        <option
+                                            key={account.id}
+                                            value={account.id}
+                                        >
+                                            {account.account_name} (
+                                            {account.account_number})
+                                        </option>
+                                    ))}
+                                </select>
+                            ) : (
+                                <select
+                                    id="to_cash_location_id"
+                                    className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                                    value={data.to_cash_location_id}
+                                    onChange={(event) =>
+                                        setData(
+                                            'to_cash_location_id',
+                                            event.target.value,
+                                        )
+                                    }
+                                    required
+                                >
+                                    <option value="">Select destination</option>
+                                    {to_cash_locations
+                                        .filter(
+                                            (location) =>
+                                                String(location.id) !==
+                                                data.from_cash_location_id,
+                                        )
+                                        .map((location) => (
+                                            <option
+                                                key={location.id}
+                                                value={location.id}
+                                            >
+                                                {location.name} ({location.code}
+                                                )
+                                            </option>
+                                        ))}
+                                </select>
+                            )}
+                            {transfer_type === 'VAULT_TO_BANK' &&
+                                errors.bank_account_id && (
+                                    <p className="text-sm text-destructive">
+                                        {errors.bank_account_id}
+                                    </p>
+                                )}
                             {errors.to_cash_location_id && (
                                 <p className="text-sm text-destructive">
                                     {errors.to_cash_location_id}
@@ -174,7 +326,15 @@ export default function TellerToTellerTransfer() {
                             </p>
                         )}
                     </div>
-                    <Button type="submit" disabled={processing || !branch_day}>
+                    <Button
+                        type="submit"
+                        disabled={
+                            processing ||
+                            !branch_day ||
+                            !hasSource ||
+                            !hasDestination
+                        }
+                    >
                         Create pending transfer
                     </Button>
                 </form>

@@ -53,6 +53,11 @@ return new class extends Migration {
             $table->index(['bank_account_id', 'transaction_date']);
         });
 
+        Schema::table('cash_transfers', function (Blueprint $table): void {
+            $table->foreign('bank_account_id')->references('id')->on('bank_accounts')->restrictOnDelete();
+            $table->foreign('bank_transaction_id')->references('id')->on('bank_transactions')->nullOnDelete();
+        });
+
         Schema::create('bank_reconciliations', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('bank_account_id')->constrained()->cascadeOnDelete();
@@ -137,6 +142,10 @@ return new class extends Migration {
 
     public function down(): void
     {
+        Schema::table('cash_transfers', function (Blueprint $table): void {
+            $table->dropForeign(['bank_account_id']);
+            $table->dropForeign(['bank_transaction_id']);
+        });
         Schema::dropIfExists('cheque_clearings');
         Schema::dropIfExists('cheque_transactions');
         Schema::dropIfExists('cheques');

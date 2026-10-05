@@ -15,8 +15,11 @@ class CashTransfer extends Model
         'branch_day_id',
         'from_cash_location_id',
         'to_cash_location_id',
+        'bank_account_id',
+        'bank_transaction_id',
         'amount',
         'transfer_no',
+        'transfer_type',
         'status',
         'requested_by',
         'approved_by',
@@ -44,6 +47,16 @@ class CashTransfer extends Model
     public function toCashLocation(): BelongsTo
     {
         return $this->belongsTo(CashLocation::class, 'to_cash_location_id');
+    }
+
+    public function bankAccount(): BelongsTo
+    {
+        return $this->belongsTo(BankAccount::class);
+    }
+
+    public function bankTransaction(): BelongsTo
+    {
+        return $this->belongsTo(BankTransaction::class);
     }
 
     public function requestedBy(): BelongsTo

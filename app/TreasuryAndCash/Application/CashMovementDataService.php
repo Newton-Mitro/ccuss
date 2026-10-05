@@ -3,6 +3,7 @@
 namespace App\TreasuryAndCash\Application;
 
 use App\FinancialServices\Models\FinancialAccount;
+use App\TreasuryAndCash\Models\BankAccount;
 use App\TreasuryAndCash\Models\BranchDay;
 use App\TreasuryAndCash\Models\CashLocation;
 use App\TreasuryAndCash\Models\CashAdjustment;
@@ -54,7 +55,7 @@ class CashMovementDataService
                     ->where('organization_id', $organizationId)
                     ->where('branch_id', $branchId);
             })
-            ->with(['fromCashLocation', 'toCashLocation', 'branchDay'])
+            ->with(['fromCashLocation', 'toCashLocation', 'bankAccount', 'branchDay'])
             ->latest('requested_at');
 
         if (!empty($search)) {
@@ -69,6 +70,10 @@ class CashMovementDataService
                     ->orWhereHas('toCashLocation', function ($location) use ($term) {
                         $location->where('name', 'like', "%{$term}%")
                             ->orWhere('code', 'like', "%{$term}%");
+                    })
+                    ->orWhereHas('bankAccount', function ($account) use ($term) {
+                        $account->where('account_name', 'like', "%{$term}%")
+                            ->orWhere('account_number', 'like', "%{$term}%");
                     });
             });
         }
@@ -103,21 +108,44 @@ class CashMovementDataService
         return $query->paginate($perPage)->withQueryString();
     }
 
-    public function forTellerTransfer(int $organizationId, int $branchId): array
+    public function forCashTransfer(int $organizationId, int $branchId, string $transferType): array
     {
+        [$sourceType, $destinationType] = match ($transferType) {
+            'VAULT_TO_TELLER' => ['VAULT', 'TELLER'],
+            'TELLER_TO_VAULT' => ['TELLER', 'VAULT'],
+            'VAULT_TO_VAULT' => ['VAULT', 'VAULT'],
+            'BANK_TO_VAULT' => [null, 'VAULT'],
+            'VAULT_TO_BANK' => ['VAULT', null],
+            default => ['TELLER', 'TELLER'],
+        };
+        $locations = CashLocation::query()
+            ->where('organization_id', $organizationId)
+            ->where('branch_id', $branchId)
+            ->where('is_active', true)
+            ->orderBy('name');
+
         return [
+            'transfer_type' => $transferType,
             'branch_day' => BranchDay::query()
                 ->where('organization_id', $organizationId)
                 ->where('branch_id', $branchId)
                 ->where('status', BranchDay::STATUS_OPEN)
                 ->latest('business_date')
                 ->first(),
-            'cash_locations' => CashLocation::query()
-                ->where('organization_id', $organizationId)
-                ->where('branch_id', $branchId)
-                ->where('is_active', true)
-                ->orderBy('name')
+            'from_cash_locations' => (clone $locations)
+                ->where('type', $sourceType)
                 ->get(['id', 'code', 'name', 'type']),
+            'to_cash_locations' => (clone $locations)
+                ->where('type', $destinationType)
+                ->get(['id', 'code', 'name', 'type']),
+            'bank_accounts' => in_array($transferType, ['BANK_TO_VAULT', 'VAULT_TO_BANK'], true)
+                ? BankAccount::query()
+                    ->where('organization_id', $organizationId)
+                    ->where('status', 'ACTIVE')
+                    ->where(fn($query) => $query->whereNull('branch_id')->orWhere('branch_id', $branchId))
+                    ->orderBy('account_name')
+                    ->get(['id', 'account_name', 'account_number'])
+                : [],
         ];
     }
 

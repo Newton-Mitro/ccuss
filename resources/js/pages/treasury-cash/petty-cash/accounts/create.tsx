@@ -9,17 +9,44 @@ import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
 export default function CreatePettyCashAccount() {
-    const { branches = [], default_branch_id } =
-        usePage<PettyCashAccountCreatePageProps>().props;
-    const { data, setData, post, processing, errors } = useForm({
-        branch_id: String(default_branch_id ?? branches[0]?.id ?? ''),
-        code: '',
-        name: '',
-        fund_limit: '',
-        current_balance: '0',
-        method: 'IMPREST',
-        status: 'ACTIVE',
+    const {
+        branches = [],
+        default_branch_id,
+        default_custodian_id,
+        users = [],
+        branch_locked = false,
+        fund,
+    } = usePage<PettyCashAccountCreatePageProps>().props;
+    const editing = Boolean(fund);
+    const { data, setData, post, put, processing, errors } = useForm({
+        branch_id: String(
+            fund?.cash_location?.branch_id ??
+                default_branch_id ??
+                branches[0]?.id ??
+                '',
+        ),
+        custodian_id: String(fund?.custodian_id ?? default_custodian_id ?? ''),
+        code: fund?.code ?? '',
+        name: fund?.name ?? '',
+        fund_limit: fund?.fund_limit ?? '',
+        current_balance: fund?.current_balance ?? '0',
+        method: fund?.method ?? 'IMPREST',
+        status: fund?.status ?? 'ACTIVE',
     });
+
+    const submit = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        if (editing && fund) {
+            put(route('petty-cash-accounts.update', fund.id));
+            return;
+        }
+
+        post(route('petty-cash-accounts.store'), {
+            preserveScroll: true,
+            preserveState: true,
+        });
+    };
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Treasury & Cash', href: '' },
@@ -28,16 +55,22 @@ export default function CreatePettyCashAccount() {
             title: 'Petty Cash Accounts',
             href: route('petty-cash-accounts.index'),
         },
-        { title: 'Create', href: '' },
+        { title: editing ? 'Edit' : 'Create', href: '' },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Create Petty Cash Fund" />
+            <Head
+                title={
+                    editing ? 'Edit Petty Cash Fund' : 'Create Petty Cash Fund'
+                }
+            />
             <div className="max-w-2xl space-y-4">
                 <div>
                     <h1 className="text-lg font-semibold">
-                        Create petty cash fund
+                        {editing
+                            ? 'Edit petty cash fund'
+                            : 'Create petty cash fund'}
                     </h1>
                     <p className="text-sm text-muted-foreground">
                         Configure a petty cash fund and its branch cash
@@ -46,13 +79,7 @@ export default function CreatePettyCashAccount() {
                 </div>
 
                 <form
-                    onSubmit={(event) => {
-                        event.preventDefault();
-                        post(route('petty-cash-accounts.store'), {
-                            preserveScroll: true,
-                            preserveState: true,
-                        });
-                    }}
+                    onSubmit={submit}
                     className="space-y-4 rounded-md border bg-card p-4"
                 >
                     <div>
@@ -61,6 +88,7 @@ export default function CreatePettyCashAccount() {
                             id="branch_id"
                             className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm"
                             value={data.branch_id}
+                            disabled={editing && branch_locked}
                             onChange={(event) =>
                                 setData('branch_id', event.target.value)
                             }
@@ -74,6 +102,33 @@ export default function CreatePettyCashAccount() {
                             ))}
                         </select>
                         <InputError message={errors.branch_id} />
+                        {editing && branch_locked && (
+                            <p className="text-xs text-muted-foreground">
+                                Branch cannot be changed after transactions
+                                exist.
+                            </p>
+                        )}
+                    </div>
+
+                    <div>
+                        <Label htmlFor="custodian_id">Custodian</Label>
+                        <select
+                            id="custodian_id"
+                            className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm"
+                            value={data.custodian_id}
+                            onChange={(event) =>
+                                setData('custodian_id', event.target.value)
+                            }
+                            required
+                        >
+                            <option value="">Select custodian</option>
+                            {users.map((user) => (
+                                <option key={user.id} value={user.id}>
+                                    {user.name} ({user.email})
+                                </option>
+                            ))}
+                        </select>
+                        <InputError message={errors.custodian_id} />
                     </div>
 
                     <div className="grid gap-4 sm:grid-cols-2">
@@ -132,25 +187,35 @@ export default function CreatePettyCashAccount() {
                             />
                             <InputError message={errors.fund_limit} />
                         </div>
-                        <div>
-                            <Label htmlFor="current_balance">
-                                Opening balance
-                            </Label>
-                            <Input
-                                id="current_balance"
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                value={data.current_balance}
-                                onChange={(event) =>
-                                    setData(
-                                        'current_balance',
-                                        event.target.value,
-                                    )
-                                }
-                            />
-                            <InputError message={errors.current_balance} />
-                        </div>
+                        {!editing && (
+                            <div>
+                                <Label htmlFor="current_balance">
+                                    Opening balance
+                                </Label>
+                                <Input
+                                    id="current_balance"
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    value={data.current_balance}
+                                    onChange={(event) =>
+                                        setData(
+                                            'current_balance',
+                                            event.target.value,
+                                        )
+                                    }
+                                />
+                                <InputError message={errors.current_balance} />
+                            </div>
+                        )}
+                        {editing && (
+                            <div>
+                                <Label>Current balance</Label>
+                                <p className="mt-2 text-sm font-medium">
+                                    {fund?.current_balance}
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     <div>
@@ -180,7 +245,11 @@ export default function CreatePettyCashAccount() {
                             type="submit"
                             disabled={processing || branches.length === 0}
                         >
-                            {processing ? 'Saving...' : 'Create fund'}
+                            {processing
+                                ? 'Saving...'
+                                : editing
+                                  ? 'Save changes'
+                                  : 'Create fund'}
                         </Button>
                     </div>
                 </form>
