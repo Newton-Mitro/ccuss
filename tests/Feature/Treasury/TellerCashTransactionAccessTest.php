@@ -1,6 +1,7 @@
 <?php
 
 use App\CustomerModule\Models\Customer;
+use App\CustomerModule\Models\KycDocument;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
@@ -14,6 +15,8 @@ use App\GeneralAccounting\Models\LedgerAccount;
 use App\GeneralAccounting\Models\TreasuryGlMapping;
 use App\TreasuryAndCash\Models\BranchDay;
 use App\TreasuryAndCash\Models\CashLocation;
+use App\TreasuryAndCash\Models\Cheque;
+use App\TreasuryAndCash\Models\ChequeBook;
 use App\TreasuryAndCash\Models\Teller;
 use App\TreasuryAndCash\Models\TellerCashTransaction;
 use App\TreasuryAndCash\Models\TellerSession;
@@ -362,6 +365,93 @@ it('creates a pending teller cash deposit for an open session', function () {
         ->and($transaction->requested_by)->toBe($fixture['user']->id);
 });
 
+it('allows a customer deposit without a verified signature', function () {
+    $fixture = tellerCashTransactionFixture();
+    grantTellerCashTransactionPermission($fixture['user']);
+
+    $customer = Customer::factory()->individualMale()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+    ]);
+    $cashAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'financial_product_id' => null,
+        'account_type' => 'CASH',
+        'account_no' => 'CASH-TELLER-002',
+    ]);
+    $savingsAccount = FinancialAccount::factory()->active(1000)->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'financial_product_id' => null,
+        'holder_type' => Customer::class,
+        'holder_id' => $customer->id,
+        'account_type' => 'SAVINGS',
+        'account_no' => 'SAVINGS-CUST-002',
+    ]);
+    $fixture['location']->update(['financial_account_id' => $cashAccount->id]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('teller-transactions.customer-deposit.store'), [
+            'teller_session_id' => $fixture['session']->id,
+            'customer_id' => $customer->id,
+            'amount' => '10.00',
+            'selected' => ['deposit-' . $savingsAccount->id],
+            'note' => 'Customer cash deposit',
+        ])
+        ->assertRedirect(route('teller-transactions.customer-deposit', ['customer_id' => $customer->id]));
+});
+
+it('requires a verified customer signature before posting a savings cheque withdrawal', function () {
+    $fixture = tellerCashTransactionFixture();
+    grantTellerCashTransactionPermission($fixture['user']);
+
+    $customer = Customer::factory()->individualMale()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+    ]);
+    $account = FinancialAccount::factory()->active(500)->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'holder_type' => Customer::class,
+        'holder_id' => $customer->id,
+        'account_type' => 'SAVINGS',
+        'account_no' => 'SAVINGS-CHEQUE-001',
+    ]);
+    $book = ChequeBook::create([
+        'financial_account_id' => $account->id,
+        'book_no' => 'SAVINGS-CHEQUE-BOOK-001',
+        'prefix' => 'CHQ',
+        'start_number' => 1,
+        'end_number' => 1,
+        'current_number' => 1,
+        'leaf_count' => 1,
+        'issued_date' => now()->toDateString(),
+        'status' => 'IN_USE',
+    ]);
+    $cheque = Cheque::create([
+        'cheque_book_id' => $book->id,
+        'financial_account_id' => $account->id,
+        'cheque_no' => 'CHQ-001',
+        'status' => 'ISSUED',
+        'amount' => 100,
+        'issue_date' => now()->toDateString(),
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('teller-transactions.savings-cheque-withdrawal.store'), [
+            'customer_id' => $customer->id,
+            'teller_session_id' => $fixture['session']->id,
+            'financial_account_id' => $account->id,
+            'cheque_id' => $cheque->id,
+        ])
+        ->assertSessionHasErrors(['customer_id']);
+
+    expect($cheque->fresh()->status)->toBe('ISSUED');
+});
+
 it('creates a pending customer deposit from selected obligations', function () {
     $fixture = tellerCashTransactionFixture();
     grantTellerCashTransactionPermission($fixture['user']);
@@ -370,6 +460,7 @@ it('creates a pending customer deposit from selected obligations', function () {
         'organization_id' => $fixture['organization']->id,
         'branch_id' => $fixture['branch']->id,
     ]);
+    KycDocument::factory()->for($customer)->signature()->verified()->create();
     $cashAccount = FinancialAccount::factory()->active()->create([
         'organization_id' => $fixture['organization']->id,
         'branch_id' => $fixture['branch']->id,

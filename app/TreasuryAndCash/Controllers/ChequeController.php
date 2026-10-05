@@ -120,6 +120,15 @@ class ChequeController extends Controller
 
     private function authorizeCheque(Request $request, Cheque $cheque): void
     {
-        abort_unless($cheque->chequeBook()->whereHas('bankAccount', fn($query) => $query->where('organization_id', $request->attributes->get('active_organization')->id))->exists(), 404);
+        $organizationId = $request->attributes->get('active_organization')->id;
+
+        $belongsToOrganization = $cheque->financialAccount()
+            ->where('organization_id', $organizationId)
+            ->exists()
+            || $cheque->chequeBook()
+                ->whereHas('bankAccount', fn($query) => $query->where('organization_id', $organizationId))
+                ->exists();
+
+        abort_unless($belongsToOrganization, 404);
     }
 }

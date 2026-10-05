@@ -606,6 +606,7 @@ class CashMovementController extends Controller
         $selectedCustomer = null;
         $savingsAccounts = collect([]);
         $availableCheques = collect([]);
+        $signatureVerified = false;
 
         $customerId = $request->query('customer_id');
         if ($customerId) {
@@ -615,12 +616,26 @@ class CashMovementController extends Controller
                 ->find($customerId);
 
             if ($selectedCustomer) {
+                $signatureVerified = $selectedCustomer->signature()
+                    ->where('verification_status', 'VERIFIED')
+                    ->exists();
+
                 $savingsAccounts = FinancialAccount::query()
                     ->where('organization_id', $organization->id)
                     ->where('holder_type', Customer::class)
                     ->where('holder_id', $selectedCustomer->id)
                     ->where('account_type', 'SAVINGS')
-                    ->with(['product', 'chequeBooks.cheques' => fn($query) => $query->whereIn('status', ['UNUSED', 'ISSUED'])->orderBy('cheque_no')])
+                    ->with([
+                        'product',
+                        'holder.signature',
+                        'holders.signature',
+                        'authorizedPersons' => function ($query) use ($organization) {
+                            $query
+                                ->whereHas('customer', fn($customerQuery) => $customerQuery->where('organization_id', $organization->id))
+                                ->with('customer.signature');
+                        },
+                        'chequeBooks.cheques' => fn($query) => $query->whereIn('status', ['UNUSED', 'ISSUED'])->orderBy('cheque_no'),
+                    ])
                     ->orderBy('account_no')
                     ->get();
 
@@ -642,14 +657,74 @@ class CashMovementController extends Controller
 
         return Inertia::render('treasury-cash/teller-transactions/savings-cheque-withdrawal-page', [
             'customer' => $selectedCustomer,
-            'savings_accounts' => $savingsAccounts->map(fn(FinancialAccount $account) => [
-                'id' => $account->id,
-                'account_type' => $account->account_type,
-                'account_no' => $account->account_no,
-                'name' => $account->name,
-                'balance' => (float) $account->balance,
-                'available_balance' => (float) $account->available_balance,
-            ])->all(),
+            'signature_verified' => $signatureVerified,
+            'savings_accounts' => $savingsAccounts->map(function (FinancialAccount $account): array {
+                $accountHolders = $account->holders->map(fn(Customer $holder) => [
+                    'id' => $holder->id,
+                    'name' => $holder->name,
+                    'customer_no' => $holder->customer_no,
+                    'primary_phone' => $holder->primary_phone,
+                    'role' => $holder->pivot->role,
+                    'ownership_percent' => $holder->pivot->ownership_percent,
+                    'signature' => $holder->signature ? [
+                        'url' => $holder->signature->url,
+                        'verification_status' => $holder->signature->verification_status,
+                    ] : null,
+                ]);
+
+                if ($account->holder instanceof Customer && !$accountHolders->contains('id', $account->holder->id)) {
+                    $holder = $account->holder;
+                    $accountHolders->prepend([
+                        'id' => $holder->id,
+                        'name' => $holder->name,
+                        'customer_no' => $holder->customer_no,
+                        'primary_phone' => $holder->primary_phone,
+                        'role' => 'PRIMARY',
+                        'ownership_percent' => 100,
+                        'signature' => $holder->signature ? [
+                            'url' => $holder->signature->url,
+                            'verification_status' => $holder->signature->verification_status,
+                        ] : null,
+                    ]);
+                }
+
+                return [
+                    'id' => $account->id,
+                    'account_type' => $account->account_type,
+                    'account_no' => $account->account_no,
+                    'name' => $account->name,
+                    'balance' => (float) $account->balance,
+                    'available_balance' => (float) $account->available_balance,
+                    'account_holder' => $account->holder instanceof Customer ? [
+                        'id' => $account->holder->id,
+                        'name' => $account->holder->name,
+                        'customer_no' => $account->holder->customer_no,
+                        'primary_phone' => $account->holder->primary_phone,
+                        'signature' => $account->holder->signature ? [
+                            'url' => $account->holder->signature->url,
+                            'verification_status' => $account->holder->signature->verification_status,
+                        ] : null,
+                    ] : null,
+                    'account_holders' => $accountHolders->values()->all(),
+                    'authorized_persons' => $account->authorizedPersons->map(fn($authorizedPerson) => [
+                        'id' => $authorizedPerson->id,
+                        'customer_id' => $authorizedPerson->customer_id,
+                        'customer_name' => $authorizedPerson->customer?->name,
+                        'customer_no' => $authorizedPerson->customer?->customer_no,
+                        'primary_phone' => $authorizedPerson->customer?->primary_phone,
+                        'authorization_type' => $authorizedPerson->authorization_type,
+                        'designation' => $authorizedPerson->designation,
+                        'transaction_limit' => $authorizedPerson->transaction_limit,
+                        'is_active' => $authorizedPerson->is_active,
+                        'effective_from' => $authorizedPerson->effective_from?->toDateString(),
+                        'effective_to' => $authorizedPerson->effective_to?->toDateString(),
+                        'signature' => $authorizedPerson->customer?->signature ? [
+                            'url' => $authorizedPerson->customer->signature->url,
+                            'verification_status' => $authorizedPerson->customer->signature->verification_status,
+                        ] : null,
+                    ])->values()->all(),
+                ];
+            })->all(),
             'available_cheques' => $availableCheques->all(),
             'teller_sessions' => TellerSession::query()
                 ->where('status', 'OPEN')
@@ -681,6 +756,12 @@ class CashMovementController extends Controller
         ]);
 
         $customer = Customer::query()->where('organization_id', $organization->id)->findOrFail($data['customer_id']);
+        if (!$customer->signature()->where('verification_status', 'VERIFIED')->exists()) {
+            throw ValidationException::withMessages([
+                'customer_id' => ['Verified customer signature is required before posting a cheque withdrawal.'],
+            ]);
+        }
+
         $account = FinancialAccount::query()->where('organization_id', $organization->id)->where('id', $data['financial_account_id'])->firstOrFail();
         $cheque = Cheque::query()->whereKey($data['cheque_id'])->where('financial_account_id', $account->id)->firstOrFail();
 

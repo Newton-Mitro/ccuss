@@ -50,6 +50,42 @@ function grantChequeViewPermission(User $user): void
     $user->roles()->syncWithoutDetaching([$role->id]);
 }
 
+function grantChequeBookCreatePermission(User $user): void
+{
+    $role = Role::firstOrCreate(
+        ['slug' => 'cheque_book_create_test'],
+        ['name' => 'Cheque Book Create Test'],
+    );
+    $permission = Permission::firstOrCreate(
+        ['slug' => 'cheque_books.create'],
+        [
+            'module' => 'cheque_books',
+            'name' => 'Create Cheque Books',
+            'action' => 'create',
+        ],
+    );
+    $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+}
+
+function grantChequeIssuePermission(User $user): void
+{
+    $role = Role::firstOrCreate(
+        ['slug' => 'cheques_issue_account_test'],
+        ['name' => 'Cheques Issue Account Test'],
+    );
+    $permission = Permission::firstOrCreate(
+        ['slug' => 'cheques.issue'],
+        [
+            'module' => 'cheques',
+            'name' => 'Issue Cheques',
+            'action' => 'issue',
+        ],
+    );
+    $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+}
+
 function chequeFixture(): array
 {
     $organization = Organization::factory()->create();
@@ -183,6 +219,82 @@ it('creates cheque leaves and enforces the cheque lifecycle', function () {
 
     expect(fn() => $service->transition($cheque->fresh(), 'bounce', $fixture['user']->id))
         ->toThrow(RuntimeException::class);
+});
+
+it('validates duplicate cheque book numbers for savings accounts', function () {
+    $fixture = chequeFixture();
+    grantChequeBookCreatePermission($fixture['user']);
+
+    $savingsAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'account_type' => 'SAVINGS',
+        'account_no' => 'SAV-DUP-001',
+    ]);
+    ChequeBook::create([
+        'financial_account_id' => $savingsAccount->id,
+        'book_no' => '5555',
+        'prefix' => 'SAV',
+        'start_number' => 1,
+        'end_number' => 2,
+        'current_number' => 1,
+        'leaf_count' => 2,
+        'issued_date' => now()->toDateString(),
+        'status' => 'IN_USE',
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->from(route('cheque-books.create'))
+        ->post(route('cheque-books.store'), [
+            'financial_account_id' => $savingsAccount->id,
+            'book_no' => '5555',
+            'prefix' => 'SAV',
+            'start_number' => 3,
+            'end_number' => 4,
+            'issued_date' => now()->toDateString(),
+        ])
+        ->assertSessionHasErrors(['book_no']);
+
+    expect(ChequeBook::query()
+        ->where('financial_account_id', $savingsAccount->id)
+        ->where('book_no', '5555')
+        ->count())->toBe(1);
+});
+
+it('allows issuing a cheque linked to an organization savings account', function () {
+    $fixture = chequeFixture();
+    grantChequeIssuePermission($fixture['user']);
+
+    $savingsAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'account_type' => 'SAVINGS',
+        'account_no' => 'SAV-ISSUE-001',
+    ]);
+    $book = ChequeBook::create([
+        'financial_account_id' => $savingsAccount->id,
+        'book_no' => 'SAV-ISSUE-BOOK',
+        'prefix' => 'SAV',
+        'start_number' => 1,
+        'end_number' => 2,
+        'current_number' => 1,
+        'leaf_count' => 2,
+        'issued_date' => now()->toDateString(),
+        'status' => 'IN_USE',
+    ]);
+    $cheque = $book->cheques()->firstOrFail();
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->from(route('cheques.index'))
+        ->post(route('cheques.issue', $cheque), [
+            'amount' => 100,
+            'payee' => 'Account holder',
+        ])
+        ->assertRedirect(route('cheques.index'));
+
+    expect($cheque->fresh()->status)->toBe('ISSUED');
 });
 
 it('posts a savings-account cheque withdrawal through the teller cash ledger', function () {
@@ -365,12 +477,17 @@ it('returns a clear error when a cheque clearing is attempted without an open br
 });
 
 it('loads a savings cheque withdrawal form for the selected customer and savings account', function () {
-    $organization = Organization::factory()->create();
+    $organization = Organization::factory()->create(['code' => 'ORG-001']);
     $branch = Branch::factory()->create(['organization_id' => $organization->id]);
     $customer = \App\CustomerModule\Models\Customer::factory()->create([
         'organization_id' => $organization->id,
         'branch_id' => $branch->id,
     ]);
+    \App\CustomerModule\Models\KycDocument::factory()
+        ->for($customer)
+        ->signature()
+        ->verified()
+        ->create();
     $account = FinancialAccount::factory()->active(1200)->create([
         'organization_id' => $organization->id,
         'branch_id' => $branch->id,
@@ -378,6 +495,35 @@ it('loads a savings cheque withdrawal form for the selected customer and savings
         'holder_id' => $customer->id,
         'account_type' => 'SAVINGS',
         'account_no' => 'SAV-5001',
+    ]);
+    $jointHolder = \App\CustomerModule\Models\Customer::factory()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+    ]);
+    \App\CustomerModule\Models\KycDocument::factory()
+        ->for($jointHolder)
+        ->signature()
+        ->verified()
+        ->create();
+    $account->holders()->attach($jointHolder->id, [
+        'role' => 'JOINT',
+        'ownership_percent' => 40,
+    ]);
+    $authorizedPerson = \App\CustomerModule\Models\Customer::factory()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+    ]);
+    \App\CustomerModule\Models\KycDocument::factory()
+        ->for($authorizedPerson)
+        ->signature()
+        ->verified()
+        ->create();
+    \App\FinancialServices\Models\FinancialAccountAuthorizedPerson::create([
+        'financial_account_id' => $account->id,
+        'customer_id' => $authorizedPerson->id,
+        'authorization_type' => 'SIGNATORY',
+        'designation' => 'Primary signatory',
+        'is_active' => true,
     ]);
     $book = ChequeBook::create([
         'financial_account_id' => $account->id,
@@ -416,5 +562,12 @@ it('loads a savings cheque withdrawal form for the selected customer and savings
             ->component('treasury-cash/teller-transactions/savings-cheque-withdrawal-page')
             ->where('customer.id', $customer->id)
             ->where('savings_accounts.0.id', $account->id)
+            ->where('savings_accounts.0.account_holder.name', $customer->name)
+            ->where('savings_accounts.0.account_holder.signature.verification_status', 'VERIFIED')
+            ->where('savings_accounts.0.account_holders.0.id', $customer->id)
+            ->where('savings_accounts.0.account_holders.1.id', $jointHolder->id)
+            ->where('savings_accounts.0.account_holders.1.signature.verification_status', 'VERIFIED')
+            ->where('savings_accounts.0.authorized_persons.0.customer_name', $authorizedPerson->name)
+            ->where('savings_accounts.0.authorized_persons.0.signature.verification_status', 'VERIFIED')
             ->where('available_cheques.0.id', $cheque->id));
 });

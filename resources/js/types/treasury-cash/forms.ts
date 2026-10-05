@@ -1,4 +1,5 @@
 import type { SharedData } from '@/types';
+import type { Customer } from '@/types/customer_kyc_module';
 
 export interface BankAccountCreatePageProps extends SharedData {
     banks: { id: number; code: string; name: string }[];
@@ -154,12 +155,8 @@ export interface TellerCashTransactionFormPageProps extends SharedData {
 }
 
 export interface SavingsChequeWithdrawalPageProps extends SharedData {
-    customer: {
-        id: number;
-        name?: string;
-        customer_no?: string;
-        status?: string;
-    } | null;
+    customer: Customer | null;
+    signature_verified: boolean;
     savings_accounts: {
         id: number;
         account_no: string;
@@ -167,6 +164,45 @@ export interface SavingsChequeWithdrawalPageProps extends SharedData {
         account_type: string;
         balance: string | number;
         available_balance: string | number;
+        account_holder: {
+            id: number;
+            name: string;
+            customer_no: string;
+            primary_phone: string | null;
+            signature: {
+                url: string;
+                verification_status: string;
+            } | null;
+        } | null;
+        account_holders: {
+            id: number;
+            name: string;
+            customer_no: string;
+            primary_phone: string | null;
+            role: string;
+            ownership_percent: string | number;
+            signature: {
+                url: string;
+                verification_status: string;
+            } | null;
+        }[];
+        authorized_persons: {
+            id: number;
+            customer_id: number;
+            customer_name: string | null;
+            customer_no: string | null;
+            primary_phone: string | null;
+            authorization_type: string;
+            designation: string | null;
+            transaction_limit: string | number | null;
+            is_active: boolean;
+            effective_from: string | null;
+            effective_to: string | null;
+            signature: {
+                url: string;
+                verification_status: string;
+            } | null;
+        }[];
     }[];
     available_cheques: {
         id: number;

@@ -117,7 +117,7 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/financial-reports/budget-vs-actual', [BudgetController::class, 'budgetVsActual'])
         ->name('financial-reports.budget-vs-actual');
 
-    Route::get('/list-vouchers', [VoucherController::class, 'index'])->name('vouchers.index');
+    Route::get('/vouchers', [VoucherController::class, 'index'])->name('vouchers.index');
     Route::get('/vouchers/create', [VoucherController::class, 'create'])->name('vouchers.create');
     Route::post('/vouchers', [VoucherController::class, 'store'])->name('vouchers.store');
     Route::get('/vouchers/{voucher}', [VoucherController::class, 'show'])->name('vouchers.show');

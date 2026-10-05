@@ -61,8 +61,8 @@ export const generalAccounting: SidebarItem[] = [
                     {
                         name: 'Voucher List',
                         icon: <i className="fa-solid fa-list-check" />,
-                        path: '/list-vouchers',
-                        match_path: 'list-vouchers',
+                        path: '/vouchers',
+                        match_path: 'vouchers',
                         permission: ['accounting.voucher_entries.view'],
                     },
                     {
