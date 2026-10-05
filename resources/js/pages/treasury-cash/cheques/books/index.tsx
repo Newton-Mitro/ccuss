@@ -46,16 +46,18 @@ export default function Index() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Cheque Books" />
             <div className="space-y-4 text-foreground">
-                <ResourcePageHeader
-                    title="Cheque Books"
-                    description="Review cheque books assigned to the active organization bank accounts."
-                />
-                <Link
-                    href={route('cheque-books.create')}
-                    className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground"
-                >
-                    <Plus className="h-4 w-4" /> Create cheque book
-                </Link>
+                <div className="flex items-center justify-around gap-4 sm:justify-between">
+                    <ResourcePageHeader
+                        title="Cheque Books"
+                        description="Review cheque books assigned to the active organization bank accounts."
+                    />
+                    <Link
+                        href={route('cheque-books.create')}
+                        className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground"
+                    >
+                        <Plus className="h-4 w-4" /> Create cheque book
+                    </Link>
+                </div>
                 <Input
                     className="w-full bg-card sm:w-80"
                     placeholder="Search book, account, or bank..."
