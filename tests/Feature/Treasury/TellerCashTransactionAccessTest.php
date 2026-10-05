@@ -41,6 +41,24 @@ function grantTellerCashTransactionPermission(User $user): void
     $user->roles()->syncWithoutDetaching([$role->id]);
 }
 
+function grantBranchOperationsDashboardPermission(User $user): void
+{
+    $role = Role::firstOrCreate(
+        ['slug' => 'branch_operations_dashboard_test'],
+        ['name' => 'Branch Operations Dashboard Test'],
+    );
+    $permission = Permission::firstOrCreate(
+        ['slug' => 'treasury.view'],
+        [
+            'module' => 'treasury',
+            'name' => 'View Treasury',
+            'action' => 'view',
+        ],
+    );
+    $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+}
+
 function grantTellerCashTransactionPostPermission(User $user): void
 {
     $role = Role::firstOrCreate(
@@ -196,6 +214,23 @@ function tellerCashTransactionFixture(): array
 
     return compact('organization', 'branch', 'user', 'branchDay', 'location', 'teller', 'session');
 }
+
+it('loads the branch operations dashboard scoped to the assigned branch', function () {
+    $fixture = tellerCashTransactionFixture();
+    grantBranchOperationsDashboardPermission($fixture['user']);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('branch-operations.dashboard'))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page
+            ->component('branch-operations/dashboard')
+            ->where('branch.id', $fixture['branch']->id)
+            ->where('branch_day.id', $fixture['branchDay']->id)
+            ->where('metrics.assigned_tellers', 1)
+            ->where('metrics.open_sessions', 1)
+            ->where('metrics.pending_transactions', 0));
+});
 
 function configureTellerSummaryMapping(array $fixture, string $transactionType): void
 {

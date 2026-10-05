@@ -52,7 +52,7 @@ export default function Index() {
             <div className="space-y-4 text-foreground">
                 <ResourcePageHeader
                     title="Cheques"
-                    description="Track cheque status, dates, payees, and linked bank accounts."
+                    description="Track cheque status, dates, payees, and linked financial accounts."
                 />
                 <Input
                     className="w-full bg-card sm:w-80"
@@ -77,7 +77,7 @@ export default function Index() {
                                         '#',
                                         'Cheque',
                                         'Book',
-                                        'Bank Account',
+                                        'Financial Account',
                                         'Cheque Date',
                                         'Payee',
                                         'Amount',
@@ -117,8 +117,41 @@ export default function Index() {
                                             {cheque.cheque_book?.book_no ?? '-'}
                                         </td>
                                         <td className="px-2 py-2">
-                                            {cheque.cheque_book?.bank_account
-                                                ?.account_name ?? '-'}
+                                            <div>
+                                                <div className="font-medium">
+                                                    {cheque.financial_account
+                                                        ?.account_no ??
+                                                        cheque.cheque_book
+                                                            ?.financial_account
+                                                            ?.account_no ??
+                                                        cheque.cheque_book
+                                                            ?.bank_account
+                                                            ?.account_name ??
+                                                        '-'}
+                                                </div>
+                                                <div className="text-xs text-muted-foreground">
+                                                    {cheque.financial_account
+                                                        ?.holder?.name ??
+                                                        cheque.cheque_book
+                                                            ?.financial_account
+                                                            ?.holder?.name ??
+                                                        cheque.financial_account
+                                                            ?.name ??
+                                                        cheque.cheque_book
+                                                            ?.financial_account
+                                                            ?.name ??
+                                                        cheque.financial_account
+                                                            ?.account_type ??
+                                                        ''}
+                                                    {(cheque.financial_account
+                                                        ?.holder?.customer_no ??
+                                                        cheque.cheque_book
+                                                            ?.financial_account
+                                                            ?.holder
+                                                            ?.customer_no) &&
+                                                        ` · ${cheque.financial_account?.holder?.customer_no ?? cheque.cheque_book?.financial_account?.holder?.customer_no}`}
+                                                </div>
+                                            </div>
                                         </td>
                                         <td className="px-2 py-2">
                                             {formatDate(cheque.cheque_date)}

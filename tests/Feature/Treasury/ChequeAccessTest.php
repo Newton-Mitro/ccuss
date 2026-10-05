@@ -166,7 +166,9 @@ it('loads cheque books and cheques for authorized organization users', function 
         ->assertInertia(fn($page) => $page
             ->component('treasury-cash/cheques/index')
             ->has('cheques.data', 1)
-            ->where('cheques.data.0.cheque_no', $fixture['cheque']->cheque_no));
+            ->where('cheques.data.0.cheque_no', $fixture['cheque']->cheque_no)
+            ->where('cheques.data.0.financial_account.id', $fixture['bankAccount']->financial_account_id)
+            ->where('cheques.data.0.cheque_book.financial_account.id', $fixture['bankAccount']->financial_account_id));
 });
 
 it('does not expose cheque pages without permission', function () {

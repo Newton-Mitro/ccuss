@@ -14,6 +14,17 @@ export type ChequeStatus =
     | 'CANCELLED'
     | 'EXPIRED';
 
+export interface ChequeFinancialAccount {
+    id: number;
+    account_no: string;
+    name?: string | null;
+    account_type: string;
+    holder?: {
+        name: string;
+        customer_no?: string | null;
+    } | null;
+}
+
 export interface ChequeListItem {
     id: number;
     cheque_no: string;
@@ -21,8 +32,10 @@ export interface ChequeListItem {
     cheque_date?: string | null;
     amount?: string | number | null;
     payee?: string | null;
+    financial_account?: ChequeFinancialAccount | null;
     cheque_book?: {
         book_no: string;
+        financial_account?: ChequeFinancialAccount | null;
         bank_account?: {
             account_name: string;
             bank?: { name: string } | null;

@@ -187,6 +187,23 @@ export default function SavingsChequeWithdrawalPage() {
         );
     };
 
+    const clearSelectedCustomer = () => {
+        setSelectedCustomer(null);
+        setSelectedAccountId('');
+        setSelectedChequeId('');
+        setSelectedSignatureKey('');
+        setNote('');
+
+        router.get(
+            route('teller-transactions.savings-cheque-withdrawal'),
+            {},
+            {
+                preserveState: true,
+                replace: true,
+            },
+        );
+    };
+
     const submit = () => {
         if (
             !selectedCustomer ||
@@ -269,6 +286,7 @@ export default function SavingsChequeWithdrawalPage() {
                         </div>
                         <FinancialAccountSearchInput
                             onSelect={handleSelectAccount}
+                            clearSelectedCustomer={clearSelectedCustomer}
                             scope="customer"
                             placeholder="Search customer or savings account..."
                         />

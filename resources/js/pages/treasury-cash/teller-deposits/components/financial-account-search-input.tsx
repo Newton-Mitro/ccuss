@@ -1,6 +1,6 @@
 import type { Customer } from '@/types/customer_kyc_module';
 import axios from 'axios';
-import { Search, WalletCards } from 'lucide-react';
+import { Search, WalletCards, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { route } from 'ziggy-js';
 
@@ -22,6 +22,7 @@ export interface FinancialAccountSearchResult {
 
 interface FinancialAccountSearchInputProps {
     onSelect: (account: FinancialAccountSearchResult) => void;
+    clearSelectedCustomer?: () => void;
     initialAccount?: FinancialAccountSearchResult | null;
     scope?: 'all' | 'customer';
     placeholder?: string;
@@ -29,6 +30,7 @@ interface FinancialAccountSearchInputProps {
 
 export function FinancialAccountSearchInput({
     onSelect,
+    clearSelectedCustomer,
     initialAccount,
     scope = 'all',
     placeholder = 'Search customer or account',
@@ -96,7 +98,7 @@ export function FinancialAccountSearchInput({
         <div className="relative w-full" ref={containerRef}>
             <div className="relative">
                 <input
-                    type="search"
+                    type="text"
                     value={query}
                     onChange={(event) => {
                         setQuery(event.target.value);
@@ -110,23 +112,44 @@ export function FinancialAccountSearchInput({
                     }}
                     placeholder={placeholder}
                     aria-label="Search financial accounts"
-                    className="h-9 w-full rounded-md border bg-background px-3 pr-10 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                    className="h-9 w-full rounded-md border bg-background px-3 pr-16 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"
                 />
-                <button
-                    type="button"
-                    onClick={() => void search()}
-                    disabled={loading}
-                    aria-label="Search accounts"
-                    className="absolute top-1/2 right-2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-primary disabled:opacity-50"
-                >
-                    {loading ? (
-                        <span className="block h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent" />
-                    ) : (
-                        <Search className="h-4 w-4" />
-                    )}
-                </button>
-            </div>
 
+                <div className="absolute top-1/2 right-1.5 flex -translate-y-1/2 items-center gap-0.5">
+                    {query && (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setQuery('');
+                                setAccounts([]);
+                                setShowResults(false);
+                                onSelect(null as any);
+                            }}
+                            aria-label="Clear account search"
+                            className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                        >
+                            <X
+                                className="h-4 w-4"
+                                onClick={clearSelectedCustomer}
+                            />
+                        </button>
+                    )}
+
+                    <button
+                        type="button"
+                        onClick={() => void search()}
+                        disabled={loading}
+                        aria-label="Search accounts"
+                        className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-primary disabled:opacity-50"
+                    >
+                        {loading ? (
+                            <span className="block h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent" />
+                        ) : (
+                            <Search className="h-4 w-4" />
+                        )}
+                    </button>
+                </div>
+            </div>
             {showResults && (
                 <div className="absolute z-30 mt-1 max-h-80 w-full overflow-auto rounded-md border bg-background shadow-lg">
                     {accounts.length > 0 ? (

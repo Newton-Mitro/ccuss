@@ -139,7 +139,6 @@ class FinancialServicesSeeder extends Seeder
 
             $products = [
                 ['SAV-REG', 'Regular Savings', 'SAVINGS', 'LIABILITY', '3.000000', 'SIMPLE', 'MONTHLY', 100],
-                ['SAV-MINOR', 'Minor Savings', 'SAVINGS', 'LIABILITY', '4.000000', 'SIMPLE', 'MONTHLY', 50],
                 ['SHR-MEM', 'Member Share Capital', 'SHARE', 'EQUITY', '0.000000', 'NONE', 'NONE', 1000],
                 ['FDR-12M', 'Twelve Month Fixed Deposit', 'FIXED_DEPOSIT', 'LIABILITY', '8.500000', 'COMPOUND', 'MATURITY', 10000],
                 ['RD-24M', 'Twenty Four Month Recurring Deposit', 'RECURRING_DEPOSIT', 'LIABILITY', '7.000000', 'COMPOUND', 'MONTHLY', 500],
@@ -733,47 +732,6 @@ class FinancialServicesSeeder extends Seeder
             );
             $jointSavingsAccount->addHolder($johnDoe, 'PRIMARY', null, 50);
             $jointSavingsAccount->addHolder($janeDoe, 'JOINT', null, 50);
-
-            $minorSavingsProduct = FinancialProduct::query()
-                ->where('organization_id', $organization->id)
-                ->where('code', 'SAV-MINOR')
-                ->firstOrFail();
-            $minorSavingsAccount = FinancialAccount::query()->updateOrCreate(
-                [
-                    'organization_id' => $organization->id,
-                    'account_no' => 'SAV-MINOR-' . $minorCustomer->id,
-                ],
-                [
-                    'branch_id' => $branchId,
-                    'financial_product_id' => $minorSavingsProduct->id,
-                    'holder_type' => Customer::class,
-                    'holder_id' => $minorCustomer->id,
-                    'name' => $minorCustomer->name . ' - ' . $minorSavingsProduct->name,
-                    'account_type' => 'SAVINGS',
-                    'status' => 'ACTIVE',
-                    'balance' => 0,
-                    'available_balance' => 0,
-                    'interest_accrued' => 0,
-                    'opened_at' => now()->toDateString(),
-                    'metadata' => ['seeded' => true, 'minor_account' => true],
-                ],
-            );
-            $minorSavingsAccount->addHolder($minorCustomer, 'PRIMARY', $johnDoe);
-
-            foreach ([$johnDoe, $janeDoe] as $parent) {
-                FinancialAccountAuthorizedPerson::query()->updateOrCreate(
-                    [
-                        'financial_account_id' => $minorSavingsAccount->id,
-                        'customer_id' => $parent->id,
-                        'authorization_type' => 'OPERATOR',
-                    ],
-                    [
-                        'designation' => 'Parent',
-                        'is_active' => true,
-                        'note' => 'Authorized to operate the minor savings account.',
-                    ],
-                );
-            }
 
             $seededSavingsCount = $customers->count();
 

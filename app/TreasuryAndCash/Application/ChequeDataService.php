@@ -48,10 +48,11 @@ class ChequeDataService
     {
         $query = Cheque::query()
             ->where(function ($builder) use ($organizationId) {
-                $builder->whereHas('chequeBook.financialAccount', fn($account) => $account->where('organization_id', $organizationId))
+                $builder->whereHas('financialAccount', fn($account) => $account->where('organization_id', $organizationId))
+                    ->orWhereHas('chequeBook.financialAccount', fn($account) => $account->where('organization_id', $organizationId))
                     ->orWhereHas('chequeBook.bankAccount.financialAccount', fn($account) => $account->where('organization_id', $organizationId));
             })
-            ->with('chequeBook.financialAccount', 'chequeBook.bankAccount.bank')
+            ->with('financialAccount.holder', 'chequeBook.financialAccount.holder', 'chequeBook.bankAccount.bank')
             ->latest();
 
         if (!empty($search)) {

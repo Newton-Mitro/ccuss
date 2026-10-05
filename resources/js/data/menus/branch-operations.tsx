@@ -5,14 +5,14 @@ export const branchOperations: SidebarItem[] = [
         name: 'Branch Operations',
         icon: <i className="fa-solid fa-store" />,
         children_expanded: false,
-        permission: ['branch_operations.view'],
+        permission: ['treasury.view'],
         children: [
             {
                 name: 'Dashboard',
                 icon: <i className="fa-solid fa-chart-line" />,
                 path: '/branch-operations',
                 match_path: 'branch-operations',
-                permission: ['branch_operations.view'],
+                permission: ['treasury.view'],
             },
 
             // Branch Day
