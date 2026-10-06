@@ -21,6 +21,7 @@ import {
     StatusBadge,
 } from '../../../components/resource-page-shell';
 import { Button } from '../../../components/ui/button';
+import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
@@ -384,37 +385,31 @@ export default function SavingsChequeWithdrawalPage() {
                                                 Savings account
                                             </label>
 
-                                            <select
+                                            <Select
                                                 id="savings-account"
-                                                className="h-9 w-full rounded-md border bg-background px-3 text-sm transition outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                                className="h-9"
                                                 value={selectedAccountId}
-                                                onChange={(event) => {
-                                                    setSelectedAccountId(
-                                                        event.target.value,
-                                                    );
+                                                onChange={(value) => {
+                                                    setSelectedAccountId(value);
                                                     setSelectedChequeId('');
                                                     setSelectedSignatureKey('');
                                                 }}
-                                                required
-                                            >
-                                                <option value="">
-                                                    Select savings account
-                                                </option>
-
-                                                {savings_accounts.map(
-                                                    (account) => (
-                                                        <option
-                                                            key={account.id}
-                                                            value={account.id}
-                                                        >
-                                                            {account.account_no}{' '}
-                                                            -{' '}
-                                                            {account.name ??
-                                                                account.account_type}
-                                                        </option>
+                                                placeholder="Select savings account"
+                                                options={[
+                                                    {
+                                                        value: '',
+                                                        label: 'Select savings account',
+                                                    },
+                                                    ...savings_accounts.map(
+                                                        (account) => ({
+                                                            value: String(
+                                                                account.id,
+                                                            ),
+                                                            label: `${account.account_no} - ${account.name ?? account.account_type}`,
+                                                        }),
                                                     ),
-                                                )}
-                                            </select>
+                                                ]}
+                                            />
                                         </div>
 
                                         {/* Balance */}
@@ -664,36 +659,31 @@ export default function SavingsChequeWithdrawalPage() {
                                         >
                                             Teller session
                                         </label>
-                                        <select
+                                        <Select
                                             id="teller-session"
-                                            className="h-8 w-full rounded-md border bg-background px-2 text-xs font-medium"
+                                            className="h-8 px-2 text-xs font-medium"
                                             value={selectedTellerSessionId}
-                                            onChange={(event) =>
+                                            onChange={(value) =>
                                                 setSelectedTellerSessionId(
-                                                    event.target.value,
+                                                    value,
                                                 )
                                             }
-                                            required
-                                        >
-                                            <option value="">
-                                                Select session
-                                            </option>
-                                            {teller_sessions.map((session) => (
-                                                <option
-                                                    key={session.id}
-                                                    value={session.id}
-                                                >
-                                                    {session.teller?.name ??
-                                                        'Teller'}{' '}
-                                                    (
-                                                    {session.teller?.code ??
-                                                        '-'}
-                                                    ) ·{' '}
-                                                    {session.branch_day
-                                                        ?.business_date ?? '-'}
-                                                </option>
-                                            ))}
-                                        </select>
+                                            placeholder="Select session"
+                                            options={[
+                                                {
+                                                    value: '',
+                                                    label: 'Select session',
+                                                },
+                                                ...teller_sessions.map(
+                                                    (session) => ({
+                                                        value: String(
+                                                            session.id,
+                                                        ),
+                                                        label: `${session.teller?.name ?? 'Teller'} (${session.teller?.code ?? '-'}) · ${session.branch_day?.business_date ?? '-'}`,
+                                                    }),
+                                                ),
+                                            ]}
+                                        />
                                     </div>
                                     <div className="shrink-0 border-l pl-2">
                                         <div className="text-[9px] text-muted-foreground">
@@ -720,38 +710,34 @@ export default function SavingsChequeWithdrawalPage() {
                                     >
                                         Issued cheque
                                     </label>
-                                    <select
+                                    <Select
                                         id="cheque-id"
-                                        className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                                        className="h-9"
                                         value={selectedChequeId}
-                                        onChange={(event) =>
-                                            setSelectedChequeId(
-                                                event.target.value,
-                                            )
+                                        onChange={(value) =>
+                                            setSelectedChequeId(value)
                                         }
                                         disabled={!selectedAccountId}
-                                        required
-                                    >
-                                        <option value="">
-                                            {selectedAccountId
+                                        placeholder={
+                                            selectedAccountId
                                                 ? 'Select cheque'
-                                                : 'Select a savings account first'}
-                                        </option>
-                                        {relevantCheques.map((cheque) => (
-                                            <option
-                                                key={cheque.id}
-                                                value={cheque.id}
-                                            >
-                                                {cheque.cheque_no} ·{' '}
-                                                {cheque.status} · BDT{' '}
-                                                {Number(
-                                                    cheque.amount || 0,
-                                                ).toLocaleString('en-BD', {
-                                                    minimumFractionDigits: 2,
-                                                })}
-                                            </option>
-                                        ))}
-                                    </select>
+                                                : 'Select a savings account first'
+                                        }
+                                        options={[
+                                            {
+                                                value: '',
+                                                label: selectedAccountId
+                                                    ? 'Select cheque'
+                                                    : 'Select a savings account first',
+                                            },
+                                            ...relevantCheques.map(
+                                                (cheque) => ({
+                                                    value: String(cheque.id),
+                                                    label: `${cheque.cheque_no} · ${cheque.status} · BDT ${Number(cheque.amount || 0).toLocaleString('en-BD', { minimumFractionDigits: 2 })}`,
+                                                }),
+                                            ),
+                                        ]}
+                                    />
                                     {selectedAccountId &&
                                         relevantCheques.length === 0 && (
                                             <p className="text-[10px] text-muted-foreground">

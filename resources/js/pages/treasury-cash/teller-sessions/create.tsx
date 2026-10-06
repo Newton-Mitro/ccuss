@@ -6,6 +6,7 @@ import { route } from 'ziggy-js';
 import { ResourcePageHeader } from '../../../components/resource-page-shell';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
+import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 
@@ -75,28 +76,26 @@ export default function CreateTellerSessionPage() {
                                 >
                                     Teller
                                 </label>
-                                <select
+                                <Select
                                     id="teller_id"
-                                    className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                                    className="h-9"
                                     value={data.teller_id}
-                                    onChange={(event) =>
-                                        setData('teller_id', event.target.value)
+                                    onChange={(value) =>
+                                        setData('teller_id', value)
                                     }
                                     disabled={!branch_day || !userHasBranch}
-                                    required
-                                >
-                                    <option value="">
-                                        Select active teller
-                                    </option>
-                                    {tellers.map((teller: any) => (
-                                        <option
-                                            key={teller.id}
-                                            value={teller.id}
-                                        >
-                                            {teller.name} ({teller.code})
-                                        </option>
-                                    ))}
-                                </select>
+                                    placeholder="Select active teller"
+                                    options={[
+                                        {
+                                            value: '',
+                                            label: 'Select active teller',
+                                        },
+                                        ...tellers.map((teller: any) => ({
+                                            value: String(teller.id),
+                                            label: `${teller.name} (${teller.code})`,
+                                        })),
+                                    ]}
+                                />
                                 {errors.teller_id && (
                                     <p className="text-sm text-destructive">
                                         {errors.teller_id}

@@ -6,6 +6,7 @@ import { route } from 'ziggy-js';
 import { ResourcePageHeader } from '../../../components/resource-page-shell';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
+import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
@@ -70,26 +71,23 @@ export default function Create({ vault, branch_locked = false }: any) {
                                 >
                                     Branch
                                 </label>
-                                <select
+                                <Select
                                     id="branch_id"
-                                    className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                                    className="h-9"
                                     value={data.branch_id}
                                     disabled={editing && branch_locked}
-                                    onChange={(event) =>
-                                        setData('branch_id', event.target.value)
+                                    onChange={(value) =>
+                                        setData('branch_id', value)
                                     }
-                                    required
-                                >
-                                    <option value="">Select branch</option>
-                                    {branches.map((branch) => (
-                                        <option
-                                            key={branch.id}
-                                            value={branch.id}
-                                        >
-                                            {branch.name} ({branch.code})
-                                        </option>
-                                    ))}
-                                </select>
+                                    placeholder="Select branch"
+                                    options={[
+                                        { value: '', label: 'Select branch' },
+                                        ...branches.map((branch) => ({
+                                            value: String(branch.id),
+                                            label: `${branch.name} (${branch.code})`,
+                                        })),
+                                    ]}
+                                />
                                 {errors.branch_id && (
                                     <p className="text-sm text-destructive">
                                         {errors.branch_id}
@@ -186,18 +184,22 @@ export default function Create({ vault, branch_locked = false }: any) {
                                 >
                                     Status
                                 </label>
-                                <select
+                                <Select
                                     id="status"
-                                    className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                                    className="h-9"
                                     value={data.status}
-                                    onChange={(event) =>
-                                        setData('status', event.target.value)
+                                    onChange={(value) =>
+                                        setData('status', value)
                                     }
-                                >
-                                    <option value="ACTIVE">Active</option>
-                                    <option value="INACTIVE">Inactive</option>
-                                    <option value="CLOSED">Closed</option>
-                                </select>
+                                    options={[
+                                        { value: 'ACTIVE', label: 'Active' },
+                                        {
+                                            value: 'INACTIVE',
+                                            label: 'Inactive',
+                                        },
+                                        { value: 'CLOSED', label: 'Closed' },
+                                    ]}
+                                />
                             </div>
                         </div>
                     </section>

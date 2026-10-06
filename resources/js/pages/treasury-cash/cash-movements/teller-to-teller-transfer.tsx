@@ -7,6 +7,7 @@ import { route } from 'ziggy-js';
 import HeadingSmall from '../../../components/heading-small';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
+import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
@@ -138,61 +139,48 @@ export default function TellerToTellerTransfer() {
                                 {transferConfig.fromLabel}
                             </label>
                             {transfer_type === 'BANK_TO_VAULT' ? (
-                                <select
+                                <Select
                                     id="bank_account_id"
-                                    className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                                    className="h-9"
                                     value={data.bank_account_id}
-                                    onChange={(event) =>
-                                        setData(
-                                            'bank_account_id',
-                                            event.target.value,
-                                        )
+                                    onChange={(value) =>
+                                        setData('bank_account_id', value)
                                     }
-                                    required
-                                >
-                                    <option value="">
-                                        Select bank account
-                                    </option>
-                                    {bank_accounts.map((account) => (
-                                        <option
-                                            key={account.id}
-                                            value={account.id}
-                                        >
-                                            {account.account_name} (
-                                            {account.account_number})
-                                        </option>
-                                    ))}
-                                </select>
+                                    placeholder="Select bank account"
+                                    options={[
+                                        {
+                                            value: '',
+                                            label: 'Select bank account',
+                                        },
+                                        ...bank_accounts.map((account) => ({
+                                            value: String(account.id),
+                                            label: `${account.account_name} (${account.account_number})`,
+                                        })),
+                                    ]}
+                                />
                             ) : (
-                                <select
+                                <Select
                                     id="from_cash_location_id"
-                                    className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                                    className="h-9"
                                     value={data.from_cash_location_id}
-                                    onChange={(event) =>
-                                        setData(
-                                            'from_cash_location_id',
-                                            event.target.value,
-                                        )
+                                    onChange={(value) =>
+                                        setData('from_cash_location_id', value)
                                     }
-                                    required
-                                >
-                                    <option value="">Select source</option>
-                                    {from_cash_locations
-                                        .filter(
-                                            (location) =>
-                                                String(location.id) !==
-                                                data.to_cash_location_id,
-                                        )
-                                        .map((location) => (
-                                            <option
-                                                key={location.id}
-                                                value={location.id}
-                                            >
-                                                {location.name} ({location.code}
-                                                )
-                                            </option>
-                                        ))}
-                                </select>
+                                    placeholder="Select source"
+                                    options={[
+                                        { value: '', label: 'Select source' },
+                                        ...from_cash_locations
+                                            .filter(
+                                                (location) =>
+                                                    String(location.id) !==
+                                                    data.to_cash_location_id,
+                                            )
+                                            .map((location) => ({
+                                                value: String(location.id),
+                                                label: `${location.name} (${location.code})`,
+                                            })),
+                                    ]}
+                                />
                             )}
                             {errors.from_cash_location_id && (
                                 <p className="text-sm text-destructive">
@@ -217,61 +205,51 @@ export default function TellerToTellerTransfer() {
                                 {transferConfig.toLabel}
                             </label>
                             {transfer_type === 'VAULT_TO_BANK' ? (
-                                <select
+                                <Select
                                     id="bank_account_id"
-                                    className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                                    className="h-9"
                                     value={data.bank_account_id}
-                                    onChange={(event) =>
-                                        setData(
-                                            'bank_account_id',
-                                            event.target.value,
-                                        )
+                                    onChange={(value) =>
+                                        setData('bank_account_id', value)
                                     }
-                                    required
-                                >
-                                    <option value="">
-                                        Select bank account
-                                    </option>
-                                    {bank_accounts.map((account) => (
-                                        <option
-                                            key={account.id}
-                                            value={account.id}
-                                        >
-                                            {account.account_name} (
-                                            {account.account_number})
-                                        </option>
-                                    ))}
-                                </select>
+                                    placeholder="Select bank account"
+                                    options={[
+                                        {
+                                            value: '',
+                                            label: 'Select bank account',
+                                        },
+                                        ...bank_accounts.map((account) => ({
+                                            value: String(account.id),
+                                            label: `${account.account_name} (${account.account_number})`,
+                                        })),
+                                    ]}
+                                />
                             ) : (
-                                <select
+                                <Select
                                     id="to_cash_location_id"
-                                    className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                                    className="h-9"
                                     value={data.to_cash_location_id}
-                                    onChange={(event) =>
-                                        setData(
-                                            'to_cash_location_id',
-                                            event.target.value,
-                                        )
+                                    onChange={(value) =>
+                                        setData('to_cash_location_id', value)
                                     }
-                                    required
-                                >
-                                    <option value="">Select destination</option>
-                                    {to_cash_locations
-                                        .filter(
-                                            (location) =>
-                                                String(location.id) !==
-                                                data.from_cash_location_id,
-                                        )
-                                        .map((location) => (
-                                            <option
-                                                key={location.id}
-                                                value={location.id}
-                                            >
-                                                {location.name} ({location.code}
-                                                )
-                                            </option>
-                                        ))}
-                                </select>
+                                    placeholder="Select destination"
+                                    options={[
+                                        {
+                                            value: '',
+                                            label: 'Select destination',
+                                        },
+                                        ...to_cash_locations
+                                            .filter(
+                                                (location) =>
+                                                    String(location.id) !==
+                                                    data.from_cash_location_id,
+                                            )
+                                            .map((location) => ({
+                                                value: String(location.id),
+                                                label: `${location.name} (${location.code})`,
+                                            })),
+                                    ]}
+                                />
                             )}
                             {transfer_type === 'VAULT_TO_BANK' &&
                                 errors.bank_account_id && (

@@ -6,6 +6,7 @@ import { route } from 'ziggy-js';
 import HeadingSmall from '../../../../components/heading-small';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
+import { Select } from '../../../../components/ui/select';
 import useFlashToastHandler from '../../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../../types';
@@ -60,22 +61,20 @@ export default function Create() {
                             >
                                 Bank
                             </label>
-                            <select
+                            <Select
                                 id="bank_id"
-                                className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                                className="h-9"
                                 value={data.bank_id}
-                                onChange={(event) =>
-                                    setData('bank_id', event.target.value)
-                                }
-                                required
-                            >
-                                <option value="">Select bank</option>
-                                {banks.map((bank) => (
-                                    <option key={bank.id} value={bank.id}>
-                                        {bank.name} ({bank.code})
-                                    </option>
-                                ))}
-                            </select>
+                                onChange={(value) => setData('bank_id', value)}
+                                placeholder="Select bank"
+                                options={[
+                                    { value: '', label: 'Select bank' },
+                                    ...banks.map((bank) => ({
+                                        value: String(bank.id),
+                                        label: `${bank.name} (${bank.code})`,
+                                    })),
+                                ]}
+                            />
                             {errors.bank_id && (
                                 <p className="text-sm text-destructive">
                                     {errors.bank_id}
@@ -89,27 +88,25 @@ export default function Create() {
                             >
                                 Financial account
                             </label>
-                            <select
+                            <Select
                                 id="financial_account_id"
-                                className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                                className="h-9"
                                 value={data.financial_account_id}
-                                onChange={(event) =>
-                                    setData(
-                                        'financial_account_id',
-                                        event.target.value,
-                                    )
+                                onChange={(value) =>
+                                    setData('financial_account_id', value)
                                 }
-                                required
-                            >
-                                <option value="">
-                                    Select financial account
-                                </option>
-                                {financial_accounts.map((account) => (
-                                    <option key={account.id} value={account.id}>
-                                        {account.name} ({account.account_no})
-                                    </option>
-                                ))}
-                            </select>
+                                placeholder="Select financial account"
+                                options={[
+                                    {
+                                        value: '',
+                                        label: 'Select financial account',
+                                    },
+                                    ...financial_accounts.map((account) => ({
+                                        value: String(account.id),
+                                        label: `${account.name} (${account.account_no})`,
+                                    })),
+                                ]}
+                            />
                             {errors.financial_account_id && (
                                 <p className="text-sm text-destructive">
                                     {errors.financial_account_id}
@@ -124,21 +121,23 @@ export default function Create() {
                         >
                             Branch
                         </label>
-                        <select
+                        <Select
                             id="branch_id"
-                            className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                            className="h-9"
                             value={data.branch_id}
-                            onChange={(event) =>
-                                setData('branch_id', event.target.value)
-                            }
-                        >
-                            <option value="">Organization-wide</option>
-                            {branches.map((branch) => (
-                                <option key={branch.id} value={branch.id}>
-                                    {branch.name} ({branch.code})
-                                </option>
-                            ))}
-                        </select>
+                            onChange={(value) => setData('branch_id', value)}
+                            placeholder="Organization-wide"
+                            options={[
+                                {
+                                    value: '',
+                                    label: 'Organization-wide',
+                                },
+                                ...branches.map((branch) => ({
+                                    value: String(branch.id),
+                                    label: `${branch.name} (${branch.code})`,
+                                })),
+                            ]}
+                        />
                     </div>
                     <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
@@ -213,19 +212,20 @@ export default function Create() {
                             >
                                 Account type
                             </label>
-                            <select
+                            <Select
                                 id="account_type"
-                                className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                                className="h-9"
                                 value={data.account_type}
-                                onChange={(event) =>
-                                    setData('account_type', event.target.value)
+                                onChange={(value) =>
+                                    setData('account_type', value)
                                 }
-                            >
-                                <option value="CURRENT">Current</option>
-                                <option value="SAVINGS">Savings</option>
-                                <option value="FDR">FDR</option>
-                                <option value="OTHER">Other</option>
-                            </select>
+                                options={[
+                                    { value: 'CURRENT', label: 'Current' },
+                                    { value: 'SAVINGS', label: 'Savings' },
+                                    { value: 'FDR', label: 'FDR' },
+                                    { value: 'OTHER', label: 'Other' },
+                                ]}
+                            />
                         </div>
                     </div>
                     <div className="grid gap-4 sm:grid-cols-2">
@@ -263,18 +263,17 @@ export default function Create() {
                             >
                                 Status
                             </label>
-                            <select
+                            <Select
                                 id="status"
-                                className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                                className="h-9"
                                 value={data.status}
-                                onChange={(event) =>
-                                    setData('status', event.target.value)
-                                }
-                            >
-                                <option value="ACTIVE">Active</option>
-                                <option value="INACTIVE">Inactive</option>
-                                <option value="CLOSED">Closed</option>
-                            </select>
+                                onChange={(value) => setData('status', value)}
+                                options={[
+                                    { value: 'ACTIVE', label: 'Active' },
+                                    { value: 'INACTIVE', label: 'Inactive' },
+                                    { value: 'CLOSED', label: 'Closed' },
+                                ]}
+                            />
                         </div>
                     </div>
                     <label className="flex items-center gap-2 text-sm">

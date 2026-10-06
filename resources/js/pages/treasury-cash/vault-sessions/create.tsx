@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
@@ -49,21 +50,26 @@ export default function CreateVaultSessionPage() {
                     className="space-y-4 rounded-lg border bg-card p-6"
                 >
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Vault</label>
-                        <select
-                            value={data.vault_id}
-                            onChange={(event) =>
-                                setData('vault_id', event.target.value)
-                            }
-                            className="w-full rounded-md border bg-background p-2"
+                        <label
+                            htmlFor="vault_id"
+                            className="text-sm font-medium"
                         >
-                            <option value="">Select vault</option>
-                            {vaults.map((vault) => (
-                                <option key={vault.id} value={vault.id}>
-                                    {vault.name} ({vault.code})
-                                </option>
-                            ))}
-                        </select>
+                            Vault
+                        </label>
+                        <Select
+                            id="vault_id"
+                            className="h-9 p-2"
+                            value={data.vault_id}
+                            onChange={(value) => setData('vault_id', value)}
+                            placeholder="Select vault"
+                            options={[
+                                { value: '', label: 'Select vault' },
+                                ...vaults.map((vault) => ({
+                                    value: String(vault.id),
+                                    label: `${vault.name} (${vault.code})`,
+                                })),
+                            ]}
+                        />
                         {errors.vault_id && (
                             <p className="text-sm text-red-500">
                                 {errors.vault_id}

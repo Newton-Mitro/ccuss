@@ -16,6 +16,7 @@ import {
 } from '../../../components/resource-page-shell';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
+import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
@@ -273,33 +274,27 @@ export default function CustomerDepositPage() {
                                         Teller Session
                                     </label>
 
-                                    <select
+                                    <Select
                                         id="customer-deposit-session"
-                                        className="h-8 w-full rounded-md border bg-background px-2 text-xs font-medium transition outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
+                                        className="h-8 px-2 text-xs font-medium"
                                         value={selectedTellerSessionId}
-                                        onChange={(event) =>
-                                            setSelectedTellerSessionId(
-                                                event.target.value,
-                                            )
+                                        onChange={(value) =>
+                                            setSelectedTellerSessionId(value)
                                         }
-                                        required
-                                    >
-                                        <option value="">Select session</option>
-
-                                        {teller_sessions.map((session) => (
-                                            <option
-                                                key={session.id}
-                                                value={session.id}
-                                            >
-                                                {session.teller?.name ??
-                                                    'Teller'}{' '}
-                                                ({session.teller?.code ?? '-'})
-                                                —{' '}
-                                                {session.branch_day
-                                                    ?.business_date ?? '-'}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        placeholder="Select session"
+                                        options={[
+                                            {
+                                                value: '',
+                                                label: 'Select session',
+                                            },
+                                            ...teller_sessions.map(
+                                                (session) => ({
+                                                    value: String(session.id),
+                                                    label: `${session.teller?.name ?? 'Teller'} (${session.teller?.code ?? '-'}) — ${session.branch_day?.business_date ?? '-'}`,
+                                                }),
+                                            ),
+                                        ]}
+                                    />
                                 </div>
 
                                 <div className="shrink-0 border-l pl-3">

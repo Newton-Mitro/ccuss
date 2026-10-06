@@ -14,6 +14,7 @@ import { route } from 'ziggy-js';
 
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
+import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../types';
@@ -149,27 +150,25 @@ export default function Form() {
                             )}
                         </div>
 
-                        <select
+                        <Select
                             id="teller_session_id"
-                            className="h-9 w-full rounded-md border bg-background px-3 text-sm transition outline-none focus:border-ring focus:ring-2 focus:ring-ring/20"
+                            className="h-9"
                             value={data.teller_session_id}
-                            onChange={(event) =>
-                                setData('teller_session_id', event.target.value)
+                            onChange={(value) =>
+                                setData('teller_session_id', value)
                             }
-                            required
-                        >
-                            <option value="">Select open teller session</option>
-
-                            {teller_sessions.map((session) => (
-                                <option key={session.id} value={session.id}>
-                                    {session.teller?.name ?? 'Teller'} (
-                                    {session.teller?.code ?? '-'}) ·{' '}
-                                    {formatDate(
-                                        session.branch_day?.business_date,
-                                    )}
-                                </option>
-                            ))}
-                        </select>
+                            placeholder="Select open teller session"
+                            options={[
+                                {
+                                    value: '',
+                                    label: 'Select open teller session',
+                                },
+                                ...teller_sessions.map((session) => ({
+                                    value: String(session.id),
+                                    label: `${session.teller?.name ?? 'Teller'} (${session.teller?.code ?? '-'}) · ${formatDate(session.branch_day?.business_date)}`,
+                                })),
+                            ]}
+                        />
 
                         {errors.teller_session_id && (
                             <p className="mt-1 text-xs text-destructive">

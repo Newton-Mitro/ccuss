@@ -5,6 +5,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatDate } from '@/lib/date_util';
@@ -67,25 +68,24 @@ export default function DividendsIndex() {
                     >
                         <div>
                             <Label>Fiscal year</Label>
-                            <select
-                                className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                            <Select
+                                className="h-9"
                                 value={data.fiscal_year_id}
-                                onChange={(event) =>
-                                    setData(
-                                        'fiscal_year_id',
-                                        event.target.value,
-                                    )
+                                onChange={(value) =>
+                                    setData('fiscal_year_id', value)
                                 }
-                            >
-                                <option value="">Select fiscal year</option>
-                                {fiscalYears.map((year) => (
-                                    <option key={year.id} value={year.id}>
-                                        {year.name} ·{' '}
-                                        {formatDate(year.start_date)} to{' '}
-                                        {formatDate(year.end_date)}
-                                    </option>
-                                ))}
-                            </select>
+                                placeholder="Select fiscal year"
+                                options={[
+                                    {
+                                        value: '',
+                                        label: 'Select fiscal year',
+                                    },
+                                    ...fiscalYears.map((year) => ({
+                                        value: String(year.id),
+                                        label: `${year.name} · ${formatDate(year.start_date)} to ${formatDate(year.end_date)}`,
+                                    })),
+                                ]}
+                            />
                         </div>
                         <div>
                             <Label>Dividend rate %</Label>

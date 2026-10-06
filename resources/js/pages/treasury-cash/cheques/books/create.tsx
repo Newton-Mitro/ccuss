@@ -2,6 +2,7 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
 import type { ChequeBookCreatePageProps } from '@/types/treasury-cash/forms';
@@ -51,25 +52,25 @@ export default function CreateChequeBook() {
                         <Label htmlFor="financial_account_id">
                             Savings account
                         </Label>
-                        <select
+                        <Select
                             id="financial_account_id"
-                            className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm"
+                            className="mt-1 h-10"
                             value={data.financial_account_id}
-                            onChange={(event) =>
-                                setData(
-                                    'financial_account_id',
-                                    event.target.value,
-                                )
+                            onChange={(value) =>
+                                setData('financial_account_id', value)
                             }
-                        >
-                            <option value="">Select savings account</option>
-                            {financial_accounts.map((account) => (
-                                <option key={account.id} value={account.id}>
-                                    {account.account_no} ·{' '}
-                                    {account.name ?? 'Savings Account'}
-                                </option>
-                            ))}
-                        </select>
+                            placeholder="Select savings account"
+                            options={[
+                                {
+                                    value: '',
+                                    label: 'Select savings account',
+                                },
+                                ...financial_accounts.map((account) => ({
+                                    value: String(account.id),
+                                    label: `${account.account_no} · ${account.name ?? 'Savings Account'}`,
+                                })),
+                            ]}
+                        />
                         <InputError message={errors.financial_account_id} />
                     </div>
                     <div className="grid gap-4 sm:grid-cols-2">

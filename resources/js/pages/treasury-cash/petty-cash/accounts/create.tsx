@@ -2,6 +2,7 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
 import type { PettyCashAccountCreatePageProps } from '@/types/treasury-cash/forms';
@@ -84,23 +85,21 @@ export default function CreatePettyCashAccount() {
                 >
                     <div>
                         <Label htmlFor="branch_id">Branch</Label>
-                        <select
+                        <Select
                             id="branch_id"
-                            className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm"
+                            className="mt-1 h-10"
                             value={data.branch_id}
                             disabled={editing && branch_locked}
-                            onChange={(event) =>
-                                setData('branch_id', event.target.value)
-                            }
-                            required
-                        >
-                            <option value="">Select branch</option>
-                            {branches.map((branch) => (
-                                <option key={branch.id} value={branch.id}>
-                                    {branch.name} ({branch.code})
-                                </option>
-                            ))}
-                        </select>
+                            onChange={(value) => setData('branch_id', value)}
+                            placeholder="Select branch"
+                            options={[
+                                { value: '', label: 'Select branch' },
+                                ...branches.map((branch) => ({
+                                    value: String(branch.id),
+                                    label: `${branch.name} (${branch.code})`,
+                                })),
+                            ]}
+                        />
                         <InputError message={errors.branch_id} />
                         {editing && branch_locked && (
                             <p className="text-xs text-muted-foreground">
@@ -112,22 +111,20 @@ export default function CreatePettyCashAccount() {
 
                     <div>
                         <Label htmlFor="custodian_id">Custodian</Label>
-                        <select
+                        <Select
                             id="custodian_id"
-                            className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm"
+                            className="mt-1 h-10"
                             value={data.custodian_id}
-                            onChange={(event) =>
-                                setData('custodian_id', event.target.value)
-                            }
-                            required
-                        >
-                            <option value="">Select custodian</option>
-                            {users.map((user) => (
-                                <option key={user.id} value={user.id}>
-                                    {user.name} ({user.email})
-                                </option>
-                            ))}
-                        </select>
+                            onChange={(value) => setData('custodian_id', value)}
+                            placeholder="Select custodian"
+                            options={[
+                                { value: '', label: 'Select custodian' },
+                                ...users.map((user) => ({
+                                    value: String(user.id),
+                                    label: `${user.name} (${user.email})`,
+                                })),
+                            ]}
+                        />
                         <InputError message={errors.custodian_id} />
                     </div>
 
@@ -145,17 +142,16 @@ export default function CreatePettyCashAccount() {
                         </div>
                         <div>
                             <Label htmlFor="method">Method</Label>
-                            <select
+                            <Select
                                 id="method"
-                                className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm"
+                                className="mt-1 h-10"
                                 value={data.method}
-                                onChange={(event) =>
-                                    setData('method', event.target.value)
-                                }
-                            >
-                                <option value="IMPREST">IMPREST</option>
-                                <option value="VARIABLE">VARIABLE</option>
-                            </select>
+                                onChange={(value) => setData('method', value)}
+                                options={[
+                                    { value: 'IMPREST', label: 'IMPREST' },
+                                    { value: 'VARIABLE', label: 'VARIABLE' },
+                                ]}
+                            />
                             <InputError message={errors.method} />
                         </div>
                     </div>
@@ -220,18 +216,17 @@ export default function CreatePettyCashAccount() {
 
                     <div>
                         <Label htmlFor="status">Status</Label>
-                        <select
+                        <Select
                             id="status"
-                            className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm"
+                            className="mt-1 h-10"
                             value={data.status}
-                            onChange={(event) =>
-                                setData('status', event.target.value)
-                            }
-                        >
-                            <option value="ACTIVE">ACTIVE</option>
-                            <option value="INACTIVE">INACTIVE</option>
-                            <option value="CLOSED">CLOSED</option>
-                        </select>
+                            onChange={(value) => setData('status', value)}
+                            options={[
+                                { value: 'ACTIVE', label: 'ACTIVE' },
+                                { value: 'INACTIVE', label: 'INACTIVE' },
+                                { value: 'CLOSED', label: 'CLOSED' },
+                            ]}
+                        />
                         <InputError message={errors.status} />
                     </div>
 

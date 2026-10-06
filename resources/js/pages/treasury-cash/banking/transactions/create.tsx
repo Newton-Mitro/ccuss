@@ -5,6 +5,7 @@ import { route } from 'ziggy-js';
 import HeadingSmall from '../../../../components/heading-small';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
+import { Select } from '../../../../components/ui/select';
 import useFlashToastHandler from '../../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../../layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '../../../../types';
@@ -60,23 +61,22 @@ export default function Create() {
                         >
                             Bank account
                         </label>
-                        <select
+                        <Select
                             id="bank_account_id"
-                            className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                            className="h-9"
                             value={data.bank_account_id}
-                            onChange={(event) =>
-                                setData('bank_account_id', event.target.value)
+                            onChange={(value) =>
+                                setData('bank_account_id', value)
                             }
-                            required
-                        >
-                            <option value="">Select account</option>
-                            {bank_accounts.map((account) => (
-                                <option key={account.id} value={account.id}>
-                                    {account.account_name} (
-                                    {account.account_number})
-                                </option>
-                            ))}
-                        </select>
+                            placeholder="Select account"
+                            options={[
+                                { value: '', label: 'Select account' },
+                                ...bank_accounts.map((account) => ({
+                                    value: String(account.id),
+                                    label: `${account.account_name} (${account.account_number})`,
+                                })),
+                            ]}
+                        />
                         {errors.bank_account_id && (
                             <p className="text-sm text-destructive">
                                 {errors.bank_account_id}
@@ -91,24 +91,33 @@ export default function Create() {
                             >
                                 Type
                             </label>
-                            <select
+                            <Select
                                 id="type"
-                                className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                                className="h-9"
                                 value={data.type}
-                                onChange={(event) =>
-                                    setData('type', event.target.value)
-                                }
-                            >
-                                <option value="DEPOSIT">Deposit</option>
-                                <option value="WITHDRAWAL">Withdrawal</option>
-                                <option value="TRANSFER_IN">Transfer in</option>
-                                <option value="TRANSFER_OUT">
-                                    Transfer out
-                                </option>
-                                <option value="CHARGE">Charge</option>
-                                <option value="INTEREST">Interest</option>
-                                <option value="ADJUSTMENT">Adjustment</option>
-                            </select>
+                                onChange={(value) => setData('type', value)}
+                                options={[
+                                    { value: 'DEPOSIT', label: 'Deposit' },
+                                    {
+                                        value: 'WITHDRAWAL',
+                                        label: 'Withdrawal',
+                                    },
+                                    {
+                                        value: 'TRANSFER_IN',
+                                        label: 'Transfer in',
+                                    },
+                                    {
+                                        value: 'TRANSFER_OUT',
+                                        label: 'Transfer out',
+                                    },
+                                    { value: 'CHARGE', label: 'Charge' },
+                                    { value: 'INTEREST', label: 'Interest' },
+                                    {
+                                        value: 'ADJUSTMENT',
+                                        label: 'Adjustment',
+                                    },
+                                ]}
+                            />
                         </div>
                         <div className="space-y-2">
                             <label

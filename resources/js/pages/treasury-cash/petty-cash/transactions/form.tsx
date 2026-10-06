@@ -7,6 +7,7 @@ import { route } from 'ziggy-js';
 import HeadingSmall from '../../../../components/heading-small';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
+import { Select } from '../../../../components/ui/select';
 import useFlashToastHandler from '../../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../../layouts/custom-auth-layout';
 import { BreadcrumbItem } from '../../../../types';
@@ -65,26 +66,22 @@ export default function Form() {
                         >
                             Petty cash fund
                         </label>
-                        <select
+                        <Select
                             id="petty_cash_fund_id"
-                            className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                            className="h-9"
                             value={data.petty_cash_fund_id}
-                            onChange={(event) =>
-                                setData(
-                                    'petty_cash_fund_id',
-                                    event.target.value,
-                                )
+                            onChange={(value) =>
+                                setData('petty_cash_fund_id', value)
                             }
-                            required
-                        >
-                            <option value="">Select fund</option>
-                            {funds.map((fund) => (
-                                <option key={fund.id} value={fund.id}>
-                                    {fund.name} ({fund.code}) - Balance{' '}
-                                    {fund.current_balance}
-                                </option>
-                            ))}
-                        </select>
+                            placeholder="Select fund"
+                            options={[
+                                { value: '', label: 'Select fund' },
+                                ...funds.map((fund) => ({
+                                    value: String(fund.id),
+                                    label: `${fund.name} (${fund.code}) - Balance ${fund.current_balance}`,
+                                })),
+                            ]}
+                        />
                         {errors.petty_cash_fund_id && (
                             <p className="text-sm text-destructive">
                                 {errors.petty_cash_fund_id}

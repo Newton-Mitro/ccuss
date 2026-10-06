@@ -5,6 +5,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatDate } from '@/lib/date_util';
@@ -58,24 +59,21 @@ export default function BankReconciliationsIndex() {
                     >
                         <div>
                             <Label>Bank account</Label>
-                            <select
-                                className="h-9 rounded-md border bg-background px-3 text-sm"
+                            <Select
+                                className="h-9"
                                 value={data.bank_account_id}
-                                onChange={(event) =>
-                                    setData(
-                                        'bank_account_id',
-                                        event.target.value,
-                                    )
+                                onChange={(value) =>
+                                    setData('bank_account_id', value)
                                 }
-                            >
-                                <option value="">Select account</option>
-                                {accounts.map((account) => (
-                                    <option key={account.id} value={account.id}>
-                                        {account.account_name} ·{' '}
-                                        {account.account_number}
-                                    </option>
-                                ))}
-                            </select>
+                                placeholder="Select account"
+                                options={[
+                                    { value: '', label: 'Select account' },
+                                    ...accounts.map((account) => ({
+                                        value: String(account.id),
+                                        label: `${account.account_name} · ${account.account_number}`,
+                                    })),
+                                ]}
+                            />
                         </div>
                         <div>
                             <Label>Statement date</Label>

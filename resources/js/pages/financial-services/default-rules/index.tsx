@@ -2,6 +2,7 @@ import { ResourcePageHeader } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
@@ -74,44 +75,39 @@ export default function DefaultRulesIndex() {
                         </div>
                         <div>
                             <Label>Account type</Label>
-                            <select
-                                className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                            <Select
+                                className="h-9"
                                 value={data.account_type}
-                                onChange={(event) =>
-                                    setData('account_type', event.target.value)
+                                onChange={(value) =>
+                                    setData('account_type', value)
                                 }
-                            >
-                                {[
+                                options={[
                                     'SAVINGS',
                                     'SHARE',
                                     'FIXED_DEPOSIT',
                                     'RECURRING_DEPOSIT',
                                     'LOAN',
                                     'OTHER',
-                                ].map((value) => (
-                                    <option key={value}>{value}</option>
-                                ))}
-                            </select>
+                                ].map((value) => ({ value, label: value }))}
+                            />
                         </div>
                         <div>
                             <Label>Product scope</Label>
-                            <select
-                                className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                            <Select
+                                className="h-9"
                                 value={data.financial_product_id}
-                                onChange={(event) =>
-                                    setData(
-                                        'financial_product_id',
-                                        event.target.value,
-                                    )
+                                onChange={(value) =>
+                                    setData('financial_product_id', value)
                                 }
-                            >
-                                <option value="">All products</option>
-                                {products.map((product) => (
-                                    <option key={product.id} value={product.id}>
-                                        {product.code} · {product.name}
-                                    </option>
-                                ))}
-                            </select>
+                                placeholder="All products"
+                                options={[
+                                    { value: '', label: 'All products' },
+                                    ...products.map((product) => ({
+                                        value: String(product.id),
+                                        label: `${product.code} · ${product.name}`,
+                                    })),
+                                ]}
+                            />
                         </div>
                         <div>
                             <Label>Grace days</Label>

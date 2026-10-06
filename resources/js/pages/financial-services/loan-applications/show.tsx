@@ -5,6 +5,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatDate } from '@/lib/date_util';
@@ -730,28 +731,20 @@ export default function LoanApplicationShow() {
                     >
                         <div>
                             <Label>Type</Label>
-                            <select
-                                className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                            <Select
+                                className="h-9"
                                 value={collateralData.type}
-                                onChange={(event) =>
-                                    setCollateralData(
-                                        'type',
-                                        event.target.value,
-                                    )
+                                onChange={(value) =>
+                                    setCollateralData('type', value)
                                 }
-                            >
-                                {[
+                                options={[
                                     'DEPOSIT_LIEN',
                                     'PROPERTY',
                                     'VEHICLE',
                                     'GUARANTEE',
                                     'OTHER',
-                                ].map((value) => (
-                                    <option key={value} value={value}>
-                                        {value}
-                                    </option>
-                                ))}
-                            </select>
+                                ].map((value) => ({ value, label: value }))}
+                            />
                         </div>
                         <div>
                             <Label>Description</Label>
@@ -929,26 +922,21 @@ export default function LoanApplicationShow() {
                     >
                         <div>
                             <Label>Customer</Label>
-                            <select
-                                className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                            <Select
+                                className="h-9"
                                 value={guarantorData.customer_id}
-                                onChange={(event) =>
-                                    setGuarantorData(
-                                        'customer_id',
-                                        event.target.value,
-                                    )
+                                onChange={(value) =>
+                                    setGuarantorData('customer_id', value)
                                 }
-                            >
-                                <option value="">Select customer</option>
-                                {guarantorCustomers.map((customer) => (
-                                    <option
-                                        key={customer.id}
-                                        value={customer.id}
-                                    >
-                                        {customer.name} · {customer.customer_no}
-                                    </option>
-                                ))}
-                            </select>
+                                placeholder="Select customer"
+                                options={[
+                                    { value: '', label: 'Select customer' },
+                                    ...guarantorCustomers.map((customer) => ({
+                                        value: String(customer.id),
+                                        label: `${customer.name} · ${customer.customer_no}`,
+                                    })),
+                                ]}
+                            />
                         </div>
                         <div>
                             <Label>Notes</Label>
@@ -1060,26 +1048,26 @@ export default function LoanApplicationShow() {
                             </div>
                             <div>
                                 <Label>Renewal frequency</Label>
-                                <select
-                                    className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                                <Select
+                                    className="h-9"
                                     value={protectionData.renewal_frequency}
-                                    onChange={(event) =>
+                                    onChange={(value) =>
                                         setProtectionData(
                                             'renewal_frequency',
-                                            event.target.value,
+                                            value,
                                         )
                                     }
-                                >
-                                    {[
+                                    options={[
                                         'NONE',
                                         'MONTHLY',
                                         'QUARTERLY',
                                         'HALF_YEARLY',
                                         'YEARLY',
-                                    ].map((value) => (
-                                        <option key={value}>{value}</option>
-                                    ))}
-                                </select>
+                                    ].map((value) => ({
+                                        value,
+                                        label: value,
+                                    }))}
+                                />
                             </div>
                             <div>
                                 <Label>Next renewal</Label>

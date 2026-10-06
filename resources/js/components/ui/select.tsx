@@ -12,6 +12,7 @@ interface Option {
 
 interface SelectSearchProps {
   options: Option[];
+  id?: string;
   className?: string;
   value?: string | number | null;
   onChange?: (value: any) => void;
@@ -23,6 +24,7 @@ interface SelectSearchProps {
 
 const Select: React.FC<SelectSearchProps> = ({
   options,
+  id,
   value,
   onChange,
   placeholder = "Select...",
@@ -119,6 +121,7 @@ const Select: React.FC<SelectSearchProps> = ({
     <div className="relative  rounded-md w-full" ref={ref}>
       {/* Trigger */}
       <button
+        id={id}
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setOpen((prev) => !prev)}

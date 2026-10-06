@@ -2,6 +2,7 @@ import { ResourcePageHeader } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
@@ -208,34 +209,33 @@ export default function ChequeClearings() {
                                     Presented cheque
                                 </Label>
 
-                                <select
+                                <Select
                                     id="cheque_id"
-                                    className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm transition-colors outline-none focus:border-ring focus:ring-2 focus:ring-ring/20"
+                                    className="h-9"
                                     value={data.cheque_id}
-                                    onChange={(event) =>
-                                        setData('cheque_id', event.target.value)
+                                    onChange={(value) =>
+                                        setData('cheque_id', value)
                                     }
-                                >
-                                    <option value="">
-                                        Select presented cheque
-                                    </option>
-
-                                    {cheques.length > 0 ? (
-                                        cheques.map((cheque) => (
-                                            <option
-                                                key={cheque.id}
-                                                value={cheque.id}
-                                            >
-                                                {cheque.cheque_no} ·{' '}
-                                                {cheque.amount}
-                                            </option>
-                                        ))
-                                    ) : (
-                                        <option value="" disabled>
-                                            No presented cheques available
-                                        </option>
-                                    )}
-                                </select>
+                                    placeholder={
+                                        cheques.length > 0
+                                            ? 'Select presented cheque'
+                                            : 'No presented cheques available'
+                                    }
+                                    options={[
+                                        {
+                                            value: '',
+                                            label:
+                                                cheques.length > 0
+                                                    ? 'Select presented cheque'
+                                                    : 'No presented cheques available',
+                                            disabled: cheques.length === 0,
+                                        },
+                                        ...cheques.map((cheque) => ({
+                                            value: String(cheque.id),
+                                            label: `${cheque.cheque_no} · ${cheque.amount}`,
+                                        })),
+                                    ]}
+                                />
 
                                 {cheques.length === 0 && (
                                     <p className="text-[11px] text-muted-foreground">

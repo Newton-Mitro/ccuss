@@ -2,6 +2,7 @@ import { ResourcePageHeader } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatDate, formatDateTime } from '@/lib/date_util';
 import type { BreadcrumbItem } from '@/types';
@@ -77,61 +78,50 @@ export default function CashCountsIndex() {
                     >
                         <div>
                             <Label>Branch day</Label>
-                            <select
-                                className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                            <Select
+                                className="h-9"
                                 value={data.branch_day_id}
-                                onChange={(event) =>
-                                    setData('branch_day_id', event.target.value)
+                                onChange={(value) =>
+                                    setData('branch_day_id', value)
                                 }
-                            >
-                                {branchDays.map((day) => (
-                                    <option key={day.id} value={day.id}>
-                                        {formatDate(day.business_date)}
-                                    </option>
-                                ))}
-                            </select>
+                                placeholder="Select branch day"
+                                options={branchDays.map((day) => ({
+                                    value: String(day.id),
+                                    label: formatDate(day.business_date),
+                                }))}
+                            />
                         </div>
                         <div>
                             <Label>Cash location</Label>
-                            <select
-                                className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                            <Select
+                                className="h-9"
                                 value={data.cash_location_id}
-                                onChange={(event) =>
-                                    setData(
-                                        'cash_location_id',
-                                        event.target.value,
-                                    )
+                                onChange={(value) =>
+                                    setData('cash_location_id', value)
                                 }
-                            >
-                                <option value="">Select location</option>
-                                {locations.map((location) => (
-                                    <option
-                                        key={location.id}
-                                        value={location.id}
-                                    >
-                                        {location.name} · {location.type}
-                                    </option>
-                                ))}
-                            </select>
+                                placeholder="Select location"
+                                options={[
+                                    { value: '', label: 'Select location' },
+                                    ...locations.map((location) => ({
+                                        value: String(location.id),
+                                        label: `${location.name} · ${location.type}`,
+                                    })),
+                                ]}
+                            />
                         </div>
                         <div>
                             <Label>Count type</Label>
-                            <select
-                                className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                            <Select
+                                className="h-9"
                                 value={data.type}
-                                onChange={(event) =>
-                                    setData('type', event.target.value)
-                                }
-                            >
-                                {[
+                                onChange={(value) => setData('type', value)}
+                                options={[
                                     'OPENING',
                                     'CLOSING',
                                     'VERIFICATION',
                                     'ADJUSTMENT',
-                                ].map((value) => (
-                                    <option key={value}>{value}</option>
-                                ))}
-                            </select>
+                                ].map((value) => ({ value, label: value }))}
+                            />
                         </div>
                         <div className="grid gap-2 sm:col-span-3 sm:grid-cols-2">
                             {denominations.map((denomination, index) => (
@@ -206,41 +196,38 @@ export default function CashCountsIndex() {
                     >
                         <div>
                             <Label>Preset</Label>
-                            <select
-                                className="h-9 rounded-md border bg-background px-3 text-sm"
+                            <Select
+                                className="h-9"
                                 value={denominationForm.data.preset}
-                                onChange={(event) =>
-                                    denominationForm.setData(
-                                        'preset',
-                                        event.target.value,
-                                    )
+                                onChange={(value) =>
+                                    denominationForm.setData('preset', value)
                                 }
-                            >
-                                <option value="CUSTOM">Custom</option>
-                                <option value="BANGLADESH">
-                                    Bangladesh (BDT)
-                                </option>
-                            </select>
+                                options={[
+                                    { value: 'CUSTOM', label: 'Custom' },
+                                    {
+                                        value: 'BANGLADESH',
+                                        label: 'Bangladesh (BDT)',
+                                    },
+                                ]}
+                            />
                         </div>
                         <div>
                             <Label>Type</Label>
-                            <select
-                                className="h-9 rounded-md border bg-background px-3 text-sm"
+                            <Select
+                                className="h-9"
                                 value={denominationForm.data.type}
-                                onChange={(event) =>
-                                    denominationForm.setData(
-                                        'type',
-                                        event.target.value,
-                                    )
+                                onChange={(value) =>
+                                    denominationForm.setData('type', value)
                                 }
                                 disabled={
                                     denominationForm.data.preset ===
                                     'BANGLADESH'
                                 }
-                            >
-                                <option>NOTE</option>
-                                <option>COIN</option>
-                            </select>
+                                options={[
+                                    { value: 'NOTE', label: 'NOTE' },
+                                    { value: 'COIN', label: 'COIN' },
+                                ]}
+                            />
                         </div>
                         <div>
                             <Label>Value</Label>
