@@ -33,6 +33,9 @@ class ChequePaymentController extends Controller
                 ->paginate(20),
             'available_cheques' => Cheque::query()
                 ->where('status', 'ISSUED')
+                ->whereNotIn('id', ChequePayment::query()
+                    ->whereNotIn('status', ['RETURNED'])
+                    ->select('cheque_id'))
                 ->where(function ($query) use ($organizationId): void {
                     $query->whereHas('financialAccount', fn($account) => $account
                         ->where('organization_id', $organizationId)

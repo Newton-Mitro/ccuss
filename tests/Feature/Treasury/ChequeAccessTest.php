@@ -511,7 +511,7 @@ it('returns a clear error when a cheque clearing is attempted without an open br
     expect(session('error'))->toContain('open branch day');
 });
 
-it('loads a savings cheque withdrawal form for the selected customer and savings account', function () {
+it('does not register the removed savings cheque withdrawal route', function () {
     $organization = Organization::factory()->create(['code' => 'ORG-001']);
     $branch = Branch::factory()->create(['organization_id' => $organization->id]);
     $customer = \App\CustomerModule\Models\Customer::factory()->create([
@@ -591,18 +591,11 @@ it('loads a savings cheque withdrawal form for the selected customer and savings
 
     $this->actingAs($user)
         ->withSession(['active_organization_id' => $organization->id])
-        ->get(route('teller-transactions.savings-cheque-withdrawal', ['customer_id' => $customer->id]))
-        ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
-            ->component('treasury-cash/teller-transactions/savings-cheque-withdrawal-page')
-            ->where('customer.id', $customer->id)
-            ->where('savings_accounts.0.id', $account->id)
-            ->where('savings_accounts.0.account_holder.name', $customer->name)
-            ->where('savings_accounts.0.account_holder.signature.verification_status', 'VERIFIED')
-            ->where('savings_accounts.0.account_holders.0.id', $customer->id)
-            ->where('savings_accounts.0.account_holders.1.id', $jointHolder->id)
-            ->where('savings_accounts.0.account_holders.1.signature.verification_status', 'VERIFIED')
-            ->where('savings_accounts.0.authorized_persons.0.customer_name', $authorizedPerson->name)
-            ->where('savings_accounts.0.authorized_persons.0.signature.verification_status', 'VERIFIED')
-            ->where('available_cheques.0.id', $cheque->id));
+        ->get('/teller-transactions/savings-cheque-withdrawal')
+        ->assertMethodNotAllowed();
+
+    $this->actingAs($user)
+        ->withSession(['active_organization_id' => $organization->id])
+        ->post('/teller-transactions/savings-cheque-withdrawal')
+        ->assertMethodNotAllowed();
 });

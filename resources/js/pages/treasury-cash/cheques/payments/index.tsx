@@ -3,10 +3,13 @@ import {
     ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import type { BreadcrumbItem, SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { ArrowUpRight, Plus } from 'lucide-react';
 import { route } from 'ziggy-js';
 
@@ -25,6 +28,13 @@ type Props = SharedData & {
         data: PaymentRow[];
         links: { url: string | null; label: string; active: boolean }[];
     };
+    available_cheques: {
+        id: number;
+        cheque_no: string;
+        amount: number;
+        account_no: string | null;
+    }[];
+    teller_sessions: { id: number; label: string }[];
 };
 
 function statusTone(
@@ -39,13 +49,17 @@ function statusTone(
 
 export default function ChequePaymentQueue() {
     useFlashToastHandler();
-    const { payments, auth } = usePage<Props>().props;
+    const { payments, auth, available_cheques, teller_sessions } =
+        usePage<Props>().props;
     const permissionSlugs = new Set(
         (auth.user.permissions ?? []).map((permission) => permission.slug),
     );
-    const canReceive =
-        permissionSlugs.has('cheque_payments.receive') &&
-        permissionSlugs.has('cash_transactions.create');
+    const canReceive = permissionSlugs.has('cheque_payments.receive');
+    const { data, setData, post, processing } = useForm({
+        cheque_id: '',
+        teller_session_id: '',
+        note: '',
+    });
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Treasury & Cash', href: route('treasury-cash.dashboard') },
         {
@@ -61,20 +75,102 @@ export default function ChequePaymentQueue() {
                 <ResourcePageHeader
                     title="Cheque Payment Review"
                     description="Review received cheques before approval and teller posting."
-                    action={
-                        canReceive ? (
-                            <Link
-                                className="inline-flex h-9 items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-                                href={route(
-                                    'teller-transactions.savings-cheque-withdrawal',
-                                )}
-                            >
-                                <Plus className="h-4 w-4" />
-                                Receive cheque
-                            </Link>
-                        ) : undefined
-                    }
                 />
+
+                {canReceive && (
+                    <form
+                        className="grid gap-3 rounded-md border bg-card p-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end"
+                        onSubmit={(event) => {
+                            event.preventDefault();
+                            post(route('cheque-payments.receive'), {
+                                preserveScroll: true,
+                            });
+                        }}
+                    >
+                        <div className="space-y-1.5">
+                            <label
+                                className="text-sm font-medium"
+                                htmlFor="payment-cheque"
+                            >
+                                Issued cheque
+                            </label>
+                            <Select
+                                id="payment-cheque"
+                                value={data.cheque_id}
+                                onChange={(value) =>
+                                    setData('cheque_id', value)
+                                }
+                                placeholder="Select cheque"
+                                disabled={available_cheques.length === 0}
+                                options={[
+                                    { value: '', label: 'Select cheque' },
+                                    ...available_cheques.map((cheque) => ({
+                                        value: String(cheque.id),
+                                        label: `${cheque.cheque_no} · ${cheque.account_no ?? 'Unknown account'} · ${Number(cheque.amount).toLocaleString()}`,
+                                    })),
+                                ]}
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label
+                                className="text-sm font-medium"
+                                htmlFor="payment-teller-session"
+                            >
+                                Open teller session
+                            </label>
+                            <Select
+                                id="payment-teller-session"
+                                value={data.teller_session_id}
+                                onChange={(value) =>
+                                    setData('teller_session_id', value)
+                                }
+                                placeholder="Select teller session"
+                                options={[
+                                    {
+                                        value: '',
+                                        label: 'Select teller session',
+                                    },
+                                    ...teller_sessions.map((session) => ({
+                                        value: String(session.id),
+                                        label: session.label,
+                                    })),
+                                ]}
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label
+                                className="text-sm font-medium"
+                                htmlFor="payment-note"
+                            >
+                                Note{' '}
+                                <span className="text-muted-foreground">
+                                    (optional)
+                                </span>
+                            </label>
+                            <Input
+                                id="payment-note"
+                                value={data.note}
+                                onChange={(event) =>
+                                    setData('note', event.target.value)
+                                }
+                                placeholder="Receipt note"
+                            />
+                        </div>
+                        <Button
+                            type="submit"
+                            disabled={
+                                processing ||
+                                !data.cheque_id ||
+                                !data.teller_session_id ||
+                                available_cheques.length === 0 ||
+                                teller_sessions.length === 0
+                            }
+                        >
+                            <Plus className="h-4 w-4" />
+                            Receive
+                        </Button>
+                    </form>
+                )}
 
                 {payments.data.length === 0 ? (
                     <ResourceEmptyState

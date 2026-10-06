@@ -91,17 +91,6 @@ export const branchOperations: SidebarItem[] = [
                         match_path: 'teller-transactions/customer-deposit',
                         permission: ['cash_transactions.create'],
                     },
-                    {
-                        name: 'Savings Cheque Withdrawal',
-                        icon: <i className="fa-solid fa-money-check-dollar" />,
-                        path: '/teller-transactions/savings-cheque-withdrawal',
-                        match_path:
-                            'teller-transactions/savings-cheque-withdrawal',
-                        permission: [
-                            'cash_transactions.create',
-                            'cheque_payments.receive',
-                        ],
-                    },
                 ],
             },
 

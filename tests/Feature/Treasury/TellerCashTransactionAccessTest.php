@@ -497,10 +497,16 @@ it('receives a savings cheque into review without posting it', function () {
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
-        ->post(route('teller-transactions.savings-cheque-withdrawal.store'), [
-            'customer_id' => $customer->id,
+        ->get(route('cheque-payments.index'))
+        ->assertInertia(fn($page) => $page
+            ->component('treasury-cash/cheques/payments/index')
+            ->where('available_cheques.0.id', $cheque->id)
+            ->where('teller_sessions.0.id', $fixture['session']->id));
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('cheque-payments.receive'), [
             'teller_session_id' => $fixture['session']->id,
-            'financial_account_id' => $account->id,
             'cheque_id' => $cheque->id,
         ])
         ->assertSessionHasNoErrors();
@@ -534,10 +540,8 @@ it('receives a savings cheque into review without posting it', function () {
     ]);
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
-        ->post(route('teller-transactions.savings-cheque-withdrawal.store'), [
-            'customer_id' => $customer->id,
+        ->post(route('cheque-payments.receive'), [
             'teller_session_id' => $fixture['session']->id,
-            'financial_account_id' => $account->id,
             'cheque_id' => $stoppedCheque->id,
         ])
         ->assertSessionHasErrors(['cheque_id']);
