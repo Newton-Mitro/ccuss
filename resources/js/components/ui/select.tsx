@@ -125,13 +125,27 @@ const Select: React.FC<SelectSearchProps> = ({
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setOpen((prev) => !prev)}
-        className={cn(
-          "w-full rounded-md border px-2 text-left  text-base flex justify-between items-center transition-[color,box-shadow] outline-none h-8",
-          error ? "border-destructive" : "border-border",
-          "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
-          "disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-background disabled:opacity-50",
-          className
-        )}
+       className={cn(
+        "flex h-8 w-full min-w-0 items-center justify-between",
+        "rounded-md border border-border",
+        "bg-background text-foreground",
+        "px-3 py-1 text-sm",
+        "outline-none",
+        "transition-[color,box-shadow,border-color,background-color]",
+
+        "focus-visible:border-ring",
+        "focus-visible:ring-2 focus-visible:ring-ring/40",
+
+        error &&
+          "border-destructive text-destructive focus-visible:ring-destructive/40",
+
+        "disabled:pointer-events-none",
+        "disabled:cursor-not-allowed",
+        "disabled:bg-border",
+        "disabled:opacity-50",
+
+        className
+      )}
       >
         <span className="truncate">
           {selectedOption ? selectedOption.label : placeholder}
