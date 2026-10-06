@@ -6,7 +6,6 @@ use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\User;
 use Database\Seeders\FinancialServicesSeeder;
-use Database\Seeders\OpeningBalanceVoucherSeeder;
 use Database\Seeders\PartySeeder;
 use Database\Seeders\SystemAdministratorRolePermissionSeeder;
 use Illuminate\Database\Eloquent\Model;
@@ -56,7 +55,6 @@ class DatabaseSeeder extends Seeder
                 FinancialServicesSeeder::class,
                 AccountDefaultRulesSeeder::class,
                 TreasuryAndCashSeeder::class,
-                OpeningBalanceVoucherSeeder::class,
             ]);
         });
 
