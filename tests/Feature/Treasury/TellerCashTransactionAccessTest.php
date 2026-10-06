@@ -17,9 +17,12 @@ use App\TreasuryAndCash\Models\BranchDay;
 use App\TreasuryAndCash\Models\CashLocation;
 use App\TreasuryAndCash\Models\Cheque;
 use App\TreasuryAndCash\Models\ChequeBook;
+use App\TreasuryAndCash\Models\ChequePayment;
+use App\TreasuryAndCash\Application\ChequePaymentService;
 use App\TreasuryAndCash\Models\Teller;
 use App\TreasuryAndCash\Models\TellerCashTransaction;
 use App\TreasuryAndCash\Models\TellerSession;
+use Illuminate\Validation\ValidationException;
 
 function grantTellerCashTransactionPermission(User $user): void
 {
@@ -38,6 +41,24 @@ function grantTellerCashTransactionPermission(User $user): void
     );
 
     $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $receivePermission = Permission::firstOrCreate(
+        ['slug' => 'cheque_payments.receive'],
+        [
+            'module' => 'cheque_payments',
+            'name' => 'Receive Cheques for Payment',
+            'action' => 'receive',
+        ],
+    );
+    $role->permissions()->syncWithoutDetaching([$receivePermission->id]);
+    $viewPermission = Permission::firstOrCreate(
+        ['slug' => 'cheque_payments.view'],
+        [
+            'module' => 'cheque_payments',
+            'name' => 'View Cheque Payments',
+            'action' => 'view',
+        ],
+    );
+    $role->permissions()->syncWithoutDetaching([$viewPermission->id]);
     $user->roles()->syncWithoutDetaching([$role->id]);
 }
 
@@ -438,7 +459,7 @@ it('allows a customer deposit without a verified signature', function () {
         ->assertRedirect(route('teller-transactions.customer-deposit', ['customer_id' => $customer->id]));
 });
 
-it('requires a verified customer signature before posting a savings cheque withdrawal', function () {
+it('receives a savings cheque into review without posting it', function () {
     $fixture = tellerCashTransactionFixture();
     grantTellerCashTransactionPermission($fixture['user']);
 
@@ -482,9 +503,116 @@ it('requires a verified customer signature before posting a savings cheque withd
             'financial_account_id' => $account->id,
             'cheque_id' => $cheque->id,
         ])
-        ->assertSessionHasErrors(['customer_id']);
+        ->assertSessionHasNoErrors();
 
-    expect($cheque->fresh()->status)->toBe('ISSUED');
+    $payment = ChequePayment::query()->where('cheque_id', $cheque->id)->firstOrFail();
+    expect($payment->status)->toBe('RECEIVED')
+        ->and($cheque->fresh()->status)->toBe('ISSUED')
+        ->and(TellerCashTransaction::query()->where('reference', 'CHEQUE-' . $cheque->cheque_no)->exists())->toBeFalse();
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('cheque-payments.index'))
+        ->assertInertia(fn($page) => $page
+            ->component('treasury-cash/cheques/payments/index')
+            ->where('payments.data.0.status', 'RECEIVED'));
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('cheque-payments.show', $payment))
+        ->assertInertia(fn($page) => $page
+            ->component('treasury-cash/cheques/payments/show')
+            ->where('payment.status', 'RECEIVED')
+            ->where('account_check.status', 'ACTIVE'));
+
+    $stoppedCheque = Cheque::create([
+        'cheque_book_id' => $book->id,
+        'financial_account_id' => $account->id,
+        'cheque_no' => 'CHQ-STOPPED',
+        'status' => 'STOPPED',
+        'amount' => 100,
+    ]);
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('teller-transactions.savings-cheque-withdrawal.store'), [
+            'customer_id' => $customer->id,
+            'teller_session_id' => $fixture['session']->id,
+            'financial_account_id' => $account->id,
+            'cheque_id' => $stoppedCheque->id,
+        ])
+        ->assertSessionHasErrors(['cheque_id']);
+});
+
+it('requires a verified signatory and a separate approver before payment', function () {
+    $fixture = tellerCashTransactionFixture();
+    $customer = Customer::factory()->individualMale()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+    ]);
+    KycDocument::factory()->for($customer)->signature()->verified()->create();
+    $account = FinancialAccount::factory()->active(500)->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'holder_type' => Customer::class,
+        'holder_id' => $customer->id,
+        'account_type' => 'SAVINGS',
+    ]);
+    $book = ChequeBook::create([
+        'financial_account_id' => $account->id,
+        'book_no' => 'PAYMENT-BOOK-' . $account->id,
+        'start_number' => 1,
+        'end_number' => 1,
+        'current_number' => 1,
+        'leaf_count' => 1,
+        'status' => 'IN_USE',
+    ]);
+    $cheque = Cheque::create([
+        'cheque_book_id' => $book->id,
+        'financial_account_id' => $account->id,
+        'cheque_no' => 'PAYMENT-' . $account->id,
+        'status' => 'ISSUED',
+        'amount' => 100,
+    ]);
+    $service = app(ChequePaymentService::class);
+    $payment = $service->receive(
+        $cheque,
+        $fixture['session']->id,
+        $fixture['organization']->id,
+        $fixture['branch']->id,
+        $fixture['user']->id,
+    );
+
+    $viewer = Customer::factory()->individualMale()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+    ]);
+    $account->authorizedPersons()->create([
+        'customer_id' => $viewer->id,
+        'authorization_type' => 'VIEWER',
+        'is_active' => true,
+    ]);
+    expect(fn() => $service->verify($payment, $viewer->id, true, true, $fixture['organization']->id, $fixture['user']->id))
+        ->toThrow(ValidationException::class);
+
+    $payment = $service->verify($payment, $customer->id, true, true, $fixture['organization']->id, $fixture['user']->id);
+    expect($payment->status)->toBe('PENDING_APPROVAL')
+        ->and($payment->checks['balance_sufficient'])->toBeTrue()
+        ->and($payment->checks['stop_payment_clear'])->toBeTrue();
+
+    expect(fn() => $service->approve($payment, $fixture['organization']->id, $fixture['user']->id))
+        ->toThrow(ValidationException::class);
+
+    $approver = User::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+    ]);
+    $payment = $service->approve($payment, $fixture['organization']->id, $approver->id);
+    expect($payment->status)->toBe('APPROVED');
+
+    expect(fn() => $service->pay($payment, $fixture['organization']->id, $fixture['branch']->id, $approver->id))
+        ->toThrow(ValidationException::class);
+    expect($payment->fresh()->status)->toBe('APPROVED')
+        ->and($cheque->fresh()->status)->toBe('ISSUED');
 });
 
 it('creates a pending customer deposit from selected obligations', function () {

@@ -1,6 +1,8 @@
 <?php
 
 use App\FinancialServices\Models\FinancialAccount;
+use App\CustomerModule\Models\Customer;
+use App\CustomerModule\Models\KycDocument;
 use App\GeneralAccounting\Models\AccountGroup;
 use App\GeneralAccounting\Models\FiscalPeriod;
 use App\GeneralAccounting\Models\FiscalYear;
@@ -12,6 +14,7 @@ use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
 use App\TreasuryAndCash\Application\ChequeService;
+use App\TreasuryAndCash\Application\ChequePaymentService;
 use App\TreasuryAndCash\Models\Bank;
 use App\TreasuryAndCash\Models\BankAccount;
 use App\TreasuryAndCash\Models\BranchDay;
@@ -300,7 +303,7 @@ it('allows issuing a cheque linked to an organization savings account', function
 });
 
 it('posts a savings-account cheque withdrawal through the teller cash ledger', function () {
-    $organization = Organization::factory()->create();
+    $organization = Organization::factory()->create(['code' => 'ORG-001']);
     $branch = Branch::factory()->create(['organization_id' => $organization->id]);
     $user = User::factory()->create([
         'organization_id' => $organization->id,
@@ -376,9 +379,16 @@ it('posts a savings-account cheque withdrawal through the teller cash ledger', f
         'expected_cash' => 1000,
         'opened_at' => now(),
     ]);
+    $customer = Customer::factory()->individualMale()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+    ]);
+    KycDocument::factory()->for($customer)->signature()->verified()->create();
     $savingsAccount = FinancialAccount::factory()->active(500)->create([
         'organization_id' => $organization->id,
         'branch_id' => $branch->id,
+        'holder_type' => Customer::class,
+        'holder_id' => $customer->id,
         'account_type' => 'SAVINGS',
         'account_no' => 'SAV-300',
     ]);
@@ -416,6 +426,29 @@ it('posts a savings-account cheque withdrawal through the teller cash ledger', f
         ->and($cashAccount->fresh()->balance)->toBe('750.0000')
         ->and($savingsAccount->fresh()->balance)->toBe('250.0000')
         ->and($transaction->financialTransaction->status)->toBe('POSTED');
+
+    $paymentCheque = Cheque::create([
+        'cheque_book_id' => $book->id,
+        'financial_account_id' => $savingsAccount->id,
+        'cheque_no' => 'CHQ-0002',
+        'status' => 'ISSUED',
+        'amount' => 100,
+    ]);
+    $paymentService = app(ChequePaymentService::class);
+    $payment = $paymentService->receive($paymentCheque, $session->id, $organization->id, $branch->id, $user->id);
+    $payment = $paymentService->verify($payment, $customer->id, true, true, $organization->id, $user->id);
+    $approver = User::factory()->create(['organization_id' => $organization->id, 'branch_id' => $branch->id]);
+    $poster = User::factory()->create(['organization_id' => $organization->id, 'branch_id' => $branch->id]);
+    $payment = $paymentService->approve($payment, $organization->id, $approver->id);
+    \Illuminate\Support\Carbon::setTestNow(now()->addMinute());
+    $payment = $paymentService->pay($payment, $organization->id, $branch->id, $poster->id);
+    \Illuminate\Support\Carbon::setTestNow();
+
+    expect($payment->status)->toBe('PAID')
+        ->and($paymentCheque->fresh()->status)->toBe('CLEARED')
+        ->and($cashAccount->fresh()->balance)->toBe('650.0000')
+        ->and($savingsAccount->fresh()->balance)->toBe('150.0000')
+        ->and($payment->financialTransaction->status)->toBe('POSTED');
 });
 
 it('returns a clear error when a cheque clearing is attempted without an open branch day', function () {

@@ -263,6 +263,33 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
 });
 
 Route::middleware(['auth', 'verified', 'organization'])
+    ->prefix('cheque-payments')
+    ->name('cheque-payments.')
+    ->group(function () {
+        Route::get('/', [\App\TreasuryAndCash\Controllers\ChequePaymentController::class, 'index'])
+            ->middleware('permission:cheque_payments.view')
+            ->name('index');
+        Route::get('/{chequePayment}', [\App\TreasuryAndCash\Controllers\ChequePaymentController::class, 'show'])
+            ->middleware('permission:cheque_payments.view')
+            ->name('show');
+        Route::post('/', [\App\TreasuryAndCash\Controllers\ChequePaymentController::class, 'receive'])
+            ->middleware('permission:cheque_payments.receive')
+            ->name('receive');
+        Route::post('/{chequePayment}/verify', [\App\TreasuryAndCash\Controllers\ChequePaymentController::class, 'verify'])
+            ->middleware('permission:cheque_payments.verify')
+            ->name('verify');
+        Route::post('/{chequePayment}/approve', [\App\TreasuryAndCash\Controllers\ChequePaymentController::class, 'approve'])
+            ->middleware('permission:cheque_payments.approve')
+            ->name('approve');
+        Route::post('/{chequePayment}/return', [\App\TreasuryAndCash\Controllers\ChequePaymentController::class, 'returnPayment'])
+            ->middleware('permission:cheque_payments.approve')
+            ->name('return');
+        Route::post('/{chequePayment}/pay', [\App\TreasuryAndCash\Controllers\ChequePaymentController::class, 'pay'])
+            ->middleware('permission:cheque_payments.post')
+            ->name('pay');
+    });
+
+Route::middleware(['auth', 'verified', 'organization'])
     ->prefix('teller-transactions')
     ->name('teller-transactions.')
     ->group(function () {
@@ -300,7 +327,7 @@ Route::middleware(['auth', 'verified', 'organization'])
             ->middleware('permission:cash_transactions.create')
             ->name('savings-cheque-withdrawal');
         Route::post('/savings-cheque-withdrawal', [CashMovementController::class, 'storeSavingsChequeWithdrawal'])
-            ->middleware('permission:cash_transactions.create')
+            ->middleware('permission:cheque_payments.receive')
             ->name('savings-cheque-withdrawal.store');
         Route::get('/withdrawal', [CashMovementController::class, 'withdrawal'])
             ->middleware('permission:cash_transactions.create')

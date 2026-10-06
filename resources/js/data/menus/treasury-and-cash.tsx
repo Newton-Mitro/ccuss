@@ -247,6 +247,13 @@ export const treasuryAndCash: SidebarItem[] = [
                         match_path: 'cheque-clearings',
                         permission: ['cheques.view'],
                     },
+                    {
+                        name: 'Cheque Payment Review',
+                        icon: <i className="fa-solid fa-list-check" />,
+                        path: '/cheque-payments',
+                        match_path: 'cheque-payments',
+                        permission: ['cheque_payments.view'],
+                    },
                 ],
             },
         ],

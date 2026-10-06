@@ -8,7 +8,6 @@ use App\Http\Controllers\Controller;
 use App\TreasuryAndCash\Application\CashAdjustmentService;
 use App\TreasuryAndCash\Application\CashMovementDataService;
 use App\TreasuryAndCash\Application\CashTransferService;
-use App\TreasuryAndCash\Application\ChequeService;
 use App\TreasuryAndCash\Application\TellerCashTransactionService;
 use App\TreasuryAndCash\Models\Cheque;
 use App\TreasuryAndCash\Models\TellerCashTransaction;
@@ -756,32 +755,34 @@ class CashMovementController extends Controller
         ]);
 
         $customer = Customer::query()->where('organization_id', $organization->id)->findOrFail($data['customer_id']);
-        if (!$customer->signature()->where('verification_status', 'VERIFIED')->exists()) {
-            throw ValidationException::withMessages([
-                'customer_id' => ['Verified customer signature is required before posting a cheque withdrawal.'],
-            ]);
-        }
-
-        $account = FinancialAccount::query()->where('organization_id', $organization->id)->where('id', $data['financial_account_id'])->firstOrFail();
-        $cheque = Cheque::query()->whereKey($data['cheque_id'])->where('financial_account_id', $account->id)->firstOrFail();
-
-        $session = TellerSession::query()
-            ->whereKey($data['teller_session_id'])
-            ->where('status', 'OPEN')
-            ->whereHas('branchDay', fn($query) => $query->where('organization_id', $organization->id)->where('branch_id', $user->branch_id)->where('status', 'OPEN'))
-            ->with(['teller.cashLocation.financialAccount'])
+        $account = FinancialAccount::query()
+            ->where('organization_id', $organization->id)
+            ->whereKey($data['financial_account_id'])
+            ->where(function ($query) use ($customer): void {
+                $query->where(fn($holder) => $holder
+                    ->where('holder_type', Customer::class)
+                    ->where('holder_id', $customer->id))
+                    ->orWhereHas('holders', fn($holders) => $holders->whereKey($customer->id));
+            })
+            ->firstOrFail();
+        $cheque = Cheque::query()
+            ->whereKey($data['cheque_id'])
+            ->where(function ($query) use ($account): void {
+                $query->where('financial_account_id', $account->id)
+                    ->orWhereHas('chequeBook', fn($book) => $book->where('financial_account_id', $account->id));
+            })
             ->firstOrFail();
 
-        app(ChequeService::class)->withdrawFromTeller(
+        $payment = app(\App\TreasuryAndCash\Application\ChequePaymentService::class)->receive(
             $cheque,
-            $session->id,
-            $organization->id,
-            $user->branch_id,
-            $user->id,
+            (int) $data['teller_session_id'],
+            (int) $organization->id,
+            (int) $user->branch_id,
+            (int) $user->id,
+            $data['note'] ?? null,
         );
 
-        return redirect()->route('teller-transactions.savings-cheque-withdrawal', ['customer_id' => $customer->id])
-            ->with('success', 'Savings cheque withdrawal posted successfully.');
+        return redirect()->route('cheque-payments.show', $payment)->with('success', 'Cheque received and submitted for verification.');
     }
 
     public function deposit(Request $request): Response

@@ -97,7 +97,10 @@ export const branchOperations: SidebarItem[] = [
                         path: '/teller-transactions/savings-cheque-withdrawal',
                         match_path:
                             'teller-transactions/savings-cheque-withdrawal',
-                        permission: ['cash_transactions.create'],
+                        permission: [
+                            'cash_transactions.create',
+                            'cheque_payments.receive',
+                        ],
                     },
                 ],
             },

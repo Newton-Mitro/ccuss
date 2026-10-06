@@ -293,7 +293,9 @@ test('default role permissions respect role responsibilities', function () {
 
     $systemAdministrator = Role::where('slug', 'system_administrator')->firstOrFail();
     $teller = Role::where('slug', 'teller')->firstOrFail();
+    $seniorTeller = Role::where('slug', 'senior_teller')->firstOrFail();
     $branchManager = Role::where('slug', 'branch_manager')->firstOrFail();
+    $assistantBranchManager = Role::where('slug', 'assistant_branch_manager')->firstOrFail();
     $loanOfficer = Role::where('slug', 'loan_officer')->firstOrFail();
     $creditManager = Role::where('slug', 'credit_loan_manager')->firstOrFail();
     $financeManager = Role::where('slug', 'finance_manager')->firstOrFail();
@@ -302,11 +304,24 @@ test('default role permissions respect role responsibilities', function () {
     expect($systemAdministrator->permissions()->count())->toBe(Permission::count())
         ->and($permissionExists($teller, 'cash_transactions.create'))->toBeTrue()
         ->and($permissionExists($teller, 'cash_transfers.approve'))->toBeFalse()
+        ->and($permissionExists($teller, 'cheque_payments.view'))->toBeTrue()
+        ->and($permissionExists($teller, 'cheque_payments.receive'))->toBeTrue()
+        ->and($permissionExists($teller, 'cheque_payments.verify'))->toBeTrue()
+        ->and($permissionExists($teller, 'cheque_payments.approve'))->toBeFalse()
+        ->and($permissionExists($teller, 'cheque_payments.post'))->toBeTrue()
+        ->and($permissionExists($seniorTeller, 'cheque_payments.receive'))->toBeTrue()
+        ->and($permissionExists($seniorTeller, 'cheque_payments.approve'))->toBeTrue()
+        ->and($permissionExists($seniorTeller, 'cheque_payments.post'))->toBeTrue()
         ->and($permissionExists($branchManager, 'cash_transfers.approve'))->toBeTrue()
+        ->and($permissionExists($branchManager, 'cheque_payments.approve'))->toBeTrue()
+        ->and($permissionExists($branchManager, 'cheque_payments.receive'))->toBeFalse()
+        ->and($permissionExists($assistantBranchManager, 'cheque_payments.approve'))->toBeTrue()
         ->and($permissionExists($loanOfficer, 'financial.loan-applications.create'))->toBeTrue()
         ->and($permissionExists($loanOfficer, 'financial.loan-applications.manage'))->toBeFalse()
         ->and($permissionExists($creditManager, 'financial.loan-applications.manage'))->toBeTrue()
         ->and($permissionExists($financeManager, 'accounting.voucher.post'))->toBeTrue()
+        ->and($permissionExists($financeManager, 'cheque_payments.approve'))->toBeTrue()
+        ->and($permissionExists($financeManager, 'cheque_payments.receive'))->toBeFalse()
         ->and($permissionExists($financeManager, 'accounting.voucher.reverse'))->toBeFalse()
         ->and($permissionExists($reportOfficer, 'accounting.reports.view'))->toBeTrue()
         ->and($permissionExists($reportOfficer, 'accounting.voucher.create'))->toBeFalse();

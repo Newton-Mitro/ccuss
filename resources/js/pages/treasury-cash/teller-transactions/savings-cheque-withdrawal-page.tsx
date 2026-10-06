@@ -137,7 +137,7 @@ export default function SavingsChequeWithdrawalPage() {
             available_cheques.filter(
                 (cheque) =>
                     String(cheque.financial_account_id) === selectedAccountId &&
-                    (cheque.status === 'UNUSED' || cheque.status === 'ISSUED'),
+                    cheque.status === 'ISSUED',
             ),
         [available_cheques, selectedAccountId],
     );
@@ -208,7 +208,6 @@ export default function SavingsChequeWithdrawalPage() {
     const submit = () => {
         if (
             !selectedCustomer ||
-            !signatureVerified ||
             !selectedAccount ||
             !selectedCheque ||
             !selectedTellerSessionId
@@ -218,11 +217,11 @@ export default function SavingsChequeWithdrawalPage() {
 
         appSwal
             .fire({
-                title: 'Post cheque withdrawal?',
-                text: `Withdraw ${selectedCheque.amount} from ${selectedAccount.account_no} using cheque ${selectedCheque.cheque_no}?`,
+                title: 'Receive cheque for review?',
+                text: `Submit cheque ${selectedCheque.cheque_no} for payment review against ${selectedAccount.account_no}?`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Post withdrawal',
+                confirmButtonText: 'Receive cheque',
                 cancelButtonText: 'Cancel',
             })
             .then((result) => {
@@ -248,7 +247,6 @@ export default function SavingsChequeWithdrawalPage() {
 
     const canSubmit =
         Boolean(selectedCustomer) &&
-        signatureVerified &&
         Boolean(selectedAccount) &&
         Boolean(selectedCheque) &&
         Boolean(selectedTellerSessionId);
@@ -263,14 +261,14 @@ export default function SavingsChequeWithdrawalPage() {
                 ========================================================= */}
                 <ResourcePageHeader
                     title="Savings Cheque Withdrawal"
-                    description="Verify the account holder signature and cash an issued cheque."
+                    description="Receive an issued cheque for account, signature, and payment review."
                     action={
                         <StatusBadge
                             tone={signatureVerified ? 'success' : 'warning'}
                         >
                             {signatureVerified
-                                ? 'Signature verified'
-                                : 'Verification required'}
+                                ? 'Signature on file'
+                                : 'Signature review required'}
                         </StatusBadge>
                     }
                 />
@@ -945,7 +943,8 @@ export default function SavingsChequeWithdrawalPage() {
                                                             }`}
                                                         />
                                                         <span>
-                                                            Signature verified
+                                                            Signature record
+                                                            available for review
                                                         </span>
                                                     </div>
 
@@ -971,14 +970,13 @@ export default function SavingsChequeWithdrawalPage() {
                                                     disabled={!canSubmit}
                                                 >
                                                     <ArrowUpFromLine className="h-4 w-4" />
-                                                    Post withdrawal
+                                                    Receive for review
                                                 </Button>
 
                                                 {!canSubmit && (
                                                     <p className="text-center text-[10px] text-muted-foreground">
-                                                        {!signatureVerified
-                                                            ? 'Verify the signature to continue.'
-                                                            : 'Complete the required transaction fields.'}
+                                                        Complete the required
+                                                        transaction fields.
                                                     </p>
                                                 )}
                                             </div>

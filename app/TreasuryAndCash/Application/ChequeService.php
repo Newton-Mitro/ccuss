@@ -99,8 +99,9 @@ class ChequeService
         int $organizationId,
         int $branchId,
         int $userId,
+        bool $markAsCleared = false,
     ): TellerCashTransaction {
-        return DB::transaction(function () use ($cheque, $tellerSessionId, $organizationId, $branchId, $userId): TellerCashTransaction {
+        return DB::transaction(function () use ($cheque, $tellerSessionId, $organizationId, $branchId, $userId, $markAsCleared): TellerCashTransaction {
             $cheque->load('chequeBook.financialAccount', 'financialAccount');
 
             if ($cheque->status !== 'ISSUED') {
@@ -158,17 +159,16 @@ class ChequeService
 
             $financialTransactionService->post($financialTransaction, $organizationId, $userId);
 
-            $cheque->update([
-                'status' => 'PRESENTED',
-                'presented_date' => now()->toDateString(),
-            ]);
+            $cheque->update($markAsCleared
+                ? ['status' => 'CLEARED', 'cleared_date' => now()->toDateString()]
+                : ['status' => 'PRESENTED', 'presented_date' => now()->toDateString()]);
 
             $cheque->transactions()->create([
-                'type' => 'PRESENT',
+                'type' => $markAsCleared ? 'CLEAR' : 'PRESENT',
                 'amount' => $cheque->amount,
                 'transaction_date' => now(),
                 'reference' => 'CHEQUE-' . $cheque->cheque_no,
-                'description' => 'Cheque presented at teller',
+                'description' => $markAsCleared ? 'Cheque paid at teller' : 'Cheque presented at teller',
                 'created_by' => $userId,
             ]);
 
