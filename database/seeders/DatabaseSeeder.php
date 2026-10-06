@@ -6,6 +6,9 @@ use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\User;
 use Database\Seeders\FinancialServicesSeeder;
+use Database\Seeders\FinancialProductAccountMappingSeeder;
+use Database\Seeders\FinancialProductCatalogSeeder;
+use Database\Seeders\FinancialProductPolicySeeder;
 use Database\Seeders\PartySeeder;
 use Database\Seeders\SystemAdministratorRolePermissionSeeder;
 use Illuminate\Database\Eloquent\Model;
@@ -50,6 +53,9 @@ class DatabaseSeeder extends Seeder
                 DefaultRolePermissionSeeder::class,
                 OrganizationStructureSeeder::class,
                 GeneralAccountingSeeder::class,
+                FinancialProductCatalogSeeder::class,
+                FinancialProductPolicySeeder::class,
+                FinancialProductAccountMappingSeeder::class,
                 PartySeeder::class,
                 CustomerSeeder::class,
                 FinancialServicesSeeder::class,

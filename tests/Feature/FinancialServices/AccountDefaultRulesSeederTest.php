@@ -13,8 +13,16 @@ it('seeds inactive account default templates for every organization without over
     foreach ($organizations as $organization) {
         expect(AccountDefaultRule::query()
             ->where('organization_id', $organization->id)
-            ->count())->toBe(2);
+            ->count())->toBe(4);
 
+        $savingsRule = AccountDefaultRule::query()
+            ->where('organization_id', $organization->id)
+            ->where('account_type', 'SAVINGS')
+            ->firstOrFail();
+        $shareRule = AccountDefaultRule::query()
+            ->where('organization_id', $organization->id)
+            ->where('account_type', 'SHARE')
+            ->firstOrFail();
         $loanRule = AccountDefaultRule::query()
             ->where('organization_id', $organization->id)
             ->where('account_type', 'LOAN')
@@ -24,7 +32,13 @@ it('seeds inactive account default templates for every organization without over
             ->where('account_type', 'RECURRING_DEPOSIT')
             ->firstOrFail();
 
-        expect($loanRule->is_active)->toBeFalse()
+        expect($savingsRule->name)->toBe('Default savings account rule')
+            ->and($savingsRule->is_active)->toBeFalse()
+            ->and($savingsRule->grace_days)->toBe(0)
+            ->and($shareRule->name)->toBe('Default share account rule')
+            ->and($shareRule->is_active)->toBeFalse()
+            ->and($shareRule->grace_days)->toBe(0)
+            ->and($loanRule->is_active)->toBeFalse()
             ->and((float) $loanRule->fine_amount)->toBe(0.0)
             ->and($recurringRule->grace_days)->toBe(7)
             ->and($recurringRule->is_active)->toBeFalse();
@@ -40,7 +54,7 @@ it('seeds inactive account default templates for every organization without over
     foreach ($organizations as $organization) {
         expect(AccountDefaultRule::query()
             ->where('organization_id', $organization->id)
-            ->count())->toBe(2);
+            ->count())->toBe(4);
     }
 
     $customizedLoanRule = AccountDefaultRule::query()

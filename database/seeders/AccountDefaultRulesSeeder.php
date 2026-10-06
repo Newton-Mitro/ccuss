@@ -12,6 +12,16 @@ class AccountDefaultRulesSeeder extends Seeder
     {
         $rules = [
             [
+                'account_type' => 'SAVINGS',
+                'name' => 'Default savings account rule',
+                'grace_days' => 0,
+            ],
+            [
+                'account_type' => 'SHARE',
+                'name' => 'Default share account rule',
+                'grace_days' => 0,
+            ],
+            [
                 'account_type' => 'LOAN',
                 'name' => 'Default loan installment rule',
                 'grace_days' => 0,

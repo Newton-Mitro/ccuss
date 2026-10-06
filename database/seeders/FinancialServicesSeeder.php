@@ -7,15 +7,12 @@ use App\FinancialServices\Application\LoanScheduleService;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialAccountAuthorizedPerson;
 use App\FinancialServices\Models\FinancialProduct;
-use App\FinancialServices\Models\FinancialProductAccountMapping;
-use App\FinancialServices\Models\FinancialProductPolicy;
 use App\FinancialServices\Models\FixedDeposit;
 use App\FinancialServices\Models\LoanAccount;
 use App\FinancialServices\Models\LoanApplication;
 use App\FinancialServices\Models\RecurringDeposit;
 use App\FinancialServices\Models\RecurringDepositInstallment;
 use App\FinancialServices\Models\ShareAccount;
-use App\GeneralAccounting\Models\LedgerAccount;
 use App\SystemAdministration\Models\Organization;
 use App\TreasuryAndCash\Models\Bank;
 use App\TreasuryAndCash\Models\BankAccount;
@@ -40,8 +37,6 @@ class FinancialServicesSeeder extends Seeder
         $branchId = $this->getBranchId($organization);
 
         DB::transaction(function () use ($organization, $branchId): void {
-            $this->createFinancialProducts($organization);
-
             $customers = $this->createCustomers($organization, $branchId);
 
             $this->createMultiProductAccounts(
@@ -97,224 +92,6 @@ class FinancialServicesSeeder extends Seeder
         return (int) $organization->branches()
             ->oldest('id')
             ->value('id');
-    }
-
-    /**
-     * Create the products, terms, policies, and accounting mappings used by
-     * the financial-services demo data.
-     */
-    private function createFinancialProducts(Organization $organization): void
-    {
-        $products = [
-            [
-                'code' => 'SAV-REG',
-                'name' => 'Regular Savings',
-                'category' => 'SAVINGS',
-                'balance_type' => 'LIABILITY',
-                'rate' => '3.000000',
-                'calculation' => 'SIMPLE',
-                'frequency' => 'MONTHLY',
-                'minimum_opening' => 0,
-            ],
-            [
-                'code' => 'SHR-MEM',
-                'name' => 'Member Share Capital',
-                'category' => 'SHARE',
-                'balance_type' => 'EQUITY',
-                'rate' => '0.000000',
-                'calculation' => 'NONE',
-                'frequency' => 'NONE',
-                'minimum_opening' => 0,
-            ],
-            [
-                'code' => 'FDR-12M',
-                'name' => 'Twelve Month Fixed Deposit',
-                'category' => 'FIXED_DEPOSIT',
-                'balance_type' => 'LIABILITY',
-                'rate' => '8.500000',
-                'calculation' => 'COMPOUND',
-                'frequency' => 'MATURITY',
-                'minimum_opening' => 0,
-            ],
-            [
-                'code' => 'RD-24M',
-                'name' => 'Twenty Four Month Recurring Deposit',
-                'category' => 'RECURRING_DEPOSIT',
-                'balance_type' => 'LIABILITY',
-                'rate' => '7.000000',
-                'calculation' => 'COMPOUND',
-                'frequency' => 'MONTHLY',
-                'minimum_opening' => 0,
-            ],
-            [
-                'code' => 'LN-GEN',
-                'name' => 'General Loan',
-                'category' => 'LOAN',
-                'balance_type' => 'ASSET',
-                'rate' => '12.000000',
-                'calculation' => 'REDUCING_BALANCE',
-                'frequency' => 'MONTHLY',
-                'minimum_opening' => 0,
-            ],
-        ];
-
-        foreach ($products as $productData) {
-            $product = $this->createFinancialProduct($organization, $productData);
-
-            $this->createProductTerm($product, $productData);
-            $this->createProductPolicy($product, $productData);
-            $this->createProductAccountMappings($organization, $product, $productData['category']);
-        }
-    }
-
-    private function createFinancialProduct(Organization $organization, array $data): FinancialProduct
-    {
-        return FinancialProduct::query()->updateOrCreate(
-            [
-                'organization_id' => $organization->id,
-                'code' => $data['code'],
-            ],
-            [
-                'name' => $data['name'],
-                'category' => $data['category'],
-                'balance_type' => $data['balance_type'],
-                'settings' => [
-                    'credit_union' => true,
-                    'requires_kyc' => true,
-                    'minimum_opening_amount' => $data['minimum_opening'],
-                    'joint_holders_allowed' => in_array(
-                        $data['category'],
-                        ['SAVINGS', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT'],
-                        true,
-                    ),
-                ],
-                'is_system' => true,
-                'status' => true,
-            ],
-        );
-    }
-
-    private function createProductTerm(FinancialProduct $product, array $data): void
-    {
-        $termValue = match ($data['category']) {
-            'FIXED_DEPOSIT' => 12,
-            'RECURRING_DEPOSIT' => 24,
-            'LOAN' => 12,
-            default => 1,
-        };
-
-        DB::table('financial_product_terms')->updateOrInsert(
-            [
-                'financial_product_id' => $product->id,
-                'code' => 'BASE',
-            ],
-            [
-                'name' => 'Base term',
-                'tenure_value' => $termValue,
-                'tenure_unit' => 'MONTH',
-                'interest_rate' => $data['rate'],
-                'interest_calculation' => $data['calculation'],
-                'interest_frequency' => $data['frequency'],
-                'minimum_amount' => $data['minimum_opening'] ?: null,
-                'maximum_amount' => null,
-                'rules' => json_encode([]),
-                'status' => true,
-                'effective_from' => self::SEED_DATE,
-                'updated_at' => now(),
-                'created_at' => now(),
-            ],
-        );
-    }
-
-    private function createProductPolicy(FinancialProduct $product, array $data): void
-    {
-        $isLoan = $data['category'] === 'LOAN';
-
-        FinancialProductPolicy::query()->updateOrCreate(
-            ['financial_product_id' => $product->id],
-            [
-                'minimum_opening_amount' => $data['minimum_opening'],
-                'minimum_deposit_amount' => $isLoan ? null : $data['minimum_opening'],
-                'maximum_loan_amount' => $isLoan ? 0 : null,
-                'loan_to_value_percent' => $isLoan ? 0 : null,
-                'eligibility_rules' => [
-                    'kyc_level' => $isLoan ? 'FULL' : 'BASIC',
-                    'organization_customers_allowed' => true,
-                ],
-                'tenure_rules' => $isLoan
-                    ? ['minimum_months' => 6, 'maximum_months' => 60]
-                    : null,
-                'repayment_rules' => $isLoan
-                    ? [
-                        'frequency' => 'MONTHLY',
-                        'allocation' => ['FEE', 'INTEREST', 'PRINCIPAL'],
-                    ]
-                    : null,
-                'status' => 'ACTIVE',
-                'version' => '1.0',
-                'effective_from' => self::SEED_DATE,
-            ],
-        );
-    }
-
-    private function createProductAccountMappings(
-        Organization $organization,
-        FinancialProduct $product,
-        string $category,
-    ): void {
-        $liabilityAccount = match ($category) {
-            'SAVINGS' => '2100',
-            'FIXED_DEPOSIT' => '2200',
-            'RECURRING_DEPOSIT' => '2300',
-            'SHARE' => '3100',
-            default => '1300',
-        };
-
-        $mappingPairs = $category === 'LOAN'
-            ? [
-                ['DISBURSEMENT', '1300', '1120'],
-                ['REPAYMENT', '1120', '1300'],
-                ['INTEREST', '1120', '4100'],
-                ['FEE', '1120', '4200'],
-            ]
-            : [
-                ['DEPOSIT', '1120', $liabilityAccount],
-                ['WITHDRAWAL', $liabilityAccount, '1120'],
-                ['INTEREST', '5200', $liabilityAccount],
-                ['FEE', $liabilityAccount, '4200'],
-                ['MIGRATION_OPENING_BALANCE', '1120', $liabilityAccount],
-            ];
-
-        foreach ($mappingPairs as [$transactionType, $debitCode, $creditCode]) {
-            $debitAccount = LedgerAccount::query()
-                ->where('organization_id', $organization->id)
-                ->where('code', $debitCode)
-                ->first();
-
-            $creditAccount = LedgerAccount::query()
-                ->where('organization_id', $organization->id)
-                ->where('code', $creditCode)
-                ->first();
-
-            if (!$debitAccount || !$creditAccount) {
-                continue;
-            }
-
-            FinancialProductAccountMapping::query()->updateOrCreate(
-                [
-                    'organization_id' => $organization->id,
-                    'financial_product_id' => $product->id,
-                    'source_type' => 'FINANCIAL_PRODUCT',
-                    'source_code' => (string) $product->id,
-                    'transaction_type' => $transactionType,
-                ],
-                [
-                    'debit_account_id' => $debitAccount->id,
-                    'credit_account_id' => $creditAccount->id,
-                    'status' => true,
-                ],
-            );
-        }
     }
 
     /**
