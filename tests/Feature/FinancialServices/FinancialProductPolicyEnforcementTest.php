@@ -117,3 +117,4 @@ it('enforces customer eligibility and verified KYC requirements when opening acc
         'account_type' => $product->category,
     ], $organization->id))->toBeInstanceOf(FinancialAccount::class);
 });
+

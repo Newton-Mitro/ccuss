@@ -36,6 +36,7 @@ class StoreFinancialProductPolicyRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'customer_can_open_multiple_account' => ['nullable', 'boolean'],
             'minimum_opening_amount' => ['nullable', 'numeric', 'min:0'],
             'minimum_deposit_amount' => ['nullable', 'numeric', 'min:0'],
             'maximum_deposit_amount' => ['nullable', 'numeric', 'gte:minimum_deposit_amount'],

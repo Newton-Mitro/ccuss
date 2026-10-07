@@ -45,6 +45,12 @@ class FinancialServicesSeeder extends Seeder
                 customer: $customers['jane_doe'],
             );
 
+            $this->createSavingsAccount(
+                organization: $organization,
+                branchId: $branchId,
+                customer: $customers['john_doe'],
+            );
+
             $this->createOrganizationAccounts(
                 organization: $organization,
                 branchId: $branchId,
@@ -219,6 +225,10 @@ class FinancialServicesSeeder extends Seeder
                 default => 'OTH-ALL-' . $customer->id,
             };
 
+            if ($accountNo === 'SHR-ALL-2') {
+                continue;
+            }
+
             $financialAccount = $this->createFinancialAccount(
                 organization: $organization,
                 branchId: $branchId,
@@ -242,6 +252,34 @@ class FinancialServicesSeeder extends Seeder
                 $this->createShareDetails($financialAccount, $customer);
             }
         }
+    }
+
+    private function createSavingsAccount(
+        Organization $organization,
+        int $branchId,
+        Customer $customer,
+    ): void {
+        $product = FinancialProduct::query()
+            ->where('organization_id', $organization->id)
+            ->where('category', 'SAVINGS')
+            ->orderBy('id')
+            ->firstOrFail();
+
+        $financialAccount = $this->createFinancialAccount(
+            organization: $organization,
+            branchId: $branchId,
+            product: $product,
+            accountNo: 'SAV-ALL-' . $customer->id,
+            holder: $customer,
+            name: $customer->name . ' - ' . $product->name,
+            metadata: [
+                'seeded' => true,
+                'multi_product_customer' => true,
+            ],
+        );
+
+        $this->ensurePrimaryHolder($financialAccount, $customer);
+        $this->createSavingsChequeBook($financialAccount, $organization, $branchId, $customer);
     }
 
     private function createFinancialAccount(

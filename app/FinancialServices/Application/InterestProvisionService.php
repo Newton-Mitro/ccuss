@@ -4,7 +4,6 @@ namespace App\FinancialServices\Application;
 
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\InterestProvision;
-use App\FinancialServices\Application\FinancialTransactionService;
 use Carbon\CarbonImmutable;
 use RuntimeException;
 
@@ -27,12 +26,14 @@ class InterestProvisionService
         FinancialAccount::query()
             ->where('organization_id', $organizationId)
             ->whereIn('status', ['PENDING', 'ACTIVE'])
-            ->whereHas('product.baseTerm', fn($query) => $query->where('interest_rate', '>', 0)->where('interest_frequency', '!=', 'NONE')->where('status', true))
-            ->with('product.baseTerm')
+            ->where(fn($query) => $query
+                ->whereHas('productTerm', fn($term) => $term->where('interest_rate', '>', 0)->where('interest_frequency', '!=', 'NONE'))
+                ->orWhere(fn($query) => $query->whereNull('financial_product_term_id')->whereHas('product.baseTerm', fn($term) => $term->where('interest_rate', '>', 0)->where('interest_frequency', '!=', 'NONE')->where('status', true))))
+            ->with(['productTerm', 'product.baseTerm'])
             ->chunkById(100, function ($accounts) use ($start, $end, $days, $userId, &$provisions): void {
                 foreach ($accounts as $account) {
                     $basis = max(0, (float) ($account->available_balance ?? $account->balance));
-                    $rate = (float) $account->product->baseTerm->interest_rate;
+                    $rate = (float) ($account->productTerm?->interest_rate ?? $account->product->baseTerm->interest_rate);
                     $amount = round($basis * $rate / 100 * $days / 365, 4);
                     if ($amount <= 0) {
                         continue;

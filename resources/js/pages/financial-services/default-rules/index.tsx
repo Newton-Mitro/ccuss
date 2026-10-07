@@ -1,4 +1,5 @@
 import { ResourcePageHeader } from '@/components/resource-page-shell';
+import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -219,24 +220,19 @@ export default function DefaultRulesIndex() {
                         </div>
                         <div>
                             <Label>Effective from</Label>
-                            <Input
-                                type="date"
+                            <AppDatePicker
                                 value={data.effective_from}
-                                onChange={(event) =>
-                                    setData(
-                                        'effective_from',
-                                        event.target.value,
-                                    )
+                                onChange={(value) =>
+                                    setData('effective_from', value)
                                 }
                             />
                         </div>
                         <div>
                             <Label>Effective to</Label>
-                            <Input
-                                type="date"
+                            <AppDatePicker
                                 value={data.effective_to}
-                                onChange={(event) =>
-                                    setData('effective_to', event.target.value)
+                                onChange={(value) =>
+                                    setData('effective_to', value)
                                 }
                             />
                         </div>

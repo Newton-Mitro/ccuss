@@ -3,6 +3,7 @@ import {
     ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
+import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -721,14 +722,10 @@ export default function FinancialAccountShow() {
                             </div>
                             <div>
                                 <Label>Member since</Label>
-                                <Input
-                                    type="date"
+                                <AppDatePicker
                                     value={membershipData.member_since}
-                                    onChange={(event) =>
-                                        setMembershipData(
-                                            'member_since',
-                                            event.target.value,
-                                        )
+                                    onChange={(value) =>
+                                        setMembershipData('member_since', value)
                                     }
                                 />
                                 <InputError
@@ -901,14 +898,10 @@ export default function FinancialAccountShow() {
                                 </div>
                                 <div>
                                     <Label>Started at</Label>
-                                    <Input
-                                        type="date"
+                                    <AppDatePicker
                                         value={fixedData.started_at}
-                                        onChange={(event) =>
-                                            setFixedData(
-                                                'started_at',
-                                                event.target.value,
-                                            )
+                                        onChange={(value) =>
+                                            setFixedData('started_at', value)
                                         }
                                     />
                                     <InputError
@@ -1217,13 +1210,12 @@ export default function FinancialAccountShow() {
                                 </div>
                                 <div>
                                     <Label>Started at</Label>
-                                    <Input
-                                        type="date"
+                                    <AppDatePicker
                                         value={recurringData.started_at}
-                                        onChange={(event) =>
+                                        onChange={(value) =>
                                             setRecurringData(
                                                 'started_at',
-                                                event.target.value,
+                                                value,
                                             )
                                         }
                                     />

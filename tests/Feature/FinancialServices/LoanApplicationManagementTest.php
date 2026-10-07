@@ -1,13 +1,13 @@
 <?php
 
 use App\CustomerModule\Models\Customer;
+use App\FinancialServices\Application\DefaultFineService;
 use App\FinancialServices\Application\LoanApplicationService;
 use App\FinancialServices\Application\LoanScheduleService;
-use App\FinancialServices\Application\DefaultFineService;
 use App\FinancialServices\Models\AccountDefaultRule;
+use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\FinancialProductPolicy;
-use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\LoanProtectionPolicy;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
@@ -101,7 +101,8 @@ it('rejects excessive approval and enforces the product loan ceiling', function 
         'financial_product_id' => $fixture['product']->id,
         'requested_amount' => 1001,
         'requested_term_months' => 12,
-    ], $fixture['organization']->id))->toThrow(RuntimeException::class, 'exceeds the product maximum');
+    ], $fixture['organization']->id))
+        ->toThrow(\Illuminate\Validation\ValidationException::class, 'requested loan amount exceeds the product maximum');
 
     $application = $service->create([
         'customer_id' => $fixture['customer']->id,

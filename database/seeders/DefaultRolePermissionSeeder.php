@@ -356,6 +356,8 @@ class DefaultRolePermissionSeeder extends Seeder
             'accounting.budgets.close',
             'financial.view',
             'financial.dashboard.view',
+            'financial.products.view',
+            'financial.products.update',
             'financial.accounts.view',
             'financial.accounts.update',
             'financial.transactions.view',

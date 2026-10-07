@@ -3,6 +3,8 @@
 use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
+use App\FinancialServices\Models\FinancialProductPolicy;
+use App\FinancialServices\Models\ShareAccount;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
@@ -128,7 +130,6 @@ it('creates an account only when the product route, account type, and product ca
         'financial_product_id' => $fixture['product']->id,
         'holder_type' => 'customer',
         'holder_id' => $fixture['customer']->id,
-        'account_no' => 'SAVINGS-NEW-002',
         'name' => 'New savings account',
         'account_type' => 'SAVINGS',
     ];
@@ -136,9 +137,13 @@ it('creates an account only when the product route, account type, and product ca
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->post(route('financial-accounts.savings.store'), $payload)
-        ->assertRedirect(route('financial-accounts.savings.show', FinancialAccount::query()
-            ->where('account_no', 'SAVINGS-NEW-002')
+        ->assertRedirect(route('financial-accounts.savings.show', $account = FinancialAccount::query()
+            ->where('organization_id', $fixture['organization']->id)
+            ->where('holder_id', $fixture['customer']->id)
+            ->latest('id')
             ->firstOrFail()));
+
+    expect($account->account_no)->toMatch('/^SAV-\d{8}$/');
 
     $payload['account_no'] = 'SAVINGS-WRONG-003';
     $payload['account_type'] = 'SHARE';
@@ -147,6 +152,155 @@ it('creates an account only when the product route, account type, and product ca
         ->assertUnprocessable();
 
     expect(FinancialAccount::query()->where('account_no', 'SAVINGS-WRONG-003')->exists())->toBeFalse();
+});
+
+it('generates account numbers for savings, share, fixed, and recurring deposits', function () {
+    $fixture = createFinancialAccountProductFixture('SAVINGS');
+    $prefixes = [
+        'SAVINGS' => 'SAV',
+        'SHARE' => 'SHR',
+        'FIXED_DEPOSIT' => 'FDR',
+        'RECURRING_DEPOSIT' => 'RDP',
+    ];
+
+    foreach ($prefixes as $category => $prefix) {
+        $product = FinancialProduct::factory()->create([
+            'organization_id' => $fixture['organization']->id,
+            'category' => $category,
+        ]);
+        $account = app(\App\FinancialServices\Application\FinancialAccountService::class)->create([
+            'branch_id' => $fixture['branch']->id,
+            'financial_product_id' => $product->id,
+            'holder_type' => Customer::class,
+            'holder_id' => $fixture['customer']->id,
+            'account_type' => $category,
+        ], $fixture['organization']->id);
+
+        expect($account->account_no)->toMatch('/^' . $prefix . '-\d{8}$/')
+            ->and($account->financial_product_term_id)->toBe(
+                in_array($category, ['SAVINGS', 'SHARE'], true)
+                ? null
+                : $product->baseTerm()->value('id'),
+            );
+    }
+});
+
+it('enforces product multiple-account rules and active policy overrides', function () {
+    $fixture = createFinancialAccountProductFixture('SAVINGS');
+    $fixture['account']->delete();
+    $fixture['product']->update(['customer_can_open_multiple_account' => false]);
+    $accountData = [
+        'financial_product_id' => $fixture['product']->id,
+        'holder_type' => Customer::class,
+        'holder_id' => $fixture['customer']->id,
+        'account_type' => 'SAVINGS',
+    ];
+    $service = app(\App\FinancialServices\Application\FinancialAccountService::class);
+
+    $service->create($accountData, $fixture['organization']->id);
+    expect(fn() => $service->create($accountData, $fixture['organization']->id))
+        ->toThrow(\Illuminate\Validation\ValidationException::class, 'already has an open account');
+
+    FinancialProductPolicy::factory()->create([
+        'financial_product_id' => $fixture['product']->id,
+        'customer_can_open_multiple_account' => true,
+        'documentation_requirements' => null,
+        'eligibility_rules' => null,
+    ]);
+
+    expect($service->create($accountData, $fixture['organization']->id))
+        ->toBeInstanceOf(FinancialAccount::class);
+
+    $fixture['product']->policy()->update(['customer_can_open_multiple_account' => false]);
+    expect(fn() => $service->create($accountData, $fixture['organization']->id))
+        ->toThrow(\Illuminate\Validation\ValidationException::class, 'already has an open account');
+});
+
+it('enforces the no-multiple-account product rule when the share form omits holder type', function () {
+    $fixture = createFinancialAccountProductFixture('SHARE');
+    grantFinancialAccountProductPermissions($fixture['user'], ['financial.accounts.create']);
+    $fixture['product']->update(['customer_can_open_multiple_account' => false]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('financial-accounts.share.store'), [
+            'branch_id' => $fixture['branch']->id,
+            'financial_product_id' => $fixture['product']->id,
+            'holder_id' => $fixture['customer']->id,
+            'account_type' => 'SHARE',
+            'membership_status' => 'PENDING',
+        ])
+        ->assertSessionHasErrors('holder_id');
+
+    expect(FinancialAccount::query()
+        ->where('organization_id', $fixture['organization']->id)
+        ->where('financial_product_id', $fixture['product']->id)
+        ->where('holder_id', $fixture['customer']->id)
+        ->count())->toBe(1);
+});
+
+it('updates share membership status when a legacy account uses the holders pivot', function () {
+    $fixture = createFinancialAccountProductFixture('SHARE');
+    grantFinancialAccountProductPermissions($fixture['user'], [
+        'financial.accounts.membership.manage',
+    ]);
+    $fixture['account']->addHolder($fixture['customer'], 'PRIMARY');
+    $fixture['account']->update(['holder_type' => null]);
+    $membership = ShareAccount::query()->create([
+        'financial_account_id' => $fixture['account']->id,
+        'membership_no' => 'MEM-SHARE-LEGACY-001',
+        'membership_status' => 'PENDING',
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->put(route('financial-accounts.membership.update', [
+            $fixture['account'],
+            $membership,
+        ]), [
+            'membership_status' => 'ACTIVE',
+        ])
+        ->assertRedirect();
+
+    expect($membership->fresh()->membership_status)->toBe('ACTIVE');
+});
+
+it('uses the selected product term to create a recurring deposit schedule', function () {
+    $fixture = createFinancialAccountProductFixture('RECURRING_DEPOSIT');
+    grantFinancialAccountProductPermissions($fixture['user'], ['financial.accounts.create']);
+    $term = $fixture['product']->baseTerm()->firstOrFail();
+    $term->update([
+        'tenure_value' => 4,
+        'tenure_unit' => 'MONTH',
+        'interest_rate' => 7.5,
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('financial-accounts.recurring.store'), [
+            'branch_id' => $fixture['branch']->id,
+            'financial_product_id' => $fixture['product']->id,
+            'financial_product_term_id' => $term->id,
+            'holder_type' => 'customer',
+            'holder_id' => $fixture['customer']->id,
+            'account_type' => 'RECURRING_DEPOSIT',
+            'installment_amount' => 250,
+            'installment_frequency' => 'WEEKLY',
+            'total_installments' => 99,
+            'started_at' => now()->toDateString(),
+            'maturity_extension_days' => 0,
+            'grace_days' => 0,
+        ])
+        ->assertRedirect(route('financial-accounts.recurring.show', $account = FinancialAccount::query()
+            ->where('organization_id', $fixture['organization']->id)
+            ->where('holder_id', $fixture['customer']->id)
+            ->latest('id')
+            ->firstOrFail()));
+
+    expect($account->financial_product_term_id)->toBe($term->id)
+        ->and($account->recurringDeposit->installment_frequency)->toBe('MONTHLY')
+        ->and($account->recurringDeposit->total_installments)->toBe(4)
+        ->and((float) $account->recurringDeposit->contractual_rate)->toBe(7.5);
 });
 
 it('does not allow direct loan account creation through the generic account endpoint', function () {
@@ -169,6 +323,31 @@ it('does not allow direct loan account creation through the generic account endp
     expect(FinancialAccount::query()->where('account_no', 'LOAN-DIRECT-001')->exists())->toBeFalse();
 });
 
+it('returns a requested amount validation error above the loan product ceiling', function () {
+    $fixture = createFinancialAccountProductFixture('LOAN');
+    grantFinancialAccountProductPermissions($fixture['user'], [
+        'financial.loan-applications.create',
+    ]);
+    FinancialProductPolicy::factory()->create([
+        'financial_product_id' => $fixture['product']->id,
+        'maximum_loan_amount' => 1000,
+        'status' => 'ACTIVE',
+        'effective_from' => now()->subDay()->toDateString(),
+        'documentation_requirements' => null,
+        'eligibility_rules' => null,
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('loan-applications.store'), [
+            'customer_id' => $fixture['customer']->id,
+            'financial_product_id' => $fixture['product']->id,
+            'requested_amount' => 1001,
+            'requested_term_months' => 12,
+        ])
+        ->assertSessionHasErrors('requested_amount');
+});
+
 it('requires an adult guardian when opening an account for a minor', function () {
     $fixture = createFinancialAccountProductFixture('SAVINGS');
     grantFinancialAccountProductPermissions($fixture['user'], ['financial.accounts.create']);
@@ -187,7 +366,6 @@ it('requires an adult guardian when opening an account for a minor', function ()
         'financial_product_id' => $fixture['product']->id,
         'holder_type' => 'customer',
         'holder_id' => $minor->id,
-        'account_no' => 'SAVINGS-MINOR-001',
         'name' => 'Minor savings account',
         'account_type' => 'SAVINGS',
     ];
@@ -197,14 +375,17 @@ it('requires an adult guardian when opening an account for a minor', function ()
         ->post(route('financial-accounts.savings.store'), $payload)
         ->assertSessionHasErrors('guardian_customer_id');
 
-    expect(FinancialAccount::query()->where('account_no', 'SAVINGS-MINOR-001')->exists())->toBeFalse();
+    expect(FinancialAccount::query()->where('holder_id', $minor->id)->exists())->toBeFalse();
 
     $this->post(route('financial-accounts.savings.store'), [
         ...$payload,
         'guardian_customer_id' => $guardian->id,
-    ])->assertRedirect(route('financial-accounts.savings.show', FinancialAccount::query()
-                    ->where('account_no', 'SAVINGS-MINOR-001')
+    ])->assertRedirect(route('financial-accounts.savings.show', $account = FinancialAccount::query()
+                    ->where('holder_id', $minor->id)
+                    ->latest('id')
                     ->firstOrFail()));
+
+    expect($account->account_no)->toMatch('/^SAV-\d{8}$/');
 });
 
 it('shows guardian validation and opens a fixed deposit for a minor with an adult guardian', function () {
@@ -220,12 +401,20 @@ it('shows guardian validation and opens a fixed deposit for a minor with an adul
         'branch_id' => $fixture['branch']->id,
         'dob' => now()->subYears(30)->toDateString(),
     ]);
+    $term = $fixture['product']->baseTerm()->firstOrFail();
+    $term->update([
+        'tenure_value' => 18,
+        'tenure_unit' => 'MONTH',
+        'interest_rate' => 9.25,
+        'minimum_amount' => 500,
+        'maximum_amount' => 2000,
+    ]);
     $payload = [
         'branch_id' => $fixture['branch']->id,
         'financial_product_id' => $fixture['product']->id,
         'holder_type' => 'customer',
         'holder_id' => $minor->id,
-        'account_no' => 'FDR-MINOR-001',
+        'financial_product_term_id' => $term->id,
         'name' => 'Minor fixed deposit',
         'account_type' => 'FIXED_DEPOSIT',
         'principal_amount' => 1000,
@@ -243,13 +432,20 @@ it('shows guardian validation and opens a fixed deposit for a minor with an adul
     $this->post(route('financial-accounts.fixed.store'), [
         ...$payload,
         'guardian_customer_id' => $guardian->id,
-    ])->assertRedirect(route('financial-accounts.fixed.show', FinancialAccount::query()
-                    ->where('account_no', 'FDR-MINOR-001')
+        'principal_amount' => 2001,
+    ])->assertSessionHasErrors('principal_amount');
+
+    $this->post(route('financial-accounts.fixed.store'), [
+        ...$payload,
+        'guardian_customer_id' => $guardian->id,
+    ])->assertRedirect(route('financial-accounts.fixed.show', $account = FinancialAccount::query()
+                    ->where('holder_id', $minor->id)
+                    ->latest('id')
                     ->firstOrFail()));
 
-    expect(FinancialAccount::query()
-        ->where('account_no', 'FDR-MINOR-001')
-        ->firstOrFail()
-        ->fixedDeposit()
-        ->exists())->toBeTrue();
+    expect($account->account_no)->toMatch('/^FDR-\d{8}$/')
+        ->and($account->financial_product_term_id)->toBe($term->id)
+        ->and($account->fixedDeposit()->exists())->toBeTrue()
+        ->and((float) $account->fixedDeposit->contractual_rate)->toBe(9.25)
+        ->and($account->fixedDeposit->term_value)->toBe(18);
 });

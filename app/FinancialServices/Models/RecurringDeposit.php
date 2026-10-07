@@ -2,7 +2,6 @@
 
 namespace App\FinancialServices\Models;
 
-use App\FinancialServices\Models\RecurringDepositInstallment;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,12 +21,16 @@ class RecurringDeposit extends Model
         'maturity_date',
         'maturity_extension_days',
         'grace_days',
+        'contractual_rate',
+        'maturity_amount',
         'closed_at',
         'closure_reason',
     ];
 
     protected $casts = [
         'installment_amount' => 'decimal:4',
+        'contractual_rate' => 'decimal:6',
+        'maturity_amount' => 'decimal:4',
         'started_at' => 'date',
         'maturity_date' => 'date',
         'closed_at' => 'date',

@@ -5,7 +5,6 @@ namespace App\FinancialServices\Application;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\RecurringDeposit;
 use App\FinancialServices\Models\RecurringDepositInstallment;
-use App\FinancialServices\Application\FinancialTransactionService;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -31,8 +30,16 @@ class RecurringDepositService
         }
 
         $startedAt = CarbonImmutable::parse($data['started_at']);
-        $totalInstallments = (int) $data['total_installments'];
-        $frequency = $data['installment_frequency'];
+        $productTerm = $account->productTerm;
+        [$frequency, $totalInstallments] = $productTerm
+            ? match ($productTerm->tenure_unit) {
+                'DAY' => ['WEEKLY', (int) ceil($productTerm->tenure_value / 7)],
+                'WEEK' => ['WEEKLY', $productTerm->tenure_value],
+                'MONTH' => ['MONTHLY', $productTerm->tenure_value],
+                'QUARTER' => ['QUARTERLY', $productTerm->tenure_value],
+                'YEAR' => ['MONTHLY', $productTerm->tenure_value * 12],
+            }
+            : [$data['installment_frequency'], (int) $data['total_installments']];
         $maturityDate = $this->dueDate($startedAt, $frequency, $totalInstallments - 1)
             ->addDays((int) ($data['maturity_extension_days'] ?? 0));
 
@@ -46,6 +53,7 @@ class RecurringDepositService
                 'maturity_date' => $maturityDate->toDateString(),
                 'maturity_extension_days' => $data['maturity_extension_days'] ?? 0,
                 'grace_days' => $data['grace_days'] ?? 0,
+                'contractual_rate' => $account->productTerm?->interest_rate,
             ]);
 
             $recurringDeposit->installments()->createMany(collect(range(1, $totalInstallments))->map(fn(int $number): array => [

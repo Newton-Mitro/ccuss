@@ -24,7 +24,6 @@ export default function SavingsAccountCreate() {
     const { data, setData, post, processing, errors } = useForm({
         financial_product_id: '',
         holder_id: '',
-        account_no: '',
         name: '',
         account_type: 'SAVINGS',
         minimum_balance: '0',
@@ -61,9 +60,12 @@ export default function SavingsAccountCreate() {
                             <Label>Saving product</Label>
                             <Select
                                 value={data.financial_product_id}
-                                onChange={(value) =>
-                                    setData('financial_product_id', value)
-                                }
+                                onChange={(value) => {
+                                    setData('financial_product_id', value);
+                                    const selected = products.find(
+                                        (item) => String(item.id) === value,
+                                    );
+                                }}
                                 options={[
                                     { value: '', label: 'Select product' },
                                     ...products.map((item) => ({
@@ -90,16 +92,6 @@ export default function SavingsAccountCreate() {
                                 ]}
                             />
                             <InputError message={errors.holder_id} />
-                        </div>
-                        <div>
-                            <Label>Account number</Label>
-                            <Input
-                                value={data.account_no}
-                                onChange={(event) =>
-                                    setData('account_no', event.target.value)
-                                }
-                            />
-                            <InputError message={errors.account_no} />
                         </div>
                         <div>
                             <Label>Display name</Label>

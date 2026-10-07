@@ -12,31 +12,37 @@ class FinancialProductService
     public function create(array $data, int $organizationId): FinancialProduct
     {
         $baseInterestRate = $data['base_interest_rate'] ?? 0;
+        $terms = $data['terms'] ?? null;
         unset($data['base_interest_rate']);
+        unset($data['terms']);
         $data['organization_id'] = $organizationId;
 
-        return DB::transaction(function () use ($data, $baseInterestRate): FinancialProduct {
+        return DB::transaction(function () use ($data, $baseInterestRate, $terms): FinancialProduct {
             $product = FinancialProduct::create($data);
             $this->saveBaseTerm($product, (float) $baseInterestRate);
+            if ($terms !== null) {
+                $this->saveTerms($product, $terms);
+            }
 
-            return $product;
+            return $product->load('terms');
         });
     }
 
     public function update(FinancialProduct $product, array $data): FinancialProduct
     {
-        if ($product->is_system) {
-            throw new RuntimeException('System financial products cannot be edited.');
-        }
-
         $baseInterestRate = $data['base_interest_rate'] ?? $product->baseTerm?->interest_rate ?? 0;
+        $terms = $data['terms'] ?? null;
         unset($data['base_interest_rate']);
+        unset($data['terms']);
 
-        return DB::transaction(function () use ($product, $data, $baseInterestRate): FinancialProduct {
+        return DB::transaction(function () use ($product, $data, $baseInterestRate, $terms): FinancialProduct {
             $product->update($data);
             $this->saveBaseTerm($product, (float) $baseInterestRate);
+            if ($terms !== null) {
+                $this->saveTerms($product, $terms);
+            }
 
-            return $product->refresh();
+            return $product->refresh()->load('terms');
         });
     }
 
@@ -70,5 +76,26 @@ class FinancialProductService
             'interest_frequency' => $product->interest_frequency,
             'status' => true,
         ])->save();
+    }
+
+    private function saveTerms(FinancialProduct $product, array $terms): void
+    {
+        $codes = [];
+
+        foreach ($terms as $attributes) {
+            $code = strtoupper($attributes['code']);
+            $codes[] = $code;
+            $term = isset($attributes['id'])
+                ? $product->terms()->whereKey($attributes['id'])->firstOrFail()
+                : $product->terms()->firstOrNew(['code' => $code]);
+            unset($attributes['id']);
+            $term->fill([
+                ...$attributes,
+                'code' => $code,
+                'financial_product_id' => $product->id,
+            ])->save();
+        }
+
+        $product->terms()->whereNotIn('code', $codes)->update(['status' => false]);
     }
 }

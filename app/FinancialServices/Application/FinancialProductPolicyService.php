@@ -2,10 +2,10 @@
 
 namespace App\FinancialServices\Application;
 
+use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\FinancialProductPolicy;
-use App\CustomerModule\Models\Customer;
 use Carbon\CarbonImmutable;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
@@ -15,6 +15,14 @@ class FinancialProductPolicyService
     public function validateAccountOpening(FinancialProduct $product, Customer $customer): void
     {
         $policy = $this->activePolicy($product);
+        $canOpenMultiple = $policy?->customer_can_open_multiple_account
+            ?? $product->customer_can_open_multiple_account;
+
+        if (!$canOpenMultiple && $this->hasOpenAccountForProduct($product, $customer)) {
+            throw ValidationException::withMessages([
+                'holder_id' => 'The selected customer already has an open account for this product.',
+            ]);
+        }
 
         if (!$policy) {
             return;
@@ -84,7 +92,9 @@ class FinancialProductPolicyService
         $policy = $this->activePolicy($product);
 
         if ($policy?->maximum_loan_amount !== null && $amount > (float) $policy->maximum_loan_amount) {
-            throw new RuntimeException('The loan amount exceeds the product maximum.');
+            throw ValidationException::withMessages([
+                'requested_amount' => 'The requested loan amount exceeds the product maximum.',
+            ]);
         }
     }
 
@@ -101,5 +111,19 @@ class FinancialProductPolicyService
             ->where(fn($query) => $query->whereNull('effective_from')->orWhereDate('effective_from', '<=', $today))
             ->where(fn($query) => $query->whereNull('effective_until')->orWhereDate('effective_until', '>=', $today))
             ->first();
+    }
+
+    private function hasOpenAccountForProduct(FinancialProduct $product, Customer $customer): bool
+    {
+        return FinancialAccount::query()
+            ->where('financial_product_id', $product->id)
+            ->whereNotIn('status', ['CLOSED', 'WRITTEN_OFF'])
+            ->where(function ($query) use ($customer): void {
+                $query->where(function ($query) use ($customer): void {
+                    $query->where('holder_type', Customer::class)
+                        ->where('holder_id', $customer->id);
+                })->orWhereHas('holders', fn($holders) => $holders->whereKey($customer->id));
+            })
+            ->exists();
     }
 }

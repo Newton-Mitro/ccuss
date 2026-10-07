@@ -5,16 +5,19 @@ import { Calendar } from 'lucide-react';
 import InputError from '../input-error';
 
 interface AppDatePickerProps {
+  id?: string;
   label?: string;
   value: string;
   onChange?: (value: string) => void;
   error?: string;
   showErrorText?: boolean;
   disabled?: boolean;
+  required?: boolean;
+  className?: string;
 }
 
 const AppDatePicker = forwardRef<HTMLInputElement, AppDatePickerProps>(
-  ({ label, value, onChange, error, disabled = false, showErrorText = false }, ref) => {
+  ({ id, label, value, onChange, error, disabled = false, required = false, className = '', showErrorText = false }, ref) => {
     const inputRef = useRef<HTMLInputElement>(null);
 
     const combinedRef = (node: HTMLInputElement) => {
@@ -36,13 +39,15 @@ const AppDatePicker = forwardRef<HTMLInputElement, AppDatePickerProps>(
 
         <div className="relative">
           <Input
+            id={id}
             aria-invalid={!!error}
             type="date"
             value={value}
             ref={combinedRef}
             onChange={(e) => onChange?.(e.target.value)}
             disabled={disabled}
-            className="h-8 text-sm pr-9 cursor-pointer"
+            required={required}
+            className={`h-8 pr-9 text-sm cursor-pointer ${className}`}
           />
           <Calendar
             className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4 cursor-pointer transition-colors hover:text-accent-foreground"

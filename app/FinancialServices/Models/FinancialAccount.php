@@ -5,7 +5,6 @@ namespace App\FinancialServices\Models;
 use App\CustomerModule\Models\Customer;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
-use App\FinancialServices\Models\DepositNominee;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,9 +13,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use App\FinancialServices\Models\FinancialProduct;
-use App\FinancialServices\Models\FinancialTransaction;
-use App\FinancialServices\Models\FinancialTransactionEntry;
 
 class FinancialAccount extends Model
 {
@@ -31,6 +27,7 @@ class FinancialAccount extends Model
         'organization_id',
         'branch_id',
         'financial_product_id',
+        'financial_product_term_id',
         'holder_type',
         'holder_id',
         'account_no',
@@ -72,6 +69,11 @@ class FinancialAccount extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(FinancialProduct::class, 'financial_product_id');
+    }
+
+    public function productTerm(): BelongsTo
+    {
+        return $this->belongsTo(FinancialProductTerm::class, 'financial_product_term_id');
     }
 
     public function holder(): MorphTo

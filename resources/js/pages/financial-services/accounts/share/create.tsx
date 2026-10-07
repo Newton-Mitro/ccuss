@@ -1,5 +1,6 @@
 import InputError from '@/components/input-error';
 import { ResourcePageHeader } from '@/components/resource-page-shell';
+import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,7 +11,11 @@ import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
 interface Props extends SharedData {
-    products: Array<{ id: number; code: string; name: string }>;
+    products: Array<{
+        id: number;
+        code: string;
+        name: string;
+    }>;
     customers: Array<{ id: number; customer_no: string; name: string }>;
 }
 
@@ -19,7 +24,6 @@ export default function ShareAccountCreate() {
     const { data, setData, post, processing, errors } = useForm({
         financial_product_id: '',
         holder_id: '',
-        account_no: '',
         name: '',
         account_type: 'SHARE',
         membership_no: '',
@@ -55,9 +59,12 @@ export default function ShareAccountCreate() {
                             <Label>Share product</Label>
                             <Select
                                 value={data.financial_product_id}
-                                onChange={(value) =>
-                                    setData('financial_product_id', value)
-                                }
+                                onChange={(value) => {
+                                    setData('financial_product_id', value);
+                                    const selected = products.find(
+                                        (item) => String(item.id) === value,
+                                    );
+                                }}
                                 options={[
                                     { value: '', label: 'Select product' },
                                     ...products.map((item) => ({
@@ -86,16 +93,6 @@ export default function ShareAccountCreate() {
                             <InputError message={errors.holder_id} />
                         </div>
                         <div>
-                            <Label>Account number</Label>
-                            <Input
-                                value={data.account_no}
-                                onChange={(event) =>
-                                    setData('account_no', event.target.value)
-                                }
-                            />
-                            <InputError message={errors.account_no} />
-                        </div>
-                        <div>
                             <Label>Display name</Label>
                             <Input
                                 value={data.name}
@@ -117,11 +114,10 @@ export default function ShareAccountCreate() {
                         </div>
                         <div>
                             <Label>Member since</Label>
-                            <Input
-                                type="date"
+                            <AppDatePicker
                                 value={data.member_since}
-                                onChange={(event) =>
-                                    setData('member_since', event.target.value)
+                                onChange={(value) =>
+                                    setData('member_since', value)
                                 }
                             />
                         </div>

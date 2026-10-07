@@ -5,7 +5,6 @@ namespace App\FinancialServices\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\FinancialServices\Models\FinancialProduct;
 
 class FinancialProductPolicy extends Model
 {
@@ -18,6 +17,7 @@ class FinancialProductPolicy extends Model
 
     protected $fillable = [
         'financial_product_id',
+        'customer_can_open_multiple_account',
         'minimum_opening_amount',
         'minimum_deposit_amount',
         'maximum_deposit_amount',
@@ -43,6 +43,7 @@ class FinancialProductPolicy extends Model
 
     protected $casts = [
         'minimum_opening_amount' => 'decimal:4',
+        'customer_can_open_multiple_account' => 'boolean',
         'minimum_deposit_amount' => 'decimal:4',
         'maximum_deposit_amount' => 'decimal:4',
         'maximum_loan_amount' => 'decimal:4',

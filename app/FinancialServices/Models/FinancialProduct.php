@@ -26,6 +26,7 @@ class FinancialProduct extends Model
         'balance_type',
         'interest_calculation',
         'interest_frequency',
+        'customer_can_open_multiple_account',
         'settings',
         'is_system',
         'status',
@@ -35,6 +36,7 @@ class FinancialProduct extends Model
         'settings' => 'array',
         'is_system' => 'boolean',
         'status' => 'boolean',
+        'customer_can_open_multiple_account' => 'boolean',
     ];
 
     public function organization(): BelongsTo

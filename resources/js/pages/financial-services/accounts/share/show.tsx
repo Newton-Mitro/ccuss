@@ -4,10 +4,12 @@ import {
     StatusBadge,
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatDate } from '@/lib/date_util';
 import type { BreadcrumbItem, SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 interface Props extends SharedData {
     account: {
@@ -18,6 +20,7 @@ interface Props extends SharedData {
         holder?: { name?: string } | null;
         product?: { name?: string } | null;
         share_account?: {
+            id: number;
             membership_no?: string;
             member_since?: string;
             membership_status?: string;
@@ -27,12 +30,50 @@ interface Props extends SharedData {
     };
 }
 export default function ShareAccountShow() {
-    const { account, customers } = usePage<
+    const { account, customers, auth } = usePage<
         Props & {
             customers: Array<{ id: number; customer_no: string; name: string }>;
         }
     >().props;
     const share = account.share_account;
+    const canManageMembership = (auth.user.permissions ?? []).some(
+        (permission) =>
+            permission.slug === 'financial.accounts.membership.manage',
+    );
+    const canActivateAccount = (auth.user.permissions ?? []).some(
+        (permission) => permission.slug === 'financial.accounts.update',
+    );
+    const {
+        data: membershipData,
+        setData: setMembershipData,
+        put: updateMembership,
+        processing: membershipProcessing,
+    } = useForm({
+        membership_status: share?.membership_status ?? 'PENDING',
+    });
+
+    const submitMembership = (event: React.FormEvent) => {
+        event.preventDefault();
+        if (!share) return;
+
+        updateMembership(
+            route('financial-accounts.membership.update', [
+                account.id,
+                share.id,
+            ]),
+            { preserveScroll: true },
+        );
+    };
+
+    const activateAccount = () => {
+        router.post(
+            route('financial-accounts.activate', account.id),
+            {},
+            {
+                preserveScroll: true,
+            },
+        );
+    };
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
         {
@@ -97,6 +138,51 @@ export default function ShareAccountShow() {
                             Account status: {account.status}
                         </span>
                     </div>
+                    {canManageMembership && share && (
+                        <form
+                            onSubmit={submitMembership}
+                            className="mt-4 flex flex-wrap items-end gap-3 border-t pt-4"
+                        >
+                            <div className="w-full max-w-xs space-y-2">
+                                <Label htmlFor="share-membership-status">
+                                    Update membership status
+                                </Label>
+                                <Select
+                                    value={membershipData.membership_status}
+                                    onChange={(value) =>
+                                        setMembershipData(
+                                            'membership_status',
+                                            value,
+                                        )
+                                    }
+                                    options={[
+                                        'PENDING',
+                                        'ACTIVE',
+                                        'SUSPENDED',
+                                        'CLOSED',
+                                    ].map((value) => ({
+                                        value,
+                                        label: value,
+                                    }))}
+                                />
+                            </div>
+                            <Button
+                                type="submit"
+                                disabled={membershipProcessing}
+                            >
+                                {membershipProcessing
+                                    ? 'Updating...'
+                                    : 'Update membership'}
+                            </Button>
+                        </form>
+                    )}
+                    {account.status === 'PENDING' && canActivateAccount && (
+                        <div className="mt-4 border-t pt-4">
+                            <Button type="button" onClick={activateAccount}>
+                                Activate account
+                            </Button>
+                        </div>
+                    )}
                 </section>
                 <FinancialAccountPeopleManagement
                     account={account}

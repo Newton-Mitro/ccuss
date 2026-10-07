@@ -5,10 +5,10 @@ namespace App\FinancialServices\Controllers;
 use App\FinancialServices\Application\FinancialProductService;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\FinancialProductAccountMapping;
-use App\GeneralAccounting\Models\LedgerAccount;
 use App\FinancialServices\Requests\StoreFinancialProductAccountMappingRequest;
 use App\FinancialServices\Requests\StoreFinancialProductRequest;
 use App\FinancialServices\Requests\UpdateFinancialProductRequest;
+use App\GeneralAccounting\Models\LedgerAccount;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -142,7 +142,7 @@ class FinancialProductController extends Controller
         $this->authorizeOrganization($request, $financialProduct);
 
         return Inertia::render('financial-services/products/form', [
-            'product' => $financialProduct->load('baseTerm'),
+            'product' => $financialProduct->load(['baseTerm', 'terms']),
         ]);
     }
 

@@ -3,6 +3,7 @@ import {
     ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
+import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -616,14 +617,10 @@ export default function JournalVoucherEntryPage() {
                                         Voucher date
                                     </Label>
 
-                                    <Input
-                                        type="date"
+                                    <AppDatePicker
                                         value={data.voucher_date}
-                                        onChange={(event) =>
-                                            setData(
-                                                'voucher_date',
-                                                event.target.value,
-                                            )
+                                        onChange={(value) =>
+                                            setData('voucher_date', value)
                                         }
                                     />
 

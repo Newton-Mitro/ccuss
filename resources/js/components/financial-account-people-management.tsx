@@ -1,4 +1,5 @@
 import InputError from '@/components/input-error';
+import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -159,7 +160,7 @@ export default function FinancialAccountPeopleManagement({
                 <div className="flex items-center justify-between">
                     <h2 className="font-semibold">Account holders</h2>
                     <span className="text-xs text-muted-foreground">
-                        Primary, joint, or signatory
+                        Primary, joint, or guardian
                     </span>
                 </div>
                 <div className="mt-3 divide-y">
@@ -471,26 +472,24 @@ export default function FinancialAccountPeopleManagement({
                         </div>
                         <div>
                             <Label>Effective from</Label>
-                            <Input
-                                type="date"
+                            <AppDatePicker
                                 value={authorizedPersonForm.data.effective_from}
-                                onChange={(event) =>
+                                onChange={(value) =>
                                     authorizedPersonForm.setData(
                                         'effective_from',
-                                        event.target.value,
+                                        value,
                                     )
                                 }
                             />
                         </div>
                         <div>
                             <Label>Effective to</Label>
-                            <Input
-                                type="date"
+                            <AppDatePicker
                                 value={authorizedPersonForm.data.effective_to}
-                                onChange={(event) =>
+                                onChange={(value) =>
                                     authorizedPersonForm.setData(
                                         'effective_to',
-                                        event.target.value,
+                                        value,
                                     )
                                 }
                             />

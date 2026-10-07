@@ -1,4 +1,5 @@
 import InputError from '@/components/input-error';
+import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -125,12 +126,11 @@ export default function CreateChequeBook() {
                         </div>
                         <div>
                             <Label htmlFor="issued_date">Issued date</Label>
-                            <Input
+                            <AppDatePicker
                                 id="issued_date"
-                                type="date"
                                 value={data.issued_date}
-                                onChange={(event) =>
-                                    setData('issued_date', event.target.value)
+                                onChange={(value) =>
+                                    setData('issued_date', value)
                                 }
                             />
                             <InputError message={errors.issued_date} />

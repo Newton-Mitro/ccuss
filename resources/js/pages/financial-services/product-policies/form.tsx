@@ -1,5 +1,6 @@
 import InputError from '@/components/input-error';
 import { ResourcePageHeader } from '@/components/resource-page-shell';
+import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,7 +16,7 @@ const jsonValue = (value: unknown) =>
 
 export default function FinancialProductPolicyForm() {
     const { product, policy } = usePage<ProductPolicyFormPageProps>().props;
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, transform, processing, errors } = useForm({
         minimum_opening_amount: String(policy?.minimum_opening_amount ?? ''),
         minimum_deposit_amount: String(policy?.minimum_deposit_amount ?? ''),
         maximum_deposit_amount: String(policy?.maximum_deposit_amount ?? ''),
@@ -28,6 +29,12 @@ export default function FinancialProductPolicyForm() {
         effective_until: policy?.effective_until ?? '',
         version: policy?.version ?? '',
         status: policy?.status ?? 'DRAFT',
+        customer_can_open_multiple_account:
+            policy?.customer_can_open_multiple_account == null
+                ? 'INHERIT'
+                : policy.customer_can_open_multiple_account
+                  ? 'ALLOW'
+                  : 'DENY',
         notes: policy?.notes ?? '',
         deposit_amount_rules: jsonValue(policy?.deposit_amount_rules),
         tenure_rules: jsonValue(policy?.tenure_rules),
@@ -43,6 +50,13 @@ export default function FinancialProductPolicyForm() {
 
     const submit = (event: React.FormEvent) => {
         event.preventDefault();
+        transform((formData) => ({
+            ...formData,
+            customer_can_open_multiple_account:
+                formData.customer_can_open_multiple_account === 'INHERIT'
+                    ? null
+                    : formData.customer_can_open_multiple_account === 'ALLOW',
+        }));
         post(route('financial-product-policies.store', product.id));
     };
 
@@ -69,6 +83,35 @@ export default function FinancialProductPolicyForm() {
                 >
                     <section className="space-y-3">
                         <h2 className="font-semibold">Limits and rates</h2>
+                        <div className="max-w-sm">
+                            <Label>Accounts per customer</Label>
+                            <Select
+                                value={data.customer_can_open_multiple_account}
+                                onChange={(value) =>
+                                    setData(
+                                        'customer_can_open_multiple_account',
+                                        value,
+                                    )
+                                }
+                                options={[
+                                    {
+                                        value: 'INHERIT',
+                                        label: 'Use product setting',
+                                    },
+                                    {
+                                        value: 'ALLOW',
+                                        label: 'Allow multiple accounts',
+                                    },
+                                    {
+                                        value: 'DENY',
+                                        label: 'One open account only',
+                                    },
+                                ]}
+                            />
+                        </div>
+                        <InputError
+                            message={errors.customer_can_open_multiple_account}
+                        />
                         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                             {[
                                 [
@@ -148,28 +191,20 @@ export default function FinancialProductPolicyForm() {
                             </div>
                             <div>
                                 <Label>Effective from</Label>
-                                <Input
-                                    type="date"
+                                <AppDatePicker
                                     value={data.effective_from}
-                                    onChange={(event) =>
-                                        setData(
-                                            'effective_from',
-                                            event.target.value,
-                                        )
+                                    onChange={(value) =>
+                                        setData('effective_from', value)
                                     }
                                 />
                                 <InputError message={errors.effective_from} />
                             </div>
                             <div>
                                 <Label>Effective until</Label>
-                                <Input
-                                    type="date"
+                                <AppDatePicker
                                     value={data.effective_until}
-                                    onChange={(event) =>
-                                        setData(
-                                            'effective_until',
-                                            event.target.value,
-                                        )
+                                    onChange={(value) =>
+                                        setData('effective_until', value)
                                     }
                                 />
                                 <InputError message={errors.effective_until} />
@@ -188,14 +223,10 @@ export default function FinancialProductPolicyForm() {
                         </div>
                         <div>
                             <Label>Source checked at</Label>
-                            <Input
-                                type="date"
+                            <AppDatePicker
                                 value={data.source_checked_at}
-                                onChange={(event) =>
-                                    setData(
-                                        'source_checked_at',
-                                        event.target.value,
-                                    )
+                                onChange={(value) =>
+                                    setData('source_checked_at', value)
                                 }
                             />
                             <InputError message={errors.source_checked_at} />

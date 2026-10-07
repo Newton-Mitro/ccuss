@@ -3,6 +3,7 @@ import { ArrowRightLeft } from 'lucide-react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
 import HeadingSmall from '../../../../components/heading-small';
+import AppDatePicker from '../../../../components/ui/app_date_picker';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import { Select } from '../../../../components/ui/select';
@@ -152,15 +153,11 @@ export default function Create() {
                             >
                                 Transaction date
                             </label>
-                            <Input
+                            <AppDatePicker
                                 id="transaction_date"
-                                type="date"
                                 value={data.transaction_date}
-                                onChange={(event) =>
-                                    setData(
-                                        'transaction_date',
-                                        event.target.value,
-                                    )
+                                onChange={(value) =>
+                                    setData('transaction_date', value)
                                 }
                                 required
                             />

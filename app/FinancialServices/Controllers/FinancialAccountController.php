@@ -6,23 +6,23 @@ use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Application\FinancialAccountService;
 use App\FinancialServices\Application\FixedDepositService;
 use App\FinancialServices\Application\RecurringDepositService;
+use App\FinancialServices\Models\DepositNominee;
+use App\FinancialServices\Models\FinancialAccount;
+use App\FinancialServices\Models\FinancialAccountAuthorizedPerson;
+use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\RecurringDeposit;
 use App\FinancialServices\Models\RecurringDepositInstallment;
-use App\FinancialServices\Models\FinancialAccount;
-use App\FinancialServices\Models\FinancialProduct;
-use App\FinancialServices\Models\DepositNominee;
 use App\FinancialServices\Models\ShareAccount;
-use App\FinancialServices\Models\FinancialAccountAuthorizedPerson;
-use App\FinancialServices\Requests\StoreFinancialAccountRequest;
 use App\FinancialServices\Requests\StoreDepositNomineeRequest;
-use App\FinancialServices\Requests\StoreFinancialAccountHolderRequest;
-use App\FinancialServices\Requests\StoreShareAccountRequest;
-use App\FinancialServices\Requests\StoreFixedDepositRequest;
-use App\FinancialServices\Requests\StoreRecurringDepositRequest;
-use App\FinancialServices\Requests\StoreRecurringDepositPaymentRequest;
 use App\FinancialServices\Requests\StoreFinancialAccountAuthorizedPersonRequest;
-use Carbon\CarbonImmutable;
+use App\FinancialServices\Requests\StoreFinancialAccountHolderRequest;
+use App\FinancialServices\Requests\StoreFinancialAccountRequest;
+use App\FinancialServices\Requests\StoreFixedDepositRequest;
+use App\FinancialServices\Requests\StoreRecurringDepositPaymentRequest;
+use App\FinancialServices\Requests\StoreRecurringDepositRequest;
+use App\FinancialServices\Requests\StoreShareAccountRequest;
 use App\Http\Controllers\Controller;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
@@ -129,15 +129,42 @@ class FinancialAccountController extends Controller
     {
         $organizationId = $this->organizationId($request);
 
+        $today = now()->toDateString();
+
         return Inertia::render($page, [
-            'products' => FinancialProduct::query()->with(['policy', 'baseTerm'])->where('organization_id', $organizationId)->where('status', true)->when($category, fn($query) => $query->where('category', $category))->orderBy('code')->get(['id', 'code', 'name', 'category'])->map(fn(FinancialProduct $product) => [
-                'id' => $product->id,
-                'code' => $product->code,
-                'name' => $product->name,
-                'category' => $product->category,
-                'base_interest_rate' => $product->baseTerm?->interest_rate,
-                'policy' => $product->policy,
-            ]),
+            'products' => FinancialProduct::query()->with([
+                'policy',
+                'baseTerm',
+                'terms' => fn($query) => $query
+                    ->where('status', true)
+                    ->where(fn($query) => $query->whereNull('effective_from')->orWhereDate('effective_from', '<=', $today))
+                    ->where(fn($query) => $query->whereNull('effective_until')->orWhereDate('effective_until', '>=', $today))
+                    ->orderBy('tenure_value'),
+            ])->where('organization_id', $organizationId)->where('status', true)->when($category, fn($query) => $query->where('category', $category))->orderBy('code')->get(['id', 'code', 'name', 'category', 'customer_can_open_multiple_account'])->map(fn(FinancialProduct $product) => [
+                    'id' => $product->id,
+                    'code' => $product->code,
+                    'name' => $product->name,
+                    'category' => $product->category,
+                    'customer_can_open_multiple_account' => $product->policy?->status === 'ACTIVE'
+                        && (!$product->policy->effective_from || $product->policy->effective_from->toDateString() <= $today)
+                        && (!$product->policy->effective_until || $product->policy->effective_until->toDateString() >= $today)
+                        ? $product->policy->customer_can_open_multiple_account ?? $product->customer_can_open_multiple_account
+                        : $product->customer_can_open_multiple_account,
+                    'base_interest_rate' => $product->baseTerm?->interest_rate,
+                    'policy' => $product->policy,
+                    'terms' => $product->terms->map(fn($term) => [
+                        'id' => $term->id,
+                        'code' => $term->code,
+                        'name' => $term->name,
+                        'tenure_value' => $term->tenure_value,
+                        'tenure_unit' => $term->tenure_unit,
+                        'interest_rate' => $term->interest_rate,
+                        'interest_calculation' => $term->interest_calculation,
+                        'interest_frequency' => $term->interest_frequency,
+                        'minimum_amount' => $term->minimum_amount,
+                        'maximum_amount' => $term->maximum_amount,
+                    ]),
+                ]),
             'customers' => Customer::query()->where('organization_id', $organizationId)->orderBy('name')->get(['id', 'customer_no', 'name', 'type', 'dob']),
             'category' => $category,
         ]);
@@ -620,7 +647,9 @@ class FinancialAccountController extends Controller
     {
         $this->authorizeOrganization($request, $account);
         abort_unless($account->account_type === 'SHARE', 422, 'Membership details are only available for share accounts.');
-        abort_unless($account->holder_type === Customer::class && $account->holder_id, 422, 'A share account must have a customer holder.');
+        $hasCustomerHolder = ($account->holder_type === Customer::class && $account->holder_id)
+            || $account->holders()->wherePivot('role', 'PRIMARY')->exists();
+        abort_unless($hasCustomerHolder, 422, 'A share account must have a customer holder.');
         abort_if($account->status === 'CLOSED', 422, 'Closed accounts cannot change membership details.');
     }
 

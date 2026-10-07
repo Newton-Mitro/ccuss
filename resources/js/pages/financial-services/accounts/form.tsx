@@ -6,11 +6,18 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '@/types';
+import type { FinancialProductTermOption } from '@/types/financial-services';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
 interface Props extends SharedData {
-    products: { id: number; code: string; name: string; category: string }[];
+    products: {
+        id: number;
+        code: string;
+        name: string;
+        category: string;
+        terms: FinancialProductTermOption[];
+    }[];
     customers: {
         id: number;
         customer_no: string;
@@ -25,6 +32,7 @@ export default function FinancialAccountForm() {
     const { products, customers, category } = usePage<Props>().props;
     const { data, setData, post, processing, errors } = useForm({
         financial_product_id: '',
+        financial_product_term_id: '',
         holder_type: 'customer',
         holder_id: '',
         account_no: '',
@@ -102,6 +110,21 @@ export default function FinancialAccountForm() {
                                             'account_type',
                                             product.category,
                                         );
+                                    setData(
+                                        'financial_product_term_id',
+                                        product &&
+                                            [
+                                                'FIXED_DEPOSIT',
+                                                'RECURRING_DEPOSIT',
+                                            ].includes(product.category)
+                                            ? (product.terms
+                                                  .find(
+                                                      (term) =>
+                                                          term.code === 'BASE',
+                                                  )
+                                                  ?.id.toString() ?? '')
+                                            : '',
+                                    );
                                 }}
                                 options={[
                                     { value: '', label: 'Select product' },
@@ -113,6 +136,31 @@ export default function FinancialAccountForm() {
                             />
                             <InputError message={errors.financial_product_id} />
                         </div>
+                        {['FIXED_DEPOSIT', 'RECURRING_DEPOSIT'].includes(
+                            selectedAccountType,
+                        ) && selectedProduct?.terms.length ? (
+                            <div>
+                                <Label>Product term</Label>
+                                <Select
+                                    value={data.financial_product_term_id}
+                                    onChange={(value) =>
+                                        setData(
+                                            'financial_product_term_id',
+                                            value,
+                                        )
+                                    }
+                                    options={selectedProduct.terms.map(
+                                        (term) => ({
+                                            value: String(term.id),
+                                            label: `${term.name} · ${term.tenure_value} ${term.tenure_unit.toLowerCase()} · ${term.interest_rate}%`,
+                                        }),
+                                    )}
+                                />
+                                <InputError
+                                    message={errors.financial_product_term_id}
+                                />
+                            </div>
+                        ) : null}
                         <div>
                             <Label>Holder</Label>
                             <Select
@@ -216,19 +264,26 @@ export default function FinancialAccountForm() {
                                 />
                             </div>
                         )}
-                        <div>
-                            <Label>Account number</Label>
-                            <Input
-                                value={data.account_no}
-                                onChange={(event) =>
-                                    setData(
-                                        'account_no',
-                                        event.target.value.toUpperCase(),
-                                    )
-                                }
-                            />
-                            <InputError message={errors.account_no} />
-                        </div>
+                        {![
+                            'SAVINGS',
+                            'SHARE',
+                            'FIXED_DEPOSIT',
+                            'RECURRING_DEPOSIT',
+                        ].includes(selectedAccountType) && (
+                            <div>
+                                <Label>Account number</Label>
+                                <Input
+                                    value={data.account_no}
+                                    onChange={(event) =>
+                                        setData(
+                                            'account_no',
+                                            event.target.value.toUpperCase(),
+                                        )
+                                    }
+                                />
+                                <InputError message={errors.account_no} />
+                            </div>
+                        )}
                         <div>
                             <Label>Account name</Label>
                             <Input

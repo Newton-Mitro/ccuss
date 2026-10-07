@@ -19,6 +19,8 @@ export interface FinancialProduct {
         interest_calculation?: string;
         interest_frequency?: string;
     } | null;
+    customer_can_open_multiple_account?: boolean;
+    terms?: FinancialProductTermOption[];
     interest_calculation?:
         | 'NONE'
         | 'SIMPLE'
@@ -37,6 +39,22 @@ export interface FinancialProduct {
     is_system?: boolean;
     status: boolean;
     account_mappings?: FinancialProductAccountMapping[];
+}
+
+export interface FinancialProductTermOption {
+    id?: number;
+    code: string;
+    name: string;
+    tenure_value: number;
+    tenure_unit: 'DAY' | 'WEEK' | 'MONTH' | 'QUARTER' | 'YEAR';
+    interest_rate: string | number;
+    interest_calculation: string;
+    interest_frequency: string;
+    minimum_amount?: string | number | null;
+    maximum_amount?: string | number | null;
+    status?: boolean;
+    effective_from?: string | null;
+    effective_until?: string | null;
 }
 
 export interface FinancialProductAccountMapping {
@@ -483,6 +501,7 @@ export interface AccountStatementPageProps extends SharedData {
 
 export interface ProductPolicy {
     status?: string;
+    customer_can_open_multiple_account?: boolean | null;
     version?: string | null;
     minimum_opening_amount?: string | number | null;
     minimum_deposit_amount?: string | number | null;
@@ -513,7 +532,14 @@ export interface FinancialProductPolicyProduct extends Pick<
 }
 
 export interface ProductPolicyFormPageProps extends SharedData {
-    product: Pick<FinancialProduct, 'id' | 'code' | 'name' | 'category'>;
+    product: Pick<
+        FinancialProduct,
+        | 'id'
+        | 'code'
+        | 'name'
+        | 'category'
+        | 'customer_can_open_multiple_account'
+    >;
     policy?: ProductPolicy | null;
 }
 

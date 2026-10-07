@@ -2,6 +2,7 @@ import {
     ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
+import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -101,14 +102,10 @@ export default function DividendsIndex() {
                         </div>
                         <div>
                             <Label>Declaration date</Label>
-                            <Input
-                                type="date"
+                            <AppDatePicker
                                 value={data.declaration_date}
-                                onChange={(event) =>
-                                    setData(
-                                        'declaration_date',
-                                        event.target.value,
-                                    )
+                                onChange={(value) =>
+                                    setData('declaration_date', value)
                                 }
                             />
                         </div>

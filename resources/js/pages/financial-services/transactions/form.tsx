@@ -1,5 +1,6 @@
 import InputError from '@/components/input-error';
 import { ResourcePageHeader } from '@/components/resource-page-shell';
+import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -82,14 +83,10 @@ export default function FinancialTransactionForm() {
                         </div>
                         <div>
                             <Label>Date</Label>
-                            <Input
-                                type="date"
+                            <AppDatePicker
                                 value={data.transaction_date}
-                                onChange={(event) =>
-                                    setData(
-                                        'transaction_date',
-                                        event.target.value,
-                                    )
+                                onChange={(value) =>
+                                    setData('transaction_date', value)
                                 }
                             />
                             <InputError message={errors.transaction_date} />

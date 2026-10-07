@@ -1,11 +1,13 @@
 import InputError from '@/components/input-error';
 import { ResourcePageHeader } from '@/components/resource-page-shell';
+import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import type { BreadcrumbItem, SharedData } from '@/types';
+import type { FinancialProductTermOption } from '@/types/financial-services';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
@@ -15,6 +17,7 @@ interface Props extends SharedData {
         code: string;
         name: string;
         base_interest_rate?: string | number | null;
+        terms: FinancialProductTermOption[];
     }>;
     customers: Array<{
         id: number;
@@ -29,9 +32,9 @@ export default function FixedDepositAccountCreate() {
     const { products, customers } = usePage<Props>().props;
     const { data, setData, post, processing, errors } = useForm({
         financial_product_id: '',
+        financial_product_term_id: '',
         holder_id: '',
         guardian_customer_id: '',
-        account_no: '',
         name: '',
         account_type: 'FIXED_DEPOSIT',
         principal_amount: '',
@@ -46,6 +49,9 @@ export default function FixedDepositAccountCreate() {
     const isMinorDepositor = depositor ? isMinor(depositor) : false;
     const product = products.find(
         (item) => String(item.id) === data.financial_product_id,
+    );
+    const selectedTerm = product?.terms.find(
+        (term) => String(term.id) === data.financial_product_term_id,
     );
     const submit = (event: React.FormEvent) => {
         event.preventDefault();
@@ -81,10 +87,22 @@ export default function FixedDepositAccountCreate() {
                                     const selected = products.find(
                                         (item) => String(item.id) === value,
                                     );
-                                    if (selected?.base_interest_rate)
+                                    const baseTerm = selected?.terms.find(
+                                        (term) => term.code === 'BASE',
+                                    );
+                                    setData(
+                                        'financial_product_term_id',
+                                        String(baseTerm?.id ?? ''),
+                                    );
+                                    if (baseTerm)
                                         setData(
                                             'contractual_rate',
-                                            String(selected.base_interest_rate),
+                                            String(baseTerm.interest_rate),
+                                        );
+                                    if (baseTerm?.tenure_unit === 'MONTH')
+                                        setData(
+                                            'term_months',
+                                            String(baseTerm.tenure_value),
                                         );
                                 }}
                                 options={[
@@ -97,6 +115,41 @@ export default function FixedDepositAccountCreate() {
                             />
                             <InputError message={errors.financial_product_id} />
                         </div>
+                        {product?.terms.length ? (
+                            <div>
+                                <Label>Product term</Label>
+                                <Select
+                                    value={data.financial_product_term_id}
+                                    onChange={(value) => {
+                                        setData(
+                                            'financial_product_term_id',
+                                            value,
+                                        );
+                                        const term = product.terms.find(
+                                            (item) => String(item.id) === value,
+                                        );
+                                        if (term) {
+                                            setData(
+                                                'contractual_rate',
+                                                String(term.interest_rate),
+                                            );
+                                            if (term.tenure_unit === 'MONTH')
+                                                setData(
+                                                    'term_months',
+                                                    String(term.tenure_value),
+                                                );
+                                        }
+                                    }}
+                                    options={product.terms.map((term) => ({
+                                        value: String(term.id),
+                                        label: `${term.name} · ${term.tenure_value} ${term.tenure_unit.toLowerCase()} · ${term.interest_rate}%`,
+                                    }))}
+                                />
+                                <InputError
+                                    message={errors.financial_product_term_id}
+                                />
+                            </div>
+                        ) : null}
                         <div>
                             <Label>Depositor</Label>
                             <Select
@@ -148,16 +201,6 @@ export default function FixedDepositAccountCreate() {
                             </div>
                         )}
                         <div>
-                            <Label>Account number</Label>
-                            <Input
-                                value={data.account_no}
-                                onChange={(event) =>
-                                    setData('account_no', event.target.value)
-                                }
-                            />
-                            <InputError message={errors.account_no} />
-                        </div>
-                        <div>
                             <Label>Display name</Label>
                             <Input
                                 value={data.name}
@@ -188,13 +231,18 @@ export default function FixedDepositAccountCreate() {
                                 type="number"
                                 min="0"
                                 step="0.000001"
-                                value={data.contractual_rate}
+                                value={
+                                    selectedTerm
+                                        ? String(selectedTerm.interest_rate)
+                                        : data.contractual_rate
+                                }
                                 onChange={(event) =>
                                     setData(
                                         'contractual_rate',
                                         event.target.value,
                                     )
                                 }
+                                readOnly={Boolean(selectedTerm)}
                             />
                             <p className="mt-1 text-xs text-muted-foreground">
                                 Product rate:{' '}
@@ -208,20 +256,24 @@ export default function FixedDepositAccountCreate() {
                                 type="number"
                                 min="1"
                                 max="600"
-                                value={data.term_months}
+                                value={
+                                    selectedTerm
+                                        ? String(selectedTerm.tenure_value)
+                                        : data.term_months
+                                }
                                 onChange={(event) =>
                                     setData('term_months', event.target.value)
                                 }
+                                readOnly={Boolean(selectedTerm)}
                             />
                             <InputError message={errors.term_months} />
                         </div>
                         <div>
                             <Label>Start date</Label>
-                            <Input
-                                type="date"
+                            <AppDatePicker
                                 value={data.started_at}
-                                onChange={(event) =>
-                                    setData('started_at', event.target.value)
+                                onChange={(value) =>
+                                    setData('started_at', value)
                                 }
                             />
                         </div>

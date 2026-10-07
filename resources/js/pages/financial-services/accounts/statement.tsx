@@ -5,7 +5,7 @@ import {
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
-import { Input } from '@/components/ui/input';
+import AppDatePicker from '@/components/ui/app_date_picker';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
@@ -133,16 +133,15 @@ export default function AccountStatement() {
                         <Label className="text-xs font-medium text-muted-foreground">
                             Reference date
                         </Label>
-                        <Input
-                            type="date"
+                        <AppDatePicker
                             value={statementDate}
-                            onChange={(event) =>
+                            onChange={(value) =>
                                 router.get(
                                     route('financial-account-statements.index'),
                                     {
                                         account_id: account?.id,
                                         period,
-                                        date: event.target.value,
+                                        date: value,
                                     },
                                     {
                                         preserveState: true,

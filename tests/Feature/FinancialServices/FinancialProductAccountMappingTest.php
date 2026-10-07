@@ -119,6 +119,65 @@ it('rejects ledger accounts from another organization', function () {
         ->assertSessionHasErrors('debit_account_id');
 });
 
+it('allows authorized users to edit system products and their terms', function () {
+    $organization = Organization::factory()->create();
+    $branch = Branch::factory()->create(['organization_id' => $organization->id]);
+    $user = User::factory()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+    ]);
+    $role = Role::firstOrCreate(
+        ['slug' => 'financial_product_update_system_test'],
+        ['name' => 'Financial Product System Update Test'],
+    );
+    $permission = Permission::firstOrCreate(
+        ['slug' => 'financial.products.update'],
+        ['module' => 'financial_products', 'name' => 'Update Products', 'action' => 'update'],
+    );
+    $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+    $product = FinancialProduct::factory()->create([
+        'organization_id' => $organization->id,
+        'is_system' => true,
+    ]);
+
+    $this->actingAs($user)
+        ->withSession(['active_organization_id' => $organization->id])
+        ->get(route('financial-products.edit', $product))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page
+            ->component('financial-services/products/form')
+            ->where('product.id', $product->id));
+
+    $this->put(route('financial-products.update', $product), [
+        'code' => $product->code,
+        'name' => $product->name,
+        'category' => $product->category,
+        'balance_type' => $product->balance_type,
+        'interest_calculation' => $product->interest_calculation,
+        'interest_frequency' => $product->interest_frequency,
+        'status' => true,
+        'customer_can_open_multiple_account' => true,
+        'terms' => [
+            [
+                'id' => $product->baseTerm->id,
+                'code' => 'BASE',
+                'name' => 'Updated system base term',
+                'tenure_value' => 18,
+                'tenure_unit' => 'MONTH',
+                'interest_rate' => 8.75,
+                'interest_calculation' => 'SIMPLE',
+                'interest_frequency' => 'MONTHLY',
+                'status' => true,
+            ]
+        ],
+    ])->assertRedirect(route('financial-products.index'));
+
+    expect($product->fresh()->is_system)->toBeTrue()
+        ->and($product->baseTerm()->first()->name)->toBe('Updated system base term')
+        ->and((float) $product->baseTerm()->first()->interest_rate)->toBe(8.75);
+});
+
 it('lists organization mappings with search, status, and product filters', function () {
     $organization = Organization::factory()->create();
     $otherOrganization = Organization::factory()->create();

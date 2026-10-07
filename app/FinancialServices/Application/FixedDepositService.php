@@ -25,12 +25,26 @@ class FixedDepositService
         }
 
         $startedAt = CarbonImmutable::parse($data['started_at']);
-        $termValue = (int) $data['term_months'];
-        $termUnit = 'MONTH';
-        $maturityDate = $startedAt->addMonthsNoOverflow($termValue);
+        $productTerm = $account->productTerm;
+        $termValue = (int) ($productTerm?->tenure_value ?? $data['term_value'] ?? $data['term_months']);
+        $termUnit = $productTerm?->tenure_unit ?? $data['term_unit'] ?? 'MONTH';
+        $maturityDate = match ($termUnit) {
+            'DAY' => $startedAt->addDays($termValue),
+            'WEEK' => $startedAt->addWeeks($termValue),
+            'MONTH' => $startedAt->addMonthsNoOverflow($termValue),
+            'QUARTER' => $startedAt->addMonthsNoOverflow($termValue * 3),
+            'YEAR' => $startedAt->addYearsNoOverflow($termValue),
+        };
         $principal = (float) $data['principal_amount'];
-        $rate = (float) $data['contractual_rate'];
-        $maturityAmount = round($principal * (1 + ($rate * $termValue / 12 / 100)), 4);
+        $rate = (float) ($productTerm?->interest_rate ?? $data['contractual_rate']);
+        $termMonths = match ($termUnit) {
+            'DAY' => $termValue / 30,
+            'WEEK' => $termValue / 4,
+            'MONTH' => $termValue,
+            'QUARTER' => $termValue * 3,
+            'YEAR' => $termValue * 12,
+        };
+        $maturityAmount = round($principal * (1 + ($rate * $termMonths / 12 / 100)), 4);
 
         return DB::transaction(fn() => $account->fixedDeposit()->create([
             'principal_amount' => $principal,

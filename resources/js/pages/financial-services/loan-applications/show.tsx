@@ -2,6 +2,7 @@ import {
     ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
+import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -1071,13 +1072,12 @@ export default function LoanApplicationShow() {
                             </div>
                             <div>
                                 <Label>Next renewal</Label>
-                                <Input
-                                    type="date"
+                                <AppDatePicker
                                     value={protectionData.next_renewal_at}
-                                    onChange={(event) =>
+                                    onChange={(value) =>
                                         setProtectionData(
                                             'next_renewal_at',
-                                            event.target.value,
+                                            value,
                                         )
                                     }
                                 />

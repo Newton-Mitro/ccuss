@@ -370,6 +370,7 @@ return new class extends Migration {
         Schema::dropIfExists('financial_transactions');
         Schema::dropIfExists('financial_accounts');
         Schema::dropIfExists('gl_account_mappings');
+        Schema::dropIfExists('financial_product_terms');
         Schema::dropIfExists('financial_products');
     }
 };

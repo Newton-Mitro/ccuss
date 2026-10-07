@@ -1,4 +1,5 @@
 import { ResourcePageHeader } from '@/components/resource-page-shell';
+import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -144,14 +145,10 @@ export default function TransactionWorkflow() {
                             </div>
                             <div>
                                 <Label>Date</Label>
-                                <Input
-                                    type="date"
+                                <AppDatePicker
                                     value={data.transaction_date}
-                                    onChange={(event) =>
-                                        setData(
-                                            'transaction_date',
-                                            event.target.value,
-                                        )
+                                    onChange={(value) =>
+                                        setData('transaction_date', value)
                                     }
                                 />
                             </div>
@@ -309,19 +306,18 @@ export default function TransactionWorkflow() {
                                         ? 'Disbursement date'
                                         : 'Repayment date'}
                                 </Label>
-                                <Input
-                                    type="date"
+                                <AppDatePicker
                                     value={
                                         workflow === 'loan-disbursement'
                                             ? data.disbursed_at
                                             : data.repayment_date
                                     }
-                                    onChange={(event) =>
+                                    onChange={(value) =>
                                         setData(
                                             workflow === 'loan-disbursement'
                                                 ? 'disbursed_at'
                                                 : 'repayment_date',
-                                            event.target.value,
+                                            value,
                                         )
                                     }
                                 />

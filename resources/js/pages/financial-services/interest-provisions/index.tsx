@@ -2,8 +2,8 @@ import {
     ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
+import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
@@ -61,21 +61,19 @@ export default function InterestProvisionsIndex() {
                     >
                         <div>
                             <Label>Period start</Label>
-                            <Input
-                                type="date"
+                            <AppDatePicker
                                 value={data.period_start}
-                                onChange={(event) =>
-                                    setData('period_start', event.target.value)
+                                onChange={(value) =>
+                                    setData('period_start', value)
                                 }
                             />
                         </div>
                         <div>
                             <Label>Period end</Label>
-                            <Input
-                                type="date"
+                            <AppDatePicker
                                 value={data.period_end}
-                                onChange={(event) =>
-                                    setData('period_end', event.target.value)
+                                onChange={(value) =>
+                                    setData('period_end', value)
                                 }
                             />
                         </div>

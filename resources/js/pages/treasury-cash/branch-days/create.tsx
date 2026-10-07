@@ -4,6 +4,7 @@ import { ArrowLeft, CalendarPlus } from 'lucide-react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
 import { ResourcePageHeader } from '../../../components/resource-page-shell';
+import AppDatePicker from '../../../components/ui/app_date_picker';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
@@ -67,15 +68,11 @@ export default function CreateBranchDayPage() {
                                 >
                                     Business date
                                 </label>
-                                <Input
+                                <AppDatePicker
                                     id="business_date"
-                                    type="date"
                                     value={data.business_date}
-                                    onChange={(event) =>
-                                        setData(
-                                            'business_date',
-                                            event.target.value,
-                                        )
+                                    onChange={(value) =>
+                                        setData('business_date', value)
                                     }
                                     disabled={!userHasBranch}
                                     required
