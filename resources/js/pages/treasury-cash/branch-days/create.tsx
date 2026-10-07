@@ -43,7 +43,7 @@ export default function CreateBranchDayPage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Open Branch Day" />
 
-            <div className="max-w-5xl space-y-6">
+            <div className="max-w-3xl space-y-6">
                 <ResourcePageHeader
                     title="Open branch day"
                     description="Create a new opening record for the current branch and business date."
