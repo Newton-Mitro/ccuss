@@ -3,6 +3,8 @@
 namespace Database\Factories;
 
 use App\FinancialServices\Models\FinancialProduct;
+use App\FinancialServices\Models\DepositPolicy;
+use App\FinancialServices\Models\LoanPolicy;
 use App\FinancialServices\Models\FinancialProductPolicy;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -12,7 +14,7 @@ class FinancialProductPolicyFactory extends Factory
 
     public function definition(): array
     {
-        $isLoan = fake()->boolean(25);
+        $isLoan = false;
 
         return [
             'financial_product_id' => FinancialProduct::factory(),
@@ -38,6 +40,64 @@ class FinancialProductPolicyFactory extends Factory
             'status' => 'ACTIVE',
             'notes' => 'Factory policy for automated tests and development data.',
         ];
+    }
+
+    public function newModel(array $attributes = []): DepositPolicy|LoanPolicy
+    {
+        $productId = $attributes['financial_product_id'] ?? null;
+        $isLoan = isset($attributes['maximum_loan_amount'])
+            && $attributes['maximum_loan_amount'] !== null;
+        if ($productId) {
+            $loanExists = \Illuminate\Support\Facades\DB::table('loan_products')->where('id', $productId)->exists();
+            $depositExists = \Illuminate\Support\Facades\DB::table('deposit_products')->where('id', $productId)->exists();
+            if ($loanExists !== $depositExists) {
+                $isLoan = $loanExists;
+            }
+        }
+
+        $fields = $isLoan
+            ? [
+                'financial_product_id',
+                'customer_can_open_multiple_account',
+                'maximum_loan_amount',
+                'loan_to_value_percent',
+                'interest_rebate_percent',
+                'loan_ceiling_rules',
+                'repayment_rules',
+                'eligibility_rules',
+                'security_rules',
+                'documentation_requirements',
+                'source_url',
+                'source_checked_at',
+                'effective_from',
+                'effective_until',
+                'version',
+                'status',
+                'notes',
+            ]
+            : [
+                'financial_product_id',
+                'customer_can_open_multiple_account',
+                'minimum_opening_amount',
+                'minimum_deposit_amount',
+                'maximum_deposit_amount',
+                'interest_rebate_percent',
+                'deposit_amount_rules',
+                'tenure_rules',
+                'eligibility_rules',
+                'documentation_requirements',
+                'maturity_examples',
+                'source_url',
+                'source_checked_at',
+                'effective_from',
+                'effective_until',
+                'version',
+                'status',
+                'notes',
+            ];
+        $attributes = array_intersect_key($attributes, array_flip($fields));
+
+        return $isLoan ? new LoanPolicy($attributes) : new DepositPolicy($attributes);
     }
 
     public function draft(): static

@@ -3,37 +3,28 @@
 namespace App\FinancialServices\Models;
 
 use App\SystemAdministration\Models\Organization;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-class FinancialProduct extends Model
+class LoanProduct extends Model
 {
     use HasFactory;
 
-    public function scopeFamily(Builder $query, ?string $family): Builder
-    {
-        return match ($family) {
-            'deposit' => $query->whereIn('category', ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT']),
-            'loan' => $query->where('category', 'LOAN'),
-            default => $query,
-        };
-    }
-
     protected static function newFactory()
     {
-        return \Database\Factories\FinancialProductFactory::new();
+        return \Database\Factories\LoanProductFactory::new();
     }
 
     protected $fillable = [
         'organization_id',
         'code',
         'name',
-        'category',
         'balance_type',
+        'interest_rate',
         'interest_calculation',
         'interest_frequency',
         'customer_can_open_multiple_account',
@@ -43,11 +34,19 @@ class FinancialProduct extends Model
     ];
 
     protected $casts = [
+        'interest_rate' => 'decimal:6',
         'settings' => 'array',
         'is_system' => 'boolean',
         'status' => 'boolean',
         'customer_can_open_multiple_account' => 'boolean',
     ];
+
+    protected $appends = ['category'];
+
+    public function getCategoryAttribute(): string
+    {
+        return 'LOAN';
+    }
 
     public function organization(): BelongsTo
     {
@@ -56,26 +55,21 @@ class FinancialProduct extends Model
 
     public function policy(): HasOne
     {
-        return $this->hasOne(FinancialProductPolicy::class);
+        return $this->hasOne(LoanPolicy::class);
     }
 
     public function accountMappings(): HasMany
     {
-        return $this->hasMany(FinancialProductAccountMapping::class);
+        return $this->hasMany(LoanProductAccountMapping::class);
     }
 
-    public function financialAccounts(): HasMany
+    public function financialAccounts(): MorphMany
     {
-        return $this->hasMany(FinancialAccount::class);
+        return $this->morphMany(FinancialAccount::class, 'product');
     }
 
-    public function terms(): HasMany
+    public function applications(): HasMany
     {
-        return $this->hasMany(FinancialProductTerm::class);
-    }
-
-    public function baseTerm(): HasOne
-    {
-        return $this->hasOne(FinancialProductTerm::class)->where('code', 'BASE');
+        return $this->hasMany(LoanApplication::class);
     }
 }

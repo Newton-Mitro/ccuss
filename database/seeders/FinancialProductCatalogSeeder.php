@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\FinancialServices\Models\FinancialProduct;
+use App\FinancialServices\Models\DepositProduct;
+use App\FinancialServices\Models\LoanProduct;
 use App\SystemAdministration\Models\Organization;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class FinancialProductCatalogSeeder extends Seeder
 {
@@ -26,58 +26,66 @@ class FinancialProductCatalogSeeder extends Seeder
             ['LN-GEN', 'General Loan', 'LOAN', 'ASSET', '12.000000', 'REDUCING_BALANCE', 'MONTHLY', 0],
         ];
 
-        DB::transaction(function () use ($organization, $products): void {
-            foreach ($products as [$code, $name, $category, $balanceType, $rate, $calculation, $frequency, $minimumOpening]) {
-                $product = FinancialProduct::query()->updateOrCreate(
-                    [
-                        'organization_id' => $organization->id,
-                        'code' => $code,
-                    ],
+        foreach ($products as [$code, $name, $category, $balanceType, $rate, $calculation, $frequency, $minimumOpening]) {
+            $settings = [
+                'credit_union' => true,
+                'requires_kyc' => true,
+                'minimum_opening_amount' => $minimumOpening,
+                'joint_holders_allowed' => in_array($category, ['SAVINGS', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT'], true),
+            ];
+
+            if ($category === 'LOAN') {
+                LoanProduct::query()->updateOrCreate(
+                    ['organization_id' => $organization->id, 'code' => $code],
                     [
                         'name' => $name,
-                        'category' => $category,
                         'balance_type' => $balanceType,
-                        'settings' => [
-                            'credit_union' => true,
-                            'requires_kyc' => true,
-                            'minimum_opening_amount' => $minimumOpening,
-                            'joint_holders_allowed' => in_array($category, ['SAVINGS', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT'], true),
-                        ],
+                        'interest_rate' => $rate,
+                        'interest_calculation' => $calculation,
+                        'interest_frequency' => $frequency,
+                        'settings' => $settings,
                         'is_system' => true,
                         'status' => true,
                     ],
                 );
-
-                $termValue = match ($category) {
-                    'FIXED_DEPOSIT' => 12,
-                    'RECURRING_DEPOSIT' => 24,
-                    'LOAN' => 12,
-                    default => 1,
-                };
-
-                DB::table('financial_product_terms')->updateOrInsert(
-                    [
-                        'financial_product_id' => $product->id,
-                        'code' => 'BASE',
-                    ],
-                    [
-                        'name' => 'Base term',
-                        'tenure_value' => $termValue,
-                        'tenure_unit' => 'MONTH',
-                        'interest_rate' => $rate,
-                        'interest_calculation' => $calculation,
-                        'interest_frequency' => $frequency,
-                        'minimum_amount' => $minimumOpening ?: null,
-                        'maximum_amount' => null,
-                        'rules' => json_encode([]),
-                        'status' => true,
-                        'effective_from' => self::EFFECTIVE_DATE,
-                        'updated_at' => now(),
-                        'created_at' => now(),
-                    ],
-                );
+                continue;
             }
-        });
+
+            $product = DepositProduct::query()->updateOrCreate(
+                ['organization_id' => $organization->id, 'code' => $code],
+                [
+                    'name' => $name,
+                    'category' => $category,
+                    'balance_type' => $balanceType,
+                    'interest_calculation' => $calculation,
+                    'interest_frequency' => $frequency,
+                    'settings' => $settings,
+                    'is_system' => true,
+                    'status' => true,
+                ],
+            );
+
+            $termValue = match ($category) {
+                'FIXED_DEPOSIT' => 12,
+                'RECURRING_DEPOSIT' => 24,
+                default => 1,
+            };
+            $product->terms()->updateOrCreate(
+                ['code' => 'BASE'],
+                [
+                    'name' => 'Base term',
+                    'tenure_value' => $termValue,
+                    'tenure_unit' => 'MONTH',
+                    'interest_rate' => $rate,
+                    'interest_calculation' => $calculation,
+                    'interest_frequency' => $frequency,
+                    'minimum_amount' => $minimumOpening ?: null,
+                    'rules' => [],
+                    'status' => true,
+                    'effective_from' => self::EFFECTIVE_DATE,
+                ],
+            );
+        }
 
         $this->command?->info('Financial product catalog seeded.');
     }

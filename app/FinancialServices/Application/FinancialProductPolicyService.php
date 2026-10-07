@@ -4,15 +4,16 @@ namespace App\FinancialServices\Application;
 
 use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Models\FinancialAccount;
-use App\FinancialServices\Models\FinancialProduct;
-use App\FinancialServices\Models\FinancialProductPolicy;
+use App\FinancialServices\Models\DepositProduct;
+use App\FinancialServices\Models\LoanProduct;
+use Illuminate\Database\Eloquent\Model;
 use Carbon\CarbonImmutable;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
 
 class FinancialProductPolicyService
 {
-    public function validateAccountOpening(FinancialProduct $product, Customer $customer): void
+    public function validateAccountOpening(DepositProduct $product, Customer $customer): void
     {
         $policy = $this->activePolicy($product);
         $canOpenMultiple = $policy?->customer_can_open_multiple_account
@@ -87,7 +88,7 @@ class FinancialProductPolicyService
         }
     }
 
-    public function validateLoanAmount(FinancialProduct $product, float $amount): void
+    public function validateLoanAmount(LoanProduct $product, float $amount): void
     {
         $policy = $this->activePolicy($product);
 
@@ -98,7 +99,7 @@ class FinancialProductPolicyService
         }
     }
 
-    private function activePolicy(?FinancialProduct $product): ?FinancialProductPolicy
+    private function activePolicy(?Model $product): ?Model
     {
         if (!$product) {
             return null;
@@ -113,10 +114,11 @@ class FinancialProductPolicyService
             ->first();
     }
 
-    private function hasOpenAccountForProduct(FinancialProduct $product, Customer $customer): bool
+    private function hasOpenAccountForProduct(DepositProduct $product, Customer $customer): bool
     {
         return FinancialAccount::query()
-            ->where('financial_product_id', $product->id)
+            ->where('product_type', DepositProduct::class)
+            ->where('product_id', $product->id)
             ->whereNotIn('status', ['CLOSED', 'WRITTEN_OFF'])
             ->where(function ($query) use ($customer): void {
                 $query->where(function ($query) use ($customer): void {

@@ -59,11 +59,6 @@ class LoanAccount extends Model
         return $this->belongsTo(FinancialAccount::class);
     }
 
-    public function product(): BelongsTo
-    {
-        return $this->belongsTo(FinancialProduct::class, 'financial_product_id');
-    }
-
     public function application(): BelongsTo
     {
         return $this->belongsTo(LoanApplication::class, 'loan_application_id');

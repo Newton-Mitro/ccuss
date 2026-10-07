@@ -3,29 +3,20 @@
 namespace App\FinancialServices\Models;
 
 use App\SystemAdministration\Models\Organization;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-class FinancialProduct extends Model
+class DepositProduct extends Model
 {
     use HasFactory;
 
-    public function scopeFamily(Builder $query, ?string $family): Builder
-    {
-        return match ($family) {
-            'deposit' => $query->whereIn('category', ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT']),
-            'loan' => $query->where('category', 'LOAN'),
-            default => $query,
-        };
-    }
-
     protected static function newFactory()
     {
-        return \Database\Factories\FinancialProductFactory::new();
+        return \Database\Factories\DepositProductFactory::new();
     }
 
     protected $fillable = [
@@ -56,26 +47,26 @@ class FinancialProduct extends Model
 
     public function policy(): HasOne
     {
-        return $this->hasOne(FinancialProductPolicy::class);
+        return $this->hasOne(DepositPolicy::class);
     }
 
     public function accountMappings(): HasMany
     {
-        return $this->hasMany(FinancialProductAccountMapping::class);
+        return $this->hasMany(DepositProductAccountMapping::class);
     }
 
-    public function financialAccounts(): HasMany
+    public function financialAccounts(): MorphMany
     {
-        return $this->hasMany(FinancialAccount::class);
+        return $this->morphMany(FinancialAccount::class, 'product');
     }
 
     public function terms(): HasMany
     {
-        return $this->hasMany(FinancialProductTerm::class);
+        return $this->hasMany(DepositProductTerm::class);
     }
 
     public function baseTerm(): HasOne
     {
-        return $this->hasOne(FinancialProductTerm::class)->where('code', 'BASE');
+        return $this->hasOne(DepositProductTerm::class)->where('code', 'BASE');
     }
 }

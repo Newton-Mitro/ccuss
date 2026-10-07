@@ -25,7 +25,7 @@ class FixedDepositService
         }
 
         $startedAt = CarbonImmutable::parse($data['started_at']);
-        $productTerm = $account->productTerm;
+        $productTerm = $account->depositProductTerm;
         $termValue = (int) ($productTerm?->tenure_value ?? $data['term_value'] ?? $data['term_months']);
         $termUnit = $productTerm?->tenure_unit ?? $data['term_unit'] ?? 'MONTH';
         $maturityDate = match ($termUnit) {

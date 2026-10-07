@@ -16,14 +16,24 @@ import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function FinancialProductAccountMappings() {
-    const { mappings, products, filters } =
-        usePage<FinancialProductAccountMappingsPageProps>().props;
+    const {
+        mappings,
+        products,
+        filters,
+        family = '',
+    } = usePage<FinancialProductAccountMappingsPageProps>().props;
+    const productRoute =
+        family === 'loan' ? 'loan-products' : 'deposit-products';
+    const mappingRoute =
+        family === 'loan'
+            ? 'loan-product-account-mappings'
+            : 'deposit-product-account-mappings';
     const [search, setSearch] = useState(filters.search ?? '');
 
     useEffect(() => {
         const timeout = setTimeout(() => {
             router.get(
-                route('financial-product-account-mappings.index'),
+                route(`${mappingRoute}.index`),
                 {
                     search: search || undefined,
                     product_id: filters.product_id || undefined,
@@ -42,13 +52,15 @@ export default function FinancialProductAccountMappings() {
         filters.product_id,
         filters.status,
         mappings.per_page,
+        family,
+        mappingRoute,
     ]);
 
     const updateFilters = (
         values: Record<string, string | number | undefined>,
     ) =>
         router.get(
-            route('financial-product-account-mappings.index'),
+            route(`${mappingRoute}.index`),
             {
                 search: search || undefined,
                 product_id:
@@ -63,18 +75,43 @@ export default function FinancialProductAccountMappings() {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
         {
-            title: 'Account Mappings',
-            href: route('financial-product-account-mappings.index'),
+            title:
+                family === 'loan'
+                    ? 'Loan Account Mappings'
+                    : family === 'deposit'
+                      ? 'Deposit Account Mappings'
+                      : 'Account Mappings',
+            href: route(`${mappingRoute}.index`),
         },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Account Mappings" />
+            <Head
+                title={
+                    family === 'loan'
+                        ? 'Loan Account Mappings'
+                        : family === 'deposit'
+                          ? 'Deposit Account Mappings'
+                          : 'Account Mappings'
+                }
+            />
             <div className="space-y-4">
                 <ResourcePageHeader
-                    title="Account mappings"
-                    description="Connect each financial product transaction to its general-ledger accounts."
+                    title={
+                        family === 'loan'
+                            ? 'Loan account mappings'
+                            : family === 'deposit'
+                              ? 'Deposit account mappings'
+                              : 'Account mappings'
+                    }
+                    description={
+                        family === 'loan'
+                            ? 'Connect loan transactions to their general-ledger accounts.'
+                            : family === 'deposit'
+                              ? 'Connect deposit transactions to their general-ledger accounts.'
+                              : 'Connect each financial product transaction to its general-ledger accounts.'
+                    }
                 />
 
                 <div className="flex flex-col justify-between sm:flex-row sm:items-center">
@@ -160,7 +197,7 @@ export default function FinancialProductAccountMappings() {
                                             <td className="px-2 py-1">
                                                 <Link
                                                     href={route(
-                                                        'financial-products.show',
+                                                        `${productRoute}.show`,
                                                         mapping.product.id,
                                                     )}
                                                     className="font-medium hover:text-primary"
@@ -252,7 +289,7 @@ export default function FinancialProductAccountMappings() {
                                             <td className="px-2 py-1">
                                                 <Link
                                                     href={route(
-                                                        'financial-products.show',
+                                                        `${productRoute}.show`,
                                                         mapping.product.id,
                                                     )}
                                                     className="inline-flex h-8 items-center gap-1 rounded-md border px-2 text-xs hover:bg-muted"

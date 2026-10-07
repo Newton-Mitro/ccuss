@@ -4,8 +4,9 @@ namespace App\FinancialServices\Application;
 
 use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Models\FinancialAccount;
-use App\FinancialServices\Models\FinancialProduct;
-use App\FinancialServices\Models\FinancialProductTerm;
+use App\FinancialServices\Models\DepositProduct;
+use App\FinancialServices\Models\DepositProductTerm;
+use App\FinancialServices\Models\LoanProduct;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -16,15 +17,22 @@ use RuntimeException;
 
 class FinancialAccountService
 {
-    public function __construct(private readonly FinancialProductPolicyService $policyService) {}
+    public function __construct(private readonly FinancialProductPolicyService $policyService)
+    {
+    }
 
     public function create(array $data, int $organizationId): FinancialAccount
     {
-        $product = isset($data['financial_product_id'])
-            ? FinancialProduct::query()
-                ->where('organization_id', $organizationId)
-                ->findOrFail($data['financial_product_id'])
+        $productModel = ($data['account_type'] ?? null) === 'LOAN' ? LoanProduct::class : DepositProduct::class;
+        $product = !empty($data['financial_product_id'])
+            ? $productModel::query()->where('organization_id', $organizationId)->findOrFail($data['financial_product_id'])
             : null;
+
+        unset($data['financial_product_id']);
+        if ($product) {
+            $data['product_type'] = $product::class;
+            $data['product_id'] = $product->id;
+        }
 
         if ($product && $product->status === false) {
             throw new RuntimeException('Accounts cannot be opened for an inactive product.');
@@ -32,16 +40,17 @@ class FinancialAccountService
 
         $term = $this->resolveProductTerm($product, $data);
         if ($term) {
-            $data['financial_product_term_id'] = $term->id;
+            $data['deposit_product_term_id'] = $term->id;
             $this->validateTermAmount($term, $data);
         }
+        unset($data['financial_product_term_id']);
 
         $data['organization_id'] = $organizationId;
-        if (($data['holder_type'] ?? null) === 'customer' || ($product && ! empty($data['holder_id']))) {
+        if (($data['holder_type'] ?? null) === 'customer' || ($product && !empty($data['holder_id']))) {
             $data['holder_type'] = Customer::class;
         }
 
-        if ($product && ($data['holder_type'] ?? null) === Customer::class && ! empty($data['holder_id'])) {
+        if ($product && ($data['holder_type'] ?? null) === Customer::class && !empty($data['holder_id'])) {
             $customer = Customer::query()
                 ->where('organization_id', $organizationId)
                 ->findOrFail($data['holder_id']);
@@ -51,7 +60,7 @@ class FinancialAccountService
         $data['status'] = 'PENDING';
         $autoNumber = in_array($data['account_type'], ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT'], true);
         if ($autoNumber) {
-            $data['account_no'] = 'TMP-'.Str::uuid();
+            $data['account_no'] = 'TMP-' . Str::uuid();
         }
 
         $jointHolderIds = $data['joint_holder_ids'] ?? [];
@@ -102,17 +111,17 @@ class FinancialAccountService
         });
     }
 
-    private function resolveProductTerm(?FinancialProduct $product, array $data): ?FinancialProductTerm
+    private function resolveProductTerm(DepositProduct|LoanProduct|null $product, array $data): ?DepositProductTerm
     {
-        if ($product && in_array($product->category, ['SAVINGS', 'SHARE'], true)) {
+        if (!$product || $product instanceof LoanProduct || in_array($product->category, ['SAVINGS', 'SHARE'], true)) {
             return null;
         }
 
         $requestedTermId = $data['financial_product_term_id'] ?? null;
-        if (! $product) {
+        if (!$product) {
             if ($requestedTermId) {
                 throw ValidationException::withMessages([
-                    'financial_product_term_id' => 'Select a term belonging to the selected product.',
+                    'financial_product_term_id' => 'Select a term belonging to the selected deposit product.',
                 ]);
             }
 
@@ -122,14 +131,14 @@ class FinancialAccountService
         $today = CarbonImmutable::today();
         $terms = $product->terms()
             ->where('status', true)
-            ->where(fn ($query) => $query->whereNull('effective_from')->orWhereDate('effective_from', '<=', $today))
-            ->where(fn ($query) => $query->whereNull('effective_until')->orWhereDate('effective_until', '>=', $today));
+            ->where(fn($query) => $query->whereNull('effective_from')->orWhereDate('effective_from', '<=', $today))
+            ->where(fn($query) => $query->whereNull('effective_until')->orWhereDate('effective_until', '>=', $today));
 
         if ($requestedTermId) {
             $term = (clone $terms)->whereKey($requestedTermId)->first();
-            if (! $term) {
+            if (!$term) {
                 throw ValidationException::withMessages([
-                    'financial_product_term_id' => 'Select an active term belonging to the selected product.',
+                    'financial_product_term_id' => 'Select an active term belonging to the selected deposit product.',
                 ]);
             }
 
@@ -139,7 +148,7 @@ class FinancialAccountService
         return (clone $terms)->where('code', 'BASE')->first() ?? $terms->first();
     }
 
-    private function validateTermAmount(FinancialProductTerm $term, array $data): void
+    private function validateTermAmount(DepositProductTerm $term, array $data): void
     {
         $amountField = match ($data['account_type']) {
             'FIXED_DEPOSIT' => 'principal_amount',
@@ -178,7 +187,7 @@ class FinancialAccountService
 
     public function close(FinancialAccount $account): FinancialAccount
     {
-        if (! in_array($account->status, ['ACTIVE', 'DORMANT', 'FROZEN'], true)) {
+        if (!in_array($account->status, ['ACTIVE', 'DORMANT', 'FROZEN'], true)) {
             throw new RuntimeException('This account cannot be closed from its current status.');
         }
 

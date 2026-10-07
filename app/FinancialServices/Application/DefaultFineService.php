@@ -5,7 +5,9 @@ namespace App\FinancialServices\Application;
 use App\FinancialServices\Models\AccountDefaultEvent;
 use App\FinancialServices\Models\AccountDefaultRule;
 use App\FinancialServices\Models\AccountFine;
+use App\FinancialServices\Models\DepositProduct;
 use App\FinancialServices\Models\FinancialAccount;
+use App\FinancialServices\Models\LoanProduct;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -36,15 +38,21 @@ class DefaultFineService
 
     public function createRule(array $data, int $organizationId): AccountDefaultRule
     {
-        if (($data['financial_product_id'] ?? null) && !$this->productBelongsToOrganization((int) $data['financial_product_id'], $organizationId)) {
+        $productId = (int) ($data['financial_product_id'] ?? 0);
+        $productType = ($data['account_type'] ?? null) === 'LOAN' ? LoanProduct::class : DepositProduct::class;
+        if ($productId && !$this->productBelongsToOrganization($productType, $productId, $organizationId)) {
             throw new RuntimeException('The default rule product must belong to the organization.');
         }
         if (($data['fine_calculation'] ?? 'FIXED') === 'PERCENTAGE' && (float) ($data['fine_rate'] ?? 0) <= 0) {
             throw new RuntimeException('Percentage fine rules require a positive fine rate.');
         }
 
+        unset($data['financial_product_id']);
+
         return AccountDefaultRule::create([
             ...$data,
+            'product_type' => $productId ? $productType : null,
+            'product_id' => $productId ?: null,
             'organization_id' => $organizationId,
             'effective_from' => $data['effective_from'] ?? now()->toDateString(),
             'is_active' => $data['is_active'] ?? true,
@@ -119,8 +127,8 @@ class DefaultFineService
             ->where('is_active', true)
             ->where(fn($query) => $query->whereNull('effective_from')->orWhereDate('effective_from', '<=', $asOfDate))
             ->where(fn($query) => $query->whereNull('effective_to')->orWhereDate('effective_to', '>=', $asOfDate))
-            ->where(fn($query) => $query->whereNull('financial_product_id')->orWhere('financial_product_id', $account->financial_product_id))
-            ->orderByRaw('CASE WHEN financial_product_id IS NULL THEN 1 ELSE 0 END')
+            ->where(fn($query) => $query->whereNull('product_id')->orWhere(fn($product) => $product->where('product_type', $account->product_type)->where('product_id', $account->product_id)))
+            ->orderByRaw('CASE WHEN product_id IS NULL THEN 1 ELSE 0 END')
             ->latest('effective_from')
             ->first();
     }
@@ -146,8 +154,8 @@ class DefaultFineService
         return $obligations;
     }
 
-    private function productBelongsToOrganization(int $productId, int $organizationId): bool
+    private function productBelongsToOrganization(string $productType, int $productId, int $organizationId): bool
     {
-        return \App\FinancialServices\Models\FinancialProduct::query()->whereKey($productId)->where('organization_id', $organizationId)->exists();
+        return $productType::query()->whereKey($productId)->where('organization_id', $organizationId)->exists();
     }
 }

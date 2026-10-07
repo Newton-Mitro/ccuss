@@ -14,15 +14,17 @@ class StoreFinancialProductRequest extends FormRequest
 
     public function rules(): array
     {
+        $loan = $this->routeIs('loan-products.*') || $this->string('family')->toString() === 'loan';
+
         return [
             'code' => ['required', 'string', 'max:50'],
             'name' => ['required', 'string', 'max:150'],
-            'category' => ['required', Rule::in(['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT', 'LOAN', 'OTHER'])],
+            'category' => ['required', Rule::in($loan ? ['LOAN'] : ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT'])],
             'balance_type' => ['required', Rule::in(['ASSET', 'LIABILITY', 'EQUITY'])],
             'base_interest_rate' => ['nullable', 'numeric', 'min:0'],
             'interest_calculation' => ['required', Rule::in(['NONE', 'SIMPLE', 'COMPOUND', 'FLAT', 'REDUCING_BALANCE'])],
             'interest_frequency' => ['required', Rule::in(['NONE', 'DAILY', 'MONTHLY', 'QUARTERLY', 'HALF_YEARLY', 'YEARLY', 'MATURITY'])],
-            'terms' => ['sometimes', 'array', 'min:1'],
+            'terms' => [$loan ? 'prohibited' : 'sometimes', 'array', 'min:1'],
             'terms.*.id' => ['nullable', 'integer'],
             'terms.*.code' => ['required', 'string', 'max:50', 'distinct'],
             'terms.*.name' => ['required', 'string', 'max:150'],

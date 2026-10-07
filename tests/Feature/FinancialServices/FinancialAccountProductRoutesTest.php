@@ -234,7 +234,8 @@ it('enforces the no-multiple-account product rule when the share form omits hold
 
     expect(FinancialAccount::query()
         ->where('organization_id', $fixture['organization']->id)
-        ->where('financial_product_id', $fixture['product']->id)
+        ->where('product_type', \App\FinancialServices\Models\DepositProduct::class)
+        ->where('product_id', $fixture['product']->id)
         ->where('holder_id', $fixture['customer']->id)
         ->count())->toBe(1);
 });

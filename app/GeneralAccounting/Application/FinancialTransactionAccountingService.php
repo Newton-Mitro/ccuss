@@ -3,6 +3,7 @@
 namespace App\GeneralAccounting\Application;
 
 use App\FinancialServices\Models\FinancialTransaction;
+use App\FinancialServices\Models\LoanProduct;
 use App\GeneralAccounting\Application\TreasurySummaryPostingService;
 use App\GeneralAccounting\Models\Voucher;
 use App\TreasuryAndCash\Models\CashLocation;
@@ -44,6 +45,8 @@ class FinancialTransactionAccountingService
 
         $source = $this->resolveSource($transaction, $entries);
         $mapping = $productMappings->count() === 1 ? $productMappings->first() : null;
+        $mappingProduct = $mapping?->product;
+        $productSourceType = $mappingProduct instanceof LoanProduct ? 'LOAN_PRODUCT' : 'DEPOSIT_PRODUCT';
 
         if (!$mapping && !$source) {
             return null;
@@ -51,8 +54,8 @@ class FinancialTransactionAccountingService
 
         return $this->postingService->post(
             organizationId: $transaction->organization_id,
-            sourceType: $mapping ? 'FINANCIAL_PRODUCT' : $source['type'],
-            sourceCode: $mapping ? (string) $mapping->financial_product_id : $source['code'],
+            sourceType: $mapping ? $productSourceType : $source['type'],
+            sourceCode: $mapping ? (string) $mappingProduct->id : $source['code'],
             transactionType: $transaction->transaction_type,
             voucherNo: 'FT-' . $transaction->transaction_no,
             voucherDate: $transaction->transaction_date->toDateString(),

@@ -63,7 +63,7 @@ it('creates and rejects duplicate product account mappings', function () {
 
     $this->actingAs($user)
         ->withSession(['active_organization_id' => $organization->id])
-        ->post(route('financial-products.account-mappings.store', $product), [
+        ->post(route('deposit-products.account-mappings.store', $product), [
             'transaction_type' => 'DEPOSIT',
             'debit_account_id' => $debit->id,
             'credit_account_id' => $credit->id,
@@ -73,7 +73,7 @@ it('creates and rejects duplicate product account mappings', function () {
 
     $this->actingAs($user)
         ->withSession(['active_organization_id' => $organization->id])
-        ->post(route('financial-products.account-mappings.store', $product), [
+        ->post(route('deposit-products.account-mappings.store', $product), [
             'transaction_type' => 'DEPOSIT',
             'debit_account_id' => $debit->id,
             'credit_account_id' => $credit->id,
@@ -81,16 +81,14 @@ it('creates and rejects duplicate product account mappings', function () {
         ])
         ->assertSessionHasErrors('transaction_type');
 
-    $this->assertDatabaseHas('gl_account_mappings', [
-        'source_type' => 'FINANCIAL_PRODUCT',
-        'source_code' => (string) $product->id,
-        'financial_product_id' => $product->id,
+    $this->assertDatabaseHas('deposit_product_account_mappings', [
+        'deposit_product_id' => $product->id,
         'transaction_type' => 'DEPOSIT',
     ]);
 
     $this->actingAs($user)
         ->withSession(['active_organization_id' => $organization->id])
-        ->get(route('financial-products.show', $product))
+        ->get(route('deposit-products.show', $product))
         ->assertSuccessful()
         ->assertInertia(fn($page) => $page
             ->component('financial-services/products/show')
@@ -112,7 +110,7 @@ it('rejects ledger accounts from another organization', function () {
 
     $this->actingAs($user)
         ->withSession(['active_organization_id' => $organization->id])
-        ->post(route('financial-products.account-mappings.store', $product), [
+        ->post(route('deposit-products.account-mappings.store', $product), [
             'transaction_type' => 'WITHDRAWAL',
             'debit_account_id' => $foreignAccount->id,
         ])
@@ -143,13 +141,13 @@ it('allows authorized users to edit system products and their terms', function (
 
     $this->actingAs($user)
         ->withSession(['active_organization_id' => $organization->id])
-        ->get(route('financial-products.edit', $product))
+        ->get(route('deposit-products.edit', $product))
         ->assertSuccessful()
         ->assertInertia(fn($page) => $page
             ->component('financial-services/products/form')
             ->where('product.id', $product->id));
 
-    $this->put(route('financial-products.update', $product), [
+    $this->put(route('deposit-products.update', $product), [
         'code' => $product->code,
         'name' => $product->name,
         'category' => $product->category,
@@ -171,7 +169,7 @@ it('allows authorized users to edit system products and their terms', function (
                 'status' => true,
             ]
         ],
-    ])->assertRedirect(route('financial-products.index'));
+    ])->assertRedirect(route('deposit-products.index'));
 
     expect($product->fresh()->is_system)->toBeTrue()
         ->and($product->baseTerm()->first()->name)->toBe('Updated system base term')
@@ -210,7 +208,7 @@ it('lists organization mappings with search, status, and product filters', funct
 
     $this->actingAs($user)
         ->withSession(['active_organization_id' => $organization->id])
-        ->get(route('financial-product-account-mappings.index', [
+        ->get(route('deposit-product-account-mappings.index', [
             'search' => 'DEPOSIT',
             'status' => 'active',
             'per_page' => 1,
@@ -224,4 +222,70 @@ it('lists organization mappings with search, status, and product filters', funct
             ->where('mappings.data.0.transaction_type', 'DEPOSIT')
             ->where('filters.search', 'DEPOSIT')
             ->where('filters.status', 'active'));
+});
+
+it('separates deposit and loan products across catalogs, policies, and mappings', function () {
+    $organization = Organization::factory()->create();
+    $branch = Branch::factory()->create(['organization_id' => $organization->id]);
+    $user = User::factory()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+    ]);
+    grantProductViewPermission($user);
+    $policyPermission = Permission::firstOrCreate(
+        ['slug' => 'financial.policies.view'],
+        ['module' => 'financial_products', 'name' => 'View Product Policies', 'action' => 'view'],
+    );
+    $user->roles()->first()->permissions()->syncWithoutDetaching([$policyPermission->id]);
+
+    $deposit = FinancialProduct::factory()->create([
+        'organization_id' => $organization->id,
+        'category' => 'SAVINGS',
+    ]);
+    $loan = FinancialProduct::factory()->create([
+        'organization_id' => $organization->id,
+        'category' => 'LOAN',
+    ]);
+    $deposit->accountMappings()->create(['transaction_type' => 'DEPOSIT']);
+    $loan->accountMappings()->create(['transaction_type' => 'LOAN_DISBURSEMENT']);
+
+    $this->actingAs($user)
+        ->withSession(['active_organization_id' => $organization->id])
+        ->get(route('deposit-products.index'))
+        ->assertInertia(fn($page) => $page
+            ->where('family', 'deposit')
+            ->where('products.total', 1)
+            ->where('products.data.0.id', $deposit->id));
+
+    $this->get(route('loan-products.index'))
+        ->assertInertia(fn($page) => $page
+            ->where('family', 'loan')
+            ->where('products.total', 1)
+            ->where('products.data.0.id', $loan->id));
+
+    $this->get(route('loan-product-policies.index'))
+        ->assertInertia(fn($page) => $page
+            ->where('family', 'loan')
+            ->where('products.total', 1)
+            ->where('products.data.0.id', $loan->id));
+
+    $this->get(route('deposit-product-policies.index'))
+        ->assertInertia(fn($page) => $page
+            ->where('family', 'deposit')
+            ->where('products.total', 1)
+            ->where('products.data.0.id', $deposit->id));
+
+    $this->get(route('loan-product-account-mappings.index'))
+        ->assertInertia(fn($page) => $page
+            ->where('family', 'loan')
+            ->where('mappings.total', 1)
+            ->where('mappings.data.0.product.id', $loan->id)
+            ->has('products', 1));
+
+    $this->get(route('deposit-product-account-mappings.index'))
+        ->assertInertia(fn($page) => $page
+            ->where('family', 'deposit')
+            ->where('mappings.total', 1)
+            ->where('mappings.data.0.product.id', $deposit->id)
+            ->has('products', 1));
 });

@@ -4,7 +4,8 @@ namespace App\Reports\Controllers;
 
 use App\Exports\ReportArrayExport;
 use App\FinancialServices\Models\FinancialAccount;
-use App\FinancialServices\Models\FinancialProduct;
+use App\FinancialServices\Models\DepositProduct;
+use App\FinancialServices\Models\LoanProduct;
 use App\FinancialServices\Models\FinancialTransaction;
 use App\GeneralAccounting\Application\AccountingReportService;
 use App\GeneralAccounting\Models\FiscalPeriod;
@@ -113,14 +114,21 @@ class ReportExportController extends Controller
             'product-summary' => [
                 'Product Summary',
                 ['Code', 'Product', 'Category', 'Accounts', 'Balance'],
-                FinancialProduct::where('organization_id', $organizationId)->withCount('financialAccounts')->withSum('financialAccounts', 'balance')->orderBy('category')->get()
+                DepositProduct::where('organization_id', $organizationId)->withCount('financialAccounts')->withSum('financialAccounts', 'balance')->orderBy('category')->get()
+                    ->concat(LoanProduct::where('organization_id', $organizationId)->withCount('financialAccounts')->withSum('financialAccounts', 'balance')->orderBy('name')->get())
                     ->map(fn($row) => [$row->code, $row->name, $row->category, $row->financial_accounts_count, $row->financial_accounts_sum_balance ?? 0])->all(),
             ],
             'account-balances' => [
                 'Account Balances',
                 ['Account', 'Product', 'Type', 'Status', 'Balance', 'Available Balance'],
                 FinancialAccount::where('organization_id', $organizationId)
-                    ->when($request->integer('product_id') > 0, fn($query) => $query->where('financial_product_id', $request->integer('product_id')))
+                    ->when($request->filled('product_id'), function ($query) use ($request): void {
+                            [$family, $id] = array_pad(explode(':', $request->string('product_id')->toString(), 2), 2, null);
+                            if (ctype_digit((string) $id)) {
+                                $query->where('product_type', $family === 'loan' ? LoanProduct::class : DepositProduct::class)
+                                ->where('product_id', (int) $id);
+                            }
+                        })
                     ->with('product')->orderByDesc('balance')->get()
                     ->map(fn($row) => [$row->account_no, $row->product?->name ?? $row->account_type, $row->account_type, $row->status, $row->balance, $row->available_balance])->all(),
             ],

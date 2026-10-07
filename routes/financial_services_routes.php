@@ -13,34 +13,50 @@ use App\FinancialServices\Controllers\DividendController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'organization'])->group(function () {
-    Route::resource('financial-products', FinancialProductController::class)
-        ->except(['create', 'show'])
-        ->names([
-            'index' => 'financial-products.index',
-            'store' => 'financial-products.store',
-            'edit' => 'financial-products.edit',
-            'update' => 'financial-products.update',
-            'destroy' => 'financial-products.destroy',
-        ]);
+    foreach (['deposit', 'loan'] as $family) {
+        $products = "{$family}-products";
+        $policies = "{$family}-product-policies";
+        $mappings = "{$family}-product-account-mappings";
 
-    Route::get('/financial-products/create', [FinancialProductController::class, 'create'])
-        ->name('financial-products.create');
-    Route::get('/financial-product-account-mappings', [FinancialProductController::class, 'mappings'])
-        ->name('financial-product-account-mappings.index');
-    Route::get('/financial-products/{financial_product}', [FinancialProductController::class, 'show'])
-        ->name('financial-products.show');
-    Route::post('/financial-products/{financial_product}/account-mappings', [FinancialProductController::class, 'storeMapping'])
-        ->name('financial-products.account-mappings.store');
-    Route::put('/financial-products/{financial_product}/account-mappings/{mapping}', [FinancialProductController::class, 'updateMapping'])
-        ->name('financial-products.account-mappings.update');
-    Route::delete('/financial-products/{financial_product}/account-mappings/{mapping}', [FinancialProductController::class, 'destroyMapping'])
-        ->name('financial-products.account-mappings.destroy');
-    Route::get('/financial-product-policies', [FinancialProductPolicyController::class, 'index'])
-        ->name('financial-product-policies.index');
-    Route::get('/financial-products/{financial_product}/policy/edit', [FinancialProductPolicyController::class, 'edit'])
-        ->name('financial-product-policies.edit');
-    Route::post('/financial-products/{financial_product}/policy', [FinancialProductPolicyController::class, 'store'])
-        ->name('financial-product-policies.store');
+        Route::resource($products, FinancialProductController::class)
+            ->except(['create', 'show'])
+            ->parameters([$products => 'financial_product'])
+            ->names([
+                'index' => "{$products}.index",
+                'store' => "{$products}.store",
+                'edit' => "{$products}.edit",
+                'update' => "{$products}.update",
+                'destroy' => "{$products}.destroy",
+            ]);
+
+        Route::get("/{$products}/create", [FinancialProductController::class, 'create'])
+            ->name("{$products}.create")
+            ->defaults('family', $family);
+        Route::get("/{$mappings}", [FinancialProductController::class, 'mappings'])
+            ->name("{$mappings}.index")
+            ->defaults('family', $family);
+        Route::get("/{$products}/{financial_product}", [FinancialProductController::class, 'show'])
+            ->name("{$products}.show")
+            ->defaults('family', $family);
+        Route::post("/{$products}/{financial_product}/account-mappings", [FinancialProductController::class, 'storeMapping'])
+            ->name("{$products}.account-mappings.store")
+            ->defaults('family', $family);
+        Route::put("/{$products}/{financial_product}/account-mappings/{mapping}", [FinancialProductController::class, 'updateMapping'])
+            ->name("{$products}.account-mappings.update")
+            ->defaults('family', $family);
+        Route::delete("/{$products}/{financial_product}/account-mappings/{mapping}", [FinancialProductController::class, 'destroyMapping'])
+            ->name("{$products}.account-mappings.destroy")
+            ->defaults('family', $family);
+        Route::get("/{$policies}", [FinancialProductPolicyController::class, 'index'])
+            ->name("{$policies}.index")
+            ->defaults('family', $family);
+        Route::get("/{$products}/{financial_product}/policy/edit", [FinancialProductPolicyController::class, 'edit'])
+            ->name("{$policies}.edit")
+            ->defaults('family', $family);
+        Route::post("/{$products}/{financial_product}/policy", [FinancialProductPolicyController::class, 'store'])
+            ->name("{$policies}.store")
+            ->defaults('family', $family);
+    }
     Route::get('/account-default-rules', [AccountDefaultRuleController::class, 'index'])->name('account-default-rules.index');
     Route::post('/account-default-rules', [AccountDefaultRuleController::class, 'store'])->name('account-default-rules.store');
     Route::put('/account-default-rules/{account_default_rule}', [AccountDefaultRuleController::class, 'update'])->name('account-default-rules.update');

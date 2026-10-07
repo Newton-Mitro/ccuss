@@ -39,7 +39,8 @@ class AccountDefaultRulesSeeder extends Seeder
                     [
                         'organization_id' => $organization->id,
                         'account_type' => $rule['account_type'],
-                        'financial_product_id' => null,
+                        'product_type' => null,
+                        'product_id' => null,
                         'name' => $rule['name'],
                     ],
                     [

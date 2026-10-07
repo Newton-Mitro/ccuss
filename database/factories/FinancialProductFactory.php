@@ -2,7 +2,10 @@
 
 namespace Database\Factories;
 
+use App\FinancialServices\Models\DepositProduct;
+use App\FinancialServices\Models\DepositProductTerm;
 use App\FinancialServices\Models\FinancialProduct;
+use App\FinancialServices\Models\LoanProduct;
 use App\SystemAdministration\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -12,7 +15,7 @@ class FinancialProductFactory extends Factory
 
     public function definition(): array
     {
-        $category = fake()->randomElement(['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT', 'LOAN', 'OTHER']);
+        $category = 'SAVINGS';
         $isLoan = $category === 'LOAN';
         $hasInterest = !$isLoan || fake()->boolean(70);
 
@@ -33,18 +36,39 @@ class FinancialProductFactory extends Factory
         ];
     }
 
+    public function newModel(array $attributes = []): DepositProduct|LoanProduct
+    {
+        $attributes['organization_id'] ??= Organization::factory();
+        $category = $attributes['category'] ?? 'SAVINGS';
+        $interestRate = $attributes['interest_rate'] ?? $attributes['base_interest_rate'] ?? fake()->randomFloat(6, 1, 18);
+
+        if ($category === 'LOAN') {
+            unset($attributes['category']);
+            return new LoanProduct([
+                ...$attributes,
+                'interest_rate' => $interestRate,
+                'balance_type' => $attributes['balance_type'] ?? 'ASSET',
+            ]);
+        }
+
+        return new DepositProduct($attributes);
+    }
+
     public function configure(): static
     {
-        return $this->afterCreating(function (FinancialProduct $product): void {
-            $product->terms()->firstOrCreate(
+        return $this->afterCreating(function (DepositProduct|LoanProduct $product): void {
+            if (!$product instanceof DepositProduct) {
+                return;
+            }
+
+            $rate = $product->interest_frequency === 'NONE' ? 0 : fake()->randomFloat(6, 1, 18);
+            $product->terms()->updateOrCreate(
                 ['code' => 'BASE'],
                 [
                     'name' => 'Base term',
                     'tenure_value' => 1,
                     'tenure_unit' => 'MONTH',
-                    'interest_rate' => $product->interest_frequency === 'NONE'
-                        ? 0
-                        : fake()->randomFloat(6, 1, 18),
+                    'interest_rate' => $rate,
                     'interest_calculation' => $product->interest_calculation,
                     'interest_frequency' => $product->interest_frequency,
                     'status' => true,
@@ -60,6 +84,7 @@ class FinancialProductFactory extends Factory
             'balance_type' => 'ASSET',
             'interest_calculation' => 'REDUCING_BALANCE',
             'interest_frequency' => 'MONTHLY',
+            'interest_rate' => 12,
         ]);
     }
 

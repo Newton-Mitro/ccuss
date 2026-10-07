@@ -12,12 +12,12 @@ class LoanScheduleService
 {
     public function generate(LoanAccount $loan, array $data = []): array
     {
-        $loan->loadMissing(['product', 'schedules.components', 'repayments']);
+        $loan->loadMissing(['financialAccount.product', 'schedules.components', 'repayments']);
         if ($loan->repayments->contains(fn($repayment) => $repayment->status === 'POSTED')) {
             throw new RuntimeException('A schedule with posted repayments cannot be regenerated.');
         }
 
-        $settings = $loan->product?->settings ?? [];
+        $settings = $loan->financialAccount?->product?->settings ?? [];
         $frequency = strtoupper((string) ($data['frequency'] ?? $settings['repayment_frequency'] ?? 'MONTHLY'));
         if (!in_array($frequency, ['WEEKLY', 'MONTHLY', 'QUARTERLY'], true)) {
             throw new RuntimeException('Loan repayment frequency must be weekly, monthly, or quarterly.');

@@ -3,7 +3,7 @@
 use App\FinancialServices\Application\FinancialTransactionService;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
-use App\FinancialServices\Models\FinancialProductAccountMapping;
+use App\FinancialServices\Models\DepositProductAccountMapping;
 use App\FinancialServices\Models\FinancialTransaction;
 use App\GeneralAccounting\Models\AccountGroup;
 use App\GeneralAccounting\Models\FiscalPeriod;
@@ -26,7 +26,7 @@ it('links a mapped posted transaction to one voucher and reverses the link', fun
     $year = FiscalYear::factory()->create(['organization_id' => $organization->id, 'start_date' => '2026-01-01', 'end_date' => '2026-12-31']);
     $period = FiscalPeriod::factory()->create(['fiscal_year_id' => $year->id, 'start_date' => '2026-01-01', 'end_date' => '2026-12-31']);
     $product = FinancialProduct::factory()->create(['organization_id' => $organization->id, 'category' => 'SAVINGS', 'balance_type' => 'LIABILITY']);
-    FinancialProductAccountMapping::create(['financial_product_id' => $product->id, 'transaction_type' => 'DEPOSIT', 'debit_account_id' => $debit->id, 'credit_account_id' => $credit->id, 'status' => true]);
+    DepositProductAccountMapping::create(['deposit_product_id' => $product->id, 'transaction_type' => 'DEPOSIT', 'debit_account_id' => $debit->id, 'credit_account_id' => $credit->id, 'status' => true]);
     $account = FinancialAccount::factory()->active()->create(['organization_id' => $organization->id, 'financial_product_id' => $product->id, 'account_type' => 'SAVINGS', 'balance' => 0, 'available_balance' => 0]);
     $service = app(FinancialTransactionService::class);
     $data = ['financial_account_id' => $account->id, 'transaction_type' => 'DEPOSIT', 'transaction_date' => '2026-09-23', 'amount' => 100, 'idempotency_key' => '11111111-1111-4111-8111-111111111111'];

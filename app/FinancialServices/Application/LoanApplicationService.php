@@ -2,8 +2,8 @@
 
 namespace App\FinancialServices\Application;
 
-use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\FinancialAccount;
+use App\FinancialServices\Models\LoanProduct;
 use App\FinancialServices\Models\LoanApplication;
 use App\FinancialServices\Models\LoanAccount;
 use App\FinancialServices\Models\LoanCollateral;
@@ -23,13 +23,14 @@ class LoanApplicationService
 
     public function create(array $data, int $organizationId): LoanApplication
     {
-        $product = FinancialProduct::query()
+        $product = LoanProduct::query()
             ->where('organization_id', $organizationId)
-            ->where('category', 'LOAN')
             ->where('status', true)
             ->findOrFail($data['financial_product_id']);
         $this->policyService->validateLoanAmount($product, (float) $data['requested_amount']);
 
+        $data['loan_product_id'] = $product->id;
+        unset($data['financial_product_id']);
         $data['organization_id'] = $organizationId;
         $data['application_no'] = $this->nextNumber($organizationId);
         $data['status'] = 'DRAFT';
@@ -43,9 +44,8 @@ class LoanApplicationService
             throw new RuntimeException('Only draft loan applications can be updated.');
         }
 
-        $product = FinancialProduct::query()
+        $product = LoanProduct::query()
             ->where('organization_id', $application->organization_id)
-            ->where('category', 'LOAN')
             ->where('status', true)
             ->findOrFail($data['financial_product_id']);
         $this->policyService->validateLoanAmount($product, (float) $data['requested_amount']);
@@ -53,7 +53,7 @@ class LoanApplicationService
         $application->update([
             'branch_id' => $data['branch_id'] ?? null,
             'customer_id' => $data['customer_id'],
-            'financial_product_id' => $product->id,
+            'loan_product_id' => $product->id,
             'requested_amount' => $data['requested_amount'],
             'requested_term_months' => $data['requested_term_months'],
             'purpose' => $data['purpose'] ?? null,
@@ -127,19 +127,20 @@ class LoanApplicationService
             throw new RuntimeException('This loan application already has a loan account.');
         }
 
-        $application->loadMissing(['product.baseTerm', 'customer']);
-        $baseTerm = $application->product->baseTerm;
-        $interestCalculation = in_array($baseTerm?->interest_calculation, ['SIMPLE', 'FLAT', 'REDUCING_BALANCE'], true)
-            ? $baseTerm->interest_calculation
+        $application->loadMissing(['product', 'customer']);
+        $product = $application->product;
+        $interestCalculation = in_array($product->interest_calculation, ['SIMPLE', 'FLAT', 'REDUCING_BALANCE'], true)
+            ? $product->interest_calculation
             : 'SIMPLE';
-        $contractualRate = (float) ($baseTerm?->interest_rate ?? 0);
-        $interestFrequency = $baseTerm?->interest_frequency ?: 'MONTHLY';
+        $contractualRate = (float) $product->interest_rate;
+        $interestFrequency = $product->interest_frequency ?: 'MONTHLY';
 
         return DB::transaction(function () use ($application, $interestCalculation, $contractualRate, $interestFrequency): LoanAccount {
             $financialAccount = FinancialAccount::create([
                 'organization_id' => $application->organization_id,
                 'branch_id' => $application->branch_id,
-                'financial_product_id' => $application->financial_product_id,
+                'product_type' => LoanProduct::class,
+                'product_id' => $application->loan_product_id,
                 'holder_type' => Customer::class,
                 'holder_id' => $application->customer_id,
                 'account_no' => $this->nextFinancialAccountNumber($application->organization_id),

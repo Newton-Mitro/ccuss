@@ -29,7 +29,8 @@ class TreasuryFinancialAccountsSeeder extends Seeder
                     ],
                     [
                         'branch_id' => $branchId,
-                        'financial_product_id' => null,
+                        'product_type' => null,
+                        'product_id' => null,
                         'name' => $name,
                         'account_type' => $accountType,
                         'status' => 'ACTIVE',
@@ -60,7 +61,8 @@ class TreasuryFinancialAccountsSeeder extends Seeder
                 ],
                 [
                     'branch_id' => $branchId,
-                    'financial_product_id' => null,
+                    'product_type' => null,
+                    'product_id' => null,
                     'name' => 'Dutch-Bangla Bank Operating Account',
                     'account_type' => 'BANK',
                     'status' => 'ACTIVE',

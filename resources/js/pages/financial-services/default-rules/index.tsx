@@ -31,7 +31,7 @@ type Rule = {
 
 type Props = SharedData & {
     rules: Rule[];
-    products: { id: number; code: string; name: string }[];
+    products: { id: number; code: string; name: string; category: string }[];
 };
 
 export default function DefaultRulesIndex() {
@@ -55,6 +55,16 @@ export default function DefaultRulesIndex() {
         effective_to: '',
         is_active: true,
     });
+    const scopedProducts = products.filter((product) =>
+        data.account_type === 'LOAN'
+            ? product.category === 'LOAN'
+            : [
+                  'SAVINGS',
+                  'SHARE',
+                  'FIXED_DEPOSIT',
+                  'RECURRING_DEPOSIT',
+              ].includes(product.category),
+    );
     const cancelEdit = () => {
         setEditingRuleId(null);
         reset();
@@ -141,7 +151,11 @@ export default function DefaultRulesIndex() {
                                 className="h-9"
                                 value={data.account_type}
                                 onChange={(value) =>
-                                    setData('account_type', value)
+                                    setData((current) => ({
+                                        ...current,
+                                        account_type: value,
+                                        financial_product_id: '',
+                                    }))
                                 }
                                 options={[
                                     'SAVINGS',
@@ -164,7 +178,7 @@ export default function DefaultRulesIndex() {
                                 placeholder="All products"
                                 options={[
                                     { value: '', label: 'All products' },
-                                    ...products.map((product) => ({
+                                    ...scopedProducts.map((product) => ({
                                         value: String(product.id),
                                         label: `${product.code} · ${product.name}`,
                                     })),

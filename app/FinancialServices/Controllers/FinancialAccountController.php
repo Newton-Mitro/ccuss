@@ -9,7 +9,7 @@ use App\FinancialServices\Application\RecurringDepositService;
 use App\FinancialServices\Models\DepositNominee;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialAccountAuthorizedPerson;
-use App\FinancialServices\Models\FinancialProduct;
+use App\FinancialServices\Models\DepositProduct;
 use App\FinancialServices\Models\RecurringDeposit;
 use App\FinancialServices\Models\RecurringDepositInstallment;
 use App\FinancialServices\Models\ShareAccount;
@@ -132,7 +132,7 @@ class FinancialAccountController extends Controller
         $today = now()->toDateString();
 
         return Inertia::render($page, [
-            'products' => FinancialProduct::query()->with([
+            'products' => DepositProduct::query()->with([
                 'policy',
                 'baseTerm',
                 'terms' => fn($query) => $query
@@ -140,7 +140,7 @@ class FinancialAccountController extends Controller
                     ->where(fn($query) => $query->whereNull('effective_from')->orWhereDate('effective_from', '<=', $today))
                     ->where(fn($query) => $query->whereNull('effective_until')->orWhereDate('effective_until', '>=', $today))
                     ->orderBy('tenure_value'),
-            ])->where('organization_id', $organizationId)->where('status', true)->when($category, fn($query) => $query->where('category', $category))->orderBy('code')->get(['id', 'code', 'name', 'category', 'customer_can_open_multiple_account'])->map(fn(FinancialProduct $product) => [
+            ])->where('organization_id', $organizationId)->where('status', true)->when($category, fn($query) => $query->where('category', $category))->orderBy('code')->get(['id', 'code', 'name', 'category', 'customer_can_open_multiple_account'])->map(fn(DepositProduct $product) => [
                     'id' => $product->id,
                     'code' => $product->code,
                     'name' => $product->name,
@@ -185,7 +185,7 @@ class FinancialAccountController extends Controller
         abort_if($category === 'LOAN', 404);
         $data = $request->validated();
         abort_unless($data['account_type'] === $category, 422, 'The account type does not match this product route.');
-        abort_unless(FinancialProduct::query()
+        abort_unless(DepositProduct::query()
             ->where('organization_id', $this->organizationId($request))
             ->where('category', $category)
             ->where('status', true)

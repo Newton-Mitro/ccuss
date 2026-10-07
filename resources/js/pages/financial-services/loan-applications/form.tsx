@@ -16,7 +16,11 @@ export default function LoanApplicationForm() {
     const { data, setData, post, put, processing, errors } = useForm({
         customer_id: application ? String(application.customer_id) : '',
         financial_product_id: application
-            ? String(application.financial_product_id)
+            ? String(
+                  application.loan_product_id ??
+                      application.financial_product_id ??
+                      '',
+              )
             : '',
         requested_amount: application
             ? String(application.requested_amount)

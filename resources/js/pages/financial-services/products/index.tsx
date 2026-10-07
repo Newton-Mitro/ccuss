@@ -16,37 +16,71 @@ import { route } from 'ziggy-js';
 import DataTablePagination from '../../../components/data-table-pagination';
 
 export default function FinancialProductIndex() {
-    const { products, filters } = usePage<FinancialProductsPageProps>().props;
+    const {
+        products,
+        filters,
+        family = '',
+    } = usePage<FinancialProductsPageProps>().props;
+    const productRoute =
+        family === 'loan' ? 'loan-products' : 'deposit-products';
     const [search, setSearch] = useState(filters.search ?? '');
     useFlashToastHandler();
 
     useEffect(() => {
         const timeout = setTimeout(() => {
             router.get(
-                route('financial-products.index'),
+                route(`${productRoute}.index`),
                 { search },
                 { preserveState: true, preserveScroll: true, replace: true },
             );
         }, 300);
 
         return () => clearTimeout(timeout);
-    }, [search]);
+    }, [search, family, productRoute]);
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
-        { title: 'Products', href: route('financial-products.index') },
+        {
+            title:
+                family === 'loan'
+                    ? 'Loan Products'
+                    : family === 'deposit'
+                      ? 'Deposit Products'
+                      : 'Products',
+            href: route(`${productRoute}.index`),
+        },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Financial Products" />
+            <Head
+                title={
+                    family === 'loan'
+                        ? 'Loan Products'
+                        : family === 'deposit'
+                          ? 'Deposit Products'
+                          : 'Financial Products'
+                }
+            />
             <div className="space-y-4">
                 <ResourcePageHeader
-                    title="Financial Products"
-                    description="Configure savings, deposits, shares, and loan products."
+                    title={
+                        family === 'loan'
+                            ? 'Loan Products'
+                            : family === 'deposit'
+                              ? 'Deposit Products'
+                              : 'Financial Products'
+                    }
+                    description={
+                        family === 'loan'
+                            ? 'Configure loan products and their operating terms.'
+                            : family === 'deposit'
+                              ? 'Configure savings, share, and deposit products.'
+                              : 'Configure savings, deposits, shares, and loan products.'
+                    }
                     action={
                         <Button asChild size="sm">
-                            <Link href={route('financial-products.create')}>
+                            <Link href={route(`${productRoute}.create`)}>
                                 <Plus className="mr-1 h-4 w-4" /> New product
                             </Link>
                         </Button>
@@ -122,8 +156,10 @@ export default function FinancialProductIndex() {
                                                 {product.balance_type}
                                             </td>
                                             <td className="px-2 py-1 tabular-nums">
-                                                {product.base_term
-                                                    ?.interest_rate ?? '0'}
+                                                {product.interest_rate ??
+                                                    product.base_term
+                                                        ?.interest_rate ??
+                                                    '0'}
                                                 %
                                             </td>
                                             <td className="px-2 py-1">
@@ -143,7 +179,7 @@ export default function FinancialProductIndex() {
                                                 <div className="flex justify-end gap-2">
                                                     <Link
                                                         href={route(
-                                                            'financial-products.show',
+                                                            `${productRoute}.show`,
                                                             product.id,
                                                         )}
                                                         className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -154,7 +190,7 @@ export default function FinancialProductIndex() {
                                                     </Link>
                                                     <Link
                                                         href={route(
-                                                            'financial-products.edit',
+                                                            `${productRoute}.edit`,
                                                             product.id,
                                                         )}
                                                         className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -176,8 +212,12 @@ export default function FinancialProductIndex() {
                     perPage={products.per_page}
                     onPerPageChange={(perPage) =>
                         router.get(
-                            route('financial-products.index'),
-                            { search, per_page: perPage, page: 1 },
+                            route(`${productRoute}.index`),
+                            {
+                                search,
+                                per_page: perPage,
+                                page: 1,
+                            },
                             { preserveState: true, preserveScroll: true },
                         )
                     }

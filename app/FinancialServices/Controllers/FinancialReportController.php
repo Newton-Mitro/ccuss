@@ -3,7 +3,8 @@
 namespace App\FinancialServices\Controllers;
 
 use App\FinancialServices\Models\FinancialAccount;
-use App\FinancialServices\Models\FinancialProduct;
+use App\FinancialServices\Models\DepositProduct;
+use App\FinancialServices\Models\LoanProduct;
 use App\FinancialServices\Models\FinancialTransaction;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -18,7 +19,8 @@ class FinancialReportController extends Controller
 
         return Inertia::render('financial-services/dashboard', [
             'metrics' => [
-                'products' => FinancialProduct::where('organization_id', $organizationId)->where('status', true)->count(),
+                'products' => DepositProduct::where('organization_id', $organizationId)->where('status', true)->count()
+                    + LoanProduct::where('organization_id', $organizationId)->where('status', true)->count(),
                 'accounts' => FinancialAccount::where('organization_id', $organizationId)->count(),
                 'activeAccounts' => FinancialAccount::where('organization_id', $organizationId)->where('status', 'ACTIVE')->count(),
                 'postedTransactions' => FinancialTransaction::where('organization_id', $organizationId)->where('status', 'POSTED')->count(),
@@ -29,11 +31,18 @@ class FinancialReportController extends Controller
 
     public function productSummary(Request $request): Response
     {
-        $products = FinancialProduct::where('organization_id', $this->organizationId($request))
+        $organizationId = $this->organizationId($request);
+        $deposits = DepositProduct::where('organization_id', $organizationId)
             ->withCount('financialAccounts')
             ->withSum('financialAccounts', 'balance')
             ->orderBy('category')
             ->get();
+        $loans = LoanProduct::where('organization_id', $organizationId)
+            ->withCount('financialAccounts')
+            ->withSum('financialAccounts', 'balance')
+            ->orderBy('name')
+            ->get();
+        $products = $deposits->concat($loans)->values();
 
         return Inertia::render('financial-services/reports/product-summary', ['products' => $products]);
     }
@@ -41,16 +50,20 @@ class FinancialReportController extends Controller
     public function accountBalances(Request $request): Response
     {
         $organizationId = $this->organizationId($request);
+        [$productFamily, $productId] = array_pad(explode(':', $request->string('product_id')->toString(), 2), 2, null);
+        $productType = $productFamily === 'loan' ? LoanProduct::class : DepositProduct::class;
         $accounts = FinancialAccount::where('organization_id', $organizationId)
-            ->when($request->integer('product_id') > 0, fn($query) => $query->where('financial_product_id', $request->integer('product_id')))
+            ->when($productId !== null && ctype_digit($productId), fn($query) => $query->where('product_type', $productType)->where('product_id', (int) $productId))
             ->with('product')
             ->orderByDesc('balance')
             ->paginate($request->integer('per_page') ?: 25)
             ->withQueryString();
 
-        $products = FinancialProduct::where('organization_id', $organizationId)
-            ->orderBy('name')
-            ->get(['id', 'code', 'name']);
+        $products = DepositProduct::where('organization_id', $organizationId)->get(['id', 'code', 'name'])
+            ->map(fn(DepositProduct $product) => ['id' => 'deposit:' . $product->id, 'code' => $product->code, 'name' => $product->name])
+            ->concat(LoanProduct::where('organization_id', $organizationId)->get(['id', 'code', 'name'])
+                ->map(fn(LoanProduct $product) => ['id' => 'loan:' . $product->id, 'code' => $product->code, 'name' => $product->name]))
+            ->values();
 
         return Inertia::render('financial-services/reports/account-balances', [
             'accounts' => $accounts,

@@ -14,8 +14,16 @@ class StoreAccountDefaultRuleRequest extends FormRequest
 
     public function rules(): array
     {
+        $loan = $this->input('account_type') === 'LOAN';
+        $organizationId = (int) $this->attributes->get('active_organization')?->id;
+
         return [
-            'financial_product_id' => ['nullable', 'integer', 'exists:financial_products,id'],
+            'financial_product_id' => [
+                'nullable',
+                'integer',
+                Rule::exists($loan ? 'loan_products' : 'deposit_products', 'id')
+                    ->where(fn($query) => $query->where('organization_id', $organizationId)),
+            ],
             'account_type' => ['required', Rule::in(['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT', 'LOAN', 'OTHER'])],
             'name' => ['required', 'string', 'max:150'],
             'grace_days' => ['required', 'integer', 'min:0'],

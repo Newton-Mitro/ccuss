@@ -19,6 +19,7 @@ class LoanApplication extends Model
         'organization_id',
         'branch_id',
         'customer_id',
+        'loan_product_id',
         'financial_product_id',
         'application_no',
         'requested_amount',
@@ -46,7 +47,17 @@ class LoanApplication extends Model
 
     public function product(): BelongsTo
     {
-        return $this->belongsTo(FinancialProduct::class, 'financial_product_id');
+        return $this->belongsTo(LoanProduct::class, 'loan_product_id');
+    }
+
+    public function setFinancialProductIdAttribute($value): void
+    {
+        $this->attributes['loan_product_id'] = $value;
+    }
+
+    public function getFinancialProductIdAttribute(): ?int
+    {
+        return $this->loan_product_id;
     }
 
     public function loanAccount(): HasOne

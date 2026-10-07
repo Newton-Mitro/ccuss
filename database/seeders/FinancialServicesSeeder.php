@@ -6,7 +6,8 @@ use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Application\LoanScheduleService;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialAccountAuthorizedPerson;
-use App\FinancialServices\Models\FinancialProduct;
+use App\FinancialServices\Models\DepositProduct;
+use App\FinancialServices\Models\LoanProduct;
 use App\FinancialServices\Models\FixedDeposit;
 use App\FinancialServices\Models\LoanAccount;
 use App\FinancialServices\Models\LoanApplication;
@@ -209,7 +210,7 @@ class FinancialServicesSeeder extends Seeder
         int $branchId,
         Customer $customer,
     ): void {
-        $products = FinancialProduct::query()
+        $products = DepositProduct::query()
             ->where('organization_id', $organization->id)
             ->orderBy('id')
             ->get();
@@ -259,7 +260,7 @@ class FinancialServicesSeeder extends Seeder
         int $branchId,
         Customer $customer,
     ): void {
-        $product = FinancialProduct::query()
+        $product = DepositProduct::query()
             ->where('organization_id', $organization->id)
             ->where('category', 'SAVINGS')
             ->orderBy('id')
@@ -285,7 +286,7 @@ class FinancialServicesSeeder extends Seeder
     private function createFinancialAccount(
         Organization $organization,
         int $branchId,
-        FinancialProduct $product,
+        DepositProduct $product,
         string $accountNo,
         Customer $holder,
         string $name,
@@ -300,7 +301,8 @@ class FinancialServicesSeeder extends Seeder
             ],
             [
                 'branch_id' => $branchId,
-                'financial_product_id' => $product->id,
+                'product_type' => DepositProduct::class,
+                'product_id' => $product->id,
                 'holder_type' => Customer::class,
                 'holder_id' => $holder->id,
                 'name' => $name,
@@ -439,7 +441,7 @@ class FinancialServicesSeeder extends Seeder
         array $signatories,
     ): void {
         foreach (['SAVINGS', 'FIXED_DEPOSIT'] as $category) {
-            $product = FinancialProduct::query()
+            $product = DepositProduct::query()
                 ->where('organization_id', $organization->id)
                 ->where('category', $category)
                 ->orderBy('code')
@@ -456,7 +458,8 @@ class FinancialServicesSeeder extends Seeder
                 ],
                 [
                     'branch_id' => $branchId,
-                    'financial_product_id' => $product->id,
+                    'product_type' => DepositProduct::class,
+                    'product_id' => $product->id,
                     'holder_type' => Customer::class,
                     'holder_id' => $organizationCustomer->id,
                     'name' => $organizationCustomer->name . ' - ' . $product->name,
@@ -503,7 +506,7 @@ class FinancialServicesSeeder extends Seeder
 
     private function createOrganizationFixedDeposit(
         FinancialAccount $financialAccount,
-        FinancialProduct $product,
+        DepositProduct $product,
     ): void {
         $rate = $this->getProductRate($product);
 
@@ -527,7 +530,7 @@ class FinancialServicesSeeder extends Seeder
         int $branchId,
         Customer $customer,
     ): void {
-        $loanProduct = FinancialProduct::query()
+        $loanProduct = LoanProduct::query()
             ->where('organization_id', $organization->id)
             ->where('code', 'LN-GEN')
             ->firstOrFail();
@@ -540,7 +543,7 @@ class FinancialServicesSeeder extends Seeder
             [
                 'branch_id' => $branchId,
                 'customer_id' => $customer->id,
-                'financial_product_id' => $loanProduct->id,
+                'loan_product_id' => $loanProduct->id,
                 'requested_amount' => 50000,
                 'approved_amount' => 50000,
                 'requested_term_months' => 24,
@@ -559,7 +562,8 @@ class FinancialServicesSeeder extends Seeder
             ],
             [
                 'branch_id' => $branchId,
-                'financial_product_id' => $loanProduct->id,
+                'product_type' => LoanProduct::class,
+                'product_id' => $loanProduct->id,
                 'holder_type' => Customer::class,
                 'holder_id' => $customer->id,
                 'name' => $customer->name . ' General Loan',
@@ -606,7 +610,7 @@ class FinancialServicesSeeder extends Seeder
         int $branchId,
         Customer $customer,
     ): void {
-        $product = FinancialProduct::query()
+        $product = DepositProduct::query()
             ->where('organization_id', $organization->id)
             ->where('code', 'RD-24M')
             ->firstOrFail();
@@ -618,7 +622,8 @@ class FinancialServicesSeeder extends Seeder
             ],
             [
                 'branch_id' => $branchId,
-                'financial_product_id' => $product->id,
+                'product_type' => DepositProduct::class,
+                'product_id' => $product->id,
                 'holder_type' => Customer::class,
                 'holder_id' => $customer->id,
                 'name' => $customer->name . ' Recurring Deposit',
@@ -676,7 +681,8 @@ class FinancialServicesSeeder extends Seeder
             ],
             [
                 'branch_id' => $branchId,
-                'financial_product_id' => null,
+                'product_type' => null,
+                'product_id' => null,
                 'name' => 'Main Teller Cash Account',
                 'account_type' => 'CASH',
                 'status' => 'ACTIVE',
@@ -697,7 +703,7 @@ class FinancialServicesSeeder extends Seeder
         Customer $primaryHolder,
         Customer $jointHolder,
     ): void {
-        $product = FinancialProduct::query()
+        $product = DepositProduct::query()
             ->where('organization_id', $organization->id)
             ->where('code', 'SAV-REG')
             ->firstOrFail();
@@ -713,7 +719,8 @@ class FinancialServicesSeeder extends Seeder
             ],
             [
                 'branch_id' => $branchId,
-                'financial_product_id' => $product->id,
+                'product_type' => DepositProduct::class,
+                'product_id' => $product->id,
                 'holder_type' => Customer::class,
                 'holder_id' => $primaryHolder->id,
                 'name' => $primaryHolder->name . ' and ' . $jointHolder->name . ' - Joint Savings',
@@ -739,7 +746,7 @@ class FinancialServicesSeeder extends Seeder
         int $branchId,
         Customer $customer,
     ): void {
-        $product = FinancialProduct::query()
+        $product = DepositProduct::query()
             ->where('organization_id', $organization->id)
             ->where('category', 'SHARE')
             ->firstOrFail();
@@ -751,7 +758,8 @@ class FinancialServicesSeeder extends Seeder
             ],
             [
                 'branch_id' => $branchId,
-                'financial_product_id' => $product->id,
+                'product_type' => DepositProduct::class,
+                'product_id' => $product->id,
                 'holder_type' => Customer::class,
                 'holder_id' => $customer->id,
                 'name' => $customer->name,
@@ -781,11 +789,10 @@ class FinancialServicesSeeder extends Seeder
         );
     }
 
-    private function getProductRate(FinancialProduct $product): float
+    private function getProductRate(DepositProduct|LoanProduct $product): float
     {
-        return (float) DB::table('financial_product_terms')
-            ->where('financial_product_id', $product->id)
-            ->where('code', 'BASE')
-            ->value('interest_rate');
+        return (float) ($product instanceof LoanProduct
+            ? $product->interest_rate
+            : $product->baseTerm?->interest_rate);
     }
 }

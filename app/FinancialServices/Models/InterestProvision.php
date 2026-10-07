@@ -6,6 +6,7 @@ use App\FinancialServices\Models\InterestPosting;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class InterestProvision extends Model
@@ -14,7 +15,8 @@ class InterestProvision extends Model
 
     protected $fillable = [
         'financial_account_id',
-        'financial_product_id',
+        'product_type',
+        'product_id',
         'period_start',
         'period_end',
         'calculated_at',
@@ -44,9 +46,9 @@ class InterestProvision extends Model
         return $this->belongsTo(FinancialAccount::class);
     }
 
-    public function product(): BelongsTo
+    public function product(): MorphTo
     {
-        return $this->belongsTo(FinancialProduct::class, 'financial_product_id');
+        return $this->morphTo('product');
     }
 
     public function posting(): HasOne

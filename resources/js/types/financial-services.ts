@@ -14,6 +14,7 @@ export interface FinancialProduct {
         | 'LOAN'
         | 'OTHER';
     balance_type: 'ASSET' | 'LIABILITY' | 'EQUITY';
+    interest_rate?: string | number;
     base_term?: {
         interest_rate: string | number;
         interest_calculation?: string;
@@ -80,11 +81,13 @@ export interface FinancialProductsPageProps extends SharedData {
         per_page: number;
     };
     filters: ListFilters;
+    family?: 'deposit' | 'loan' | '';
 }
 
 export interface FinancialProductPageProps extends SharedData {
     product: FinancialProduct;
     ledgerAccounts: LedgerAccountOption[];
+    family?: 'deposit' | 'loan' | '';
 }
 
 export interface FinancialProductAccountMappingsPageProps extends SharedData {
@@ -98,19 +101,22 @@ export interface FinancialProductAccountMappingsPageProps extends SharedData {
         links: { url: string | null; label: string; active: boolean }[];
         per_page: number;
     };
-    products: { id: number; code: string; name: string }[];
+    products: { id: string | number; code: string; name: string }[];
     filters: {
         search?: string;
         product_id?: string | number;
         status?: string;
         per_page?: string | number;
         page?: string | number;
+        family?: 'deposit' | 'loan' | '';
     };
+    family?: 'deposit' | 'loan' | '';
 }
 
 export interface LoanApplication {
     id: number;
     customer_id?: number;
+    loan_product_id?: number;
     financial_product_id?: number;
     application_no: string;
     requested_amount: string | number;
@@ -251,6 +257,7 @@ export interface LoanApplicationShowPageProps extends SharedData {
 
 export interface FinancialProductFormPageProps extends SharedData {
     product?: FinancialProduct;
+    family?: 'deposit' | 'loan' | '';
 }
 
 export interface FinancialAccountOption {
@@ -541,6 +548,7 @@ export interface ProductPolicyFormPageProps extends SharedData {
         | 'customer_can_open_multiple_account'
     >;
     policy?: ProductPolicy | null;
+    family?: 'deposit' | 'loan' | '';
 }
 
 export interface ProductPoliciesPageProps extends SharedData {
@@ -549,6 +557,7 @@ export interface ProductPoliciesPageProps extends SharedData {
         links: { url: string | null; label: string; active: boolean }[];
         per_page: number;
     };
+    family?: 'deposit' | 'loan' | '';
 }
 
 export interface AccountBalancesReportPageProps extends SharedData {

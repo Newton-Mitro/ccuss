@@ -2,14 +2,16 @@
 
 namespace App\FinancialServices\Application;
 
-use App\FinancialServices\Models\FinancialProduct;
+use App\FinancialServices\Models\DepositProduct;
+use App\FinancialServices\Models\LoanProduct;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class FinancialProductService
 {
-    public function create(array $data, int $organizationId): FinancialProduct
+    public function create(array $data, int $organizationId, string $family = 'deposit'): Model
     {
         $baseInterestRate = $data['base_interest_rate'] ?? 0;
         $terms = $data['terms'] ?? null;
@@ -17,8 +19,16 @@ class FinancialProductService
         unset($data['terms']);
         $data['organization_id'] = $organizationId;
 
-        return DB::transaction(function () use ($data, $baseInterestRate, $terms): FinancialProduct {
-            $product = FinancialProduct::create($data);
+        return DB::transaction(function () use ($data, $baseInterestRate, $terms, $family): Model {
+            if ($family === 'loan') {
+                unset($data['category']);
+                $data['interest_rate'] = $baseInterestRate;
+
+                return LoanProduct::create($data);
+            }
+
+            unset($data['interest_rate']);
+            $product = DepositProduct::create($data);
             $this->saveBaseTerm($product, (float) $baseInterestRate);
             if ($terms !== null) {
                 $this->saveTerms($product, $terms);
@@ -28,14 +38,24 @@ class FinancialProductService
         });
     }
 
-    public function update(FinancialProduct $product, array $data): FinancialProduct
+    public function update(Model $product, array $data): Model
     {
-        $baseInterestRate = $data['base_interest_rate'] ?? $product->baseTerm?->interest_rate ?? 0;
+        $baseInterestRate = $data['base_interest_rate']
+            ?? ($product instanceof LoanProduct ? $product->interest_rate : $product->baseTerm?->interest_rate)
+            ?? 0;
         $terms = $data['terms'] ?? null;
         unset($data['base_interest_rate']);
         unset($data['terms']);
 
-        return DB::transaction(function () use ($product, $data, $baseInterestRate, $terms): FinancialProduct {
+        return DB::transaction(function () use ($product, $data, $baseInterestRate, $terms): Model {
+            if ($product instanceof LoanProduct) {
+                $data['interest_rate'] = $baseInterestRate;
+                $product->update($data);
+
+                return $product->refresh();
+            }
+
+            unset($data['interest_rate']);
             $product->update($data);
             $this->saveBaseTerm($product, (float) $baseInterestRate);
             if ($terms !== null) {
@@ -46,7 +66,7 @@ class FinancialProductService
         });
     }
 
-    public function delete(FinancialProduct $product): void
+    public function delete(Model $product): void
     {
         if ($product->is_system) {
             throw new RuntimeException('System financial products cannot be deleted.');
@@ -59,12 +79,14 @@ class FinancialProductService
         $product->delete();
     }
 
-    public function queryForOrganization(int $organizationId): Builder
+    public function queryForOrganization(int $organizationId, string $family): Builder
     {
-        return FinancialProduct::query()->where('organization_id', $organizationId);
+        $model = $family === 'loan' ? LoanProduct::class : DepositProduct::class;
+
+        return $model::query()->where('organization_id', $organizationId);
     }
 
-    private function saveBaseTerm(FinancialProduct $product, float $rate): void
+    private function saveBaseTerm(DepositProduct $product, float $rate): void
     {
         $term = $product->terms()->firstOrNew(['code' => 'BASE']);
         $term->fill([
@@ -78,7 +100,7 @@ class FinancialProductService
         ])->save();
     }
 
-    private function saveTerms(FinancialProduct $product, array $terms): void
+    private function saveTerms(DepositProduct $product, array $terms): void
     {
         $codes = [];
 
@@ -92,7 +114,7 @@ class FinancialProductService
             $term->fill([
                 ...$attributes,
                 'code' => $code,
-                'financial_product_id' => $product->id,
+                'deposit_product_id' => $product->id,
             ])->save();
         }
 

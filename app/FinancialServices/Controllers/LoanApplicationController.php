@@ -5,7 +5,7 @@ namespace App\FinancialServices\Controllers;
 use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Application\LoanApplicationService;
 use App\FinancialServices\Application\LoanScheduleService;
-use App\FinancialServices\Models\FinancialProduct;
+use App\FinancialServices\Models\LoanProduct;
 use App\FinancialServices\Models\LoanApplication;
 use App\FinancialServices\Models\LoanCollateral;
 use App\FinancialServices\Models\LoanGuarantor;
@@ -51,7 +51,7 @@ class LoanApplicationController extends Controller
 
         return Inertia::render('financial-services/loan-applications/form', [
             'customers' => Customer::query()->where('organization_id', $organizationId)->orderBy('name')->get(['id', 'customer_no', 'name']),
-            'products' => FinancialProduct::query()->where('organization_id', $organizationId)->where('category', 'LOAN')->where('status', true)->orderBy('code')->get(['id', 'code', 'name']),
+            'products' => LoanProduct::query()->where('organization_id', $organizationId)->where('status', true)->orderBy('code')->get(['id', 'code', 'name']),
             'application' => null,
         ]);
     }
@@ -64,7 +64,7 @@ class LoanApplicationController extends Controller
 
         return Inertia::render('financial-services/loan-applications/form', [
             'customers' => Customer::query()->where('organization_id', $organizationId)->orderBy('name')->get(['id', 'customer_no', 'name']),
-            'products' => FinancialProduct::query()->where('organization_id', $organizationId)->where('category', 'LOAN')->where('status', true)->orderBy('code')->get(['id', 'code', 'name']),
+            'products' => LoanProduct::query()->where('organization_id', $organizationId)->where('status', true)->orderBy('code')->get(['id', 'code', 'name']),
             'application' => $loanApplication,
         ]);
     }

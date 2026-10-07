@@ -16,8 +16,17 @@ import { useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function FinancialProductShow() {
-    const { product, ledgerAccounts } =
-        usePage<FinancialProductPageProps>().props;
+    const {
+        product,
+        ledgerAccounts,
+        family = '',
+    } = usePage<FinancialProductPageProps>().props;
+    const productRoute =
+        family === 'loan' ? 'loan-products' : 'deposit-products';
+    const mappingRoute =
+        family === 'loan'
+            ? 'loan-product-account-mappings'
+            : 'deposit-product-account-mappings';
     const [editingMappingId, setEditingMappingId] = useState<number | null>(
         null,
     );
@@ -29,7 +38,15 @@ export default function FinancialProductShow() {
     });
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
-        { title: 'Products', href: route('financial-products.index') },
+        {
+            title:
+                family === 'loan'
+                    ? 'Loan Products'
+                    : family === 'deposit'
+                      ? 'Deposit Products'
+                      : 'Products',
+            href: route(`${productRoute}.index`),
+        },
         { title: product.code, href: '' },
     ];
 
@@ -43,7 +60,7 @@ export default function FinancialProductShow() {
         };
         if (editingMappingId) {
             put(
-                route('financial-products.account-mappings.update', [
+                route(`${productRoute}.account-mappings.update`, [
                     product.id,
                     editingMappingId,
                 ]),
@@ -51,7 +68,7 @@ export default function FinancialProductShow() {
             );
         } else {
             post(
-                route('financial-products.account-mappings.store', product.id),
+                route(`${productRoute}.account-mappings.store`, product.id),
                 options,
             );
         }
@@ -85,10 +102,11 @@ export default function FinancialProductShow() {
                         <div className="flex flex-wrap gap-2">
                             <Button asChild size="sm" variant="outline">
                                 <Link
-                                    href={route(
-                                        'financial-product-account-mappings.index',
-                                        { query: { product_id: product.id } },
-                                    )}
+                                    href={route(`${mappingRoute}.index`, {
+                                        query: {
+                                            product_id: product.id,
+                                        },
+                                    })}
                                 >
                                     Account mappings
                                 </Link>
@@ -96,7 +114,7 @@ export default function FinancialProductShow() {
                             <Button asChild size="sm">
                                 <Link
                                     href={route(
-                                        'financial-products.edit',
+                                        `${productRoute}.edit`,
                                         product.id,
                                     )}
                                 >
@@ -110,8 +128,10 @@ export default function FinancialProductShow() {
                     {[
                         ['Balance type', product.balance_type],
                         [
-                            'Base term rate',
-                            `${product.base_term?.interest_rate ?? '0'}%`,
+                            family === 'loan'
+                                ? 'Interest rate'
+                                : 'Base term rate',
+                            `${product.interest_rate ?? product.base_term?.interest_rate ?? '0'}%`,
                         ],
                         [
                             'Calculation',
@@ -295,7 +315,7 @@ export default function FinancialProductShow() {
                                                     onClick={() =>
                                                         router.delete(
                                                             route(
-                                                                'financial-products.account-mappings.destroy',
+                                                                `${productRoute}.account-mappings.destroy`,
                                                                 [
                                                                     product.id,
                                                                     mapping.id,

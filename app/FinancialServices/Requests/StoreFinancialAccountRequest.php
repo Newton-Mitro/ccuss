@@ -16,6 +16,8 @@ class StoreFinancialAccountRequest extends FormRequest
     public function rules(): array
     {
         $organizationId = (int) $this->attributes->get('active_organization')?->id;
+        $loan = $this->input('account_type') === 'LOAN';
+        $productTable = $loan ? 'loan_products' : 'deposit_products';
 
         return [
             'branch_id' => [
@@ -26,12 +28,13 @@ class StoreFinancialAccountRequest extends FormRequest
             'financial_product_id' => [
                 'nullable',
                 'integer',
-                Rule::exists('financial_products', 'id')->where(fn($query) => $query->where('organization_id', $organizationId)),
+                Rule::exists($productTable, 'id')->where(fn($query) => $query->where('organization_id', $organizationId)),
             ],
             'financial_product_term_id' => [
+                Rule::prohibitedIf($loan),
                 'nullable',
                 'integer',
-                Rule::exists('financial_product_terms', 'id')->where(fn($query) => $query->where('financial_product_id', $this->input('financial_product_id'))),
+                Rule::exists('deposit_product_terms', 'id')->where(fn($query) => $query->where('deposit_product_id', $this->input('financial_product_id'))),
             ],
             'holder_type' => ['nullable', Rule::in(['customer'])],
             'holder_id' => [

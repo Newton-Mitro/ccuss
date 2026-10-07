@@ -3,6 +3,7 @@
 namespace App\FinancialServices\Application;
 
 use App\FinancialServices\Models\FinancialAccount;
+use App\FinancialServices\Models\DepositProduct;
 use App\FinancialServices\Models\InterestProvision;
 use Carbon\CarbonImmutable;
 use RuntimeException;
@@ -27,13 +28,14 @@ class InterestProvisionService
             ->where('organization_id', $organizationId)
             ->whereIn('status', ['PENDING', 'ACTIVE'])
             ->where(fn($query) => $query
-                ->whereHas('productTerm', fn($term) => $term->where('interest_rate', '>', 0)->where('interest_frequency', '!=', 'NONE'))
-                ->orWhere(fn($query) => $query->whereNull('financial_product_term_id')->whereHas('product.baseTerm', fn($term) => $term->where('interest_rate', '>', 0)->where('interest_frequency', '!=', 'NONE')->where('status', true))))
-            ->with(['productTerm', 'product.baseTerm'])
+                ->whereHas('depositProductTerm', fn($term) => $term->where('interest_rate', '>', 0)->where('interest_frequency', '!=', 'NONE'))
+                ->orWhere(fn($query) => $query->whereNull('deposit_product_term_id')->whereHasMorph('product', [DepositProduct::class], fn($product) => $product->whereHas('baseTerm', fn($term) => $term->where('interest_rate', '>', 0)->where('interest_frequency', '!=', 'NONE')->where('status', true)))))
+            ->where('product_type', DepositProduct::class)
+            ->with(['depositProductTerm', 'product.baseTerm'])
             ->chunkById(100, function ($accounts) use ($start, $end, $days, $userId, &$provisions): void {
                 foreach ($accounts as $account) {
                     $basis = max(0, (float) ($account->available_balance ?? $account->balance));
-                    $rate = (float) ($account->productTerm?->interest_rate ?? $account->product->baseTerm->interest_rate);
+                    $rate = (float) ($account->depositProductTerm?->interest_rate ?? $account->product->baseTerm->interest_rate);
                     $amount = round($basis * $rate / 100 * $days / 365, 4);
                     if ($amount <= 0) {
                         continue;
@@ -48,7 +50,8 @@ class InterestProvisionService
                             'period_end' => $end->toDateString(),
                         ]);
                     $provision->fill([
-                        'financial_product_id' => $account->financial_product_id,
+                        'product_type' => DepositProduct::class,
+                        'product_id' => $account->product_id,
                         'calculated_at' => now()->toDateString(),
                         'basis_amount' => $basis,
                         'annual_rate' => $rate,

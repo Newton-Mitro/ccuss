@@ -30,7 +30,7 @@ class RecurringDepositService
         }
 
         $startedAt = CarbonImmutable::parse($data['started_at']);
-        $productTerm = $account->productTerm;
+        $productTerm = $account->depositProductTerm;
         [$frequency, $totalInstallments] = $productTerm
             ? match ($productTerm->tenure_unit) {
                 'DAY' => ['WEEKLY', (int) ceil($productTerm->tenure_value / 7)],
@@ -53,7 +53,7 @@ class RecurringDepositService
                 'maturity_date' => $maturityDate->toDateString(),
                 'maturity_extension_days' => $data['maturity_extension_days'] ?? 0,
                 'grace_days' => $data['grace_days'] ?? 0,
-                'contractual_rate' => $account->productTerm?->interest_rate,
+                'contractual_rate' => $account->depositProductTerm?->interest_rate,
             ]);
 
             $recurringDeposit->installments()->createMany(collect(range(1, $totalInstallments))->map(fn(int $number): array => [

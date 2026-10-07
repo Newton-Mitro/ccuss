@@ -15,7 +15,7 @@ use App\SystemAdministration\Models\User;
 
 function loanApplicationFixture(): array
 {
-    $organization = Organization::factory()->create();
+    $organization = Organization::factory()->create(['code' => 'ORG-001']);
     $branch = Branch::factory()->create(['organization_id' => $organization->id]);
     $user = User::factory()->create(['organization_id' => $organization->id, 'branch_id' => $branch->id]);
     $customer = Customer::factory()->individualMale()->create(['organization_id' => $organization->id, 'branch_id' => $branch->id]);

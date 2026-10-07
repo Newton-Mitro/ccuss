@@ -26,6 +26,9 @@ class FinancialAccount extends Model
     protected $fillable = [
         'organization_id',
         'branch_id',
+        'product_type',
+        'product_id',
+        'deposit_product_term_id',
         'financial_product_id',
         'financial_product_term_id',
         'holder_type',
@@ -66,14 +69,42 @@ class FinancialAccount extends Model
         return $this->belongsTo(Branch::class);
     }
 
-    public function product(): BelongsTo
+    public function product(): MorphTo
     {
-        return $this->belongsTo(FinancialProduct::class, 'financial_product_id');
+        return $this->morphTo();
+    }
+
+    public function setFinancialProductIdAttribute($value): void
+    {
+        $this->attributes['product_id'] = $value;
+        $this->attributes['product_type'] = $value
+            ? (($this->attributes['account_type'] ?? null) === 'LOAN' ? LoanProduct::class : DepositProduct::class)
+            : null;
+    }
+
+    public function getFinancialProductIdAttribute(): ?int
+    {
+        return $this->product_id;
+    }
+
+    public function setFinancialProductTermIdAttribute($value): void
+    {
+        $this->attributes['deposit_product_term_id'] = $value;
+    }
+
+    public function getFinancialProductTermIdAttribute(): ?int
+    {
+        return $this->deposit_product_term_id;
+    }
+
+    public function depositProductTerm(): BelongsTo
+    {
+        return $this->belongsTo(DepositProductTerm::class, 'deposit_product_term_id');
     }
 
     public function productTerm(): BelongsTo
     {
-        return $this->belongsTo(FinancialProductTerm::class, 'financial_product_term_id');
+        return $this->depositProductTerm();
     }
 
     public function holder(): MorphTo

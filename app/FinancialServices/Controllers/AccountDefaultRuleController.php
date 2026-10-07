@@ -4,7 +4,8 @@ namespace App\FinancialServices\Controllers;
 
 use App\FinancialServices\Application\DefaultFineService;
 use App\FinancialServices\Models\AccountDefaultRule;
-use App\FinancialServices\Models\FinancialProduct;
+use App\FinancialServices\Models\DepositProduct;
+use App\FinancialServices\Models\LoanProduct;
 use App\FinancialServices\Requests\StoreAccountDefaultRuleRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -25,8 +26,12 @@ class AccountDefaultRuleController extends Controller
         $organizationId = $this->organizationId($request);
 
         return Inertia::render('financial-services/default-rules/index', [
-            'rules' => AccountDefaultRule::query()->where('organization_id', $organizationId)->with('product:id,code,name')->latest('id')->get(),
-            'products' => FinancialProduct::query()->where('organization_id', $organizationId)->where('status', true)->orderBy('code')->get(['id', 'code', 'name']),
+            'rules' => AccountDefaultRule::query()->where('organization_id', $organizationId)->with('product:id,code,name')->latest('id')->get()->map(function (AccountDefaultRule $rule): array {
+                return [...$rule->toArray(), 'financial_product_id' => $rule->product_id];
+            }),
+            'products' => DepositProduct::query()->where('organization_id', $organizationId)->where('status', true)->get(['id', 'code', 'name', 'category'])
+                ->concat(LoanProduct::query()->where('organization_id', $organizationId)->where('status', true)->get(['id', 'code', 'name'])->map(fn(LoanProduct $product) => [...$product->toArray(), 'category' => 'LOAN']))
+                ->sortBy('code')->values(),
         ]);
     }
 
@@ -41,9 +46,14 @@ class AccountDefaultRuleController extends Controller
     {
         $this->authorizeOrganization($request, $accountDefaultRule);
         $data = $request->validated();
-        if (($data['financial_product_id'] ?? null) && !FinancialProduct::query()->where('organization_id', $this->organizationId($request))->whereKey($data['financial_product_id'])->exists()) {
+        $productId = (int) ($data['financial_product_id'] ?? 0);
+        $productClass = ($data['account_type'] ?? null) === 'LOAN' ? LoanProduct::class : DepositProduct::class;
+        if ($productId && !$productClass::query()->where('organization_id', $this->organizationId($request))->whereKey($productId)->exists()) {
             abort(422, 'The selected product does not belong to the organization.');
         }
+        unset($data['financial_product_id']);
+        $data['product_type'] = $productId ? $productClass : null;
+        $data['product_id'] = $productId ?: null;
         $accountDefaultRule->update($data);
 
         return back()->with('success', 'Default rule updated successfully.');

@@ -12,7 +12,7 @@ use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\User;
 
 it('enforces active product deposit limits when creating transactions', function () {
-    $organization = Organization::factory()->create();
+    $organization = Organization::factory()->create(['code' => 'ORG-001']);
     Branch::factory()->create(['organization_id' => $organization->id]);
     $user = User::factory()->create(['organization_id' => $organization->id]);
     $product = FinancialProduct::factory()->create([
@@ -75,7 +75,7 @@ it('ignores draft product policies during transaction validation', function () {
 });
 
 it('enforces customer eligibility and verified KYC requirements when opening accounts', function () {
-    $organization = Organization::factory()->create();
+    $organization = Organization::factory()->create(['code' => 'ORG-001']);
     Branch::factory()->create(['organization_id' => $organization->id]);
     $customer = Customer::factory()->individualMale()->create(['organization_id' => $organization->id]);
     $product = FinancialProduct::factory()->create(['organization_id' => $organization->id]);

@@ -7,6 +7,7 @@ use App\SystemAdministration\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AccountDefaultRule extends Model
@@ -15,7 +16,8 @@ class AccountDefaultRule extends Model
 
     protected $fillable = [
         'organization_id',
-        'financial_product_id',
+        'product_type',
+        'product_id',
         'account_type',
         'name',
         'grace_days',
@@ -45,9 +47,9 @@ class AccountDefaultRule extends Model
         return $this->belongsTo(Organization::class);
     }
 
-    public function product(): BelongsTo
+    public function product(): MorphTo
     {
-        return $this->belongsTo(FinancialProduct::class, 'financial_product_id');
+        return $this->morphTo('product');
     }
 
     public function defaultEvents(): HasMany

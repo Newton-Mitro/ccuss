@@ -15,7 +15,15 @@ const jsonValue = (value: unknown) =>
     value ? JSON.stringify(value, null, 2) : '';
 
 export default function FinancialProductPolicyForm() {
-    const { product, policy } = usePage<ProductPolicyFormPageProps>().props;
+    const {
+        product,
+        policy,
+        family = '',
+    } = usePage<ProductPolicyFormPageProps>().props;
+    const policyRoute =
+        family === 'loan'
+            ? 'loan-product-policies'
+            : 'deposit-product-policies';
     const { data, setData, post, transform, processing, errors } = useForm({
         minimum_opening_amount: String(policy?.minimum_opening_amount ?? ''),
         minimum_deposit_amount: String(policy?.minimum_deposit_amount ?? ''),
@@ -57,14 +65,14 @@ export default function FinancialProductPolicyForm() {
                     ? null
                     : formData.customer_can_open_multiple_account === 'ALLOW',
         }));
-        post(route('financial-product-policies.store', product.id));
+        post(route(`${policyRoute}.store`, product.id));
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
         {
             title: 'Product Policies',
-            href: route('financial-product-policies.index'),
+            href: route(`${policyRoute}.index`),
         },
         { title: product.name, href: '' },
     ];
@@ -74,8 +82,12 @@ export default function FinancialProductPolicyForm() {
             <Head title={`Policy: ${product.name}`} />
             <div className="max-w-5xl space-y-4">
                 <ResourcePageHeader
-                    title={`Policy for ${product.code} · ${product.name}`}
-                    description="Configure the approved operating rules for this financial product."
+                    title={`${family === 'loan' ? 'Loan' : 'Deposit'} policy for ${product.code} · ${product.name}`}
+                    description={
+                        family === 'loan'
+                            ? 'Configure loan ceilings, repayment, and security requirements.'
+                            : 'Configure opening, deposit, tenure, and maturity rules.'
+                    }
                 />
                 <form
                     onSubmit={submit}
@@ -114,20 +126,31 @@ export default function FinancialProductPolicyForm() {
                         />
                         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                             {[
-                                [
-                                    'minimum_opening_amount',
-                                    'Minimum opening amount',
-                                ],
-                                [
-                                    'minimum_deposit_amount',
-                                    'Minimum deposit amount',
-                                ],
-                                [
-                                    'maximum_deposit_amount',
-                                    'Maximum deposit amount',
-                                ],
-                                ['maximum_loan_amount', 'Maximum loan amount'],
-                                ['loan_to_value_percent', 'Loan-to-value (%)'],
+                                ...(family === 'loan'
+                                    ? [
+                                          [
+                                              'maximum_loan_amount',
+                                              'Maximum loan amount',
+                                          ],
+                                          [
+                                              'loan_to_value_percent',
+                                              'Loan-to-value (%)',
+                                          ],
+                                      ]
+                                    : [
+                                          [
+                                              'minimum_opening_amount',
+                                              'Minimum opening amount',
+                                          ],
+                                          [
+                                              'minimum_deposit_amount',
+                                              'Minimum deposit amount',
+                                          ],
+                                          [
+                                              'maximum_deposit_amount',
+                                              'Maximum deposit amount',
+                                          ],
+                                      ]),
                                 [
                                     'interest_rebate_percent',
                                     'Interest rebate (%)',
@@ -254,20 +277,34 @@ export default function FinancialProductPolicyForm() {
                         </p>
                         <div className="grid gap-3 md:grid-cols-2">
                             {[
-                                [
-                                    'deposit_amount_rules',
-                                    'Deposit amount rules',
-                                ],
-                                ['tenure_rules', 'Tenure rules'],
-                                ['loan_ceiling_rules', 'Loan ceiling rules'],
-                                ['repayment_rules', 'Repayment rules'],
+                                ...(family === 'loan'
+                                    ? [
+                                          [
+                                              'loan_ceiling_rules',
+                                              'Loan ceiling rules',
+                                          ],
+                                          [
+                                              'repayment_rules',
+                                              'Repayment rules',
+                                          ],
+                                          ['security_rules', 'Security rules'],
+                                      ]
+                                    : [
+                                          [
+                                              'deposit_amount_rules',
+                                              'Deposit amount rules',
+                                          ],
+                                          ['tenure_rules', 'Tenure rules'],
+                                          [
+                                              'maturity_examples',
+                                              'Maturity examples',
+                                          ],
+                                      ]),
                                 ['eligibility_rules', 'Eligibility rules'],
-                                ['security_rules', 'Security rules'],
                                 [
                                     'documentation_requirements',
                                     'Documentation requirements',
                                 ],
-                                ['maturity_examples', 'Maturity examples'],
                             ].map(([field, label]) => (
                                 <div key={field}>
                                     <Label>{label}</Label>
@@ -297,9 +334,7 @@ export default function FinancialProductPolicyForm() {
 
                     <div className="flex justify-end gap-2 border-t pt-4">
                         <Button asChild type="button" variant="outline">
-                            <Link
-                                href={route('financial-product-policies.index')}
-                            >
+                            <Link href={route(`${policyRoute}.index`)}>
                                 Cancel
                             </Link>
                         </Button>

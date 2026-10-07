@@ -19,7 +19,7 @@ class StoreLoanApplicationRequest extends FormRequest
         return [
             'branch_id' => ['nullable', 'integer', Rule::exists('branches', 'id')->where(fn($query) => $query->where('organization_id', $organizationId))],
             'customer_id' => ['required', 'integer', Rule::exists('customers', 'id')->where(fn($query) => $query->where('organization_id', $organizationId))],
-            'financial_product_id' => ['required', 'integer', Rule::exists('financial_products', 'id')->where(fn($query) => $query->where('organization_id', $organizationId)->where('category', 'LOAN')->where('status', true))],
+            'financial_product_id' => ['required', 'integer', Rule::exists('loan_products', 'id')->where(fn($query) => $query->where('organization_id', $organizationId)->where('status', true))],
             'requested_amount' => ['required', 'numeric', 'gt:0'],
             'requested_term_months' => ['required', 'integer', 'min:1', 'max:600'],
             'purpose' => ['nullable', 'string', 'max:5000'],
