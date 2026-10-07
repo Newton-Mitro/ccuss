@@ -800,7 +800,7 @@ export default function ChequePaymentReview() {
                                         )}
                                     </div>
 
-                                    <div className="relative h-64 overflow-hidden rounded-lg border bg-white shadow-inner sm:h-72">
+                                    <div className="relative h-64 overflow-hidden rounded-lg border bg-background shadow-inner sm:h-72">
                                         {selectedSignatory?.signature?.url ? (
                                             <ReactPanZoom
                                                 image={
