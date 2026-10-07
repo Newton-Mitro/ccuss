@@ -8,7 +8,7 @@ export const customerAndKYC: SidebarItem[] = [
         permission: ['customer.view'],
         children: [
             {
-                name: 'Dashboard',
+                name: 'Overview',
                 icon: <i className="fa-solid fa-gauge-high" />,
                 path: '/customer-kyc',
                 match_path: 'customer-kyc',

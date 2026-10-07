@@ -78,8 +78,6 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/financial-accounts/category/{category}', [FinancialAccountController::class, 'categoryIndex'])
         ->where('category', 'SAVINGS|SHARE|FIXED_DEPOSIT|RECURRING_DEPOSIT|LOAN')
         ->name('financial-accounts.category');
-    Route::get('/financial-accounts/create', [FinancialAccountController::class, 'create'])->name('financial-accounts.create');
-    Route::post('/financial-accounts', [FinancialAccountController::class, 'store'])->name('financial-accounts.store');
     foreach ([
         'savings' => 'SAVINGS',
         'share' => 'SHARE',

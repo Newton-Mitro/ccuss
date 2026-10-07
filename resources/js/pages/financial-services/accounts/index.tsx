@@ -39,7 +39,7 @@ export default function FinancialAccountIndex() {
     const [search, setSearch] = useState(filters.search ?? '');
     const categoryLabel = category?.replaceAll('_', ' ') ?? 'All';
     const indexRoute = getIndexRoute(category);
-    const createRoute = getCreateRoute(category);
+    const createRoute = category ? getCreateRoute(category) : undefined;
 
     useEffect(() => {
         const timeout = setTimeout(
@@ -84,12 +84,14 @@ export default function FinancialAccountIndex() {
                             : 'Manage member, deposit, loan, cash, and bank accounts.'
                     }
                     action={
-                        <Button asChild>
-                            <Link href={createRoute}>
-                                <Plus className="mr-2 h-4 w-4" />
-                                New account
-                            </Link>
-                        </Button>
+                        createRoute ? (
+                            <Button asChild>
+                                <Link href={createRoute}>
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    New account
+                                </Link>
+                            </Button>
+                        ) : null
                     }
                 />
                 <Input
@@ -237,7 +239,7 @@ function getIndexRoute(category?: string | null): string {
     }
 }
 
-function getCreateRoute(category?: string | null): string {
+function getCreateRoute(category: string): string {
     switch (category) {
         case 'SAVINGS':
             return route('financial-accounts.savings.create');
@@ -250,7 +252,9 @@ function getCreateRoute(category?: string | null): string {
         case 'LOAN':
             return route('loan-accounts.create');
         default:
-            return route('financial-accounts.create');
+            throw new Error(
+                `No account creation route exists for ${category}.`,
+            );
     }
 }
 

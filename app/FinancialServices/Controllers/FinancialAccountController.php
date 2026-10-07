@@ -36,7 +36,6 @@ class FinancialAccountController extends Controller
         private readonly RecurringDepositService $recurringDepositService,
     ) {
         $this->middleware('permission:financial.accounts.view')->only(['index', 'show', 'statement']);
-        $this->middleware('permission:financial.accounts.create')->only(['create', 'store']);
         $this->middleware('permission:financial.accounts.view')->only(['productIndex', 'productShow']);
         $this->middleware('permission:financial.accounts.create')->only(['productCreate', 'productStore']);
         $this->middleware('permission:financial.accounts.update')->only(['activate', 'productEdit', 'productUpdate']);
@@ -112,20 +111,7 @@ class FinancialAccountController extends Controller
         ]);
     }
 
-    public function create(Request $request): Response
-    {
-        $organizationId = $this->organizationId($request);
-        $category = $request->string('category')->upper()->value();
-        $category = in_array($category, ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT', 'LOAN'], true)
-            ? $category
-            : null;
-
-        abort_if($category === 'LOAN', 404);
-
-        return $this->createForCategory($request, $category);
-    }
-
-    private function createForCategory(Request $request, ?string $category, string $page = 'financial-services/accounts/form'): Response
+    private function createForCategory(Request $request, string $category, string $page): Response
     {
         $organizationId = $this->organizationId($request);
 
@@ -168,15 +154,6 @@ class FinancialAccountController extends Controller
             'customers' => Customer::query()->where('organization_id', $organizationId)->orderBy('name')->get(['id', 'customer_no', 'name', 'type', 'dob']),
             'category' => $category,
         ]);
-    }
-
-    public function store(StoreFinancialAccountRequest $request)
-    {
-        $data = $request->validated();
-        abort_if($data['account_type'] === 'LOAN', 422, 'Loan accounts must be created from an approved loan application.');
-        $this->accountService->create($data, $this->organizationId($request));
-
-        return redirect()->route('financial-accounts.index')->with('success', 'Financial account opened successfully.');
     }
 
     public function productStore(StoreFinancialAccountRequest $request)

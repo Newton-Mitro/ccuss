@@ -8,7 +8,7 @@ export const administrationAndSecurity: SidebarItem[] = [
         permission: [],
         children: [
             {
-                name: 'Dashboard',
+                name: 'Overview',
                 icon: <i className="fa-solid fa-gauge-high" />,
                 path: '/admin-dashboard',
                 match_path: 'admin-dashboard',

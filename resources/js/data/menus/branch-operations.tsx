@@ -8,7 +8,7 @@ export const branchOperations: SidebarItem[] = [
         permission: ['treasury.view'],
         children: [
             {
-                name: 'Dashboard',
+                name: 'Overview',
                 icon: <i className="fa-solid fa-chart-line" />,
                 path: '/branch-operations',
                 match_path: 'branch-operations',

@@ -18,7 +18,8 @@ it('loads the financial services dashboard with split product catalogs', functio
         ->assertSuccessful()
         ->assertInertia(fn($page) => $page
             ->component('financial-services/dashboard')
-            ->where('metrics.products', 2));
+            ->where('metrics.depositProducts', 1)
+            ->where('metrics.loanProducts', 1));
 });
 
 it('filters and paginates the financial transactions report', function () {

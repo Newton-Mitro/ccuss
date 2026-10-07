@@ -8,7 +8,7 @@ export const treasuryAndCash: SidebarItem[] = [
         permission: ['treasury.view'],
         children: [
             {
-                name: 'Dashboard',
+                name: 'Overview',
                 icon: <i className="fa-solid fa-chart-line" />,
                 path: '/treasury-cash',
                 match_path: 'treasury-cash',

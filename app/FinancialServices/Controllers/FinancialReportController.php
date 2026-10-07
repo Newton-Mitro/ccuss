@@ -19,8 +19,8 @@ class FinancialReportController extends Controller
 
         return Inertia::render('financial-services/dashboard', [
             'metrics' => [
-                'products' => DepositProduct::where('organization_id', $organizationId)->where('status', true)->count()
-                    + LoanProduct::where('organization_id', $organizationId)->where('status', true)->count(),
+                'depositProducts' => DepositProduct::where('organization_id', $organizationId)->where('status', true)->count(),
+                'loanProducts' => LoanProduct::where('organization_id', $organizationId)->where('status', true)->count(),
                 'accounts' => FinancialAccount::where('organization_id', $organizationId)->count(),
                 'activeAccounts' => FinancialAccount::where('organization_id', $organizationId)->where('status', 'ACTIVE')->count(),
                 'postedTransactions' => FinancialTransaction::where('organization_id', $organizationId)->where('status', 'POSTED')->count(),

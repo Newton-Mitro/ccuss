@@ -3,15 +3,14 @@ import {
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
-import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowDownToLine,
     ArrowUpFromLine,
-    Landmark,
-    Plus,
+    HandCoins,
+    PiggyBank,
     WalletCards,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
@@ -19,7 +18,8 @@ import DashboardMetricCharts from '../../components/dashboard-metric-charts';
 
 interface Props extends SharedData {
     metrics: {
-        products: number;
+        depositProducts: number;
+        loanProducts: number;
         accounts: number;
         activeAccounts: number;
         postedTransactions: number;
@@ -45,10 +45,16 @@ export default function FinancialServicesDashboard() {
     ];
     const cards = [
         {
-            label: 'Active products',
-            value: metrics.products,
-            icon: Landmark,
+            label: 'Deposit products',
+            value: metrics.depositProducts,
+            icon: PiggyBank,
             tone: 'text-sky-600',
+        },
+        {
+            label: 'Loan products',
+            value: metrics.loanProducts,
+            icon: HandCoins,
+            tone: 'text-indigo-600',
         },
         {
             label: 'Financial accounts',
@@ -77,23 +83,17 @@ export default function FinancialServicesDashboard() {
                 <ResourcePageHeader
                     title="Financial Services"
                     description="A focused view of products, accounts, and operational activity."
-                    action={
-                        <Button asChild size="sm">
-                            <Link href={route('financial-accounts.create')}>
-                                <Plus className="mr-1 h-4 w-4" /> Open account
-                            </Link>
-                        </Button>
-                    }
                 />
                 <DashboardMetricCharts
                     metrics={{
-                        'Active products': metrics.products,
+                        'Deposit products': metrics.depositProducts,
+                        'Loan products': metrics.loanProducts,
                         'Financial accounts': metrics.accounts,
                         'Active accounts': metrics.activeAccounts,
                         'Posted transactions': metrics.postedTransactions,
                     }}
                 />
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
                     {cards.map(({ label, value, icon: Icon, tone }) => (
                         <div
                             key={label}

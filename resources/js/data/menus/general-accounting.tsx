@@ -8,7 +8,7 @@ export const generalAccounting: SidebarItem[] = [
         permission: ['accounting.view'],
         children: [
             {
-                name: 'Dashboard',
+                name: 'Overview',
                 icon: <i className="fa-solid fa-gauge-high" />,
                 path: '/general-accounting',
                 match_path: 'general-accounting',

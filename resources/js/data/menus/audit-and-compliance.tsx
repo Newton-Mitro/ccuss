@@ -15,7 +15,7 @@ export const auditAndCompliance: SidebarItem[] = [
                 permission: [],
                 children: [
                     {
-                        name: 'Audit Dashboard',
+                        name: 'Overview',
                         icon: <i className="fa-solid fa-gauge-high" />,
                         path: '/internal-audit',
                         match_path: 'internal-audit',

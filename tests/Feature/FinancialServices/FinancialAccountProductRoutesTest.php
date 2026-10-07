@@ -304,13 +304,17 @@ it('uses the selected product term to create a recurring deposit schedule', func
         ->and((float) $account->recurringDeposit->contractual_rate)->toBe(7.5);
 });
 
-it('does not allow direct loan account creation through the generic account endpoint', function () {
+it('does not expose generic financial-account creation endpoints', function () {
     $fixture = createFinancialAccountProductFixture('LOAN');
-    grantFinancialAccountProductPermissions($fixture['user'], ['financial.accounts.create']);
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
-        ->post(route('financial-accounts.store'), [
+        ->get('/financial-accounts/create')
+        ->assertNotFound();
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post('/financial-accounts', [
             'branch_id' => $fixture['branch']->id,
             'financial_product_id' => $fixture['product']->id,
             'holder_type' => 'customer',
@@ -319,7 +323,7 @@ it('does not allow direct loan account creation through the generic account endp
             'name' => 'Direct loan attempt',
             'account_type' => 'LOAN',
         ])
-        ->assertUnprocessable();
+        ->assertNotFound();
 
     expect(FinancialAccount::query()->where('account_no', 'LOAN-DIRECT-001')->exists())->toBeFalse();
 });
