@@ -10,7 +10,7 @@ return new class extends Migration {
         Schema::create('interest_provisions', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('financial_account_id')->constrained('financial_accounts')->cascadeOnDelete();
-            $table->foreignId('financial_product_id')->constrained('financial_products')->restrictOnDelete();
+            $table->nullableMorphs('product');
             $table->date('period_start');
             $table->date('period_end');
             $table->date('calculated_at');

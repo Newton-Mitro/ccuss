@@ -47,8 +47,8 @@ return new class extends Migration {
                 ->constrained('customers')
                 ->restrictOnDelete();
 
-            $table->foreignId('financial_product_id')
-                ->constrained('financial_products')
+            $table->foreignId('loan_product_id')
+                ->constrained('loan_products')
                 ->restrictOnDelete();
 
             /*
@@ -126,7 +126,7 @@ return new class extends Migration {
             ]);
 
             $table->index([
-                'financial_product_id',
+                'loan_product_id',
                 'status',
             ]);
         });

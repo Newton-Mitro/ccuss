@@ -46,7 +46,7 @@ return new class extends Migration {
             |     -> financial_account
             |     -> financial_product
             |
-            | Therefore financial_product_id is intentionally not duplicated here.
+            | Therefore the product morph is intentionally not duplicated here.
             |
             */
 
@@ -163,7 +163,7 @@ return new class extends Migration {
             | Interest
             |--------------------------------------------------------------------------
             |
-            | Product defaults come from financial_product / financial_product_terms.
+            | Product defaults come from deposit_products / deposit_product_terms.
             | These values are stored here as the contracted values for this
             | particular deposit.
             |

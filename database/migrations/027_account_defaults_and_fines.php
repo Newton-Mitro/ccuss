@@ -29,10 +29,7 @@ return new class extends Migration {
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->foreignId('financial_product_id')
-                ->nullable()
-                ->constrained('financial_products')
-                ->cascadeOnDelete();
+            $table->nullableMorphs('product');
 
             $table->enum('account_type', [
                 'SAVINGS',
@@ -120,7 +117,8 @@ return new class extends Migration {
 
             $table->index(
                 [
-                    'financial_product_id',
+                    'product_type',
+                    'product_id',
                     'is_active',
                 ],
                 'default_rule_product_index'
