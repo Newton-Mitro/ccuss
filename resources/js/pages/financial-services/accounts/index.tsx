@@ -39,7 +39,8 @@ export default function FinancialAccountIndex() {
     const [search, setSearch] = useState(filters.search ?? '');
     const categoryLabel = category?.replaceAll('_', ' ') ?? 'All';
     const indexRoute = getIndexRoute(category);
-    const createRoute = category ? getCreateRoute(category) : undefined;
+    const createRoute =
+        category && category !== 'LOAN' ? getCreateRoute(category) : undefined;
 
     useEffect(() => {
         const timeout = setTimeout(
@@ -249,8 +250,6 @@ function getCreateRoute(category: string): string {
             return route('financial-accounts.fixed.create');
         case 'RECURRING_DEPOSIT':
             return route('financial-accounts.recurring.create');
-        case 'LOAN':
-            return route('loan-accounts.create');
         default:
             throw new Error(
                 `No account creation route exists for ${category}.`,

@@ -39,21 +39,14 @@ export default function LoanApplicationsIndex() {
                                 <th className="px-3 py-2">Product</th>
                                 <th className="px-3 py-2">Amount</th>
                                 <th className="px-3 py-2">Status</th>
+                                <th className="px-3 py-2 text-right">Action</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y">
                             {applications.data.map((application) => (
                                 <tr key={application.id}>
                                     <td className="px-3 py-2">
-                                        <Link
-                                            className="font-medium text-primary hover:underline"
-                                            href={route(
-                                                'loan-applications.show',
-                                                application.id,
-                                            )}
-                                        >
-                                            {application.application_no}
-                                        </Link>
+                                        {application.application_no}
                                     </td>
                                     <td className="px-3 py-2">
                                         {application.customer?.name ??
@@ -68,6 +61,17 @@ export default function LoanApplicationsIndex() {
                                     </td>
                                     <td className="px-3 py-2">
                                         {application.status}
+                                    </td>
+                                    <td className="px-3 py-2 text-right">
+                                        <Link
+                                            className="font-medium text-primary hover:underline"
+                                            href={route(
+                                                'loan-applications.show',
+                                                application.id,
+                                            )}
+                                        >
+                                            View
+                                        </Link>
                                     </td>
                                 </tr>
                             ))}

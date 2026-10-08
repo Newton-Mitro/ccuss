@@ -165,14 +165,23 @@ it('registers and verifies loan collateral for the owning application', function
         'requested_amount' => 5000,
         'requested_term_months' => 12,
     ], $fixture['organization']->id);
+    $financialAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'holder_type' => Customer::class,
+        'holder_id' => $fixture['customer']->id,
+        'account_type' => 'SAVINGS',
+    ]);
     $collateral = $service->addCollateral($application, [
-        'type' => 'PROPERTY',
-        'description' => 'Residential property',
+        'type' => 'DEPOSIT_LIEN',
+        'financial_account_id' => $financialAccount->id,
+        'description' => 'Deposited savings account',
         'assessed_value' => 10000,
         'secured_value' => 7500,
     ]);
 
-    expect($collateral->status)->toBe('PENDING');
+    expect($collateral->status)->toBe('PENDING')
+        ->and($collateral->financial_account_id)->toBe($financialAccount->id);
     expect($service->verifyCollateral($application, $collateral, true)->status)->toBe('VERIFIED');
 
     $otherApplication = $service->create([

@@ -13,19 +13,20 @@ class TellerSessionService
         int $organizationId,
         int $branchId,
         int $userId,
+        int $branchDayId,
         int $tellerId,
         float|int|string $openingCash,
         ?string $openingNote = null,
     ): TellerSession {
         $branchDay = BranchDay::query()
+            ->whereKey($branchDayId)
             ->where('organization_id', $organizationId)
             ->where('branch_id', $branchId)
             ->where('status', BranchDay::STATUS_OPEN)
-            ->latest('business_date')
             ->first();
 
         if (!$branchDay) {
-            throw new \RuntimeException('An open branch day is required before opening a teller session.');
+            throw new \RuntimeException('The selected branch day is not open for this branch.');
         }
 
         $teller = Teller::query()

@@ -4,13 +4,11 @@ import {
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatDate } from '@/lib/date_util';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { Plus } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 interface Props extends SharedData {
@@ -63,14 +61,6 @@ export default function LoanAccountIndex() {
                 <ResourcePageHeader
                     title="Loan accounts"
                     description="Monitor approved loan contracts, disbursement, outstanding balance, and repayment lifecycle."
-                    action={
-                        <Button asChild>
-                            <Link href={route('loan-accounts.create')}>
-                                <Plus className="mr-2 h-4 w-4" />
-                                Create from application
-                            </Link>
-                        </Button>
-                    }
                 />
                 <Input
                     className="w-full bg-card sm:w-96"

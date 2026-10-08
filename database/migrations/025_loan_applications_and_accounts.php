@@ -407,6 +407,11 @@ return new class extends Migration {
                 ->constrained('loan_accounts')
                 ->cascadeOnDelete();
 
+            $table->foreignId('financial_account_id')
+                ->nullable()
+                ->constrained('financial_accounts')
+                ->cascadeOnDelete();
+
             $table->enum('type', [
                 'DEPOSIT_LIEN',
                 'PROPERTY',
@@ -447,6 +452,8 @@ return new class extends Migration {
                 'loan_account_id',
                 'status',
             ]);
+
+            $table->index('financial_account_id');
         });
 
 

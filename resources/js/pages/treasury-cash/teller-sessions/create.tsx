@@ -11,10 +11,16 @@ import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 
 export default function CreateTellerSessionPage() {
-    const { branch_day, tellers, user_branch_id } = usePage<any>().props;
+    const {
+        branch_day,
+        branch_days = [],
+        tellers = [],
+        user_branch_id,
+    } = usePage<any>().props;
     const userHasBranch = !!user_branch_id;
 
     const { data, setData, post, processing, errors } = useForm({
+        branch_day_id: branch_day?.id ? String(branch_day.id) : '',
         teller_id: '',
         opening_cash: '',
         opening_note: '',
@@ -69,6 +75,42 @@ export default function CreateTellerSessionPage() {
                 >
                     <section className="p-5 sm:p-6">
                         <div className="space-y-5">
+                            <div className="space-y-2">
+                                <label
+                                    htmlFor="branch_day_id"
+                                    className="text-sm font-medium"
+                                >
+                                    Branch day
+                                </label>
+                                <Select
+                                    id="branch_day_id"
+                                    className="h-9"
+                                    value={data.branch_day_id}
+                                    onChange={(value) =>
+                                        setData('branch_day_id', value)
+                                    }
+                                    disabled={
+                                        !branch_days.length || !userHasBranch
+                                    }
+                                    placeholder="Select branch day"
+                                    options={[
+                                        {
+                                            value: '',
+                                            label: 'Select branch day',
+                                        },
+                                        ...branch_days.map((item: any) => ({
+                                            value: String(item.id),
+                                            label: `${item.branch_name ?? 'Branch'} — ${item.business_date}`,
+                                        })),
+                                    ]}
+                                />
+                                {errors.branch_day_id && (
+                                    <p className="text-sm text-destructive">
+                                        {errors.branch_day_id}
+                                    </p>
+                                )}
+                            </div>
+
                             <div className="space-y-2">
                                 <label
                                     htmlFor="teller_id"

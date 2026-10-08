@@ -12,7 +12,7 @@ export default function useFlashToastHandler() {
         const key = JSON.stringify(flash);
 
         // Prevent duplicate execution
-        if (shownRef.current === key) return;
+        // if (shownRef.current === key) return;
 
         if (flash.success) {
             toast.success(flash.success);

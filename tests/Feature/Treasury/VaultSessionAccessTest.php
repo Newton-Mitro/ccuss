@@ -105,16 +105,44 @@ it('does not expose vault sessions without permission', function () {
         ->assertForbidden();
 });
 
-it('opens a vault session for the active branch day', function () {
+it('exposes open branch days on the vault session creation page', function () {
     $fixture = vaultSessionFixture();
     grantVaultSessionCreatePermission($fixture['user']);
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('vault-sessions.create'))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page
+            ->component('treasury-cash/vault-sessions/create')
+            ->has('branch_days', 1)
+            ->where('branch_days.0.branch_name', $fixture['branch']->name));
+});
+
+it('opens a vault session for the selected open branch day', function () {
+    $fixture = vaultSessionFixture();
+    grantVaultSessionCreatePermission($fixture['user']);
+    $selectedBranchDay = BranchDay::create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'business_date' => '2026-09-17',
+        'status' => 'OPEN',
+        'opened_at' => now(),
+        'opened_by' => $fixture['user']->id,
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->post(route('vault-sessions.open'), [
+            'branch_day_id' => $selectedBranchDay->id,
             'vault_id' => $fixture['vault']->id,
             'opening_cash' => 10000,
             'opening_note' => 'Opening balance',
         ])
         ->assertRedirect(route('vault-sessions.index'));
+
+    $session = \App\TreasuryAndCash\Models\VaultSession::query()->latest('id')->first();
+
+    expect($session)->not->toBeNull()
+        ->and($session->branch_day_id)->toBe($selectedBranchDay->id);
 });

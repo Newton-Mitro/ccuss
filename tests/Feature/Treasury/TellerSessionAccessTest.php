@@ -134,7 +134,10 @@ it('loads the dedicated teller session creation page for users with open access'
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('teller-sessions.create'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page->component('treasury-cash/teller-sessions/create'));
+        ->assertInertia(fn($page) => $page
+            ->component('treasury-cash/teller-sessions/create')
+            ->has('branch_days', 1)
+            ->where('branch_days.0.branch_name', $fixture['branch']->name));
 });
 
 it('does not expose teller sessions without permission', function () {
@@ -167,10 +170,19 @@ it('opens and closes a teller session for an active branch day', function () {
         'status' => 'ACTIVE',
         'maximum_cash' => 25000,
     ]);
+    $selectedBranchDay = BranchDay::create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'business_date' => '2026-09-17',
+        'status' => 'OPEN',
+        'opened_at' => now(),
+        'opened_by' => $fixture['user']->id,
+    ]);
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->post(route('teller-sessions.open'), [
+            'branch_day_id' => $selectedBranchDay->id,
             'teller_id' => $freshTeller->id,
             'opening_cash' => 5500,
             'opening_note' => 'Session opened',
@@ -180,6 +192,7 @@ it('opens and closes a teller session for an active branch day', function () {
     $session = TellerSession::query()->latest('id')->first();
 
     expect($session)->not->toBeNull()
+        ->and($session->branch_day_id)->toBe($selectedBranchDay->id)
         ->and($session->teller_id)->toBe($freshTeller->id)
         ->and($session->opening_cash)->toBe('5500.0000')
         ->and($session->status)->toBe('OPEN');

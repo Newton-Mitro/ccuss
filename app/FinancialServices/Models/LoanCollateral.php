@@ -13,6 +13,7 @@ class LoanCollateral extends Model
     protected $fillable = [
         'loan_application_id',
         'loan_account_id',
+        'financial_account_id',
         'type',
         'description',
         'assessed_value',
@@ -36,5 +37,10 @@ class LoanCollateral extends Model
     public function loanAccount(): BelongsTo
     {
         return $this->belongsTo(LoanAccount::class);
+    }
+
+    public function financialAccount(): BelongsTo
+    {
+        return $this->belongsTo(FinancialAccount::class);
     }
 }

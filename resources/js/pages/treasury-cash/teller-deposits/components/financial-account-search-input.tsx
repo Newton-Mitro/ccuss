@@ -20,17 +20,26 @@ export interface FinancialAccountSearchResult {
     }>;
 }
 
+export type FinancialAccountSearchScope =
+    | 'all'
+    | 'deposit'
+    | 'loan'
+    | 'teller'
+    | 'vault'
+    | 'petty_cash'
+    | 'bank';
+
 interface FinancialAccountSearchInputProps {
     onSelect: (account: FinancialAccountSearchResult) => void;
-    clearSelectedCustomer?: () => void;
+    clearSelectedAccount?: () => void;
     initialAccount?: FinancialAccountSearchResult | null;
-    scope?: 'all' | 'customer';
+    scope?: FinancialAccountSearchScope;
     placeholder?: string;
 }
 
 export function FinancialAccountSearchInput({
     onSelect,
-    clearSelectedCustomer,
+    clearSelectedAccount,
     initialAccount,
     scope = 'all',
     placeholder = 'Search customer or account',
@@ -53,7 +62,7 @@ export function FinancialAccountSearchInput({
                 `${initialAccount.account_no} - ${initialAccount.holder?.name ?? initialAccount.name ?? ''}`,
             );
         }
-    }, [initialAccount?.id]);
+    }, [initialAccount]);
 
     useEffect(() => {
         const closeResults = (event: MouseEvent) => {
@@ -130,7 +139,7 @@ export function FinancialAccountSearchInput({
                         >
                             <X
                                 className="h-4 w-4"
-                                onClick={clearSelectedCustomer}
+                                onClick={clearSelectedAccount}
                             />
                         </button>
                     )}

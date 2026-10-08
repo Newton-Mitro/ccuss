@@ -285,8 +285,8 @@ export default function SavingsChequeWithdrawalPage() {
                         </div>
                         <FinancialAccountSearchInput
                             onSelect={handleSelectAccount}
-                            clearSelectedCustomer={clearSelectedCustomer}
-                            scope="customer"
+                            clearSelectedAccount={clearSelectedCustomer}
+                            scope="deposit"
                             placeholder="Search customer or savings account..."
                         />
                     </div>

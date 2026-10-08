@@ -38,6 +38,8 @@ interface ObligationsRow {
     id: string;
     account_id: number;
     account_type: string;
+    account_name: string | null;
+    account_no: string;
     due_type: string;
     month: string;
     amount: number;
@@ -197,7 +199,7 @@ export default function CustomerDepositPage() {
                     <FinancialAccountSearchInput
                         onSelect={handleSelectAccount}
                         initialAccount={selectedAccount}
-                        scope="customer"
+                        scope="deposit"
                         placeholder="Search customer or financial account"
                     />
                 </div>
@@ -345,70 +347,107 @@ export default function CustomerDepositPage() {
                         </div>
 
                         <div className="grid items-start gap-4 xl:grid-cols-2">
-                            <div className="flex h-90 min-h-0 flex-col overflow-hidden rounded-lg border bg-card sm:h-105">
-                                <div className="flex shrink-0 items-center justify-between gap-3 border-b px-3 py-2">
-                                    <div className="flex items-center gap-2 text-sm font-medium">
-                                        <WalletCards className="h-4 w-4 text-primary" />
-                                        Customer accounts
+                            {/* Customer Accounts */}
+                            <div className="flex h-95 min-h-0 flex-col overflow-hidden rounded-xl border bg-card shadow-sm sm:h-105">
+                                <div className="flex shrink-0 items-center justify-between gap-3 border-b bg-muted/20 px-4 py-3">
+                                    <div className="flex min-w-0 items-center gap-3">
+                                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                            <WalletCards className="h-4 w-4" />
+                                        </div>
+
+                                        <div className="min-w-0">
+                                            <div className="text-sm font-semibold">
+                                                Customer accounts
+                                            </div>
+                                            <p className="text-[11px] text-muted-foreground">
+                                                Eligible accounts available for
+                                                selection
+                                            </p>
+                                        </div>
                                     </div>
+
                                     <StatusBadge tone="info">
                                         {customerAccounts.length} accounts
                                     </StatusBadge>
                                 </div>
+
                                 {customerAccounts.length > 0 ? (
                                     <div className="min-h-0 flex-1 overflow-auto">
                                         <table className="w-full min-w-150 text-sm">
-                                            <thead className="sticky top-0 z-10 bg-muted text-left text-xs text-muted-foreground">
+                                            <thead className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
                                                 <tr>
-                                                    <th className="px-3 py-1.5 font-medium">
+                                                    <th className="px-4 py-2 text-left text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                                                         Account
                                                     </th>
-                                                    <th className="px-3 py-1.5 font-medium">
+                                                    <th className="px-3 py-2 text-left text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                                                         Type
                                                     </th>
-                                                    <th className="px-3 py-1.5 text-right font-medium">
+                                                    <th className="px-3 py-2 text-right text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                                                         Balance
                                                     </th>
-                                                    <th className="px-3 py-1.5 text-right font-medium">
+                                                    <th className="px-4 py-2 text-right text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                                                         Available
                                                     </th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y">
+
+                                            <tbody className="divide-y divide-border/60">
                                                 {customerAccounts.map(
                                                     (account) => (
                                                         <tr
                                                             key={account.id}
-                                                            className="hover:bg-muted/30"
+                                                            className="group transition-colors hover:bg-muted/30"
                                                         >
-                                                            <td className="px-3 py-1.5">
-                                                                <div className="font-medium">
-                                                                    {
-                                                                        account.account_no
-                                                                    }
+                                                            <td className="px-4 py-2.5">
+                                                                <div className="flex min-w-0 items-center gap-2">
+                                                                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary">
+                                                                        <WalletCards className="h-3.5 w-3.5" />
+                                                                    </div>
+
+                                                                    <div className="min-w-0">
+                                                                        <div className="truncate font-semibold tabular-nums">
+                                                                            {
+                                                                                account.account_no
+                                                                            }
+                                                                        </div>
+
+                                                                        <div className="truncate text-xs text-muted-foreground">
+                                                                            {account.name ??
+                                                                                'Unnamed account'}
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
-                                                                <div className="text-xs text-muted-foreground">
-                                                                    {account.name ??
-                                                                        'Unnamed account'}
-                                                                </div>
                                                             </td>
-                                                            <td className="px-3 py-1.5 text-xs text-muted-foreground">
-                                                                {account.account_type.replaceAll(
-                                                                    '_',
-                                                                    ' ',
-                                                                )}
+
+                                                            <td className="px-3 py-2.5">
+                                                                <span className="inline-flex rounded-md bg-muted px-2 py-1 text-[11px] font-medium text-muted-foreground capitalize">
+                                                                    {account.account_type.replaceAll(
+                                                                        '_',
+                                                                        ' ',
+                                                                    )}
+                                                                </span>
                                                             </td>
-                                                            <td className="px-3 py-1.5 text-right tabular-nums">
-                                                                BDT{' '}
-                                                                {account.balance.toFixed(
-                                                                    2,
-                                                                )}
+
+                                                            <td className="px-3 py-2.5 text-right tabular-nums">
+                                                                <span className="mr-1 text-[10px] text-muted-foreground">
+                                                                    BDT
+                                                                </span>
+                                                                <span className="font-medium">
+                                                                    {account.balance.toFixed(
+                                                                        2,
+                                                                    )}
+                                                                </span>
                                                             </td>
-                                                            <td className="px-3 py-1.5 text-right font-medium tabular-nums">
-                                                                BDT{' '}
-                                                                {account.available_balance.toFixed(
-                                                                    2,
-                                                                )}
+
+                                                            <td className="px-4 py-2.5 text-right tabular-nums">
+                                                                <span className="mr-1 text-[10px] text-muted-foreground">
+                                                                    BDT
+                                                                </span>
+                                                                <span className="font-semibold text-primary">
+                                                                    {account.available_balance.toFixed(
+                                                                        2,
+                                                                    )}
+                                                                </span>
                                                             </td>
                                                         </tr>
                                                     ),
@@ -417,20 +456,43 @@ export default function CustomerDepositPage() {
                                         </table>
                                     </div>
                                 ) : (
-                                    <div className="px-3 py-4 text-sm text-muted-foreground">
-                                        No eligible savings, share, recurring
-                                        deposit, or loan account found for this
-                                        customer.
+                                    <div className="flex min-h-0 flex-1 items-center justify-center p-6 text-center">
+                                        <div className="max-w-sm">
+                                            <WalletCards className="mx-auto mb-3 h-8 w-8 text-muted-foreground/50" />
+
+                                            <p className="text-sm font-medium">
+                                                No eligible accounts
+                                            </p>
+
+                                            <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                                                No eligible savings, share,
+                                                recurring deposit, or loan
+                                                account was found for this
+                                                customer.
+                                            </p>
+                                        </div>
                                     </div>
                                 )}
                             </div>
 
-                            <div className="flex h-90 min-h-0 flex-col overflow-hidden rounded-lg border bg-card sm:h-105">
-                                <div className="flex shrink-0 items-center justify-between gap-3 border-b px-3 py-2">
-                                    <div className="flex items-center gap-2 text-sm font-medium">
-                                        <CreditCard className="h-4 w-4 text-primary" />
-                                        Obligations
+                            {/* Obligations */}
+                            <div className="flex h-95 min-h-0 flex-col overflow-hidden rounded-xl border bg-card shadow-sm sm:h-105">
+                                <div className="flex shrink-0 items-center justify-between gap-3 border-b bg-muted/20 px-4 py-3">
+                                    <div className="flex min-w-0 items-center gap-3">
+                                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                                            <CreditCard className="h-4 w-4" />
+                                        </div>
+
+                                        <div className="min-w-0">
+                                            <div className="text-sm font-semibold">
+                                                Obligations
+                                            </div>
+                                            <p className="text-[11px] text-muted-foreground">
+                                                Outstanding customer obligations
+                                            </p>
+                                        </div>
                                     </div>
+
                                     <StatusBadge tone="warning">
                                         {obligations.length} items
                                     </StatusBadge>
@@ -439,32 +501,33 @@ export default function CustomerDepositPage() {
                                 {obligations.length > 0 ? (
                                     <div className="min-h-0 flex-1 overflow-auto">
                                         <table className="w-full min-w-145 border-collapse text-sm">
-                                            <thead className="sticky top-0 z-10 bg-muted text-left text-muted-foreground">
+                                            <thead className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
                                                 <tr>
-                                                    <th className="border-b px-2 py-1.5">
+                                                    <th className="w-12 px-3 py-2 text-center text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                                                         Select
                                                     </th>
-                                                    <th className="border-b px-2 py-1.5">
+                                                    <th className="px-3 py-2 text-left text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                                                         Account
                                                     </th>
-                                                    <th className="border-b px-2 py-1.5">
+                                                    <th className="px-3 py-2 text-left text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                                                         Due type
                                                     </th>
-                                                    <th className="border-b px-2 py-1.5">
+                                                    <th className="px-3 py-2 text-left text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                                                         Month
                                                     </th>
-                                                    <th className="border-b px-2 py-1.5 text-right">
+                                                    <th className="px-4 py-2 text-right text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                                                         Amount
                                                     </th>
                                                 </tr>
                                             </thead>
-                                            <tbody>
+
+                                            <tbody className="divide-y divide-border/60">
                                                 {obligations.map((row) => (
                                                     <tr
                                                         key={row.id}
-                                                        className="border-b even:bg-muted/40"
+                                                        className="group transition-colors hover:bg-muted/30"
                                                     >
-                                                        <td className="px-2 py-1.5">
+                                                        <td className="px-3 py-2.5 text-center">
                                                             <input
                                                                 type="checkbox"
                                                                 checked={Boolean(
@@ -477,23 +540,45 @@ export default function CustomerDepositPage() {
                                                                         row.id,
                                                                     )
                                                                 }
-                                                                className="h-4 w-4 accent-primary"
+                                                                className="h-4 w-4 cursor-pointer rounded border-input accent-primary"
                                                             />
                                                         </td>
-                                                        <td className="px-2 py-1.5">
-                                                            {row.account_type}
+
+                                                        <td className="px-3 py-2.5">
+                                                            <div className="min-w-0">
+                                                                <div className="truncate font-semibold">
+                                                                    {
+                                                                        row.account_name
+                                                                    }
+                                                                </div>
+
+                                                                <div className="truncate text-xs text-muted-foreground">
+                                                                    {
+                                                                        row.account_no
+                                                                    }
+                                                                </div>
+                                                            </div>
                                                         </td>
-                                                        <td className="px-2 py-1.5">
-                                                            {row.due_type}
+
+                                                        <td className="px-3 py-2.5">
+                                                            <span className="inline-flex rounded-md bg-amber-500/10 px-2 py-1 text-[11px] font-medium text-amber-700 dark:text-amber-400">
+                                                                {row.due_type}
+                                                            </span>
                                                         </td>
-                                                        <td className="px-2 py-1.5">
+
+                                                        <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">
                                                             {row.month}
                                                         </td>
-                                                        <td className="px-2 py-1.5 text-right font-medium tabular-nums">
-                                                            BDT{' '}
-                                                            {row.amount.toFixed(
-                                                                2,
-                                                            )}
+
+                                                        <td className="px-4 py-2.5 text-right tabular-nums">
+                                                            <span className="mr-1 text-[10px] text-muted-foreground">
+                                                                BDT
+                                                            </span>
+                                                            <span className="font-semibold">
+                                                                {row.amount.toFixed(
+                                                                    2,
+                                                                )}
+                                                            </span>
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -501,9 +586,19 @@ export default function CustomerDepositPage() {
                                         </table>
                                     </div>
                                 ) : (
-                                    <div className="flex min-h-0 flex-1 items-center justify-center p-4 text-center text-sm text-muted-foreground">
-                                        No obligation details are available for
-                                        this customer yet.
+                                    <div className="flex min-h-0 flex-1 items-center justify-center p-6 text-center">
+                                        <div>
+                                            <CreditCard className="mx-auto mb-3 h-8 w-8 text-muted-foreground/50" />
+
+                                            <p className="text-sm font-medium">
+                                                No outstanding obligations
+                                            </p>
+
+                                            <p className="mt-1 text-xs text-muted-foreground">
+                                                No obligation details are
+                                                currently available.
+                                            </p>
+                                        </div>
                                     </div>
                                 )}
                             </div>

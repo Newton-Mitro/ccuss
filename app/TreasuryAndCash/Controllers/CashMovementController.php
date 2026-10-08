@@ -369,10 +369,36 @@ class CashMovementController extends Controller
         }
 
         $pattern = '%' . $search . '%';
-        $scope = $request->query('scope') === 'customer' ? 'customer' : 'all';
+        $scope = $request->query('scope', 'all');
+        $accountTypes = [
+            'deposit' => ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT'],
+            'loan' => ['LOAN'],
+            'all' => null,
+        ];
+
         $accountsQuery = FinancialAccount::query()
             ->where('organization_id', $organization->id)
             ->whereIn('status', ['PENDING', 'ACTIVE'])
+            ->where(function ($query) use ($scope, $accountTypes): void {
+                if (isset($accountTypes[$scope]) && $accountTypes[$scope] !== null) {
+                    $query->whereIn('account_type', $accountTypes[$scope]);
+                } elseif (in_array($scope, ['teller', 'vault', 'petty_cash'], true)) {
+                    $query->whereExists(function ($locationQuery) use ($scope): void {
+                        $locationQuery
+                            ->selectRaw('1')
+                            ->from('cash_locations')
+                            ->whereColumn('cash_locations.financial_account_id', 'financial_accounts.id')
+                            ->where('cash_locations.type', strtoupper(str_replace('_', '_', $scope)));
+                    });
+                } elseif ($scope === 'bank') {
+                    $query->whereExists(function ($bankAccountQuery): void {
+                        $bankAccountQuery
+                            ->selectRaw('1')
+                            ->from('bank_accounts')
+                            ->whereColumn('bank_accounts.financial_account_id', 'financial_accounts.id');
+                    });
+                }
+            })
             ->where(function ($query) use ($pattern): void {
                 $query->where('account_no', 'like', $pattern)
                     ->orWhere('name', 'like', $pattern)
@@ -390,7 +416,6 @@ class CashMovementController extends Controller
         if ($scope === 'customer') {
             $accountsQuery
                 ->where('holder_type', Customer::class)
-                ->whereIn('account_type', ['SAVINGS', 'SHARE', 'RECURRING_DEPOSIT', 'LOAN'])
                 ->whereHas('customer');
         }
 
@@ -858,6 +883,8 @@ class CashMovementController extends Controller
                     'id' => 'loan-interest-' . $account->id,
                     'account_id' => $account->id,
                     'account_type' => 'LOAN',
+                    'account_name' => $account->name,
+                    'account_no' => $account->account_no,
                     'due_type' => 'Loan interest',
                     'month' => 'Current month',
                     'amount' => $currentMonthDue,
@@ -866,6 +893,8 @@ class CashMovementController extends Controller
                     'id' => 'loan-interest-prev-' . $account->id,
                     'account_id' => $account->id,
                     'account_type' => 'LOAN',
+                    'account_name' => $account->name,
+                    'account_no' => $account->account_no,
                     'due_type' => 'Loan interest',
                     'month' => 'Previous month',
                     'amount' => $previousDue,
@@ -879,6 +908,8 @@ class CashMovementController extends Controller
                     'id' => 'protection-fee-' . $account->id,
                     'account_id' => $account->id,
                     'account_type' => 'LOAN',
+                    'account_name' => $account->name,
+                    'account_no' => $account->account_no,
                     'due_type' => 'Loan protection fee',
                     'month' => 'Current month',
                     'amount' => $protectionFee,
@@ -887,6 +918,8 @@ class CashMovementController extends Controller
                     'id' => 'renewal-fee-' . $account->id,
                     'account_id' => $account->id,
                     'account_type' => 'LOAN',
+                    'account_name' => $account->name,
+                    'account_no' => $account->account_no,
                     'due_type' => 'Loan protection renew fee',
                     'month' => 'Current month',
                     'amount' => $renewalFee,
@@ -895,6 +928,8 @@ class CashMovementController extends Controller
                     'id' => 'fine-' . $account->id,
                     'account_id' => $account->id,
                     'account_type' => 'LOAN',
+                    'account_name' => $account->name,
+                    'account_no' => $account->account_no,
                     'due_type' => 'Loan fine',
                     'month' => 'Previous month',
                     'amount' => $fineAmount,
@@ -907,6 +942,8 @@ class CashMovementController extends Controller
                     'id' => 'deposit-' . $account->id,
                     'account_id' => $account->id,
                     'account_type' => $account->account_type,
+                    'account_name' => $account->name,
+                    'account_no' => $account->account_no,
                     'due_type' => 'Deposit contribution',
                     'month' => 'Current month',
                     'amount' => round($depositDue, 2),

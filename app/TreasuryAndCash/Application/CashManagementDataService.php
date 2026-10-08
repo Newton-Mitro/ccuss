@@ -64,13 +64,21 @@ class CashManagementDataService
 
     public function tellerSessionOptions(int $organizationId, int $branchId): array
     {
+        $branchName = \App\SystemAdministration\Models\Branch::whereKey($branchId)->value('name');
+        $branchDays = \App\TreasuryAndCash\Models\BranchDay::query()
+            ->where('organization_id', $organizationId)
+            ->where('branch_id', $branchId)
+            ->where('status', \App\TreasuryAndCash\Models\BranchDay::STATUS_OPEN)
+            ->orderByDesc('business_date')
+            ->get(['id', 'business_date']);
+
         return [
-            'branch_day' => \App\TreasuryAndCash\Models\BranchDay::query()
-                ->where('organization_id', $organizationId)
-                ->where('branch_id', $branchId)
-                ->where('status', \App\TreasuryAndCash\Models\BranchDay::STATUS_OPEN)
-                ->latest('business_date')
-                ->first(['id', 'business_date']),
+            'branch_day' => $branchDays->first(),
+            'branch_days' => $branchDays->map(fn($branchDay) => [
+                'id' => $branchDay->id,
+                'business_date' => $branchDay->business_date,
+                'branch_name' => $branchName,
+            ])->all(),
             'tellers' => Teller::query()
                 ->where('status', 'ACTIVE')
                 ->whereHas('cashLocation', function ($query) use ($organizationId, $branchId) {
@@ -113,13 +121,21 @@ class CashManagementDataService
 
     public function vaultSessionOptions(int $organizationId, int $branchId): array
     {
+        $branchName = \App\SystemAdministration\Models\Branch::whereKey($branchId)->value('name');
+        $branchDays = \App\TreasuryAndCash\Models\BranchDay::query()
+            ->where('organization_id', $organizationId)
+            ->where('branch_id', $branchId)
+            ->where('status', \App\TreasuryAndCash\Models\BranchDay::STATUS_OPEN)
+            ->orderByDesc('business_date')
+            ->get(['id', 'business_date']);
+
         return [
-            'branch_day' => \App\TreasuryAndCash\Models\BranchDay::query()
-                ->where('organization_id', $organizationId)
-                ->where('branch_id', $branchId)
-                ->where('status', \App\TreasuryAndCash\Models\BranchDay::STATUS_OPEN)
-                ->latest('business_date')
-                ->first(['id', 'business_date']),
+            'branch_day' => $branchDays->first(),
+            'branch_days' => $branchDays->map(fn($branchDay) => [
+                'id' => $branchDay->id,
+                'business_date' => $branchDay->business_date,
+                'branch_name' => $branchName,
+            ])->all(),
             'vaults' => Vault::query()
                 ->whereHas('cashLocation', function ($query) use ($organizationId, $branchId) {
                     $query->where('organization_id', $organizationId)

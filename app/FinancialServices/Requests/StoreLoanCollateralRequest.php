@@ -16,6 +16,11 @@ class StoreLoanCollateralRequest extends FormRequest
     {
         return [
             'type' => ['required', Rule::in(['DEPOSIT_LIEN', 'PROPERTY', 'VEHICLE', 'GUARANTEE', 'OTHER'])],
+            'financial_account_id' => [
+                'nullable',
+                'integer',
+                'exists:financial_accounts,id',
+            ],
             'description' => ['required', 'string', 'max:255'],
             'assessed_value' => ['nullable', 'numeric', 'gte:0'],
             'secured_value' => ['nullable', 'numeric', 'gte:0', 'lte:assessed_value'],

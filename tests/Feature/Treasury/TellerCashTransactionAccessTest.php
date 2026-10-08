@@ -351,6 +351,21 @@ it('searches customer deposit accounts by account and holder details', function 
         'account_no' => 'SAV-ACCOUNT-SEARCH-001',
         'name' => 'Holiday Savings Reserve',
     ]);
+    $loanCustomer = Customer::factory()->individualMale()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'customer_no' => 'IND-LOAN-ACCOUNT-SEARCH-001',
+        'name' => 'Loan Account Search Holder',
+    ]);
+    $loanAccount = FinancialAccount::factory()->active(500)->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'holder_type' => Customer::class,
+        'holder_id' => $loanCustomer->id,
+        'account_type' => 'LOAN',
+        'account_no' => 'LOAN-ACCOUNT-SEARCH-001',
+        'name' => 'Loan Account Search',
+    ]);
 
     foreach ([
         $account->account_no,
@@ -367,6 +382,26 @@ it('searches customer deposit accounts by account and holder details', function 
                 'account_no' => $account->account_no,
             ]);
     }
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->getJson(route('teller-transactions.deposit.accounts.search', [
+            'search' => $loanCustomer->name,
+            'scope' => 'deposit',
+        ]))
+        ->assertSuccessful()
+        ->assertJsonMissing(['id' => $loanAccount->id])
+        ->assertJsonCount(0);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->getJson(route('teller-transactions.deposit.accounts.search', [
+            'search' => $loanCustomer->name,
+            'scope' => 'loan',
+        ]))
+        ->assertSuccessful()
+        ->assertJsonFragment(['id' => $loanAccount->id])
+        ->assertJsonCount(1);
 });
 
 it('restores the selected customer account on the customer deposit page', function () {
@@ -383,6 +418,7 @@ it('restores the selected customer account on the customer deposit page', functi
         'holder_id' => $customer->id,
         'account_type' => 'SAVINGS',
         'account_no' => 'SAV-RESTORE-001',
+        'name' => 'Customer Deposit Account',
     ]);
 
     $this->actingAs($fixture['user'])
@@ -394,7 +430,9 @@ it('restores the selected customer account on the customer deposit page', functi
         ->assertSuccessful()
         ->assertInertia(fn($page) => $page
             ->where('customer.id', $customer->id)
-            ->where('selectedAccount.id', $account->id));
+            ->where('selectedAccount.id', $account->id)
+            ->where('obligations.0.account_name', $account->name)
+            ->where('obligations.0.account_no', $account->account_no));
 });
 
 it('creates a pending teller cash deposit for an open session', function () {

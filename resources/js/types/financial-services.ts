@@ -147,6 +147,13 @@ export interface LoanApplication {
 export interface LoanCollateral {
     id: number;
     type: string;
+    financial_account_id?: number | null;
+    financial_account?: {
+        id: number;
+        account_no: string;
+        name?: string | null;
+        account_type: string;
+    } | null;
     description: string;
     assessed_value?: string | number | null;
     secured_value?: string | number | null;

@@ -9,10 +9,21 @@ import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
 
 export default function CreateVaultSessionPage() {
-    const { vaults } = usePage<{
-        vaults: { id: number; code: string; name: string }[];
+    const {
+        branch_day,
+        branch_days = [],
+        vaults = [],
+    } = usePage<{
+        branch_day?: { id: number; business_date: string };
+        branch_days?: {
+            id: number;
+            business_date: string;
+            branch_name?: string;
+        }[];
+        vaults?: { id: number; code: string; name: string }[];
     }>().props;
     const { data, setData, post, processing, errors } = useForm({
+        branch_day_id: branch_day?.id ? String(branch_day.id) : '',
         vault_id: '',
         opening_cash: '',
         opening_note: '',
@@ -49,6 +60,36 @@ export default function CreateVaultSessionPage() {
                     onSubmit={handleSubmit}
                     className="space-y-4 rounded-lg border bg-card p-6"
                 >
+                    <div className="space-y-2">
+                        <label
+                            htmlFor="branch_day_id"
+                            className="text-sm font-medium"
+                        >
+                            Branch day
+                        </label>
+                        <Select
+                            id="branch_day_id"
+                            className="h-9 p-2"
+                            value={data.branch_day_id}
+                            onChange={(value) =>
+                                setData('branch_day_id', value)
+                            }
+                            placeholder="Select branch day"
+                            options={[
+                                { value: '', label: 'Select branch day' },
+                                ...branch_days.map((item) => ({
+                                    value: String(item.id),
+                                    label: `${item.branch_name ?? 'Branch'} — ${item.business_date}`,
+                                })),
+                            ]}
+                        />
+                        {errors.branch_day_id && (
+                            <p className="text-sm text-red-500">
+                                {errors.branch_day_id}
+                            </p>
+                        )}
+                    </div>
+
                     <div className="space-y-2">
                         <label
                             htmlFor="vault_id"

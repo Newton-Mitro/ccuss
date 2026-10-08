@@ -72,10 +72,7 @@ class FinancialAccountController extends Controller
     public function productCreate(Request $request): Response
     {
         $category = $this->productCategory($request);
-
-        if ($category === 'LOAN') {
-            return Inertia::render('financial-services/accounts/loan/create');
-        }
+        abort_if($category === 'LOAN', 404, 'Loan account creation is disabled.');
 
         return $this->createForCategory($request, $category, "financial-services/accounts/{$request->route('product')}/create");
     }

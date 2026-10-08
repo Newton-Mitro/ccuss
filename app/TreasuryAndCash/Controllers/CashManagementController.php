@@ -328,6 +328,7 @@ class CashManagementController extends Controller
         if (!$user?->branch_id) {
             return Inertia::render('treasury-cash/teller-sessions/create', [
                 'branch_day' => null,
+                'branch_days' => [],
                 'tellers' => [],
                 'user_branch_id' => null,
                 'organization' => $organization,
@@ -338,6 +339,7 @@ class CashManagementController extends Controller
 
         return Inertia::render('treasury-cash/teller-sessions/create', [
             'branch_day' => $options['branch_day'],
+            'branch_days' => $options['branch_days'],
             'tellers' => $options['tellers'],
             'user_branch_id' => $user->branch_id,
             'organization' => $organization,
@@ -356,6 +358,7 @@ class CashManagementController extends Controller
                 $organization->id,
                 $user->branch_id,
                 $user->id,
+                $request->validated('branch_day_id'),
                 $request->validated('teller_id'),
                 $request->validated('opening_cash'),
                 $request->validated('opening_note'),
@@ -421,6 +424,7 @@ class CashManagementController extends Controller
         if (!$user?->branch_id) {
             return Inertia::render('treasury-cash/vault-sessions/create', [
                 'branch_day' => null,
+                'branch_days' => [],
                 'vaults' => [],
                 'user_branch_id' => null,
                 'organization' => $organization,
@@ -431,6 +435,7 @@ class CashManagementController extends Controller
 
         return Inertia::render('treasury-cash/vault-sessions/create', [
             'branch_day' => $options['branch_day'],
+            'branch_days' => $options['branch_days'],
             'vaults' => $options['vaults'],
             'user_branch_id' => $user->branch_id,
             'organization' => $organization,
@@ -449,6 +454,7 @@ class CashManagementController extends Controller
                 $organization->id,
                 $user->branch_id,
                 $user->id,
+                $request->validated('branch_day_id'),
                 $request->validated('vault_id'),
                 $request->validated('opening_cash'),
                 $request->validated('opening_note'),
