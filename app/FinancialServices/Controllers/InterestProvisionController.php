@@ -20,14 +20,25 @@ class InterestProvisionController extends Controller
     public function index(Request $request): Response
     {
         $organizationId = $this->organizationId($request);
+        $query = InterestProvision::query()
+            ->whereHas('financialAccount', fn($query) => $query->where('organization_id', $organizationId))
+            ->with(['financialAccount:id,account_no,name', 'product:id,code,name'])
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = $request->string('search')->trim();
+                $query->where(fn($query) => $query
+                    ->whereHas('financialAccount', fn($query) => $query
+                        ->where('account_no', 'like', "%{$search}%")
+                        ->orWhere('name', 'like', "%{$search}%"))
+                    ->orWhereHas('product', fn($query) => $query
+                        ->where('code', 'like', "%{$search}%")
+                        ->orWhere('name', 'like', "%{$search}%"))
+                    ->orWhere('status', 'like', "%{$search}%"));
+            })
+            ->latest('period_end');
 
         return Inertia::render('financial-services/interest-provisions/index', [
-            'provisions' => InterestProvision::query()
-                ->whereHas('financialAccount', fn($query) => $query->where('organization_id', $organizationId))
-                ->with(['financialAccount:id,account_no,name', 'product:id,code,name'])
-                ->latest('period_end')
-                ->paginate($request->integer('per_page', 20))
-                ->withQueryString(),
+            'provisions' => $query->paginate($request->integer('per_page', 20))->withQueryString(),
+            'filters' => $request->only(['search', 'per_page', 'page']),
         ]);
     }
 

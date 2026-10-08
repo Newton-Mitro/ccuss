@@ -146,7 +146,8 @@ class LoanApplicationService
                 'account_no' => $this->nextFinancialAccountNumber($application->organization_id),
                 'name' => $application->customer->name . ' Loan',
                 'account_type' => 'LOAN',
-                'status' => 'PENDING',
+                'status' => 'ACTIVE',
+                'opened_at' => CarbonImmutable::today()->toDateString(),
             ]);
 
             return $application->loanAccount()->create([

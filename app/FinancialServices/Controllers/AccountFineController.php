@@ -20,14 +20,24 @@ class AccountFineController extends Controller
 
     public function index(Request $request): Response
     {
+        $query = AccountFine::query()
+            ->whereHas('financialAccount', fn($query) => $query->where('organization_id', $this->organizationId($request)))
+            ->with(['financialAccount:id,account_no,name', 'defaultEvent.rule:id,name'])
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = $request->string('search')->trim();
+                $query->where(fn($query) => $query
+                    ->whereHas('financialAccount', fn($query) => $query
+                        ->where('account_no', 'like', "%{$search}%")
+                        ->orWhere('name', 'like', "%{$search}%"))
+                    ->orWhereHas('defaultEvent.rule', fn($query) => $query
+                        ->where('name', 'like', "%{$search}%"))
+                    ->orWhere('status', 'like', "%{$search}%"));
+            })
+            ->latest('assessed_at');
+
         return Inertia::render('financial-services/fines/index', [
-            'fines' => AccountFine::query()
-                ->whereHas('financialAccount', fn($query) => $query->where('organization_id', $this->organizationId($request)))
-                ->with(['financialAccount:id,account_no,name', 'defaultEvent.rule:id,name'])
-                ->latest('assessed_at')
-                ->paginate($request->integer('per_page', 20))
-                ->withQueryString(),
-            'filters' => $request->only(['per_page', 'page']),
+            'fines' => $query->paginate($request->integer('per_page', 20))->withQueryString(),
+            'filters' => $request->only(['search', 'per_page', 'page']),
         ]);
     }
 

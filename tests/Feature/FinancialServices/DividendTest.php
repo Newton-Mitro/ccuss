@@ -4,7 +4,6 @@ use App\FinancialServices\Application\DividendService;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\ShareAccount;
-use App\FinancialServices\Models\ShareDividendDeclaration;
 use App\GeneralAccounting\Models\FiscalYear;
 use App\CustomerModule\Models\Customer;
 use App\SystemAdministration\Models\Organization;
@@ -13,15 +12,15 @@ use App\SystemAdministration\Models\User;
 use App\FinancialServices\Application\FinancialTransactionService;
 
 it('calculates idempotent dividends for active share members', function () {
-    $organization = Organization::factory()->create();
+    $organization = Organization::factory()->create(['code' => 'ORG-001']);
     $branch = Branch::factory()->create(['organization_id' => $organization->id]);
     $user = User::factory()->create(['organization_id' => $organization->id, 'branch_id' => $branch->id]);
     $customer = Customer::factory()->individualMale()->create(['organization_id' => $organization->id, 'branch_id' => $branch->id]);
     $product = FinancialProduct::factory()->create(['organization_id' => $organization->id, 'category' => 'SHARE', 'balance_type' => 'EQUITY']);
     $account = FinancialAccount::factory()->active()->create(['organization_id' => $organization->id, 'branch_id' => $branch->id, 'financial_product_id' => $product->id, 'account_type' => 'SHARE', 'balance' => 1000, 'available_balance' => 1000]);
-    ShareAccount::create(['financial_account_id' => $account->id, 'customer_id' => $customer->id, 'membership_status' => 'ACTIVE', 'member_since' => '2025-01-01']);
+    ShareAccount::create(['financial_account_id' => $account->id, 'customer_id' => $customer->id, 'membership_no' => 'MEM-001', 'membership_status' => 'ACTIVE', 'member_since' => '2025-01-01']);
     $suspendedAccount = FinancialAccount::factory()->active()->create(['organization_id' => $organization->id, 'branch_id' => $branch->id, 'financial_product_id' => $product->id, 'account_type' => 'SHARE', 'balance' => 500, 'available_balance' => 500]);
-    ShareAccount::create(['financial_account_id' => $suspendedAccount->id, 'customer_id' => $customer->id, 'membership_status' => 'SUSPENDED']);
+    ShareAccount::create(['financial_account_id' => $suspendedAccount->id, 'customer_id' => $customer->id, 'membership_no' => 'MEM-002', 'membership_status' => 'SUSPENDED']);
     $fiscalYear = FiscalYear::factory()->create(['organization_id' => $organization->id, 'start_date' => '2025-01-01', 'end_date' => '2025-12-31']);
     $service = app(DividendService::class);
     $declaration = $service->createDeclaration(['fiscal_year_id' => $fiscalYear->id, 'dividend_rate' => 5], $organization->id);

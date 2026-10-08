@@ -4,7 +4,7 @@ use App\FinancialServices\Models\AccountDefaultRule;
 use App\SystemAdministration\Models\Organization;
 use Database\Seeders\AccountDefaultRulesSeeder;
 
-it('seeds inactive account default templates for every organization without overwriting edits', function () {
+it('seeds active account default rules for every organization without overwriting edits', function () {
     $organizations = Organization::factory()->count(2)->create();
     $seeder = new AccountDefaultRulesSeeder;
 
@@ -33,15 +33,15 @@ it('seeds inactive account default templates for every organization without over
             ->firstOrFail();
 
         expect($savingsRule->name)->toBe('Default savings account rule')
-            ->and($savingsRule->is_active)->toBeFalse()
+            ->and($savingsRule->is_active)->toBeTrue()
             ->and($savingsRule->grace_days)->toBe(0)
             ->and($shareRule->name)->toBe('Default share account rule')
-            ->and($shareRule->is_active)->toBeFalse()
+            ->and($shareRule->is_active)->toBeTrue()
             ->and($shareRule->grace_days)->toBe(0)
-            ->and($loanRule->is_active)->toBeFalse()
-            ->and((float) $loanRule->fine_amount)->toBe(0.0)
+            ->and($loanRule->is_active)->toBeTrue()
+            ->and((float) $loanRule->fine_amount)->toBe(100.0)
             ->and($recurringRule->grace_days)->toBe(7)
-            ->and($recurringRule->is_active)->toBeFalse();
+            ->and($recurringRule->is_active)->toBeTrue();
     }
 
     AccountDefaultRule::query()

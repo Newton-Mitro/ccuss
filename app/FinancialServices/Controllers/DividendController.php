@@ -22,10 +22,22 @@ class DividendController extends Controller
     public function index(Request $request): Response
     {
         $organizationId = $this->organizationId($request);
+        $query = ShareDividendDeclaration::query()
+            ->where('organization_id', $organizationId)
+            ->with('allocations')
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = $request->string('search')->trim();
+                $query->where(fn($query) => $query
+                    ->where('declaration_no', 'like', "%{$search}%")
+                    ->orWhere('status', 'like', "%{$search}%")
+                    ->orWhere('note', 'like', "%{$search}%"));
+            })
+            ->latest('id');
 
         return Inertia::render('financial-services/dividends/index', [
-            'declarations' => ShareDividendDeclaration::query()->where('organization_id', $organizationId)->with('allocations')->latest('id')->paginate(20),
+            'declarations' => $query->paginate($request->integer('per_page', 20))->withQueryString(),
             'fiscalYears' => FiscalYear::query()->where('organization_id', $organizationId)->whereIn('status', ['OPEN', 'CLOSED'])->orderByDesc('start_date')->get(['id', 'name', 'start_date', 'end_date']),
+            'filters' => $request->only(['search', 'per_page', 'page']),
         ]);
     }
 

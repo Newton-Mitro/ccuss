@@ -46,16 +46,30 @@ class AccountDefaultRulesSeeder extends Seeder
                     [
                         'grace_days' => $rule['grace_days'],
                         'fine_calculation' => 'FIXED',
-                        'fine_amount' => 0,
+                        'fine_amount' => 100,
                         'fine_rate' => 0,
                         'maximum_fine' => null,
                         'extends_maturity' => false,
                         'maturity_extension_days' => 0,
-                        'is_active' => false,
+                        'is_active' => true,
                         'effective_from' => null,
                         'effective_to' => null,
                     ],
                 );
+
+                AccountDefaultRule::query()
+                    ->where('organization_id', $organization->id)
+                    ->where('account_type', $rule['account_type'])
+                    ->where('name', $rule['name'])
+                    ->where('is_active', false)
+                    ->where('fine_amount', 0)
+                    ->where('fine_rate', 0)
+                    ->update([
+                        'fine_calculation' => 'FIXED',
+                        'fine_amount' => 100,
+                        'fine_rate' => 0,
+                        'is_active' => true,
+                    ]);
             }
         });
     }

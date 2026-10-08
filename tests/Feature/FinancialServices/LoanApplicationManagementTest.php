@@ -147,10 +147,13 @@ it('creates one linked financial and loan account after approval', function () {
     $service->approve($application, [], $fixture['user']->id);
 
     $loan = $service->createLoanAccount($application->fresh());
+    $financialAccount = FinancialAccount::query()->whereKey($loan->financial_account_id)->firstOrFail();
 
     expect($loan->loan_no)->toBe('LN-' . str_pad((string) $application->id, 8, '0', STR_PAD_LEFT))
         ->and($loan->status)->toBe('APPROVED')
-        ->and(FinancialAccount::query()->whereKey($loan->financial_account_id)->value('account_type'))->toBe('LOAN');
+        ->and($financialAccount->account_type)->toBe('LOAN')
+        ->and($financialAccount->status)->toBe('ACTIVE')
+        ->and($financialAccount->opened_at)->not->toBeNull();
 
     expect(fn() => $service->createLoanAccount($application->fresh()))
         ->toThrow(RuntimeException::class, 'already has a loan account');
