@@ -28,8 +28,10 @@ class FinancialServicesSeeder extends Seeder
     private const ORGANIZATION_CODE = 'ORG-001';
     private const SEED_DATE = '2025-07-01';
 
-    private const SAVINGS_OPENING_AMOUNT = 0;
-    private const SHARE_OPENING_AMOUNT = 0;
+    private const SAVINGS_OPENING_AMOUNT = 100000;
+    private const SHARE_OPENING_AMOUNT = 100000;
+    private const FIXED_DEPOSIT_OPENING_AMOUNT = 100000;
+    private const RECURRING_DEPOSIT_OPENING_AMOUNT = 100000;
     private const TELLER_OPENING_BALANCE = 0;
 
     public function run(): void
@@ -292,7 +294,13 @@ class FinancialServicesSeeder extends Seeder
         string $name,
         array $metadata = [],
     ): FinancialAccount {
-        $balance = 0;
+        $balance = match ($product->category) {
+            'SAVINGS' => self::SAVINGS_OPENING_AMOUNT,
+            'SHARE' => self::SHARE_OPENING_AMOUNT,
+            'FIXED_DEPOSIT' => self::FIXED_DEPOSIT_OPENING_AMOUNT,
+            'RECURRING_DEPOSIT' => self::RECURRING_DEPOSIT_OPENING_AMOUNT,
+            default => 0,
+        };
 
         return FinancialAccount::query()->updateOrCreate(
             [
@@ -465,8 +473,16 @@ class FinancialServicesSeeder extends Seeder
                     'name' => $organizationCustomer->name . ' - ' . $product->name,
                     'account_type' => $category,
                     'status' => 'ACTIVE',
-                    'balance' => 0,
-                    'available_balance' => $category === 'SAVINGS' ? 0 : 0,
+                    'balance' => match ($category) {
+                        'SAVINGS' => self::SAVINGS_OPENING_AMOUNT,
+                        'FIXED_DEPOSIT' => self::FIXED_DEPOSIT_OPENING_AMOUNT,
+                        default => 0,
+                    },
+                    'available_balance' => match ($category) {
+                        'SAVINGS' => self::SAVINGS_OPENING_AMOUNT,
+                        'FIXED_DEPOSIT' => self::FIXED_DEPOSIT_OPENING_AMOUNT,
+                        default => 0,
+                    },
                     'opened_at' => self::SEED_DATE,
                     'metadata' => [
                         'seeded' => true,
@@ -629,8 +645,8 @@ class FinancialServicesSeeder extends Seeder
                 'name' => $customer->name . ' Recurring Deposit',
                 'account_type' => 'RECURRING_DEPOSIT',
                 'status' => 'ACTIVE',
-                'balance' => 0,
-                'available_balance' => 0,
+                'balance' => self::RECURRING_DEPOSIT_OPENING_AMOUNT,
+                'available_balance' => self::RECURRING_DEPOSIT_OPENING_AMOUNT,
                 'opened_at' => self::SEED_DATE,
                 'metadata' => ['seeded' => true],
             ],
@@ -726,8 +742,8 @@ class FinancialServicesSeeder extends Seeder
                 'name' => $primaryHolder->name . ' and ' . $jointHolder->name . ' - Joint Savings',
                 'account_type' => 'SAVINGS',
                 'status' => 'ACTIVE',
-                'balance' => 0,
-                'available_balance' => 0,
+                'balance' => self::SAVINGS_OPENING_AMOUNT,
+                'available_balance' => self::SAVINGS_OPENING_AMOUNT,
                 'interest_accrued' => 0,
                 'opened_at' => now()->toDateString(),
                 'metadata' => [

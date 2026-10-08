@@ -172,14 +172,11 @@ export default function Index() {
                                                 {voucher.voucher_no}
                                             </td>
                                             <td className="px-2 py-1">
-                                                {voucher.fiscal_year?.code ||
+                                                {voucher.fiscal_year?.name ||
                                                     '-'}
                                             </td>
                                             <td className="px-2 py-1">
-                                                {voucher.fiscal_period
-                                                    ?.period_name ||
-                                                    voucher.fiscal_period
-                                                        ?.name ||
+                                                {voucher.fiscal_period?.name ||
                                                     '-'}
                                             </td>
                                             <td className="px-2 py-1">

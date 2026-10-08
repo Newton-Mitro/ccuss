@@ -7,6 +7,7 @@ use App\GeneralAccounting\Application\LedgerAccountService;
 use App\GeneralAccounting\Application\VoucherService;
 use App\GeneralAccounting\Models\Party;
 use App\GeneralAccounting\Models\Voucher;
+use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
@@ -284,6 +285,10 @@ it('provides parties without subledger data to voucher creation', function () {
 
 it('loads accounting parties when editing and viewing a voucher draft', function () {
     $fixture = voucherFixture();
+    $branch = Branch::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'name' => 'Test Branch',
+    ]);
     $party = Party::query()->create([
         'organization_id' => $fixture['organization']->id,
         'code' => 'MEM-001',
@@ -301,6 +306,7 @@ it('loads accounting parties when editing and viewing a voucher draft', function
             ['account_id' => $fixture['accounts'][1]->id, 'debit' => 0, 'credit' => 100],
         ],
     ], $fixture['organization']->id, $fixture['user']->id);
+    $voucher->update(['branch_id' => $branch->id]);
 
     $response = $this
         ->actingAs($fixture['user'])
@@ -317,6 +323,7 @@ it('loads accounting parties when editing and viewing a voucher draft', function
         ->assertOk()
         ->assertInertia(fn(Assert $page) => $page
             ->component('general-accounting/vouchers/show')
+            ->where('voucher.branch.name', $branch->name)
             ->where('voucher.entries.0.party.name', $party->name));
 });
 

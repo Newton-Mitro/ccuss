@@ -140,7 +140,7 @@ export default function VoucherView() {
                             Fiscal Year
                         </span>
                         <p className="text-sm">
-                            {voucher.fiscal_year?.code || '-'}
+                            {voucher.fiscal_year?.name || '-'}
                         </p>
                     </div>
                     <div>
@@ -148,7 +148,7 @@ export default function VoucherView() {
                             Fiscal Period
                         </span>
                         <p className="text-sm">
-                            {voucher.fiscal_period?.period_name || '-'}
+                            {voucher.fiscal_period?.name || '-'}
                         </p>
                     </div>
                     <div>
