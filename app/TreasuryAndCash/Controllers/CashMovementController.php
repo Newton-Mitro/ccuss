@@ -465,7 +465,13 @@ class CashMovementController extends Controller
                     ->where('organization_id', $organization->id)
                     ->where('holder_type', Customer::class)
                     ->where('holder_id', $selectedCustomer->id)
-                    ->with(['product', 'loanAccount', 'shareAccount', 'recurringDeposit'])
+                    ->with([
+                        'product',
+                        'loanAccount' => ['schedules.components', 'protectionPolicy', 'arrears'],
+                        'shareAccount',
+                        'recurringDeposit.installments',
+                        'fines',
+                    ])
                     ->orderBy('account_no')
                     ->get();
 
@@ -562,7 +568,13 @@ class CashMovementController extends Controller
             ->where('organization_id', $organization->id)
             ->where('holder_type', Customer::class)
             ->where('holder_id', $customer->id)
-            ->with(['product', 'loanAccount', 'shareAccount', 'recurringDeposit'])
+            ->with([
+                'product',
+                'loanAccount' => ['schedules.components', 'protectionPolicy', 'arrears'],
+                'shareAccount',
+                'recurringDeposit.installments',
+                'fines',
+            ])
             ->orderBy('account_no')
             ->get();
 
@@ -870,83 +882,141 @@ class CashMovementController extends Controller
     private function buildCustomerDepositObligations($customerAccounts): array
     {
         $rows = [];
+        $now = now();
+        $currentMonthStart = $now->copy()->startOfMonth();
 
         foreach ($customerAccounts as $account) {
             if ($account->account_type === 'LOAN' && $account->loanAccount) {
-                $principal = (float) ($account->loanAccount->principal_amount ?: $account->balance ?: 0);
-                $rate = (float) ($account->loanAccount->contractual_rate ?: 0.12);
-                $dailyInterest = $principal * $rate / 365;
-                $currentMonthDue = round($dailyInterest * 30, 2);
-                $previousDue = round($dailyInterest * 45, 2);
+                foreach ($account->loanAccount->schedules as $schedule) {
+                    foreach ($schedule->components as $component) {
+                        $outstanding = max(0, (float) $component->amount_due - (float) $component->amount_paid);
+                        if ($outstanding <= 0 || $component->status === 'PAID' || $component->status === 'WAIVED') {
+                            continue;
+                        }
 
-                $rows[] = [
-                    'id' => 'loan-interest-' . $account->id,
-                    'account_id' => $account->id,
-                    'account_type' => 'LOAN',
-                    'account_name' => $account->name,
-                    'account_no' => $account->account_no,
-                    'due_type' => 'Loan interest',
-                    'month' => 'Current month',
-                    'amount' => $currentMonthDue,
-                ];
-                $rows[] = [
-                    'id' => 'loan-interest-prev-' . $account->id,
-                    'account_id' => $account->id,
-                    'account_type' => 'LOAN',
-                    'account_name' => $account->name,
-                    'account_no' => $account->account_no,
-                    'due_type' => 'Loan interest',
-                    'month' => 'Previous month',
-                    'amount' => $previousDue,
-                ];
+                        $dueDate = $schedule->due_date;
+                        if ($dueDate->greaterThan($now->copy()->endOfMonth())) {
+                            continue;
+                        }
 
-                $protectionFee = 125;
-                $renewalFee = 50;
-                $fineAmount = 0;
+                        $typeLabels = [
+                            'PRINCIPAL' => 'Loan repayment',
+                            'INTEREST' => 'Loan interest',
+                            'FEE' => 'Loan fine',
+                            'PROTECTION_FEE' => 'Loan protection fee',
+                        ];
+                        $rows[] = [
+                            'id' => 'loan-' . $component->id,
+                            'account_id' => $account->id,
+                            'account_type' => 'LOAN',
+                            'account_name' => $account->name,
+                            'account_no' => $account->account_no,
+                            'due_type' => $typeLabels[$component->type] ?? 'Loan obligation',
+                            'month' => $dueDate->greaterThanOrEqualTo($currentMonthStart) ? 'Current month' : 'Previous month',
+                            'amount' => round($outstanding, 4),
+                        ];
+                    }
+                }
 
-                $rows[] = [
-                    'id' => 'protection-fee-' . $account->id,
-                    'account_id' => $account->id,
-                    'account_type' => 'LOAN',
-                    'account_name' => $account->name,
-                    'account_no' => $account->account_no,
-                    'due_type' => 'Loan protection fee',
-                    'month' => 'Current month',
-                    'amount' => $protectionFee,
-                ];
-                $rows[] = [
-                    'id' => 'renewal-fee-' . $account->id,
-                    'account_id' => $account->id,
-                    'account_type' => 'LOAN',
-                    'account_name' => $account->name,
-                    'account_no' => $account->account_no,
-                    'due_type' => 'Loan protection renew fee',
-                    'month' => 'Current month',
-                    'amount' => $renewalFee,
-                ];
-                $rows[] = [
-                    'id' => 'fine-' . $account->id,
-                    'account_id' => $account->id,
-                    'account_type' => 'LOAN',
-                    'account_name' => $account->name,
-                    'account_no' => $account->account_no,
-                    'due_type' => 'Loan fine',
-                    'month' => 'Previous month',
-                    'amount' => $fineAmount,
-                ];
+                $protectionPolicy = $account->loanAccount->protectionPolicy;
+                if (
+                    $protectionPolicy
+                    && $protectionPolicy->status === 'ACTIVE'
+                    && $protectionPolicy->next_renewal_at
+                    && $protectionPolicy->next_renewal_at->lessThanOrEqualTo($now->copy()->endOfMonth())
+                    && (float) $protectionPolicy->renewal_fee > 0
+                ) {
+                    $rows[] = [
+                        'id' => 'loan-protection-renewal-' . $account->id,
+                        'account_id' => $account->id,
+                        'account_type' => 'LOAN',
+                        'account_name' => $account->name,
+                        'account_no' => $account->account_no,
+                        'due_type' => 'Loan protection renew fee',
+                        'month' => $protectionPolicy->next_renewal_at->greaterThanOrEqualTo($currentMonthStart) ? 'Current month' : 'Previous month',
+                        'amount' => round((float) $protectionPolicy->renewal_fee, 4),
+                    ];
+                }
             }
 
-            if ($account->account_type === 'SAVINGS' || $account->account_type === 'SHARE' || $account->account_type === 'RECURRING_DEPOSIT') {
+            if (in_array($account->account_type, ['SAVINGS', 'SHARE'], true)) {
                 $depositDue = max(0, (float) $account->balance * 0.01);
+                if ($depositDue > 0) {
+                    $rows[] = [
+                        'id' => 'deposit-' . $account->id,
+                        'account_id' => $account->id,
+                        'account_type' => $account->account_type,
+                        'account_name' => $account->name,
+                        'account_no' => $account->account_no,
+                        'due_type' => 'Customer deposit',
+                        'month' => 'Current month',
+                        'amount' => round($depositDue, 4),
+                    ];
+                }
+            }
+
+            if ($account->account_type === 'RECURRING_DEPOSIT' && $account->recurringDeposit) {
+                foreach ($account->recurringDeposit->installments as $installment) {
+                    if (
+                        $installment->status === 'PAID'
+                        || $installment->status === 'WAIVED'
+                        || $installment->due_date->greaterThan($now->copy()->endOfMonth())
+                    ) {
+                        continue;
+                    }
+
+                    $contribution = max(0, (float) $installment->amount_due - (float) $installment->amount_paid);
+                    if ($contribution > 0) {
+                        $rows[] = [
+                            'id' => 'deposit-contribution-' . $installment->id,
+                            'account_id' => $account->id,
+                            'account_type' => $account->account_type,
+                            'account_name' => $account->name,
+                            'account_no' => $account->account_no,
+                            'due_type' => 'Deposit contribution',
+                            'month' => $installment->due_date->greaterThanOrEqualTo($currentMonthStart) ? 'Current month' : 'Previous month',
+                            'amount' => round($contribution, 4),
+                        ];
+                    }
+
+                    $fine = (float) $installment->fine_amount;
+                    if ($fine > 0) {
+                        $rows[] = [
+                            'id' => 'deposit-fine-' . $installment->id,
+                            'account_id' => $account->id,
+                            'account_type' => $account->account_type,
+                            'account_name' => $account->name,
+                            'account_no' => $account->account_no,
+                            'due_type' => 'Deposit fine',
+                            'month' => $installment->due_date->greaterThanOrEqualTo($currentMonthStart) ? 'Current month' : 'Previous month',
+                            'amount' => round($fine, 4),
+                        ];
+                    }
+                }
+            }
+
+            foreach ($account->fines as $fine) {
+                if (
+                    in_array($fine->status, ['PAID', 'WAIVED', 'REVERSED'], true)
+                    || $fine->assessed_at->greaterThan($now->copy()->endOfMonth())
+                ) {
+                    continue;
+                }
+
+                $outstanding = max(0, (float) $fine->assessed_amount - (float) $fine->waived_amount - (float) $fine->paid_amount);
+                if ($outstanding <= 0) {
+                    continue;
+                }
+
                 $rows[] = [
-                    'id' => 'deposit-' . $account->id,
+                    'id' => 'account-fine-' . $fine->id,
                     'account_id' => $account->id,
                     'account_type' => $account->account_type,
                     'account_name' => $account->name,
                     'account_no' => $account->account_no,
-                    'due_type' => 'Deposit contribution',
-                    'month' => 'Current month',
-                    'amount' => round($depositDue, 2),
+                    'due_type' => 'Deposit fine',
+                    'month' => $fine->assessed_at->greaterThanOrEqualTo($currentMonthStart) ? 'Current month' : 'Previous month',
+                    'amount' => round($outstanding, 4),
                 ];
             }
         }

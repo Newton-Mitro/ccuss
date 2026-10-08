@@ -346,9 +346,9 @@ export default function CustomerDepositPage() {
                             </div>
                         </div>
 
-                        <div className="grid items-start gap-4 xl:grid-cols-2">
-                            {/* Customer Accounts */}
-                            <div className="flex h-95 min-h-0 flex-col overflow-hidden rounded-xl border bg-card shadow-sm sm:h-105">
+                        <div className="grid items-start gap-4 xl:grid-cols-12">
+                            {/* Customer Accounts — 5/12 */}
+                            <div className="flex h-95 min-h-0 flex-col overflow-hidden rounded-xl border bg-card shadow-sm sm:h-105 xl:col-span-5">
                                 <div className="flex shrink-0 items-center justify-between gap-3 border-b bg-muted/20 px-4 py-3">
                                     <div className="flex min-w-0 items-center gap-3">
                                         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -359,6 +359,7 @@ export default function CustomerDepositPage() {
                                             <div className="text-sm font-semibold">
                                                 Customer accounts
                                             </div>
+
                                             <p className="text-[11px] text-muted-foreground">
                                                 Eligible accounts available for
                                                 selection
@@ -379,12 +380,15 @@ export default function CustomerDepositPage() {
                                                     <th className="px-4 py-2 text-left text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                                                         Account
                                                     </th>
+
                                                     <th className="px-3 py-2 text-left text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                                                         Type
                                                     </th>
+
                                                     <th className="px-3 py-2 text-right text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                                                         Balance
                                                     </th>
+
                                                     <th className="px-4 py-2 text-right text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                                                         Available
                                                     </th>
@@ -400,7 +404,7 @@ export default function CustomerDepositPage() {
                                                         >
                                                             <td className="px-4 py-2.5">
                                                                 <div className="flex min-w-0 items-center gap-2">
-                                                                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary">
+                                                                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
                                                                         <WalletCards className="h-3.5 w-3.5" />
                                                                     </div>
 
@@ -432,6 +436,7 @@ export default function CustomerDepositPage() {
                                                                 <span className="mr-1 text-[10px] text-muted-foreground">
                                                                     BDT
                                                                 </span>
+
                                                                 <span className="font-medium">
                                                                     {account.balance.toFixed(
                                                                         2,
@@ -443,6 +448,7 @@ export default function CustomerDepositPage() {
                                                                 <span className="mr-1 text-[10px] text-muted-foreground">
                                                                     BDT
                                                                 </span>
+
                                                                 <span className="font-semibold text-primary">
                                                                     {account.available_balance.toFixed(
                                                                         2,
@@ -475,8 +481,8 @@ export default function CustomerDepositPage() {
                                 )}
                             </div>
 
-                            {/* Obligations */}
-                            <div className="flex h-95 min-h-0 flex-col overflow-hidden rounded-xl border bg-card shadow-sm sm:h-105">
+                            {/* Obligations — 7/12 */}
+                            <div className="flex h-95 min-h-0 flex-col overflow-hidden rounded-xl border bg-card shadow-sm sm:h-105 xl:col-span-7">
                                 <div className="flex shrink-0 items-center justify-between gap-3 border-b bg-muted/20 px-4 py-3">
                                     <div className="flex min-w-0 items-center gap-3">
                                         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
@@ -487,6 +493,7 @@ export default function CustomerDepositPage() {
                                             <div className="text-sm font-semibold">
                                                 Obligations
                                             </div>
+
                                             <p className="text-[11px] text-muted-foreground">
                                                 Outstanding customer obligations
                                             </p>
@@ -506,15 +513,23 @@ export default function CustomerDepositPage() {
                                                     <th className="w-12 px-3 py-2 text-center text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                                                         Select
                                                     </th>
+
                                                     <th className="px-3 py-2 text-left text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                                                         Account
                                                     </th>
+
                                                     <th className="px-3 py-2 text-left text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                                                         Due type
                                                     </th>
+
+                                                    <th className="px-3 py-2 text-left text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
+                                                        Reference
+                                                    </th>
+
                                                     <th className="px-3 py-2 text-left text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                                                         Month
                                                     </th>
+
                                                     <th className="px-4 py-2 text-right text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                                                         Amount
                                                     </th>
@@ -528,20 +543,23 @@ export default function CustomerDepositPage() {
                                                         className="group transition-colors hover:bg-muted/30"
                                                     >
                                                         <td className="px-3 py-2.5 text-center">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={Boolean(
-                                                                    selectedRows[
-                                                                        row.id
-                                                                    ],
-                                                                )}
-                                                                onChange={() =>
-                                                                    toggleRow(
-                                                                        row.id,
-                                                                    )
-                                                                }
-                                                                className="h-4 w-4 cursor-pointer rounded border-input accent-primary"
-                                                            />
+                                                            <label className="inline-flex cursor-pointer items-center justify-center rounded-md p-1.5 transition-colors hover:bg-primary/10">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={Boolean(
+                                                                        selectedRows[
+                                                                            row
+                                                                                .id
+                                                                        ],
+                                                                    )}
+                                                                    onChange={() =>
+                                                                        toggleRow(
+                                                                            row.id,
+                                                                        )
+                                                                    }
+                                                                    className="h-4 w-4 cursor-pointer rounded border-input accent-primary"
+                                                                />
+                                                            </label>
                                                         </td>
 
                                                         <td className="px-3 py-2.5">
@@ -566,6 +584,12 @@ export default function CustomerDepositPage() {
                                                             </span>
                                                         </td>
 
+                                                        <td className="px-3 py-2.5">
+                                                            <span className="font-mono text-[11px] text-muted-foreground">
+                                                                {row.id}
+                                                            </span>
+                                                        </td>
+
                                                         <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">
                                                             {row.month}
                                                         </td>
@@ -574,6 +598,7 @@ export default function CustomerDepositPage() {
                                                             <span className="mr-1 text-[10px] text-muted-foreground">
                                                                 BDT
                                                             </span>
+
                                                             <span className="font-semibold">
                                                                 {row.amount.toFixed(
                                                                     2,

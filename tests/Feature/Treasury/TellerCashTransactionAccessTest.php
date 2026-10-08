@@ -8,6 +8,12 @@ use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
 use App\FinancialServices\Models\FinancialAccount;
+use App\FinancialServices\Models\LoanAccount;
+use App\FinancialServices\Models\LoanProtectionPolicy;
+use App\FinancialServices\Models\LoanSchedule;
+use App\FinancialServices\Models\LoanScheduleComponent;
+use App\FinancialServices\Models\RecurringDeposit;
+use App\FinancialServices\Models\RecurringDepositInstallment;
 use App\GeneralAccounting\Models\AccountGroup;
 use App\GeneralAccounting\Models\FiscalPeriod;
 use App\GeneralAccounting\Models\FiscalYear;
@@ -433,6 +439,129 @@ it('restores the selected customer account on the customer deposit page', functi
             ->where('selectedAccount.id', $account->id)
             ->where('obligations.0.account_name', $account->name)
             ->where('obligations.0.account_no', $account->account_no));
+});
+
+it('lists real customer loan, protection, deposit, and fine obligations', function () {
+    $fixture = tellerCashTransactionFixture();
+    grantTellerCashTransactionPermission($fixture['user']);
+    $customer = Customer::factory()->individualMale()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+    ]);
+    $loanAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'holder_type' => Customer::class,
+        'holder_id' => $customer->id,
+        'account_type' => 'LOAN',
+        'account_no' => 'LOAN-OBLIGATION-001',
+        'name' => 'Loan Obligation Account',
+    ]);
+    $loan = LoanAccount::create([
+        'financial_account_id' => $loanAccount->id,
+        'loan_no' => 'LOAN-OBLIGATION-001',
+        'principal_amount' => 1000,
+        'contractual_rate' => 0.12,
+        'interest_calculation' => 'SIMPLE',
+        'interest_frequency' => 'MONTHLY',
+        'term_value' => 12,
+        'term_unit' => 'MONTH',
+        'status' => 'ACTIVE',
+    ]);
+    $schedule = LoanSchedule::create([
+        'loan_account_id' => $loan->id,
+        'schedule_version' => 1,
+        'installment_no' => 1,
+        'due_date' => now()->toDateString(),
+        'opening_principal' => 1000,
+        'scheduled_principal' => 100,
+        'scheduled_interest' => 20,
+        'scheduled_fee' => 10,
+        'scheduled_protection_fee' => 5,
+        'total_due' => 135,
+        'total_paid' => 0,
+        'status' => 'OVERDUE',
+    ]);
+    LoanScheduleComponent::create([
+        'loan_schedule_id' => $schedule->id,
+        'type' => 'PRINCIPAL',
+        'amount_due' => 100,
+        'amount_paid' => 0,
+        'status' => 'PENDING',
+    ]);
+    LoanScheduleComponent::create([
+        'loan_schedule_id' => $schedule->id,
+        'type' => 'INTEREST',
+        'amount_due' => 20,
+        'amount_paid' => 0,
+        'status' => 'PENDING',
+    ]);
+    LoanScheduleComponent::create([
+        'loan_schedule_id' => $schedule->id,
+        'type' => 'FEE',
+        'amount_due' => 10,
+        'amount_paid' => 0,
+        'status' => 'PENDING',
+    ]);
+    LoanScheduleComponent::create([
+        'loan_schedule_id' => $schedule->id,
+        'type' => 'PROTECTION_FEE',
+        'amount_due' => 5,
+        'amount_paid' => 0,
+        'status' => 'PENDING',
+    ]);
+    LoanProtectionPolicy::create([
+        'loan_account_id' => $loan->id,
+        'required' => true,
+        'initial_fee' => 0,
+        'renewal_fee' => 50,
+        'renewal_frequency' => 'MONTHLY',
+        'next_renewal_at' => now()->toDateString(),
+        'status' => 'ACTIVE',
+    ]);
+    $depositAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'holder_type' => Customer::class,
+        'holder_id' => $customer->id,
+        'account_type' => 'RECURRING_DEPOSIT',
+        'account_no' => 'DEPOSIT-OBLIGATION-001',
+        'name' => 'Deposit Obligation Account',
+    ]);
+    $recurringDeposit = RecurringDeposit::create([
+        'financial_account_id' => $depositAccount->id,
+        'installment_amount' => 100,
+        'installment_frequency' => 'MONTHLY',
+        'total_installments' => 1,
+        'paid_installments' => 0,
+        'started_at' => now()->subMonth()->toDateString(),
+        'maturity_date' => now()->addMonth()->toDateString(),
+    ]);
+    RecurringDepositInstallment::create([
+        'recurring_deposit_id' => $recurringDeposit->id,
+        'installment_no' => 1,
+        'due_date' => now()->subMonth()->toDateString(),
+        'amount_due' => 100,
+        'amount_paid' => 0,
+        'fine_amount' => 25,
+        'status' => 'MISSED',
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('teller-transactions.customer-deposit', [
+            'customer_id' => $customer->id,
+            'account_id' => $loanAccount->id,
+        ]))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page
+            ->where('obligations', fn($obligations) => collect($obligations)->contains(fn($row) => $row['due_type'] === 'Loan repayment' && $row['amount'] === 100)
+                && collect($obligations)->contains(fn($row) => $row['due_type'] === 'Loan interest' && $row['amount'] === 20)
+                && collect($obligations)->contains(fn($row) => $row['due_type'] === 'Loan fine' && $row['amount'] === 10)
+                && collect($obligations)->contains(fn($row) => $row['due_type'] === 'Loan protection fee' && $row['amount'] === 5)
+                && collect($obligations)->contains(fn($row) => $row['due_type'] === 'Loan protection renew fee' && $row['amount'] === 50)
+                && collect($obligations)->contains(fn($row) => $row['due_type'] === 'Deposit contribution' && $row['amount'] === 100)
+                && collect($obligations)->contains(fn($row) => $row['due_type'] === 'Deposit fine' && $row['amount'] === 25)));
 });
 
 it('creates a pending teller cash deposit for an open session', function () {
