@@ -3,6 +3,7 @@ import type { Customer } from '@/types/customer_kyc_module';
 import { Head, router, usePage } from '@inertiajs/react';
 import {
     ArrowDownToLine,
+    ArrowUpRight,
     CreditCard,
     Search,
     ShieldCheck,
@@ -99,6 +100,23 @@ export default function CustomerDepositPage() {
             ) ?? null,
         [selectedTellerSessionId, teller_sessions],
     );
+
+    const getAccountViewRoute = (account: CustomerAccount) => {
+        const routeName =
+            account.account_type === 'SAVINGS'
+                ? 'financial-accounts.savings.show'
+                : account.account_type === 'SHARE'
+                  ? 'financial-accounts.share.show'
+                  : account.account_type === 'FIXED_DEPOSIT'
+                    ? 'financial-accounts.fixed.show'
+                    : account.account_type === 'RECURRING_DEPOSIT'
+                      ? 'financial-accounts.recurring.show'
+                      : account.account_type === 'LOAN'
+                        ? 'loan-accounts.show'
+                        : 'financial-accounts.show';
+
+        return route(routeName, account.id);
+    };
 
     const totalSelected = useMemo(
         () =>
@@ -392,6 +410,10 @@ export default function CustomerDepositPage() {
                                                     <th className="px-4 py-2 text-right text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                                                         Available
                                                     </th>
+
+                                                    <th className="px-3 py-2 text-right text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
+                                                        View
+                                                    </th>
                                                 </tr>
                                             </thead>
 
@@ -454,6 +476,20 @@ export default function CustomerDepositPage() {
                                                                         2,
                                                                     )}
                                                                 </span>
+                                                            </td>
+
+                                                            <td className="px-3 py-2.5 text-right">
+                                                                <a
+                                                                    href={getAccountViewRoute(
+                                                                        account,
+                                                                    )}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="inline-flex h-7 w-7 items-center justify-center rounded-md border bg-background text-muted-foreground transition-colors hover:border-primary/30 hover:text-primary"
+                                                                    title="View account"
+                                                                >
+                                                                    <ArrowUpRight className="h-3.5 w-3.5" />
+                                                                </a>
                                                             </td>
                                                         </tr>
                                                     ),
