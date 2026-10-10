@@ -11,6 +11,7 @@ use App\GeneralAccounting\Models\FiscalPeriod;
 use App\GeneralAccounting\Models\FiscalYear;
 use App\GeneralAccounting\Models\LedgerAccount;
 use App\GeneralAccounting\Models\TreasuryGlMapping;
+use App\GeneralAccounting\Models\Voucher;
 use App\TreasuryAndCash\Models\Bank;
 use App\TreasuryAndCash\Models\BankAccount;
 use App\TreasuryAndCash\Models\BranchDay;
@@ -171,6 +172,50 @@ function cashTransferFixture(): array
         'expected_cash' => 1000,
         'opened_at' => now(),
     ]);
+
+    $accountGroup = AccountGroup::factory()->create(['organization_id' => $organization->id]);
+    $clearingAccount = LedgerAccount::factory()->create([
+        'organization_id' => $organization->id,
+        'account_group_id' => $accountGroup->id,
+    ]);
+    $tellerLedgerAccount = LedgerAccount::factory()->create([
+        'organization_id' => $organization->id,
+        'account_group_id' => $accountGroup->id,
+    ]);
+    $vaultLedgerAccount = LedgerAccount::factory()->create([
+        'organization_id' => $organization->id,
+        'account_group_id' => $accountGroup->id,
+    ]);
+    $fiscalYear = FiscalYear::factory()->create([
+        'organization_id' => $organization->id,
+        'name' => 'Transfer Fiscal Year ' . $organization->id,
+        'start_date' => '2026-01-01',
+        'end_date' => '2026-12-31',
+        'status' => 'OPEN',
+    ]);
+    FiscalPeriod::factory()->create([
+        'fiscal_year_id' => $fiscalYear->id,
+        'start_date' => '2026-01-01',
+        'end_date' => '2026-12-31',
+        'status' => 'OPEN',
+    ]);
+
+    foreach ([
+        ['TELLER', 'DEPOSIT', $tellerLedgerAccount->id, $clearingAccount->id],
+        ['TELLER', 'WITHDRAWAL', $clearingAccount->id, $tellerLedgerAccount->id],
+        ['VAULT', 'DEPOSIT', $vaultLedgerAccount->id, $clearingAccount->id],
+        ['VAULT', 'WITHDRAWAL', $clearingAccount->id, $vaultLedgerAccount->id],
+    ] as [$sourceCode, $transactionType, $debitAccountId, $creditAccountId]) {
+        TreasuryGlMapping::query()->create([
+            'organization_id' => $organization->id,
+            'source_type' => 'CASH_LOCATION',
+            'source_code' => $sourceCode,
+            'transaction_type' => $transactionType,
+            'debit_account_id' => $debitAccountId,
+            'credit_account_id' => $creditAccountId,
+            'status' => true,
+        ]);
+    }
 
     return compact(
         'organization',
@@ -452,7 +497,11 @@ it('funds an open vault from a bank and updates both balances on completion', fu
         ->and($bankTransaction->type)->toBe('TRANSFER_OUT')
         ->and($bankTransaction->status)->toBe('POSTED')
         ->and($bankTransaction->balance_after)->toBe('9750.0000')
-        ->and($fixture['vaultSession']->fresh()->expected_cash)->toBe('1250.0000');
+        ->and($fixture['vaultSession']->fresh()->expected_cash)->toBe('1250.0000')
+        ->and(Voucher::query()->where(
+            'voucher_no',
+            'CASH-TRF-' . $transfer->id . '-CASH-IN',
+        )->exists())->toBeTrue();
 
     TreasuryGlMapping::query()->create([
         'organization_id' => $fixture['organization']->id,
@@ -500,7 +549,11 @@ it('funds an open vault from a bank and updates both balances on completion', fu
         ->and($depositBankTransaction->type)->toBe('TRANSFER_IN')
         ->and($depositBankTransaction->status)->toBe('POSTED')
         ->and($depositBankTransaction->balance_after)->toBe('9950.0000')
-        ->and($fixture['vaultSession']->fresh()->expected_cash)->toBe('1050.0000');
+        ->and($fixture['vaultSession']->fresh()->expected_cash)->toBe('1050.0000')
+        ->and(Voucher::query()->where(
+            'voucher_no',
+            'CASH-TRF-' . $vaultDeposit->id . '-CASH-OUT',
+        )->exists())->toBeTrue();
 });
 
 it('moves cash between open vault sessions on vault-to-vault completion', function () {
@@ -586,5 +639,9 @@ it('approves and completes a pending cash transfer', function () {
     expect($transfer->fresh()->status)->toBe('COMPLETED')
         ->and($transfer->fresh()->completed_at)->not->toBeNull()
         ->and($fixture['sourceSession']->fresh()->expected_cash)->toBe('3749.5000')
-        ->and($fixture['targetSession']->fresh()->expected_cash)->toBe('1350.5000');
+        ->and($fixture['targetSession']->fresh()->expected_cash)->toBe('1350.5000')
+        ->and(Voucher::query()->whereIn('voucher_no', [
+            'CASH-TRF-' . $transfer->id . '-CASH-OUT',
+            'CASH-TRF-' . $transfer->id . '-CASH-IN',
+        ])->count())->toBe(2);
 });

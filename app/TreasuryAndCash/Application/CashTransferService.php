@@ -2,6 +2,7 @@
 
 namespace App\TreasuryAndCash\Application;
 
+use App\GeneralAccounting\Application\TreasurySummaryPostingService;
 use App\TreasuryAndCash\Models\BankAccount;
 use App\TreasuryAndCash\Models\BranchDay;
 use App\TreasuryAndCash\Models\CashLocation;
@@ -14,6 +15,7 @@ class CashTransferService
 {
     public function __construct(
         private readonly BankTransactionService $bankTransactionService,
+        private readonly TreasurySummaryPostingService $summaryPostingService,
     ) {
     }
 
@@ -165,6 +167,15 @@ class CashTransferService
                 $this->bankTransactionService->post($organizationId, $branchId, $bankTransaction->id, $userId);
                 $transfer->bank_transaction_id = $bankTransaction->id;
                 $destinationSession->update(['expected_cash' => $destinationExpected + $amount]);
+                $this->postCashLocationLeg(
+                    $organizationId,
+                    $branchId,
+                    $userId,
+                    $transfer,
+                    $transfer->toCashLocation,
+                    'DEPOSIT',
+                    'CASH-IN',
+                );
             } elseif ($transfer->transfer_type === 'VAULT_TO_BANK') {
                 $sourceSession = $this->openSessionForLocation($transfer->fromCashLocation, $transfer->branch_day_id);
                 $sourceExpected = (float) ($sourceSession->expected_cash ?? $sourceSession->opening_cash);
@@ -183,6 +194,15 @@ class CashTransferService
                 $this->bankTransactionService->post($organizationId, $branchId, $bankTransaction->id, $userId);
                 $sourceSession->update(['expected_cash' => $sourceExpected - $amount]);
                 $transfer->bank_transaction_id = $bankTransaction->id;
+                $this->postCashLocationLeg(
+                    $organizationId,
+                    $branchId,
+                    $userId,
+                    $transfer,
+                    $transfer->fromCashLocation,
+                    'WITHDRAWAL',
+                    'CASH-OUT',
+                );
             } else {
                 $destinationSession = $this->openSessionForLocation($transfer->toCashLocation, $transfer->branch_day_id);
                 $destinationExpected = (float) ($destinationSession->expected_cash ?? $destinationSession->opening_cash);
@@ -195,6 +215,24 @@ class CashTransferService
 
                 $sourceSession->update(['expected_cash' => $sourceExpected - $amount]);
                 $destinationSession->update(['expected_cash' => $destinationExpected + $amount]);
+                $this->postCashLocationLeg(
+                    $organizationId,
+                    $branchId,
+                    $userId,
+                    $transfer,
+                    $transfer->fromCashLocation,
+                    'WITHDRAWAL',
+                    'CASH-OUT',
+                );
+                $this->postCashLocationLeg(
+                    $organizationId,
+                    $branchId,
+                    $userId,
+                    $transfer,
+                    $transfer->toCashLocation,
+                    'DEPOSIT',
+                    'CASH-IN',
+                );
             }
 
             $transfer->update([
@@ -204,6 +242,30 @@ class CashTransferService
 
             return $transfer->fresh();
         });
+    }
+
+    private function postCashLocationLeg(
+        int $organizationId,
+        int $branchId,
+        int $userId,
+        CashTransfer $transfer,
+        CashLocation $location,
+        string $transactionType,
+        string $suffix,
+    ): void {
+        $this->summaryPostingService->post(
+            organizationId: $organizationId,
+            sourceType: 'CASH_LOCATION',
+            sourceCode: $location->type,
+            transactionType: $transactionType,
+            voucherNo: 'CASH-TRF-' . $transfer->id . '-' . $suffix,
+            voucherDate: now()->toDateString(),
+            branchId: $branchId,
+            userId: $userId,
+            amount: (float) $transfer->amount,
+            description: 'Cash transfer ' . $transfer->transfer_no . ' ' . strtolower($transactionType),
+            reference: $transfer->transfer_no,
+        );
     }
 
     private function openSessionForLocation(CashLocation $location, int $branchDayId): TellerSession|VaultSession

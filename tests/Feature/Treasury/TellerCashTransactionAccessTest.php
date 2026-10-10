@@ -818,7 +818,7 @@ it('creates a pending customer deposit from selected obligations', function () {
         ->post(route('teller-transactions.customer-deposit.store'), [
             'teller_session_id' => $fixture['session']->id,
             'customer_id' => $customer->id,
-            'amount' => '10.00',
+            'amount' => '5.00',
             'selected' => ['deposit-' . $savingsAccount->id],
             'note' => 'Customer cash deposit',
         ])
@@ -827,8 +827,10 @@ it('creates a pending customer deposit from selected obligations', function () {
     $transaction = TellerCashTransaction::query()->latest()->firstOrFail();
 
     expect($transaction->type)->toBe('DEPOSIT')
-        ->and($transaction->amount)->toBe('10.0000')
-        ->and($transaction->financial_transaction_id)->not->toBeNull();
+        ->and($transaction->amount)->toBe('5.0000')
+        ->and($transaction->financialTransaction->amount)->toBe('10.0000')
+        ->and($transaction->financialTransaction->entries)
+        ->toHaveCount(2);
 });
 
 it('posts a pending deposit and updates the teller expected cash', function () {

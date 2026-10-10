@@ -600,12 +600,24 @@ class CashMovementController extends Controller
             ]);
         }
 
+        $remainingAmount = round((float) $data['amount'], 4);
         $lines = $selectedObligations
-            ->map(fn(array $obligation): array => [
-                'financial_account_id' => (int) $obligation['account_id'],
-                'amount' => (string) number_format((float) $obligation['amount'], 4, '.', ''),
-                'description' => $obligation['due_type'] . ' - ' . $obligation['month'],
-            ])
+            ->map(function (array $obligation) use (&$remainingAmount): ?array {
+                if ($remainingAmount <= 0) {
+                    return null;
+                }
+
+                $lineAmount = min(round((float) $obligation['amount'], 4), $remainingAmount);
+                $remainingAmount = round($remainingAmount - $lineAmount, 4);
+
+                return [
+                    'financial_account_id' => (int) $obligation['account_id'],
+                    'amount' => (string) number_format($lineAmount, 4, '.', ''),
+                    'description' => $obligation['due_type'] . ' - ' . $obligation['month'],
+                ];
+            })
+            ->filter()
+            ->values()
             ->all();
 
         $this->tellerCashTransactionService->create(

@@ -20,14 +20,21 @@ class TreasuryCashLocationsSeeder extends Seeder
         $organization = Organization::query()->where('code', 'ORG-001')->firstOrFail();
         $branchId = $organization->branches()->oldest('id')->value('id');
         $user = User::query()->where('email', 'super.admin@email.com')->firstOrFail();
+        $secondTellerUser = User::query()->where('email', 'employee@email.com')->firstOrFail();
 
         $accounts = FinancialAccount::query()
             ->where('organization_id', $organization->id)
-            ->whereIn('account_no', ['CASH-VAULT-001', 'CASH-TELLER-001', 'CASH-PETTY-001'])
+            ->whereIn('account_no', [
+                'CASH-VAULT-001',
+                'CASH-VAULT-002',
+                'CASH-TELLER-001',
+                'CASH-TELLER-002',
+                'CASH-PETTY-001',
+            ])
             ->get()
             ->keyBy('account_no');
 
-        DB::transaction(function () use ($organization, $branchId, $user, $accounts): void {
+        DB::transaction(function () use ($organization, $branchId, $user, $secondTellerUser, $accounts): void {
             CashDenomination::seedBangladeshPreset($organization->id);
 
             $vaultLocation = CashLocation::query()->updateOrCreate(
@@ -54,6 +61,30 @@ class TreasuryCashLocationsSeeder extends Seeder
                 ],
             );
 
+            $secondVaultLocation = CashLocation::query()->updateOrCreate(
+                [
+                    'organization_id' => $organization->id,
+                    'code' => 'VAULT-002',
+                ],
+                [
+                    'branch_id' => $branchId,
+                    'financial_account_id' => $accounts['CASH-VAULT-002']->id,
+                    'name' => 'Secondary Vault',
+                    'type' => 'VAULT',
+                    'is_active' => true,
+                ],
+            );
+
+            Vault::query()->updateOrCreate(
+                ['cash_location_id' => $secondVaultLocation->id],
+                [
+                    'code' => 'VAULT-002',
+                    'name' => 'Secondary Branch Vault',
+                    'status' => 'ACTIVE',
+                    'maximum_balance' => 500000,
+                ],
+            );
+
             $tellerLocation = CashLocation::query()->updateOrCreate(
                 [
                     'organization_id' => $organization->id,
@@ -74,6 +105,31 @@ class TreasuryCashLocationsSeeder extends Seeder
                     'user_id' => $user->id,
                     'code' => 'TELLER-001',
                     'name' => 'Main Teller',
+                    'status' => 'ACTIVE',
+                    'maximum_cash' => 100000,
+                ],
+            );
+
+            $secondTellerLocation = CashLocation::query()->updateOrCreate(
+                [
+                    'organization_id' => $organization->id,
+                    'code' => 'TELLER-002',
+                ],
+                [
+                    'branch_id' => $branchId,
+                    'financial_account_id' => $accounts['CASH-TELLER-002']->id,
+                    'name' => 'Secondary Teller',
+                    'type' => 'TELLER',
+                    'is_active' => true,
+                ],
+            );
+
+            Teller::query()->updateOrCreate(
+                ['cash_location_id' => $secondTellerLocation->id],
+                [
+                    'user_id' => $secondTellerUser->id,
+                    'code' => 'TELLER-002',
+                    'name' => 'Secondary Teller',
                     'status' => 'ACTIVE',
                     'maximum_cash' => 100000,
                 ],
