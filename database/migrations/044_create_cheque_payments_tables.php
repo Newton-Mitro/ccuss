@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->foreignId('financial_transaction_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('signatory_customer_id')->nullable()->constrained('customers')->nullOnDelete();
             $table->string('status', 30)->default('RECEIVED');
-            $table->decimal('amount', 20, 4);
+            $table->decimal('amount', 20, 2);
             $table->json('checks')->nullable();
             $table->text('note')->nullable();
             $table->text('return_reason')->nullable();

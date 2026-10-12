@@ -27,7 +27,7 @@ return new class extends Migration {
             $table->string('code', 50);
             $table->string('name', 150);
             $table->enum('status', ['ACTIVE', 'INACTIVE', 'CLOSED'])->default('ACTIVE');
-            $table->decimal('maximum_balance', 20, 4)->nullable();
+            $table->decimal('maximum_balance', 20, 2)->nullable();
             $table->timestamps();
             $table->unique('code');
         });
@@ -39,7 +39,7 @@ return new class extends Migration {
             $table->string('code', 50);
             $table->string('name', 150);
             $table->enum('status', ['ACTIVE', 'INACTIVE', 'CLOSED'])->default('ACTIVE');
-            $table->decimal('maximum_cash', 20, 4)->nullable();
+            $table->decimal('maximum_cash', 20, 2)->nullable();
             $table->timestamps();
             $table->unique('code');
         });
@@ -51,11 +51,11 @@ return new class extends Migration {
             $table->foreignId('opened_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('closed_by')->nullable()->constrained('users')->nullOnDelete();
             $table->enum('status', ['OPEN', 'CLOSING', 'CLOSED'])->default('OPEN');
-            $table->decimal('opening_cash', 20, 4)->default(0);
+            $table->decimal('opening_cash', 20, 2)->default(0);
             $table->text('opening_note')->nullable();
-            $table->decimal('closing_cash', 20, 4)->nullable();
-            $table->decimal('expected_cash', 20, 4)->nullable();
-            $table->decimal('cash_difference', 20, 4)->nullable();
+            $table->decimal('closing_cash', 20, 2)->nullable();
+            $table->decimal('expected_cash', 20, 2)->nullable();
+            $table->decimal('cash_difference', 20, 2)->nullable();
             $table->timestamp('opened_at')->nullable();
             $table->timestamp('closed_at')->nullable();
             $table->text('closing_note')->nullable();
@@ -68,7 +68,7 @@ return new class extends Migration {
             $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
             $table->string('currency', 10)->default('BDT');
             $table->enum('type', ['NOTE', 'COIN'])->default('NOTE');
-            $table->decimal('value', 20, 4);
+            $table->decimal('value', 20, 2);
             $table->string('name', 50)->nullable();
             $table->boolean('is_active')->default(true);
             $table->unsignedInteger('sort_order')->default(0);
@@ -82,7 +82,7 @@ return new class extends Migration {
             $table->foreignId('cash_location_id')->constrained()->restrictOnDelete();
             $table->foreignId('teller_session_id')->nullable()->constrained()->nullOnDelete();
             $table->enum('type', ['OPENING', 'CLOSING', 'TRANSFER_OUT', 'TRANSFER_IN', 'VERIFICATION', 'ADJUSTMENT']);
-            $table->decimal('total_amount', 20, 4)->default(0);
+            $table->decimal('total_amount', 20, 2)->default(0);
             $table->foreignId('counted_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('counted_at');
             $table->text('note')->nullable();
@@ -95,7 +95,7 @@ return new class extends Migration {
             $table->foreignId('cash_count_id')->constrained()->cascadeOnDelete();
             $table->foreignId('cash_denomination_id')->constrained()->restrictOnDelete();
             $table->unsignedInteger('quantity')->default(0);
-            $table->decimal('amount', 20, 4)->default(0);
+            $table->decimal('amount', 20, 2)->default(0);
             $table->timestamps();
             $table->unique(['cash_count_id', 'cash_denomination_id'], 'cash_count_denomination_unique');
         });
@@ -115,7 +115,7 @@ return new class extends Migration {
                 'BANK_TO_VAULT',
                 'VAULT_TO_BANK',
             ])->default('TELLER_TO_TELLER');
-            $table->decimal('amount', 20, 4);
+            $table->decimal('amount', 20, 2);
             $table->string('transfer_no', 100);
             $table->enum('status', ['PENDING', 'APPROVED', 'COMPLETED', 'CANCELLED'])->default('PENDING');
             $table->foreignId('requested_by')->nullable()->constrained('users')->nullOnDelete();
@@ -133,8 +133,8 @@ return new class extends Migration {
             $table->foreignId('custodian_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('code', 50);
             $table->string('name', 150);
-            $table->decimal('fund_limit', 20, 4);
-            $table->decimal('current_balance', 20, 4)->default(0);
+            $table->decimal('fund_limit', 20, 2);
+            $table->decimal('current_balance', 20, 2)->default(0);
             $table->enum('method', ['IMPREST', 'VARIABLE'])->default('IMPREST');
             $table->enum('status', ['ACTIVE', 'INACTIVE', 'CLOSED'])->default('ACTIVE');
             $table->timestamps();
@@ -147,7 +147,7 @@ return new class extends Migration {
             $table->foreignId('petty_cash_fund_id')->constrained()->restrictOnDelete();
             $table->string('transaction_no', 100);
             $table->enum('type', ['FUNDING', 'EXPENSE', 'REPLENISHMENT', 'RETURN', 'ADJUSTMENT']);
-            $table->decimal('amount', 20, 4);
+            $table->decimal('amount', 20, 2);
             $table->string('payee')->nullable();
             $table->text('description')->nullable();
             $table->foreignId('expense_account_id')->nullable()->constrained('accounts')->nullOnDelete();
@@ -160,14 +160,14 @@ return new class extends Migration {
         Schema::create('branch_cash_summaries', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('branch_day_id')->unique()->constrained()->cascadeOnDelete();
-            $table->decimal('opening_cash', 20, 4)->default(0);
-            $table->decimal('cash_received', 20, 4)->default(0);
-            $table->decimal('cash_paid', 20, 4)->default(0);
-            $table->decimal('vault_balance', 20, 4)->default(0);
-            $table->decimal('teller_balance', 20, 4)->default(0);
-            $table->decimal('petty_cash_balance', 20, 4)->default(0);
-            $table->decimal('closing_cash', 20, 4)->default(0);
-            $table->decimal('cash_difference', 20, 4)->default(0);
+            $table->decimal('opening_cash', 20, 2)->default(0);
+            $table->decimal('cash_received', 20, 2)->default(0);
+            $table->decimal('cash_paid', 20, 2)->default(0);
+            $table->decimal('vault_balance', 20, 2)->default(0);
+            $table->decimal('teller_balance', 20, 2)->default(0);
+            $table->decimal('petty_cash_balance', 20, 2)->default(0);
+            $table->decimal('closing_cash', 20, 2)->default(0);
+            $table->decimal('cash_difference', 20, 2)->default(0);
             $table->timestamps();
         });
 
@@ -176,7 +176,7 @@ return new class extends Migration {
             $table->foreignId('branch_day_id')->constrained()->cascadeOnDelete();
             $table->foreignId('cash_location_id')->constrained()->restrictOnDelete();
             $table->foreignId('teller_session_id')->nullable()->constrained()->nullOnDelete();
-            $table->decimal('amount', 20, 4);
+            $table->decimal('amount', 20, 2);
             $table->enum('type', ['SHORTAGE', 'EXCESS']);
             $table->text('reason');
             $table->enum('status', ['PENDING', 'APPROVED', 'POSTED', 'CANCELLED'])->default('PENDING');
@@ -195,7 +195,7 @@ return new class extends Migration {
             $table->foreignId('financial_transaction_id')->nullable()->constrained('financial_transactions')->nullOnDelete();
             $table->string('transaction_no', 100);
             $table->enum('type', ['DEPOSIT', 'WITHDRAWAL']);
-            $table->decimal('amount', 20, 4);
+            $table->decimal('amount', 20, 2);
             $table->enum('status', ['PENDING', 'POSTED', 'CANCELLED', 'REVERSED'])->default('PENDING');
             $table->string('reference')->nullable();
             $table->text('note')->nullable();

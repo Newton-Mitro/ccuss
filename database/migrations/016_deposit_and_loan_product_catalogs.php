@@ -32,11 +32,11 @@ return new class extends Migration {
             $table->string('name', 150);
             $table->unsignedInteger('tenure_value');
             $table->enum('tenure_unit', ['DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR']);
-            $table->decimal('interest_rate', 12, 6)->default(0);
+            $table->decimal('interest_rate', 12, 2)->default(0);
             $table->enum('interest_calculation', ['NONE', 'SIMPLE', 'COMPOUND', 'FLAT', 'REDUCING_BALANCE'])->default('NONE');
             $table->enum('interest_frequency', ['NONE', 'DAILY', 'MONTHLY', 'QUARTERLY', 'HALF_YEARLY', 'YEARLY', 'MATURITY'])->default('NONE');
-            $table->decimal('minimum_amount', 20, 4)->nullable();
-            $table->decimal('maximum_amount', 20, 4)->nullable();
+            $table->decimal('minimum_amount', 20, 2)->nullable();
+            $table->decimal('maximum_amount', 20, 2)->nullable();
             $table->json('rules')->nullable();
             $table->boolean('status')->default(true);
             $table->date('effective_from')->nullable();
@@ -49,10 +49,10 @@ return new class extends Migration {
         Schema::create('deposit_policies', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('deposit_product_id')->unique()->constrained()->cascadeOnDelete();
-            $table->decimal('minimum_opening_amount', 20, 4)->nullable();
-            $table->decimal('minimum_deposit_amount', 20, 4)->nullable();
-            $table->decimal('maximum_deposit_amount', 20, 4)->nullable();
-            $table->decimal('interest_rebate_percent', 8, 4)->nullable();
+            $table->decimal('minimum_opening_amount', 20, 2)->nullable();
+            $table->decimal('minimum_deposit_amount', 20, 2)->nullable();
+            $table->decimal('maximum_deposit_amount', 20, 2)->nullable();
+            $table->decimal('interest_rebate_percent', 8, 2)->nullable();
             $table->boolean('customer_can_open_multiple_account')->nullable();
             $table->json('deposit_amount_rules')->nullable();
             $table->json('tenure_rules')->nullable();
@@ -88,7 +88,7 @@ return new class extends Migration {
             $table->string('code', 50);
             $table->string('name', 150);
             $table->enum('balance_type', ['ASSET', 'LIABILITY', 'EQUITY'])->default('ASSET');
-            $table->decimal('interest_rate', 12, 6)->default(0);
+            $table->decimal('interest_rate', 12, 2)->default(0);
             $table->enum('interest_calculation', ['NONE', 'SIMPLE', 'COMPOUND', 'FLAT', 'REDUCING_BALANCE'])->default('SIMPLE');
             $table->enum('interest_frequency', ['NONE', 'DAILY', 'MONTHLY', 'QUARTERLY', 'HALF_YEARLY', 'YEARLY', 'MATURITY'])->default('MONTHLY');
             $table->boolean('customer_can_open_multiple_account')->default(true);
@@ -103,9 +103,9 @@ return new class extends Migration {
         Schema::create('loan_policies', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('loan_product_id')->unique()->constrained()->cascadeOnDelete();
-            $table->decimal('maximum_loan_amount', 20, 4)->nullable();
-            $table->decimal('loan_to_value_percent', 8, 4)->nullable();
-            $table->decimal('interest_rebate_percent', 8, 4)->nullable();
+            $table->decimal('maximum_loan_amount', 20, 2)->nullable();
+            $table->decimal('loan_to_value_percent', 8, 2)->nullable();
+            $table->decimal('interest_rebate_percent', 8, 2)->nullable();
             $table->boolean('customer_can_open_multiple_account')->nullable();
             $table->json('loan_ceiling_rules')->nullable();
             $table->json('repayment_rules')->nullable();

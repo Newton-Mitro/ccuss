@@ -28,7 +28,7 @@ return new class extends Migration {
             $table->string('account_number', 100);
             $table->string('routing_number', 100)->nullable();
             $table->enum('account_type', ['CURRENT', 'SAVINGS', 'FDR', 'OTHER'])->default('CURRENT');
-            $table->decimal('opening_balance', 20, 4)->default(0);
+            $table->decimal('opening_balance', 20, 2)->default(0);
             $table->boolean('is_reconcilable')->default(true);
             $table->enum('status', ['ACTIVE', 'INACTIVE', 'CLOSED'])->default('ACTIVE');
             $table->timestamps();
@@ -42,11 +42,11 @@ return new class extends Migration {
             $table->foreignId('bank_account_id')->constrained()->restrictOnDelete();
             $table->string('transaction_no', 100);
             $table->enum('type', ['DEPOSIT', 'WITHDRAWAL', 'TRANSFER_IN', 'TRANSFER_OUT', 'CHARGE', 'INTEREST', 'ADJUSTMENT']);
-            $table->decimal('amount', 20, 4);
+            $table->decimal('amount', 20, 2);
             $table->date('transaction_date');
             $table->string('reference')->nullable();
             $table->text('description')->nullable();
-            $table->decimal('balance_after', 20, 4)->nullable();
+            $table->decimal('balance_after', 20, 2)->nullable();
             $table->enum('status', ['PENDING', 'POSTED', 'RECONCILED', 'CANCELLED'])->default('PENDING');
             $table->timestamps();
             $table->unique(['bank_account_id', 'transaction_no']);
@@ -62,9 +62,9 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('bank_account_id')->constrained()->cascadeOnDelete();
             $table->date('statement_date');
-            $table->decimal('statement_balance', 20, 4);
-            $table->decimal('book_balance', 20, 4);
-            $table->decimal('difference', 20, 4);
+            $table->decimal('statement_balance', 20, 2);
+            $table->decimal('book_balance', 20, 2);
+            $table->decimal('difference', 20, 2);
             $table->enum('status', ['OPEN', 'RECONCILED'])->default('OPEN');
             $table->foreignId('reconciled_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('reconciled_at')->nullable();
@@ -97,7 +97,7 @@ return new class extends Migration {
             $table->enum('status', ['UNUSED', 'ISSUED', 'PRESENTED', 'CLEARED', 'BOUNCED', 'STOPPED', 'CANCELLED', 'EXPIRED'])->default('UNUSED');
             $table->date('issue_date')->nullable();
             $table->date('cheque_date')->nullable();
-            $table->decimal('amount', 20, 4)->nullable();
+            $table->decimal('amount', 20, 2)->nullable();
             $table->string('payee')->nullable();
             $table->string('memo')->nullable();
             $table->date('presented_date')->nullable();
@@ -113,7 +113,7 @@ return new class extends Migration {
             $table->foreignId('cheque_id')->constrained()->cascadeOnDelete();
             $table->foreignId('branch_day_id')->nullable()->constrained()->nullOnDelete();
             $table->enum('type', ['ISSUE', 'DEPOSIT', 'PRESENT', 'CLEAR', 'BOUNCE', 'STOP', 'CANCEL', 'RETURN']);
-            $table->decimal('amount', 20, 4)->nullable();
+            $table->decimal('amount', 20, 2)->nullable();
             $table->dateTime('transaction_date');
             $table->string('reference')->nullable();
             $table->text('description')->nullable();
@@ -130,7 +130,7 @@ return new class extends Migration {
             $table->string('drawer_bank_name', 150)->nullable();
             $table->string('drawer_bank_branch', 150)->nullable();
             $table->string('drawer_account_no', 100)->nullable();
-            $table->decimal('amount', 20, 4);
+            $table->decimal('amount', 20, 2);
             $table->date('clearing_date');
             $table->enum('status', ['RECEIVED', 'SENT', 'PRESENTED', 'CLEARED', 'RETURNED', 'CANCELLED'])->default('RECEIVED');
             $table->string('return_reason')->nullable();

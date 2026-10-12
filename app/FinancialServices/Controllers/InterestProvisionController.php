@@ -14,7 +14,8 @@ class InterestProvisionController extends Controller
     public function __construct(private readonly InterestProvisionService $service)
     {
         $this->middleware('permission:financial.accounts.view')->only('index');
-        $this->middleware('permission:financial.accounts.manage')->only(['calculate', 'approve', 'reject', 'post']);
+        $this->middleware('permission:financial.transactions.create')->only('calculate');
+        $this->middleware('permission:financial.transactions.post')->only(['approve', 'reject', 'post']);
     }
 
     public function index(Request $request): Response

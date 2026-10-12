@@ -18,9 +18,9 @@ return new class extends Migration {
             $table->string('name', 200)->nullable();
             $table->enum('account_type', ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT', 'LOAN', 'CASH', 'BANK', 'OTHER']);
             $table->enum('status', ['PENDING', 'ACTIVE', 'DORMANT', 'FROZEN', 'CLOSED', 'WRITTEN_OFF'])->default('PENDING');
-            $table->decimal('balance', 20, 4)->default(0);
-            $table->decimal('available_balance', 20, 4)->default(0);
-            $table->decimal('interest_accrued', 20, 4)->default(0);
+            $table->decimal('balance', 20, 2)->default(0);
+            $table->decimal('available_balance', 20, 2)->default(0);
+            $table->decimal('interest_accrued', 20, 2)->default(0);
             $table->date('opened_at')->nullable();
             $table->date('closed_at')->nullable();
             $table->date('last_operated_at')->nullable();
@@ -77,7 +77,7 @@ return new class extends Migration {
 
             $table->dateTime('transaction_date');
 
-            $table->decimal('amount', 20, 4);
+            $table->decimal('amount', 20, 2);
 
             $table->string('currency', 10)
                 ->default('BDT');
@@ -194,8 +194,8 @@ return new class extends Migration {
             $table->foreignId('financial_transaction_id')->constrained()->cascadeOnDelete();
             $table->foreignId('financial_account_id')->constrained()->restrictOnDelete();
             $table->enum('direction', ['DEBIT', 'CREDIT']);
-            $table->decimal('amount', 20, 4);
-            $table->decimal('balance_after', 20, 4)->nullable();
+            $table->decimal('amount', 20, 2);
+            $table->decimal('balance_after', 20, 2)->nullable();
             $table->string('description')->nullable();
             $table->unsignedInteger('line_no')->default(1);
             $table->timestamps();
@@ -208,7 +208,7 @@ return new class extends Migration {
             $table->foreignId('financial_account_id')->constrained('financial_accounts')->cascadeOnDelete();
             $table->foreignId('customer_id')->constrained('customers')->restrictOnDelete();
             $table->enum('role', ['PRIMARY', 'JOINT', 'GUARDIAN'])->default('JOINT');
-            $table->decimal('ownership_percent', 8, 4)->default(100);
+            $table->decimal('ownership_percent', 8, 2)->default(100);
             $table->foreignId('guardian_customer_id')->nullable()->constrained('customers')->restrictOnDelete();
             $table->timestamps();
             $table->unique(['financial_account_id', 'customer_id'], 'deposit_account_holder_unique');
@@ -221,7 +221,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('customer_id');
             $table->enum('authorization_type', ['SIGNATORY', 'OPERATOR', 'VIEWER'])->default('SIGNATORY');
             $table->string('designation', 100)->nullable();
-            $table->decimal('transaction_limit', 20, 4)->nullable();
+            $table->decimal('transaction_limit', 20, 2)->nullable();
             $table->date('effective_from')->nullable();
             $table->date('effective_to')->nullable();
             $table->boolean('is_active')->default(true);
@@ -251,7 +251,7 @@ return new class extends Migration {
             $table->string('phone', 50)->nullable();
             $table->string('identification_type', 100)->nullable();
             $table->string('identification_number', 100)->nullable();
-            $table->decimal('share_percent', 8, 4)->default(100);
+            $table->decimal('share_percent', 8, 2)->default(100);
             $table->boolean('is_primary')->default(true);
             $table->timestamps();
             $table->foreign('financial_account_id', 'faa_nominee_account_fk')->references('id')->on('financial_accounts')->cascadeOnDelete();

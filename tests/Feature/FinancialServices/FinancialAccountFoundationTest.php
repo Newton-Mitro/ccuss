@@ -86,6 +86,30 @@ it('loads unified account subtype data on the account detail page', function () 
             ->where('account.nominees.0.name', 'Nominee One'));
 });
 
+it('allows users with financial view permission to open dividends', function () {
+    $user = User::factory()->create();
+    $role = Role::firstOrCreate(
+        ['slug' => 'financial_view_test'],
+        ['name' => 'Financial View Test'],
+    );
+    $permission = Permission::firstOrCreate(
+        ['slug' => 'financial.view'],
+        [
+            'module' => 'financial',
+            'name' => 'View Financial Services',
+            'action' => 'view',
+        ],
+    );
+    $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+
+    $this->actingAs($user)
+        ->withSession(['active_organization_id' => $user->organization_id])
+        ->get(route('dividends.index'))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page->component('financial-services/dividends/index'));
+});
+
 it('assigns a primary holder when opening a share account', function () {
     $organization = Organization::factory()->create();
     $branch = Branch::factory()->create(['organization_id' => $organization->id]);

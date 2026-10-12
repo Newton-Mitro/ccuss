@@ -14,9 +14,9 @@ return new class extends Migration {
             $table->date('period_start');
             $table->date('period_end');
             $table->date('calculated_at');
-            $table->decimal('basis_amount', 20, 4);
-            $table->decimal('annual_rate', 12, 6);
-            $table->decimal('provisioned_amount', 20, 4);
+            $table->decimal('basis_amount', 20, 2);
+            $table->decimal('annual_rate', 12, 2);
+            $table->decimal('provisioned_amount', 20, 2);
             $table->enum('status', ['CALCULATED', 'APPROVED', 'POSTED', 'REVERSED'])->default('CALCULATED');
             $table->foreignId('financial_transaction_id')->nullable()->constrained('financial_transactions')->nullOnDelete();
             $table->foreignId('calculated_by')->nullable()->constrained('users')->nullOnDelete();
@@ -32,7 +32,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('interest_provision_id')->constrained()->cascadeOnDelete();
             $table->foreignId('financial_transaction_id')->unique()->constrained('financial_transactions')->restrictOnDelete();
-            $table->decimal('amount', 20, 4);
+            $table->decimal('amount', 20, 2);
             $table->date('posted_at');
             $table->enum('status', ['POSTED', 'REVERSED'])->default('POSTED');
             $table->foreignId('posted_by')->nullable()->constrained('users')->nullOnDelete();
@@ -45,9 +45,9 @@ return new class extends Migration {
             $table->foreignId('fiscal_year_id')->constrained('fiscal_years')->restrictOnDelete();
             $table->string('declaration_no', 100);
             $table->date('declaration_date');
-            $table->decimal('dividend_rate', 12, 6);
-            $table->decimal('total_basis_amount', 20, 4)->default(0);
-            $table->decimal('total_dividend_amount', 20, 4)->default(0);
+            $table->decimal('dividend_rate', 12, 2);
+            $table->decimal('total_basis_amount', 20, 2)->default(0);
+            $table->decimal('total_dividend_amount', 20, 2)->default(0);
             $table->enum('status', ['DRAFT', 'APPROVED', 'POSTED', 'CANCELLED'])->default('DRAFT');
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('approved_at')->nullable();
@@ -62,9 +62,9 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('share_dividend_declaration_id')->constrained()->cascadeOnDelete();
             $table->foreignId('share_account_id')->constrained('share_accounts')->restrictOnDelete();
-            $table->decimal('basis_amount', 20, 4);
-            $table->decimal('dividend_rate', 12, 6);
-            $table->decimal('dividend_amount', 20, 4);
+            $table->decimal('basis_amount', 20, 2);
+            $table->decimal('dividend_rate', 12, 2);
+            $table->decimal('dividend_amount', 20, 2);
             $table->enum('status', ['CALCULATED', 'POSTED', 'REVERSED'])->default('CALCULATED');
             $table->foreignId('financial_transaction_id')->nullable()->constrained('financial_transactions')->nullOnDelete();
             $table->timestamps();

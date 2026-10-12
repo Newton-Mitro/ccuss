@@ -59,7 +59,7 @@ return new class extends Migration {
 
             $table->string('application_no', 100);
 
-            $table->decimal('requested_amount', 20, 4);
+            $table->decimal('requested_amount', 20, 2);
 
             $table->unsignedInteger('requested_term_months')
                 ->nullable();
@@ -72,13 +72,13 @@ return new class extends Migration {
             |--------------------------------------------------------------------------
             */
 
-            $table->decimal('approved_amount', 20, 4)
+            $table->decimal('approved_amount', 20, 2)
                 ->nullable();
 
             $table->unsignedInteger('approved_term_months')
                 ->nullable();
 
-            $table->decimal('approved_rate', 12, 6)
+            $table->decimal('approved_rate', 12, 2)
                 ->nullable();
 
             $table->enum('status', [
@@ -194,9 +194,9 @@ return new class extends Migration {
             |--------------------------------------------------------------------------
             */
 
-            $table->decimal('principal_amount', 20, 4);
+            $table->decimal('principal_amount', 20, 2);
 
-            $table->decimal('disbursed_amount', 20, 4)
+            $table->decimal('disbursed_amount', 20, 2)
                 ->default(0);
 
             /*
@@ -209,7 +209,7 @@ return new class extends Migration {
             |
             */
 
-            $table->decimal('contractual_rate', 12, 6);
+            $table->decimal('contractual_rate', 12, 2);
 
             $table->enum('interest_calculation', [
                 'SIMPLE',
@@ -251,7 +251,7 @@ return new class extends Migration {
             |
             */
 
-            $table->decimal('scheduled_principal_amount', 20, 4)
+            $table->decimal('scheduled_principal_amount', 20, 2)
                 ->nullable();
 
             $table->enum('repayment_frequency', [
@@ -265,7 +265,7 @@ return new class extends Migration {
             $table->unsignedInteger('grace_days')
                 ->default(0);
 
-            $table->decimal('late_payment_fine_rate', 12, 6)
+            $table->decimal('late_payment_fine_rate', 12, 2)
                 ->default(0);
 
             /*
@@ -422,10 +422,10 @@ return new class extends Migration {
 
             $table->string('description', 255);
 
-            $table->decimal('assessed_value', 20, 4)
+            $table->decimal('assessed_value', 20, 2)
                 ->nullable();
 
-            $table->decimal('secured_value', 20, 4)
+            $table->decimal('secured_value', 20, 2)
                 ->nullable();
 
             $table->enum('status', [
@@ -533,7 +533,7 @@ return new class extends Migration {
                 ->constrained('financial_transactions')
                 ->nullOnDelete();
 
-            $table->decimal('amount', 20, 4);
+            $table->decimal('amount', 20, 2);
 
             $table->date('disbursed_at');
 
@@ -610,15 +610,15 @@ return new class extends Migration {
             |--------------------------------------------------------------------------
             */
 
-            $table->decimal('principal_due', 20, 4);
+            $table->decimal('principal_due', 20, 2);
 
-            $table->decimal('interest_due', 20, 4)
+            $table->decimal('interest_due', 20, 2)
                 ->default(0);
 
-            $table->decimal('fine_due', 20, 4)
+            $table->decimal('fine_due', 20, 2)
                 ->default(0);
 
-            $table->decimal('total_due', 20, 4)
+            $table->decimal('total_due', 20, 2)
                 ->default(0);
 
             /*
@@ -627,16 +627,16 @@ return new class extends Migration {
             |--------------------------------------------------------------------------
             */
 
-            $table->decimal('principal_paid', 20, 4)
+            $table->decimal('principal_paid', 20, 2)
                 ->default(0);
 
-            $table->decimal('interest_paid', 20, 4)
+            $table->decimal('interest_paid', 20, 2)
                 ->default(0);
 
-            $table->decimal('fine_paid', 20, 4)
+            $table->decimal('fine_paid', 20, 2)
                 ->default(0);
 
-            $table->decimal('total_paid', 20, 4)
+            $table->decimal('total_paid', 20, 2)
                 ->default(0);
 
             /*
@@ -708,15 +708,15 @@ return new class extends Migration {
 
             $table->dateTime('repayment_at');
 
-            $table->decimal('amount', 20, 4);
+            $table->decimal('amount', 20, 2);
 
-            $table->decimal('principal_amount', 20, 4)
+            $table->decimal('principal_amount', 20, 2)
                 ->default(0);
 
-            $table->decimal('interest_amount', 20, 4)
+            $table->decimal('interest_amount', 20, 2)
                 ->default(0);
 
-            $table->decimal('fine_amount', 20, 4)
+            $table->decimal('fine_amount', 20, 2)
                 ->default(0);
 
             /*
@@ -728,7 +728,7 @@ return new class extends Migration {
             |
             */
 
-            $table->decimal('extra_principal_amount', 20, 4)
+            $table->decimal('extra_principal_amount', 20, 2)
                 ->default(0);
 
             $table->enum('status', [
@@ -780,13 +780,13 @@ return new class extends Migration {
             $table->boolean('required')
                 ->default(false);
 
-            $table->decimal('coverage_amount', 20, 4)
+            $table->decimal('coverage_amount', 20, 2)
                 ->nullable();
 
-            $table->decimal('initial_fee', 20, 4)
+            $table->decimal('initial_fee', 20, 2)
                 ->default(0);
 
-            $table->decimal('renewal_fee', 20, 4)
+            $table->decimal('renewal_fee', 20, 2)
                 ->default(0);
 
             $table->enum('renewal_frequency', [

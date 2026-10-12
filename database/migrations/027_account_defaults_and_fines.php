@@ -56,13 +56,13 @@ return new class extends Migration {
                 'PERCENTAGE',
             ])->default('FIXED');
 
-            $table->decimal('fine_amount', 20, 4)
+            $table->decimal('fine_amount', 20, 2)
                 ->default(0);
 
-            $table->decimal('fine_rate', 12, 6)
+            $table->decimal('fine_rate', 12, 2)
                 ->default(0);
 
-            $table->decimal('maximum_fine', 20, 4)
+            $table->decimal('maximum_fine', 20, 2)
                 ->nullable();
 
             /*
@@ -231,18 +231,18 @@ return new class extends Migration {
 
             $table->date('assessed_at');
 
-            $table->decimal('base_amount', 20, 4)
+            $table->decimal('base_amount', 20, 2)
                 ->default(0);
 
-            $table->decimal('rate', 12, 6)
+            $table->decimal('rate', 12, 2)
                 ->default(0);
 
-            $table->decimal('assessed_amount', 20, 4);
+            $table->decimal('assessed_amount', 20, 2);
 
-            $table->decimal('waived_amount', 20, 4)
+            $table->decimal('waived_amount', 20, 2)
                 ->default(0);
 
-            $table->decimal('paid_amount', 20, 4)
+            $table->decimal('paid_amount', 20, 2)
                 ->default(0);
 
             /*

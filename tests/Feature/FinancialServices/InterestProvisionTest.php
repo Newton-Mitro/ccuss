@@ -7,7 +7,10 @@ use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\InterestProvision;
 use App\SystemAdministration\Models\Organization;
+use App\SystemAdministration\Models\Permission;
+use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
+use Illuminate\Support\Facades\Schema;
 
 it('stores product rates on the base term instead of financial_products', function () {
     $organization = Organization::factory()->create();
@@ -121,6 +124,35 @@ it('calculates idempotent interest provisions and supports approval', function (
     expect(fn() => $service->approve($first[0]->fresh(), $user->id))
         ->toThrow(RuntimeException::class, 'Only calculated');
     expect(InterestProvision::query()->where('financial_account_id', $account->id)->count())->toBe(1);
+});
+
+it('allows transaction creators to calculate interest provisions', function () {
+    $organization = Organization::factory()->create();
+    $user = User::factory()->create(['organization_id' => $organization->id]);
+    $role = Role::firstOrCreate(
+        ['slug' => 'interest_provision_create_test'],
+        ['name' => 'Interest Provision Create Test'],
+    );
+    $permission = Permission::firstOrCreate(
+        ['slug' => 'financial.transactions.create'],
+        [
+            'module' => 'financial_transactions',
+            'name' => 'Create Financial Transactions',
+            'action' => 'create',
+        ],
+    );
+    $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+
+    $this->actingAs($user)
+        ->withSession(['active_organization_id' => $organization->id])
+        ->from(route('interest-provisions.index'))
+        ->post(route('interest-provisions.calculate'), [
+            'period_start' => '2026-01-01',
+            'period_end' => '2026-01-31',
+        ])
+        ->assertRedirect(route('interest-provisions.index'))
+        ->assertSessionHas('success', 'Interest provisions calculated successfully.');
 });
 
 it('does not calculate interest for another organization', function () {

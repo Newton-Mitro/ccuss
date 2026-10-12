@@ -60,24 +60,24 @@ return new class extends Migration {
             |--------------------------------------------------------------------------
             */
 
-            $table->decimal('opening_principal', 20, 4);
+            $table->decimal('opening_principal', 20, 2);
 
-            $table->decimal('scheduled_principal', 20, 4)
+            $table->decimal('scheduled_principal', 20, 2)
                 ->default(0);
 
-            $table->decimal('scheduled_interest', 20, 4)
+            $table->decimal('scheduled_interest', 20, 2)
                 ->default(0);
 
-            $table->decimal('scheduled_fee', 20, 4)
+            $table->decimal('scheduled_fee', 20, 2)
                 ->default(0);
 
-            $table->decimal('scheduled_protection_fee', 20, 4)
+            $table->decimal('scheduled_protection_fee', 20, 2)
                 ->default(0);
 
-            $table->decimal('total_due', 20, 4)
+            $table->decimal('total_due', 20, 2)
                 ->default(0);
 
-            $table->decimal('total_paid', 20, 4)
+            $table->decimal('total_paid', 20, 2)
                 ->default(0);
 
             /*
@@ -165,9 +165,9 @@ return new class extends Migration {
                 'PROTECTION_FEE',
             ]);
 
-            $table->decimal('amount_due', 20, 4);
+            $table->decimal('amount_due', 20, 2);
 
-            $table->decimal('amount_paid', 20, 4)
+            $table->decimal('amount_paid', 20, 2)
                 ->default(0);
 
             $table->enum('status', [
@@ -213,7 +213,7 @@ return new class extends Migration {
                 ->constrained()
                 ->restrictOnDelete();
 
-            $table->decimal('amount', 20, 4);
+            $table->decimal('amount', 20, 2);
 
             $table->timestamps();
 
@@ -272,16 +272,16 @@ return new class extends Migration {
             $table->unsignedInteger('days_overdue')
                 ->default(0);
 
-            $table->decimal('principal_overdue', 20, 4)
+            $table->decimal('principal_overdue', 20, 2)
                 ->default(0);
 
-            $table->decimal('interest_overdue', 20, 4)
+            $table->decimal('interest_overdue', 20, 2)
                 ->default(0);
 
-            $table->decimal('fee_overdue', 20, 4)
+            $table->decimal('fee_overdue', 20, 2)
                 ->default(0);
 
-            $table->decimal('total_overdue', 20, 4)
+            $table->decimal('total_overdue', 20, 2)
                 ->default(0);
 
             /*

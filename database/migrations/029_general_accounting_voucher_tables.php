@@ -50,8 +50,8 @@ return new class extends Migration {
             $table->foreignId('cost_center_id')->nullable()->constrained('cost_centers')->nullOnDelete();
             $table->foreignId('party_id')->nullable()->constrained('parties')->nullOnDelete();
             $table->string('description')->nullable();
-            $table->decimal('debit', 20, 4)->default(0);
-            $table->decimal('credit', 20, 4)->default(0);
+            $table->decimal('debit', 20, 2)->default(0);
+            $table->decimal('credit', 20, 2)->default(0);
             $table->string('reference', 150)->nullable();
             $table->unsignedInteger('line_no')->default(1);
             $table->timestamps();

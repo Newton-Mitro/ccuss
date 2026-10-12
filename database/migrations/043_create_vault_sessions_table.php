@@ -14,11 +14,11 @@ return new class extends Migration {
             $table->foreignId('opened_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('closed_by')->nullable()->constrained('users')->nullOnDelete();
             $table->enum('status', ['OPEN', 'CLOSING', 'CLOSED'])->default('OPEN');
-            $table->decimal('opening_cash', 20, 4)->default(0);
+            $table->decimal('opening_cash', 20, 2)->default(0);
             $table->text('opening_note')->nullable();
-            $table->decimal('closing_cash', 20, 4)->nullable();
-            $table->decimal('expected_cash', 20, 4)->nullable();
-            $table->decimal('cash_difference', 20, 4)->nullable();
+            $table->decimal('closing_cash', 20, 2)->nullable();
+            $table->decimal('expected_cash', 20, 2)->nullable();
+            $table->decimal('cash_difference', 20, 2)->nullable();
             $table->timestamp('opened_at')->nullable();
             $table->timestamp('closed_at')->nullable();
             $table->text('closing_note')->nullable();

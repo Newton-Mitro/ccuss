@@ -361,7 +361,7 @@ return new class extends Migration {
                 ->constrained()
                 ->nullOnDelete();
 
-            $table->decimal('amount', 20, 4)
+            $table->decimal('amount', 20, 2)
                 ->default(0);
 
             $table->timestamps();

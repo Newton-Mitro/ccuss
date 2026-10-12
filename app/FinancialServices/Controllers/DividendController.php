@@ -15,8 +15,9 @@ class DividendController extends Controller
 {
     public function __construct(private readonly DividendService $service)
     {
-        $this->middleware('permission:financial.accounts.view')->only('index');
-        $this->middleware('permission:financial.accounts.manage')->only(['store', 'calculate', 'approve', 'post']);
+        $this->middleware('permission:financial.accounts.view,financial.view')->only('index');
+        $this->middleware('permission:financial.transactions.create')->only(['store', 'calculate']);
+        $this->middleware('permission:financial.transactions.post')->only(['approve', 'post']);
     }
 
     public function index(Request $request): Response

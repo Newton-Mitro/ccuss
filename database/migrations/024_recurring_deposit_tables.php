@@ -47,7 +47,7 @@ return new class extends Migration {
             |--------------------------------------------------------------------------
             */
 
-            $table->decimal('installment_amount', 20, 4);
+            $table->decimal('installment_amount', 20, 2);
 
             $table->enum('installment_frequency', [
                 'WEEKLY',
@@ -88,10 +88,10 @@ return new class extends Migration {
             |--------------------------------------------------------------------------
             */
 
-            $table->decimal('contractual_rate', 12, 6)
+            $table->decimal('contractual_rate', 12, 2)
                 ->nullable();
 
-            $table->decimal('maturity_amount', 20, 4)
+            $table->decimal('maturity_amount', 20, 2)
                 ->nullable();
 
             /*
@@ -166,9 +166,9 @@ return new class extends Migration {
 
             $table->date('due_date');
 
-            $table->decimal('amount_due', 20, 4);
+            $table->decimal('amount_due', 20, 2);
 
-            $table->decimal('amount_paid', 20, 4)
+            $table->decimal('amount_paid', 20, 2)
                 ->default(0);
 
             /*
@@ -177,7 +177,7 @@ return new class extends Migration {
             |--------------------------------------------------------------------------
             */
 
-            $table->decimal('fine_amount', 20, 4)
+            $table->decimal('fine_amount', 20, 2)
                 ->default(0);
 
             /*

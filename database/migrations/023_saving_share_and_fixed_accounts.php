@@ -51,7 +51,7 @@ return new class extends Migration {
             */
 
             // Savings-specific rules
-            $table->decimal('minimum_balance', 20, 4)->default(0);
+            $table->decimal('minimum_balance', 20, 2)->default(0);
 
             // Optional savings-specific settings
             $table->json('settings')->nullable();
@@ -106,9 +106,9 @@ return new class extends Migration {
             |--------------------------------------------------------------------------
             */
 
-            $table->decimal('total_shares', 20, 4)->default(0);
+            $table->decimal('total_shares', 20, 2)->default(0);
 
-            $table->decimal('share_value', 20, 4)->default(0);
+            $table->decimal('share_value', 20, 2)->default(0);
 
             $table->timestamps();
 
@@ -156,7 +156,7 @@ return new class extends Migration {
             |--------------------------------------------------------------------------
             */
 
-            $table->decimal('principal_amount', 20, 4);
+            $table->decimal('principal_amount', 20, 2);
 
             /*
             |--------------------------------------------------------------------------
@@ -169,7 +169,7 @@ return new class extends Migration {
             |
             */
 
-            $table->decimal('contractual_rate', 12, 6);
+            $table->decimal('contractual_rate', 12, 2);
 
             /*
             |--------------------------------------------------------------------------
@@ -203,7 +203,7 @@ return new class extends Migration {
             |--------------------------------------------------------------------------
             */
 
-            $table->decimal('maturity_amount', 20, 4)->nullable();
+            $table->decimal('maturity_amount', 20, 2)->nullable();
 
             $table->enum('maturity_instruction', [
                 'PAYOUT',
